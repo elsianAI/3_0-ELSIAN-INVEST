@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BenchmarkComparisons_v1",
+  "description": "Registro acumulativo de comparaciones inter-modelo. Cada entrada registra metricas objetivas (script) y evaluacion cualitativa (agente + humano).",
+  "type": "object",
+  "required": ["version_esquema", "comparaciones"],
+  "properties": {
+    "version_esquema": {
+      "type": "string",
+      "const": "BenchmarkComparisons_v1"
+    },
+    "comparaciones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ticker", "fecha_caso", "modelo_a", "modelo_b", "fecha_comparacion"],
+        "properties": {
+          "ticker": {
+            "type": "string",
+            "description": "Ticker del caso comparado"
+          },
+          "fecha_caso": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha del caso original"
+          },
+          "modelo_a": {
+            "type": "object",
+            "required": ["nombre", "directorio"],
+            "properties": {
+              "nombre": { "type": "string", "description": "ID del modelo (e.g., claude-opus-4-6)" },
+              "directorio": { "type": "string", "description": "Path relativo al repo (e.g., casos/CRCT/2026-02-12)" }
+            }
+          },
+          "modelo_b": {
+            "type": "object",
+            "required": ["nombre", "directorio"],
+            "properties": {
+              "nombre": { "type": "string", "description": "ID del modelo alternativo" },
+              "directorio": { "type": "string", "description": "Path relativo al repo" }
+            }
+          },
+          "metricas_script": {
+            "type": "object",
+            "description": "Output directo de benchmark_comparator.py",
+            "properties": {
+              "completitud_truth_pack": { "$ref": "#/$defs/ab_metric" },
+              "completitud_implied": { "$ref": "#/$defs/ab_metric" },
+              "claims_count": { "$ref": "#/$defs/ab_metric" },
+              "claims_con_evidencia": { "$ref": "#/$defs/ab_metric" },
+              "falsaciones_concretas": { "$ref": "#/$defs/ab_metric" },
+              "predicciones_count": { "$ref": "#/$defs/ab_metric" },
+              "predicciones_con_probabilidad": { "$ref": "#/$defs/ab_metric" },
+              "coherencia_decision": {
+                "type": "object",
+                "properties": {
+                  "a": { "type": ["boolean", "null"] },
+                  "b": { "type": ["boolean", "null"] }
+                }
+              },
+              "score": {
+                "type": "object",
+                "properties": {
+                  "a": { "type": ["number", "null"] },
+                  "b": { "type": ["number", "null"] },
+                  "diff": { "type": ["number", "null"] }
+                }
+              }
+            }
+          },
+          "evaluacion_agente": {
+            "type": "object",
+            "description": "Evaluacion cualitativa del agente comparador (instrucciones_comparador_V1.md)",
+            "properties": {
+              "profundidad": { "$ref": "#/$defs/dimension_result" },
+              "originalidad": { "$ref": "#/$defs/dimension_result" },
+              "rigor_evidencial": { "$ref": "#/$defs/dimension_result" },
+              "calibracion": { "$ref": "#/$defs/dimension_result" },
+              "red_team": { "$ref": "#/$defs/dimension_result" },
+              "decision": { "$ref": "#/$defs/dimension_result" },
+              "peticion_fuentes": { "$ref": "#/$defs/dimension_result" },
+              "veredicto_global": {
+                "type": "string",
+                "enum": ["A", "B", "EMPATE"]
+              },
+              "confianza_0_1": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "resumen": { "type": "string" }
+            }
+          },
+          "evaluacion_humana": {
+            "type": ["object", "null"],
+            "description": "Evaluacion opcional del operador humano",
+            "properties": {
+              "ganador": {
+                "type": "string",
+                "enum": ["A", "B", "EMPATE"]
+              },
+              "score_a": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "score_b": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "notas": { "type": "string" }
+            }
+          },
+          "fecha_comparacion": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    },
+    "resumen_elo": {
+      "type": "object",
+      "description": "Ranking ELO acumulativo por modelo",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "elo": { "type": "number" },
+          "partidas": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "ab_metric": {
+      "type": "object",
+      "properties": {
+        "a": { "type": ["number", "null"] },
+        "b": { "type": ["number", "null"] }
+      }
+    },
+    "dimension_result": {
+      "type": "object",
+      "required": ["ganador", "nota"],
+      "properties": {
+        "ganador": {
+          "type": "string",
+          "enum": ["A", "B", "EMPATE"]
+        },
+        "nota": {
+          "type": "string",
+          "description": "1-2 frases justificando el veredicto"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "version_esquema": "PreFilterUniverse_v1",
+  "fecha_corte": "YYYY-MM-DD",
+  "universo_parametros": {
+    "cap_min_usd": 50000000,
+    "cap_max_usd": 3000000000,
+    "mercados": ["USA", "UK", "CA", "EU"],
+    "liquidez_tiers": {
+      "tier_1": { "cap_min_usd": 1000000000, "cap_max_usd": 3000000000, "liquidez_min_usd_dia": 1000000 },
+      "tier_2": { "cap_min_usd": 300000000, "cap_max_usd": 1000000000, "liquidez_min_usd_dia": 300000 },
+      "tier_3": { "cap_min_usd": 50000000, "cap_max_usd": 300000000, "liquidez_min_usd_dia": 50000 }
+    },
+    "exclusiones_tickers": ["CROX", "GCT", "SIG"],
+    "_nota_exclusiones": "Tickers ya en el sistema (pipelines activos o completados). Proporcionados por el usuario o extraídos de CHANGELOG."
+  },
+  "stats": {
+    "empresas_buscadas_brutas": 80,
+    "empresas_con_datos_obtenidos": 65,
+    "empresas_pasaron_gates": 22,
+    "empresas_descartadas": 43,
+    "descartados_por_gate": {
+      "cap_rango": 5,
+      "liquidez": 8,
+      "biotech_clinico": 3,
+      "pre_revenue": 2,
+      "binario": 1,
+      "en_sistema": 4,
+      "datos_insuficientes": 20
+    },
+    "_nota_gates": "Los 7 gates binarios (G1-G7). Cada empresa descartada se cuenta en el primer gate que falla. datos_insuficientes = <4/6 métricas core no-null."
+  },
+  "universo_filtrado": [
+    {
+      "ticker": "XXXX",
+      "nombre": "Nombre completo de la empresa",
+      "bolsa": "NYSE|NASDAQ|LSE|TSX|Euronext|Xetra|...",
+      "pais": "US|GB|CA|DE|FR|...",
+      "sector": "Texto (ej: Technology, Industrials)",
+      "industria": "Texto (ej: Software-Application, Specialty Chemicals)",
+      "market_cap_usd": 123456789,
+
+      "metricas_verificadas": {
+        "ev_usd": null,
+        "ev_fcf": null,
+        "fcf_yield": null,
+        "roic": null,
+        "margen_operativo": null,
+        "net_debt_ebitda": null,
+        "interest_coverage": null,
+        "drawdown_52w": null,
+        "insider_ownership_pct": null,
+        "insider_buying_6m": null,
+        "analyst_count": null,
+        "liquidez_media_usd_dia": null,
+        "revenue_ttm_usd": null,
+        "fcf_ttm_usd": null,
+        "caja_usd": null,
+        "deuda_total_usd": null,
+        "_nota_core_metrics": "Core metrics (6): ev_fcf, fcf_yield, roic, margen_operativo, net_debt_ebitda, drawdown_52w. El resto son adicionales (buscar si disponible, null si no)."
+      },
+
+      "null_count_core": 1,
+      "_nota_null_count": "Cuenta de nulls entre las 6 core metrics. Gate G7 requiere ≤2 nulls (≥4/6 con valor).",
+
+      "fuentes_verificacion": [
+        {
+          "metrica": "market_cap",
+          "fuente": "https://finance.yahoo.com/quote/XXXX",
+          "valor": 123456789,
+          "fecha": "2026-02-10"
+        },
+        {
+          "metrica": "market_cap",
+          "fuente": "https://stockanalysis.com/stocks/xxxx/",
+          "valor": 123000000,
+          "fecha": "2026-02-10"
+        }
+      ],
+      "_nota_fuentes": "Mínimo 2 fuentes por métrica core. URLs raw (sin markdown). Si solo 1 fuente disponible, marcar verificacion_unica: true.",
+
+      "gate_results": {
+        "cap_rango": true,
+        "liquidez": true,
+        "no_biotech": true,
+        "no_pre_revenue": true,
+        "no_binario": true,
+        "no_en_sistema": true,
+        "datos_minimos": true,
+        "_nota_gates": "G1: $50M ≤ market_cap ≤ $3B. G2: Liquidez ≥ mínimo de su tier. G3: No biotech clínico (sector+revenue). G4: revenue_ttm > 0. G5: No depende de evento binario (flag manual). G6: Ticker no en exclusiones. G7: ≥4/6 core metrics no-null."
+      },
+
+      "hunting_ground_tags": ["HG-Q1", "HG-E1"],
+      "_nota_hg": "Tags de hunting grounds donde fue encontrado. HG-Q1: Compounder castigado. HG-Q2: Activos ocultos. HG-Q3: FCF machine olvidada. HG-E1: Cluster insider buying. HG-E2: Spin-off/huérfano. HG-E3: Simplificación/activista."
+    }
+  ],
+  "descartados_notable": [
+    {
+      "ticker": "YYYY",
+      "razon": "Market cap $5.5B excede rango",
+      "nota": "Insider cluster buying interesante pero fuera de universo"
+    }
+  ],
+  "_nota_descartados": "Empresas que fallaron un gate pero tienen alguna característica interesante. Máximo 5-10 para contexto."
+}

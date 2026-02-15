@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScannerReport_v1",
+  "description": "Reporte diario del SCANNER: hallazgos de eventos y oportunidades en el universo ELSIAN.",
+  "type": "object",
+  "required": [
+    "version_esquema",
+    "fecha_scan",
+    "universo_escaneado",
+    "hallazgos",
+    "resumen_ejecutivo",
+    "sub_scanner_status",
+    "candidatos_nuevos",
+    "_meta"
+  ],
+  "properties": {
+    "version_esquema": {
+      "const": "ScannerReport_v1"
+    },
+    "fecha_scan": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de ejecución del scan (YYYY-MM-DD)"
+    },
+    "universo_escaneado": {
+      "type": "object",
+      "required": ["mercados", "rango_cap_usd", "n_empresas_en_watchlist"],
+      "properties": {
+        "mercados": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Mercados escaneados (e.g., ['USA', 'UK', 'CA', 'EU'])"
+        },
+        "rango_cap_usd": {
+          "type": "object",
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" }
+          }
+        },
+        "n_empresas_en_watchlist": {
+          "type": "integer",
+          "description": "Número de empresas en la watchlist activa escaneadas"
+        }
+      }
+    },
+    "hallazgos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ticker", "empresa", "bolsa", "tipo_evento",
+          "clasificacion", "en_watchlist", "descripcion",
+          "datos_clave", "fuente", "accion_recomendada", "urgencia"
+        ],
+        "properties": {
+          "ticker": { "type": "string" },
+          "empresa": { "type": "string" },
+          "bolsa": { "type": "string" },
+          "market_cap_usd": { "type": ["number", "null"] },
+          "tipo_evento": {
+            "enum": [
+              "EARNINGS_SURPRISE", "EARNINGS_UPCOMING", "INSIDER_BUY", "INSIDER_SELL",
+              "PRICE_MOVE", "VOLUME_SPIKE", "52W_LOW", "52W_HIGH",
+              "FILING_8K", "FILING_13D", "FILING_FORM4", "FILING_OTHER",
+              "NEWS_MA", "NEWS_MANAGEMENT", "NEWS_RESTRUCTURING",
+              "NEWS_BUYBACK", "NEWS_DIVIDEND", "NEWS_SPINOFF", "NEWS_OTHER",
+              "KC_ALERT"
+            ]
+          },
+          "clasificacion": {
+            "enum": ["URGENT", "TRIAGE_CANDIDATE", "INFO"]
+          },
+          "en_watchlist": { "type": "boolean" },
+          "caso_id_existente": { "type": ["string", "null"] },
+          "descripcion": {
+            "type": "string",
+            "description": "Descripción breve del hallazgo (1-3 frases)"
+          },
+          "datos_clave": {
+            "type": "object",
+            "description": "Datos específicos según tipo_evento (ver instrucciones §7)"
+          },
+          "fuente": {
+            "type": "object",
+            "required": ["url", "tipo"],
+            "properties": {
+              "url": { "type": "string", "description": "URL cruda, nunca Markdown" },
+              "fecha": { "type": ["string", "null"], "format": "date" },
+              "tipo": { "type": "string" }
+            }
+          },
+          "accion_recomendada": {
+            "enum": ["PIPELINE", "MONITOR", "TRIAGE", "OBSERVAR"]
+          },
+          "urgencia": {
+            "enum": ["ALTA", "MEDIA", "BAJA"]
+          },
+          "kc_afectados": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "IDs de kill criteria potencialmente activados"
+          }
+        }
+      }
+    },
+    "candidatos_nuevos": {
+      "type": "array",
+      "description": "Lista de empresas nuevas (no en watchlist) que el SCANNER recomienda añadir al listado maestro de candidatos para futura evaluación.",
+      "items": {
+        "type": "object",
+        "required": ["ticker", "empresa", "bolsa", "market_cap_usd", "motivo", "score_interes"],
+        "properties": {
+          "ticker": { "type": "string" },
+          "empresa": { "type": "string" },
+          "bolsa": { "type": "string" },
+          "market_cap_usd": { "type": ["number", "null"] },
+          "sector": { "type": ["string", "null"] },
+          "motivo": { "type": "string", "description": "Por qué se recomienda como candidato (1-2 frases)" },
+          "eventos_detectados": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Referencias a los hallazgos relevantes"
+          },
+          "score_interes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Score de interés preliminar 1-10 basado en la calidad del evento detectado"
+          },
+          "fecha_deteccion": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "resumen_ejecutivo": {
+      "type": "object",
+      "required": ["total_hallazgos", "urgent_count", "triage_candidates", "kc_alerts", "proximas_acciones"],
+      "properties": {
+        "total_hallazgos": { "type": "integer" },
+        "urgent_count": { "type": "integer" },
+        "triage_candidates": { "type": "integer" },
+        "kc_alerts": { "type": "integer" },
+        "candidatos_nuevos_count": { "type": "integer" },
+        "proximas_acciones": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Lista ordenada de acciones recomendadas al operador"
+        }
+      }
+    },
+    "sub_scanner_status": {
+      "type": "object",
+      "required": ["earnings", "filings", "price", "news"],
+      "properties": {
+        "earnings": {
+          "type": "object",
+          "properties": {
+            "ejecutado": { "type": "boolean" },
+            "hallazgos": { "type": "integer" },
+            "errores": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "filings": {
+          "type": "object",
+          "properties": {
+            "ejecutado": { "type": "boolean" },
+            "hallazgos": { "type": "integer" },
+            "errores": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "price": {
+          "type": "object",
+          "properties": {
+            "ejecutado": { "type": "boolean" },
+            "hallazgos": { "type": "integer" },
+            "errores": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "news": {
+          "type": "object",
+          "properties": {
+            "ejecutado": { "type": "boolean" },
+            "hallazgos": { "type": "integer" },
+            "errores": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "_meta": {
+      "type": "object",
+      "required": ["motor", "plataforma", "modelo", "timestamp", "version_protocolo"],
+      "properties": {
+        "motor": { "type": "string" },
+        "plataforma": { "type": "string" },
+        "modelo": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "version_protocolo": { "type": "string" }
+      }
+    }
+  }
+}

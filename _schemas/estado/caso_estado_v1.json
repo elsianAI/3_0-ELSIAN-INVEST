@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "caso_estado_v1",
+  "description": "Estado de un caso individual de ELSIAN INVEST. Vive en casos/{T}/{D}_{M}/_estado.json. Reemplaza la entrada equivalente en el antiguo array ESTADO_REPO.json.casos[].",
+  "type": "object",
+  "required": [
+    "version_esquema",
+    "caso_id",
+    "ticker",
+    "fecha_caso",
+    "directorio",
+    "pipeline",
+    "estado_pipeline"
+  ],
+  "properties": {
+    "version_esquema": {
+      "const": "caso_estado_v1",
+      "description": "Identificador de schema. Permite evolucionar sin romper lectores."
+    },
+    "caso_id": {
+      "type": "string",
+      "pattern": "^CASE_\\d{8}_[A-Z0-9]+_[A-Za-z0-9]+",
+      "description": "ID unico del caso. Formato: CASE_YYYYMMDD_TICKER_MODEL (ej. CASE_20260205_CROX_Claude)"
+    },
+    "ticker": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ticker en mayusculas (ej. CROX, GCT, 0327)"
+    },
+    "bolsa": {
+      "type": ["string", "null"],
+      "description": "Bolsa de cotizacion (ej. NYSE, NASDAQ, SEHK)"
+    },
+    "fecha_caso": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Fecha de inicio del caso, formato ISO 8601"
+    },
+    "directorio": {
+      "type": "string",
+      "description": "Ruta relativa al directorio del caso (ej. casos/CROX/2026-02-05_Claude)"
+    },
+    "pipeline": {
+      "type": "object",
+      "description": "Estado de cada step del pipeline (8 steps)",
+      "required": ["SOURCES", "TRUTH_PACK", "IMPLIED", "CATALYST", "FORENSIC", "BULL", "RED_TEAM", "ARBITRO"],
+      "properties": {
+        "SOURCES":    { "$ref": "#/$defs/pipeline_step" },
+        "TRUTH_PACK": { "$ref": "#/$defs/pipeline_step" },
+        "IMPLIED":    { "$ref": "#/$defs/pipeline_step" },
+        "CATALYST":   { "$ref": "#/$defs/pipeline_step" },
+        "FORENSIC":   { "$ref": "#/$defs/pipeline_step" },
+        "BULL":       { "$ref": "#/$defs/pipeline_step" },
+        "RED_TEAM":   { "$ref": "#/$defs/pipeline_step" },
+        "ARBITRO":    { "$ref": "#/$defs/pipeline_step" }
+      },
+      "additionalProperties": false
+    },
+    "estado_pipeline": {
+      "type": "string",
+      "enum": ["COMPLETO", "INCOMPLETO", "SUPERSEDED", "QUARANTINE", "EXCLUIDO", "LEGACY"],
+      "description": "Estado global del pipeline"
+    },
+    "decision": {
+      "type": ["string", "null"],
+      "enum": ["WATCHLIST", "INVERTIR", "DESCARTAR", null],
+      "description": "Decision del ARBITRO (null si pipeline incompleto)"
+    },
+    "score": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Puntuacion del caso (0-100)"
+    },
+    "confianza": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Nivel de confianza del ARBITRO (0-1)"
+    },
+    "probabilistica": {
+      "type": ["object", "null"],
+      "description": "Metricas probabilisticas del DecisionPacket v2",
+      "properties": {
+        "probabilidad_exito": { "type": "number" },
+        "retorno_esperado_pct": { "type": "number" },
+        "kelly_sizing_pct": { "type": "number" },
+        "ratio_asimetria": { "type": "number" },
+        "conviccion": { "type": "number" }
+      }
+    },
+    "next_step": {
+      "type": ["string", "null"],
+      "description": "Siguiente paso recomendado (MONITOR, RE-HACER, EXIT, null)"
+    },
+    "proxima_revision": {
+      "type": ["string", "null"],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Fecha de proxima revision de monitoring (ISO 8601)"
+    },
+    "monitoring": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Array de filenames de MonitoringUpdates ejecutados"
+    },
+    "notas": {
+      "type": ["string", "null"],
+      "description": "Notas libres sobre el caso"
+    },
+    "_meta": {
+      "type": "object",
+      "required": ["ultima_actualizacion"],
+      "properties": {
+        "ultima_actualizacion": {
+          "type": "string",
+          "description": "Timestamp ISO 8601 del ultimo cambio"
+        },
+        "actualizado_por": {
+          "type": "string",
+          "description": "Identificador de quien actualizo (ej. agente:claude-opus, agente:codex, usuario:manual)"
+        }
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "pipeline_step": {
+      "type": "object",
+      "required": ["estado"],
+      "properties": {
+        "estado": {
+          "type": "string",
+          "enum": ["DONE", "PENDING"],
+          "description": "Estado del step"
+        },
+        "artefacto": {
+          "type": ["string", "null"],
+          "description": "Nombre del archivo del artefacto generado"
+        },
+        "artefacto_previo": {
+          "type": ["string", "null"],
+          "description": "Artefacto previo (ej. DecisionPacket_v1 cuando v2 es el actual)"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

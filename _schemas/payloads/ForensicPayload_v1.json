@@ -1,0 +1,276 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_YYYYMMDD_TICKER",
+  "fecha_corte": "YYYY-MM-DD",
+
+  "agente": {
+    "agent_role": "CATALYST|FORENSIC|BULL|RED_TEAM",
+    "agent_nombre": "CATALYST_v1",
+    "modelo": "UNKNOWN",
+    "idioma": "es"
+  },
+
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_YYYYMMDD_TICKER",
+    "implied_expectations_caso_id": "CASE_YYYYMMDD_TICKER",
+    "sources_pack_caso_id": "CASE_YYYYMMDD_TICKER"
+  },
+
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Máx 5 bullets, 1 frase cada uno."
+    ],
+    "veredicto_role_local": "APTO|WATCHLIST|NO_APTO",
+    "confianza_0_1": 0.5
+  },
+
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO|INFERENCIA|HIPOTESIS",
+      "criticidad": "CRITICO|IMPORTANTE|CONTEXTUAL",
+      "enunciado": "1 frase precisa",
+      "confianza_0_1": 0.5,
+      "impacto": "ALTO|MEDIO|BAJO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK|EXTERNA",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "página/sección si aplica",
+          "cita_corta": "máx 25 palabras",
+          "interpretacion": "1 frase"
+        }
+      ],
+      "falsacion": {
+        "test": "qué evento observable refuta este claim",
+        "ventana_meses": { "min": 3, "max": 12 },
+        "fuente_prevista": "earnings|filing|kpi_operativo|precio|otro"
+      }
+    }
+  ],
+
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Evento observable y medible",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": { "min": 3, "max": 12 },
+      "criterio_validacion": "Cómo se decide si ocurrió (sin ambigüedad)",
+      "fuente_prevista": "earnings|10-Q|10-K|PR|kpi_operativo|otro"
+    }
+  ],
+
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA|MEDIA|BAJA",
+      "item": "Documento/dato faltante",
+      "por_que_importa": "1 frase",
+      "como_obtenerlo": "IR/filing específico / sección / palabra clave"
+    }
+  ],
+
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+        "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+
+        "veredicto_forense": {
+        "status": "APTO|WATCHLIST|NO_APTO",
+        "confianza_0_1": 0.5,
+        "razon_principal": "1-2 frases"
+        },
+
+        "supervivencia": {
+        "horizonte_meses": { "min": 12, "max": 24 },
+        "evaluacion": {
+            "resultado": "PASS|CONDITIONAL|FAIL|UNKNOWN",
+            "score_0_5": null,
+            "por_que": [
+            "3-6 bullets, concretos"
+            ]
+        },
+        "liquidez": {
+            "caja_usd": null,
+            "linea_credito_disponible_usd": null,
+            "otras_fuentes_liquidez": [
+            "revolver",
+            "factoring",
+            "asset-based lending",
+            "otros (si está documentado)"
+            ],
+            "runway_meses_estimado": null,
+            "metodo_estimacion": "Si estimas runway, explica con 1-2 frases qué consumos usaste y de qué periodos.",
+            "notas": "Si no hay datos suficientes, dejar null y pedir fuente."
+        },
+        "deuda_y_refinanciacion": {
+            "deuda_total_usd": null,
+            "deuda_neta_usd": null,
+            "coste_deuda_aprox_pct": null,
+            "coverage_intereses": null,
+            "net_debt_ebitda": null,
+            "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "1-2 frases"
+            },
+            "vencimientos": [
+            {
+                "anio": 2026,
+                "importe_usd": null,
+                "tipo": "bono|term_loan|revolver|leasing|otro|unknown",
+                "riesgo": "BAJO|MEDIO|ALTO|UNKNOWN",
+                "fuente_ref": { "source_id": "SRC_XXX", "ubicacion": "nota deuda / MD&A" }
+            }
+            ],
+            "covenants": {
+            "disponible": false,
+            "tipos_detectados": ["leverage_ratio", "interest_coverage", "minimum_liquidity", "other"],
+            "riesgo_breach": "BAJO|MEDIO|ALTO|UNKNOWN",
+            "comentario": "1-3 frases"
+            }
+        },
+
+        "riesgo_dilucion": {
+            "nivel": "BAJO|MEDIO|ALTO|UNKNOWN",
+            "motores": [
+            "SBC",
+            "convertibles",
+            "emisiones recientes",
+            "necesidad de capital por burn",
+            "otros"
+            ],
+            "share_count_yoy_pct": null,
+            "comentario": "1-3 frases, con evidencia si posible"
+        }
+        },
+
+        "calidad_de_resultados_y_contabilidad": {
+        "resumen": "2-4 frases",
+        "red_flags": [
+            {
+            "flag_id": "F-001",
+            "categoria": "REVENUE_RECOGNITION|WORKING_CAPITAL|ONE_OFFS|CAPEX_CAPITALIZATION|SBC|LEASES|GOODWILL_IMPAIRMENT|RELATED_PARTIES|OTHER",
+            "descripcion": "1-2 frases",
+            "severidad": "BAJA|MEDIA|ALTA",
+            "probabilidad_0_1": 0.5,
+            "por_que_importa": "1 frase",
+            "evidencias": [
+                {
+                "source_id": "SRC_XXX",
+                "ubicacion": "nota / tabla / página",
+                "cita_corta": "máx 25 palabras",
+                "interpretacion": "1 frase"
+                }
+            ],
+            "test_de_falsacion": {
+                "test": "qué evento/lectura confirmaría que NO es un problema (o lo es)",
+                "ventana_meses": { "min": 3, "max": 12 },
+                "fuente_prevista": "earnings|10-Q|10-K|filing|otro"
+            }
+            }
+        ],
+        "puentes_criticos": {
+            "ebitda_a_cfo": {
+            "lectura": "1-3 frases",
+            "posibles_distorsiones": [
+                "capital circulante",
+                "one-offs",
+                "intereses",
+                "impuestos",
+                "otros"
+            ]
+            },
+            "cfo_a_fcf": {
+            "lectura": "1-3 frases",
+            "capex_riesgo": "BAJO|MEDIO|ALTO|UNKNOWN",
+            "notas": "p.ej. capex requerido para mantener vs crecer si está documentado"
+            }
+        }
+        },
+
+        "capital_allocation_y_alineacion": {
+        "recompras": {
+            "disponible": false,
+            "sostenible_por_fcf": "SI|NO|UNKNOWN",
+            "comentario": "1-2 frases"
+        },
+        "sbc_y_compensacion": {
+            "sbc_relevante": "SI|NO|UNKNOWN",
+            "comentario": "1-2 frases"
+        },
+        "mna": {
+            "riesgo_mala_asignacion": "BAJO|MEDIO|ALTO|UNKNOWN",
+            "comentario": "1-2 frases"
+        },
+        "alineacion_management": {
+            "insiders": "UNKNOWN",
+            "comentario": "Si no hay datos accesibles, solicitar en peticiones_de_fuentes."
+        }
+        },
+
+        "downside_engineering": {
+        "escenarios_adversos": [
+            {
+            "escenario_id": "D-001",
+            "descripcion": "1-2 frases (p.ej. margen no se recupera + demanda débil)",
+            "impacto_en_supervivencia": "BAJO|MEDIO|ALTO",
+            "mecanismo_de_dolor": [
+                "caída de CFO",
+                "subida de working capital",
+                "vencimientos cercanos",
+                "otros"
+            ],
+            "indicadores_tempranos": [
+                "2-5 indicadores observables"
+            ]
+            }
+        ],
+        "conclusion_downside": "2-4 frases"
+        },
+
+        "kill_criteria_propuestos": [
+        {
+            "kc_id": "KC-001",
+            "relacionado_con": "supervivencia|deuda|dilucion|contabilidad|fcf|margen|otro",
+            "definicion": "Condición objetiva y medible (sin ambigüedad)",
+            "ventana_meses": { "min": 1, "max": 12 },
+            "fuente_prevista": "earnings|filing|kpi_operativo|otro",
+            "accion_recomendada": "SALIR|REDUCIR_50|REVISAR_COMITE|CONGELAR_COMPRAS",
+            "por_que": "1 frase"
+        }
+        ],
+
+        "recomendacion_para_arbitro": {
+        "riesgo_global": "BAJO|MEDIO|ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": null,
+        "condiciones_para_aumentar_tamaño": [
+            "2-5 bullets: qué evidencia tendría que aparecer"
+        ],
+        "condiciones_para_reducir_o_salir": [
+            "2-5 bullets: qué señales obligan a actuar"
+        ]
+        },
+
+        "faltantes_criticos_forense": [
+        {
+            "item": "tabla_vencimientos|covenants|acciones_diluidas|detalle_capex|detalle_sbc|revolver_disponible",
+            "por_que_importa": "1 frase",
+            "como_obtenerlo": "qué documento/sección exacta buscar"
+        }
+        ]
+    }
+  }
+,
+
+  "log": {
+    "limitaciones": ["máx 5 bullets"],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

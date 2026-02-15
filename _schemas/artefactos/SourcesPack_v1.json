@@ -1,0 +1,88 @@
+{
+  "version_esquema": "SourcesPack_v1",
+  "caso_id": "CASE_YYYYMMDD_TICKER",
+  "fecha_corte": "YYYY-MM-DD",
+  "empresa": {
+    "ticker": "XXXX",
+    "nombre": "Nombre Empresa",
+    "bolsa": "NYSE|NASDAQ|AMEX|OTRA|UNKNOWN",
+    "pais": "US|ES|DE|...|UNKNOWN",
+    "sector": "Texto|UNKNOWN",
+    "industria": "Texto|UNKNOWN",
+    "web_ir": "https://... (si existe)"
+  },
+  "universo_contexto": {
+    "mercados_objetivo": ["USA"],
+    "liquidez_min_usd_dia": 2000000,
+    "capitalizacion_min_usd": 300000000,
+    "capitalizacion_max_usd": 20000000000,
+    "exclusiones_no_especulativo": {
+      "pre_revenue": true,
+      "biotech_clinico": true,
+      "tesis_binaria": true
+    }
+  },
+  "cobertura_documental": {
+    "informe_anual": { "encontrado": false, "source_id": null, "tipo": "10-K|20-F|ANNUAL_REPORT|UNKNOWN" },
+    "informe_trimestral": { "encontrado": false, "source_id": null, "tipo": "10-Q|6-K|QUARTERLY_REPORT|UNKNOWN" },
+    "earnings_release_mas_reciente": { "encontrado": false, "source_id": null, "tipo": "PRESS_RELEASE|8-K|IR_NEWS|UNKNOWN" },
+    "transcripcion_resultados_mas_reciente": { "encontrado": false, "source_id": null, "tipo": "TRANSCRIPT|AUDIO|UNKNOWN" },
+    "presentacion_inversores_mas_reciente": { "encontrado": false, "source_id": null, "tipo": "INVESTOR_PRESENTATION|SLIDES|UNKNOWN" },
+    "proxy_o_gobierno_corporativo": { "encontrado": false, "source_id": null, "tipo": "DEF14A|PROXY|UNKNOWN" },
+    "documento_deuda_o_credit_agreement": { "encontrado": false, "source_id": null, "tipo": "CREDIT_AGREEMENT|NOTE_DEBT|UNKNOWN" },
+    "fuente_precio_y_acciones": { "encontrado": false, "source_id": null, "tipo": "MARKET_DATA|UNKNOWN" }
+  },
+  "fuentes": [
+    {
+      "source_id": "SRC_001",
+      "categoria": "REGULATORIO|IR|TRANSCRIPCION|MERCADO|OTRA",
+      "tipo": "10-K|10-Q|20-F|6-K|8-K|PRESS_RELEASE|IR_NEWS|INVESTOR_PRESENTATION|TRANSCRIPT|PROXY|CREDIT_AGREEMENT|MARKET_DATA|OTHER",
+      "titulo": "Texto",
+      "url": "https://...",
+      "local_path": "_raw_filings/SRC_001_10-K_FY2024.txt (opcional, ruta relativa al dir del caso. Si presente, agentes downstream leen este archivo en vez de acceder a url)",
+      "publicador": "SEC|Company IR|Proveedor|UNKNOWN",
+      "fecha_publicacion": "YYYY-MM-DD",
+      "fecha_recuperacion": "YYYY-MM-DD",
+      "idioma": "es|en|unknown",
+      "fiabilidad": "A|B|C",
+      "relevancia": "ALTA|MEDIA|BAJA",
+      "notas": "1-2 líneas sobre qué aporta",
+      "extractos": [
+        {
+          "texto": "máx 25 palabras",
+          "ubicacion": "sección/página si aplica",
+          "tema": "deuda|margen|guidance|segmentos|capex|buyback|riesgos|otro"
+        }
+      ]
+    }
+  ],
+  "faltantes": [
+    {
+      "item": "transcripcion_resultados_mas_reciente",
+      "por_que_importa": "1 frase",
+      "como_conseguirlo": "qué fuente concreta buscar (IR, 8-K, proveedor transcripciones)"
+    }
+  ],
+  "peticion_para_truth_pack": {
+    "prioridades_extraccion": [
+      "ingresos",
+      "ebit",
+      "net_income",
+      "cfo",
+      "capex",
+      "fcf",
+      "caja",
+      "deuda_total",
+      "acciones_diluidas"
+    ],
+    "preguntas_clave": [
+      "¿Hay tabla de vencimientos 24-36 meses?",
+      "¿Qué items distorsionan EBITDA→FCF?",
+      "¿Hay SBC o dilución neta relevante?"
+    ]
+  },
+  "log": {
+    "limitaciones": ["si hubo paywall, pdf inaccesible, etc."],
+    "observaciones": ["cualquier nota útil para el extractor"]
+  }
+}

@@ -1,0 +1,567 @@
+{
+  "version_esquema": "DecisionPacket_v1",
+  "caso_id": "CASE_YYYYMMDD_TICKER",
+  "fecha_corte": "YYYY-MM-DD",
+  "empresa": {
+    "ticker": "XXXX",
+    "nombre": "Nombre Empresa",
+    "bolsa": "NYSE|NASDAQ|OTRA|UNKNOWN",
+    "pais": "US|...|UNKNOWN",
+    "sector": "Texto|UNKNOWN",
+    "industria": "Texto|UNKNOWN"
+  },
+  "input_refs": {
+    "sources_pack_caso_id": "CASE_YYYYMMDD_TICKER",
+    "truth_pack_caso_id": "CASE_YYYYMMDD_TICKER",
+    "implied_expectations_caso_id": "CASE_YYYYMMDD_TICKER",
+    "agent_reports": [
+      {
+        "agent_role": "CATALYST",
+        "agent_nombre": "CATALYST_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.5
+      },
+      {
+        "agent_role": "FORENSIC",
+        "agent_nombre": "FORENSIC_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.5
+      },
+      {
+        "agent_role": "BULL",
+        "agent_nombre": "BULL_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.5
+      },
+      {
+        "agent_role": "RED_TEAM",
+        "agent_nombre": "RED_TEAM_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.5
+      }
+    ]
+  },
+  "charter": {
+    "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+    "horizonte_meses": {
+      "min": 6,
+      "max": 30
+    },
+    "restricciones_no_especulativo": [
+      "Evitar tesis binaria",
+      "Evitar dependencia de financiacion salvadora",
+      "Exigir supervivencia 12-24 meses razonable",
+      "Exigir catalizador no binario y medible"
+    ]
+  },
+  "resumen_ejecutivo": {
+    "decision": "INVERTIR|WATCHLIST|DESCARTAR|BLOQUEADO",
+    "tamaño_recomendado_pct_cartera": null,
+    "confianza_global_0_1": 0.5,
+    "racional_5_lineas": [
+      "Línea 1",
+      "Línea 2",
+      "Línea 3",
+      "Línea 4",
+      "Línea 5"
+    ],
+    "lo_mas_importante_ahora": [
+      "3-7 bullets: qué hay que vigilar / confirmar"
+    ],
+    "principales_riesgos": [
+      "3-7 bullets"
+    ]
+  },
+  "gates": {
+    "data_quality_gate": {
+      "status": "PASS|FAIL",
+      "por_que": [
+        "2-6 bullets"
+      ],
+      "faltantes_criticos": [
+        {
+          "item": "EV|FCF|EBIT|acciones|deuda|vencimientos|covenants|otro",
+          "como_resolver": "qué pedir"
+        }
+      ]
+    },
+    "survivability_gate": {
+      "status": "PASS|CONDITIONAL|FAIL|UNKNOWN",
+      "por_que": [
+        "2-6 bullets"
+      ],
+      "condiciones_si_conditional": [
+        "condiciones verificables"
+      ]
+    },
+    "mispricing_gate": {
+      "status": "PASS|FAIL|UNKNOWN",
+      "por_que": [
+        "2-6 bullets"
+      ]
+    },
+    "catalyst_gate": {
+      "status": "PASS|FAIL|UNKNOWN",
+      "por_que": [
+        "2-6 bullets"
+      ]
+    },
+    "non_speculative_gate": {
+      "status": "PASS|FAIL",
+      "banderas": {
+        "tesis_binaria_detectada": false,
+        "dependencia_financiacion_salvadora": false,
+        "opacidad_inaceptable": false
+      },
+      "por_que": [
+        "2-6 bullets"
+      ]
+    }
+  },
+  "scoring_preliminar": {
+    "metodo": "Score_0_100",
+    "componentes": {
+      "S_supervivencia_0_25": null,
+      "M_mispricing_0_25": null,
+      "C_catalizador_0_20": null,
+      "Q_calidad_0_15": null,
+      "R_downside_0_15": null,
+      "V_penalizacion_0_a_menos15": null
+    },
+    "total_0_100": null,
+    "nota": "1-2 frases sobre por qué este score y qué lo limita"
+  },
+  "assumption_ledger": {
+    "reglas": {
+      "id_prefix": "A-",
+      "max_supuestos": 40,
+      "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+    },
+    "supuestos": [
+      {
+        "assumption_id": "A-001",
+        "enunciado": "1 frase precisa",
+        "tipo": "HECHO|INFERENCIA|HIPOTESIS",
+        "criticidad": "CRITICO|IMPORTANTE|CONTEXTUAL",
+        "probabilidad_0_1": 0.5,
+        "confianza_0_1": 0.5,
+        "impacto": "ALTO|MEDIO|BAJO",
+        "drivers_afectados": [
+          "FCF",
+          "MARGEN_OPERATIVO",
+          "COSTE_DEUDA",
+          "MULTIPLO",
+          "CAPEX",
+          "WC",
+          "OTRO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_XXX",
+            "ubicacion": "página/sección",
+            "cita_corta": "máx 25 palabras",
+            "interpretacion": "1 frase"
+          }
+        ],
+        "falsacion": {
+          "test": "Evento/lectura observable que refuta el supuesto",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings|10-Q|10-K|filing|kpi_operativo|otro",
+          "accion_si_falla": "SALIR|REDUCIR_50|REVISAR_COMITE|CONGELAR_COMPRAS"
+        },
+        "dependencias": [
+          "A-002",
+          "A-005"
+        ],
+        "estado": "ABIERTA|CONFIRMADA|DEGRADADA|REFUTADA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_001"
+          },
+          {
+            "agent_role": "CATALYST",
+            "claim_id": "CLM_002"
+          }
+        ],
+        "notas_arbitro": "1-2 líneas"
+      }
+    ]
+  },
+  "evidence_graph": {
+    "version": "EvidenceGraph_v1",
+    "nodos": [
+      {
+        "node_id": "E-001",
+        "tipo": "EVIDENCIA",
+        "label": "SRC_XXX: resumen corto",
+        "ref": {
+          "source_id": "SRC_XXX"
+        }
+      },
+      {
+        "node_id": "A-001",
+        "tipo": "SUPUESTO",
+        "label": "Supuesto A-001",
+        "ref": {
+          "assumption_id": "A-001"
+        }
+      },
+      {
+        "node_id": "C-001",
+        "tipo": "CATALIZADOR",
+        "label": "Catalizador C-001",
+        "ref": {
+          "catalyst_id": "C-001"
+        }
+      },
+      {
+        "node_id": "SC-BASE",
+        "tipo": "ESCENARIO",
+        "label": "Escenario BASE",
+        "ref": {
+          "scenario_id": "BASE"
+        }
+      },
+      {
+        "node_id": "D-001",
+        "tipo": "DECISION",
+        "label": "Decisión final",
+        "ref": {
+          "decision": "INVERTIR|WATCHLIST|DESCARTAR|BLOQUEADO"
+        }
+      }
+    ],
+    "aristas": [
+      {
+        "from": "E-001",
+        "to": "A-001",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.7,
+        "nota": "1 frase"
+      },
+      {
+        "from": "A-001",
+        "to": "SC-BASE",
+        "relacion": "DEPENDE_DE",
+        "peso_0_1": 0.6,
+        "nota": "1 frase"
+      },
+      {
+        "from": "C-001",
+        "to": "A-001",
+        "relacion": "DISPARA",
+        "peso_0_1": 0.5,
+        "nota": "1 frase"
+      },
+      {
+        "from": "SC-BASE",
+        "to": "D-001",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.8,
+        "nota": "1 frase"
+      }
+    ],
+    "validacion_grafo": {
+      "ids_unicos": true,
+      "aristas_referencian_nodos_existentes": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "detalle": "si algo falla, explicar"
+    }
+  },
+  "catalizadores_consolidados": [
+    {
+      "catalyst_id": "C-001",
+      "nombre": "Texto",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 24
+      },
+      "probabilidad_0_1": 0.5,
+      "mecanismo_cierre_gap": "1-2 frases",
+      "supuestos_afectados": [
+        "A-001",
+        "A-004"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "test medible",
+          "fuente_prevista": "earnings|filing|otro",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          }
+        }
+      ]
+    }
+  ],
+  "escenarios": [
+    {
+      "scenario_id": "BASE",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 24
+      },
+      "descripcion": "2-4 frases",
+      "drivers_clave": [
+        "A-001",
+        "A-003"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": null,
+        "base": null,
+        "max": null
+      },
+      "nota_valoracion": "si null, explicar por qué falta"
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.25,
+      "ventana_meses": {
+        "min": 9,
+        "probable": 18,
+        "max": 30
+      },
+      "descripcion": "2-4 frases",
+      "drivers_clave": [
+        "A-001",
+        "A-007"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": null,
+        "base": null,
+        "max": null
+      },
+      "nota_valoracion": "si null, explicar por qué falta"
+    },
+    {
+      "scenario_id": "BEAR",
+      "probabilidad_0_1": 0.25,
+      "ventana_meses": {
+        "min": 3,
+        "probable": 12,
+        "max": 24
+      },
+      "descripcion": "2-4 frases",
+      "drivers_clave": [
+        "A-010",
+        "A-011"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": null,
+        "base": null,
+        "max": null
+      },
+      "nota_valoracion": "si null, explicar por qué falta"
+    }
+  ],
+  "kill_criteria_final": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con_assumption_id": "A-001",
+      "definicion": "Condición objetiva y medible",
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "fuente_prevista": "earnings|filing|kpi_operativo|otro",
+      "accion": "SALIR|REDUCIR_50|REVISAR_COMITE|CONGELAR_COMPRAS",
+      "severidad": "ALTA|MEDIA|BAJA",
+      "por_que": "1 frase"
+    }
+  ],
+  "plan_monitorizacion": {
+    "frecuencias": {
+      "pulso_diario": {
+        "activo": true,
+        "que_mirar": [
+          "precio vs umbral",
+          "noticias",
+          "filings"
+        ]
+      },
+      "revision_semanal": {
+        "activo": true,
+        "que_mirar": [
+          "estado supuestos críticos",
+          "catalizadores",
+          "riesgos balance"
+        ]
+      },
+      "modo_evento": {
+        "activo": true,
+        "que_mirar": [
+          "earnings/transcript",
+          "10-Q/10-K",
+          "guidance",
+          "métricas clave"
+        ]
+      }
+    },
+    "lista_de_checks_por_supuesto": [
+      {
+        "assumption_id": "A-001",
+        "indicadores": [
+          "KPI X",
+          "margen",
+          "FCF"
+        ],
+        "fuente": "earnings|filing|otro",
+        "frecuencia": "TRIMESTRAL"
+      }
+    ],
+    "umbrales_alerta": [
+      {
+        "tipo": "PRECIO",
+        "condicion": "caída > X% en Y días",
+        "accion": "REVISAR_COMITE",
+        "severidad": "MEDIA"
+      }
+    ]
+  },
+  "predicciones_para_calibracion_consolidadas": [
+    {
+      "pred_id": "CP-001",
+      "descripcion": "Evento observable y medible",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Cómo se decide si ocurrió",
+      "fuente_prevista": "earnings|10-Q|10-K|PR|kpi_operativo|otro",
+      "origen": [
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_003"
+        },
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_006"
+        }
+      ]
+    }
+  ],
+  "arbitraje": {
+    "desacuerdos_detectados": [
+      {
+        "tema": "Ej: sostenibilidad de margen",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "mejora fuerte",
+            "confianza_0_1": 0.7
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "no revierte",
+            "confianza_0_1": 0.7
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "RESUELTO|NO_RESUELTO",
+          "decision": "convertir_en_escenario|pedir_fuente|penalizar_tamaño|descartar",
+          "por_que": "2-4 frases",
+          "accion": "qué se hace a continuación"
+        }
+      }
+    ],
+    "puntos_abiertos": [
+      "3-10 bullets: lo que no se pudo resolver con la evidencia actual"
+    ]
+  },
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA|MEDIA|BAJA",
+      "item": "Dato/documento faltante",
+      "por_que_importa": "1 frase",
+      "como_obtenerlo": "filing/sección/palabras clave"
+    }
+  ],
+  "salida_para_siguiente_agente": {
+    "monitor_input_recomendado": "Usar este DecisionPacket_v1 como entrada base del Monitor",
+    "estado_caso": "ACTIVO|EN_ESPERA|CERRADO",
+    "proxima_revision_sugerida": "YYYY-MM-DD"
+  },
+  "log": {
+    "autochequeos": {
+      "decision_respeta_gates": true,
+      "supuestos_criticos_tienen_evidencia": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "kill_criteria_mapeados_a_supuestos": true,
+      "salida_solo_json": true
+    },
+    "limitaciones": [
+      "máx 8 bullets"
+    ],
+    "revision": {
+      "es_revision": true,
+      "revision_num": 2,
+      "decision_packet_anterior_caso_id": "CASE_YYYYMMDD_TICKER",
+      "monitoring_updates_usados": [
+        "MON_2026-01-03_001"
+      ],
+      "resumen_cambios": [
+        "A-001 degradada por evidencia NE-001",
+        "KC-003 pasa a EN_RIESGO",
+        "Probabilidades de escenarios ajustadas"
+      ]
+    }
+  },
+
+  "control": {
+    "estado_flujo": "ARBITRATE|REARBITRATE",
+    "next_step": "MONITOR|REMEDIATE|EXIT",
+    "next_agent_role": "TRUTH_PACK|SOURCES|IMPLIED|ARBITRO|MONITOR|NONE",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 2,
+    "issues": [
+      {
+        "issue_id": "ISS-001",
+        "issue_code": "LEASE_PV_MISSING",
+        "gate_afectado": "data_quality_gate|non_speculative_gate|survivability_gate|mispricing_gate|catalyst_gate",
+        "severidad": "ALTA|MEDIA|BAJA",
+        "resoluble": true,
+        "owner_agent_role": "TRUTH_PACK|SOURCES|IMPLIED|ARBITRO",
+        "descripcion": "Falta lease PV para calcular EV_economic y comparar expectativas implícitas con cargas de arrendamiento.",
+        "criterio_aceptacion": {
+          "required_fields": ["operating_lease_liabilities_pv_total", "lease_discount_rate", "lease_remaining_term"],
+          "notes": "Debe venir con fuente_ref (source_id + ubicación + cita corta)."
+        }
+      }
+    ],
+    "work_orders": [
+      {
+        "wo_id": "WO-001",
+        "agent_role": "TRUTH_PACK",
+        "tipo": "EXTRACT_FIELDS",
+        "issue_refs": ["ISS-001"],
+        "targets": {
+          "fields": [
+            "operating_lease_liabilities_pv_current",
+            "operating_lease_liabilities_pv_noncurrent",
+            "operating_lease_liabilities_pv_total",
+            "lease_discount_rate",
+            "lease_remaining_term"
+          ],
+          "notes": "Extraer PV de leases y metadata desde 10-K/10-Q (nota de arrendamientos)."
+        },
+        "acceptance": {
+          "required_fields": ["operating_lease_liabilities_pv_total"],
+          "pass_if_present": true
+        },
+        "depends_on": []
+      }
+    ],
+    "dispatch_queue": [
+      { "step": 1, "agent_role": "TRUTH_PACK", "wo_ids": ["WO-001"] }
+    ]
+  }
+}

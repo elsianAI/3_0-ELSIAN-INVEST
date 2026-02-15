@@ -1,0 +1,350 @@
+"""
+TP_VALIDATOR: Ejecuta gates de calidad sobre TruthPack.
+100% determinista, 0 tokens LLM.
+
+Gates:
+  N1) BALANCE_IDENTITY: Assets ≈ Liabilities + Equity (±2%)
+  N2) CASHFLOW_IDENTITY: CFO + CFI + CFF ≈ ΔCash (±5%)
+  N3) UNIDADES_SANITY: No saltos 1000x entre periodos consecutivos
+  N4) EV_SANITY: EV >= 0 o justificado
+  N5) MARGIN_SANITY: Márgenes dentro de rangos sectoriales
+  N6) TTM_SANITY: TTM consistente con anuales y trimestrales
+  N7) DATA_COMPLETENESS: % campos null por sección
+
+Confidence score: 100 - 15×FAIL - 5×WARN - 10×SKIP
+"""
+
+import json
+import sys
+from pathlib import Path
+from datetime import datetime, timezone
+
+
+GATES = [
+    {"name": "BALANCE_IDENTITY",   "tolerance": 0.02, "critical": True},
+    {"name": "CASHFLOW_IDENTITY",  "tolerance": 0.05, "critical": True},
+    {"name": "UNIDADES_SANITY",    "tolerance": None,  "critical": False},
+    {"name": "EV_SANITY",          "tolerance": None,  "critical": False},
+    {"name": "MARGIN_SANITY",      "tolerance": None,  "critical": False},
+    {"name": "TTM_SANITY",         "tolerance": 0.20, "critical": False},
+    {"name": "DATA_COMPLETENESS",  "tolerance": None,  "critical": False},
+]
+
+# Sector-typical margin ranges for sanity checking
+SECTOR_MARGINS = {
+    "default": {"gross": (-10, 90), "operating": (-50, 60), "net": (-100, 50)},
+}
+
+
+def validate(tp_with_metrics: dict) -> dict:
+    """
+    Ejecuta todos los gates sobre el TruthPack con métricas.
+    Retorna TruthPack completo con sección `data_quality` añadida.
+    """
+    result = dict(tp_with_metrics)
+    gates_results = []
+    warnings = []
+
+    # Execute each gate
+    gate_funcs = {
+        "BALANCE_IDENTITY": _gate_balance_identity,
+        "CASHFLOW_IDENTITY": _gate_cashflow_identity,
+        "UNIDADES_SANITY": _gate_unidades_sanity,
+        "EV_SANITY": _gate_ev_sanity,
+        "MARGIN_SANITY": _gate_margin_sanity,
+        "TTM_SANITY": _gate_ttm_sanity,
+        "DATA_COMPLETENESS": _gate_data_completeness,
+    }
+
+    for gate_def in GATES:
+        gate_name = gate_def["name"]
+        func = gate_funcs.get(gate_name)
+        if func:
+            gate_result = func(result)
+            gate_result["critical"] = gate_def["critical"]
+            gates_results.append(gate_result)
+
+            if gate_result["status"] == "WARNING":
+                warnings.append(f"{gate_name}: {gate_result.get('note', '')}")
+            elif gate_result["status"] == "FAIL":
+                warnings.append(f"CRITICAL — {gate_name}: {gate_result.get('note', '')}")
+
+    # Calculate overall
+    overall = _overall_status(gates_results)
+    confidence = _calc_confidence(gates_results)
+
+    # Build data_quality section
+    result["data_quality"] = {
+        "status": overall,
+        "validaciones": {g["name"]: {"status": g["status"], "detalle": g.get("note", "")} for g in gates_results},
+        "gates": gates_results,
+        "overall_status": overall,
+        "warnings": warnings,
+        "confidence_score": confidence,
+        "faltantes_criticos": _find_critical_missing(result),
+        "limitaciones": _find_limitations(result),
+        "nota": (
+            f"Validation by tp_validator.py. "
+            f"Overall: {overall}. Confidence: {confidence}%. "
+            f"{len(warnings)} warnings."
+        ),
+    }
+
+    result["recomendacion_siguiente_paso"] = {
+        "puede_pasar_a_implied_expectations": overall != "FAIL",
+        "condiciones": warnings[:3] if overall == "FAIL" else [],
+    }
+
+    # Inject _meta
+    result["_meta"] = {
+        "timestamp_validacion": datetime.now(timezone.utc).isoformat(),
+        "version_schema": "TruthPack_v1",
+        "tp_validator_version": "1.0.0",
+        "notas_auditoria": f"{len(gates_results)} gates executed, {confidence}% confidence",
+    }
+
+    return result
+
+
+def _gate_balance_identity(tp: dict) -> dict:
+    """Assets = Liabilities + Equity. Tolerance 2%."""
+    bs = tp.get("balance_sheet_ultimo", {})
+    assets = bs.get("activos_totales_usd") or bs.get("total_assets_usd")
+    liabilities = bs.get("pasivos_totales_usd") or bs.get("total_liabilities_usd")
+    equity = bs.get("patrimonio_usd") or bs.get("equity_usd")
+
+    if assets is None or liabilities is None or equity is None:
+        return {"name": "BALANCE_IDENTITY", "status": "SKIP", "note": "Missing balance sheet data"}
+
+    expected = liabilities + equity
+    if expected == 0:
+        return {"name": "BALANCE_IDENTITY", "status": "SKIP", "note": "L+E = 0"}
+
+    diff_pct = abs(assets - expected) / abs(expected)
+    if diff_pct <= 0.02:
+        return {"name": "BALANCE_IDENTITY", "status": "PASS", "note": f"Diff: {diff_pct:.2%}", "actual_value": diff_pct}
+    else:
+        return {"name": "BALANCE_IDENTITY", "status": "FAIL", "note": f"Diff: {diff_pct:.2%} > 2%", "actual_value": diff_pct}
+
+
+def _gate_cashflow_identity(tp: dict) -> dict:
+    """CFO + CFI + CFF ≈ ΔCash. Tolerance 5%."""
+    # This requires CFI and CFF which may not always be in the TP
+    annual = tp.get("historico_anual", [])
+    if not annual:
+        return {"name": "CASHFLOW_IDENTITY", "status": "SKIP", "note": "No annual data"}
+
+    fy0 = annual[-1]
+    cfo = fy0.get("cfo_usd")
+    cfi = fy0.get("cfi_usd")
+    cff = fy0.get("cff_usd")
+
+    if cfo is None or cfi is None or cff is None:
+        return {"name": "CASHFLOW_IDENTITY", "status": "SKIP", "note": "Missing CF components (CFO/CFI/CFF)"}
+
+    total_cf = cfo + cfi + cff
+    delta_cash = fy0.get("cambio_caja_usd") or fy0.get("delta_cash_usd")
+
+    if delta_cash is None:
+        return {"name": "CASHFLOW_IDENTITY", "status": "SKIP", "note": "No delta_cash to compare"}
+
+    if delta_cash == 0:
+        diff_pct = abs(total_cf) / max(abs(cfo), 1)
+    else:
+        diff_pct = abs(total_cf - delta_cash) / abs(delta_cash)
+
+    if diff_pct <= 0.05:
+        return {"name": "CASHFLOW_IDENTITY", "status": "PASS", "note": f"Diff: {diff_pct:.2%}"}
+    else:
+        return {"name": "CASHFLOW_IDENTITY", "status": "FAIL", "note": f"Diff: {diff_pct:.2%} > 5%"}
+
+
+def _gate_unidades_sanity(tp: dict) -> dict:
+    """No saltos 1000x entre períodos consecutivos."""
+    annual = tp.get("historico_anual", [])
+    anomalies = []
+
+    for i in range(1, len(annual)):
+        prev = annual[i - 1]
+        curr = annual[i]
+        for field in ["ingresos_usd", "ebit_usd", "net_income_usd", "cfo_usd"]:
+            p_val = prev.get(field)
+            c_val = curr.get(field)
+            if p_val and c_val and p_val != 0:
+                ratio = abs(c_val / p_val)
+                if ratio > 1000 or ratio < 0.001:
+                    anomalies.append(f"{field}: {prev.get('periodo')}→{curr.get('periodo')} ratio={ratio:.0f}x")
+
+    if not anomalies:
+        return {"name": "UNIDADES_SANITY", "status": "PASS", "note": "No 1000x jumps detected"}
+    else:
+        return {"name": "UNIDADES_SANITY", "status": "FAIL", "note": f"Anomalies: {'; '.join(anomalies[:3])}"}
+
+
+def _gate_ev_sanity(tp: dict) -> dict:
+    """EV >= 0."""
+    metricas = tp.get("metricas_derivadas", {})
+    ev = metricas.get("ev_usd") or tp.get("mercado", {}).get("enterprise_value_usd")
+
+    if ev is None:
+        return {"name": "EV_SANITY", "status": "SKIP", "note": "EV not calculated"}
+    if ev >= 0:
+        return {"name": "EV_SANITY", "status": "PASS", "note": f"EV = {ev:,.0f}"}
+    else:
+        return {"name": "EV_SANITY", "status": "WARNING", "note": f"Negative EV = {ev:,.0f} (cash > market_cap + debt)"}
+
+
+def _gate_margin_sanity(tp: dict) -> dict:
+    """Márgenes dentro de rangos sectoriales."""
+    metricas = tp.get("metricas_derivadas", {})
+    ranges = SECTOR_MARGINS["default"]
+    issues = []
+
+    for metric, key in [("gross", "margen_bruto_pct"), ("operating", "margen_operativo_pct"), ("net", "margen_neto_pct")]:
+        val = metricas.get(key)
+        if val is not None:
+            lo, hi = ranges[metric]
+            if val < lo or val > hi:
+                issues.append(f"{key}={val:.1f}% outside [{lo},{hi}]")
+
+    if not issues:
+        return {"name": "MARGIN_SANITY", "status": "PASS", "note": "Margins within expected ranges"}
+    else:
+        return {"name": "MARGIN_SANITY", "status": "WARNING", "note": "; ".join(issues)}
+
+
+def _gate_ttm_sanity(tp: dict) -> dict:
+    """TTM consistente con anuales y trimestrales."""
+    ttm = tp.get("ttm", {})
+    annual = tp.get("historico_anual", [])
+
+    if not ttm or ttm.get("metodo") == "no_disponible":
+        return {"name": "TTM_SANITY", "status": "SKIP", "note": "TTM not calculated"}
+
+    if not annual:
+        return {"name": "TTM_SANITY", "status": "SKIP", "note": "No annual data to compare"}
+
+    fy0 = annual[-1]
+    ttm_rev = ttm.get("ingresos_usd")
+    fy0_rev = fy0.get("ingresos_usd")
+
+    if ttm_rev is None or fy0_rev is None or fy0_rev == 0:
+        return {"name": "TTM_SANITY", "status": "SKIP", "note": "Cannot compare TTM vs FY0 revenue"}
+
+    ratio = ttm_rev / fy0_rev
+    if 0.5 <= ratio <= 2.0:
+        return {"name": "TTM_SANITY", "status": "PASS", "note": f"TTM/FY0 revenue ratio: {ratio:.2f}"}
+    else:
+        return {"name": "TTM_SANITY", "status": "WARNING", "note": f"TTM/FY0 revenue ratio: {ratio:.2f} — unusually large deviation"}
+
+
+def _gate_data_completeness(tp: dict) -> dict:
+    """Cuenta campos null por sección."""
+    sections = {
+        "historico_anual": tp.get("historico_anual", []),
+        "historico_trimestral": tp.get("historico_trimestral", []),
+        "balance_sheet_ultimo": [tp.get("balance_sheet_ultimo", {})],
+        "metricas_derivadas": [tp.get("metricas_derivadas", {})],
+    }
+
+    total_fields = 0
+    null_fields = 0
+    details = {}
+
+    for section_name, items in sections.items():
+        if not items:
+            continue
+        s_total = 0
+        s_null = 0
+        for item in (items if isinstance(items, list) else [items]):
+            if isinstance(item, dict):
+                for k, v in item.items():
+                    if k.startswith("_") or k in ("periodo", "fecha_fin", "fuente_refs"):
+                        continue
+                    s_total += 1
+                    if v is None:
+                        s_null += 1
+        total_fields += s_total
+        null_fields += s_null
+        if s_total > 0:
+            details[section_name] = f"{s_null}/{s_total} null ({s_null/s_total*100:.0f}%)"
+
+    completeness_pct = ((total_fields - null_fields) / total_fields * 100) if total_fields > 0 else 0
+    status = "PASS" if completeness_pct >= 50 else "WARNING"
+
+    return {
+        "name": "DATA_COMPLETENESS",
+        "status": status,
+        "note": f"Overall: {completeness_pct:.0f}% complete. {details}",
+        "completeness_pct": completeness_pct,
+    }
+
+
+def _calc_confidence(gates: list[dict]) -> float:
+    """100 - 15*FAIL - 5*WARN - 10*SKIP."""
+    score = 100.0
+    for g in gates:
+        if g["status"] == "FAIL":
+            score -= 15
+        elif g["status"] == "WARNING":
+            score -= 5
+        elif g["status"] == "SKIP":
+            score -= 10
+    return max(0, min(100, round(score, 1)))
+
+
+def _overall_status(gates: list[dict]) -> str:
+    """PASS / PARTIAL / FAIL."""
+    has_critical_fail = any(g["status"] == "FAIL" and g.get("critical") for g in gates)
+    has_any_fail = any(g["status"] == "FAIL" for g in gates)
+    has_warning = any(g["status"] == "WARNING" for g in gates)
+
+    if has_critical_fail:
+        return "FAIL"
+    if has_any_fail or has_warning:
+        return "PARTIAL"
+    return "PASS"
+
+
+def _find_critical_missing(tp: dict) -> list[dict]:
+    """Find critically missing data fields."""
+    missing = []
+    metricas = tp.get("metricas_derivadas", {})
+
+    if metricas.get("ev_usd") is None:
+        missing.append({"item": "enterprise_value", "impacto": "Cannot calculate EV multiples", "como_conseguirlo": "Need market_cap + debt - cash"})
+    if metricas.get("fcf_usd") is None:
+        missing.append({"item": "free_cash_flow", "impacto": "Cannot calculate FCF metrics", "como_conseguirlo": "Need CFO and capex"})
+
+    return missing
+
+
+def _find_limitations(tp: dict) -> list[str]:
+    """Find limitations in the data."""
+    limitations = []
+    ttm = tp.get("ttm", {})
+    if ttm.get("metodo") == "FY0_fallback":
+        limitations.append("TTM calculated from FY0 only (no quarterly data)")
+    if ttm.get("metodo") == "no_disponible":
+        limitations.append("TTM not available")
+
+    annual = tp.get("historico_anual", [])
+    if len(annual) < 3:
+        limitations.append(f"Only {len(annual)} years of annual data (recommended: 5)")
+
+    return limitations
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print(f"Usage: {sys.argv[0]} <tp_with_metrics.json> <output.json>")
+        sys.exit(1)
+
+    input_path = Path(sys.argv[1])
+    output_path = Path(sys.argv[2])
+
+    tp = json.loads(input_path.read_text())
+    result = validate(tp)
+    output_path.write_text(json.dumps(result, indent=2, ensure_ascii=False))
+    print(f"[tp_validator] Output written to {output_path}")
+    print(f"[tp_validator] Overall: {result['data_quality']['overall_status']} — Confidence: {result['data_quality']['confidence_score']}%")

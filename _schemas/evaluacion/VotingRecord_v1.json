@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VotingRecord_v1",
+  "version_esquema": "1.1",
+  "descripcion": "Histórico de votaciones ciegas en ejecución dual/multi-modelo. Acumula scores por step y modelo para optimizar routing.",
+  "type": "object",
+  "required": ["meta", "scoreboard"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["fecha_generacion", "version_schema", "ventana_acumulacion", "modelos_activos"],
+      "properties": {
+        "fecha_generacion": {
+          "type": "string",
+          "format": "date-time",
+          "descripcion": "ISO 8601 datetime de última actualización"
+        },
+        "version_schema": {
+          "type": "string",
+          "const": "1.1"
+        },
+        "ventana_acumulacion": {
+          "type": "object",
+          "required": ["desde", "hasta"],
+          "properties": {
+            "desde": { "type": "string", "format": "date" },
+            "hasta": { "type": "string", "format": "date" }
+          }
+        },
+        "modelos_activos": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["codex53", "opus46", "gemini3pro", "chatgpt"]
+          },
+          "descripcion": "Modelos configurados para votación en el período actual"
+        }
+      }
+    },
+    "scoreboard": {
+      "type": "object",
+      "required": ["por_step", "promedio_global"],
+      "properties": {
+        "por_step": {
+          "type": "object",
+          "properties": {
+            "SOURCES": { "$ref": "#/definitions/step_votacion" },
+            "TRUTH_PACK": { "$ref": "#/definitions/step_votacion" },
+            "IMPLIED": { "$ref": "#/definitions/step_votacion" },
+            "CATALYST": { "$ref": "#/definitions/step_votacion" },
+            "FORENSIC": { "$ref": "#/definitions/step_votacion" },
+            "BULL": { "$ref": "#/definitions/step_votacion" },
+            "RED_TEAM": { "$ref": "#/definitions/step_votacion" }
+          }
+        },
+        "promedio_global": {
+          "type": "object",
+          "required": ["codex53", "opus46", "gemini3pro"],
+          "properties": {
+            "codex53": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "descripcion": "Proporción de votaciones ganadas por codex53 (0-1)"
+            },
+            "opus46": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "descripcion": "Proporción de votaciones ganadas por opus46 (0-1)"
+            },
+            "gemini3pro": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "descripcion": "Proporción de votaciones ganadas por gemini3pro (0-1)"
+            },
+            "chatgpt": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "descripcion": "Proporción de votaciones ganadas por artefactos externos chatgpt (0-1)"
+            }
+          }
+        }
+      }
+    },
+    "recomendaciones_routing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step", "modelo_recomendado", "confianza_recomendacion"],
+        "properties": {
+          "step": {
+            "type": "string",
+            "enum": ["SOURCES", "TRUTH_PACK", "IMPLIED", "CATALYST", "FORENSIC", "BULL", "RED_TEAM"]
+          },
+          "modelo_recomendado": {
+            "type": "string",
+            "enum": ["codex53", "opus46", "gemini3pro", "chatgpt", "balance"],
+            "descripcion": "Modelo recomendado para siguiente ejecución (balance = ejecutar comparación multi-modelo)"
+          },
+          "confianza_recomendacion": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "descripcion": "Confianza en la recomendación basada en volumen de datos"
+          },
+          "notas": {
+            "type": "string",
+            "descripcion": "Justificación de la recomendación"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "step_votacion": {
+      "type": "object",
+      "required": ["votaciones_totales", "codex53", "opus46", "gemini3pro"],
+      "properties": {
+        "votaciones_totales": {
+          "type": "integer",
+          "minimum": 0,
+          "descripcion": "Número total de votaciones registradas para este step"
+        },
+        "codex53": { "$ref": "#/definitions/estadisticas_modelo" },
+        "opus46": { "$ref": "#/definitions/estadisticas_modelo" },
+        "gemini3pro": { "$ref": "#/definitions/estadisticas_modelo" },
+        "chatgpt": { "$ref": "#/definitions/estadisticas_modelo" }
+      }
+    },
+    "estadisticas_modelo": {
+      "type": "object",
+      "required": ["ganadas", "puntuacion_media", "puntuaciones_historico"],
+      "properties": {
+        "ganadas": {
+          "type": "integer",
+          "minimum": 0,
+          "descripcion": "Número de votaciones ganadas por este modelo en este step"
+        },
+        "puntuacion_media": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 100.0,
+          "descripcion": "Promedio de scores ciegos recibidos"
+        },
+        "desv_estandar": {
+          "type": "number",
+          "minimum": 0.0,
+          "descripcion": "Desviación estándar de scores"
+        },
+        "puntuaciones_historico": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["score", "fecha", "caso_id"],
+            "properties": {
+              "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+              "fecha": { "type": "string", "format": "date" },
+              "caso_id": { "type": "string" },
+              "evaluacion_breve": { "type": "string" }
+            }
+          },
+          "descripcion": "Historial detallado de cada votación"
+        }
+      }
+    }
+  }
+}

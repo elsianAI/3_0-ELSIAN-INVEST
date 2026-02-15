@@ -1,0 +1,200 @@
+{
+  "version_esquema": "CandidateList_v2",
+  "rol_scout": "SCOUT_Q | SCOUT_E | SCOUT_MERGED",
+  "fecha_corte": "YYYY-MM-DD",
+  "universo": {
+    "mercados_objetivo": ["USA", "UK", "CA", "EU"],
+    "capitalizacion_min_usd": 50000000,
+    "capitalizacion_max_usd": 3000000000,
+    "liquidez_tiers": {
+      "tier_1": { "cap_min_usd": 1000000000, "cap_max_usd": 3000000000, "liquidez_min_usd_dia": 1000000 },
+      "tier_2": { "cap_min_usd": 300000000, "cap_max_usd": 1000000000, "liquidez_min_usd_dia": 300000 },
+      "tier_3": { "cap_min_usd": 50000000, "cap_max_usd": 300000000, "liquidez_min_usd_dia": 50000, "nota": "liquidez_limitada=true, posición máxima reducida" }
+    },
+    "exclusiones_no_especulativo": {
+      "pre_revenue": true,
+      "biotech_clinico": true,
+      "tesis_binaria": true
+    },
+    "umbral_score_minimo_batch": 80
+  },
+  "metodologia": {
+    "objetivo": "Encontrar expectation gaps extraordinarios con catalizador no binario (6-30 meses), datos verificados y convicción alta.",
+    "pre_filter_ref": "candidatos/PreFilter_YYYY-MM-DD.json",
+    "metodos_usados": [
+      {
+        "id": "METODO_1",
+        "descripcion": "Descripción",
+        "fuentes_base": [
+          { "tipo": "screener|market_data|news|filing|ir", "url": "https://...", "nota": "qué aportó" }
+        ]
+      }
+    ],
+    "reglas_de_calidad": {
+      "no_inventar_metricas": true,
+      "si_no_hay_dato_marcar_null": true,
+      "min_fuentes_por_candidato": 2,
+      "min_metricas_core_no_null": 5,
+      "null_penalty_por_metrica": -5,
+      "umbral_score_batch": 80,
+      "cupo_candidatos": "0-5 (preferible 0 a mediocres)"
+    }
+  },
+  "candidatos": [
+    {
+      "ranking": 1,
+      "ticker": "XXXX",
+      "nombre": "Nombre empresa",
+      "bolsa": "NYSE|NASDAQ|LSE|TSX|...",
+      "pais": "US|GB|CA|DE|...",
+      "sector": "Texto",
+      "industria": "Texto",
+      "precio": { "valor": null, "divisa": "USD", "fecha": "YYYY-MM-DD" },
+      "capitalizacion_usd": null,
+      "liquidez_media_3m_usd_dia": null,
+      "pre_filter_passed": true,
+
+      "checklist_exclusion": {
+        "es_biotech_clinico": false,
+        "es_pre_revenue": false,
+        "depende_evento_binario": false,
+        "necesita_financiacion_12m": false,
+        "ticker_ya_en_sistema": false,
+        "todas_pasan": true
+      },
+
+      "metricas_rapidas": {
+        "ev_usd": null,
+        "ev_ebit": null,
+        "ev_fcf": null,
+        "p_fcf": null,
+        "fcf_yield": null,
+        "net_debt_ebitda": null,
+        "interest_coverage": null,
+        "roic": null,
+        "margen_operativo": null,
+        "crec_yoy_ingresos": null,
+        "drawdown_52w": null,
+        "share_count_yoy": null,
+        "insider_ownership_pct": null,
+        "insider_buying_6m_count": null,
+        "founder_led": null,
+        "analyst_coverage_count": null,
+        "null_count_core": 0,
+        "_nota_core_metrics": "Core metrics son: ev_fcf, fcf_yield, roic, margen_operativo, net_debt_ebitda, drawdown_52w. null_count_core cuenta los null entre estos 6."
+      },
+
+      "señales": {
+        "mispricing": [
+          { "tag": "FCF_YIELD_ALTO|MULTIPLO_DEPRIMIDO|DRAWDOWN_EXCESIVO|DESCUENTO_SUM_OF_PARTS|CAJA_NETA_SIGNIFICATIVA", "detalle": "1 frase con dato verificado", "confianza_0_1": 0.5 }
+        ],
+        "catalizador": [
+          { "tag": "RE_RATING_POR_EVIDENCIA|BUYBACK_SOSTENIBLE|DESAPALANCAMIENTO|SPINOFF|INSIDER_CLUSTER|ACTIVISTA|REESTRUCTURACION", "detalle": "1 frase con fecha/trigger", "confianza_0_1": 0.5 }
+        ],
+        "supervivencia": [
+          { "tag": "CAJA_NETA|DEUDA_MANEJABLE|FCF_POSITIVO_SOSTENIDO|RIESGO_REFY", "detalle": "1 frase", "confianza_0_1": 0.5 }
+        ],
+        "calidad": [
+          { "tag": "ROIC_ALTO|MARGEN_ESTABLE|RECURRENCIA|MOAT_NICHO|FCF_CONSISTENTE", "detalle": "1 frase", "confianza_0_1": 0.5 }
+        ],
+        "management_alignment": [
+          { "tag": "FOUNDER_LED|INSIDER_BUYING_CLUSTER|HIGH_OWNERSHIP|SKIN_IN_GAME|NO_DILUTION|BUYBACK_FCF_FUNDED", "detalle": "1 frase con evidencia", "confianza_0_1": 0.5 }
+        ],
+        "verificabilidad": {
+          "opacidad": "BAJA|MEDIA|ALTA",
+          "por_que": "1 frase"
+        }
+      },
+
+      "hipotesis_gap": "2-3 frases máximo: qué descuenta el mercado y por qué podría estar mal. Basado en datos verificados.",
+
+      "parrafo_conviccion": "80-150 palabras: ¿Por qué esta empresa es extraordinaria y está en el top 0.1% del universo filtrado? ¿Qué sabe el scout que el mercado no ha procesado? Si no puedes articular esto de forma convincente, el candidato no es extraordinario y no debe estar en candidatos[].",
+
+      "catalizadores_no_binarios": [
+        {
+          "descripcion": "1 frase con trigger y fecha",
+          "ventana_meses": { "min": 6, "max": 24 },
+          "probabilidad_0_1": 0.5,
+          "evidencia_actual": ["1-2 bullets con fuente"],
+          "evidencia_que_lo_confirmaria": ["1-2 bullets"]
+        }
+      ],
+      "riesgos_clave": ["bullets"],
+      "flags": {
+        "dependencia_binaria": false,
+        "dependencia_financiacion_salvadora": false,
+        "distress_alto": false,
+        "liquidez_limitada": false
+      },
+
+      "peticion_para_recolector": {
+        "documentos_obligatorios": [
+          "ultimo_informe_anual",
+          "ultimo_trimestral",
+          "ultima_presentacion_inversores",
+          "ultima_transcripcion_resultados"
+        ],
+        "preguntas_clave_a_responder": [
+          "¿Cuál es el puente EBITDA→FCF y qué lo distorsiona?",
+          "¿Vencimientos/covenants 24 meses?",
+          "¿Qué KPI prueba/refuta el catalizador?"
+        ],
+        "fuentes_jurisdiccion": null
+      },
+
+      "fuentes": [
+        { "tipo": "market_data|screener|news|filing|ir", "titulo": "Texto", "url": "https://...", "fecha": "YYYY-MM-DD" }
+      ],
+
+      "score_preliminar": {
+        "score_bruto": 85,
+        "null_penalty": -5,
+        "score_final": 80,
+        "desglose": { "Q": 20, "M": 18, "A": 15, "C": 12, "R": 10, "S": 12, "V_penalizacion": -2 },
+        "test_extraordinario": {
+          "calidad": true,
+          "management": true,
+          "catalizador": true,
+          "downside": true,
+          "pasa": true,
+          "puntaje_4": "3/4 o 4/4"
+        },
+        "explicacion_1_linea": "Por qué este score. Incluir justificación de null_penalty."
+      }
+    }
+  ],
+  "watchlist": [
+    {
+      "ticker": "YYYY",
+      "score_final": 72,
+      "razon": "Score 72 < umbral 80. Interesante pero falta X evidencia / hay riesgo Y",
+      "siguiente_trigger": "Qué tendría que pasar para reconsiderar"
+    }
+  ],
+  "pendientes_de_datos": [
+    {
+      "ticker": "WWWW",
+      "null_count_core": 3,
+      "razon_interes": "Tesis interesante pero null_count_core ≥3 impide scoring fiable",
+      "datos_faltantes": ["roic", "fcf_yield", "net_debt_ebitda"],
+      "siguiente_paso": "Verificar en filings / IR page"
+    }
+  ],
+  "exclusiones": [
+    { "ticker": "ZZZZ", "razon": "Biotech clínico / pre-revenue / binario / ilíquido / fuera de rango / en sistema", "gate_fallido": "no_biotech" }
+  ],
+  "resumen": {
+    "top_tesis_patterns": ["Patrón 1", "Patrón 2"],
+    "concentraciones": { "por_sector": "texto corto", "por_pais": "texto corto" },
+    "kill_ratio": {
+      "pre_filter_evaluados": 80,
+      "pre_filter_pasaron": 22,
+      "scout_evaluados": 22,
+      "scout_candidatos_score_ge_80": 2,
+      "scout_watchlist": 8,
+      "scout_excluidos": 12,
+      "ratio_final": "2/80 = 2.5%"
+    },
+    "advertencias": ["limitaciones de datos, etc."]
+  }
+}

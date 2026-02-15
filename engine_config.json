@@ -1,0 +1,169 @@
+{
+  "version": "1.0.0",
+  "workspace": ".",
+
+  "models": {
+    "codex": {
+      "binary": "/opt/homebrew/bin/codex",
+      "binary_fallback": "/Applications/Codex.app/Contents/Resources/codex",
+      "min_version": "0.101.0",
+      "default_model": "gpt-5.3-codex",
+      "command_suffix": ["exec"],
+      "flags": ["--full-auto"],
+      "output_file_flag": "--output-last-message",
+      "output_schema_flag": "--output-schema",
+      "version_flag": "--version",
+      "timeout_seconds": 3600,
+      "max_retries": 1
+    },
+    "gemini": {
+      "binary": "/opt/homebrew/bin/gemini",
+      "binary_fallback": null,
+      "min_version": "0.28.0",
+      "default_model": "gemini-3-pro-preview",
+      "command_suffix": ["-p"],
+      "flags": ["--output-format", "json", "--yolo"],
+      "output_file_flag": null,
+      "output_schema_flag": null,
+      "version_flag": "--version",
+      "timeout_seconds": 3600,
+      "max_retries": 1
+    },
+    "claude": {
+      "binary": "claude",
+      "binary_fallback": null,
+      "min_version": "2.0.0",
+      "default_model": "opus",
+      "command_suffix": ["-p"],
+      "flags": ["--output-format", "json", "--no-session-persistence"],
+      "output_file_flag": null,
+      "output_schema_flag": "--json-schema",
+      "version_flag": "--version",
+      "timeout_seconds": 3600,
+      "max_retries": 1
+    }
+  },
+
+  "default_model": "codex",
+
+  "task_routing": {
+    "TP_EXTRACTOR_FILING":  { "model": "codex" },
+    "IMPLIED":              { "model": "codex" },
+    "CATALYST_DETECTION":   { "model": "codex" },
+    "CATALYST_SCORING":     { "model": "codex" },
+    "FORENSIC_DETECTION":   { "model": "codex" },
+    "FORENSIC_SCORING":     { "model": "codex" },
+    "BULL":                 { "model": "codex" },
+    "RED_TEAM":             { "model": "codex" },
+    "ARBITRO":              { "model": "codex", "escalate_to": "claude", "escalate_condition": "decision_invertir_ratio_lt_1.2" },
+    "SCANNER":              { "model": "codex" },
+    "MONITOR":              { "model": "codex" },
+    "SCOUT_PREFILTRO":      { "model": "codex" },
+    "SCOUT_Q":              { "model": "codex" },
+    "SCOUT_E":              { "model": "codex" },
+    "SCOUT_SELECTOR":       { "model": "codex" },
+    "OUTCOME":              { "model": "codex" },
+    "EVALUADOR":            { "model": "codex" },
+    "COMPARADOR":           { "model": "codex" },
+    "FUSION":               { "model": "codex" }
+  },
+
+  "multi_model_tasks": {
+    "BULL": {
+      "enabled": false,
+      "models": ["codex", "gemini", "claude"],
+      "fusion_model": "claude",
+      "fusion_instruction": "instrucciones_fusion_V1.md"
+    },
+    "RED_TEAM": {
+      "enabled": false,
+      "models": ["codex", "gemini", "claude"],
+      "fusion_model": "claude",
+      "fusion_instruction": "instrucciones_fusion_V1.md"
+    },
+    "ARBITRO": {
+      "enabled": false,
+      "models": ["codex", "gemini", "claude"],
+      "fusion_model": "claude",
+      "fusion_instruction": "instrucciones_fusion_V1.md"
+    }
+  },
+
+  "pipeline_dag": {
+    "PIPELINE": [
+      {"step": "PREFETCH",           "type": "python", "runners": ["sec_fetcher", "market_data", "transcript_finder"], "parallel": true, "pipeline_key": "SOURCES"},
+      {"step": "SOURCES_COMPILER",   "type": "python", "runner": "sources_compiler", "pipeline_key": "SOURCES"},
+      {"step": "TP_EXTRACTOR_FILING","type": "llm_per_filing", "instruction": "instrucciones_tp_extractor_filing_V1.md", "pipeline_key": "TRUTH_PACK"},
+      {"step": "TP_EXTRACTOR_MERGER","type": "python", "runner": "tp_extractor_merger", "pipeline_key": "TRUTH_PACK"},
+      {"step": "TP_CALCULATOR",      "type": "python", "runner": "tp_calculator", "pipeline_key": "TRUTH_PACK"},
+      {"step": "TP_VALIDATOR",       "type": "python", "runner": "tp_validator", "pipeline_key": "TRUTH_PACK"},
+      {"step": "IMPLIED",            "type": "llm", "instruction": "instrucciones_implied_V4.md", "pipeline_key": "IMPLIED"},
+      {"step": "CATALYST_DETECTION", "type": "llm", "instruction": "instrucciones_catalyst_detection_V1.md", "pipeline_key": "CATALYST", "parallel_group": "CATFOR"},
+      {"step": "CATALYST_SCORING",   "type": "llm", "instruction": "instrucciones_catalyst_scoring_V1.md", "pipeline_key": "CATALYST", "depends_on": "CATALYST_DETECTION"},
+      {"step": "FORENSIC_DETECTION", "type": "llm", "instruction": "instrucciones_forensic_detection_V1.md", "pipeline_key": "FORENSIC", "parallel_group": "CATFOR"},
+      {"step": "FORENSIC_SCORING",   "type": "llm", "instruction": "instrucciones_forensic_scoring_V1.md", "pipeline_key": "FORENSIC", "depends_on": "FORENSIC_DETECTION"},
+      {"step": "BULL",               "type": "llm", "instruction": "instrucciones_bull_V4.md", "pipeline_key": "BULL"},
+      {"step": "RED_TEAM",           "type": "llm", "instruction": "instrucciones_red_team_V4.md", "pipeline_key": "RED_TEAM"},
+      {"step": "ARBITRO",            "type": "llm", "instruction": "instrucciones_arbitro_V6.md", "pipeline_key": "ARBITRO"},
+      {"step": "QUALITY_AUDIT",      "type": "python", "runner": "quality_audit", "pipeline_key": null}
+    ],
+    "MONITOR": [
+      {"step": "MONITOR", "type": "llm", "instruction": "instrucciones_monitor_V2.md", "pipeline_key": null}
+    ],
+    "SCANNER": [
+      {"step": "SCANNER", "type": "llm", "instruction": "instrucciones_scanner_V1.md", "pipeline_key": null}
+    ],
+    "SCOUT": [
+      {"step": "SCOUT_PREFILTRO", "type": "llm", "instruction": "instrucciones_prefiltro_V1.md"},
+      {"step": "SCOUT_Q", "type": "llm", "instruction": "instrucciones_scoutQ_V3.md", "parallel_group": "SCOUT_QE"},
+      {"step": "SCOUT_E", "type": "llm", "instruction": "instrucciones_scoutE_V3.md", "parallel_group": "SCOUT_QE"},
+      {"step": "SCOUT_SELECTOR", "type": "llm", "instruction": "instrucciones_scout-Selector_V4.md"}
+    ],
+    "OUTCOME": [
+      {"step": "OUTCOME", "type": "llm", "instruction": "instrucciones_outcome_builder_V2.md"}
+    ],
+    "EVALUAR": [
+      {"step": "EVALUADOR", "type": "llm", "instruction": "instrucciones_evaluador_V2.md"}
+    ],
+    "BENCHMARK": [
+      {"step": "COMPARADOR", "type": "llm", "instruction": "instrucciones_comparador_V1.md"}
+    ]
+  },
+
+  "prefetch_validation": {
+    "sec_fetcher":        {"min_sources": 3, "require_annual": true, "require_quarterly": true},
+    "market_data":        {"min_sources": 1, "require_current_price": true},
+    "transcript_finder":  {"min_sources": 1}
+  },
+
+  "tp_extractor_filing_priority": ["10-K", "20-F", "10-Q", "6-K", "8-K", "DEF14A", "transcript", "presentation"],
+
+  "naming": {
+    "caso_id_format": "CASE_{D_ID}_{T}",
+    "artefacto_format": "{Schema}_{T}_{D}.json",
+    "directory_format": "casos/{T}/{D}"
+  },
+
+  "paths": {
+    "workspace": ".",
+    "casos": "casos",
+    "schemas": "_schemas",
+    "instrucciones": "_instrucciones/activas",
+    "scanner": "_scanner",
+    "scout": "_scout",
+    "candidatos": "candidatos",
+    "tmp": "tmp",
+    "changelog": "CHANGELOG.md",
+    "estado_repo": "ESTADO_REPO.json",
+    "fechas_clave": "_docs/FECHAS_CLAVE.md"
+  },
+
+  "execution": {
+    "codex_approval_policy": "full-auto",
+    "codex_sandbox": "false",
+    "max_parallel_filings": 4,
+    "max_parallel_backends": 3,
+    "retry_on_failure": 1,
+    "fail_fast": true
+  }
+}

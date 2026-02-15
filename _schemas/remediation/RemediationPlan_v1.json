@@ -1,0 +1,145 @@
+{
+  "version_esquema": "RemediationPlan_v1",
+  "caso_id": "CASE_YYYYMMDD_TICKER",
+  "fecha_corte": "YYYY-MM-DD",
+  "file_name": "RemediationPlan_CASE_YYYYMMDD_TICKER.json",
+  "empresa": {
+    "ticker": "XXXX",
+    "nombre": "Nombre Empresa",
+    "bolsa": "NYSE|NASDAQ|OTRA|UNKNOWN",
+    "pais": "US|...|UNKNOWN",
+    "sector": "Texto|UNKNOWN",
+    "industria": "Texto|UNKNOWN"
+  },
+  "decision_packet_ref": {
+    "version_esquema": "DecisionPacketRef_v1",
+    "caso_id": "CASE_YYYYMMDD_TICKER",
+    "fecha_corte": "YYYY-MM-DD",
+    "file_name": "DecisionPacket_CASE_YYYYMMDD_TICKER_rev001.json",
+    "sha256": null,
+    "revision_num": 1,
+    "nota": "Adjuntar al ARBITRO en REARBITRATE"
+  },
+  "control": {
+    "estado_flujo": "ARBITRATE|REARBITRATE",
+    "next_step": "REMEDIATE",
+    "next_agent_role": "SOURCES",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 1,
+
+    "issues": [
+      {
+        "issue_id": "ISS-001",
+        "issue_code": "WC_BRIDGE_MISSING",
+        "gate_afectado": "non_speculative_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "TRUTH_PACK",
+        "descripcion": "Faltan campos canónicos de WC bridge para validación determinista de CFO/FCF.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "wc_change_accounts_receivable",
+            "wc_change_inventories",
+            "wc_change_accounts_payable",
+            "wc_change_other_operating",
+            "cfo_usd"
+          ],
+          "notes": "Deben venir con evidencia mínima (source_id+ubicación+cita corta)."
+        }
+      }
+    ],
+
+    "work_orders": [
+      {
+        "wo_id": "WO-101",
+        "agent_role": "SOURCES",
+        "tipo": "FETCH_SOURCES",
+        "issue_refs": ["ISS-001"],
+        "targets": { "fields": [], "notes": "Traer 10-K/10-Q/8-K earnings/DEF14A si faltan." },
+        "acceptance": { "required_fields": ["artifact_updates.sources_pack"], "pass_if_present": true },
+        "depends_on": []
+      },
+      {
+        "wo_id": "WO-201",
+        "agent_role": "TRUTH_PACK",
+        "tipo": "EXTRACT_FIELDS",
+        "issue_refs": ["ISS-001"],
+        "targets": {
+          "fields": [
+            "wc_change_accounts_receivable",
+            "wc_change_inventories",
+            "wc_change_accounts_payable",
+            "wc_change_other_operating",
+            "cfo_usd"
+          ],
+          "notes": "Extraer WC bridge canónico y CFO."
+        },
+        "acceptance": { "required_fields": ["wc_change_accounts_receivable", "cfo_usd"], "pass_if_present": true },
+        "depends_on": ["WO-101"]
+      },
+      {
+        "wo_id": "WO-301",
+        "agent_role": "IMPLIED",
+        "tipo": "RECALC",
+        "issue_refs": ["ISS-001"],
+        "targets": { "fields": [], "notes": "Recalcular implied con truth_pack actualizado." },
+        "acceptance": { "required_fields": ["artifact_updates.implied_expectations"], "pass_if_present": true },
+        "depends_on": ["WO-201"]
+      },
+
+      {
+        "wo_id": "WO-401",
+        "agent_role": "CATALYST",
+        "tipo": "REVIEW",
+        "issue_refs": ["ISS-001"],
+        "targets": { "fields": [], "notes": "Refrescar catalizadores con TruthPack/Implied actualizados." },
+        "acceptance": { "required_fields": ["artifact_updates.agent_reports.CATALYST"], "pass_if_present": true },
+        "depends_on": ["WO-301"]
+      },
+      {
+        "wo_id": "WO-402",
+        "agent_role": "FORENSIC",
+        "tipo": "REVIEW",
+        "issue_refs": ["ISS-001"],
+        "targets": { "fields": [], "notes": "Refrescar forense/supervivencia con TruthPack actualizado." },
+        "acceptance": { "required_fields": ["artifact_updates.agent_reports.FORENSIC"], "pass_if_present": true },
+        "depends_on": ["WO-201"]
+      },
+      {
+        "wo_id": "WO-403",
+        "agent_role": "BULL",
+        "tipo": "REVIEW",
+        "issue_refs": ["ISS-001"],
+        "targets": { "fields": [], "notes": "Refrescar bull con TruthPack/Implied actualizados." },
+        "acceptance": { "required_fields": ["artifact_updates.agent_reports.BULL"], "pass_if_present": true },
+        "depends_on": ["WO-301"]
+      },
+      {
+        "wo_id": "WO-404",
+        "agent_role": "RED_TEAM",
+        "tipo": "REVIEW",
+        "issue_refs": ["ISS-001"],
+        "targets": { "fields": [], "notes": "Refrescar red team atacando el bull actualizado." },
+        "acceptance": { "required_fields": ["artifact_updates.agent_reports.RED_TEAM"], "pass_if_present": true },
+        "depends_on": ["WO-403"]
+      }
+    ],
+
+    "dispatch_queue": [
+      { "step": 1, "agent_role": "SOURCES", "wo_ids": ["WO-101"] },
+      { "step": 2, "agent_role": "TRUTH_PACK", "wo_ids": ["WO-201"] },
+      { "step": 3, "agent_role": "IMPLIED", "wo_ids": ["WO-301"] },
+      { "step": 4, "agent_role": "CATALYST", "wo_ids": ["WO-401"] },
+      { "step": 5, "agent_role": "FORENSIC", "wo_ids": ["WO-402"] },
+      { "step": 6, "agent_role": "BULL", "wo_ids": ["WO-403"] },
+      { "step": 7, "agent_role": "RED_TEAM", "wo_ids": ["WO-404"] },
+      { "step": 8, "agent_role": "ARBITRO", "wo_ids": [] }
+    ]
+  },
+  "log": {
+    "notes": [
+      "Este plan es el input del loop REMEDIATE (en PATCH).",
+      "El DecisionPacket completo no viaja por PatchBundle; se adjunta solo al ARBITRO en REARBITRATE."
+    ]
+  }
+}
