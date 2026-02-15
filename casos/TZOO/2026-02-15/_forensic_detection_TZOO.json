@@ -1,0 +1,450 @@
+{
+  "red_flags": [
+    {
+      "red_flag_id": "RF-001",
+      "categoria": "OTHER",
+      "descripcion": "Opacidad de liquidez base: caja, deuda total y pasivos al 2024-12-31 aparecen en null, lo que impide medir colchón financiero y riesgo de refinanciación.",
+      "evidencia": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo.efectivo_y_equivalentes (fecha 2024-12-31)",
+          "dato": null
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo.deuda_total (fecha 2024-12-31)",
+          "dato": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.gates[BALANCE_IDENTITY]",
+          "dato": "SKIP: Missing balance sheet data"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-002",
+      "categoria": "CAPEX_CAPITALIZATION",
+      "descripcion": "Opacidad de conversión de utilidades a caja: CFO, CAPEX y FCF no están disponibles y el flujo operativo trimestral reportado está truncado.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.cfo_usd / ttm.capex_usd / ttm.fcf_usd",
+          "dato": "null / null / null"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.gates[CASHFLOW_IDENTITY]",
+          "dato": "SKIP: Missing CF components (CFO/CFI/CFF)"
+        },
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "historico_trimestral[Q1-2023].flujo_caja_operativo_parcial.net_cash_from_operating_activities",
+          "dato": null
+        },
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "historico_trimestral[Q1-2024].flujo_caja_operativo_parcial.net_cash_from_operating_activities",
+          "dato": null
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-003",
+      "categoria": "WORKING_CAPITAL",
+      "descripcion": "Arrastre relevante y volatilidad en capital de trabajo (cuentas por cobrar y refund reserves), con impacto material sobre conversión a caja en periodos recientes.",
+      "evidencia": [
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "historico_trimestral[Q1-2023].flujo_caja_operativo_parcial.change_in_accounts_receivable",
+          "dato": -372000
+        },
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "historico_trimestral[Q1-2023].flujo_caja_operativo_parcial.net_recoveries_accounts_receivable_and_refund_reserves",
+          "dato": -712000
+        },
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "historico_trimestral[Q1-2023].estado_resultados.operating_income",
+          "dato": 4711000
+        },
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "historico_trimestral[Q1-2024].flujo_caja_operativo_parcial.change_in_accounts_receivable / net_recoveries_accounts_receivable_and_refund_reserves / change_in_prepaid_income_taxes",
+          "dato": "-235000 / -33000 / -63000"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-004",
+      "categoria": "WORKING_CAPITAL",
+      "descripcion": "Distorsión crítica EBIT→CFO (puente parcial) superior a 15% en Q1-2023 y Q1-2024.",
+      "evidencia": [
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "Q1-2023: operating_income y flujo_caja_operativo_parcial (NI, D&A, SBC, deferred tax, FX, AR, recoveries)",
+          "dato": "EBIT 4.711M vs CFO proxy parcial 3.400M; diferencia -1.311M (-27.8%)"
+        },
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "Q1-2024: operating_income y flujo_caja_operativo_parcial (NI, D&A, SBC, deferred tax, FX, AR, recoveries, prepaid taxes)",
+          "dato": "EBIT 5.591M vs CFO proxy parcial 4.354M; diferencia -1.237M (-22.1%)"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-005",
+      "categoria": "REVENUE_RECOGNITION",
+      "descripcion": "Cambio de mix hacia membresías sin datos de ingresos diferidos/pasivos por contrato en el pack; no se puede auditar plenamente el timing de reconocimiento.",
+      "evidencia": [
+        {
+          "source_id": "SRC_050",
+          "ubicacion": "historico_trimestral[FY2026 guidance].membership_fees_share_of_revenue_expected",
+          "dato": "25%"
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[FY2024].cuota_membresia_anual_nuevos_miembros",
+          "dato": 40
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones (extracto truncado Item 8 y notas incompletas)",
+          "dato": "Sin detalle completo de notas de reconocimiento/diferidos"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-006",
+      "categoria": "LEASES",
+      "descripcion": "Obligaciones fuera de balance por arrendamientos no verificables por ausencia de cifras de ROU, lease current/non-current y gasto de lease.",
+      "evidencia": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.lease_data.activo_derecho_de_uso_operativo",
+          "dato": null
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.lease_data.pasivo_arrendamiento_corriente / pasivo_arrendamiento_no_corriente / gasto_arrendamiento",
+          "dato": "null / null / null"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones (leasing no identificado en extracto)",
+          "dato": "No se identificaron tablas/cifras de leasing"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-007",
+      "categoria": "GOODWILL_IMPAIRMENT",
+      "descripcion": "No hay visibilidad suficiente para validar goodwill/intangibles e impairment reciente en el material disponible.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones (estados financieros y notas truncadas)",
+          "dato": "No se visualizó Item 8 completo"
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo (sin desglose de goodwill/intangibles)",
+          "dato": "No disponible en extracto"
+        }
+      ]
+    }
+  ],
+  "liquidez": {
+    "horizonte_supervivencia_meses": {
+      "min": 12,
+      "max": 24
+    },
+    "efectivo_disponible": {
+      "caja_usd": null,
+      "lineas_credito_disponibles_usd": null,
+      "efectivo_total_disponible_usd": null,
+      "evidencia": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo.efectivo_y_equivalentes",
+          "dato": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "mercado.caja_y_equivalentes_usd",
+          "dato": null
+        }
+      ]
+    },
+    "runway": {
+      "runway_meses_estimado": null,
+      "metodo": "No estimable por ausencia simultánea de caja, CFO reportado y CAPEX.",
+      "proxy_caja_operativa_parcial": [
+        {
+          "periodo": "Q1-2023",
+          "cfo_proxy_parcial_usd": 3400000,
+          "base_calculo": "NI + D&A + SBC + deferred tax + FX + cambios WC visibles"
+        },
+        {
+          "periodo": "Q1-2024",
+          "cfo_proxy_parcial_usd": 4354000,
+          "base_calculo": "NI + D&A + SBC + deferred tax + FX + cambios WC visibles"
+        }
+      ],
+      "limitacion": "net_cash_from_operating_activities trimestral y CFO TTM están en null."
+    },
+    "deuda_y_vencimientos_12_24m": {
+      "deuda_total_usd": null,
+      "maturity_wall_12_24m": "NO_EVALUABLE",
+      "vencimientos_detectados": [],
+      "evidencia": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo.deuda_total",
+          "dato": null
+        }
+      ]
+    },
+    "covenants": {
+      "riesgo_incumplimiento": "NO_EVALUABLE",
+      "detalle": "No hay métricas de covenants ni headroom en el pack.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.gates (faltan componentes de balance/cashflow para pruebas de cobertura y apalancamiento)",
+          "dato": "BALANCE_IDENTITY SKIP; CASHFLOW_IDENTITY SKIP"
+        }
+      ]
+    },
+    "riesgo_dilucion_accionaria": {
+      "nivel": "UNKNOWN",
+      "capital_disponible_para_evitar_dilucion_usd": null,
+      "drivers_observados": [
+        "Antecedente de private placement con valor razonable de 15.2M en 2022",
+        "Variación de acciones YoY no disponible"
+      ],
+      "evidencia": [
+        {
+          "source_id": "SRC_002",
+          "ubicacion": "historico_anual[2022-12-30].valor_razonable_agregado_acciones_emitidas_private_placement",
+          "dato": 15200000
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas.variacion_acciones_yoy_pct",
+          "dato": null
+        }
+      ]
+    },
+    "senal_operativa_relevante": [
+      {
+        "source_id": "SRC_010",
+        "ubicacion": "historico_trimestral[9M-2023 vs 9M-2024].metricas.revenue",
+        "dato": "63.328M vs 63.224M (-0.2%)"
+      },
+      {
+        "source_id": "SRC_010",
+        "ubicacion": "historico_trimestral[9M-2023 vs 9M-2024].metricas.operating_income",
+        "dato": "11.093M vs 13.647M (+23.0%)"
+      }
+    ]
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "metodologia": "Puente parcial usando líneas visibles en Q1: NI + D&A + SBC + deferred tax + FX + cambios de capital de trabajo visibles.",
+      "periodos_analizados": [
+        {
+          "periodo": "Q1-2023",
+          "ebit_usd": 4711000,
+          "cfo_proxy_parcial_usd": 3400000,
+          "diferencia_usd": -1311000,
+          "distorsion_pct_sobre_ebit": -27.8,
+          "distorsion_critica_ge_15pct": true,
+          "drivers_principales": [
+            "Arrastre de capital de trabajo: AR -372k y recoveries/refund reserves -712k",
+            "Carga fiscal en P&L: income_tax_expense 1.378M"
+          ],
+          "evidencia": [
+            {
+              "source_id": "SRC_012",
+              "ubicacion": "historico_trimestral[Q1-2023].estado_resultados.operating_income",
+              "dato": 4711000
+            },
+            {
+              "source_id": "SRC_012",
+              "ubicacion": "historico_trimestral[Q1-2023].flujo_caja_operativo_parcial",
+              "dato": "NI 3.681M; D&A 478k; SBC 396k; deferred tax -68k; FX -3k; recoveries -712k; AR -372k"
+            }
+          ]
+        },
+        {
+          "periodo": "Q1-2024",
+          "ebit_usd": 5591000,
+          "cfo_proxy_parcial_usd": 4354000,
+          "diferencia_usd": -1237000,
+          "distorsion_pct_sobre_ebit": -22.1,
+          "distorsion_critica_ge_15pct": true,
+          "drivers_principales": [
+            "Arrastre de capital de trabajo visible: AR -235k, recoveries/refund reserves -33k, prepaid taxes -63k",
+            "Carga fiscal en P&L: income_tax_expense 1.505M"
+          ],
+          "evidencia": [
+            {
+              "source_id": "SRC_012",
+              "ubicacion": "historico_trimestral[Q1-2024].estado_resultados.operating_income",
+              "dato": 5591000
+            },
+            {
+              "source_id": "SRC_012",
+              "ubicacion": "historico_trimestral[Q1-2024].flujo_caja_operativo_parcial",
+              "dato": "NI 4.225M; D&A 383k; SBC 95k; deferred tax -15k; FX -3k; recoveries -33k; AR -235k; prepaid taxes -63k"
+            }
+          ]
+        }
+      ],
+      "limitacion": "No hay CFO reportado final por periodo; net_cash_from_operating_activities aparece en null."
+    },
+    "cfo_a_fcf": {
+      "metodologia": "FCF = CFO - CAPEX",
+      "cfo_usd": null,
+      "capex_usd": null,
+      "fcf_usd": null,
+      "distorsion_pct": null,
+      "distorsion_critica_ge_15pct": "NO_EVALUABLE",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.cfo_usd / ttm.capex_usd / ttm.fcf_usd",
+          "dato": "null / null / null"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.gates[CASHFLOW_IDENTITY]",
+          "dato": "SKIP"
+        }
+      ]
+    },
+    "conclusion_puente_ebit_cfo_fcf": "La cadena EBIT→CFO muestra distorsiones parciales >15% en Q1-2023 y Q1-2024; el tramo CFO→FCF no es auditable con los datos disponibles."
+  },
+  "kill_criteria_candidatos": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con": "supervivencia",
+      "definicion": "Net cash from operating activities <= 0 en dos trimestres consecutivos.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "10-Q/10-K",
+      "evidencia_base": [
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "Q1-2023 y Q1-2024: net_cash_from_operating_activities en null (se requiere monitoreo explícito en próximos filings)"
+        }
+      ]
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con": "contabilidad",
+      "definicion": "[(change_in_accounts_receivable + net_recoveries_accounts_receivable_and_refund_reserves + change_in_prepaid_income_taxes) / operating_income] <= -0.15 en dos trimestres consecutivos.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "10-Q",
+      "evidencia_base": [
+        {
+          "source_id": "SRC_012",
+          "ubicacion": "Q1-2023 ratio visible aprox. -23.0% sobre EBIT; Q1-2024 aprox. -5.9%"
+        }
+      ]
+    },
+    {
+      "kc_id": "KC-003",
+      "relacionado_con": "fcf",
+      "definicion": "Ausencia de divulgación reconciliable de CFO y CAPEX en dos reportes periódicos consecutivos (10-Q/10-K).",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "ALTA",
+      "fuente_prevista": "10-Q/10-K",
+      "evidencia_base": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.cfo_usd, ttm.capex_usd, ttm.fcf_usd en null; CASHFLOW_IDENTITY SKIP"
+        }
+      ]
+    },
+    {
+      "kc_id": "KC-004",
+      "relacionado_con": "deuda",
+      "definicion": "Vencimientos de deuda a 12 meses > (caja + CFO TTM) sin refinanciación firmada o extensión contractual publicada 90 días antes del vencimiento principal.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 24
+      },
+      "probabilidad_cualitativa": "BAJA",
+      "fuente_prevista": "10-Q/10-K/8-K",
+      "evidencia_base": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "deuda_total y detalle de vencimientos no visibles en el extracto"
+        }
+      ]
+    },
+    {
+      "kc_id": "KC-005",
+      "relacionado_con": "dilucion",
+      "definicion": "Acciones diluidas promedio > +5% YoY con CFO TTM <= 0 en el mismo periodo.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "BAJA",
+      "fuente_prevista": "10-Q/10-K",
+      "evidencia_base": [
+        {
+          "source_id": "SRC_002",
+          "ubicacion": "antecedente de emisiones (private placement 2022: 15.2M valor razonable)"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas.variacion_acciones_yoy_pct en null"
+        }
+      ]
+    },
+    {
+      "kc_id": "KC-006",
+      "relacionado_con": "contabilidad",
+      "definicion": "Si la participación de ingresos por membresía sube de forma material y el pasivo por ingresos diferidos/contract liabilities no acompaña (desacople persistente >= 10 puntos porcentuales durante 2 trimestres).",
+      "ventana_meses": {
+        "min": 3,
+        "max": 18
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "10-Q/10-K",
+      "evidencia_base": [
+        {
+          "source_id": "SRC_050",
+          "ubicacion": "guidance FY2026: membership_fees_share_of_revenue_expected = 25%"
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "cuota_membresia_anual_nuevos_miembros = 40 USD"
+        }
+      ]
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "Ejecución realizada solo con TruthPack_v1; SourcesPack_v1 no fue provisto.",
+      "No se revisaron filings directamente fuera del contenido ya extraído en TruthPack.",
+      "Estados financieros y notas aparecen truncados en el material disponible (Item 8 incompleto).",
+      "Sin caja/deuda/capex/cfo reportados, la cuantificación de runway y FCF queda no evaluable."
+    ]
+  }
+}
