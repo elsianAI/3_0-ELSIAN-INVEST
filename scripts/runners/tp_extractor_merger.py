@@ -160,7 +160,8 @@ def _merge_annual(extractions: list[dict]) -> list:
                 continue
 
             if periodo not in by_period:
-                by_period[periodo] = {"data": dict(entry), "priority": priority, "source": filing_type}
+                seeded = _seed_field_sources(dict(entry), filing_type)
+                by_period[periodo] = {"data": seeded, "priority": priority, "source": filing_type}
             else:
                 existing = by_period[periodo]
                 merged = _merge_period_entries(existing["data"], entry,
@@ -186,7 +187,8 @@ def _merge_quarterly(extractions: list[dict]) -> list:
                 continue
 
             if periodo not in by_period:
-                by_period[periodo] = {"data": dict(entry), "priority": priority}
+                seeded = _seed_field_sources(dict(entry), filing_type)
+                by_period[periodo] = {"data": seeded, "priority": priority}
             else:
                 existing = by_period[periodo]
                 merged = _merge_period_entries(existing["data"], entry,
@@ -201,6 +203,7 @@ def _merge_balance_sheet(extractions: list[dict]) -> dict:
     """Usa el filing más reciente con datos de balance."""
     best = {}
     best_priority = 999
+    best_filing = "UNKNOWN"
 
     for ext in extractions:
         bs = ext.get("balance_sheet_ultimo", {})
@@ -213,7 +216,10 @@ def _merge_balance_sheet(extractions: list[dict]) -> dict:
         if priority < best_priority:
             best = bs
             best_priority = priority
+            best_filing = filing_type
 
+    if best:
+        best = _seed_field_sources(dict(best), best_filing)
     return best
 
 
@@ -252,6 +258,19 @@ def _period_sort_key(periodo: str, entry: dict) -> str:
             return f"{year}-{month:02d}-28"
         return f"{year}-12-31"
     return periodo
+
+
+def _seed_field_sources(entry: dict, filing_type: str) -> dict:
+    """Seed _field_sources for the first filing that introduces a period."""
+    _SKIP = {"periodo", "fecha_fin", "fuente_refs", "_field_sources", "_periodo_parcial"}
+    provenance = {}
+    for k, v in entry.items():
+        if k.startswith("_") or k in _SKIP:
+            continue
+        if v is not None:
+            provenance[k] = filing_type
+    entry["_field_sources"] = provenance
+    return entry
 
 
 def _merge_period_entries(existing: dict, new_entry: dict,
