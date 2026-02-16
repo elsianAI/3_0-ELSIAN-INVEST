@@ -462,6 +462,11 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
     filing_records = []
     for i, result in enumerate(results):
         if result.success and result.output:
+            # Inject filing_type from SourcesPack so merger can attribute fields
+            if i < len(filings):
+                ft = filings[i].get("tipo", filings[i].get("filing_type", ""))
+                if ft:
+                    result.output["filing_type"] = ft
             tmp_path = case_dir / f"_tmp_tp_filing_{i:03d}.json"
             tmp_path.write_text(json.dumps(result.output, indent=2, ensure_ascii=False))
             successful += 1

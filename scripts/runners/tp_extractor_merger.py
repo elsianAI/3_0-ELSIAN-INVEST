@@ -66,7 +66,7 @@ def _resolve_filing_type(ext: dict) -> str:
     """
     # 1) Explicit field
     ft = ext.get("filing_type", "")
-    if ft in FILING_PRIORITY:
+    if ft:
         return ft
 
     # 2) Search in log.source_filing, log.fuentes_consultadas, etc.
