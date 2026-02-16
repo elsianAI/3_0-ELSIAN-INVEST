@@ -23,9 +23,10 @@ from .dispatcher import (
     dispatch_with_escalation,
 )
 from .prompt_builder import build_prompt
-from .validator import validate_artifact, validate_file, validate_inter_step
+from .validator import validate_artifact, validate_file, validate_inter_step, validate_partial_truthpack
 from .changelog import append_entry
 from .dashboard import generate_dashboard
+from .quality_voting import maybe_vote_step
 
 # DAG de dependencias entre steps principales
 PIPELINE_DAG = {
@@ -95,8 +96,10 @@ def execute_pipeline(config: EngineConfig, case_dir: Path, ticker: str, date_str
             for s, res in parallel_results.items():
                 results[s] = res
                 if res.get("success"):
+                    mark_step_done(case_dir, s, model=res.get("model", "unknown"))
                     print(f"[pipeline] ✓ {s} completed")
                 else:
+                    mark_step_failed(case_dir, s, res.get("error", "unknown"))
                     print(f"[pipeline] ✗ {s} failed: {res.get('error')}")
                     all_ok = False
 
@@ -115,11 +118,13 @@ def execute_pipeline(config: EngineConfig, case_dir: Path, ticker: str, date_str
             results[step_name] = step_result
 
             if step_result.get("success"):
+                mark_step_done(case_dir, step_name, model=step_result.get("model", "unknown"))
                 print(f"[pipeline] ✓ {step_name} completed")
                 # Extract decision fields from ARBITRO
                 if step_name == "ARBITRO":
                     _extract_decision_fields(case_dir, step_result)
             else:
+                mark_step_failed(case_dir, step_name, step_result.get("error", "unknown"))
                 print(f"[pipeline] ✗ {step_name} failed: {step_result.get('error')}")
                 if config.execution.get("fail_fast", True):
                     print("[pipeline] fail_fast=true — stopping pipeline")
@@ -166,11 +171,21 @@ def execute_step(config: EngineConfig, case_dir: Path, step_name: str, ticker: s
 
 
 def _execute_step_group(config: EngineConfig, case_dir: Path, group_name: str, ticker: str) -> dict:
-    """Execute a group of sub-steps (e.g., SOURCES → PREFETCH + SOURCES_COMPILER)."""
+    """Execute a group of sub-steps (e.g., SOURCES → PREFETCH + SOURCES_COMPILER).
+
+    Skips sub-steps that are already DONE (for continue/retry scenarios).
+    """
     sub_steps = SUB_STEPS[group_name]
     results = {}
+    state = load_state(case_dir)
 
     for sub_step in sub_steps:
+        # Skip already-done sub-steps
+        ss_status = state.get("sub_steps", {}).get(sub_step, {}).get("status", "PENDING")
+        if ss_status == "DONE":
+            print(f"[pipeline]   → Sub-step: {sub_step} (already DONE, skipping)")
+            continue
+
         print(f"[pipeline]   → Sub-step: {sub_step}")
         mark_step_in_progress(case_dir, sub_step)
 
@@ -185,6 +200,24 @@ def _execute_step_group(config: EngineConfig, case_dir: Path, group_name: str, t
                     ticker, "PIPELINE", sub_step,
                     result.get("model", "python"),
                 )
+
+                # Gate post-TP_VALIDATOR: verificar data_quality del TruthPack
+                if sub_step == "TP_VALIDATOR":
+                    dq_result = _check_truthpack_quality(case_dir, ticker)
+                    if dq_result == "FAIL":
+                        mark_step_failed(case_dir, sub_step, "TruthPack data_quality: FAIL")
+                        if config.execution.get("fail_fast", True):
+                            return {"success": False, "error": "TruthPack data_quality FAIL", "results": results}
+                    elif dq_result == "PARTIAL":
+                        print(f"[pipeline]   ⚠ TruthPack data_quality: PARTIAL — pipeline continúa", file=sys.stderr)
+                    elif dq_result is None:
+                        gate_missing = config.execution.get("tp_quality_gate_missing", "fail")
+                        if gate_missing == "warn":
+                            print(f"[pipeline]   ⚠ No se pudo leer data_quality del TruthPack — gate inactivo (tp_quality_gate_missing=warn)", file=sys.stderr)
+                        else:
+                            mark_step_failed(case_dir, sub_step, "TruthPack data_quality: no disponible")
+                            if config.execution.get("fail_fast", True):
+                                return {"success": False, "error": "TruthPack data_quality no disponible — gate fail-closed", "results": results}
             else:
                 mark_step_failed(case_dir, sub_step, result.get("error", "unknown"))
                 if config.execution.get("fail_fast", True):
@@ -203,6 +236,21 @@ def _execute_single_step(config: EngineConfig, case_dir: Path, step_name: str, t
     backends = step_cfg.get("backends", [])
     is_multi = step_cfg.get("multi", False)
     parallel_by = step_cfg.get("parallel_by")
+
+    # Inter-step validation (solo para steps con checks configurados)
+    input_artifacts = _resolve_input_artifacts(case_dir, step_name)
+    loaded_artifacts = {}
+    for art_name, art_path in input_artifacts.items():
+        try:
+            loaded_artifacts[art_name] = json.loads(art_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            pass
+    if loaded_artifacts:
+        passed, errors, warnings = validate_inter_step(step_name, loaded_artifacts)
+        for w in warnings:
+            print(f"[router] ⚠ inter-step warning ({step_name}): {w}", file=sys.stderr)
+        if not passed:
+            return {"success": False, "error": f"Inter-step validation failed: {'; '.join(errors)}"}
 
     # Python runner — execute directly
     if "python" in backends:
@@ -256,6 +304,20 @@ def _execute_single_step(config: EngineConfig, case_dir: Path, step_name: str, t
             is_valid, errors = validate_artifact(result.output, schema_name, schemas_dir)
             if not is_valid:
                 print(f"[router] WARNING: Artifact validation failed: {errors}", file=sys.stderr)
+
+        # Quality voting (report-only): nunca bloquear pipeline por fallos de voting
+        try:
+            maybe_vote_step(
+                config=config,
+                case_dir=case_dir,
+                step_name=step_name,
+                artifact_payload=result.output,
+                artifact_path=artifact_path,
+                model=result.model,
+                backend=result.backend,
+            )
+        except Exception as exc:
+            print(f"[router] WARNING: quality voting failed for {step_name}: {exc}", file=sys.stderr)
 
         return {
             "success": True,
@@ -319,6 +381,49 @@ def _run_python_step(config: EngineConfig, case_dir: Path, step_name: str, ticke
         return {"success": False, "error": str(e), "model": "python"}
 
 
+def _select_filings(filings: list[dict], config: EngineConfig) -> list[dict]:
+    """Filter and prioritize filings to reduce unnecessary LLM calls.
+
+    Uses tp_extractor_max_per_type from config to cap filings per type.
+    Within each type, keeps the most recent by fecha_publicacion.
+    """
+    max_per_type = config.raw.get("tp_extractor_max_per_type", {})
+    if not max_per_type:
+        return filings  # no limits configured — pass all through
+
+    default_max = max_per_type.get("_default", 999)
+
+    # Group by type
+    by_type: dict[str, list[dict]] = {}
+    for f in filings:
+        ftype = f.get("tipo", f.get("type", "UNKNOWN"))
+        by_type.setdefault(ftype, []).append(f)
+
+    selected = []
+    skipped_count = 0
+
+    for ftype, group in by_type.items():
+        limit = max_per_type.get(ftype, default_max)
+
+        # Sort by fecha_publicacion descending (most recent first)
+        group.sort(key=lambda x: x.get("fecha_publicacion", "0000-00-00"), reverse=True)
+
+        selected.extend(group[:limit])
+        skipped_count += max(0, len(group) - limit)
+
+    if skipped_count:
+        print(f"[router] Filing selection: {len(selected)} selected, {skipped_count} skipped "
+              f"(from {len(filings)} total)")
+        for ftype, group in sorted(by_type.items()):
+            limit = max_per_type.get(ftype, default_max)
+            if len(group) > limit:
+                print(f"[router]   {ftype}: {limit}/{len(group)} (skipped {len(group) - limit} oldest)")
+            else:
+                print(f"[router]   {ftype}: {len(group)}/{len(group)}")
+
+    return selected
+
+
 def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: str, ticker: str) -> dict:
     """Execute TP_EXTRACTOR with parallel filing dispatch."""
     instrucciones_dir = config.get_path("instrucciones")
@@ -332,33 +437,66 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
         sp = json.load(f)
 
     # Extract filing entries from SourcesPack
-    filings = []
+    all_filings = []
     for source in sp.get("fuentes", sp.get("fuentes_usadas", sp.get("sources", []))):
         local_path = source.get("local_path")
         if local_path:
             source["ticker"] = ticker
-            filings.append(source)
+            all_filings.append(source)
 
-    if not filings:
+    if not all_filings:
         return {"success": False, "error": "No filings with local_path found in SourcesPack"}
+
+    # Apply filing selection filter
+    filings = _select_filings(all_filings, config)
+
+    # Clean stale partials from previous runs to avoid merger contamination
+    for old_partial in case_dir.glob("_tmp_tp_filing_*.json"):
+        old_partial.unlink()
 
     # Dispatch in parallel
     results = dispatch_parallel_filings(config, filings, instrucciones_dir, case_dir)
 
-    # Save partial results
+    # Save partial results and validate
     successful = 0
+    filing_records = []
     for i, result in enumerate(results):
         if result.success and result.output:
             tmp_path = case_dir / f"_tmp_tp_filing_{i:03d}.json"
             tmp_path.write_text(json.dumps(result.output, indent=2, ensure_ascii=False))
             successful += 1
 
+            # Validar parcial
+            is_valid, val_errors = validate_partial_truthpack(result.output)
+            filing_records.append({
+                "index": i,
+                "output": result.output,
+                "valid": is_valid,
+                "errors": val_errors,
+            })
+            if not is_valid:
+                print(f"[router] WARNING: Partial TP filing {i:03d} inválido: {val_errors}", file=sys.stderr)
+
     if successful == 0:
         return {"success": False, "error": "All filing extractions failed"}
 
+    # Quality voting (report-only): nunca bloquear pipeline por fallos de voting
+    try:
+        first_ok = next((r for r in results if r.success), None)
+        maybe_vote_step(
+            config=config,
+            case_dir=case_dir,
+            step_name=step_name,
+            model=first_ok.model if first_ok else None,
+            backend=first_ok.backend if first_ok else None,
+            filing_records=filing_records,
+        )
+    except Exception as exc:
+        print(f"[router] WARNING: quality voting failed for {step_name}: {exc}", file=sys.stderr)
+
     return {
         "success": True,
-        "model": results[0].model if results else "unknown",
+        "model": first_ok.model if first_ok else "unknown",
         "filings_processed": successful,
         "filings_total": len(filings),
     }
@@ -386,6 +524,49 @@ def is_step_ready(case_dir: Path, step_name: str) -> bool:
     return True
 
 
+def _check_truthpack_quality(case_dir: Path, ticker: str) -> str | None:
+    """Lee data_quality del TruthPack generado por TP_VALIDATOR.
+
+    Resolución determinista del artefacto:
+    1. Nombre exacto: TruthPack_v1_{ticker}.json
+    2. Fallback: TruthPack_v1_*.json con mtime más reciente
+
+    Retorna: "PASS", "PARTIAL", "FAIL", o None si no se puede leer.
+    """
+    # 1. Nombre exacto (es lo que _build_runner_args genera para TP_VALIDATOR)
+    tp_path = case_dir / f"TruthPack_v1_{ticker}.json"
+
+    if not tp_path.exists():
+        # 2. Fallback: buscar por glob, mtime más reciente
+        candidates = sorted(
+            case_dir.glob("TruthPack_v1_*.json"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+        if candidates:
+            tp_path = candidates[0]
+        else:
+            print(
+                f"[router] ERROR: No se encontró TruthPack_v1 tras TP_VALIDATOR "
+                f"(step=TP_VALIDATOR, ticker={ticker}, case_dir={case_dir})",
+                file=sys.stderr,
+            )
+            return None
+
+    try:
+        tp = json.loads(tp_path.read_text())
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"[router] ERROR: No se pudo leer {tp_path}: {e}", file=sys.stderr)
+        return None
+
+    dq = tp.get("data_quality", {})
+    # Dual-key fallback: status → overall_status
+    status = dq.get("status") or dq.get("overall_status")
+    if status:
+        print(f"[router] TruthPack data_quality: {status} (confidence: {dq.get('confidence_score', '?')}%)")
+    return status
+
+
 def get_parallel_group(step_name: str) -> list[str]:
     """Retorna steps que pueden ejecutarse en paralelo con step_name."""
     dag_entry = PIPELINE_DAG.get(step_name, {})
@@ -406,11 +587,17 @@ def _resolve_input_artifacts(case_dir: Path, step_name: str) -> dict[str, Path]:
 
 
 def _find_artifact(case_dir: Path, pattern: str) -> Path | None:
-    """Find an artifact file in case_dir matching the pattern."""
-    for f in case_dir.iterdir():
-        if f.is_file() and f.name.startswith(pattern) and f.suffix == ".json":
-            return f
-    return None
+    """Find an artifact file in case_dir matching the pattern.
+
+    Deterministic: returns the most recently modified match.
+    """
+    matches = [
+        f for f in case_dir.iterdir()
+        if f.is_file() and f.name.startswith(pattern) and f.suffix == ".json"
+    ]
+    if not matches:
+        return None
+    return max(matches, key=lambda p: p.stat().st_mtime)
 
 
 def _get_artifact_filename(step_name: str, ticker: str, case_dir: Path) -> str:
@@ -534,7 +721,12 @@ def _execute_parallel_steps(
 
 
 def _extract_decision_fields(case_dir: Path, step_result: dict) -> None:
-    """Extract decision/score/confianza from ARBITRO result and update state."""
+    """Extract decision/score/confianza from ARBITRO result and update state.
+
+    Handles both formats:
+    - Legacy (flat): data.decision, data.score, data.confianza
+    - DecisionPacket_v2: data.resumen_ejecutivo.decision, .confianza_global_0_1
+    """
     artifact_name = step_result.get("artifact")
     if not artifact_name:
         return
@@ -547,16 +739,30 @@ def _extract_decision_fields(case_dir: Path, step_result: dict) -> None:
         with open(artifact_path) as f:
             data = json.load(f)
 
+        # Try flat format first (legacy / DecisionPacket_v1)
         decision = data.get("decision", data.get("Decision"))
         score = data.get("score", data.get("Score"))
         confianza = data.get("confianza", data.get("Confianza", ""))
         probabilistica = data.get("probabilistica")
 
-        if decision is not None and score is not None:
+        # Fall back to DecisionPacket_v2 nested format
+        # Handle both top-level resumen and decision_packet wrapper
+        resumen = data.get("resumen_ejecutivo", {})
+        if not resumen and isinstance(data.get("decision_packet"), dict):
+            resumen = data["decision_packet"].get("resumen_ejecutivo", {})
+        if isinstance(resumen, dict):
+            if decision is None:
+                decision = resumen.get("decision")
+            if score is None:
+                score = resumen.get("score_global", resumen.get("score"))
+            if not confianza:
+                confianza = resumen.get("confianza_global_0_1", resumen.get("confianza", ""))
+
+        if decision is not None:
             update_decision_fields(
                 case_dir,
                 decision=str(decision),
-                score=float(score),
+                score=float(score) if score is not None else 0.0,
                 confianza=str(confianza),
                 probabilistica=probabilistica,
             )

@@ -15,6 +15,16 @@ Confidence score: 100 - 15×FAIL - 5×WARN - 10×SKIP
 """
 
 import json
+from typing import Optional
+
+
+def _num(val) -> Optional[float]:
+    """Return val only if it's a real number (not bool, not dict, etc.)."""
+    if isinstance(val, bool):
+        return None
+    if isinstance(val, (int, float)):
+        return val
+    return None
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
@@ -27,6 +37,7 @@ GATES = [
     {"name": "EV_SANITY",          "tolerance": None,  "critical": False},
     {"name": "MARGIN_SANITY",      "tolerance": None,  "critical": False},
     {"name": "TTM_SANITY",         "tolerance": 0.20, "critical": False},
+    {"name": "TTM_CONSECUTIVE",    "tolerance": None,  "critical": True},
     {"name": "DATA_COMPLETENESS",  "tolerance": None,  "critical": False},
 ]
 
@@ -53,6 +64,7 @@ def validate(tp_with_metrics: dict) -> dict:
         "EV_SANITY": _gate_ev_sanity,
         "MARGIN_SANITY": _gate_margin_sanity,
         "TTM_SANITY": _gate_ttm_sanity,
+        "TTM_CONSECUTIVE": _gate_ttm_consecutive,
         "DATA_COMPLETENESS": _gate_data_completeness,
     }
 
@@ -109,12 +121,13 @@ def validate(tp_with_metrics: dict) -> dict:
 def _gate_balance_identity(tp: dict) -> dict:
     """Assets = Liabilities + Equity. Tolerance 2%."""
     bs = tp.get("balance_sheet_ultimo", {})
-    assets = bs.get("activos_totales_usd") or bs.get("total_assets_usd")
-    liabilities = bs.get("pasivos_totales_usd") or bs.get("total_liabilities_usd")
-    equity = bs.get("patrimonio_usd") or bs.get("equity_usd")
+    assets = _num(bs.get("activos_totales_usd")) or _num(bs.get("total_assets_usd"))
+    liabilities = _num(bs.get("pasivos_totales_usd")) or _num(bs.get("total_liabilities_usd"))
+    equity = _num(bs.get("patrimonio_usd")) or _num(bs.get("equity_usd"))
 
     if assets is None or liabilities is None or equity is None:
-        return {"name": "BALANCE_IDENTITY", "status": "SKIP", "note": "Missing balance sheet data"}
+        return {"name": "BALANCE_IDENTITY", "status": "FAIL",
+                "note": "Missing balance sheet data — critical gate cannot be skipped"}
 
     expected = liabilities + equity
     if expected == 0:
@@ -135,15 +148,16 @@ def _gate_cashflow_identity(tp: dict) -> dict:
         return {"name": "CASHFLOW_IDENTITY", "status": "SKIP", "note": "No annual data"}
 
     fy0 = annual[-1]
-    cfo = fy0.get("cfo_usd")
-    cfi = fy0.get("cfi_usd")
-    cff = fy0.get("cff_usd")
+    cfo = _num(fy0.get("cfo_usd"))
+    cfi = _num(fy0.get("cfi_usd"))
+    cff = _num(fy0.get("cff_usd"))
 
     if cfo is None or cfi is None or cff is None:
-        return {"name": "CASHFLOW_IDENTITY", "status": "SKIP", "note": "Missing CF components (CFO/CFI/CFF)"}
+        return {"name": "CASHFLOW_IDENTITY", "status": "FAIL",
+                "note": "Missing CF components (CFO/CFI/CFF) — critical gate cannot be skipped"}
 
     total_cf = cfo + cfi + cff
-    delta_cash = fy0.get("cambio_caja_usd") or fy0.get("delta_cash_usd")
+    delta_cash = _num(fy0.get("cambio_caja_usd")) or _num(fy0.get("delta_cash_usd"))
 
     if delta_cash is None:
         return {"name": "CASHFLOW_IDENTITY", "status": "SKIP", "note": "No delta_cash to compare"}
@@ -170,7 +184,7 @@ def _gate_unidades_sanity(tp: dict) -> dict:
         for field in ["ingresos_usd", "ebit_usd", "net_income_usd", "cfo_usd"]:
             p_val = prev.get(field)
             c_val = curr.get(field)
-            if p_val and c_val and p_val != 0:
+            if isinstance(p_val, (int, float)) and isinstance(c_val, (int, float)) and p_val != 0:
                 ratio = abs(c_val / p_val)
                 if ratio > 1000 or ratio < 0.001:
                     anomalies.append(f"{field}: {prev.get('periodo')}→{curr.get('periodo')} ratio={ratio:.0f}x")
@@ -184,7 +198,7 @@ def _gate_unidades_sanity(tp: dict) -> dict:
 def _gate_ev_sanity(tp: dict) -> dict:
     """EV >= 0."""
     metricas = tp.get("metricas_derivadas", {})
-    ev = metricas.get("ev_usd") or tp.get("mercado", {}).get("enterprise_value_usd")
+    ev = _num(metricas.get("ev_usd")) or _num(tp.get("mercado", {}).get("enterprise_value_usd"))
 
     if ev is None:
         return {"name": "EV_SANITY", "status": "SKIP", "note": "EV not calculated"}
@@ -236,6 +250,30 @@ def _gate_ttm_sanity(tp: dict) -> dict:
         return {"name": "TTM_SANITY", "status": "PASS", "note": f"TTM/FY0 revenue ratio: {ratio:.2f}"}
     else:
         return {"name": "TTM_SANITY", "status": "WARNING", "note": f"TTM/FY0 revenue ratio: {ratio:.2f} — unusually large deviation"}
+
+
+def _gate_ttm_consecutive(tp: dict) -> dict:
+    """Validate that the TTM quarters are actually consecutive (no cross-era)."""
+    ttm = tp.get("ttm", {})
+    if not ttm or ttm.get("metodo") != "suma_4_trimestres":
+        if ttm and ttm.get("metodo") == "no_disponible":
+            return {"name": "TTM_CONSECUTIVE", "status": "SKIP", "note": "TTM not calculated"}
+        # FY0_fallback triggered by non-consecutive quarters → WARNING
+        if ttm and ttm.get("metodo") == "FY0_fallback":
+            nota = ttm.get("nota", "")
+            if "NO consecutivos" in nota:
+                return {"name": "TTM_CONSECUTIVE", "status": "WARNING",
+                        "note": f"FY0_fallback triggered by non-consecutive quarters: {nota}"}
+        return {"name": "TTM_CONSECUTIVE", "status": "PASS",
+                "note": f"TTM method: {ttm.get('metodo', 'none')} — not based on quarterly sum"}
+
+    nota = ttm.get("nota", "")
+    if "NO consecutivos" in nota or "rechazado" in nota:
+        return {"name": "TTM_CONSECUTIVE", "status": "FAIL",
+                "note": f"TTM quarters not consecutive: {nota}"}
+
+    return {"name": "TTM_CONSECUTIVE", "status": "PASS",
+            "note": f"TTM passed consecutiveness check. {nota}"}
 
 
 def _gate_data_completeness(tp: dict) -> dict:
@@ -296,10 +334,11 @@ def _calc_confidence(gates: list[dict]) -> float:
 def _overall_status(gates: list[dict]) -> str:
     """PASS / PARTIAL / FAIL."""
     has_critical_fail = any(g["status"] == "FAIL" and g.get("critical") for g in gates)
+    has_critical_skip = any(g["status"] == "SKIP" and g.get("critical") for g in gates)
     has_any_fail = any(g["status"] == "FAIL" for g in gates)
     has_warning = any(g["status"] == "WARNING" for g in gates)
 
-    if has_critical_fail:
+    if has_critical_fail or has_critical_skip:
         return "FAIL"
     if has_any_fail or has_warning:
         return "PARTIAL"

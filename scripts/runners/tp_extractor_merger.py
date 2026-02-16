@@ -10,9 +10,29 @@ Lógica:
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
+
+try:
+    from tp_normalizer import normalize as _normalize_tp
+    _HAS_NORMALIZER = True
+except ImportError:
+    try:
+        from scripts.runners.tp_normalizer import normalize as _normalize_tp
+        _HAS_NORMALIZER = True
+    except ImportError:
+        _HAS_NORMALIZER = False
+
+
+def _dedup(items: list) -> list:
+    """Deduplicate a list that may contain unhashable types (dicts)."""
+    seen = []
+    for item in items:
+        if item not in seen:
+            seen.append(item)
+    return seen
 
 
 FILING_PRIORITY = {
@@ -24,6 +44,50 @@ FILING_PRIORITY = {
     "DEF14A": 6,
 }
 
+# Patterns to detect filing type from filenames / source_filing strings
+_FILING_TYPE_PATTERNS = [
+    (re.compile(r"(?:10-K|10K)", re.IGNORECASE), "10-K"),
+    (re.compile(r"(?:20-F|20F)", re.IGNORECASE), "20-F"),
+    (re.compile(r"(?:10-Q|10Q)", re.IGNORECASE), "10-Q"),
+    (re.compile(r"(?:6-K|6K)", re.IGNORECASE), "6-K"),
+    (re.compile(r"8-K", re.IGNORECASE), "8-K"),
+    (re.compile(r"DEF14A", re.IGNORECASE), "DEF14A"),
+    (re.compile(r"TRANSCRIPT|earnings.?call", re.IGNORECASE), "TRANSCRIPT"),
+    (re.compile(r"PRESENT", re.IGNORECASE), "PRESENTATION"),
+]
+
+
+def _resolve_filing_type(ext: dict) -> str:
+    """Extract filing type from extraction metadata.
+
+    Tries multiple heuristics to map source identifiers to a known
+    filing type so that FILING_PRIORITY produces a meaningful value
+    instead of defaulting to 99.
+    """
+    # 1) Explicit field
+    ft = ext.get("filing_type", "")
+    if ft in FILING_PRIORITY:
+        return ft
+
+    # 2) Search in log.source_filing, log.fuentes_consultadas, etc.
+    candidates = [ft]
+    log = ext.get("log", {})
+    sf = log.get("source_filing", "")
+    if isinstance(sf, str):
+        candidates.append(sf)
+    elif isinstance(sf, list):
+        candidates.extend(str(s) for s in sf)
+    fc = log.get("fuentes_consultadas", [])
+    if isinstance(fc, list):
+        candidates.extend(str(c) for c in fc)
+
+    combined = " ".join(candidates)
+    for pattern, ftype in _FILING_TYPE_PATTERNS:
+        if pattern.search(combined):
+            return ftype
+
+    return "UNKNOWN"
+
 
 def merge(partial_extractions: list[dict]) -> dict:
     """
@@ -33,36 +97,53 @@ def merge(partial_extractions: list[dict]) -> dict:
     if not partial_extractions:
         return {"error": "No partial extractions to merge"}
 
-    if len(partial_extractions) == 1:
-        return partial_extractions[0]
+    # Normalize ALL partials BEFORE merging so that field names are
+    # standardised (e.g. "revenue" → "ingresos_usd", "cfo" → "cfo_usd").
+    # Without this, the merge logic can't find values sitting under
+    # non-standard keys and the merged result ends up with NULLs.
+    normalized_extractions = [_apply_normalization(pe) for pe in partial_extractions]
+
+    if len(normalized_extractions) == 1:
+        return normalized_extractions[0]
 
     # Use first extraction as base template
-    base = dict(partial_extractions[0])
+    base = dict(normalized_extractions[0])
 
     # Merge sections
-    base["historico_anual"] = _merge_annual(partial_extractions)
-    base["historico_trimestral"] = _merge_quarterly(partial_extractions)
-    base["balance_sheet_ultimo"] = _merge_balance_sheet(partial_extractions)
-    base["lease_data"] = _merge_lease_data(partial_extractions)
+    base["historico_anual"] = _merge_annual(normalized_extractions)
+    base["historico_trimestral"] = _merge_quarterly(normalized_extractions)
+    base["balance_sheet_ultimo"] = _merge_balance_sheet(normalized_extractions)
+    base["lease_data"] = _merge_lease_data(normalized_extractions)
 
     # Merge log/sources
     all_sources = []
     all_conversions = []
     all_limitations = []
-    for pe in partial_extractions:
+    for pe in normalized_extractions:
         log = pe.get("log", {})
         all_sources.extend(log.get("fuentes_consultadas", log.get("source_filing", [])) if isinstance(log.get("fuentes_consultadas", log.get("source_filing", [])), list) else [log.get("source_filing", "unknown")])
         all_conversions.extend(log.get("conversiones_aplicadas", []))
         all_limitations.extend(log.get("limitaciones", []))
 
     base["log"] = {
-        "fuentes_consultadas": list(set(all_sources)),
-        "conversiones_aplicadas": list(set(all_conversions)),
-        "limitaciones": list(set(all_limitations)),
+        "fuentes_consultadas": _dedup(all_sources),
+        "conversiones_aplicadas": _dedup(all_conversions),
+        "limitaciones": _dedup(all_limitations),
         "merger_note": f"Merged {len(partial_extractions)} filings at {datetime.now(timezone.utc).isoformat()}",
     }
 
-    return base
+    return base  # already normalized per-partial
+
+
+def _apply_normalization(tp: dict) -> dict:
+    """Aplica normalización con fallback seguro a datos sin modificar."""
+    if not _HAS_NORMALIZER:
+        return tp
+    try:
+        return _normalize_tp(tp)
+    except Exception as e:
+        print(f"[merger] WARNING: Normalización falló ({e}), usando datos sin normalizar")
+        return tp
 
 
 def _merge_annual(extractions: list[dict]) -> list:
@@ -70,7 +151,7 @@ def _merge_annual(extractions: list[dict]) -> list:
     by_period = {}
 
     for ext in extractions:
-        filing_type = ext.get("filing_type", ext.get("log", {}).get("source_filing", "UNKNOWN"))
+        filing_type = _resolve_filing_type(ext)
         priority = FILING_PRIORITY.get(filing_type, 99)
 
         for entry in ext.get("historico_anual", []):
@@ -82,12 +163,12 @@ def _merge_annual(extractions: list[dict]) -> list:
                 by_period[periodo] = {"data": dict(entry), "priority": priority, "source": filing_type}
             else:
                 existing = by_period[periodo]
-                # Merge fields: fill nulls from lower-priority, resolve conflicts by priority
-                merged = _merge_period_entries(existing["data"], entry, existing["priority"], priority)
+                merged = _merge_period_entries(existing["data"], entry,
+                                              existing["priority"], priority, filing_type)
                 by_period[periodo]["data"] = merged
 
-    # Sort by period
-    periods = sorted(by_period.keys())
+    # Sort by chronological key, not alphabetical period string
+    periods = sorted(by_period.keys(), key=lambda p: _period_sort_key(p, by_period[p]["data"]))
     return [by_period[p]["data"] for p in periods]
 
 
@@ -96,7 +177,7 @@ def _merge_quarterly(extractions: list[dict]) -> list:
     by_period = {}
 
     for ext in extractions:
-        filing_type = ext.get("filing_type", "UNKNOWN")
+        filing_type = _resolve_filing_type(ext)
         priority = FILING_PRIORITY.get(filing_type, 99)
 
         for entry in ext.get("historico_trimestral", []):
@@ -108,10 +189,11 @@ def _merge_quarterly(extractions: list[dict]) -> list:
                 by_period[periodo] = {"data": dict(entry), "priority": priority}
             else:
                 existing = by_period[periodo]
-                merged = _merge_period_entries(existing["data"], entry, existing["priority"], priority)
+                merged = _merge_period_entries(existing["data"], entry,
+                                              existing["priority"], priority, filing_type)
                 by_period[periodo]["data"] = merged
 
-    periods = sorted(by_period.keys())
+    periods = sorted(by_period.keys(), key=lambda p: _period_sort_key(p, by_period[p]["data"]))
     return [by_period[p]["data"] for p in periods]
 
 
@@ -125,7 +207,7 @@ def _merge_balance_sheet(extractions: list[dict]) -> dict:
         if not bs or all(v is None for k, v in bs.items() if not k.startswith("_")):
             continue
 
-        filing_type = ext.get("filing_type", "UNKNOWN")
+        filing_type = _resolve_filing_type(ext)
         priority = FILING_PRIORITY.get(filing_type, 99)
 
         if priority < best_priority:
@@ -145,7 +227,7 @@ def _merge_lease_data(extractions: list[dict]) -> dict:
         if not ld or all(v is None for k, v in ld.items() if not k.startswith("_")):
             continue
 
-        filing_type = ext.get("filing_type", "UNKNOWN")
+        filing_type = _resolve_filing_type(ext)
         priority = FILING_PRIORITY.get(filing_type, 99)
 
         if priority < best_priority:
@@ -155,24 +237,56 @@ def _merge_lease_data(extractions: list[dict]) -> dict:
     return best
 
 
-def _merge_period_entries(existing: dict, new_entry: dict, existing_priority: int, new_priority: int) -> dict:
-    """Merge two period entries, resolving conflicts by priority."""
+def _period_sort_key(periodo: str, entry: dict) -> str:
+    """Return an ISO-date sort key for chronological ordering."""
+    fecha_fin = entry.get("fecha_fin")
+    if fecha_fin and re.match(r"\d{4}-\d{2}-\d{2}", str(fecha_fin)):
+        return str(fecha_fin)
+    m = re.search(r"(?:FY)?(\d{4})", periodo)
+    if m:
+        year = m.group(1)
+        qm = re.match(r"Q([1-4])", periodo)
+        if qm:
+            q = int(qm.group(1))
+            month = q * 3
+            return f"{year}-{month:02d}-28"
+        return f"{year}-12-31"
+    return periodo
+
+
+def _merge_period_entries(existing: dict, new_entry: dict,
+                         existing_priority: int, new_priority: int,
+                         new_source: str = "UNKNOWN") -> dict:
+    """Merge two period entries, resolving conflicts by priority.
+
+    Rules:
+      - Null-fill is ONLY allowed when new source has equal or better
+        (lower) priority.  A TRANSCRIPT (4) cannot fill a null that
+        a 20-F (1) correctly left empty.
+      - Conflicts use higher priority (lower number wins).
+      - Provenance tracked in _field_sources.
+    """
     merged = dict(existing)
+    provenance = dict(merged.get("_field_sources", {}))
 
     for key, new_val in new_entry.items():
-        if key in ("periodo", "fecha_fin", "fuente_refs"):
+        if key in ("periodo", "fecha_fin", "fuente_refs", "_field_sources"):
             continue
 
         existing_val = merged.get(key)
 
         if existing_val is None and new_val is not None:
-            # Fill null with new data
-            merged[key] = new_val
+            # Null-fill: only if new source is same or better priority
+            if new_priority <= existing_priority:
+                merged[key] = new_val
+                provenance[key] = new_source
         elif existing_val is not None and new_val is not None and existing_val != new_val:
             # Conflict — use higher priority (lower number)
             if new_priority < existing_priority:
                 merged[key] = new_val
+                provenance[key] = new_source
 
+    merged["_field_sources"] = provenance
     return merged
 
 

@@ -302,19 +302,59 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
                 raw_rel = str(raw_dir.relative_to(REPO_ROOT))
             except ValueError:
                 raw_rel = "_raw_filings"
-            # Force canonical txt path for downstream readers.
+            # Force canonical path for downstream readers.
+            # Priority: .clean.md > .txt > .htm (best quality first)
             token = canonical_type_token(src_type)
-            canonical_name = f"{new_id}_{token}.txt"
-            txt_exists = (raw_dir / canonical_name).exists()
-            if txt_exists:
-                src["local_path"] = f"{raw_rel}/{canonical_name}"
+            # Try multiple candidate names — the actual filename may include
+            # a period suffix (e.g., SRC_001_20-F_FY2025.txt) that the
+            # canonical_name template omits.
+            def _clean_md_is_useful_check(path: Path) -> bool:
+                """Semantic quality gate for .clean.md files (duplicated to avoid cross-layer import)."""
+                try:
+                    text = path.read_text(errors="replace")
+                except Exception:
+                    return False
+                if text.count("_Section not found in filing._") >= 4:
+                    return False
+                import re as _re
+                numeric_rows = _re.findall(r"^\|.*\d[\d,\.]*.*\|$", text, _re.MULTILINE)
+                if len(numeric_rows) < 5:
+                    return False
+                for section in ("INCOME STATEMENT", "BALANCE SHEET", "CASH FLOW"):
+                    idx = text.find(f"## {section}")
+                    if idx >= 0 and "_Section not found" not in text[idx:idx + 200]:
+                        return True
+                return False
+
+            resolved_path = None
+            for ext_candidate in (".clean.md", ".txt", ".htm", ".html"):
+                exact = f"{new_id}_{token}{ext_candidate}"
+                candidate_path = raw_dir / exact
+                if candidate_path.exists():
+                    # Skip .clean.md that fails semantic quality gate
+                    if ext_candidate == ".clean.md" and not _clean_md_is_useful_check(candidate_path):
+                        continue
+                    resolved_path = f"{raw_rel}/{exact}"
+                    break
+                # Glob fallback for period-suffix variants
+                pattern = f"{new_id}_{token}*{ext_candidate}"
+                glob_matches = sorted(raw_dir.glob(pattern))
+                if glob_matches:
+                    gm = glob_matches[0]
+                    if ext_candidate == ".clean.md" and not _clean_md_is_useful_check(gm):
+                        continue
+                    resolved_path = f"{raw_rel}/{gm.name}"
+                    break
+
+            if resolved_path:
+                src["local_path"] = resolved_path
             else:
                 # Fallback to best candidate file with the new id.
                 matches = sorted(raw_dir.glob(f"{new_id}_*"))
                 if matches:
                     src["local_path"] = f"{raw_rel}/{matches[0].name}"
                 else:
-                    # Keep existing local_path if file wasn't found (may already be correct)
+                    # Keep existing local_path if file wasn't found
                     print(f"WARNING: no local file found for {new_id} ({src_type}), keeping: {local_path}", file=sys.stderr)
                     src["local_path"] = local_path
 

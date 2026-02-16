@@ -579,6 +579,31 @@ def write_raw_files(
 
     (raw_dir / original_name).write_bytes(binary)
     (raw_dir / txt_name).write_text(text, encoding="utf-8")
+
+    # Generate .ixbrl.json and .clean.md for financial filings
+    htm_path = raw_dir / original_name
+    tipo_upper = tipo.upper().replace(" ", "")
+    is_financial = any(ft in tipo_upper for ft in ("10-K", "10K", "20-F", "20F", "10-Q", "10Q", "6-K", "6K"))
+    if is_financial and ext in ("htm", "html"):
+        try:
+            from scripts.runners.ixbrl_extractor import extract_ixbrl_facts
+            ixbrl_data = extract_ixbrl_facts(htm_path)
+            ixbrl_name = f"{base}.ixbrl.json"
+            import json as _json
+            (raw_dir / ixbrl_name).write_text(
+                _json.dumps(ixbrl_data, indent=2, ensure_ascii=False), encoding="utf-8")
+        except Exception as e:
+            print(f"WARNING: iXBRL extraction failed for {original_name}: {e}", file=sys.stderr)
+
+        try:
+            from scripts.runners.clean_md_extractor import extract_financial_tables
+            clean_md = extract_financial_tables(htm_path)
+            if clean_md:  # empty string = quality gate rejected
+                clean_name = f"{base}.clean.md"
+                (raw_dir / clean_name).write_text(clean_md, encoding="utf-8")
+        except Exception as e:
+            print(f"WARNING: clean.md extraction failed for {original_name}: {e}", file=sys.stderr)
+
     return raw_dir_local_path(raw_dir, txt_name), first_25_words(text), None
 
 

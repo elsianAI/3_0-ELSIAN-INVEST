@@ -1,5 +1,7 @@
 """Construye prompts completos inyectando instrucciones + schemas + artefactos."""
 from __future__ import annotations
+import json
+import re
 from pathlib import Path
 
 # Mapeo step → fichero de instrucciones
@@ -115,6 +117,13 @@ def build_filing_prompt(
 ) -> str:
     """
     Prompt para TP_EXTRACTOR por filing individual.
+
+    Strategy:
+      1. If .ixbrl.json exists alongside the filing, inject pre-extracted
+         authoritative data at the top of the prompt.
+      2. For .clean.md files (pre-filtered financial tables), no truncation
+         needed — they are already within budget (hard cap 220k).
+      3. For .txt/.htm, truncate at 300k chars as safety net.
     """
     parts = []
 
@@ -123,11 +132,78 @@ def build_filing_prompt(
     if instr_path.exists():
         parts.append(f"# INSTRUCCIONES\n\n{instr_path.read_text()}")
 
-    # Filing content
-    if filing_path.exists():
-        content = filing_path.read_text(errors="replace")
-        if len(content) > 300_000:
-            content = content[:300_000] + "\n\n... [TRUNCATED]"
+    # Try to inject iXBRL pre-extracted data
+    ixbrl_path = filing_path.with_suffix(".ixbrl.json")
+    # Also try pattern: base.clean.md → base.ixbrl.json
+    if not ixbrl_path.exists():
+        ixbrl_path = Path(str(filing_path).replace(".clean.md", ".ixbrl.json")
+                          .replace(".txt", ".ixbrl.json")
+                          .replace(".htm", ".ixbrl.json"))
+    # Also look for .ixbrl.json sibling with same stem base
+    if not ixbrl_path.exists():
+        stem = filing_path.stem
+        if stem.endswith(".clean"):
+            stem = stem[:-6]
+        candidates = list(filing_path.parent.glob(f"{stem}*.ixbrl.json"))
+        if candidates:
+            ixbrl_path = candidates[0]
+
+    if ixbrl_path.exists():
+        try:
+            ixbrl_data = json.loads(ixbrl_path.read_text())
+            consolidated = ixbrl_data.get("consolidated", {})
+            if consolidated:
+                ixbrl_section = "# DATOS PRE-EXTRAÍDOS (fuente: iXBRL — AUTORITATIVOS)\n\n"
+                ixbrl_section += ("Estos datos fueron extraídos determinísticamente de los tags "
+                                  "iXBRL del filing. Son autoritativos: si encuentras datos en "
+                                  "el texto que contradigan estos valores, MANTÉN los valores "
+                                  "iXBRL y anota la discrepancia.\n\n```json\n")
+                ixbrl_section += json.dumps(consolidated, indent=2, ensure_ascii=False)
+                ixbrl_section += "\n```\n"
+                parts.append(ixbrl_section)
+        except Exception:
+            pass  # Non-critical — proceed without iXBRL data
+
+    # Filing content — prefer .clean.md over .htm/.txt for financial filings,
+    # but only if the .clean.md has actual useful content (semantic quality gate).
+    def _clean_md_is_useful(text: str) -> bool:
+        """Check if .clean.md has real financial data, not just 'Section not found' stubs."""
+        # Criterion 1: must not have ALL 4 sections missing
+        if text.count("_Section not found in filing._") >= 4:
+            return False
+        # Criterion 2: at least 5 table rows with numeric data
+        numeric_rows = re.findall(r"^\|.*\d[\d,\.]*.*\|$", text, re.MULTILINE)
+        if len(numeric_rows) < 5:
+            return False
+        # Criterion 3: at least one valid financial section (heading NOT followed by "not found")
+        for section in ("INCOME STATEMENT", "BALANCE SHEET", "CASH FLOW"):
+            idx = text.find(f"## {section}")
+            if idx >= 0:
+                after = text[idx:idx + 200]
+                if "_Section not found" not in after:
+                    return True
+        return False
+
+    content_path = filing_path
+    if not filing_path.name.endswith(".clean.md"):
+        clean_candidate = filing_path.parent / (filing_path.stem + ".clean.md")
+        if clean_candidate.exists():
+            _clean_content = clean_candidate.read_text(errors="replace")
+            if _clean_md_is_useful(_clean_content):
+                content_path = clean_candidate
+
+    if content_path.exists():
+        content = content_path.read_text(errors="replace")
+        is_clean_md = content_path.name.endswith(".clean.md")
+        if is_clean_md:
+            # .clean.md is already pre-filtered and within 220k budget
+            # No truncation — this is the whole point of .clean.md
+            if len(content) > 220_000:
+                content = content[:220_000] + "\n\n... [TRUNCATED at 220k safety cap]"
+        else:
+            # Legacy .txt / .htm fallback: truncate at 300k
+            if len(content) > 300_000:
+                content = content[:300_000] + "\n\n... [TRUNCATED]"
         parts.append(f"# FILING CONTENT\n\n```\n{content}\n```")
 
     # Filing metadata
