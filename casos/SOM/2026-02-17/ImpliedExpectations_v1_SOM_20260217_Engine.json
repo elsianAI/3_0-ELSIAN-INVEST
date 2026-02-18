@@ -11,20 +11,20 @@
     "industria": "UNKNOWN"
   },
   "input_refs": {
-    "truth_pack_version": "TruthPack_v1_partial",
-    "truth_pack_caso_id": "UNKNOWN"
+    "truth_pack_version": "TruthPack_v1",
+    "truth_pack_caso_id": "CASE_20260217_SOM"
   },
-  "status": "BLOCKED",
-  "motivo_blocked": "Prerequisitos no cumplidos: truth_pack.data_quality.status='PARTIAL' (se requiere 'PASS') y falta enterprise_value_usd para traducir precio/EV a expectativas implícitas.",
+  "status": "OK",
+  "motivo_blocked": null,
   "snapshot_mercado": {
     "fecha": "2026-02-18",
-    "precio_usd": 210.0,
-    "market_cap_usd": null,
-    "enterprise_value_usd": null,
-    "deuda_total_usd": 0,
-    "caja_usd": 29486000,
-    "deuda_neta_usd": -29486000,
-    "acciones_diluidas": null
+    "precio_usd": 2.17,
+    "market_cap_usd": 117320000.0,
+    "enterprise_value_usd": 87834000.0,
+    "deuda_total_usd": 0.0,
+    "caja_usd": 29486000.0,
+    "deuda_neta_usd": -29486000.0,
+    "acciones_diluidas": 54064516.0
   },
   "metricas_base": {
     "periodo_base": "TTM",
@@ -38,19 +38,20 @@
     "margen_fcf_pct": 13.92
   },
   "seleccion_metodo": {
-    "metodo_principal": "BLOCKED",
-    "razon": "FCF y EBIT base están presentes y positivos, pero falta EV/market cap y el gate de calidad no está en PASS. Sin esos datos no puede inferirse la expectativa implícita del precio.",
+    "metodo_principal": "REVERSE_DCF_FCF",
+    "razon": "El FCF base es positivo (USD 15.2m), por lo que el enfoque directo es resolver el crecimiento de FCF implicito por el EV actual en un grid de descuento y terminal.",
     "metodos_secundarios": [
-      "MULTIPLOS_IMPLICITOS_SOLO"
+      "MULTIPLOS_IMPLICITOS_SOLO",
+      "REVERSE_EARNINGS_POWER"
     ]
   },
   "multiples_implicitos": {
-    "disponible": false,
-    "ev_ebit": null,
-    "ev_fcf": null,
-    "p_fcf": null,
-    "fcf_yield_pct": null,
-    "comentario": "Sin EV ni market cap no se pueden calcular múltiplos implícitos ni rendimiento de FCF."
+    "disponible": true,
+    "ev_ebit": 3.6146,
+    "ev_fcf": 5.7786,
+    "p_fcf": 7.7184,
+    "fcf_yield_pct": 12.956,
+    "comentario": "Los multiplos actuales son bajos para una compania sin deuda neta; el precio parece descontar deterioro operativo o menor durabilidad del FCF."
   },
   "parametros_modelo": {
     "horizonte_anos": 5,
@@ -69,7 +70,7 @@
       15,
       18
     ],
-    "nota_parametros": "Se usan rangos estándar para costo de capital y valor terminal, evitando puntos únicos. El grid define 24 combinaciones únicas (3x2x4). La ejecución requiere EV observable.",
+    "nota_parametros": "Se usa un rango de tasa de descuento de 8%-12% para cubrir escenarios de riesgo bajo, medio y alto. El crecimiento terminal de 2%-3% representa crecimiento nominal moderado de largo plazo. Los multiplos terminales 10x-18x abarcan una banda conservadora a neutral para FCF maduro. Se evaluaron las 24 combinaciones unicas del grid sin filas duplicadas.",
     "convenciones": {
       "definicion_fcf": "FCF = CFO - CAPEX (usando capex como salida de caja)",
       "ev_formula": "EV = market_cap + deuda_total - caja",
@@ -77,9 +78,202 @@
     }
   },
   "reverse_dcf_fcf": {
-    "aplicable": false,
+    "aplicable": true,
     "fcf0_usd": 15200000,
-    "resultado_grid": [],
+    "resultado_grid": [
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.1454,
+        "fcf_year5_implicito_usd": 6927107.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.1675,
+        "fcf_year5_implicito_usd": 6077052.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.1948,
+        "fcf_year5_implicito_usd": 5143553.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.2172,
+        "fcf_year5_implicito_usd": 4466557.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.1466,
+        "fcf_year5_implicito_usd": 6879636.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.1687,
+        "fcf_year5_implicito_usd": 6033782.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.196,
+        "fcf_year5_implicito_usd": 5105400.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.2184,
+        "fcf_year5_implicito_usd": 4432445.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.1296,
+        "fcf_year5_implicito_usd": 7592705.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.1521,
+        "fcf_year5_implicito_usd": 6660972.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.1799,
+        "fcf_year5_implicito_usd": 5637777.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.2027,
+        "fcf_year5_implicito_usd": 4895731.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.1308,
+        "fcf_year5_implicito_usd": 7540673.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.1533,
+        "fcf_year5_implicito_usd": 6613544.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.1811,
+        "fcf_year5_implicito_usd": 5595958.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.204,
+        "fcf_year5_implicito_usd": 4858341.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.1138,
+        "fcf_year5_implicito_usd": 8308512.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.1367,
+        "fcf_year5_implicito_usd": 7288938.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.165,
+        "fcf_year5_implicito_usd": 6169281.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.1883,
+        "fcf_year5_implicito_usd": 5357279.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.115,
+        "fcf_year5_implicito_usd": 8251573.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.1379,
+        "fcf_year5_implicito_usd": 7237039.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.1663,
+        "fcf_year5_implicito_usd": 6123519.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.1895,
+        "fcf_year5_implicito_usd": 5316364.0,
+        "nota": "Implica contraccion de FCF frente al nivel base en 5 anos."
+      }
+    ],
     "sensibilidades": {
       "ranking_drivers": [
         {
@@ -95,19 +289,19 @@
           "importancia": "MEDIA"
         }
       ],
-      "observacion": "No ejecutable por ausencia de EV; no puede despejarse el crecimiento implícito."
+      "observacion": "En todo el grid el crecimiento implicito es negativo. Un multiple terminal mas alto reduce la contraccion exigida; una tasa de descuento mas alta la reduce parcialmente."
     },
     "validaciones_modelo": {
-      "ev_presente": false,
+      "ev_presente": true,
       "fcf0_presente": true,
-      "resultados_sin_valores_absurdos": false,
-      "detalle": "Falla de prerequisito: enterprise_value_usd nulo."
+      "resultados_sin_valores_absurdos": true,
+      "detalle": "24/24 combinaciones validas y unicas; CAGR implicito entre -21.84% y -11.38% anual; sin uso de EBITA."
     }
   },
   "reverse_earnings_power": {
     "aplicable": false,
     "metrica_base": "EBIT",
-    "valor_base_usd": 24300000,
+    "valor_base_usd": null,
     "rango_normalizado_usd": {
       "min": null,
       "base": null,
@@ -118,75 +312,53 @@
       "multiple_base": null,
       "multiple_max": null
     },
-    "lectura": "No puede derivarse múltiplo implícito sobre earnings power sin EV/market cap. Se mantiene EBIT (no EBITA) como convención principal.",
-    "supuestos": [
-      "Métrica operativa base: EBIT reportado en TTM FY0_fallback.",
-      "Sin EV no se puede mapear precio a múltiplo implícito normalizado."
-    ]
+    "lectura": "No aplicado como metodo principal porque FCF base es positivo y permite reverse DCF directo.",
+    "supuestos": []
   },
   "resumen_expectativas_implicitas": {
     "enunciados": [
-      "Con los datos actuales no es posible responder qué tendría que ser cierto para que el precio tenga sentido, porque falta EV/market cap.",
-      "Una vez incorporado EV, el motor puede estimar el CAGR de FCF implícito a 5 años bajo el grid de descuento y terminal."
+      "Para justificar el EV actual (USD 87.8m), el mercado parece asumir contraccion de FCF durante 5 anos, no crecimiento.",
+      "En el grid evaluado, el CAGR de FCF implicito cae entre -21.84% y -11.38% anual, con FCF ano 5 entre ~USD 4.4m y ~USD 8.3m."
     ],
-    "variable_critica_principal": "RIESGO_CAPITAL",
+    "variable_critica_principal": "CRECIMIENTO_FCF",
     "que_deberia_observarse_en_6_12_meses": [
-      "Publicación de market_cap_usd y acciones diluidas consistentes para reconstruir EV y P/FCF.",
-      "Estados auditados FY2025 con CFO, CAPEX y EBIT completos para confirmar la base de FCF/earnings power."
+      "Evolucion trimestral de CFO y FCF (si se mantiene por encima de USD 15m anualizado o sigue cayendo).",
+      "Margen operativo EBIT y conversion EBIT->CFO, para confirmar si la erosion de margen continua.",
+      "Nivel de ingresos y mix bruto: estabilizacion vs nueva caida de ventas.",
+      "Capex de mantenimiento vs crecimiento, para validar sostenibilidad de FCF reportado."
     ]
   },
   "banderas": {
-    "expectativas_extremas": false,
-    "posible_value_trap": false,
-    "posible_peak_earnings": false,
+    "expectativas_extremas": true,
+    "posible_value_trap": true,
+    "posible_peak_earnings": true,
     "alto_riesgo_balance": false,
     "opacidad_alta": true,
     "notas": [
-      "Evaluación de expectativas bloqueada por EV nulo.",
-      "Calidad global PARTIAL en lugar de PASS.",
-      "Faltan market cap y acciones diluidas para métricas por acción y múltiplos."
+      "El precio solo cierra con contraccion de FCF de doble digito anual en todo el grid.",
+      "Hay net cash y deuda financiera cero, por lo que el riesgo no parece venir del balance.",
+      "TTM usa FY0 fallback y hay vacios trimestrales/material mixto de fuentes, elevando incertidumbre de persistencia."
     ]
   },
-  "faltantes_criticos": [
-    {
-      "item": "enterprise_value_usd",
-      "por_que_importa": "Es la variable objetivo del motor inverso para traducir precio en expectativas.",
-      "como_resolver": "Aportar EV directo o market_cap_usd actualizado para calcular EV = market_cap + deuda_total - caja."
-    },
-    {
-      "item": "market_cap_usd",
-      "por_que_importa": "Necesario para EV y para múltiplos basados en equity (p.ej. P/FCF).",
-      "como_resolver": "Incluir market cap de la misma fecha del precio de mercado."
-    },
-    {
-      "item": "acciones_diluidas",
-      "por_que_importa": "Permite validar consistencia entre precio, market cap y métricas por acción.",
-      "como_resolver": "Incluir recuento diluido promedio o cierre del periodo base."
-    },
-    {
-      "item": "truth_pack.data_quality.status=PASS",
-      "por_que_importa": "Regla de entrada obligatoria para ejecutar implied expectations en modo normal.",
-      "como_resolver": "Remediar faltantes del TruthPack y revalidar hasta obtener status PASS."
-    }
-  ],
+  "faltantes_criticos": [],
   "log": {
     "limitaciones": [
-      "TruthPack con data_quality.status = PARTIAL.",
-      "EV y market cap ausentes en snapshot de mercado.",
-      "TTM construido con método FY0_fallback (no suma trimestral).",
-      "Cobertura de fuentes core con warning (sin 10-K/20-F explícito)."
+      "TTM se basa en FY0 fallback, no en suma trimestral consecutiva.",
+      "Cobertura trimestral incompleta para 2024-2025.",
+      "Parte de FY2025 proviene de IR news con campos financieros nulos.",
+      "Historico combina annual report e investor presentation con granularidad desigual."
     ],
     "traza_calculo": [
-      "Se detectó modo NORMAL (sin RemediationPlan/PatchBundle).",
-      "Se validó prerequisito N1 y falló por status distinto de PASS.",
-      "Se validó N2: FCF/EBIT presentes, pero EV ausente (bloqueante).",
-      "Se construyó snapshot de mercado con precio, deuda, caja y deuda neta disponibles.",
-      "Se extrajo base operativa desde TTM FY0_fallback (ingresos, EBIT, CFO, CAPEX, FCF).",
-      "No se calcularon múltiplos implícitos por ausencia de EV/market cap.",
-      "No se ejecutó reverse DCF por falta de EV, pese a FCF positivo.",
-      "Se mantuvo convención EBIT (no EBITA) para earnings power.",
-      "Se preservó grid estándar de 24 combinaciones únicas sin duplicados.",
-      "Se emitió artefacto en estado BLOCKED con faltantes críticos y pasos de remediación."
+      "Se valido data_quality.status=PASS.",
+      "Se verifico EV presente y FCF/EBIT presentes en base TTM.",
+      "Se tomo FCF0=USD 15.2m (TTM/FY0 fallback).",
+      "Se calcularon EV/EBIT, EV/FCF, P/FCF y FCF yield con EV y market cap del TruthPack.",
+      "Metodo principal seleccionado: REVERSE_DCF_FCF por FCF positivo.",
+      "Se resolvio CAGR de FCF a 5 anos por cada combinacion del grid (3x2x4=24).",
+      "Terminal value modelado como multiplo sobre FCF del ano 5 ajustado por crecimiento terminal.",
+      "Se verifico unicidad de 24 combinaciones (sin filas duplicadas).",
+      "Se verifico consistencia de resultados y ausencia de valores absurdos.",
+      "Se emitieron banderas de expectativas implicitas y calidad de visibilidad."
     ]
   }
 }

@@ -1,0 +1,456 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260217_SOM",
+  "fecha_corte": "2026-02-18",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp-01-21",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260217_SOM",
+    "implied_expectations_caso_id": "CASE_20260217_SOM",
+    "sources_pack_caso_id": "CASE_20260217_SOM"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La contracción de ingresos (-18% en FY25) valida el escenario implícito del mercado; no es pesimismo, es realidad operativa.",
+      "El apalancamiento operativo negativo amenaza con comprimir el margen EBIT más rápido que las ventas, invalidando la tesis de 'resiliencia'.",
+      "La supuesta 'caja neta' es vulnerable a una asignación de capital cuestionable (CFF negativo masivo) en un negocio que encoge.",
+      "La opacidad de datos (sin estados auditados FY2025 completos) impide confirmar la calidad real del FCF reportado.",
+      "Clásico perfil de Value Trap: métricas trailing baratas en una compañía con deterioro estructural de top-line."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La caída de ingresos de FY24 a FY25 (~18%) excede o iguala la contracción implícita de FCF (-11% a -22%), confirmando que el mercado no está 'sobre-penalizando'.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual",
+          "cita_corta": "Ingresos FY24 109.2m -> FY25 88.9m (-18.6%).",
+          "interpretacion": "El deterioro real es severo y actual, no una proyección pesimista."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf",
+          "cita_corta": "CAGR FCF implícito -11% a -22%.",
+          "interpretacion": "El precio refleja correctamente la tendencia actual del negocio."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos FY26 muestran crecimiento interanual o caída < 5%.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La 'resiliencia de márgenes' es un indicador retrasado; con ingresos cayendo a niveles de 2017 (<90M), la estructura de costes fijos comprimirá el EBIT.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual",
+          "cita_corta": "EBIT FY23 33.6m -> FY24 24.3m (-27%) con ventas -9.5%.",
+          "interpretacion": "El EBIT cae 3x más rápido que las ventas (apalancamiento negativo)."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen EBIT FY25/26 se mantiene > 20% con ingresos < 90m.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El bajo Capex (~2% ventas) no es una virtud, sino la causa probable de la erosión competitiva y caída de ingresos.",
+      "confianza_0_1": 0.8,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual",
+          "cita_corta": "Capex FY24 2.4m vs Ingresos 109m.",
+          "interpretacion": "Subinversión crónica ('milking') que precede al declive."
+        }
+      ],
+      "falsacion": {
+        "test": "Aumento de Capex recupera cuota de mercado o ingresos en 12-24 meses.",
+        "ventana_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "fuente_prevista": "filing"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "Ingresos FY26 continúan cayendo por debajo de USD 85m.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Ingresos reportados < 85,000,000 USD.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "Margen EBIT reportado para FY25 o FY26 cae por debajo del 18%.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT/Ingresos < 0.18.",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Estados financieros auditados completos FY2025.",
+      "por_que_importa": "Crítico para verificar si el 'FCF' es real o fruto de maniobras de circulante insostenibles.",
+      "como_obtenerlo": "Filing regulatorio."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de 'Other Cash Adjustments' y desglose de CFF.",
+      "por_que_importa": "Para confirmar si la salida de caja financiera es discrecional o estructural.",
+      "como_obtenerlo": "Notas del Cash Flow Statement."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.85,
+        "riesgo_principal": "STRUCTURAL_DECLINE",
+        "resumen_1_2_frases": "Deterioro estructural de ingresos (-18%) que el mercado está descontando correctamente. Riesgo alto de compresión de márgenes por apalancamiento negativo."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "Mercado descuenta contracción FCF excesiva (-11% a -22%).",
+            "evaluacion_red_team": {
+              "estado": "FALSO",
+              "probabilidad_de_fallo_0_1": 0.9,
+              "por_que": [
+                "Los ingresos ya caen al ~18% anual (FY25).",
+                "El EBIT cae más rápido que las ventas por costes fijos.",
+                "El mercado está siendo realista, no pesimista."
+              ]
+            },
+            "puntos_ciegos": [
+              "Ignora la velocidad actual del deterioro de ingresos.",
+              "Asume estabilización sin catalizador visible."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual",
+                "cita_corta": "Ingresos FY25 88.9m vs FY24 109.2m (-18.6%).",
+                "interpretacion": "La caída es real y actual."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Ingresos FY26 crecen o caen < 5%.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_002",
+            "resumen_claim_bull": "Bajo riesgo de ruina por caja neta y deuda cero.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.4,
+              "por_que": [
+                "La caja neta protege de la quiebra inmediata, pero no de la destrucción de valor.",
+                "CFF negativo recurrente (-19m, -22m) sugiere que la caja se está consumiendo rápidamente.",
+                "Si la operación quema caja o el dividendo se paga con reservas, la red de seguridad desaparece."
+              ]
+            },
+            "puntos_ciegos": [
+              "Sostenibilidad de los flujos de salida de financiación (CFF).",
+              "Posible uso de caja para 'tapar agujeros' operativos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual",
+                "cita_corta": "CFF FY23 -22.5m, FY24 -19.3m.",
+                "interpretacion": "Salidas masivas de caja financiera."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Caja neta cae por debajo de 15m USD en próximos 12 meses.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "balance_sheet"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_003",
+            "resumen_claim_bull": "Resiliencia operativa con margen EBIT > 22%.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.7,
+              "por_que": [
+                "El margen es una métrica rezagada en negocios en contracción.",
+                "La caída de ingresos FY25 (-18%) ejercerá fuerte presión en márgenes fijos.",
+                "Probable compresión significativa en reporte final FY25."
+              ]
+            },
+            "puntos_ciegos": [
+              "Efecto del apalancamiento operativo negativo.",
+              "Costes fijos (SG&A, GA) que no bajan linealmente con ventas."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual",
+                "cita_corta": "EBIT cae 27% en FY24 con caída ventas 9%.",
+                "interpretacion": "Sensibilidad alta del margen a caída de volumen."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "EBIT reportado < 18m USD en TTM.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "earnings"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Asumir 'estabilización' (ingresos planos o ligera baja) cuando la tendencia es aceleración de la caída (-9% FY24 -> -18% FY25).",
+          "Confiar en 'múltiplos de distress' sin considerar que el denominador (FCF) puede desaparecer.",
+          "Ignorar la falta de auditoría FY25 como un simple tema de 'opacidad' y no como posible ocultación de deterioro."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "SOM es un negocio en obsolescencia estructural.",
+          "Los flujos de caja se reducirán año tras año hasta la irrelevancia.",
+          "La caja neta se consumirá o repartirá antes de liquidar.",
+          "El 'descuento' actual es el precio justo de un activo terminal."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "Deterioro estructural de ingresos imparable: -18% en FY25 tras -9% en FY24.",
+          "Apalancamiento operativo negativo destruirá los márgenes EBIT más rápido de lo previsto.",
+          "Bajo Capex histórico explica la pérdida de competitividad; revertirlo costaría el FCF.",
+          "Opacidad en FY25 sugiere intento de maquillar un año desastroso.",
+          "Value Trap de manual: parece barato por retrovisor, caro por parabrisas."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "Costes fijos (Personal, GA) se mantienen mientras ingresos caen, colapsando rentabilidad.",
+            "indicadores_tempranos": [
+              "Margen bruto estable pero EBIT cayendo.",
+              "Ratio SG&A/Ventas subiendo."
+            ]
+          },
+          {
+            "mecanismo": "DEMANDA_DEBIL",
+            "descripcion": "Pérdida de clientes o contratos clave que no se recuperan.",
+            "indicadores_tempranos": [
+              "Aceleración caída ingresos (de -9% a -18%)."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Continuidad de tendencia actual. Ingresos caen a ~80m, margen EBIT al 15%.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.6,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "75m - 85m",
+                "justificacion": "Inercia de caída del 18%."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "12% - 16%",
+                "justificacion": "Desapalancamiento operativo."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "EARNINGS_CAEN",
+              "explicacion": "Menor EBIT y menor múltiplo por falta de crecimiento.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -30,
+                "base": -15,
+                "max": 0
+              },
+              "nota": "Value trap con rentabilidad negativa o nula."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Aceleración del colapso. Ingresos < 60m, entrada en pérdidas operativas.",
+            "ventana_meses": {
+              "min": 12,
+              "probable": 18,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.25,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "< 60m",
+                "justificacion": "Pérdida masiva de cuota."
+              }
+            ],
+            "impacto_en_supervivencia": "MEDIO",
+            "nota": "Supervivencia no inmediata por caja neta, pero destrucción total de valor equity."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.85,
+        "razones": [
+          "Caída de ingresos por 3 años consecutivos (133 -> 120 -> 109 -> 89).",
+          "Múltiplos ópticamente bajos (EV/FCF 5.8x) basados en pasado.",
+          "Falta de catalizador de crecimiento visible.",
+          "Opacidad en información financiera reciente.",
+          "Posible subinversión (Capex bajo) inflando FCF temporalmente."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "Rebote de pedidos/ingresos en 2 trimestres.",
+              "Competidores sufriendo igual (sectorial)."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "Pérdida de cuota vs competidores.",
+              "Caída de ingresos constante sin suelo.",
+              "Obsolescencia de producto."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "Ingresos FY26 (o TTM futuro) caen por debajo de USD 80m.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirmaría irrelevancia del negocio."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "TESIS",
+          "definicion": "Margen EBIT cae por debajo del 12%.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Pérdida de la única defensa (rentabilidad)."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Estabilización real de ingresos (flat YoY).",
+          "umbral_o_condicion": "Variación ingresos 0% o positiva en 2 trimestres.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Auditoría limpia FY25 confirmando FCF real > 12m.",
+          "umbral_o_condicion": "Reporte completo sin salvedades y cash flow verificado.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "filing"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0,
+        "si_se_invierte_igual": [
+          "Exigir stop-loss estricto por precio o fundamental (ingresos).",
+          "Esperar a ver FY25 auditado antes de poner un centavo.",
+          "No promediar a la baja si caen las ventas."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Por qué caen los ingresos un 18% en FY25?",
+          "¿Es el CFF negativo dividendo sostenible o quema de naves?",
+          "¿Dónde están los estados financieros completos de FY25?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta de detalle granular en costes para modelar apalancamiento exacto.",
+      "Desconocimiento del desglose exacto de CFF."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

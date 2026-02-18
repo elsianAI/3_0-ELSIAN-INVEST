@@ -5,7 +5,7 @@
   "agente": {
     "agent_role": "BULL",
     "agent_nombre": "BULL_v1",
-    "modelo": "GPT-5",
+    "modelo": "gpt-5-codex",
     "idioma": "es"
   },
   "input_refs": {
@@ -15,47 +15,85 @@
   },
   "resumen_ejecutivo": {
     "bullets": [
-      "SOM combina caida de ingresos reciente con preservacion de caja neta y FCF positivo, creando una tesis de recuperacion no binaria.",
-      "La posible infravaloracion viene de opacidad de valoracion (EV/market cap/acciones faltantes) mas que de estres de balance.",
-      "El balance defensivo (caja 29.5m, deuda 0) reduce riesgo de perdida permanente mientras se ejecuta el ajuste operativo.",
-      "El cierre del gap bull exige tres pruebas: estabilizacion comercial, mejora de margen y normalizacion de disclosure.",
-      "Sin datos de valoracion completos, la tesis permanece en WATCHLIST con disciplina estricta de falsacion."
+      "El mercado solo justifica el EV actual con contraccion fuerte de FCF, lo que deja asimetria si el FCF se estabiliza.",
+      "SOM combina caja neta relevante y deuda financiera cero, reduciendo riesgo de perdida permanente por balance.",
+      "La tesis alcista no exige crecimiento agresivo: requiere sostener FCF, disciplina de capex y mejora gradual de visibilidad.",
+      "El principal riesgo bajista es continuidad de caida de ingresos con deterioro de conversion a caja y opacidad de reportes.",
+      "Con evidencia actual, el caso es APTO tactico con monitoreo estricto de FCF, circulante y disclosure FY2025-FY2026."
     ],
-    "veredicto_role_local": "WATCHLIST",
-    "confianza_0_1": 0.67
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.66
   },
   "claims": [
     {
       "claim_id": "CLM_001",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La valoracion actual incorpora un escenario de deterioro de FCF muy exigente; estabilizar FCF ya cerraria parte material del gap.",
+      "confianza_0_1": 0.81,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "url": null,
+          "titulo": "reverse_dcf_fcf.resultado_grid",
+          "fecha": "2026-02-18",
+          "ubicacion": "cagr_fcf_5y_implicito",
+          "cita_corta": "CAGR FCF implicito entre -21.84% y -11.38% anual.",
+          "interpretacion": "El precio descuenta destruccion de caja sostenida."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "url": null,
+          "titulo": "multiples_implicitos",
+          "fecha": "2026-02-18",
+          "ubicacion": "ev_fcf y fcf_yield_pct",
+          "cita_corta": "EV/FCF 5.7786 y FCF yield 12.956%.",
+          "interpretacion": "El multiple implicito es bajo para una empresa sin deuda neta."
+        }
+      ],
+      "falsacion": {
+        "test": "FCF anualizado cae a <= 8,000,000 USD en dos publicaciones consecutivas.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
       "tipo": "HECHO",
       "criticidad": "CRITICO",
-      "enunciado": "La combinacion de caja neta, deuda financiera cero y pasivos de lease acotados reduce el riesgo de estres financiero en 12-24 meses.",
-      "confianza_0_1": 0.91,
+      "enunciado": "El riesgo de ruina financiera es bajo porque la compania llega al ajuste con caja neta y sin deuda financiera.",
+      "confianza_0_1": 0.89,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
           "source_id": "SRC_002",
           "url": null,
-          "titulo": null,
+          "titulo": "Annual Report FY2024",
           "fecha": "2024-12-31",
           "ubicacion": "balance_sheet_ultimo",
-          "cita_corta": "FY2024: caja_usd 29,486,000 y deuda_total_usd 0.",
-          "interpretacion": "No existe presion inmediata de refinanciacion."
+          "cita_corta": "deuda_total_usd 0; caja_usd 29,486,000.",
+          "interpretacion": "No hay presion de refinanciacion por deuda financiera."
         },
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_002",
+          "source_id": "TruthPack_v1",
           "url": null,
-          "titulo": null,
+          "titulo": "lease_data FY2024",
           "fecha": "2024-12-31",
-          "ubicacion": "lease_data",
-          "cita_corta": "Lease liabilities: 561,000 corrientes y 2,214,000 no corrientes.",
-          "interpretacion": "Obligaciones financieras operativas pequenas frente a la caja disponible."
+          "ubicacion": "lease liabilities",
+          "cita_corta": "Pasivos de lease totales aprox. 2,775,000 USD.",
+          "interpretacion": "Compromisos contractuales existen, pero son acotados frente a la caja."
         }
       ],
       "falsacion": {
-        "test": "Caja cae por debajo de 18m, o aparece deuda financiera >10m, o pasivos de lease suben >50% sin mejora de ingresos.",
+        "test": "deuda_total_usd supera 10,000,000 USD o caja_usd baja de 15,000,000 USD.",
         "ventana_meses": {
           "min": 6,
           "max": 24
@@ -64,439 +102,403 @@
       }
     },
     {
-      "claim_id": "CLM_002",
+      "claim_id": "CLM_003",
       "tipo": "HECHO",
       "criticidad": "IMPORTANTE",
-      "enunciado": "El negocio ha mostrado capacidad estructural de rentabilidad operativa, con EBIT positivo de FY2012 a FY2024.",
-      "confianza_0_1": 0.83,
-      "impacto": "MEDIO",
+      "enunciado": "El historial sugiere un modelo economicamente viable: SOM transito de perdidas a rentabilidad operativa sostenida por mas de una decada.",
+      "confianza_0_1": 0.73,
+      "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
           "source_id": "SRC_007",
           "url": null,
-          "titulo": null,
-          "fecha": "2012-12-31",
-          "ubicacion": "historico_anual.FY2012",
-          "cita_corta": "FY2012: ingresos 32,200,000 y EBIT 1,400,000.",
-          "interpretacion": "La compania ya era rentable en una fase mas pequena del ciclo."
-        },
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "SRC_007",
-          "url": null,
-          "titulo": null,
-          "fecha": "2022-12-31",
-          "ubicacion": "historico_anual.FY2022",
-          "cita_corta": "FY2022: ingresos 133,600,000 y EBIT 43,100,000.",
-          "interpretacion": "Existe capacidad historica de generar rentabilidad alta."
+          "titulo": "Investor Presentation historica",
+          "fecha": "2026-02-18",
+          "ubicacion": "historico_anual FY2011-FY2012",
+          "cita_corta": "EBIT pasa de -1.8m (FY2011) a +1.4m (FY2012).",
+          "interpretacion": "Hubo punto de inflexion operativo comprobado."
         },
         {
           "tipo": "SOURCEPACK",
           "source_id": "SRC_008",
           "url": null,
-          "titulo": null,
+          "titulo": "Investor Presentation FY2024",
           "fecha": "2024-12-31",
-          "ubicacion": "historico_anual.FY2024",
-          "cita_corta": "FY2024 EBIT: 24,300,000, aun en fase de desaceleracion.",
-          "interpretacion": "El deterioro reciente no ha destruido la rentabilidad operativa."
+          "ubicacion": "Operating Results",
+          "cita_corta": "FY2024 EBIT 24.3m sobre ingresos 109.2m.",
+          "interpretacion": "El negocio sigue siendo rentable incluso tras desaceleracion."
         }
       ],
       "falsacion": {
-        "test": "FY2026 reporta EBIT <=0 o margen EBIT <=10% de forma anual.",
+        "test": "FY2026 reporta EBIT < 15,000,000 USD y net_income <= 0.",
         "ventana_meses": {
-          "min": 6,
+          "min": 9,
           "max": 18
         },
         "fuente_prevista": "earnings"
       }
     },
     {
-      "claim_id": "CLM_003",
+      "claim_id": "CLM_004",
       "tipo": "HECHO",
       "criticidad": "CRITICO",
-      "enunciado": "Incluso con caida de ventas, la conversion a caja sigue positiva y financia la transicion sin apalancamiento.",
-      "confianza_0_1": 0.8,
+      "enunciado": "La resiliencia de caja no ha desaparecido: FY2024 cerro con FCF positivo y H1-2025 mantuvo CFO positivo pese a menor escala.",
+      "confianza_0_1": 0.72,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_008",
+          "source_id": "TruthPack_v1",
           "url": null,
-          "titulo": null,
-          "fecha": "2024-12-31",
-          "ubicacion": "historico_anual.FY2024",
-          "cita_corta": "FY2024: CFO 17,600,000; CAPEX -2,400,000; FCF 15,200,000.",
-          "interpretacion": "La caja libre sigue siendo positiva en un ano debil."
+          "titulo": "ttm y metricas_derivadas",
+          "fecha": "2026-02-18",
+          "ubicacion": "ttm.fcf_usd y margen_operativo_pct",
+          "cita_corta": "FCF 15.2m; margen operativo 22.25%.",
+          "interpretacion": "La rentabilidad en caja sigue siendo material."
         },
         {
           "tipo": "SOURCEPACK",
           "source_id": "SRC_004",
           "url": null,
-          "titulo": null,
-          "fecha": null,
-          "ubicacion": "historico_trimestral.H1-2024/H1-2025",
-          "cita_corta": "H1-2025 CFO 4,100,000 vs H1-2024 2,900,000.",
-          "interpretacion": "La caja operativa semestral no se deteriora al ritmo de ingresos."
-        }
-      ],
-      "falsacion": {
-        "test": "Dos periodos consecutivos con FCF negativo o CFO/ingresos por debajo de 10%.",
-        "ventana_meses": {
-          "min": 6,
-          "max": 18
-        },
-        "fuente_prevista": "filing"
-      }
-    },
-    {
-      "claim_id": "CLM_004",
-      "tipo": "INFERENCIA",
-      "criticidad": "IMPORTANTE",
-      "enunciado": "El capital de trabajo elevado ofrece una palanca de self-help que puede sostener caja mientras madura la recuperacion comercial.",
-      "confianza_0_1": 0.72,
-      "impacto": "MEDIO",
-      "evidencias": [
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "TruthPack_v1",
-          "url": null,
-          "titulo": null,
-          "fecha": "2024-12-31",
-          "ubicacion": "metricas_derivadas.wc_change.working_capital_usd",
-          "cita_corta": "working_capital_usd: 24,523,000.",
-          "interpretacion": "Hay caja inmovilizada significativa respecto al tamano actual de ventas."
-        },
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "SRC_002",
-          "url": null,
-          "titulo": null,
-          "fecha": "2024-12-31",
-          "ubicacion": "balance_sheet_ultimo",
-          "cita_corta": "inventarios 18,816,000; cuentas_por_cobrar 9,251,000.",
-          "interpretacion": "La mejora de rotacion puede liberar caja sin depender solo de crecimiento."
-        }
-      ],
-      "falsacion": {
-        "test": "Inventarios/ingresos supera 20% y CFO anual cae por debajo de 12m.",
-        "ventana_meses": {
-          "min": 6,
-          "max": 18
-        },
-        "fuente_prevista": "filing"
-      }
-    },
-    {
-      "claim_id": "CLM_005",
-      "tipo": "HECHO",
-      "criticidad": "CRITICO",
-      "enunciado": "La brecha principal hoy es informativa, no de solvencia: el analisis de expectativas implicitas esta bloqueado por faltantes de valoracion.",
-      "confianza_0_1": 0.94,
-      "impacto": "ALTO",
-      "evidencias": [
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "ImpliedExpectations_v1",
-          "url": null,
-          "titulo": null,
+          "titulo": "Regulatory filing H1-2025",
           "fecha": "2026-02-18",
-          "ubicacion": "status/motivo_blocked",
-          "cita_corta": "BLOCKED por data_quality PARTIAL y falta enterprise_value_usd.",
-          "interpretacion": "No puede mapearse el precio actual a expectativas cuantitativas."
-        },
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "ImpliedExpectations_v1",
-          "url": null,
-          "titulo": null,
-          "fecha": "2026-02-18",
-          "ubicacion": "faltantes_criticos",
-          "cita_corta": "Faltan enterprise_value_usd, market_cap_usd y acciones_diluidas.",
-          "interpretacion": "El descuento por opacidad puede reducirse con disclosure completo."
+          "ubicacion": "historico_trimestral H1-2025",
+          "cita_corta": "H1-2025 CFO 4.1m con ingresos 39.8m.",
+          "interpretacion": "No hay evidencia de colapso inmediato de caja operativa."
         }
       ],
       "falsacion": {
-        "test": "Tras completar EV, market cap y acciones, el analisis implicito muestra expectativas ya exigentes y sin margen de rerating.",
-        "ventana_meses": {
-          "min": 3,
-          "max": 12
-        },
-        "fuente_prevista": "otro"
-      }
-    },
-    {
-      "claim_id": "CLM_006",
-      "tipo": "HIPOTESIS",
-      "criticidad": "IMPORTANTE",
-      "enunciado": "Una recuperacion parcial, sin volver a maximos historicos de ingresos, puede habilitar rerating si el margen supera 24% y se mantiene FCF positivo.",
-      "confianza_0_1": 0.62,
-      "impacto": "MEDIO",
-      "evidencias": [
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "TruthPack_v1",
-          "url": null,
-          "titulo": null,
-          "fecha": "2024-12-31",
-          "ubicacion": "metricas_derivadas.margen_operativo_pct",
-          "cita_corta": "margen_operativo_pct FY2024: 22.25.",
-          "interpretacion": "La distancia a un umbral de 24% es acotada."
-        },
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "SRC_007",
-          "url": null,
-          "titulo": null,
-          "fecha": "2022-12-31",
-          "ubicacion": "historico_anual.FY2022",
-          "cita_corta": "FY2022: EBIT 43,100,000 con ingresos 133,600,000.",
-          "interpretacion": "Existe evidencia historica de rentabilidad superior al nivel actual."
-        }
-      ],
-      "falsacion": {
-        "test": "En 18 meses no se alcanza margen >=24% y no se estabilizan ingresos frente a FY2025.",
+        "test": "FCF anualizado <= 10,000,000 USD y margen EBIT < 15% en el mismo ejercicio.",
         "ventana_meses": {
           "min": 6,
           "max": 18
         },
         "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La asimetria es no binaria porque depende de palancas operativas graduales (capex y capital de trabajo), no de un evento unico.",
+      "confianza_0_1": 0.69,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_008",
+          "url": null,
+          "titulo": "FY2024 Cash Flow",
+          "fecha": "2024-12-31",
+          "ubicacion": "capex e ingresos FY2024",
+          "cita_corta": "capex -2.4m sobre ingresos 109.2m (~2.2%).",
+          "interpretacion": "La intensidad de capital observada es baja."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": "metricas_derivadas",
+          "fecha": "2026-02-18",
+          "ubicacion": "working_capital_usd",
+          "cita_corta": "working_capital_usd 24,523,000.",
+          "interpretacion": "Hay palanca cuantificable para mejorar conversion de caja."
+        }
+      ],
+      "falsacion": {
+        "test": "capex/ingresos supera 5% sin mejora de ingresos y el capital de trabajo sigue absorbiendo caja.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "kpi_operativo"
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "Existe opcionalidad de retorno por accion si se formaliza una politica de capital consistente con la caja neta actual.",
+      "confianza_0_1": 0.58,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_008",
+          "url": null,
+          "titulo": "FY2024 Cash Flow",
+          "fecha": "2024-12-31",
+          "ubicacion": "cff_usd FY2024",
+          "cita_corta": "cff_usd FY2024 = -19.3m.",
+          "interpretacion": "Ya hubo retornos/egresos financieros materiales."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_002",
+          "url": null,
+          "titulo": "Annual Report FY2023",
+          "fecha": "2023-12-31",
+          "ubicacion": "cff_usd FY2023",
+          "cita_corta": "cff_usd FY2023 = -22.576m.",
+          "interpretacion": "La compania tiene historial reciente de salida de caja a financiacion."
+        }
+      ],
+      "falsacion": {
+        "test": "No se define marco de asignacion y las acciones diluidas suben >5% interanual.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        },
+        "fuente_prevista": "filing"
       }
     }
   ],
   "predicciones_calibracion": [
     {
       "pred_id": "PRED_001",
-      "descripcion": "ImpliedExpectations cambia de BLOCKED a estado ejecutable con EV y market cap completos.",
-      "probabilidad_0_1": 0.66,
-      "ventana_meses": {
-        "min": 3,
-        "max": 12
-      },
-      "criterio_validacion": "Campo status distinto de BLOCKED y enterprise_value_usd no nulo.",
-      "fuente_prevista": "otro"
-    },
-    {
-      "pred_id": "PRED_002",
-      "descripcion": "FY2026 reporta ingresos al menos iguales a FY2025 (>= 88,900,000).",
-      "probabilidad_0_1": 0.49,
+      "descripcion": "FCF anualizado se mantiene >= 12,000,000 USD en dos publicaciones consecutivas.",
+      "probabilidad_0_1": 0.62,
       "ventana_meses": {
         "min": 6,
         "max": 18
       },
-      "criterio_validacion": "Ingresos FY2026 publicados >= 88,900,000.",
+      "criterio_validacion": "CFO-CAPEX anualizado >= 12,000,000 USD en dos cortes seguidos.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "FY2026 ingresos reportados >= 84,000,000 USD.",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "El ingreso anual FY2026 publicado es >= 84,000,000 USD.",
       "fuente_prevista": "earnings"
     },
     {
       "pred_id": "PRED_003",
-      "descripcion": "FY2026 mantiene CFO >= 15,000,000 y FCF anual positivo.",
-      "probabilidad_0_1": 0.58,
+      "descripcion": "Margen EBIT FY2026 >= 20%.",
+      "probabilidad_0_1": 0.56,
       "ventana_meses": {
-        "min": 6,
+        "min": 9,
         "max": 18
       },
-      "criterio_validacion": "CFO anual >= 15,000,000 y (CFO - CAPEX) > 0.",
+      "criterio_validacion": "EBIT/ingresos FY2026 >= 0.20.",
       "fuente_prevista": "10-K"
     },
     {
       "pred_id": "PRED_004",
-      "descripcion": "Inventarios sobre ingresos cae por debajo de 18% en el siguiente cierre anual.",
-      "probabilidad_0_1": 0.55,
+      "descripcion": "Capex/ingresos se mantiene <= 3.5% en cada reporte del periodo.",
+      "probabilidad_0_1": 0.68,
       "ventana_meses": {
         "min": 6,
-        "max": 18
+        "max": 24
       },
-      "criterio_validacion": "inventarios_usd / ingresos_usd < 0.18 en reporte anual.",
+      "criterio_validacion": "capex_usd absoluto / ingresos_usd <= 0.035 en cada corte reportado.",
       "fuente_prevista": "kpi_operativo"
     },
     {
       "pred_id": "PRED_005",
-      "descripcion": "La empresa conserva deuda financiera cero y caja >= 25,000,000 en el proximo anual.",
-      "probabilidad_0_1": 0.7,
+      "descripcion": "deuda_total_usd permanece en 0 y caja_usd >= 20,000,000 USD.",
+      "probabilidad_0_1": 0.74,
       "ventana_meses": {
         "min": 6,
-        "max": 18
+        "max": 24
       },
-      "criterio_validacion": "deuda_total_usd = 0 y caja_usd >= 25,000,000 en cierre anual.",
+      "criterio_validacion": "deuda_total_usd = 0 y caja_usd >= 20,000,000 en cada cierre anual/semestral.",
       "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "Se publica FY2025 auditado completo antes del siguiente cierre anual.",
+      "probabilidad_0_1": 0.41,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Documento anual incluye estado de resultados, balance y cash flow completos para FY2025.",
+      "fuente_prevista": "otro"
     }
   ],
   "peticiones_de_fuentes": [
     {
       "prioridad": "ALTA",
-      "item": "Market cap, enterprise value y acciones diluidas en la misma fecha del precio.",
-      "por_que_importa": "Permite cuantificar multiples implicitos y retorno esperado sin suposiciones arbitrarias.",
-      "como_obtenerlo": "Snapshot de mercado oficial + nota de capital social/EPS diluido del filing anual."
+      "item": "FY2025 auditado completo con estado de resultados, balance y cash flow.",
+      "por_que_importa": "Sin ese set no se puede validar durabilidad real de FCF ni puentes contables.",
+      "como_obtenerlo": "IR annual report FY2025; secciones Financial Statements + Notes."
     },
     {
       "prioridad": "ALTA",
-      "item": "Estados auditados FY2025 completos (P&L, balance y flujo de caja).",
-      "por_que_importa": "Confirma si la contraccion de ingresos ya deterioro estructuralmente margenes y caja.",
-      "como_obtenerlo": "Annual report FY2025 auditado, secciones de estados financieros y notas."
+      "item": "Serie trimestral Q1-Q4 con ingresos, EBIT, CFO, CAPEX, inventarios, AR y AP.",
+      "por_que_importa": "Permite confirmar si la estabilizacion es estructural o solo efecto de corte semestral.",
+      "como_obtenerlo": "Results centre y filings regulatorios trimestrales; tablas de working capital."
     },
     {
       "prioridad": "MEDIA",
-      "item": "Desglose de CFF FY2024-FY2025 (dividendos, recompras, otros).",
-      "por_que_importa": "Aclara si la salida de caja responde a asignacion de capital o a factores no recurrentes.",
-      "como_obtenerlo": "Estado de flujos detallado y nota de patrimonio."
+      "item": "Desglose de CFF entre dividendos, recompras y otros usos.",
+      "por_que_importa": "Aclara si el retorno al accionista es recurrente y sostenible con FCF.",
+      "como_obtenerlo": "Notas de cash flow y capital allocation en annual/interim report."
     },
     {
       "prioridad": "MEDIA",
-      "item": "KPIs de circulante (DIO, DSO, DPO) y aging de inventarios.",
-      "por_que_importa": "Valida la palanca de liberacion de caja y el riesgo de obsolescencia.",
-      "como_obtenerlo": "Notas de working capital e inventarios en filing anual/semestral."
+      "item": "Detalle de acciones diluidas y compensacion basada en acciones.",
+      "por_que_importa": "Reduce incertidumbre sobre riesgo de dilucion economica.",
+      "como_obtenerlo": "Nota de EPS, capital social y SBC en filing anual."
     },
     {
       "prioridad": "MEDIA",
-      "item": "Desglose de SG&A fijo vs variable y por funcion.",
-      "por_que_importa": "Permite estimar con mas precision la velocidad de recuperacion de margen operativo.",
-      "como_obtenerlo": "MD&A, presentacion de resultados y notas de gastos operativos."
+      "item": "Descripcion formal de segmentos/lineas de negocio y backlog/order intake.",
+      "por_que_importa": "Sin segmentacion se dificulta estimar velocidad de recuperacion de ingresos.",
+      "como_obtenerlo": "Presentaciones de resultados y MD&A con desglose por unidad/geografia."
     }
   ],
   "payload": {
     "payload_version": "BullPayload_v1",
     "contenido": {
       "tesis_5_lineas": [
-        "SOM opera un negocio historicamente rentable que en FY2025 entra en contraccion de ingresos, pero conserva caja operativa positiva.",
-        "La infravaloracion potencial nace de extrapolar la caida reciente y castigar la opacidad de valoracion, no de un balance fragil.",
-        "El catalizador de cierre de gap es triple: disclosure completo de EV/capitalizacion, estabilizacion de ventas y mejora gradual de margen.",
-        "El margen de seguridad proviene de caja neta (29.5m), deuda financiera cero y FCF positivo (15.2m en FY2024).",
-        "Lo critico a vigilar es si la debilidad comercial se vuelve estructural o si el circulante deja de liberar caja."
+        "SOM es una empresa operativamente rentable y generadora de caja, aunque el input no detalla su sector/producto con precision.",
+        "Con EV/EBIT 3.61x y EV/FCF 5.78x, el precio actual descuenta un deterioro severo y prolongado del FCF.",
+        "El cierre del gap puede venir de estabilizar FCF y margen, mas mejora de visibilidad de reportes, sin exigir crecimiento agresivo.",
+        "El margen de seguridad proviene de caja neta de 29.5m, deuda financiera cero y FCF FY2024 de 15.2m.",
+        "Hay que vigilar tres riesgos: caida persistente de ingresos, empeoramiento de conversion EBIT->CFO y opacidad en FY2025-FY2026."
       ],
       "variant_perception": {
-        "que_cree_el_mercado": "Con ImpliedExpectations en BLOCKED, la lectura dominante es que la caida de ingresos de FY2025 puede ser estructural y que la falta de EV/market cap impide defender valor razonable.",
-        "por_que_podria_estarse_equivocando": "El mercado puede estar mezclando dos riesgos distintos: deterioro operativo y opacidad informativa. La evidencia actual sugiere que la solvencia sigue fuerte (caja neta, deuda 0, FCF positivo), por lo que una mejora parcial en margen/circulante puede sostener valor aun sin rebote completo de ventas. Si ademas se normaliza disclosure, el descuento por incertidumbre puede comprimirse en 6-30 meses.",
-        "variable_critica_principal": "MARGEN_OPERATIVO",
+        "que_cree_el_mercado": "Segun ImpliedExpectations, el EV actual solo cuadra con contraccion de FCF de doble digito anual durante 5 anos (-21.84% a -11.38%).",
+        "por_que_podria_estarse_equivocando": "Ese precio mezcla dos riesgos distintos: caida ciclica de ingresos y deterioro estructural permanente. Si SOM mantiene FCF de doble digito bajo, evita tension de balance y reporta con mas consistencia, el descuento por escenario extremo puede comprimirse aunque el crecimiento sea bajo. El gap se cerraria por menor probabilidad de value trap y rerating de multiples deprimidos.",
+        "variable_critica_principal": "CRECIMIENTO_FCF",
         "drivers_clave": [
           {
             "driver": "FCF",
-            "argumento": "Mientras FCF siga positivo en fase de contraccion, disminuye el riesgo de dilucion o financiacion defensiva.",
+            "argumento": "La clave no es crecer rapido, sino demostrar que FCF no colapsa por debajo del rango implicito por mercado.",
             "observables_en_6_12_meses": [
-              "CFO anual >= 15m.",
-              "FCF semestral y anual > 0.",
-              "Caja de cierre >= 25m."
+              "FCF anualizado >= 12m en dos reportes consecutivos.",
+              "Margen FCF >= 10%-12% en cierres oficiales.",
+              "CFO no cae por debajo de 12m anualizado."
             ]
           },
           {
             "driver": "WC",
-            "argumento": "Con working capital de 24.5m, una mejora de rotacion puede financiar la transicion operativa.",
+            "argumento": "El capital de trabajo actual ofrece palanca para sostener caja sin depender de expansion de ventas.",
             "observables_en_6_12_meses": [
-              "Inventarios/ingresos por debajo de 18%.",
-              "DSO y DIO en descenso interanual.",
-              "CFO creciendo mas rapido que EBIT."
+              "Inventarios/ingresos deja de subir y converge a <= 20%.",
+              "AR crece por debajo de ingresos o se estabiliza.",
+              "CFO/EBIT mejora frente a 2024."
             ]
           },
           {
-            "driver": "MARGEN",
-            "argumento": "El rerating requiere demostrar que la compresion de margen es reversible y no estructural.",
+            "driver": "CAPEX",
+            "argumento": "Capex bajo y disciplinado protege FCF mientras se normaliza la demanda.",
             "observables_en_6_12_meses": [
-              "EBIT/ingresos >= 24% en al menos un corte reportado.",
-              "SG&A/ingresos en tendencia descendente.",
-              "EBIT deja de caer mas rapido que ingresos."
+              "capex/ingresos <= 3.5% de forma sostenida.",
+              "No aparecen picos de inversion sin explicacion de retorno.",
+              "FCF se mantiene positivo tras capex."
             ]
           },
           {
             "driver": "MULTIPLO",
-            "argumento": "Sin EV/market cap/acciones no hay ancla de valor; al publicarse, puede cerrarse el descuento por opacidad.",
+            "argumento": "Con EV/FCF y EV/EBIT comprimidos, una mejora moderada de visibilidad puede reratear el activo.",
             "observables_en_6_12_meses": [
-              "enterprise_value_usd y market_cap_usd no nulos.",
-              "acciones_diluidas publicadas y reconciliables con precio.",
-              "ImpliedExpectations con status distinto de BLOCKED."
+              "Publicacion de FY2025 auditado completo.",
+              "Disminucion de dependencias de FY0 fallback.",
+              "Expansion de EV/FCF por encima de 7x con FCF estable."
             ]
           }
         ]
       },
       "construccion_de_asimetria": {
         "por_que_no_es_especulativo": [
-          "No depende de un evento binario regulatorio ni de refinanciacion urgente.",
-          "La compania parte con deuda financiera cero y caja neta positiva.",
-          "Hay evidencia de FCF positivo en FY2024 pese a caida de ingresos.",
-          "Existe historial largo de EBIT positivo (FY2012-FY2024).",
-          "Los catalizadores clave son medibles con filings y KPIs operativos."
+          "La tesis parte de multiples actuales y cash flows observados, no de crecimiento no demostrado.",
+          "El balance sin deuda financiera reduce riesgo de evento binario de refinanciacion.",
+          "El FCF base positivo permite sostener espera de catalizadores operativos.",
+          "Las palancas clave (capex, circulante, disclosure) son medibles y monitoreables cada reporte.",
+          "Se definieron falsaciones explicitas para evitar narrativa no refutable."
         ],
-        "si_el_catalizador_se_retrasa": "Si la normalizacion de disclosure o la mejora de margen tardan, el caso base no implica ruina inmediata por el colchon de caja y ausencia de deuda financiera. El riesgo principal seria estancamiento de cotizacion, no quiebra, salvo deterioro simultaneo de ingresos y CFO.",
+        "si_el_catalizador_se_retrasa": "Si la mejora tarda, el caso no necesariamente se rompe mientras FCF siga positivo de forma consistente y la caja neta permanezca holgada. El costo de espera aumenta si no mejora la transparencia, por lo que el seguimiento de disclosure es condicion necesaria.",
         "opcionalidad_sana": [
-          "Liberacion parcial de circulante (inventarios/cobros) puede sostener FCF sin crecimiento fuerte.",
-          "Recuperar margen hacia 24-27% ya mejora significativamente la tesis sin exigir volver a maximos de 2021-2022.",
-          "Reducir opacidad de EV y acciones puede habilitar rerating por compresion de prima de incertidumbre.",
-          "La simple estabilizacion de ingresos sobre FY2025 puede cambiar la narrativa de caida estructural."
+          "Formalizacion de politica de asignacion de capital que eleve retorno por accion.",
+          "Compresion del descuento por opacidad al publicar FY2025 completo y series trimestrales mas ricas.",
+          "Recuperacion parcial de ingresos hacia niveles intermedios sin volver al pico FY2023.",
+          "Mejora de conversion EBIT->CFO por gestion de circulante."
         ]
       },
       "escenarios": [
         {
           "scenario_id": "BASE",
-          "descripcion": "La compania frena la contraccion, mantiene FCF positivo y muestra mejora moderada de eficiencia. El gap no se cierra completo, pero disminuye el descuento por fragilidad percibida. El cierre es parcial y depende de pruebas operativas y de disclosure.",
+          "descripcion": "La compania no vuelve al pico de 2023, pero evita nuevo deterioro profundo. Ingresos se estabilizan cerca de FY2025, margenes siguen rentables y FCF se sostiene en doble digito bajo. El mercado reduce parte del descuento extremo de FCF.",
           "ventana_meses": {
             "min": 6,
-            "probable": 12,
+            "probable": 15,
             "max": 24
           },
-          "probabilidad_0_1": 0.45,
+          "probabilidad_0_1": 0.55,
           "hipotesis_fundamentales": [
             {
               "variable": "INGRESOS",
               "direccion": "ESTABLE",
-              "rango": "FY2026 >= FY2025 (88.9m) y por debajo de FY2024 (109.2m).",
-              "justificacion": "Asume desaceleracion de la caida, no rebote completo."
+              "rango": "FY2026 en banda 84m-92m (anclado a FY2025 reportado 88.9m).",
+              "justificacion": "No exige recuperacion fuerte; solo desaceleracion de la caida."
             },
             {
               "variable": "MARGEN_OPERATIVO",
-              "direccion": "MEJORA",
-              "rango": "Desde 22.25% FY2024 hacia banda 23-24%.",
-              "justificacion": "Requiere disciplina de gastos y mejor absorcion de costes."
+              "direccion": "ESTABLE",
+              "rango": "19%-22% (FY2024: 22.25%).",
+              "justificacion": "Permite absorber menor escala sin romper economia unitaria."
             },
             {
               "variable": "FCF",
               "direccion": "ESTABLE",
-              "rango": "FCF anual positivo, cercano al nivel FY2024 (15.2m).",
-              "justificacion": "Caja operativa e inventarios permiten sostener conversion."
+              "rango": "12m-15m anualizado (FY2024: 15.2m).",
+              "justificacion": "Compatible con capex bajo y ajuste de circulante gradual."
+            },
+            {
+              "variable": "CAPEX",
+              "direccion": "ESTABLE",
+              "rango": "2.0%-3.5% de ingresos.",
+              "justificacion": "Historico reciente soporta intensidad de capital contenida."
             },
             {
               "variable": "WC",
               "direccion": "MEJORA",
-              "rango": "Menor intensidad de inventarios sobre ingresos frente a FY2024.",
-              "justificacion": "El punto de partida de circulante es alto para el nivel de ventas."
-            },
-            {
-              "variable": "COSTE_DEUDA",
-              "direccion": "ESTABLE",
-              "rango": "Sin deuda financiera relevante (deuda_total_usd = 0).",
-              "justificacion": "No hay presion de refinanciacion que fuerce destruccion de valor."
+              "rango": "Inventarios y AR dejan de crecer por encima de ventas.",
+              "justificacion": "La palanca de circulante es material sobre CFO."
             }
           ],
           "mecanismo_de_revaloracion": {
-            "tipo": "EARNINGS_INFLECTION",
-            "explicacion": "La revalorizacion vendria por menor riesgo percibido de deterioro estructural: estabilizacion de ventas, margen algo mejor y persistencia de caja positiva.",
+            "tipo": "RE_RATING",
+            "explicacion": "Con FCF sostenido y menor incertidumbre de continuidad, el mercado reduce prima de riesgo y mueve el multiple hacia banda menos distresada.",
             "que_debe_observarse": [
-              "Dos cortes consecutivos con menor caida interanual de ingresos.",
-              "EBIT/ingresos >= 23% en al menos un reporte anual o semestral.",
-              "FCF > 0 y CFO/ingresos >= 14%.",
-              "Inventarios/ingresos en tendencia descendente."
+              "FCF anualizado >= 12m en dos cortes.",
+              "Publicacion de FY2025 completo.",
+              "Margen EBIT >= 19%-20%.",
+              "Sin deterioro de caja neta por debajo de 20m."
             ]
           },
           "valoracion_indicativa": {
-            "metodo": "NO_DISPONIBLE",
+            "metodo": "MULTIPLO",
             "inputs_usados": [
-              "enterprise_value_usd: null",
-              "market_cap_usd: null",
-              "acciones_diluidas: null",
-              "fcf_usd FY2024: 15200000"
+              "EV actual: 87.834m",
+              "FCF base: 13m-15m",
+              "EV/FCF objetivo base: 7x-8x",
+              "Caja neta de referencia: 27m-30m"
             ],
             "supuestos_explicitos": [
-              "Sin EV o market cap observables no existe metodo fiable para retorno 12-24m.",
-              "Ancla conservadora aplicada: no se estima upside hasta completar EV, market cap y acciones."
+              "Ancla conservadora: EV/FCF (menor upside que EV/EBIT con mismos supuestos).",
+              "Sin deuda financiera nueva material.",
+              "Si FCF cae por debajo de 12m sostenido, esta valoracion pierde validez."
             ],
             "resultado_retorno_12_24m_pct_rango": {
-              "min": null,
-              "base": null,
-              "max": null
+              "min": 1,
+              "base": 13,
+              "max": 28
             },
-            "nota": "No se cuantifica retorno BASE para evitar inventar multiples. La separacion entre tesis operativa y retorno queda justificada por faltantes criticos de valoracion."
+            "nota": "Retorno BASE derivado mecanicamente de supuestos de FCF y multiple ancla, sin haircut discrecional adicional. Falta FY2025 auditado para reducir error de estimacion."
           }
         },
         {
           "scenario_id": "BULL",
-          "descripcion": "Se cierra gran parte del gap porque coincide una mejora operativa visible con transparencia de valoracion completa. El mercado deja de extrapolar el peor tramo de 2025 y asigna menor descuento por opacidad. El rerating ocurre sobre una base de caja aun robusta.",
+          "descripcion": "La contraccion de ingresos se revierte parcialmente, margenes vuelven a zona alta historica reciente y el mercado deja de tratar a SOM como value trap. Se combina inflexion operativa con rerating de multiple.",
           "ventana_meses": {
             "min": 9,
             "probable": 18,
@@ -507,100 +509,100 @@
             {
               "variable": "INGRESOS",
               "direccion": "MEJORA",
-              "rango": "Recuperacion parcial hacia FY2024 (109.2m) desde FY2025 (88.9m).",
-              "justificacion": "Basta recuperar parte de la caida para cambiar narrativa de riesgo."
+              "rango": "95m-105m (aun por debajo de FY2023: 120.699m).",
+              "justificacion": "Implica recuperacion parcial, no vuelta al pico."
             },
             {
               "variable": "MARGEN_OPERATIVO",
               "direccion": "MEJORA",
-              "rango": ">=24% con potencial de aproximacion a 25-27%.",
-              "justificacion": "Combinacion de mejor mix, escala y disciplina de costes."
+              "rango": "22%-25%.",
+              "justificacion": "Requiere mejor mix y disciplina de costes."
             },
             {
               "variable": "FCF",
               "direccion": "MEJORA",
-              "rango": "FCF supera FY2024 (15.2m) y se acerca a banda FY2023 (22.7m).",
-              "justificacion": "Mayor margen y menor friccion de circulante amplifican caja libre."
+              "rango": "16m-19m anualizado.",
+              "justificacion": "Combinacion de margen operativo y conversion de caja mas solida."
+            },
+            {
+              "variable": "CAPEX",
+              "direccion": "ESTABLE",
+              "rango": "2%-3% de ingresos.",
+              "justificacion": "Mantener capex contenido sostiene la expansion del FCF."
             },
             {
               "variable": "WC",
               "direccion": "MEJORA",
-              "rango": "Inventarios/ingresos por debajo del nivel FY2024 (~17.2%).",
-              "justificacion": "La liberacion de capital de trabajo acelera el perfil de caja."
-            },
-            {
-              "variable": "OTRO",
-              "direccion": "MEJORA",
-              "rango": "ImpliedExpectations deja de estar BLOCKED con EV/market cap/acciones completos.",
-              "justificacion": "Se reduce la prima de opacidad y se habilita comparabilidad de multiples."
+              "rango": "Liberacion neta de circulante frente a FY2024.",
+              "justificacion": "Acelera conversion de EBIT a CFO."
             }
           ],
           "mecanismo_de_revaloracion": {
-            "tipo": "RE_RATING",
-            "explicacion": "El rerating se activa cuando el mercado puede medir expectativas implicitas con datos completos y confirma una inflexion operativa creible.",
+            "tipo": "EARNINGS_INFLECTION",
+            "explicacion": "Al confirmar inflexion en ingresos/margen y FCF, el mercado invalida la tesis de contraccion estructural y paga un multiple mas cercano a normalidad.",
             "que_debe_observarse": [
-              "status de ImpliedExpectations distinto de BLOCKED.",
-              "enterprise_value_usd, market_cap_usd y acciones_diluidas disponibles y consistentes.",
-              "Margen operativo >=24% con FCF positivo sostenido.",
-              "Ingresos FY2026 al menos en estabilizacion frente a FY2025."
+              "Ingresos en crecimiento interanual positivo.",
+              "FCF >= 16m anualizado.",
+              "EV/FCF reexpande a 9x-10x.",
+              "Disclosure trimestral mas completo y consistente."
             ]
           },
           "valoracion_indicativa": {
-            "metodo": "NO_DISPONIBLE",
+            "metodo": "MULTIPLO",
             "inputs_usados": [
-              "enterprise_value_usd: null",
-              "market_cap_usd: null",
-              "acciones_diluidas: null",
-              "margen_operativo_pct FY2024: 22.25"
+              "EV actual: 87.834m",
+              "FCF bull: 16m-19m",
+              "EV/FCF objetivo bull: 9x-10x",
+              "Caja neta de referencia: 26m-32m"
             ],
             "supuestos_explicitos": [
-              "No se usa metodo optimista por conveniencia narrativa.",
-              "Sin EV y market cap no existe ancla cuantitativa fiable para retorno bull."
+              "El rerating exige evidencia operativa, no solo narrativa.",
+              "No se asume apalancamiento financiero para elevar retorno.",
+              "Si no mejora transparencia de reportes, el multiple objetivo debe bajarse."
             ],
             "resultado_retorno_12_24m_pct_rango": {
-              "min": null,
-              "base": null,
-              "max": null
+              "min": 45,
+              "base": 66,
+              "max": 89
             },
-            "nota": "Retorno bull no estimable sin inventar. Prioridad: completar variables de valoracion y re-ejecutar implied expectations."
+            "nota": "Escenario condicionado a confirmacion de inflexion operativa y calidad de disclosure; sin eso, no aplica el multiple de 9x-10x."
           }
         }
       ],
       "lo_que_tendria_que_ser_cierto_para_estar_equivocados": [
-        "Que la caida de ingresos sea estructural y FY2026 quede por debajo de 85m.",
-        "Que el margen EBIT caiga a <=15% pese a acciones de eficiencia.",
-        "Que el CFO se vuelva negativo en dos periodos consecutivos.",
-        "Que inventarios/ingresos suba por encima de 20% con evidencia de obsolescencia.",
-        "Que aparezca deuda financiera material (>10m) o la caja caiga por debajo de 18m.",
-        "Que, aun con disclosure completo, no aparezca ningun descuento de valoracion frente a fundamentales."
+        "Que el FCF estructural real este por debajo de 8m y no sea recuperable con disciplina operativa.",
+        "Que la caida de ingresos siga >15% anual en FY2026 sin capacidad de defensa de margen.",
+        "Que el capital de trabajo siga absorbiendo caja pese a menor actividad (inventarios/AR empeorando).",
+        "Que aparezca deuda financiera material o la caja neta caiga por debajo de 15m rapidamente.",
+        "Que FY2025 auditado revele deterioro de calidad de resultados no visible en el set actual."
       ],
       "preguntas_criticas_abiertas": [
-        "Cual fue el driver dominante de la caida FY2025: volumen, precio, mix o perdida de clientes?",
-        "Cual es el market_cap_usd exacto y el numero de acciones diluidas en la fecha del precio 210?",
-        "Que parte del CFF negativo FY2024 responde a dividendos/recompras vs otros conceptos?",
-        "Cual es el aging de inventarios y la politica de provisiones por obsolescencia?",
-        "Que porcentaje de SG&A es fijo y que porcentaje variable?",
-        "Existe guidance FY2026 verificable para ingresos, margen y caja?"
+        "Cual es el nivel de FCF verdaderamente recurrente tras normalizar circulante y capex?",
+        "Que parte de la caida 2024-2025 es ciclica y que parte es estructural por perdida de demanda?",
+        "Existe politica explicita de asignacion de capital con piso de caja y criterios de recompra/dividendo?",
+        "Como evolucionan inventarios y AR trimestralmente en relacion con ventas y margenes?",
+        "El margen EBIT de 20%+ es sostenible con la escala de ingresos post-caida?",
+        "Cuando estara disponible FY2025 auditado completo y con que granularidad trimestral posterior?"
       ],
       "recomendacion_para_arbitro": {
-        "conviccion_preliminar_0_5": 3.0,
+        "conviccion_preliminar_0_5": 3.4,
         "riesgo_de_sesgo_confirmacion": "MEDIO",
         "en_que_no_debe_ceder_el_arbitro": [
-          "Exigir EV, market cap y acciones diluidas consistentes antes de aceptar cualquier multiple objetivo.",
-          "Exigir FY2025 auditado completo para validar calidad de beneficios y de caja.",
-          "Mantener kill criteria de caja y CFO aunque mejore la narrativa comercial.",
-          "No aceptar rerating por relato sin evidencia de margen y circulante en datos reportados."
+          "Exigir evidencia de FCF sostenido (>=12m) antes de aceptar rerating estructural.",
+          "No aceptar supuestos de crecimiento de ingresos sin respaldo en reportes oficiales.",
+          "Exigir FY2025 auditado completo para validar calidad contable y puentes de caja.",
+          "Mantener kill criteria de balance/caja y de deterioro operativo sin flexibilizar."
         ]
       }
     }
   },
   "log": {
     "limitaciones": [
-      "ImpliedExpectations permanece BLOCKED por falta de EV/market cap/acciones diluidas.",
-      "TruthPack tiene data_quality PARTIAL y warning de cobertura core.",
-      "FY2025 llega como IR_NEWS con estados financieros incompletos.",
-      "No hay market cap ni EV para cuantificar valoracion indicativa fiable.",
-      "Serie trimestral incompleta (solo H1) limita la velocidad de confirmacion."
+      "El input no detalla modelo de negocio/segmentos, solo datos financieros.",
+      "FY2025 llega parcial (principalmente ingresos) y limita precision de normalizacion.",
+      "Cobertura trimestral incompleta y uso de FY0 fallback para TTM elevan incertidumbre.",
+      "No hay detalle completo de acciones diluidas/SBC para riesgo de dilucion economica.",
+      "La valoracion indicativa depende de supuestos operativos que deben validarse con nuevos filings."
     ],
     "autochequeos": {
       "sin_metricas_inventadas": true,
