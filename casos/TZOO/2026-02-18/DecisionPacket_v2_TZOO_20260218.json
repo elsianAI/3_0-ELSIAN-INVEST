@@ -1,0 +1,521 @@
+{
+  "version_esquema": "DecisionPacket_v2",
+  "backward_compatible_with": "DecisionPacket_v1",
+  "caso_id": "CASE_20260218_TZOO",
+  "fecha_corte": "2026-02-18",
+  "empresa": {
+    "ticker": "TZOO",
+    "nombre": "Travelzoo",
+    "bolsa": "NASDAQ",
+    "pais": "US",
+    "sector": "Communication Services",
+    "industria": "Internet Content & Information"
+  },
+  "input_refs": {
+    "sources_pack_caso_id": "CASE_20260218_TZOO",
+    "truth_pack_caso_id": "CASE_20260218_TZOO",
+    "implied_expectations_caso_id": "CASE_20260218_TZOO",
+    "agent_reports": [
+      {
+        "agent_role": "BULL",
+        "agent_nombre": "BULL_v1",
+        "report_ref": "AgentReport_v1_BULL",
+        "confianza_0_1": 0.61
+      },
+      {
+        "agent_role": "RED_TEAM",
+        "agent_nombre": "RED_TEAM_v1",
+        "report_ref": "AgentReport_v1_REDTEAM",
+        "confianza_0_1": 0.79
+      },
+      {
+        "agent_role": "CATALYST",
+        "agent_nombre": "CATALYST_v1",
+        "report_ref": "AgentReport_v1_CATALYST",
+        "confianza_0_1": 0.71
+      },
+      {
+        "agent_role": "FORENSIC",
+        "agent_nombre": "FORENSIC_SCORING_v1",
+        "report_ref": "AgentReport_v1_FORENSIC",
+        "confianza_0_1": 0.67
+      }
+    ]
+  },
+  "charter": {
+    "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+    "horizonte_meses": {
+      "min": 6,
+      "max": 30
+    },
+    "restricciones_no_especulativo": [
+      "Evitar tesis binaria",
+      "Evitar dependencia de financiacion salvadora",
+      "Exigir supervivencia 12-24 meses razonable",
+      "Exigir catalizador no binario y medible"
+    ]
+  },
+  "resumen_ejecutivo": {
+    "decision": "WATCHLIST",
+    "tamaño_recomendado_pct_cartera": 0,
+    "confianza_global_0_1": 0.70,
+    "racional_5_lineas": [
+      "La valoración superficial (P/FCF FY24 ~3x) es atractiva, pero anclada en un pasado (2024) que diverge del deterioro operativo severo de 2025 (margen EBIT cayendo a ~2%).",
+      "Existe una opacidad crítica en la estructura de capital (falta deuda total y EV) que bloquea el cálculo de expectativas implícitas y eleva el riesgo de 'blind side'.",
+      "La supervivencia a corto plazo es condicional (Score 2/5); el consumo de caja (CFF > CFO) y el bajo patrimonio reducen el margen de seguridad.",
+      "La tesis Bull de reversión de costos (COGS/SG&A) es plausible pero carece de confirmación en los últimos 2 trimestres.",
+      "Se requiere monitorear 1-2 trimestres para validar: 1) Reporte de deuda/EV, 2) Estabilización de margen EBIT >10%, 3) Freno al drenaje de caja."
+    ],
+    "lo_mas_importante_ahora": [
+      "Confirmar si la falta de reporte de deuda total es un error de extracción o una política de opacidad (Filing Check).",
+      "Monitorear márgenes EBIT en el próximo Q: si se mantiene <5%, la tesis de valor se rompe.",
+      "Vigilar la posición de caja neta: si cae de $10M, el riesgo de dilución se dispara."
+    ],
+    "principales_riesgos": [
+      "Value Trap: Múltiplo bajo óptico con fundamentales en deterioro acelerado.",
+      "Opacidad de Balance: Pasivos totales ($50M) vs Patrimonio ($4M) con composición de deuda desconocida.",
+      "Capital Allocation: Salidas de caja financiera (CFF) superando la generación operativa (CFO)."
+    ]
+  },
+  "decision_probabilistica": {
+    "probabilidad_exito_0_1": 0.45,
+    "retorno_esperado_ponderado_pct": 2.5,
+    "escenarios_ponderados": {
+      "base": {
+        "probabilidad_0_1": 0.40,
+        "retorno_estimado_pct": 10
+      },
+      "bull": {
+        "probabilidad_0_1": 0.15,
+        "retorno_estimado_pct": 110
+      },
+      "bear": {
+        "probabilidad_0_1": 0.45,
+        "retorno_estimado_pct": -40
+      }
+    },
+    "sizing_kelly": {
+      "kelly_crudo_pct": 0,
+      "factor_ajuste_confianza": 0.49,
+      "kelly_ajustado_pct": 0,
+      "tope_maximo_pct": 10,
+      "sizing_preliminar_pct": 0,
+      "sizing_final_pct": 0,
+      "nota": "Kelly negativo o cero debido a probabilidad de éxito < 50% y downside material (Value Trap)."
+    },
+    "intervalo_confianza_90_pct": {
+      "percentil_5": -48,
+      "percentil_50": 2.5,
+      "percentil_95": 88
+    },
+    "conviccion_0_1": 0.70,
+    "ratio_asimetria": 2.75,
+    "_comment_ratio_asimetria": "Upside Bull (+110) vs Bear Downside (-40). Asimetría teórica alta, pero bloqueada por probabilidad de éxito baja.",
+    "expected_value_anualizado_pct": 1.7,
+    "decision_categorica": "WATCHLIST"
+  },
+  "analisis_sensibilidad": [
+    {
+      "assumption_id": "A-002",
+      "variable": "margen_operativo_2026_pct",
+      "valor_base": 12.5,
+      "rango_test": {
+        "min": 2.0,
+        "max": 18.0,
+        "paso": 2.0
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": -60,
+        "si_max": 80
+      },
+      "impacto_en_decision": "Si margen < 8% sostenido, DESCARTAR. Si > 15%, INVERTIR.",
+      "nota": "La sensibilidad al margen es extrema dada la estructura de costos fijos y bajo patrimonio."
+    }
+  ],
+  "gates": {
+    "data_quality_gate": {
+      "status": "FAIL",
+      "por_que": [
+        "ImpliedExpectations BLOCKED por falta de 'enterprise_value_usd' y 'deuda_total_usd'.",
+        "Opacidad crítica en estructura de capital impide valoración inversa."
+      ],
+      "faltantes_criticos": [
+        {
+          "item": "deuda_total_usd",
+          "como_resolver": "Revisar notas 10-K/10-Q manual o esperar siguiente filing si es opacidad del emisor."
+        }
+      ]
+    },
+    "survivability_gate": {
+      "status": "CONDITIONAL",
+      "por_que": [
+        "Score Forense 2/5. Patrimonio exiguo ($4.3M) frente a pasivos ($50M).",
+        "CFF > CFO en 9M2025 drena liquidez."
+      ],
+      "condiciones_si_conditional": [
+        "Caja debe mantenerse > $10M.",
+        "CFO TTM debe volver a ser positivo."
+      ]
+    },
+    "mispricing_gate": {
+      "status": "PASS",
+      "por_que": [
+        "P/FCF FY24 ~3x es zona de distress/mispricing profundo.",
+        "Gap evidente entre precio y earnings power histórico (si es recuperable)."
+      ]
+    },
+    "catalyst_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Catalizadores identificados: Normalización de COGS/SG&A y Disclosure de EV.",
+        "Probabilidades > 50% y ventanas definidas (6-18 meses)."
+      ]
+    },
+    "non_speculative_gate": {
+      "status": "FAIL",
+      "banderas": {
+        "tesis_binaria_detectada": false,
+        "dependencia_financiacion_salvadora": false,
+        "opacidad_inaceptable": true
+      },
+      "por_que": [
+        "Falta de detalle en deuda financiera y estructura de capital califica como opacidad inaceptable para inversión inmediata."
+      ]
+    }
+  },
+  "scoring_preliminar": {
+    "metodo": "Score_0_100",
+    "componentes": {
+      "S_supervivencia_0_25": 10,
+      "M_mispricing_0_25": 22,
+      "C_catalizador_0_20": 12,
+      "Q_calidad_0_15": 5,
+      "R_downside_0_15": 5,
+      "V_penalizacion_0_a_menos15": -10
+    },
+    "total_0_100": 44,
+    "nota": "Penalización fuerte por opacidad (-10) y baja calidad de balance. Score insuficiente para Invertir (>60)."
+  },
+  "assumption_ledger": {
+    "reglas": {
+      "id_prefix": "A-",
+      "max_supuestos": 40,
+      "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+    },
+    "supuestos": [
+      {
+        "assumption_id": "A-001",
+        "enunciado": "TZOO cotiza a P/FCF ~3x sobre métricas FY2024.",
+        "tipo": "HECHO",
+        "criticidad": "CONTEXTUAL",
+        "probabilidad_0_1": 1.0,
+        "confianza_0_1": 1.0,
+        "impacto": "ALTO",
+        "drivers_afectados": ["MULTIPLO"],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "FY2024",
+            "cita_corta": "FCF 21M vs Market Cap 62M",
+            "interpretacion": "Baratura óptica indiscutible."
+          }
+        ],
+        "falsacion": {
+          "test": "N/A (Hecho histórico)",
+          "ventana_meses": {"min": 0, "max": 0},
+          "fuente_prevista": "N/A",
+          "accion_si_falla": "N/A"
+        },
+        "dependencias": [],
+        "estado": "CONFIRMADA",
+        "origen": [{"agent_role": "BULL", "claim_id": "CLM_001"}]
+      },
+      {
+        "assumption_id": "A-002",
+        "enunciado": "El deterioro de margen EBIT en 2025 (de ~22% a ~2%) es transitorio/reversible.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.45,
+        "confianza_0_1": 0.50,
+        "impacto": "ALTO",
+        "drivers_afectados": ["MARGEN_OPERATIVO", "FCF"],
+        "evidencias": [],
+        "falsacion": {
+          "test": "EBIT Margin < 5% en próximos 2 trimestres.",
+          "ventana_meses": {"min": 3, "max": 6},
+          "fuente_prevista": "earnings",
+          "accion_si_falla": "DESCARTAR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [{"agent_role": "BULL", "claim_id": "CLM_003"}]
+      },
+      {
+        "assumption_id": "A-003",
+        "enunciado": "La estructura de capital no esconde deuda tóxica ni covenants rotos (Opacity Risk).",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.50,
+        "confianza_0_1": 0.30,
+        "impacto": "ALTO",
+        "drivers_afectados": ["COSTE_DEUDA", "VALOR_TERMINAL"],
+        "evidencias": [],
+        "falsacion": {
+          "test": "Aparición de deuda >$12M CP o dilución forzada >7%.",
+          "ventana_meses": {"min": 1, "max": 6},
+          "fuente_prevista": "filing",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [{"agent_role": "RED_TEAM", "claim_id": "CLM_RT_005"}]
+      },
+      {
+        "assumption_id": "A-004",
+        "enunciado": "La caja reportada ($17M FY24) es representativa de la liquidez disponible actual.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.30,
+        "confianza_0_1": 0.40,
+        "impacto": "ALTO",
+        "drivers_afectados": ["SUPERVIVENCIA"],
+        "evidencias": [
+          {
+            "source_id": "SRC_007",
+            "ubicacion": "9M-2025",
+            "cita_corta": "Delta cash -8.5M",
+            "interpretacion": "Refuta estabilidad de caja FY24."
+          }
+        ],
+        "falsacion": {
+          "test": "Caja < $10M en próximo reporte.",
+          "ventana_meses": {"min": 1, "max": 3},
+          "fuente_prevista": "filing",
+          "accion_si_falla": "REDUCIR_50"
+        },
+        "dependencias": [],
+        "estado": "DEGRADADA",
+        "origen": [{"agent_role": "RED_TEAM", "claim_id": "CLM_RT_004"}]
+      }
+    ]
+  },
+  "evidence_graph": {
+    "version": "EvidenceGraph_v1",
+    "nodos": [
+      { "node_id": "A-002", "tipo": "SUPUESTO", "label": "Margen Reversible", "ref": { "assumption_id": "A-002" } },
+      { "node_id": "A-003", "tipo": "SUPUESTO", "label": "No Deuda Tóxica", "ref": { "assumption_id": "A-003" } },
+      { "node_id": "C-005", "tipo": "CATALIZADOR", "label": "Disclosure EV", "ref": { "catalyst_id": "C-005" } },
+      { "node_id": "D-FINAL", "tipo": "DECISION", "label": "WATCHLIST", "ref": { "decision": "WATCHLIST" } }
+    ],
+    "aristas": [
+      { "from": "C-005", "to": "A-003", "relacion": "SOPORTA", "peso_0_1": 0.9, "nota": "Publicar deuda resuelve la hipótesis de opacidad." },
+      { "from": "A-002", "to": "D-FINAL", "relacion": "INFORMA", "peso_0_1": 0.8, "nota": "Si margen no revierte, pasa a Descartar." },
+      { "from": "A-003", "to": "D-FINAL", "relacion": "BLOQUEA", "peso_0_1": 1.0, "nota": "Opacidad actual bloquea Inversión." }
+    ],
+    "validacion_grafo": {
+      "ids_unicos": true,
+      "aristas_referencian_nodos_existentes": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "detalle": "Grafo coherente."
+    }
+  },
+  "catalizadores_consolidados": [
+    {
+      "catalyst_id": "C-001",
+      "nombre": "Normalización de Margen EBIT",
+      "es_no_binario": true,
+      "ventana_meses": { "min": 6, "probable": 12, "max": 18 },
+      "probabilidad_0_1": 0.58,
+      "mecanismo_cierre_gap": "Retorno a márgenes >10% valida earnings power.",
+      "supuestos_afectados": ["A-002"],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "EBIT > $2M trimestral",
+          "fuente_prevista": "earnings",
+          "ventana_meses": { "min": 3, "max": 6 }
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-005",
+      "nombre": "Disclosure de Estructura de Capital",
+      "es_no_binario": true,
+      "ventana_meses": { "min": 6, "probable": 12, "max": 18 },
+      "probabilidad_0_1": 0.62,
+      "mecanismo_cierre_gap": "Publicación de deuda total elimina prima de riesgo por opacidad.",
+      "supuestos_afectados": ["A-003"],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "EV calculable en reporte",
+          "fuente_prevista": "filing",
+          "ventana_meses": { "min": 3, "max": 6 }
+        }
+      ]
+    }
+  ],
+  "escenarios": [
+    {
+      "scenario_id": "BASE",
+      "probabilidad_0_1": 0.40,
+      "ventana_meses": { "min": 6, "probable": 12, "max": 24 },
+      "descripcion": "Estabilización mediocre. Márgenes se quedan en ~10%, caja se preserva pero no crece. Valoración se mantiene deprimida.",
+      "drivers_clave": ["A-002", "A-004"],
+      "retorno_12_24m_pct_rango": { "min": 0, "base": 10, "max": 20 },
+      "nota_valoracion": "Re-rating limitado por falta de crecimiento."
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.15,
+      "ventana_meses": { "min": 12, "probable": 18, "max": 30 },
+      "descripcion": "Recuperación plena. Márgenes vuelven a 18-20%, se aclara balance, EV/FCF expande a 8-10x.",
+      "drivers_clave": ["A-002", "A-003", "C-001"],
+      "retorno_12_24m_pct_rango": { "min": 80, "base": 110, "max": 150 },
+      "nota_valoracion": "Expansión de múltiplo + crecimiento de FCF."
+    },
+    {
+      "scenario_id": "BEAR",
+      "probabilidad_0_1": 0.45,
+      "ventana_meses": { "min": 6, "probable": 12, "max": 18 },
+      "descripcion": "Value Trap confirmada. Margen sigue <5%, caja cae <$10M, dilución necesaria.",
+      "drivers_clave": ["A-003", "A-004"],
+      "retorno_12_24m_pct_rango": { "min": -60, "base": -40, "max": -20 },
+      "nota_valoracion": "Compresión de múltiplo y destrucción de equity."
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.15,
+      "ventana_meses": { "min": 12, "probable": 18, "max": 30 },
+      "descripcion": "Recuperación plena. Márgenes vuelven a 18-20%, se aclara balance, EV/FCF expande a 8-10x.",
+      "drivers_clave": ["A-002", "A-003", "C-001"],
+      "retorno_12_24m_pct_rango": { "min": 80, "base": 110, "max": 150 },
+      "nota_valoracion": "Expansión de múltiplo + crecimiento de FCF."
+    }
+  ],
+  "kill_criteria_final": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con_assumption_id": "A-004",
+      "definicion": "Caja < $10M en cualquier reporte.",
+      "ventana_meses": { "min": 1, "max": 12 },
+      "fuente_prevista": "filing",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Ruptura de margen de seguridad de liquidez."
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con_assumption_id": "A-002",
+      "definicion": "EBIT Margin < 5% por 2 trimestres consecutivos.",
+      "ventana_meses": { "min": 3, "max": 9 },
+      "fuente_prevista": "earnings",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Confirma deterioro estructural de unidad económica."
+    }
+  ],
+  "plan_monitorizacion": {
+    "frecuencias": {
+      "pulso_diario": { "activo": false, "que_mirar": [] },
+      "revision_semanal": { "activo": false, "que_mirar": [] },
+      "modo_evento": {
+        "activo": true,
+        "que_mirar": ["Earnings Release", "10-Q Filing", "Note on Debt"]
+      }
+    },
+    "lista_de_checks_por_supuesto": [
+      {
+        "assumption_id": "A-003",
+        "indicadores": ["Deuda Total USD", "Enterprise Value"],
+        "fuente": "filing",
+        "frecuencia": "TRIMESTRAL"
+      }
+    ],
+    "umbrales_alerta": []
+  },
+  "predicciones_para_calibracion_consolidadas": [
+    {
+      "pred_id": "CP-001",
+      "descripcion": "Caja cae por debajo de 10M en próximos 12m.",
+      "probabilidad_0_1": 0.50,
+      "ventana_meses": { "min": 3, "max": 12 },
+      "criterio_validacion": "Cash < 10M",
+      "fuente_prevista": "filing",
+      "origen": [{"agent_role": "RED_TEAM", "pred_id": "PRED_RT_005"}]
+    }
+  ],
+  "arbitraje": {
+    "notas_arbitro": [
+      "Se anula la señal de 'Mispricing' (P/FCF bajo) debido a 'Data Quality FAIL' y 'Non-Speculative FAIL' (Opacidad).",
+      "Decisión WATCHLIST impuesta por necesidad de validar supervivencia y estructura de capital antes de asignar capital.",
+      "La probabilidad de éxito del caso Bull se penaliza a 15% por falta de evidencia de reversión de costos en 9M25."
+    ],
+    "desacuerdos_detectados": [
+      {
+        "tema": "Reversibilidad de Margen",
+        "agentes": [
+          { "agent_role": "BULL", "posicion": "Reversible (Costos transitorios)", "confianza_0_1": 0.61 },
+          { "agent_role": "RED_TEAM", "posicion": "Estructural (Value Trap)", "confianza_0_1": 0.79 }
+        ],
+        "resolucion_arbitro": {
+          "estado": "RESUELTO",
+          "decision": "convertir_en_escenario",
+          "por_que": "No hay datos para desempatar hoy. Se modelan ambos escenarios con mayor peso al Bear por tendencia reciente.",
+          "accion": "Monitorizar EBIT margin."
+        }
+      }
+    ],
+    "puntos_abiertos": [
+      "Valor real de Deuda Financiera Total.",
+      "Composición de CFF (Recompras vs Deuda).",
+      "Caja real disponible vs Restricted."
+    ]
+  },
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Deuda Financiera Total y Vencimientos",
+      "por_que_importa": "Crítico para EV y Supervivencia.",
+      "como_obtenerlo": "Nota de Deuda en 10-K."
+    }
+  ],
+  "salida_para_siguiente_agente": {
+    "monitor_input_recomendado": "Vigilar próximo filing buscando 'Debt Note' y 'EBIT'.",
+    "estado_caso": "EN_ESPERA",
+    "proxima_revision_sugerida": "2026-05-15"
+  },
+  "log": {
+    "autochequeos": {
+      "decision_respeta_gates": true,
+      "supuestos_criticos_tienen_evidencia": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "kill_criteria_mapeados_a_supuestos": true,
+      "probabilidades_escenarios_suman_1": true,
+      "kelly_sizing_dentro_de_tope": true,
+      "intervalo_confianza_coherente_con_escenarios": true,
+      "decision_categorica_coherente_con_probabilistica": true,
+      "sizing_final_igual_preliminar_si_invertir": true,
+      "sensibilidad_cubre_supuestos_criticos": true,
+      "salida_solo_json": true
+    },
+    "limitaciones": [
+      "Valoración bloqueada por falta de EV."
+    ],
+    "revision": {
+      "es_revision": false,
+      "revision_num": 1,
+      "decision_packet_anterior_caso_id": null,
+      "monitoring_updates_usados": [],
+      "resumen_cambios": []
+    }
+  },
+  "control": {
+    "estado_flujo": "ARBITRATE",
+    "next_step": "MONITOR",
+    "next_agent_role": "MONITOR",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 2,
+    "issues": [],
+    "work_orders": [],
+    "dispatch_queue": []
+  }
+}
