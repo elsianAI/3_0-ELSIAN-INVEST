@@ -1,0 +1,913 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260217_IOSP",
+  "fecha_corte": "2026-02-18",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "fusion:claude+gemini-2.0-flash-thinking-exp+gpt-5-codex",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260217_IOSP",
+    "implied_expectations_caso_id": "CASE_20260217_IOSP",
+    "sources_pack_caso_id": "CASE_20260217_IOSP"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "El veredicto consolidado es NO_APTO: hay deterioro de earning power y alto riesgo de value trap.",
+      "Entre FY2022 y FY2025: ingresos caen de 1.9637B a 1.778B, gross profit de 586.7M a 492.4M y EBIT de 187.3M a 129.5M.",
+      "El rebote de Q4-2025 (EBIT 46.8M) tras Q3-2025 (EBIT 5.9M) no prueba normalizacion sostenible por si solo.",
+      "La tesis de liberacion de capital de trabajo no esta demostrada: WC operativo elevado y conversion de caja historicamente irregular.",
+      "La valoracion (~14.27x EV/EBIT y ~20.99x EV/FCF) no ofrece margen de seguridad claro para un negocio sin crecimiento confirmado.",
+      "La calidad de datos sigue en PARTIAL con TTM_CONSECUTIVE en WARNING, elevando el riesgo de error de valoracion."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.78
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Entre FY2022 y FY2025 IOSP muestra deterioro material de ingresos, margen bruto y EBIT, incompatible con una recuperacion asumida por defecto.",
+      "confianza_0_1": 0.91,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_002",
+          "ubicacion": "historico_anual[FY2022]",
+          "cita_corta": "FY2022: ingresos 1.9637B, gross profit 586.7M, EBIT 187.3M.",
+          "interpretacion": "FY2022 marca un nivel operativo sustancialmente superior."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[FY2025]",
+          "cita_corta": "FY2025: ingresos 1.778B, gross profit 492.4M, EBIT 129.5M; margen EBIT ~7.3% vs ~9.5% en FY2022.",
+          "interpretacion": "La compresion acumulada sugiere deterioro no trivial."
+        }
+      ],
+      "falsacion": {
+        "test": "Si FY2026 reporta EBIT >=160M USD y margen EBIT >=8.5%, este claim pierde fuerza.",
+        "ventana_meses": {
+          "min": 9,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La volatilidad extrema de EBIT entre Q3-2025 y Q4-2025 sugiere baja visibilidad operativa y no valida aun una normalizacion durable.",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral[Q3-2025]",
+          "cita_corta": "Q3-2025: EBIT 5.9M sobre 441.9M de ingresos (margen ~1.3%).",
+          "interpretacion": "Piso operativo extremadamente debil."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_019",
+          "ubicacion": "historico_trimestral[Q4-2025]",
+          "cita_corta": "Q4-2025: EBIT 46.8M sobre 455.6M de ingresos (margen ~10.3%), con granularidad de flujo incompleta.",
+          "interpretacion": "Un trimestre fuerte no basta para confirmar tendencia."
+        }
+      ],
+      "falsacion": {
+        "test": "Si Q1-2026 y Q2-2026 muestran margen EBIT >=9.0% en ambos trimestres, este claim se debilita.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La liberacion de capital de trabajo usada por la tesis BULL esta no probada y puede fallar como driver de FCF.",
+      "confianza_0_1": 0.84,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1.metricas_derivadas",
+          "ubicacion": "metricas_derivadas.wc_change",
+          "cita_corta": "Working capital operativo ~496.9M (~27.95% de ingresos FY2025).",
+          "interpretacion": "Intensidad de circulante elevada para una narrativa de liberacion facil."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_008",
+          "ubicacion": "historico_trimestral[Q2-2025_YTD]",
+          "cita_corta": "1H2025: CFO 37.6M vs EBIT 76.8M.",
+          "interpretacion": "Conversion de EBIT a caja insuficiente en una parte relevante del ano."
+        }
+      ],
+      "falsacion": {
+        "test": "Si FY2026 cierra con (AR+Inventarios-AP)/Ingresos <=26.0% y CFO/EBIT >=1.0, este claim queda refutado.",
+        "ventana_meses": {
+          "min": 9,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La valoracion actual deja margen de seguridad limitado para un negocio con riesgo de estancamiento en EBIT/FCF.",
+      "confianza_0_1": 0.77,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1.metricas_derivadas",
+          "ubicacion": "metricas_derivadas.ev_ebit/ev_fcf",
+          "cita_corta": "EV/EBIT 14.2664x y EV/FCF 20.9943x.",
+          "interpretacion": "Multiples no de estres para un caso con dudas sobre calidad de ganancias."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[FY2025]",
+          "cita_corta": "FY2025 FCF ~88.0M (CFO 138.3M, capex -50.3M).",
+          "interpretacion": "FCF positivo, pero inferior a niveles de FY2023/FY2024."
+        }
+      ],
+      "falsacion": {
+        "test": "Si FY2026 alcanza EBIT >=170M USD y FCF >=120M USD sin expansion de multiple, este claim se debilita.",
+        "ventana_meses": {
+          "min": 9,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La calidad de datos parcial limita la verificabilidad de la tesis y eleva el riesgo de error de valoracion.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1.data_quality",
+          "ubicacion": "data_quality.overall_status / validaciones.TTM_CONSECUTIVE",
+          "cita_corta": "overall_status PARTIAL; TTM_CONSECUTIVE en WARNING.",
+          "interpretacion": "La base cuantitativa no esta completamente robusta."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "status",
+          "cita_corta": "ImpliedExpectations en BLOCKED por data_quality PARTIAL.",
+          "interpretacion": "No hay lectura implicita completa para validar mispricing."
+        }
+      ],
+      "falsacion": {
+        "test": "Si antes del 2026-12-31 TruthPack pasa a PASS y se restablece una serie trimestral consecutiva valida, este claim queda refutado.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "otro"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "Ingresos LTM continúan planos o negativos en los proximos 2 trimestres.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Growth YoY de ingresos <=0% en reportes Q1-2026 y Q2-2026.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "FY2026 EBIT no supera 140M USD.",
+      "probabilidad_0_1": 0.62,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "EBIT anual en 10-K FY2026 <=140000000.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Al menos 2 de los proximos 4 trimestres reportan margen EBIT <7%.",
+      "probabilidad_0_1": 0.64,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT/Ingresos trimestral <0.07 en >=2 de 4 reportes consecutivos.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "FY2026 FCF se mantiene <=90M USD.",
+      "probabilidad_0_1": 0.58,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "FCF anual (CFO-CAPEX) en FY2026 <=90000000.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "El mercado no revaloriza la accion por encima de 15x EBIT mientras no haya crecimiento top-line.",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Multiplo EV/EBIT LTM se mantiene <=15x.",
+      "fuente_prevista": "precio"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "El ratio (AR+Inventarios-AP)/Ingresos permanece >27.5% al cierre FY2026.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "Calculo anual con balance y ventas FY2026 >0.275.",
+      "fuente_prevista": "10-K"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Serie trimestral consecutiva (8 trimestres) de CFO, CFI, CFF, CAPEX y delta_cash de 3 meses.",
+      "por_que_importa": "Sin esto no se valida conversion de caja ni se resuelve el warning TTM_CONSECUTIVE.",
+      "como_obtenerlo": "10-Q/10-K, estado de flujos 3M con conciliacion YTD."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "DSO, DIO y DPO trimestrales por segmento (Performance Chemicals y Fuel Specialties).",
+      "por_que_importa": "Permite distinguir si el capital de trabajo alto es ciclico o estructural.",
+      "como_obtenerlo": "MD&A 10-Q/10-K y notas de AR/inventarios/AP."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de one-offs y ajustes en Q4-2025; puente de EBIT a net income.",
+      "por_que_importa": "Es clave para evaluar si el rebote de Q4 fue recurrente o limpieza contable posterior a Q3.",
+      "como_obtenerlo": "MD&A del 10-K FY2025 + transcript Q4 (Q&A) + notas fiscales/otros ingresos-gastos."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Bridge de Gross Margin FY22 vs FY25 por precio/volumen/mix/costos.",
+      "por_que_importa": "Aclara si la compresion de margen es transitoria o estructural.",
+      "como_obtenerlo": "Presentacion de inversores, 10-K y earnings calls."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Capex de mantenimiento vs crecimiento por planta/segmento.",
+      "por_que_importa": "Evita sobreestimar FCF normalizado.",
+      "como_obtenerlo": "10-K notas PPE/capex + Q&A management."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Politica de asignacion de capital 2026 (M&A vs buybacks/dividendos) con umbrales de ROIC.",
+      "por_que_importa": "La caja neta puede proteger o destruir valor segun ejecucion.",
+      "como_obtenerlo": "8-K, proxy y calls de resultados."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Desmontar la tesis de recuperacion ciclica cuando la evidencia apunte a deterioro estructural y/o value trap, proponiendo kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.78,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "El balance fuerte no compensa el deterioro observado en EBIT/FCF ni la falta de confirmacion de crecimiento. Con data quality parcial y multiples exigentes, la asimetria riesgo-retorno es insuficiente."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "Riesgo de balance bajo por caja neta y deuda financiera cero.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.42,
+              "por_que": [
+                "Caja neta mitiga quiebra, pero no perdida permanente de capital.",
+                "La caja en un negocio ex-growth puede terminar en asignacion de capital suboptima."
+              ]
+            },
+            "puntos_ciegos": [
+              "Confunde riesgo de solvencia con retorno esperado.",
+              "No incorpora riesgo de M&A destructivo para comprar crecimiento."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "historico_anual[FY2023,FY2025]",
+                "cita_corta": "CFO FY2023 207.3M vs FY2025 138.3M.",
+                "interpretacion": "El colchon interno de caja se ha debilitado."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si se anuncia adquisicion >100M sin sinergias claras o con multiple exigente, el claim se debilita materialmente.",
+              "ventana_meses": {
+                "min": 1,
+                "max": 12
+              },
+              "fuente_prevista": "8-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_002",
+            "resumen_claim_bull": "FY2025 es un valle; el earning power normal es mayor.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.68,
+              "por_que": [
+                "La degradacion lleva varios anos (no solo FY2025).",
+                "No hay evidencia suficiente de transitoriedad por segmento."
+              ]
+            },
+            "puntos_ciegos": [
+              "No separa ciclo de cambio estructural de mix/precio.",
+              "No justifica por que volverian margenes historicos rapidamente."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "historico_anual",
+                "cita_corta": "Ingresos y EBIT retroceden desde FY2022 a FY2025.",
+                "interpretacion": "La pendiente negativa reduce credibilidad del 'valle temporal'."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si FY2026 cierra con EBIT <=140M USD y margen EBIT <=7.5%, la hipotesis de FY2025 como valle queda invalidada.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 18
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_003",
+            "resumen_claim_bull": "El rebote Q4-2025 demuestra recuperacion operativa.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.57,
+              "por_que": [
+                "Se apoya en un unico trimestre tras un Q3 extremadamente debil.",
+                "La calidad del rebote no esta plenamente trazada con puente completo de caja."
+              ]
+            },
+            "puntos_ciegos": [
+              "No prueba persistencia en Q1/Q2-2026.",
+              "No descarta estacionalidad o efectos no recurrentes."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_007",
+                "ubicacion": "Q3-2025",
+                "cita_corta": "EBIT de 5.9M en Q3-2025.",
+                "interpretacion": "La base de comparacion estaba anormalmente deprimida."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si el promedio de margen EBIT de Q1-2026 y Q2-2026 es <7.0%, el claim queda invalidado.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_004",
+            "resumen_claim_bull": "Existe palanca de FCF por liberacion de capital de trabajo.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.7,
+              "por_que": [
+                "El ratio de circulante operativo sigue alto.",
+                "No hay DSO/DIO/DPO suficientes para demostrar tendencia de liberacion."
+              ]
+            },
+            "puntos_ciegos": [
+              "Puede ser una necesidad estructural del negocio, no un exceso temporal.",
+              "Depende de ejecucion operativa aun no demostrada."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1.metricas_derivadas",
+                "ubicacion": "metricas_derivadas.wc_change",
+                "cita_corta": "WC operativo ~27.95% de ventas.",
+                "interpretacion": "Niveles elevados no compatibles con liberacion facil inmediata."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si FY2026 reporta (AR+Inventarios-AP)/Ingresos >27.5% y CFO/EBIT <0.9, el claim queda invalidado.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 18
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Extrapolar Q4-2025 como nueva normalidad con un solo trimestre.",
+          "Asumir reversa de margenes sin bridge de precio/volumen/mix.",
+          "Modelar liberacion de circulante sin DSO/DIO/DPO y sin plan operativo cuantificado.",
+          "Usar caja neta como argumento de retorno, cuando solo reduce riesgo de quiebra.",
+          "Asumir rerating por mejora de data quality sin mejora simultanea en fundamentales."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "FY2025 podria ser el nuevo nivel de rentabilidad, no un valle temporal.",
+          "Q4-2025 pudo ser un rebote puntual y no una tendencia.",
+          "El capital de trabajo requerido podria seguir alto estructuralmente.",
+          "EV/EBIT actual ya podria reflejar correctamente un perfil ex-growth con volatilidad."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "IOSP puede ser una trampa de valor: balance sano, pero earning power debilitado.",
+          "La caida de ingresos y EBIT desde FY2022 sugiere riesgo de cambio estructural.",
+          "Q4-2025 no alcanza para validar recuperacion durable.",
+          "La conversion de caja depende de una liberacion de circulante no demostrada.",
+          "Con multiples actuales, el downside por revision de EBIT/FCF puede dominar el upside."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "Presion en precio/mix/costos impide volver a margenes historicos.",
+            "indicadores_tempranos": [
+              "Margen EBIT <7.0% en 2 de 4 trimestres.",
+              "Margen bruto <=28.0%.",
+              "Ingresos planos con EBIT descendente."
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "AR e inventarios altos restringen conversion de EBIT a CFO.",
+            "indicadores_tempranos": [
+              "(AR+Inventarios-AP)/Ingresos >27.5%.",
+              "CFO/EBIT <0.9.",
+              "FCF trimestral <=0 en 2 trimestres consecutivos."
+            ]
+          },
+          {
+            "mecanismo": "ASIGNACION_CAPITAL_DESTRUCTIVA",
+            "descripcion": "Uso de caja en M&A o recompras mal temporizadas reduce retorno al accionista.",
+            "indicadores_tempranos": [
+              "M&A relevante sin ROIC objetivo verificable.",
+              "Caida material de caja sin mejora proporcional de EBIT/FCF.",
+              "ROIC estancado en niveles bajos."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Meseta de bajo crecimiento: ingresos planos, margen presionado y FCF por debajo de niveles historicos recientes.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "1.72B-1.80B USD",
+                "justificacion": "Tendencia 2022-2025 sin evidencia robusta de aceleracion."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "NO_MEJORA",
+                "rango": "5.5%-7.0%",
+                "justificacion": "Recuperacion no confirmada por secuencia larga."
+              },
+              {
+                "variable": "FCF",
+                "direccion": "EMPEORA",
+                "rango": "55M-85M USD",
+                "justificacion": "Friccion de circulante y capex."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "EARNINGS_CAEN",
+              "explicacion": "El ajuste principal vendria por menores ganancias y menor confianza en su calidad.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -35,
+                "base": -22,
+                "max": -10
+              },
+              "nota": "Un marco alternativo del otro modelo ubica este rango en -30% a -5%."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Persisten presiones de margen y caja; decisiones de asignacion de capital amplifican destruccion de valor.",
+            "ventana_meses": {
+              "min": 3,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.2,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "EBIT",
+                "direccion": "EMPEORA",
+                "rango": "70M-95M USD",
+                "justificacion": "FY2025 no seria piso sino transicion a menor rentabilidad."
+              },
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "Caja 140M-180M USD",
+                "justificacion": "Conversion de caja insuficiente con mayor exigencia operativa."
+              }
+            ],
+            "impacto_en_supervivencia": "MEDIO",
+            "nota": "No implica quiebra inmediata por caja neta, pero si caida material del equity."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.69,
+        "razones": [
+          "EBIT FY2025 (129.5M) muy por debajo de FY2022 (187.3M).",
+          "Ingresos FY2022->FY2025 en descenso sostenido.",
+          "Gross profit tambien cae materialmente.",
+          "FCF FY2025 (~88M) por debajo de FY2023/FY2024 (~145M/~143M).",
+          "Recuperacion apoyada en un trimestre (Q4-2025) tras Q3 muy debil.",
+          "Capital de trabajo operativo elevado y tesis de liberacion no demostrada.",
+          "Data quality PARTIAL e ImpliedExpectations BLOCKED.",
+          "Multiples actuales no reflejan un descuento profundo para este perfil."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "FY2026 EBIT >=160M y margen EBIT >=8.5%.",
+              "Dos trimestres consecutivos con margen EBIT >=9.0%.",
+              "(AR+Inventarios-AP)/Ingresos <=26.0%.",
+              "FCF FY2026 >=110M sin M&A agresivo."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "FY2026 EBIT <=140M o margen EBIT <=7.0% sostenido.",
+              "Ratio de capital de trabajo >27.5% pese a crecimiento bajo.",
+              "FCF <=90M por segundo ano consecutivo.",
+              "Persistencia de data_quality PARTIAL y TTM_CONSECUTIVE WARNING."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "Ingresos YoY negativos en los proximos 2 reportes trimestrales consecutivos.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma continuidad del deterioro top-line."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "TESIS",
+          "definicion": "Dos trimestres consecutivos con margen EBIT <6.0%.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Invalida narrativa de normalizacion operativa."
+        },
+        {
+          "kc_id": "KC-RT-003",
+          "tipo": "CATALIZADOR",
+          "definicion": "EBIT Margin LTM cae por debajo de 6.5%.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Indica deterioro adicional de earning power."
+        },
+        {
+          "kc_id": "KC-RT-004",
+          "tipo": "BALANCE",
+          "definicion": "Caja cae por debajo de 180M USD sin retorno incremental verificable.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 18
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Se erosiona el principal amortiguador del caso."
+        },
+        {
+          "kc_id": "KC-RT-005",
+          "tipo": "CATALIZADOR",
+          "definicion": "Anuncio de adquisicion >100M sin sinergias claras o multiples exigentes.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "8-K",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Aumenta riesgo de asignacion de capital destructiva."
+        },
+        {
+          "kc_id": "KC-RT-006",
+          "tipo": "CATALIZADOR",
+          "definicion": "TruthPack no pasa a PASS y TTM_CONSECUTIVE sigue WARNING al 2026-12-31.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "otro",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Sin mejora de calidad de datos, persiste el riesgo de falsa precision."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Crecimiento organico de ventas >5% YoY",
+          "umbral_o_condicion": "Sostenido por 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Recuperacion operativa anual verificable",
+          "umbral_o_condicion": "FY2026 EBIT >=160M USD y margen EBIT >=8.5%.",
+          "ventana_meses": {
+            "min": 9,
+            "max": 18
+          },
+          "fuente_prevista": "10-K"
+        },
+        {
+          "item": "Conversion de caja robusta",
+          "umbral_o_condicion": "FY2026 CFO/EBIT >=1.0 y FCF >=110M USD.",
+          "ventana_meses": {
+            "min": 9,
+            "max": 18
+          },
+          "fuente_prevista": "10-K"
+        },
+        {
+          "item": "Asignacion de capital claramente pro-accionista",
+          "umbral_o_condicion": "Anuncio de buyback >5% del market cap sin deterioro operativo.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "8-K"
+        },
+        {
+          "item": "Reduccion de riesgo metodologico",
+          "umbral_o_condicion": "TruthPack en PASS e ImpliedExpectations desbloqueado antes del 2026-12-31.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "otro"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 1.0,
+        "si_se_invierte_igual": [
+          "Esperar al menos 2 trimestres consecutivos de estabilidad de margen antes de escalar posicion.",
+          "No pagar mas de 12x EBIT normalizado en ausencia de crecimiento verificable.",
+          "Aplicar stop fundamental con KC-RT-001, KC-RT-002 y KC-RT-004.",
+          "No promediar a la baja mientras data_quality permanezca PARTIAL.",
+          "Monitorear uso de caja (priorizar retorno al accionista y evitar M&A oportunista)."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "Que explica la caida consecutiva de ingresos desde FY2022?",
+          "Que parte del EBIT Q4-2025 es recurrente vs one-offs?",
+          "Cual es el plan operativo medible para reducir capital de trabajo?",
+          "Que capex es mantenimiento vs crecimiento y cual es su trayectoria?",
+          "Existe una politica explicita para evitar uso destructivo de caja?"
+        ],
+        "trazabilidad_sizing": {
+          "prior_usado": 0.5,
+          "ajustes_hacia_value_trap": {
+            "alza_total": 0.29,
+            "baja_total": -0.1,
+            "probabilidad_final_value_trap": 0.69
+          },
+          "regla_de_traduccion_a_tamano": "Con probabilidad_value_trap >=0.65 y data_quality PARTIAL, solo se permite exposicion tactica maxima de 1.0% y con gatillos de salida fundamentales.",
+          "bloqueadores_verificables": [
+            "TTM_CONSECUTIVE en WARNING.",
+            "ImpliedExpectations BLOCKED.",
+            "Deterioro FY2022->FY2025 en ingresos y EBIT."
+          ]
+        }
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "ImpliedExpectations permanece BLOCKED por data_quality PARTIAL.",
+      "TTM usa FY0_fallback por trimestres no consecutivos (TTM_CONSECUTIVE WARNING).",
+      "Falta serie completa de flujo trimestral 3M para varios periodos.",
+      "No hay DSO/DIO/DPO trimestrales en el input.",
+      "Q4-2025 proviene de 8-K con menor granularidad que 10-Q.",
+      "No se cuenta con desglose completo de productos/segmentos para atribucion fina de margenes.",
+      "Output de Claude no fue utilizable por error de autenticacion (is_error=true)."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "fusion": {
+      "step_name": "RED_TEAM",
+      "schema": "AgentReport_v1",
+      "modelos_usados": [
+        {
+          "modelo": "claude",
+          "estado": "ERROR_OUTPUT",
+          "detalle": "Not logged in · Please run /login"
+        },
+        {
+          "modelo": "gemini-2.0-flash-thinking-exp",
+          "estado": "OK"
+        },
+        {
+          "modelo": "gpt-5-codex",
+          "estado": "OK"
+        }
+      ],
+      "criterios_resolucion": [
+        "Se priorizaron campos con mayor trazabilidad (mas source_id y evidencia explicita).",
+        "En discrepancias cuantitativas no se promediaron valores ciegamente; se eligio el valor mas fundamentado y se reporto rango.",
+        "Claims/texto redundantes se consolidaron y se preservaron aportes unicos de cada modelo valido.",
+        "Todos los warnings/flags se propagaron al resultado final, incluyendo errores de ejecucion.",
+        "Se mantuvo el schema AgentReport_v1 y se anadio _meta.fusion para auditoria de decisiones."
+      ],
+      "conflictos": [
+        {
+          "conflicto_id": "CFX-001",
+          "campo": "input_model_output",
+          "valores_por_modelo": {
+            "claude": "is_error=true, output no compatible con AgentReport_v1",
+            "gemini": "AgentReport_v1 valido",
+            "codex": "AgentReport_v1 valido"
+          },
+          "resolucion": "Se excluyo Claude del cuerpo analitico y se registro su flag de error en log y meta.",
+          "criterio": "Incompatibilidad de schema y ausencia total de contenido analitico utilizable."
+        },
+        {
+          "conflicto_id": "CFX-002",
+          "campo": "resumen_ejecutivo.confianza_0_1",
+          "valores_por_modelo": {
+            "gemini": 0.75,
+            "codex": 0.79
+          },
+          "resolucion": 0.78,
+          "criterio": "Se adopta valor recomendado cercano al modelo con mayor soporte cuantitativo (codex), manteniendo prudencia."
+        },
+        {
+          "conflicto_id": "CFX-003",
+          "campo": "payload.contenido.diagnostico_global.riesgo_principal",
+          "valores_por_modelo": {
+            "gemini": "DETERIORO_FUNDAMENTAL",
+            "codex": "VALUE_TRAP"
+          },
+          "resolucion": "VALUE_TRAP",
+          "criterio": "VALUE_TRAP integra el deterioro fundamental como mecanismo causal y conecta mejor con sizing/kill criteria."
+        },
+        {
+          "conflicto_id": "CFX-004",
+          "campo": "payload.contenido.recomendacion_para_arbitro.tamaño_maximo_sugerido_pct_cartera",
+          "valores_por_modelo": {
+            "gemini": 0,
+            "codex": 1.0
+          },
+          "resolucion": 1.0,
+          "criterio": "Se mantiene NO_APTO; 1.0% queda como limite tactico condicional solo 'si se invierte igual', con reglas estrictas."
+        },
+        {
+          "conflicto_id": "CFX-005",
+          "campo": "payload.contenido.value_trap_checklist.probabilidad_value_trap_0_1",
+          "valores_por_modelo": {
+            "gemini": 0.65,
+            "codex": 0.69
+          },
+          "resolucion": 0.69,
+          "criterio": "Mayor trazabilidad explicita de ajustes y fuentes en codex."
+        },
+        {
+          "conflicto_id": "CFX-006",
+          "campo": "payload.contenido.bear_case.escenarios_bajistas[BEAR_BASE].resultado_retorno_12_24m_pct_rango",
+          "valores_por_modelo": {
+            "gemini": {
+              "min": -30,
+              "base": -15,
+              "max": -5
+            },
+            "codex": {
+              "min": -35,
+              "base": -22,
+              "max": -10
+            }
+          },
+          "resolucion": {
+            "min": -35,
+            "base": -22,
+            "max": -10
+          },
+          "criterio": "Se prioriza escenario mas sustentado por desglose de drivers; se conserva nota del rango alternativo."
+        },
+        {
+          "conflicto_id": "CFX-007",
+          "campo": "claims/predicciones cobertura",
+          "valores_por_modelo": {
+            "gemini": "Cobertura mas compacta (2 claims, 2 predicciones)",
+            "codex": "Cobertura mas extensa (5 claims, 5 predicciones)"
+          },
+          "resolucion": "Se tomo base codex y se incorporaron aportes unicos de gemini (ingresos corto plazo, EV/EBIT <=15x, one-offs Q4, bridge GM).",
+          "criterio": "Maximizar robustez sin duplicar ni inventar."
+        }
+      ],
+      "rangos_probabilidades": [
+        {
+          "campo": "resumen_ejecutivo.confianza_0_1",
+          "min": 0.75,
+          "max": 0.79,
+          "recomendado": 0.78
+        },
+        {
+          "campo": "payload.contenido.diagnostico_global.confianza_0_1",
+          "min": 0.75,
+          "max": 0.78,
+          "recomendado": 0.78
+        },
+        {
+          "campo": "payload.contenido.value_trap_checklist.probabilidad_value_trap_0_1",
+          "min": 0.65,
+          "max": 0.69,
+          "recomendado": 0.69
+        },
+        {
+          "campo": "claims[CLM_002].confianza_0_1",
+          "min": 0.8,
+          "max": 0.85,
+          "recomendado": 0.8
+        },
+        {
+          "campo": "predicciones_calibracion[estancamiento_ingresos_2_trimestres].probabilidad_0_1",
+          "min": 0.7,
+          "max": 0.7,
+          "recomendado": 0.7
+        },
+        {
+          "campo": "predicciones_calibracion[EV_EBIT_<=15x].probabilidad_0_1",
+          "min": 0.8,
+          "max": 0.8,
+          "recomendado": 0.8
+        }
+      ]
+    }
+  }
+}

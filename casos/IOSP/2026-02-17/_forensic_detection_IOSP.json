@@ -1,0 +1,349 @@
+{
+  "caso_id": "CASE_20260217_IOSP",
+  "fecha_corte": "2026-02-18",
+  "red_flags": [
+    {
+      "red_flag_id": "F-001",
+      "categoria": "WORKING_CAPITAL",
+      "descripcion": "Conversion EBIT->CFO muy volatil y capital de trabajo alto frente a ventas, con episodios de CFO negativo pese a utilidad positiva.",
+      "evidencia": [
+        {
+          "source_id": "SRC_002",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2022]",
+          "hallazgo": "EBIT 187300000 vs CFO 81700000 (distorsion -56.4%)."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2023]",
+          "hallazgo": "EBIT 161600000 vs CFO 207300000 (distorsion +28.3%)."
+        },
+        {
+          "source_id": "SRC_014",
+          "ubicacion": "TruthPack_v1.historico_trimestral[periodo=Q2-2022]",
+          "hallazgo": "CFO -36500000 con net_income 32300000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo + historico_anual[periodo=FY2025]",
+          "hallazgo": "Working capital operativo (AR+Inventarios-AP) = 496900000, equivalente a 27.9% de ingresos FY2025."
+        }
+      ]
+    },
+    {
+      "red_flag_id": "F-002",
+      "categoria": "ONE_OFFS",
+      "descripcion": "Alta volatilidad entre EBIT y utilidad neta, compatible con partidas por debajo de EBIT/impuestos que distorsionan calidad de resultados.",
+      "evidencia": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2024]",
+          "hallazgo": "EBIT 177900000 vs net_income 35600000 (conversion neta sobre EBIT ~20%)."
+        },
+        {
+          "source_id": "SRC_019",
+          "ubicacion": "TruthPack_v1.historico_trimestral[periodo=Q4-2024]",
+          "hallazgo": "EBIT 41100000 con net_income -70400000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025]",
+          "hallazgo": "Net_income rebota a 116600000 tras FY2024 en 35600000."
+        }
+      ]
+    },
+    {
+      "red_flag_id": "F-003",
+      "categoria": "LEASES",
+      "descripcion": "Existe apalancamiento economico fuera de deuda financiera tradicional: deuda total reportada en 0, pero con obligaciones de arrendamiento materiales.",
+      "evidencia": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo",
+          "hallazgo": "deuda_total_usd = 0; caja_usd = 292500000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.lease_data",
+          "hallazgo": "Operating lease liabilities total = 52700000; tramo corriente = 15900000; no corriente = 36800000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.lease_data",
+          "hallazgo": "Costo anual de leases (operating + short-term) = 25900000."
+        }
+      ]
+    },
+    {
+      "red_flag_id": "F-004",
+      "categoria": "CAPEX_CAPITALIZATION",
+      "descripcion": "Puente CFO->FCF muestra compresion estructural por capex (>=15% recurrente); falta desglose mantenimiento vs crecimiento para validar calidad del FCF.",
+      "evidencia": [
+        {
+          "source_id": "SRC_005",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2019]",
+          "hallazgo": "CFO 161600000, capex -29900000, FCF 131700000 (haircut vs CFO -18.5%)."
+        },
+        {
+          "source_id": "SRC_002",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2022]",
+          "hallazgo": "CFO 81700000, capex -39600000, FCF 42100000 (haircut vs CFO -48.5%)."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025]",
+          "hallazgo": "CFO 138300000, capex -50300000, FCF 88000000 (haircut vs CFO -36.4%); capex/depreciacion = 1.15x."
+        }
+      ]
+    }
+  ],
+  "liquidez": {
+    "efectivo_disponible": {
+      "caja_usd": 292500000,
+      "linea_credito_disponible_usd": null,
+      "liquidez_visible_usd": 292500000,
+      "evidencia": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo",
+          "hallazgo": "caja_usd 292500000 y deuda_total_usd 0."
+        }
+      ]
+    },
+    "runway": {
+      "runway_meses_estimado_base": ">24",
+      "supuesto_base": "No hay burn estructural observado (FCF anual positivo FY2019-FY2025).",
+      "runway_meses_estimado_estres": 69.8,
+      "supuesto_estres": "CFO = 0 y capex anual igual a FY2025 (50300000).",
+      "metodo": "runway = caja_usd / burn_anual * 12"
+    },
+    "vencimientos_12_24_meses": {
+      "deuda_financiera_reportada_usd": 0,
+      "maturity_wall_deuda_financiera": "No visible en 12-24 meses con deuda total reportada en cero.",
+      "obligaciones_leasing": {
+        "corriente_12m_usd": 15900000,
+        "no_corriente_usd": 36800000
+      },
+      "evidencia": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo + TruthPack_v1.lease_data",
+          "hallazgo": "Deuda total 0; pasivo de leases total 52700000."
+        }
+      ]
+    },
+    "riesgo_incumplimiento_covenants": {
+      "riesgo": "UNKNOWN",
+      "detalle": "No hay covenants ni headroom cuantificados en el TruthPack; sin deuda financiera dispuesta."
+    },
+    "riesgo_dilucion_accionaria": {
+      "riesgo": "MEDIO",
+      "detalle": "variacion_acciones_yoy_pct es null y no hay desglose SBC/convertibles en el TruthPack; presion de financiamiento inmediata mitigada por caja neta y FCF positivo."
+    }
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "lectura": "El puente no es lineal: hay anos con conversion muy por debajo y por encima de EBIT; la magnitud supera umbral critico del 15% en multiples periodos.",
+      "distorsiones_criticas_ge_15_pct": [
+        {
+          "periodo": "FY2020",
+          "ebit_usd": 33700000,
+          "cfo_usd": 145900000,
+          "distorsion_pct": 332.9,
+          "source_id": "SRC_004",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2020]"
+        },
+        {
+          "periodo": "FY2021",
+          "ebit_usd": 132100000,
+          "cfo_usd": 93200000,
+          "distorsion_pct": -29.4,
+          "source_id": "SRC_003",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2021]"
+        },
+        {
+          "periodo": "FY2022",
+          "ebit_usd": 187300000,
+          "cfo_usd": 81700000,
+          "distorsion_pct": -56.4,
+          "source_id": "SRC_002",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2022]"
+        },
+        {
+          "periodo": "FY2023",
+          "ebit_usd": 161600000,
+          "cfo_usd": 207300000,
+          "distorsion_pct": 28.3,
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2023]"
+        }
+      ],
+      "fy2025_referencia": {
+        "ebit_usd": 129500000,
+        "cfo_usd": 138300000,
+        "distorsion_pct": 6.8,
+        "source_id": "SRC_001",
+        "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025]"
+      },
+      "componentes_no_desglosados_en_truthpack": [
+        "stock-based compensation",
+        "impuestos pagados",
+        "detalle de cambios de capital de trabajo"
+      ]
+    },
+    "cfo_a_fcf": {
+      "lectura": "Compresion recurrente de CFO hacia FCF por capex material; la distorsion excede 15% en toda la serie anual disponible.",
+      "distorsiones_criticas_ge_15_pct": [
+        {
+          "periodo": "FY2019",
+          "cfo_usd": 161600000,
+          "capex_usd": -29900000,
+          "fcf_usd": 131700000,
+          "distorsion_pct": -18.5,
+          "source_id": "SRC_005",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2019]"
+        },
+        {
+          "periodo": "FY2020",
+          "cfo_usd": 145900000,
+          "capex_usd": -29700000,
+          "fcf_usd": 116200000,
+          "distorsion_pct": -20.4,
+          "source_id": "SRC_004",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2020]"
+        },
+        {
+          "periodo": "FY2021",
+          "cfo_usd": 93200000,
+          "capex_usd": -39100000,
+          "fcf_usd": 54100000,
+          "distorsion_pct": -41.9,
+          "source_id": "SRC_003",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2021]"
+        },
+        {
+          "periodo": "FY2022",
+          "cfo_usd": 81700000,
+          "capex_usd": -39600000,
+          "fcf_usd": 42100000,
+          "distorsion_pct": -48.5,
+          "source_id": "SRC_002",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2022]"
+        },
+        {
+          "periodo": "FY2023",
+          "cfo_usd": 207300000,
+          "capex_usd": -62100000,
+          "fcf_usd": 145200000,
+          "distorsion_pct": -30.0,
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2023]"
+        },
+        {
+          "periodo": "FY2024",
+          "cfo_usd": 184500000,
+          "capex_usd": -41400000,
+          "fcf_usd": 143100000,
+          "distorsion_pct": -22.4,
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2024]"
+        },
+        {
+          "periodo": "FY2025",
+          "cfo_usd": 138300000,
+          "capex_usd": -50300000,
+          "fcf_usd": 88000000,
+          "distorsion_pct": -36.4,
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025]"
+        }
+      ]
+    },
+    "resumen_fy2025_ebit_cfo_fcf": {
+      "ebit_usd": 129500000,
+      "cfo_usd": 138300000,
+      "fcf_usd": 88000000,
+      "distorsion_ebit_a_cfo_pct": 6.8,
+      "distorsion_cfo_a_fcf_pct": -36.4,
+      "distorsion_ebit_a_fcf_pct": -32.0,
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025]"
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con": "supervivencia",
+      "definicion": "CFO LTM <= 0 USD en cualquier cierre trimestral.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "BAJA",
+      "fuente_prevista": "10-Q/10-K"
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con": "fcf",
+      "definicion": "FCF LTM <= 0 USD durante 2 trimestres consecutivos.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "10-Q/10-K"
+    },
+    {
+      "kc_id": "KC-003",
+      "relacionado_con": "supervivencia",
+      "definicion": "Caja y equivalentes < 150000000 USD sin disclosure de linea de credito comprometida disponible >= 50000000 USD.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 24
+      },
+      "probabilidad_cualitativa": "BAJA",
+      "fuente_prevista": "10-Q/10-K"
+    },
+    {
+      "kc_id": "KC-004",
+      "relacionado_con": "contabilidad",
+      "definicion": "CFO/EBIT < 0.70 por 2 trimestres consecutivos o (AR+Inventarios-AP)/Ingresos > 35% en cierre trimestral.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "kc_id": "KC-005",
+      "relacionado_con": "deuda",
+      "definicion": "Nueva deuda financiera bruta > 150000000 USD acompanada de advertencia de covenant/headroom reducido en filing.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 24
+      },
+      "probabilidad_cualitativa": "BAJA",
+      "fuente_prevista": "10-Q/10-K/8-K"
+    },
+    {
+      "kc_id": "KC-006",
+      "relacionado_con": "dilucion",
+      "definicion": "Aumento de acciones diluidas > 5% interanual con FCF LTM <= 0 USD.",
+      "ventana_meses": {
+        "min": 6,
+        "max": 24
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "10-Q/10-K"
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "TruthPack presenta data_quality.status = PARTIAL.",
+      "No se entrego SourcesPack_v1 para verificar notas de filing directamente.",
+      "No hay desglose de covenants, disponibilidad de revolver, SBC ni detalle de goodwill/RPT.",
+      "TTM usa FY0 fallback por trimestres no consecutivos.",
+      "Parte del cash flow trimestral esta reportado en formato YTD y no siempre como trimestre aislado."
+    ]
+  }
+}
