@@ -1,0 +1,545 @@
+{
+  "artefacto": "Partial AgentReport",
+  "caso_id": "CASE_20260217_SOM",
+  "fecha_corte": "2026-02-18",
+  "claims_list": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La compañía está en contracción de ingresos y la caída se aceleró en 2025.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_008",
+          "ubicacion": "historico_anual.FY2024.ingresos_usd",
+          "cita": "FY2024 ingresos_usd: 109200000."
+        },
+        {
+          "source_id": "IR_NEWS",
+          "ubicacion": "historico_anual.FY2025.ingresos_usd",
+          "cita": "FY2025 ingresos_usd: 88900000."
+        },
+        {
+          "source_id": "SRC_004",
+          "ubicacion": "historico_trimestral.H1-2025.ingresos_usd",
+          "cita": "H1-2025 ingresos_usd: 39800000; H1-2024: 51800000."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos semestrales dejan de caer interanualmente",
+        "umbral": "YoY >= -10% en 2 semestres consecutivos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La rentabilidad operativa se comprimió de forma relevante desde 2022.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_anual.FY2022",
+          "cita": "FY2022 ingresos_usd: 133600000; ebit_usd: 43100000."
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas.margen_operativo_pct",
+          "cita": "margen_operativo_pct FY2024: 22.25."
+        }
+      ],
+      "falsacion": {
+        "test": "Recuperación sostenida del margen operativo",
+        "umbral": "Margen operativo >= 24% en 2 periodos reportados",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "A pesar de la caída en ventas, la empresa mantiene generación de caja operativa y FCF positivo.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_008",
+          "ubicacion": "historico_anual.FY2024",
+          "cita": "cfo_usd: 17600000; capex_usd: -2400000; fcf_usd: 15200000."
+        },
+        {
+          "source_id": "SRC_004",
+          "ubicacion": "historico_trimestral.H1-2025.cfo_usd",
+          "cita": "H1-2025 cfo_usd: 4100000; H1-2024 cfo_usd: 2900000."
+        }
+      ],
+      "falsacion": {
+        "test": "Deterioro de conversión de caja",
+        "umbral": "FCF <= 0 o CFO/ingresos < 10%",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El balance presenta caja neta y deuda financiera cero.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_002",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita": "deuda_total_usd: 0; caja_usd: 29486000."
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas.deuda_neta_usd",
+          "cita": "deuda_neta_usd: -29486000."
+        }
+      ],
+      "falsacion": {
+        "test": "Aparición de deuda neta positiva",
+        "umbral": "deuda_neta_usd > 0",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El capital de trabajo es alto en relación con ventas y puede liberar caja si se normaliza.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_002",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita": "inventarios_usd: 18816000; cuentas_por_cobrar_usd: 9251000; cuentas_por_pagar_usd: 3544000."
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas.wc_change.working_capital_usd",
+          "cita": "working_capital_usd: 24523000."
+        }
+      ],
+      "falsacion": {
+        "test": "Capital de trabajo continúa expandiéndose",
+        "umbral": "working_capital/ingresos sube >= 200 bps",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La lectura de expectativas implícitas está bloqueada por opacidad de datos clave de mercado y calidad.",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "status/motivo_blocked",
+          "cita": "status BLOCKED por data_quality PARTIAL y falta enterprise_value_usd."
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.validaciones.CORE_FILING_COVERAGE",
+          "cita": "No 10-K/20-F found in field provenance."
+        }
+      ],
+      "falsacion": {
+        "test": "Desbloqueo del motor de expectativas",
+        "umbral": "data_quality PASS y EV/market cap disponibles",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        }
+      }
+    }
+  ],
+  "catalyst_candidates": [
+    {
+      "catalyst_id": "C-001",
+      "descripción": "Estabilizar ingresos en 2-3 semestres mediante ejecución comercial y retención para pasar de contracción fuerte a variaciones interanuales cercanas a cero.",
+      "tipo": "OPERATIVO",
+      "estado_actual": "La base de ingresos cayó en FY2025 y también en H1-2025; cerrar la brecha exige frenar la caída antes de recuperar crecimiento.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_008",
+          "ubicacion": "historico_anual.FY2024.ingresos_usd",
+          "cita": "FY2024 ingresos_usd: 109200000."
+        },
+        {
+          "source_id": "IR_NEWS",
+          "ubicacion": "historico_anual.FY2025.ingresos_usd",
+          "cita": "FY2025 ingresos_usd: 88900000."
+        },
+        {
+          "source_id": "SRC_004",
+          "ubicacion": "historico_trimestral.H1-2025",
+          "cita": "H1-2025 ingresos_usd: 39800000; H1-2024: 51800000."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test_medible": "Desaceleración de la caída interanual semestral",
+          "umbral": "YoY >= -10% durante 2 semestres consecutivos",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        },
+        {
+          "test_medible": "Salida de contracción anual",
+          "umbral": "Ingresos FY >= 0% YoY",
+          "ventana_meses": {
+            "min": 12,
+            "max": 30
+          }
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "dirección": "↑",
+          "magnitud_estimada": "media (mejor absorción de costes fijos)"
+        },
+        {
+          "driver": "margen",
+          "dirección": "↑",
+          "magnitud_estimada": "media (1-3 pp si se estabiliza volumen)"
+        },
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "baja-media (menor riesgo de caída estructural)"
+        }
+      ],
+      "indicadores_líderes": [
+        "Variación interanual de ingresos semestrales",
+        "Crecimiento secuencial H2 vs H1",
+        "Ingresos FY2026 vs FY2025",
+        "EBIT no cae más rápido que ingresos"
+      ],
+      "riesgos_ejecución": [
+        "Debilidad de demanda final prolongada",
+        "Pérdida de clientes clave",
+        "Presión competitiva en precios",
+        "Ciclos de venta más largos",
+        "Ejecución comercial insuficiente"
+      ],
+      "contracatalizadores": [
+        "Nueva caída de ingresos >15% YoY",
+        "Recortes reiterados de guidance comercial",
+        "Mayor concentración en pocos clientes"
+      ]
+    },
+    {
+      "catalyst_id": "C-002",
+      "descripción": "Recuperación de margen operativo mediante control de SG&A y mejora de mix bruto, revirtiendo parte de la compresión observada desde 2022.",
+      "tipo": "OPERATIVO",
+      "estado_actual": "El margen operativo cayó desde niveles históricamente altos; el cierre de brecha requiere disciplina de costes y recuperación de rentabilidad por unidad vendida.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_anual.FY2022",
+          "cita": "FY2022 ingresos_usd: 133600000; ebit_usd: 43100000."
+        },
+        {
+          "source_id": "SRC_008",
+          "ubicacion": "historico_anual.FY2024",
+          "cita": "FY2024 ingresos_usd: 109200000; ebit_usd: 24300000."
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas",
+          "cita": "margen_bruto_pct: 53.85; margen_operativo_pct: 22.25."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test_medible": "Recuperación de margen operativo reportado",
+          "umbral": "margen_operativo >= 24%",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        },
+        {
+          "test_medible": "Menor intensidad de SG&A sobre ventas",
+          "umbral": "SG&A/ingresos <= 30%",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "margen",
+          "dirección": "↑",
+          "magnitud_estimada": "media-alta (2-4 pp potenciales)"
+        },
+        {
+          "driver": "FCF",
+          "dirección": "↑",
+          "magnitud_estimada": "media (expansión de EBIT a caja)"
+        },
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "baja-media (mayor calidad de beneficios)"
+        }
+      ],
+      "indicadores_líderes": [
+        "SG&A absoluto estable o decreciente",
+        "Margen bruto secuencial estable/mejorando",
+        "Crecimiento EBIT superior al crecimiento de ingresos",
+        "Menor brecha entre EBIT y flujo operativo"
+      ],
+      "riesgos_ejecución": [
+        "Inflación de costes de insumos",
+        "Necesidad de descuentos para sostener ventas",
+        "Sobrecorrección de costes que erosione crecimiento",
+        "Mix de producto menos rentable",
+        "Gastos fijos rígidos"
+      ],
+      "contracatalizadores": [
+        "margen_operativo cae por debajo de 20%",
+        "SG&A/ingresos permanece >33%",
+        "Contracción adicional de margen bruto"
+      ]
+    },
+    {
+      "catalyst_id": "C-003",
+      "descripción": "Liberar capital de trabajo, especialmente inventarios, para aumentar FCF sin depender de recuperación inmediata de ingresos.",
+      "tipo": "FINANCIERO",
+      "estado_actual": "El capital de trabajo es elevado y concentra caja en inventarios; normalizarlo puede cerrar brecha de caja y reducir percepción de riesgo operativo.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_002",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita": "inventarios_usd: 18816000; cuentas_por_cobrar_usd: 9251000; cuentas_por_pagar_usd: 3544000."
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas.wc_change",
+          "cita": "working_capital_usd: 24523000."
+        },
+        {
+          "source_id": "SRC_008",
+          "ubicacion": "historico_anual.FY2024",
+          "cita": "cfo_usd: 17600000; capex_usd: -2400000."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test_medible": "Reducción de intensidad de inventarios",
+          "umbral": "inventarios/ingresos < 15%",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        },
+        {
+          "test_medible": "Descompresión de capital de trabajo",
+          "umbral": "working_capital/ingresos mejora >= 300 bps",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "dirección": "↑",
+          "magnitud_estimada": "alta (liberación de caja de una base de WC elevada)"
+        },
+        {
+          "driver": "deuda",
+          "dirección": "↓",
+          "magnitud_estimada": "baja-media (menos necesidad futura de financiación)"
+        },
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "media (mayor visibilidad de caja)"
+        }
+      ],
+      "indicadores_líderes": [
+        "Inventarios absolutos bajan trimestre a trimestre",
+        "CFO supera net income de forma sostenida",
+        "Menor capital de trabajo sobre ingresos",
+        "Caja final deja de caer antes de financiación",
+        "Menos ajustes de caja ligados a circulante"
+      ],
+      "riesgos_ejecución": [
+        "Rupturas de stock por reducción agresiva",
+        "Liquidación con descuentos y erosión de margen",
+        "Aumento de morosidad en cuentas por cobrar",
+        "Peores términos con proveedores",
+        "Inventario obsoleto y cargos extraordinarios"
+      ],
+      "contracatalizadores": [
+        "Inventarios superan 20m sin rebote de ventas",
+        "CFO se vuelve negativo",
+        "Aumento simultáneo de inventarios y cuentas por cobrar"
+      ]
+    },
+    {
+      "catalyst_id": "C-004",
+      "descripción": "Normalización de disclosure (FY2025 completo, market cap, acciones diluidas y EV) para desbloquear lectura de expectativas implícitas y reducir descuento por opacidad.",
+      "tipo": "CORPORATIVO",
+      "estado_actual": "El análisis de expectativas está bloqueado por datos incompletos y cobertura de fuentes core insuficiente; cerrar esta brecha es accionable desde reporting.",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "status/motivo_blocked",
+          "cita": "Prerequisitos no cumplidos: data_quality PARTIAL y falta enterprise_value_usd."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "faltantes_criticos",
+          "cita": "Faltan enterprise_value_usd, market_cap_usd y acciones_diluidas."
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.CORE_FILING_COVERAGE",
+          "cita": "No 10-K/20-F found in field provenance."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test_medible": "Desbloqueo del artefacto de expectativas",
+          "umbral": "status distinto de BLOCKED",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          }
+        },
+        {
+          "test_medible": "Completitud de datos de valoración",
+          "umbral": "market_cap_usd, enterprise_value_usd y acciones_diluidas reportados en 2 cortes consecutivos",
+          "ventana_meses": {
+            "min": 3,
+            "max": 18
+          }
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "media-alta (menor prima por incertidumbre informativa)"
+        },
+        {
+          "driver": "deuda",
+          "dirección": "↓",
+          "magnitud_estimada": "baja (menor coste potencial si se requiriera financiación)"
+        }
+      ],
+      "indicadores_líderes": [
+        "Publicación de estados FY2025 con CFO, CFI, CFF y CAPEX completos",
+        "Divulgación consistente de acciones diluidas",
+        "Consistencia entre precio, market cap y EV",
+        "El siguiente ImpliedExpectations corre sin bloqueo"
+      ],
+      "riesgos_ejecución": [
+        "Retrasos de auditoría o cierre contable",
+        "Cambios metodológicos que rompan comparabilidad",
+        "Persistencia de datos nulos en campos críticos",
+        "Diferencias entre presentaciones y reportes regulatorios"
+      ],
+      "contracatalizadores": [
+        "Se mantiene status BLOCKED",
+        "Reexpresiones frecuentes de cifras",
+        "Continúa ausencia de market_cap o acciones diluidas"
+      ]
+    },
+    {
+      "catalyst_id": "C-005",
+      "descripción": "Consolidar resiliencia de conversión de caja en ciclo débil para demostrar capacidad estructural de FCF aun sin recuperación plena de ingresos.",
+      "tipo": "FINANCIERO",
+      "estado_actual": "Hay señales de caja operativa relativamente resistente frente a ventas en descenso; el mercado necesita ver persistencia, no un dato aislado.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_008",
+          "ubicacion": "historico_anual.FY2024",
+          "cita": "cfo_usd: 17600000; net_income_usd: 18600000; capex_usd: -2400000."
+        },
+        {
+          "source_id": "SRC_004",
+          "ubicacion": "historico_trimestral.H1-2025/H1-2024",
+          "cita": "H1-2025 cfo_usd: 4100000 vs H1-2024: 2900000."
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas",
+          "cita": "margen_fcf_pct: 13.92."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test_medible": "Sostenimiento de conversión operativa",
+          "umbral": "CFO/ingresos >= 14% en 2 periodos consecutivos",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        },
+        {
+          "test_medible": "Persistencia de caja libre positiva",
+          "umbral": "FCF > 0 en cada semestre reportado",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "dirección": "↑",
+          "magnitud_estimada": "media (estabilidad/crecimiento sobre base FY2024)"
+        },
+        {
+          "driver": "margen",
+          "dirección": "↑",
+          "magnitud_estimada": "baja-media (mejor conversión EBIT-caja)"
+        },
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "media (menor riesgo de trampa de valor)"
+        }
+      ],
+      "indicadores_líderes": [
+        "CFO interanual no decreciente",
+        "FCF positivo por semestre",
+        "Brecha CFO-EBIT se mantiene acotada",
+        "Caja neta se preserva sin apalancamiento"
+      ],
+      "riesgos_ejecución": [
+        "Reversión de capital de trabajo",
+        "Capex defensivo superior al previsto",
+        "Mayor salida de caja por impuestos",
+        "Pagos a accionistas superiores a generación real",
+        "Volatilidad operativa por menor escala de ingresos"
+      ],
+      "contracatalizadores": [
+        "Dos semestres consecutivos de FCF negativo",
+        "CFO/ingresos cae por debajo de 10%",
+        "Caída de caja >25% sin mejora operativa"
+      ]
+    }
+  ]
+}
