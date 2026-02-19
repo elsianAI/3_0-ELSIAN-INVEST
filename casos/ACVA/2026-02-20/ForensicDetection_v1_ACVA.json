@@ -1,0 +1,330 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260220_ACVA",
+  "fecha_corte": "2026-02-19",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "Gemini_Forensic_v1",
+    "modelo": "Gemini-1.5-Pro",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260220_ACVA",
+    "implied_expectations_caso_id": "CASE_20260220_ACVA",
+    "sources_pack_caso_id": "CASE_20260220_ACVA"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Dependencia crítica de 'Marketplace Float': ~90% de la caja reportada (224M) corresponde a fondos de clientes.",
+      "Caja corporativa real estimada en ~24M USD frente a deuda total de 123M USD (Posición neta negativa).",
+      "Divergencia masiva EBIT (-84M) vs CFO (+65M) impulsada por SBC y gestión de capital circulante (float).",
+      "Rentabilidad operativa negativa persistente; el modelo depende de financiamiento vía float y SBC.",
+      "Riesgo de liquidez latente si el volumen de transacciones (y por ende el float) se contrae."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.9
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_F01",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La caja reportada de 224M USD incluye aprox. 200M USD de 'Marketplace Float' (fondos de clientes), dejando caja propia mínima.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack Log / MD&A Inference",
+          "cita_corta": "caja_usd incluye 200000000 de marketplace float",
+          "interpretacion": "La liquidez real es una fracción de la reportada."
+        }
+      ],
+      "falsacion": {
+        "test": "Verificar desglose de 'Restricted Cash' o 'Funds due to customers' en notas 10-K",
+        "ventana_meses": { "min": 1, "max": 3 },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_F02",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El CFO positivo de 65M USD está sostenido por SBC (~50-80M estimado) y cambios en el Float, no por rentabilidad económica.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Estado de Flujos (Bridge EBIT-CFO)",
+          "cita_corta": "EBIT -84M vs CFO +65M; Depr 36M",
+          "interpretacion": "Gap de 149M explicado mayormente por SBC y WC."
+        }
+      ],
+      "falsacion": {
+        "test": "Calcular FCF excluyendo impacto de cambios en 'Funds due to customers'",
+        "ventana_meses": { "min": 3, "max": 6 },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_F01",
+      "descripcion": "El CFO reportado caerá significativamente si el crecimiento de ingresos (y float) se desacelera.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": { "min": 6, "max": 12 },
+      "criterio_validacion": "CFO trimestral < 0 en periodo de bajo crecimiento secuencial",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Credit Agreement / Covenants Details",
+      "por_que_importa": "Determinar si la deuda de 123M tiene covenants de liquidez mínima que excluyan el Float.",
+      "como_obtenerlo": "Buscar Exhibit 10.x en filings pasados o 'Credit Facilities' en notas 10-K."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Auditoría de calidad de beneficios, liquidez real (ex-float) y sostenibilidad de la estructura de capital.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.85,
+        "razon_principal": "Estructura de capital frágil enmascarada por 'Marketplace Float'; caja propia (~24M) insuficiente para cubrir deuda (123M) sin refinanciación o crecimiento continuo del float."
+      },
+      "supervivencia": {
+        "horizonte_meses": { "min": 12, "max": 18 },
+        "evaluacion": {
+          "resultado": "CONDITIONAL",
+          "score_0_5": 2.5,
+          "por_que": [
+            "La liquidez 'propia' es muy baja (~24M estimados).",
+            "Depende de que el 'Float' siga disponible y no sea restringido legalmente para uso operativo general (fungibilidad).",
+            "CFO positivo (+65M) mitiga el riesgo inmediato, pero es de baja calidad (SBC/Float driven).",
+            "Vencimientos de deuda no inminentes a corto plazo, pero el apalancamiento neto real es alto."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 224065000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "Marketplace Float (restringido/pasivo circulante)",
+            "Revolver (posible, no confirmado)"
+          ],
+          "runway_meses_estimado": 12,
+          "metodo_estimacion": "Basado en 'Real Net Cash' negativo y CFO positivo pero volátil. Si el mercado crediticio se cierra, la posición es precaria.",
+          "notas": "La caja reportada incluye ~200M de fondos de clientes. Caja libre real < 30M."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 123000000,
+          "deuda_neta_usd": -101065000,
+          "coste_deuda_aprox_pct": 3.4,
+          "coverage_intereses": -19.8,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "No se detallan vencimientos inminentes en TruthPack, pero la deuda a largo plazo existe."
+          },
+          "vencimientos": [],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "UNKNOWN",
+            "comentario": "Falta información crítica sobre covenants de la deuda de 123M."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "ALTO",
+          "motores": [
+            "SBC (Stock Based Compensation) alto para compensar flujo de caja."
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "SBC es un componente mayor del puente EBIT-CFO."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Resultados distorsionados por la dinámica de Marketplace Float y alto componente de SBC. El EBIT negativo es la realidad económica subyacente.",
+        "red_flags": [
+          {
+            "flag_id": "F-001",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Caja reportada inflada por 'Marketplace Float' (~200M).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.95,
+            "por_que_importa": "Oculta una posición de deuda neta real y dependencia de fondos de clientes.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Balance / Notas",
+                "cita_corta": "Caja 224M vs Payables 345M",
+                "interpretacion": "La caja no es libre; está calzada contra pasivos corrientes masivos."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Verificar ratio (Cash - Float) / Burn Rate",
+              "ventana_meses": { "min": 3, "max": 6 },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "F-002",
+            "categoria": "SBC",
+            "descripcion": "SBC convierte pérdidas operativas en CFO positivo.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.85,
+            "por_que_importa": "La generación de caja es a costa de dilución accionarial, no de eficiencia operativa.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "CFO Bridge",
+                "cita_corta": "Gap EBIT (-84M) a CFO (+65M)",
+                "interpretacion": "Gran parte del ajuste no-cash es SBC."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Revisar línea SBC en Cash Flow Statement",
+              "ventana_meses": { "min": 1, "max": 3 },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "F-003",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "Posible subestimación de Capex por exclusión de capitalización de software en TruthPack.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.6,
+            "por_que_importa": "Infla el FCF si los costes de desarrollo se tratan como inversión y no gasto.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "TruthPack Log",
+                "cita_corta": "no se agrego Capitalization of software costs",
+                "interpretacion": "El ítem existe y fue excluido del cálculo estándar de Capex."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Sumar Capitalized Software a Capex total",
+              "ventana_meses": { "min": 1, "max": 3 },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "Conversión extremadamente alta (>100% de la pérdida) sugiere items no-cash masivos (SBC) o generación de WC temporal.",
+            "posibles_distorsiones": [
+              "SBC",
+              "Cambios en Float (Payables)",
+              "Depreciación"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Conversión directa alta por bajo capex tangible (-4.5M), pero ignora software cap.",
+            "capex_riesgo": "MEDIO",
+            "notas": "Modelo asset-light, pero intensivo en desarrollo."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "NO",
+          "comentario": "No sostenible con la estructura de capital actual."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "SI",
+          "comentario": "Principal mecanismo de financiación operativa implícita."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "UNKNOWN",
+          "comentario": "Sin datos de M&A reciente en el TruthPack."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Verificar en Proxy (DEF14A)."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Contracción del volumen de subastas (GMV) reduce el Float disponible.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "Salida de caja por pago a vendedores sin entrada de nuevos compradores",
+              "Consumo de la caja corporativa limitada"
+            ],
+            "indicadores_tempranos": [
+              "Desaceleración de Revenue",
+              "Caída de Payables",
+              "CFO negativo"
+            ]
+          }
+        ],
+        "conclusion_downside": "El riesgo principal no es P&L, es Balance Sheet. Una contracción del negocio drena la liquidez inmediatamente debido al descalce de float."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja Corporativa Estimada (Total Cash - 200M) < 15M USD",
+          "ventana_meses": { "min": 3, "max": 6 },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Inminencia de dilución masiva o impago de deuda."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "fcf",
+          "definicion": "CFO Operativo (LTM) negativo por dos trimestres consecutivos",
+          "ventana_meses": { "min": 3, "max": 6 },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Indica fin del subsidio por Float/SBC y quema real de caja."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": "2.0",
+        "condiciones_para_aumentar_tamaño": [
+          "EBIT positivo o break-even",
+          "Caja Corporativa (ex-float) > Deuda Total"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Caída de ingresos YoY",
+          "Aumento de deuda financiera"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "Detalle de Covenants",
+          "por_que_importa": "Para saber si el Float cuenta para los ratios de liquidez exigidos por acreedores.",
+          "como_obtenerlo": "Credit Agreement (Exhibit 10.x)"
+        },
+        {
+          "item": "Desglose exacto de Restricted Cash vs Cash Equivalents",
+          "por_que_importa": "Confirmar la cifra exacta de 'Caja Propia'.",
+          "como_obtenerlo": "Nota de Cash & Cash Equivalents en 10-K"
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "No se tuvo acceso al texto completo del Credit Agreement para verificar covenants.",
+      "Cálculo de 'Caja Propia' es una estimación basada en notas del log sobre Marketplace Float.",
+      "TruthPack balance sheet (FY2024) tiene latencia respecto a datos trimestrales Q3-2025."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}
