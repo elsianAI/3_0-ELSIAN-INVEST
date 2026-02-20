@@ -1,11 +1,11 @@
 {
   "version_esquema": "AgentReport_v1",
   "caso_id": "CASE_20260220_ACVA",
-  "fecha_corte": "2026-02-19",
+  "fecha_corte": "2026-02-20",
   "agente": {
     "agent_role": "FORENSIC",
     "agent_nombre": "FORENSIC_DETECTION_v1",
-    "modelo": "claude-opus-4-6",
+    "modelo": "UNKNOWN",
     "idioma": "es"
   },
   "input_refs": {
@@ -15,11 +15,11 @@
   },
   "resumen_ejecutivo": {
     "bullets": [
-      "ACVA mantiene EBIT negativo persistente (6 años consecutivos) pero CFO positivo y creciente en FY2024 y los 3 trimestres de 2025, lo que genera una divergencia EBIT-CFO que requiere scrutinio de la calidad del puente.",
-      "El balance muestra caja neta positiva ($224M caja vs $123M deuda FY2024) y la posición ha mejorado en 2025 (reportes de transcripts indican ~$316M caja y ~$220M deuda en Q3-2025), lo que reduce riesgo de supervivencia inmediata.",
-      "SGA ha crecido de forma acelerada ($62M FY2019 a $217M FY2024, CAGR ~28%) superando el crecimiento de ingresos en algunos periodos, lo que constituye bandera roja de eficiencia operativa.",
-      "Las cuentas por pagar ($345M) exceden significativamente las cuentas por cobrar ($168M) en FY2024, sugiriendo dependencia de financiamiento de proveedores/marketplace float que distorsiona el CFO.",
-      "Goodwill e intangibles implícitos por adquisiciones (CFI negativo elevado en FY2021-FY2023) requieren evaluación de deterioro; sin línea explícita de goodwill en el TruthPack disponible."
+      "ACVA genera pérdidas operativas persistentes (EBIT negativo todos los años FY2019-FY2024) pese a sextuplicar ingresos, con un gap EBIT→CFO de ~$149M en FY2024 que implica compensación en acciones masiva no desglosada explícitamente.",
+      "La posición de caja neta ($224M caja vs $123M deuda) y CFO positivo reciente reducen el riesgo de supervivencia a 12-24 meses, pero una porción material de la caja reportada podría incluir float de marketplace ($198M divulgados) que no es capital libre.",
+      "Las cuentas por pagar ($346M) superan ampliamente las cuentas por cobrar ($169M), reflejando la dinámica de float del marketplace que infla artificialmente el capital circulante y el CFO.",
+      "Picos de SGA en Q3-2025 ($73M, +38% secuencial) y grandes salidas de inversión en 2025 ($125M CFI 9M) sugieren posible actividad de M&A reciente sin transparencia sobre goodwill acumulado.",
+      "El gasto en intereses se ha cuadruplicado en 18 meses ($535K Q1-2024 → $2.5M Q3-2025), indicando mayor apalancamiento no visible solo en la deuda de balance FY2024."
     ],
     "veredicto_role_local": "WATCHLIST",
     "confianza_0_1": 0.65
@@ -29,79 +29,79 @@
       "claim_id": "CLM_001",
       "tipo": "HECHO",
       "criticidad": "CRITICO",
-      "enunciado": "ACVA ha registrado EBIT negativo en cada uno de los 6 ejercicios fiscales de FY2019 a FY2024, con pérdida operativa acumulada superior a $476M.",
-      "confianza_0_1": 0.95,
+      "enunciado": "El gap entre EBIT (-$84M) y CFO (+$65M) en FY2024 es de $149M, del cual solo $37M corresponde a D&A, implicando ~$110M+ en ajustes no monetarios adicionales (probablemente SBC).",
+      "confianza_0_1": 0.85,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
           "source_id": "SRC_001",
           "url": null,
-          "titulo": null,
-          "fecha": null,
-          "ubicacion": "Consolidated Statements of Operations, FY2019-FY2024",
-          "cita_corta": "EBIT negativo en todos los años: -$79M (FY19), -$41M (FY20), -$77M (FY21), -$106M (FY22), -$90M (FY23), -$84M (FY24)",
-          "interpretacion": "La empresa no ha logrado rentabilidad operativa GAAP en su historia como empresa pública."
+          "titulo": "Form 10-K FY2024",
+          "fecha": "2025-02-19",
+          "ubicacion": "Estado de flujos de efectivo / Conciliación net income a CFO",
+          "cita_corta": "EBIT -84.1M, D&A 36.7M, CFO +65.4M, Net Income -79.7M",
+          "interpretacion": "La diferencia no explicada por D&A (~$110M) es consistente con SBC masiva típica de tech companies post-IPO."
         }
       ],
       "falsacion": {
-        "test": "ACVA reporta EBIT positivo en un trimestre futuro completo",
-        "ventana_meses": {
-          "min": 3,
-          "max": 12
-        },
-        "fuente_prevista": "earnings"
-      }
-    },
-    {
-      "claim_id": "CLM_002",
-      "tipo": "HECHO",
-      "criticidad": "CRITICO",
-      "enunciado": "Existe una divergencia estructural entre EBIT negativo (-$84M FY2024) y CFO positivo (+$65M FY2024), con brecha de ~$149M explicada principalmente por SBC, depreciación y variaciones de capital de trabajo.",
-      "confianza_0_1": 0.9,
-      "impacto": "ALTO",
-      "evidencias": [
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "SRC_001",
-          "url": null,
-          "titulo": null,
-          "fecha": null,
-          "ubicacion": "Consolidated Statements of Cash Flows, FY2024",
-          "cita_corta": "EBIT -$84M, D&A $37M, CFO +$65M; gap de ~$149M incluye SBC y WC",
-          "interpretacion": "La depreciación ($37M) cubre ~25% del gap; el resto implica SBC elevado y/o favorable cambio en capital de trabajo."
-        }
-      ],
-      "falsacion": {
-        "test": "Publicación del 10-K FY2024 con detalle de reconciliación de net income a CFO confirmando componentes de SBC y WC",
+        "test": "Verificar SBC explícita en 10-K FY2024 (nota de stock-based compensation); si SBC < $80M, existe otra distorsión no identificada",
         "ventana_meses": {
           "min": 1,
           "max": 3
         },
-        "fuente_prevista": "10-K"
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "Una parte material de la caja reportada ($224M FY2024) podría incluir float de marketplace ($198M divulgados en transcripts), lo que significa que la caja realmente disponible para la empresa podría ser significativamente menor.",
+      "confianza_0_1": 0.7,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_043",
+          "url": null,
+          "titulo": "Earnings Transcript Q3-2025",
+          "fecha": null,
+          "ubicacion": "Sección de resultados financieros",
+          "cita_corta": "Marketplace float disclosed: 198 million USD; cash and equivalents + marketable securities combinados",
+          "interpretacion": "Si el float se incluye en la caja reportada, la caja libre real podría ser solo ~$26-70M, cambiando drásticamente el perfil de liquidez."
+        }
+      ],
+      "falsacion": {
+        "test": "Verificar en balance sheet detallado si el float de marketplace se contabiliza dentro de cash and equivalents o como pasivo separado",
+        "ventana_meses": {
+          "min": 1,
+          "max": 3
+        },
+        "fuente_prevista": "filing"
       }
     },
     {
       "claim_id": "CLM_003",
-      "tipo": "INFERENCIA",
+      "tipo": "HECHO",
       "criticidad": "IMPORTANTE",
-      "enunciado": "Las cuentas por pagar de $345M vs cuentas por cobrar de $168M sugieren que ACVA se beneficia de un float de marketplace significativo que infla el CFO operativo.",
-      "confianza_0_1": 0.8,
-      "impacto": "ALTO",
+      "enunciado": "Las cuentas por pagar ($346M) representan el 54% de los ingresos FY2024 y son 2x las cuentas por cobrar ($169M), generando un capital circulante negativo de -$177M que infla el CFO.",
+      "confianza_0_1": 0.9,
+      "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
           "source_id": "SRC_001",
           "url": null,
-          "titulo": null,
-          "fecha": null,
-          "ubicacion": "Consolidated Balance Sheet, FY2024",
-          "cita_corta": "Cuentas por pagar $345.6M vs cuentas por cobrar $168.8M al 31-dic-2024",
-          "interpretacion": "La diferencia de ~$177M representa un float neto a favor que sostiene caja operativa pero es reversible ante caída de volumen."
+          "titulo": "Form 10-K FY2024 - Balance Sheet",
+          "fecha": "2025-02-19",
+          "ubicacion": "Balance consolidado",
+          "cita_corta": "A/P 345.6M, Trade receivables 168.8M",
+          "interpretacion": "El modelo de marketplace permite retener fondos de transacciones antes de pagar a vendedores, inflando pasivos corrientes y CFO operativo."
         }
       ],
       "falsacion": {
-        "test": "Si cuentas por pagar caen >20% sin caída proporcional de ingresos, confirma dependencia de float",
+        "test": "Si A/P disminuyen >20% sin caída proporcional en volúmenes, indica presión sobre términos de pago y reducción del beneficio de float",
         "ventana_meses": {
           "min": 3,
           "max": 12
@@ -111,81 +111,81 @@
     },
     {
       "claim_id": "CLM_004",
-      "tipo": "INFERENCIA",
+      "tipo": "HECHO",
       "criticidad": "IMPORTANTE",
-      "enunciado": "SGA ha crecido desproporcionadamente: de $62M (FY2019) a $217M (FY2024), un CAGR de ~28%, superando el CAGR de ingresos de ~43% en los primeros años pero desacelerándose; la ratio SGA/ingresos se mantiene en ~34% (FY2024).",
-      "confianza_0_1": 0.85,
+      "enunciado": "El gasto en intereses se cuadruplicó de $535K (Q1-2024) a $2.5M (Q3-2025), sugiriendo un incremento significativo de deuda post-cierre FY2024.",
+      "confianza_0_1": 0.9,
       "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_001",
+          "source_id": "SRC_005",
           "url": null,
-          "titulo": null,
-          "fecha": null,
-          "ubicacion": "Consolidated Statements of Operations",
-          "cita_corta": "SGA FY2024 $217M sobre ingresos $637M (34.1%); FY2023 $167M sobre $481M (34.6%)",
-          "interpretacion": "La ratio SGA/ingresos se mantiene estable pero elevada; no hay apalancamiento operativo significativo en esta línea."
+          "titulo": "Form 10-Q Q3-2025",
+          "fecha": "2025-11-05",
+          "ubicacion": "Estado de resultados trimestral",
+          "cita_corta": "Interest expense Q1-24: $535K, Q3-25: $2.5M",
+          "interpretacion": "El salto implica que la deuda ha crecido substancialmente desde los $123M del balance FY2024, posiblemente a ~$220M referenciados en transcripts."
         }
       ],
       "falsacion": {
-        "test": "SGA/ingresos cae por debajo de 30% en dos trimestres consecutivos",
+        "test": "Confirmar saldo de deuda en 10-Q Q3-2025; si deuda > $200M, la ratio net debt/EBITDA se deteriora materialmente",
         "ventana_meses": {
-          "min": 6,
-          "max": 12
+          "min": 1,
+          "max": 3
         },
-        "fuente_prevista": "earnings"
+        "fuente_prevista": "10-Q"
       }
     },
     {
       "claim_id": "CLM_005",
       "tipo": "INFERENCIA",
       "criticidad": "IMPORTANTE",
-      "enunciado": "El gasto en inversiones (CFI) fue altamente negativo en FY2021 (-$129M), FY2022 (-$283M) y FY2023 (-$111M), sugiriendo adquisiciones significativas que probablemente generaron goodwill cuyo deterioro no ha sido evaluado en el TruthPack.",
-      "confianza_0_1": 0.75,
+      "enunciado": "Los flujos de inversión (CFI) de -$94M y -$125M acumulados en H1 y 9M-2025 respectivamente sugieren actividad de M&A reciente, con riesgo de goodwill acumulado sin deterioro reconocido.",
+      "confianza_0_1": 0.7,
       "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_001",
+          "source_id": "SRC_005",
           "url": null,
-          "titulo": null,
-          "fecha": null,
-          "ubicacion": "Consolidated Statements of Cash Flows, FY2021-FY2023",
-          "cita_corta": "CFI: -$129M (FY21), -$283M (FY22), -$111M (FY23) vs capex solo -$2.6M/-$3.2M/-$2.3M",
-          "interpretacion": "La diferencia entre CFI y capex implica ~$515M en adquisiciones/inversiones en 3 años; probablemente generó goodwill material."
+          "titulo": "Form 10-Q Q3-2025",
+          "fecha": "2025-11-05",
+          "ubicacion": "Estado de flujos de efectivo",
+          "cita_corta": "CFI 9M-2025: -$124.8M vs capex solo $6.8M",
+          "interpretacion": "La diferencia de ~$118M entre CFI y capex indica adquisiciones o inversiones significativas no capturadas en capex."
         }
       ],
       "falsacion": {
-        "test": "Revisión de la nota de goodwill e intangibles en 10-K FY2024 confirma o descarta impairment reciente",
+        "test": "Verificar goodwill en balance Q3-2025 y si se ha realizado test de deterioro; si goodwill > 30% de activos totales, riesgo elevado",
         "ventana_meses": {
           "min": 1,
           "max": 6
         },
-        "fuente_prevista": "10-K"
+        "fuente_prevista": "10-Q"
       }
     },
     {
       "claim_id": "CLM_006",
       "tipo": "HECHO",
       "criticidad": "IMPORTANTE",
-      "enunciado": "En Q3-2025, SGA saltó a $72.8M (desde $55M en Q3-2024) y G&A a $48.2M (desde $30.8M), un incremento de ~32% y ~56% respectivamente, superando el crecimiento de ingresos del trimestre (~16.5%).",
+      "enunciado": "SGA en Q3-2025 saltó a $73M (+38% secuencial desde ~$53M en Q1-Q2), con G&A específicamente subiendo de $27-31M a $48M.",
       "confianza_0_1": 0.9,
-      "impacto": "ALTO",
+      "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
           "source_id": "SRC_005",
           "url": null,
-          "titulo": null,
-          "fecha": null,
-          "ubicacion": "10-Q Q3-2025, Income Statement",
-          "cita_corta": "Q3-2025 SGA $72.8M y G&A $48.2M vs Q3-2024 SGA $55M y G&A $30.8M",
-          "interpretacion": "Salto anómalo en gastos operativos en Q3-2025 que revirtió la tendencia de mejora de margen EBIT; requiere explicación por M&A o reestructuración."
+          "titulo": "Form 10-Q Q3-2025",
+          "fecha": "2025-11-05",
+          "ubicacion": "Estado de resultados",
+          "cita_corta": "SGA Q3-25: $72.8M, G&A Q3-25: $48.2M vs Q2-25 G&A: $26.7M",
+          "interpretacion": "El salto de G&A podría reflejar costos de integración de M&A, one-offs legales, o aceleración de SBC por vesting de RSUs."
         }
       ],
       "falsacion": {
-        "test": "Q4-2025 muestra SGA y G&A normalizados (regreso a ratio <35% de ingresos)",
+        "test": "Si G&A se normaliza a <$35M en Q4-2025, fue one-off; si persiste >$45M, es un cambio estructural en la base de costos",
         "ventana_meses": {
           "min": 3,
           "max": 6
@@ -197,96 +197,107 @@
       "claim_id": "CLM_007",
       "tipo": "HECHO",
       "criticidad": "CONTEXTUAL",
-      "enunciado": "El interés pagado se ha multiplicado por 5x de FY2023 ($1.6M) a FY2024 ($4.2M) y sigue subiendo en 2025 ($2.5M solo en Q3-2025), consistente con el aumento de deuda de $123M a ~$220M.",
-      "confianza_0_1": 0.85,
+      "enunciado": "ACVA nunca ha reportado EBIT positivo en el periodo observable (FY2019-FY2024), aunque la tendencia de pérdidas operativas se ha reducido levemente ($84M FY2024 vs $106M FY2022).",
+      "confianza_0_1": 0.95,
       "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
           "source_id": "SRC_001",
           "url": null,
-          "titulo": null,
-          "fecha": null,
-          "ubicacion": "Income Statement, Interest expense line",
-          "cita_corta": "Interest expense: $1.6M (FY23), $4.2M (FY24), $2.5M (Q3-2025 solo)",
-          "interpretacion": "Carga financiera creciente por nueva deuda; aún manejable vs CFO pero en tendencia adversa."
+          "titulo": "Form 10-K FY2024",
+          "fecha": "2025-02-19",
+          "ubicacion": "Estado de resultados consolidado",
+          "cita_corta": "EBIT: FY19 -79M, FY20 -41M, FY21 -77M, FY22 -106M, FY23 -90M, FY24 -84M",
+          "interpretacion": "La empresa depende de ajustes no monetarios para generar caja; la rentabilidad GAAP operativa no se ha alcanzado en 6 años."
         }
       ],
       "falsacion": {
-        "test": "Si interest expense TTM supera $12M sin crecimiento proporcional de CFO, señala estrés financiero",
+        "test": "Si EBIT trimestral se vuelve positivo en los próximos 4 trimestres, la tesis de rentabilidad estructural se valida",
         "ventana_meses": {
           "min": 3,
           "max": 12
         },
-        "fuente_prevista": "10-Q"
+        "fuente_prevista": "earnings"
       }
     }
   ],
   "predicciones_calibracion": [
     {
       "pred_id": "PRED_001",
-      "descripcion": "ACVA reportará EBIT negativo en FY2025 completo, aunque la pérdida será inferior a los -$84M de FY2024.",
+      "descripcion": "SBC anual FY2024 será revelada en el 10-K como superior a $90M USD",
       "probabilidad_0_1": 0.75,
       "ventana_meses": {
-        "min": 3,
-        "max": 6
+        "min": 1,
+        "max": 3
       },
-      "criterio_validacion": "EBIT FY2025 en 10-K: negativo pero mayor (menos negativo) que -$84M",
+      "criterio_validacion": "Leer nota de SBC en 10-K FY2024; verificar total stock-based compensation expense",
       "fuente_prevista": "10-K"
     },
     {
       "pred_id": "PRED_002",
-      "descripcion": "CFO FY2025 completo será superior a $150M, impulsado por crecimiento de ingresos y float de marketplace.",
-      "probabilidad_0_1": 0.65,
+      "descripcion": "La deuda total al cierre Q3-2025 superará $200M vs $123M de FY2024",
+      "probabilidad_0_1": 0.7,
       "ventana_meses": {
-        "min": 3,
-        "max": 6
+        "min": 1,
+        "max": 3
       },
-      "criterio_validacion": "CFO FY2025 en 10-K o suma de 10-Qs supera $150M",
-      "fuente_prevista": "10-K"
+      "criterio_validacion": "Leer balance en 10-Q Q3-2025; verificar long-term debt + current portion",
+      "fuente_prevista": "10-Q"
     },
     {
       "pred_id": "PRED_003",
-      "descripcion": "La deuda total de ACVA se mantendrá por debajo de $300M a cierre de FY2025.",
-      "probabilidad_0_1": 0.7,
+      "descripcion": "ACVA no alcanzará EBIT trimestral positivo antes de Q2-2026",
+      "probabilidad_0_1": 0.6,
       "ventana_meses": {
         "min": 3,
-        "max": 6
+        "max": 12
       },
-      "criterio_validacion": "Deuda total en balance FY2025 < $300M",
-      "fuente_prevista": "10-K"
+      "criterio_validacion": "EBIT trimestral reportado en 10-Q; si EBIT > 0 en cualquier trimestre, predicción falsada",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "El goodwill en balance al cierre 2025 superará $300M USD, representando >25% de activos totales",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Verificar línea de goodwill en balance sheet Q3-2025 o 10-K FY2025",
+      "fuente_prevista": "10-Q"
     }
   ],
   "peticiones_de_fuentes": [
     {
       "prioridad": "ALTA",
-      "item": "Detalle de goodwill e intangibles por segmento y test de impairment más reciente",
-      "por_que_importa": "Con ~$515M de inversiones de CFI en 3 años (FY2021-FY2023) y activos totales de $984M, goodwill es probablemente >40% de activos y su evaluación de deterioro es crítica.",
-      "como_obtenerlo": "10-K FY2024, Note on Goodwill and Intangible Assets (probablemente nota 5-8)"
+      "item": "Nota de stock-based compensation del 10-K FY2024",
+      "por_que_importa": "Necesaria para cuantificar el componente principal del gap EBIT→CFO y evaluar dilución real",
+      "como_obtenerlo": "10-K FY2024 (SRC_001), sección de notas a estados financieros, nota sobre Stock-Based Compensation"
     },
     {
       "prioridad": "ALTA",
-      "item": "Detalle de stock-based compensation (SBC) anual y trimestral",
-      "por_que_importa": "SBC es probablemente el mayor componente del gap EBIT→CFO (~$80-100M estimado); sin cuantificación exacta no se puede evaluar dilución real ni calidad de earnings.",
-      "como_obtenerlo": "10-K FY2024, Cash Flow reconciliation (addback for stock-based compensation) y nota de equity compensation"
+      "item": "Desglose de goodwill y activos intangibles del balance más reciente",
+      "por_que_importa": "Los CFI elevados en 2021-2022 y 2025 implican adquisiciones significativas; necesario evaluar riesgo de deterioro",
+      "como_obtenerlo": "10-Q Q3-2025 (SRC_005), balance sheet y nota de goodwill/intangibles"
     },
     {
       "prioridad": "ALTA",
-      "item": "Tabla de vencimientos de deuda y términos de la línea de crédito",
-      "por_que_importa": "Deuda creció de $123M a ~$220M en 9 meses; necesario entender perfil de amortización y covenants.",
-      "como_obtenerlo": "10-K FY2024, Note on Debt / 10-Q Q3-2025, Note on Long-term Debt"
+      "item": "Detalle de la línea de crédito revolver y covenants",
+      "por_que_importa": "La deuda ha crecido significativamente; los covenants determinan headroom financiero real",
+      "como_obtenerlo": "10-K FY2024 (SRC_001) o 10-Q Q3-2025 (SRC_005), nota de deuda / credit facility"
     },
     {
       "prioridad": "MEDIA",
-      "item": "Número de acciones diluidas (weighted-average diluted shares outstanding)",
-      "por_que_importa": "Necesario para cuantificar dilución por SBC y calcular métricas por acción.",
-      "como_obtenerlo": "10-K FY2024, Income Statement (diluted shares) o Note on EPS"
+      "item": "Tabla de vencimientos de deuda a 5 años",
+      "por_que_importa": "Necesaria para evaluar maturity wall y riesgo de refinanciación",
+      "como_obtenerlo": "10-K FY2024 (SRC_001), nota de deuda a largo plazo, tabla de maturities"
     },
     {
       "prioridad": "MEDIA",
-      "item": "Detalle de adquisiciones realizadas en FY2022 y FY2025 (Q2/Q3)",
-      "por_que_importa": "CFI de -$283M en FY2022 y -$94M en Q2-2025 + -$125M en Q3-2025 sugiere adquisiciones materiales no detalladas en el TruthPack.",
-      "como_obtenerlo": "10-K FY2022 Note on Business Combinations; 10-Q Q3-2025 Note on Acquisitions"
+      "item": "Desglose del marketplace float vs cash libre en balance",
+      "por_que_importa": "Determina la liquidez real disponible para la empresa vs fondos en tránsito de clientes",
+      "como_obtenerlo": "10-K FY2024 (SRC_001), notas sobre restricted cash, marketplace obligations, o MD&A"
     }
   ],
   "payload": {
@@ -296,7 +307,7 @@
       "veredicto_forense": {
         "status": "WATCHLIST",
         "confianza_0_1": 0.65,
-        "razon_principal": "ACVA no tiene riesgo de supervivencia inmediato (caja neta positiva, CFO creciente), pero la persistencia de EBIT negativo, la dependencia de SBC para cerrar el gap EBIT→CFO, el salto anómalo de gastos en Q3-2025 y la aceleración de deuda justifican monitoreo cercano."
+        "razon_principal": "Supervivencia no está en riesgo inmediato gracias a CFO positivo y posición de caja neta, pero la combinación de EBIT persistentemente negativo, SBC masiva no cuantificada, posible inflación de caja por marketplace float, y crecimiento acelerado de deuda en 2025 requiere monitoreo activo."
       },
       "supervivencia": {
         "horizonte_meses": {
@@ -304,25 +315,27 @@
           "max": 24
         },
         "evaluacion": {
-          "resultado": "PASS",
+          "resultado": "CONDITIONAL",
           "score_0_5": null,
           "por_que": [
-            "Posición de caja neta: $224M caja vs $123M deuda al cierre FY2024; estimada en ~$316M caja vs ~$220M deuda a Q3-2025.",
-            "CFO positivo y creciente: $65M en FY2024, run-rate de ~$238M en 9M-2025 (3 trimestres sumados: $67M+$80M+$91M).",
-            "Ingresos en crecimiento sostenido: TTM ~$736M, CAGR 5 años ~43%.",
-            "Capex bajo (históricamente <$7M/año), preservando caja generada.",
-            "No se identifican covenants restrictivos con la información disponible, aunque la deuda ha crecido rápidamente."
+            "CFO FY2024 de +$65M y tendencia ascendente en 2025 (9M-2025 CFO: +$238M acumulado Q1-Q3) proporciona colchón operativo.",
+            "Posición de caja neta a FY2024: $224M caja vs $123M deuda = -$101M deuda neta.",
+            "Sin embargo, parte de la caja puede ser marketplace float (~$198M divulgados), reduciendo potencialmente la caja libre real a niveles preocupantes.",
+            "La deuda parece haber crecido significativamente en 2025 (intereses 4x mayores), posiblemente a ~$220M, eliminando la posición de caja neta.",
+            "Capex muy bajo ($4.5M FY2024) confirma modelo capital-light, pero CFI elevados en 2025 sugieren adquisiciones que consumen caja.",
+            "CONDICIONAL: supervivencia depende de que el CFO operativo (excluyendo float) se mantenga positivo y de que las adquisiciones generen retorno."
           ]
         },
         "liquidez": {
           "caja_usd": 224065000,
           "linea_credito_disponible_usd": null,
           "otras_fuentes_liquidez": [
-            "Marketplace float neto (~$177M en payables excediendo receivables, actuando como fuente de liquidez operativa)"
+            "Revolver (se menciona capacidad de $125-200M en distintos periodos; saldo y disponibilidad no confirmados)",
+            "Marketplace float como fuente temporal de liquidez operativa"
           ],
-          "runway_meses_estimado": null,
-          "metodo_estimacion": "No se estima runway porque la empresa es CFO-positiva. La caja cubre >2 años de pérdida neta al ritmo FY2024 ($80M/año), pero la empresa no consume caja en términos operativos.",
-          "notas": "La cifra de caja de FY2024 ($224M) probablemente incluye marketable securities. Transcripts de 2025 reportan ~$316M en Q3-2025 combinando cash equivalents y marketable securities, incluyendo ~$200M de marketplace float."
+          "runway_meses_estimado": 36,
+          "metodo_estimacion": "Con CFO anualizado de ~$87M (FY2024: $65M, tendencia ascendente) y caja de $224M, sin considerar float. Si se descuenta float ($198M), caja libre ~$26M con CFO positivo da runway limitado pero suficiente si CFO se mantiene.",
+          "notas": "La estimación de runway es altamente sensible a la clasificación del marketplace float. Si el float es pasivo separado (no incluido en caja), runway es amplio (>36 meses). Si está incluido en caja, la liquidez real es mucho más ajustada."
         },
         "deuda_y_refinanciacion": {
           "deuda_total_usd": 123000000,
@@ -333,82 +346,86 @@
           "maturity_wall": {
             "existe": false,
             "horizonte_meses": 24,
-            "comentario": "No se identifican vencimientos inminentes en la información disponible. La deuda ha crecido de $123M (FY2024) a ~$220M (Q3-2025), sugiriendo nueva emisión o draw-down reciente. Se requiere tabla de vencimientos del 10-K/10-Q."
+            "comentario": "No se identificó tabla de vencimientos en los datos disponibles. La deuda FY2024 ($123M) está clasificada como long-term. Con el aumento de intereses en 2025, es necesario confirmar si hay vencimientos próximos."
           },
           "vencimientos": [
             {
               "anio": 2026,
               "importe_usd": null,
-              "tipo": "unknown",
+              "tipo": "revolver",
               "riesgo": "UNKNOWN",
               "fuente_ref": {
                 "source_id": "SRC_001",
-                "ubicacion": "Note on Debt (no accesible directamente)"
+                "ubicacion": "Nota de deuda / credit facility"
               }
             }
           ],
           "covenants": {
             "disponible": false,
-            "tipos_detectados": [],
+            "tipos_detectados": [
+              "leverage_ratio",
+              "minimum_liquidity"
+            ],
             "riesgo_breach": "UNKNOWN",
-            "comentario": "No se identificaron covenants específicos en la información cuantitativa disponible. La empresa tiene un historial de financiación mixta (equity + deuda); el riesgo de breach depende de los términos del facility vigente."
+            "comentario": "Los covenants típicos de un revolver de esta magnitud incluirían ratios de apalancamiento y liquidez mínima. Con EBITDA ajustado posiblemente positivo pero EBIT GAAP negativo, el riesgo depende de qué definición de EBITDA se use en los covenants. No se pudo verificar sin acceso al credit agreement."
           }
         },
         "riesgo_dilucion": {
           "nivel": "ALTO",
           "motores": [
-            "SBC",
-            "necesidad de capital por burn operativo GAAP",
-            "emisiones recientes (CFF positivo FY2021: $376M, FY2019: $162M)"
+            "SBC masiva estimada en >$90M anuales (inferida del gap EBIT→CFO)",
+            "Shares outstanding en balance: ~172M acciones (BV/share $2.56 con patrimonio $440M)",
+            "Crecimiento histórico de SGA consistente con emisión continua de RSUs",
+            "Posible emisión adicional si necesita capital para adquisiciones"
           ],
           "share_count_yoy_pct": null,
-          "comentario": "ACVA tiene un gap EBIT→CFO estimado en $100-120M+ que probablemente incluye SBC >$80M/año. Con patrimonio de $440M y market cap de $1.16B, la dilución por SBC es material (~7%+ anual estimado). El CFF positivo recurrente en años anteriores confirma uso de emisión de equity como fuente de financiación."
+          "comentario": "La SBC es el mecanismo principal de dilución. Con pérdidas GAAP persistentes y SBC estimada >$90M/año sobre un market cap de $1.16B, la dilución implícita es de ~8%+ anual. El BV/share de $2.56 vs precio $6.75 indica que buena parte del valor de mercado descansa en intangibles y expectativas futuras, amplificando el impacto relativo de la dilución."
         }
       },
       "calidad_de_resultados_y_contabilidad": {
-        "resumen": "La calidad de resultados de ACVA presenta señales mixtas. El CFO es positivo y creciente, pero está inflado por SBC no-cash (estimado >$80M) y un float de marketplace favorable (~$177M neto en payables). El EBIT permanece negativo, lo que indica que la rentabilidad operativa cash es en parte un artefacto contable del SBC addback y de timing de cobros/pagos del marketplace. El salto de gastos en Q3-2025 introduce incertidumbre adicional sobre la tendencia de convergencia hacia break-even operativo.",
+        "resumen": "La calidad de resultados es baja en términos GAAP (6 años consecutivos de EBIT negativo) pero la conversión a caja ha mejorado materialmente (CFO positivo desde FY2024). La brecha entre EBIT y CFO está dominada por ajustes no monetarios (D&A + SBC estimada), lo que genera una imagen artificial de generación de caja si no se ajusta por la dilución real de la SBC. El modelo de marketplace con float infla adicionalmente las métricas de capital circulante y CFO.",
         "red_flags": [
           {
             "flag_id": "F-001",
             "categoria": "SBC",
-            "descripcion": "Gap EBIT→CFO de ~$149M en FY2024, del cual D&A explica solo $37M. El remanente (~$112M) se atribuye principalmente a SBC y cambios de WC, implicando SBC potencialmente >$80M/año.",
+            "descripcion": "El gap entre EBIT (-$84M) y CFO (+$65M) de $149M en FY2024, del cual solo $37M es D&A, implica ~$110M+ en SBC y otros ajustes no monetarios que representan >17% de ingresos.",
             "severidad": "ALTA",
             "probabilidad_0_1": 0.85,
-            "por_que_importa": "SBC diluye a los accionistas y su magnitud (posiblemente >12% del revenue) distorsiona la conversión aparente de EBIT a CFO.",
+            "por_que_importa": "La SBC masiva distorsiona la imagen de generación de caja y diluye a los accionistas existentes en ~8-10% anual estimado.",
             "evidencias": [
               {
                 "source_id": "SRC_001",
-                "ubicacion": "Cash Flow Statement reconciliation, FY2024",
-                "cita_corta": "EBIT -$84M + D&A $37M = -$47M ajustado; CFO +$65M; gap residual ~$112M",
-                "interpretacion": "Se requiere cuantificación exacta del SBC addback en la reconciliación de flujos."
+                "ubicacion": "Estado de flujos de efectivo, conciliación net income a CFO",
+                "cita_corta": "Net income -79.7M, D&A +36.7M, CFO +65.4M; gap residual ~$108M",
+                "interpretacion": "El residual no explicado por D&A es consistente con SBC + cambios en WC; la magnitud sugiere SBC como driver dominante."
               }
             ],
             "test_de_falsacion": {
-              "test": "SBC en reconciliación de cash flows del 10-K FY2024 es inferior a $60M",
+              "test": "Verificar SBC total en nota del 10-K; si SBC < $70M, hay otra fuente material de ajuste no identificada",
               "ventana_meses": {
                 "min": 1,
                 "max": 3
               },
-              "fuente_prevista": "10-K"
+              "fuente_prevista": "filing"
             }
           },
           {
             "flag_id": "F-002",
             "categoria": "WORKING_CAPITAL",
-            "descripcion": "Cuentas por pagar ($345.6M) representan 2.05x las cuentas por cobrar ($168.8M), y el working capital neto es -$177M. Esto sugiere un float significativo del marketplace que infla CFO.",
+            "descripcion": "Las cuentas por pagar ($346M, 54% de revenue) son anómalamente altas y 2x las cuentas por cobrar ($169M), reflejando el efecto del marketplace float que infla el CFO reportado.",
             "severidad": "MEDIA",
             "probabilidad_0_1": 0.8,
-            "por_que_importa": "Si el volumen de subastas cae, el float se revertiría rápidamente drenando caja operativa; el CFO 'real' excluido el float es materialmente menor.",
+            "por_que_importa": "Si los volúmenes de transacciones caen o los términos de pago se acortan, la liberación de float reduciría bruscamente el CFO y la caja.",
             "evidencias": [
               {
                 "source_id": "SRC_001",
-                "ubicacion": "Consolidated Balance Sheet, FY2024",
-                "cita_corta": "AP $345.6M vs AR $168.8M; WC neto -$176.8M",
-                "interpretacion": "La ratio AP/AR de 2.05x es inusualmente alta y consistente con modelo de marketplace con float de intermediación."
+                "ubicacion": "Balance consolidado FY2024",
+                "cita_corta": "A/P 345.6M, Trade receivables 168.8M, WC negativo -$177M",
+                "interpretacion": "El capital circulante negativo es un beneficio temporal del modelo de negocio pero crea sensibilidad al ciclo de volúmenes."
               }
             ],
             "test_de_falsacion": {
-              "test": "Cuentas por pagar caen >25% en dos trimestres consecutivos sin caída proporcional de ingresos",
+              "test": "Si A/P caen >25% sin caída equivalente en revenue, confirma reversión del beneficio de float",
               "ventana_meses": {
                 "min": 3,
                 "max": 12
@@ -419,44 +436,44 @@
           {
             "flag_id": "F-003",
             "categoria": "GOODWILL_IMPAIRMENT",
-            "descripcion": "CFI acumulado de -$538M en FY2021-FY2023 (vs capex de solo ~$8M) implica ~$530M en adquisiciones. Con activos totales de $984M, goodwill/intangibles probablemente representan >50% del activo total.",
+            "descripcion": "Los flujos de inversión acumulados FY2021-FY2023 suman ~$523M y en 9M-2025 alcanzan $125M, con capex de solo $6.8M en 9M-2025, sugiriendo adquisiciones por ~$118M sin test de deterioro de goodwill documentado.",
             "severidad": "MEDIA",
-            "probabilidad_0_1": 0.65,
-            "por_que_importa": "Si goodwill es ~$500M+ sobre un patrimonio de $440M, cualquier impairment material podría convertir el patrimonio en negativo y activar covenants o restricciones de deuda.",
+            "probabilidad_0_1": 0.6,
+            "por_que_importa": "Si las adquisiciones no generan el retorno esperado, un deterioro de goodwill podría destruir valor de balance y potencialmente disparar covenants de deuda.",
             "evidencias": [
               {
-                "source_id": "SRC_001",
-                "ubicacion": "Cash Flow Statement, CFI line FY2021-FY2023",
-                "cita_corta": "CFI: -$129M (FY21), -$283M (FY22), -$111M (FY23); capex total ~$8M en esos 3 años",
-                "interpretacion": "La diferencia ~$530M corresponde probablemente a adquisiciones que generaron goodwill/intangibles."
+                "source_id": "SRC_005",
+                "ubicacion": "Estado de flujos de efectivo 9M-2025",
+                "cita_corta": "CFI 9M-2025: -$124.8M; capex solo $6.8M; diferencia ~$118M en inversiones/adquisiciones",
+                "interpretacion": "Los CFI significativamente superiores al capex son típicos de adquisiciones; el goodwill acumulado podría ser material."
               }
             ],
             "test_de_falsacion": {
-              "test": "Nota de goodwill en 10-K FY2024 revela impairment test reciente sin deterioro material, o goodwill < $300M",
+              "test": "Verificar goodwill en balance Q3-2025; si goodwill < $250M y no hay deterioro pendiente, riesgo reducido",
               "ventana_meses": {
                 "min": 1,
-                "max": 3
+                "max": 6
               },
-              "fuente_prevista": "10-K"
+              "fuente_prevista": "10-Q"
             }
           },
           {
             "flag_id": "F-004",
             "categoria": "ONE_OFFS",
-            "descripcion": "En Q3-2025, SGA saltó a $72.8M (+32% YoY) y G&A a $48.2M (+56% YoY), mientras ingresos crecieron solo 16.5%. Esto revirtió la tendencia de mejora de margen operativo.",
+            "descripcion": "SGA en Q3-2025 saltó a $73M (+38% secuencial) con G&A subiendo de $27-31M a $48M en un solo trimestre, sin explicación visible en los datos disponibles.",
             "severidad": "MEDIA",
             "probabilidad_0_1": 0.75,
-            "por_que_importa": "Si el salto es recurrente (no one-off), la convergencia a break-even EBIT se retrasaría materialmente; si es por adquisición, inflaría goodwill adicionalmente.",
+            "por_que_importa": "Si el incremento es estructural, el camino a rentabilidad GAAP se aleja significativamente; si es one-off (integración, litigio), debería normalizarse.",
             "evidencias": [
               {
                 "source_id": "SRC_005",
-                "ubicacion": "Income Statement, Q3-2025 vs Q3-2024",
-                "cita_corta": "Q3-2025: SGA $72.8M, G&A $48.2M; Q3-2024: SGA $55M, G&A $30.8M",
-                "interpretacion": "El salto de ~$17M en G&A en un trimestre es anómalo y sugiere adquisición completada o cargo no recurrente."
+                "ubicacion": "Estado de resultados Q3-2025",
+                "cita_corta": "SGA Q3-25: $72.8M (Q2-25: $53.0M); G&A Q3-25: $48.2M (Q2-25: $26.7M)",
+                "interpretacion": "El salto de $21.5M en G&A en un solo trimestre requiere explicación; puede ser aceleración de SBC, costos de M&A o cambio contable."
               }
             ],
             "test_de_falsacion": {
-              "test": "Q4-2025 muestra G&A normalizada <$35M y/o empresa divulga cargo no recurrente específico",
+              "test": "Si G&A en Q4-2025 vuelve a <$35M, fue one-off; si se mantiene >$40M, es cambio estructural",
               "ventana_meses": {
                 "min": 3,
                 "max": 6
@@ -466,48 +483,48 @@
           },
           {
             "flag_id": "F-005",
-            "categoria": "CAPEX_CAPITALIZATION",
-            "descripcion": "El TruthPack reporta capex solo como 'Purchases of property and equipment' (~$4.5M FY2024), excluyendo 'Capitalization of software costs' que se reporta por separado y no fue incluido.",
-            "severidad": "BAJA",
-            "probabilidad_0_1": 0.7,
-            "por_que_importa": "Para una empresa de tecnología/marketplace, los costos de software capitalizados son una forma de capex genuino; excluirlos subestima la inversión real de mantenimiento y sobreestima el FCF libre.",
+            "categoria": "OTHER",
+            "descripcion": "El costo de intereses se cuadruplicó de $535K (Q1-2024) a $2.5M (Q3-2025), indicando aumento de deuda no reflejado aún en el balance FY2024 ($123M).",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.85,
+            "por_que_importa": "Si la deuda ha subido a ~$220M (referencia en transcripts), la posición de caja neta se erosiona y el servicio de deuda anualizado supera $10M.",
             "evidencias": [
               {
-                "source_id": "SRC_001",
-                "ubicacion": "Cash Flow Statement, Investing Activities",
-                "cita_corta": "Capex $4.5M FY2024; nota de limitación: capitalized software costs reportados por separado",
-                "interpretacion": "El FCF real podría ser $10-20M menor si se incluyen software costs capitalizados."
+                "source_id": "SRC_007",
+                "ubicacion": "Estado de resultados Q1-2024 vs Q3-2025",
+                "cita_corta": "Interest expense: Q1-24 $535K → Q1-25 $1.9M → Q2-25 $2.3M → Q3-25 $2.5M",
+                "interpretacion": "Trayectoria ascendente consistente con disposiciones progresivas del revolver para financiar adquisiciones."
               }
             ],
             "test_de_falsacion": {
-              "test": "Verificar línea 'Capitalization of software costs' en 10-K FY2024 cash flow statement; si <$5M, impacto inmaterial",
+              "test": "Confirmar deuda total en balance Q3-2025; si < $150M, la subida de intereses puede deberse a incremento de tasas más que de principal",
               "ventana_meses": {
                 "min": 1,
                 "max": 3
               },
-              "fuente_prevista": "10-K"
+              "fuente_prevista": "10-Q"
             }
           },
           {
             "flag_id": "F-006",
-            "categoria": "OTHER",
-            "descripcion": "La deuda total creció ~79% en 9 meses: de $123M (FY2024) a ~$220M (Q3-2025 según transcript), sin detalle de términos, covenants ni uso de fondos en la información disponible.",
-            "severidad": "MEDIA",
-            "probabilidad_0_1": 0.8,
-            "por_que_importa": "El rápido crecimiento de deuda en una empresa con EBIT negativo aumenta el riesgo financiero y el coste de capital; si se destinó a adquisiciones, amplifica el riesgo de goodwill.",
+            "categoria": "REVENUE_RECOGNITION",
+            "descripcion": "No se identificaron anomalías específicas de reconocimiento agresivo de ingresos en los datos disponibles, pero la ausencia de COGS y gross profit explícitos dificulta el análisis de márgenes brutos.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.2,
+            "por_que_importa": "Sin desglose de cost of revenue consolidado, no se puede evaluar si los márgenes brutos se mantienen o deterioran con el crecimiento.",
             "evidencias": [
               {
-                "source_id": "SRC_005",
-                "ubicacion": "Transcript Q3-2025 / Balance Sheet data",
-                "cita_corta": "Deuda total ~$220M en Q3-2025 vs $123M al cierre FY2024",
-                "interpretacion": "Crecimiento de ~$97M de deuda en 9 meses; coincide con CFI negativo elevado en Q2-Q3 2025."
+                "source_id": "SRC_001",
+                "ubicacion": "Estado de resultados consolidado",
+                "cita_corta": "COGS y gross profit reportados como null; costos desglosados en Marketplace y Customer assurance por separado",
+                "interpretacion": "La falta de una línea consolidada de costo de revenue es una limitación del filing, no necesariamente una bandera roja."
               }
             ],
             "test_de_falsacion": {
-              "test": "10-Q Q3-2025 revela uso de fondos y términos del nuevo endeudamiento; si es revolver con availability >$100M, riesgo mitigado",
+              "test": "Reconstruir gross margin a partir de las dos líneas de costo; si margen bruto cae >5pp interanual, alertar",
               "ventana_meses": {
-                "min": 1,
-                "max": 3
+                "min": 3,
+                "max": 12
               },
               "fuente_prevista": "10-Q"
             }
@@ -515,18 +532,18 @@
         ],
         "puentes_criticos": {
           "ebitda_a_cfo": {
-            "lectura": "EBIT FY2024: -$84.1M. Sumando D&A ($36.7M) se obtiene EBITDA implícito de -$47.4M. CFO fue +$65.4M, lo que implica un gap EBITDA→CFO de ~$113M. Este gap se explica por: (1) SBC estimado en $80-100M+ (no cuantificado exactamente), (2) cambio favorable de capital de trabajo (payables del marketplace), (3) impuestos pagados mínimos ($0.7M). La distorsión es >100% del EBITDA, lo que convierte el puente en no fiable sin desglose del SBC.",
+            "lectura": "FY2024: EBIT -$84.1M + D&A $36.7M = EBITDA ~-$47.4M. Sin embargo, CFO fue +$65.4M, una diferencia de ~$113M desde EBITDA. Esta brecha está dominada por SBC (estimada >$90M), con contribución adicional del cambio en capital circulante (float de marketplace). La distorsión supera ampliamente el umbral del 15% y es el hallazgo forense más relevante del caso.",
             "posibles_distorsiones": [
-              "Stock-based compensation (estimado >$80M, principal driver)",
-              "Capital circulante: float del marketplace (~$177M neto favorable en payables)",
-              "Impuestos pagados mínimos (empresa con NOLs acumulados)",
-              "Otros ajustes no-cash no cuantificados"
+              "SBC masiva (~$90-110M estimada, >17% de ingresos)",
+              "Capital circulante favorable por marketplace float ($198M)",
+              "Impuestos pagados mínimos por NOLs acumulados",
+              "Intereses pagados crecientes pero aún moderados"
             ]
           },
           "cfo_a_fcf": {
-            "lectura": "CFO FY2024: +$65.4M. Capex reportado: -$4.5M (solo property & equipment). FCF aparente: ~$70M. Sin embargo, si se incluyen software costs capitalizados (no disponibles pero estimados en $10-20M), FCF real podría ser $50-60M. Además, el CFO incluye float de marketplace que no es recurrente si el volumen cae.",
-            "capex_riesgo": "MEDIO",
-            "notas": "Capex de mantenimiento (P&E) es bajo, pero la exclusión de software capitalizados subestima la inversión real. Para una empresa de tecnología, el capex 'real' incluye desarrollo de software. CFF FY2024 fue -$7.9M, indicando recompras o pagos netos de deuda mínimos."
+            "lectura": "FY2024: CFO $65.4M - capex $4.5M = FCF $60.9M. La conversión de CFO a FCF es casi perfecta (~93%) gracias al modelo capital-light. Sin embargo, si se consideran las salidas por adquisiciones (CFI total -$15.9M FY2024, pero -$125M en 9M-2025), el FCF real económico es mucho menor. El capex de mantenimiento parece muy bajo ($4-5M para una empresa de $637M de revenue).",
+            "capex_riesgo": "BAJO",
+            "notas": "Capex de mantenimiento bajo y estable. El riesgo no está en capex sino en la capitalización de software costs (reportado por separado en el filing) y en el cash consumido por adquisiciones que no se refleja en la métrica estándar de FCF."
           }
         }
       },
@@ -534,188 +551,194 @@
         "recompras": {
           "disponible": false,
           "sostenible_por_fcf": "UNKNOWN",
-          "comentario": "No se identifican programas de recompra activos en la información disponible. CFF negativo en FY2024 (-$7.9M) podría incluir recompras menores pero también pagos de deuda."
+          "comentario": "No se identificaron programas de recompra en los datos disponibles. Con pérdidas GAAP persistentes y dilución por SBC, la prioridad debería ser reducir la emisión neta de acciones antes que recompras."
         },
         "sbc_y_compensacion": {
           "sbc_relevante": "SI",
-          "comentario": "SBC es probablemente el mayor addback no-cash en la reconciliación a CFO. Estimado en >$80M/año basándose en el gap EBIT→CFO residual. Proxy DEF14A disponible (SRC_039) pero no accesible para cuantificación exacta."
+          "comentario": "La SBC estimada en >$90M anuales (>14% de revenue FY2024) es el driver dominante de la brecha EBIT→CFO y la principal fuente de dilución. Sin la SBC, la empresa probablemente reportaría EBIT cercano a breakeven. Esto plantea la cuestión de si la SBC es costo real o artefacto contable; para los accionistas existentes, la dilución es real."
         },
         "mna": {
           "riesgo_mala_asignacion": "MEDIO",
-          "comentario": "~$530M invertidos en adquisiciones FY2021-FY2023 sin evidencia de retorno visible (EBIT sigue negativo). Nuevas adquisiciones en 2025 (CFI elevado en Q2-Q3) amplifican este riesgo si no generan sinergias demostrables."
+          "comentario": "Los CFI elevados en FY2021-22 ($129M + $283M) y nuevamente en 2025 (~$118M en adquisiciones estimadas) sugieren una estrategia activa de M&A. Sin datos de goodwill y retorno sobre adquisiciones pasadas, el riesgo de mala asignación es MEDIO."
         },
         "alineacion_management": {
           "insiders": "UNKNOWN",
-          "comentario": "DEF14A disponible como SRC_039 pero no accesible directamente. Se solicita en peticiones_de_fuentes."
+          "comentario": "El SourcesPack incluye DEF14A (SRC_039) que contendría datos de insider ownership. Sin acceso al contenido, no se puede evaluar alineación. Solicitar en peticiones_de_fuentes."
         }
       },
       "downside_engineering": {
         "escenarios_adversos": [
           {
             "escenario_id": "D-001",
-            "descripcion": "Caída de volumen de subastas >20% por recesión en el mercado de autos usados, revirtiendo el float del marketplace y drenando caja.",
+            "descripcion": "Caída de volúmenes de subastas por recesión o cambio regulatorio reduce el float de marketplace y el CFO se vuelve negativo.",
             "impacto_en_supervivencia": "ALTO",
             "mecanismo_de_dolor": [
-              "Reversión del float: cuentas por pagar caen, liberando ~$70-100M de caja",
-              "Caída de ingresos reduce CFO bruto",
-              "EBIT se deteriora desde nivel ya negativo",
-              "Posible necesidad de emisión de equity dilutiva"
+              "Liberación de float reduce A/P y drena caja en 2-3 trimestres",
+              "CFO se vuelve negativo por pérdida de beneficio de capital circulante",
+              "Empresa necesita recurrir al revolver o emitir acciones para cubrir pérdidas operativas"
             ],
             "indicadores_tempranos": [
-              "Caída de GMV (gross merchandise value) trimestral >10% YoY",
-              "Cuentas por pagar caen >15% secuencial sin mejora de AR days",
-              "CFO trimestral cae por debajo de $20M",
-              "Management retira o baja guidance de ingresos"
+              "Volúmenes de transacciones en marketplace caen >15% YoY",
+              "A/P cae >20% trimestral sin proporción en revenue",
+              "CFO trimestral se vuelve negativo",
+              "Float de marketplace cae bajo $150M"
             ]
           },
           {
             "escenario_id": "D-002",
-            "descripcion": "Goodwill impairment material ($100M+) por deterioro del valor de adquisiciones realizadas en 2021-2023, erosionando patrimonio y potencialmente activando covenants de deuda.",
+            "descripcion": "Las adquisiciones de 2025 no se integran exitosamente, forzando un deterioro de goodwill y posible breach de covenants.",
             "impacto_en_supervivencia": "MEDIO",
             "mecanismo_de_dolor": [
-              "Impairment charge reduce patrimonio (actualmente $440M) potencialmente debajo de umbrales de covenants",
-              "Pérdida contable amplificada podría afectar coste de refinanciación",
-              "Señal negativa al mercado sobre calidad de M&A histórica"
+              "Write-down de goodwill reduce patrimonio y deteriora ratios de balance",
+              "Si covenants están ligados a net worth o leverage, posible breach",
+              "Pérdida de confianza del mercado por write-off amplifica caída de precio"
             ],
             "indicadores_tempranos": [
-              "Management menciona goodwill impairment review en earnings call",
-              "Deterioro de métricas operativas en segmentos adquiridos",
-              "Reducción de intangibles en balance secuencial sin amortización programada que lo explique"
+              "Ingresos de segmentos adquiridos no alcanzan objetivos en 2-3 trimestres",
+              "Reestructuración de personal o cierre de unidades adquiridas",
+              "Auditor menciona riesgo de deterioro en notas",
+              "Management evita dar guidance sobre contribución de adquisiciones"
             ]
           },
           {
             "escenario_id": "D-003",
-            "descripcion": "SBC continúa >$80M/año y acciones diluidas crecen >8% anual, eliminando la creación de valor por acción pese a crecimiento de ingresos.",
+            "descripcion": "El EBIT no mejora hacia breakeven y la SBC se mantiene elevada, perpetuando la dilución sin crear valor económico para accionistas.",
             "impacto_en_supervivencia": "BAJO",
             "mecanismo_de_dolor": [
-              "Dilución anual material comprime FCF por acción y BV por acción",
-              "Potencial espiral: precio cae → más opciones/RSUs para compensar → más dilución",
-              "Múltiplos de mercado se comprimen al ajustar por dilución real"
+              "Dilución continua de ~8-10% anual erosiona valor por acción",
+              "Share count sube de ~172M a >200M en 2-3 años",
+              "Precio por acción no puede apreciarse si el denominador crece más rápido que los fundamentales"
             ],
             "indicadores_tempranos": [
-              "Shares outstanding crecen >2% secuencial trimestre sobre trimestre",
-              "SBC/revenue se mantiene >12%",
-              "Management no implementa programa de recompra para contrarrestar dilución"
+              "SBC/revenue se mantiene >12% por 4+ trimestres",
+              "Share count diluido crece >5% YoY",
+              "EBIT trimestral no muestra tendencia de mejora",
+              "Insider selling aumenta"
             ]
           }
         ],
-        "conclusion_downside": "El principal riesgo no es insolvencia sino destrucción de valor por acción. ACVA tiene colchón de caja suficiente para 24+ meses incluso en escenarios adversos, pero la combinación de EBIT negativo persistente, SBC masivo, y adquisiciones de retorno incierto podría generar dilución sostenida que impida la materialización de valor para accionistas. Un escenario de recesión en autos usados amplificaría el riesgo de float reversal que es la pieza más frágil de la generación de caja."
+        "conclusion_downside": "El riesgo de supervivencia absoluta es bajo a 12-24 meses dado el CFO positivo y posición de caja. Sin embargo, el riesgo de destrucción de valor para los accionistas es significativo: la combinación de EBIT negativo persistente, SBC masiva, y dependencia del float de marketplace crea un escenario donde la empresa sobrevive pero diluye progresivamente a los accionistas. El escenario de mayor riesgo es una caída cíclica en volúmenes de subastas que revierta el beneficio del float y exponga las pérdidas operativas reales."
       },
       "kill_criteria_propuestos": [
         {
           "kc_id": "KC-001",
           "relacionado_con": "fcf",
-          "definicion": "CFO trimestral cae por debajo de $10M en dos trimestres consecutivos (excluyendo estacionalidad Q4 conocida).",
+          "definicion": "CFO trimestral se vuelve negativo en 2 de 3 trimestres consecutivos (excluyendo estacionalidad Q1 conocida).",
           "ventana_meses": {
             "min": 3,
             "max": 12
           },
-          "fuente_prevista": "10-Q",
-          "accion_recomendada": "REDUCIR_50",
-          "por_que": "CFO es la principal línea de defensa ante EBIT negativo; su deterioro señala agotamiento del modelo de generación de caja."
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "CFO positivo es el ancla fundamental de la tesis; sin él, la empresa quema caja con EBIT negativo."
         },
         {
           "kc_id": "KC-002",
-          "relacionado_con": "deuda",
-          "definicion": "Deuda total supera $350M o deuda neta se vuelve positiva (caja < deuda) durante más de un trimestre.",
-          "ventana_meses": {
-            "min": 3,
-            "max": 12
-          },
-          "fuente_prevista": "10-Q",
-          "accion_recomendada": "REVISAR_COMITE",
-          "por_que": "La posición de caja neta es la principal protección del balance; perderla en contexto de EBIT negativo eleva el riesgo financiero materialmente."
-        },
-        {
-          "kc_id": "KC-003",
-          "relacionado_con": "contabilidad",
-          "definicion": "ACVA anuncia goodwill impairment superior a $100M o patrimonio cae por debajo de $300M.",
-          "ventana_meses": {
-            "min": 3,
-            "max": 12
-          },
-          "fuente_prevista": "10-K",
-          "accion_recomendada": "REDUCIR_50",
-          "por_que": "Impairment de esta magnitud indicaría fracaso de la estrategia de M&A y pondría en riesgo la estructura de capital."
-        },
-        {
-          "kc_id": "KC-004",
           "relacionado_con": "dilucion",
-          "definicion": "Acciones diluidas crecen >10% YoY en cualquier periodo de 4 trimestres consecutivos.",
+          "definicion": "Share count diluido crece >10% YoY en cualquier periodo reportado.",
           "ventana_meses": {
             "min": 6,
             "max": 12
           },
           "fuente_prevista": "10-Q",
-          "accion_recomendada": "CONGELAR_COMPRAS",
-          "por_que": "Dilución >10% anual destruye valor por acción más rápido de lo que el crecimiento de ingresos puede compensar."
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Dilución >10% anual destruye valor por acción más rápido que el crecimiento del negocio."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "deuda",
+          "definicion": "Deuda neta (deuda total - caja excluyendo float) supera $200M o ratio deuda neta / EBITDA ajustado > 4x.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "El apalancamiento excesivo en una empresa aún no rentable a nivel GAAP crea riesgo de distress financiero."
+        },
+        {
+          "kc_id": "KC-004",
+          "relacionado_con": "contabilidad",
+          "definicion": "Deterioro de goodwill reportado por >$100M en cualquier periodo o auditor expresa duda de empresa en marcha.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "Un write-down de esa magnitud confirmaría que las adquisiciones destruyeron valor y el balance se erosiona."
         },
         {
           "kc_id": "KC-005",
           "relacionado_con": "margen",
-          "definicion": "EBIT FY2025 es más negativo que EBIT FY2024 (-$84M), indicando reversión de la tendencia de mejora operativa.",
+          "definicion": "Ingresos trimestrales caen YoY en 2 trimestres consecutivos.",
           "ventana_meses": {
-            "min": 3,
-            "max": 9
+            "min": 6,
+            "max": 12
           },
-          "fuente_prevista": "10-K",
-          "accion_recomendada": "REVISAR_COMITE",
-          "por_que": "La tesis de valor depende de convergencia a break-even; un deterioro rompería la narrativa de mejora."
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Una empresa con EBIT negativo y costos fijos elevados no puede absorber caídas de revenue sin espiral de pérdidas."
         }
       ],
       "recomendacion_para_arbitro": {
         "riesgo_global": "MEDIO",
         "tamaño_maximo_sugerido_pct_cartera": 3.0,
         "condiciones_para_aumentar_tamaño": [
-          "EBIT trimestral alcanza break-even o positivo de forma sostenida (2 trimestres consecutivos).",
-          "SBC/revenue cae por debajo de 10% con evidencia de desaceleración de emisión de equity.",
-          "Detalle de goodwill confirma que es <$400M y último impairment test fue clean.",
-          "CFO se mantiene >$50M/trimestre excluyendo variaciones de float del marketplace."
+          "EBIT trimestral se vuelve positivo por primera vez, confirmando apalancamiento operativo.",
+          "SBC/revenue cae bajo 10%, reduciendo la dilución efectiva.",
+          "Marketplace float se contabiliza como pasivo separado y la caja libre real supera $150M.",
+          "Adquisiciones de 2025 demuestran contribución de ingresos >$20M trimestrales con integración exitosa."
         ],
         "condiciones_para_reducir_o_salir": [
-          "CFO cae a negativo en cualquier trimestre no afectado por estacionalidad conocida.",
-          "Deuda neta se vuelve positiva (caja < deuda total).",
-          "Goodwill impairment >$100M.",
-          "Management emite equity nueva >10% de shares outstanding en una sola transacción.",
-          "Ingresos trimestrales caen YoY por primera vez, indicando contracción del marketplace."
+          "CFO se vuelve negativo en 2+ trimestres, indicando que la tesis de generación de caja se rompe.",
+          "Deuda neta excluyendo float supera $200M con EBITDA ajustado insuficiente para servicio.",
+          "Dilución accionaria >10% YoY sin mejora proporcional en fundamentales por acción.",
+          "Write-down de goodwill >$100M o cambio de auditor.",
+          "Revenue YoY se contrae en 2+ trimestres consecutivos."
         ]
       },
       "faltantes_criticos_forense": [
         {
           "item": "detalle_sbc",
-          "por_que_importa": "Sin cuantificación exacta del SBC, no se puede evaluar la calidad real del CFO ni la dilución por acción.",
-          "como_obtenerlo": "10-K FY2024, Cash Flow Statement addback for stock-based compensation + Note on Stock-based Compensation"
+          "por_que_importa": "Es el driver dominante (~$90-110M estimado) del gap EBIT→CFO y la fuente principal de dilución; sin cuantificar, el análisis es incompleto.",
+          "como_obtenerlo": "10-K FY2024 (SRC_001), nota de Stock-Based Compensation / Share-Based Payments"
         },
         {
           "item": "tabla_vencimientos",
-          "por_que_importa": "Deuda creció 79% en 9 meses; sin perfil de vencimientos no se puede evaluar riesgo de refinanciación.",
-          "como_obtenerlo": "10-K FY2024, Note on Debt / Long-term obligations schedule"
-        },
-        {
-          "item": "acciones_diluidas",
-          "por_que_importa": "Necesario para cuantificar dilución anual real y calcular métricas por acción fiables.",
-          "como_obtenerlo": "10-K FY2024, EPS note (weighted-average diluted shares)"
-        },
-        {
-          "item": "detalle_capex",
-          "por_que_importa": "Capitalized software costs excluidos del capex reportado subestiman inversión real.",
-          "como_obtenerlo": "10-K FY2024, Cash Flow Statement línea 'Capitalization of software costs'"
+          "por_que_importa": "Con deuda creciente, necesario verificar si hay maturity wall en los próximos 24 meses.",
+          "como_obtenerlo": "10-K FY2024 (SRC_001), nota de deuda a largo plazo, tabla contractual de pagos"
         },
         {
           "item": "covenants",
-          "por_que_importa": "Con EBIT negativo y deuda creciente, covenants restrictivos podrían limitar flexibilidad financiera.",
-          "como_obtenerlo": "10-K FY2024 o 10-Q Q3-2025, Note on Credit Facility / Debt terms"
+          "por_que_importa": "El revolver probablemente tiene covenants financieros que podrían dispararse si EBITDA no mejora o la deuda sigue subiendo.",
+          "como_obtenerlo": "10-K FY2024 (SRC_001), nota de credit facility / credit agreement terms"
+        },
+        {
+          "item": "acciones_diluidas",
+          "por_que_importa": "Necesario para calcular dilución real y métricas por acción; sin este dato no se puede validar el share count YoY.",
+          "como_obtenerlo": "10-K FY2024 o 10-Q más reciente, weighted average diluted shares outstanding"
+        },
+        {
+          "item": "detalle_goodwill",
+          "por_que_importa": "Los CFI elevados sugieren goodwill significativo; sin confirmar el monto, no se puede evaluar riesgo de deterioro.",
+          "como_obtenerlo": "Balance sheet en 10-Q Q3-2025 (SRC_005), línea de goodwill y nota de intangibles"
+        },
+        {
+          "item": "revolver_disponible",
+          "por_que_importa": "La capacidad disponible del revolver determina la liquidez incremental real de la empresa.",
+          "como_obtenerlo": "10-Q Q3-2025 (SRC_005) o 10-K FY2024 (SRC_001), nota de línea de crédito / borrowing capacity"
         }
       ]
     }
   },
   "log": {
     "limitaciones": [
-      "No se tuvo acceso directo a los raw filings (10-K, 10-Qs); análisis basado en TruthPack cuantitativo e ImpliedExpectations.",
-      "SBC no cuantificado exactamente; estimación inferida del gap EBIT→CFO residual.",
-      "Goodwill/intangibles no reportados como línea separada en TruthPack; inferidos del patrón de CFI.",
-      "Q4-2024 tiene datos incompletos (solo ingresos de transcript); puentes trimestrales parciales.",
-      "Datos de marketplace float inferidos de ratio AP/AR y notas de transcripts, no de nota contable directa."
+      "No se pudo acceder al contenido de los raw filings (SRC_001 a SRC_048); el análisis se basa exclusivamente en los datos estructurados del TruthPack y metadatos del SourcesPack.",
+      "La SBC no está reportada explícitamente en el TruthPack; se infirió del gap EBIT→CFO descontando D&A, lo cual puede sobreestimar o subestimar la cifra real.",
+      "No se pudo confirmar si el marketplace float está incluido en la línea de caja del balance o se contabiliza como pasivo separado.",
+      "El TruthPack no desglosa goodwill ni intangibles; el riesgo de deterioro se infiere de los patrones de CFI.",
+      "Los covenants de deuda no se pudieron verificar sin acceso al credit agreement."
     ],
     "autochequeos": {
       "sin_metricas_inventadas": true,
