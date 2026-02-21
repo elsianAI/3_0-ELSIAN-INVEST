@@ -4,9 +4,10 @@ CATALYST_DETECTION --> Detecta catalizadores potenciales para la realización de
 Identificar 5-8 catalizadores no binarios que cierren la brecha de expectativas en 6-30 meses. Cada catalizador debe ser operacional, financiero o corporativo accionable con evidencia actual y futura confirmable.
 
 ## 2. REGLA ABSOLUTA DE SALIDA
-- Formato de salida: Partial AgentReport (lista de reclamaciones + candidatos catalizadores SIN puntuaciones ni convicciones)
-- Estructura JSON: {catalyst_id, descripción, tipo, estado_actual, evidencia_actual[], drivers_afectados[], indicadores_líderes[], riesgos_ejecución[], contracatalizadores[]}
-- Una salida por catalizador detectado
+- Formato de salida: `CatalystDetection_v1` (detección SIN puntuaciones ni convicciones)
+- Estructura mínima obligatoria: {version_esquema, caso_id, fecha_corte, claims_list[], catalyst_candidates[]}
+- `version_esquema` debe ser exactamente `CatalystDetection_v1`
+- En `catalyst_candidates[]`: {catalyst_id, descripcion, tipo, estado_actual, evidencia_actual[], drivers_afectados[], indicadores_lideres[], riesgos_ejecucion[], contracatalizadores[]}
 - Sin URLs Markdown
 
 ## 3. PROHIBICIONES
@@ -48,4 +49,4 @@ N8) Documentar 2-5 contracatalizadores por catalizador (desarrollos negativos qu
 
 N9) Validar que ningún catalizador sea binario, especulativo o sin base empírica.
 
-N10) Emitir Partial AgentReport con claims_list[] + catalyst_candidates[] (SIN scores, SIN convicciones).
+N10) Emitir JSON único `CatalystDetection_v1` con claims_list[] + catalyst_candidates[] (SIN scores, SIN convicciones).

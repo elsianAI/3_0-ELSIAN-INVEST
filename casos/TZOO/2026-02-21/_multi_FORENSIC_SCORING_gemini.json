@@ -1,0 +1,399 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260221_TZOO",
+  "fecha_corte": "2026-02-21",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp-01-21",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260221_TZOO",
+    "implied_expectations_caso_id": "CASE_20260221_TZOO",
+    "forensic_detection_id": "ForensicDetection_v1"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Deterioro estructural severo: Margen operativo colapsó de 22% (FY24) a 7.5% (FY25) y 2.5% (Q4-25) por explosión de COGS (+73%).",
+      "Asignación de capital depredadora: Recompras de acciones (2.3x FCF) consumieron liquidez y llevaron el patrimonio a terreno negativo (-$3.1M).",
+      "Modelo de negocio bajo estrés: Dependencia crítica del float de Merchant Payables ($14-23M) con caja declinante ($10M est.).",
+      "Gobernanza cuestionable: Préstamos a accionistas, activos fiscales inciertos (MTE) y debilidad material en controles internos.",
+      "Veredicto técnico: Supervivencia condicional a la suspensión inmediata de recompras y estabilización de márgenes."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.9
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_FOR_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La estructura de costos ha sufrido una ruptura estructural, con COGS creciendo 73% vs ingresos +9%, eliminando la rentabilidad operativa.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2024 vs FY2025",
+          "cita_corta": "COGS $10.5M a $18.1M; Margen Op 22% a 7.5%",
+          "interpretacion": "Compresión de márgenes no explicada por crecimiento de volumen."
+        }
+      ],
+      "falsacion": {
+        "test": "COGS/Ingresos revierte a rango 12-14% en Q1-Q2 2026",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_FOR_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La política de recompras agresiva (>$13M/año) es insostenible con FCF actual ($5.6M) y patrimonio negativo; su continuidad provocará crisis de liquidez en <12 meses.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "cash_flow FY2025",
+          "cita_corta": "CFF -$13.1M vs FCF $5.6M",
+          "interpretacion": "Burn rate de caja discrecional excede generación orgánica."
+        }
+      ],
+      "falsacion": {
+        "test": "Suspensión o reducción drástica (>80%) de recompras en próximos reportes",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_FOR_001",
+      "descripcion": "Margen operativo GAAP de Q1 2026 se mantendrá por debajo del 10% (lejos del histórico 20%+).",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Operating Income / Revenue < 0.10 en 10-Q",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_FOR_002",
+      "descripcion": "La caja total (excl. restricted) caerá por debajo de $8M en Q1 2026 si continúan recompras.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Cash and cash equivalents < 8,000,000 USD",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FOR_003",
+      "descripcion": "Merchant Payables se mantendrán por encima del 100% de la Caja Disponible.",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Merchant Payables > Cash & Equivalents",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de vencimientos de Merchant Payables",
+      "por_que_importa": "Crítico para evaluar riesgo de 'run on the bank' si ventas caen.",
+      "como_obtenerlo": "Notas a los estados financieros (10-K FY2025 completo)"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Confirmación de deuda financiera en 10-K FY2025",
+      "por_que_importa": "Validar asunción de deuda cero fuera de leases.",
+      "como_obtenerlo": "Balance Sheet 10-K"
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar sostenibilidad financiera ante deterioro de márgenes y política de capital agresiva.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.9,
+        "razon_principal": "Deterioro operativo agudo (márgenes a cero) combinado con vaciamiento de caja por recompras en entidad con patrimonio negativo."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "CONDITIONAL",
+          "score_0_5": 2,
+          "por_que": [
+            "Liquidez apretada: Caja cayendo, patrimonio negativo.",
+            "Operación en deterioro: Margen operativo Q4 2.5%, Net Income Q4 negativo.",
+            "Supervivencia depende exclusivamente de la voluntad de la gerencia de detener recompras.",
+            "Riesgo estructural: Costos (COGS) subiendo mucho más rápido que ingresos."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 10087000,
+          "linea_credito_disponible_usd": 0,
+          "otras_fuentes_liquidez": [
+            "Flujo de caja operativo (aún positivo $5.7M FY25)",
+            "No hay líneas confirmadas"
+          ],
+          "runway_meses_estimado": 16,
+          "metodo_estimacion": "Caja estimada dic-25 / (Burn por recompras + Capex mantenimiento). Asume CFO cubre opex básico pero no recompras.",
+          "notas": "Caja estimada basada en delta cash FY2025."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 0,
+          "deuda_neta_usd": -10087000,
+          "coste_deuda_aprox_pct": 0,
+          "coverage_intereses": null,
+          "net_debt_ebitda": -1.46,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "Sin deuda financiera tradicional. Pasivos principales son operativos (leases, payables)."
+          },
+          "vencimientos": [],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "UNKNOWN",
+            "comentario": "Sin deuda bancaria reportada."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "ALTO",
+          "motores": [
+            "Patrimonio negativo",
+            "Necesidad de liquidez si recompras vacían caja"
+          ],
+          "share_count_yoy_pct": -4.8,
+          "comentario": "Históricamente anti-dilutiva (buybacks), pero el balance actual hace probable una emisión futura de emergencia."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Calidad baja y en deterioro. Ganancias sostenidas por reducción de impuestos y otros ingresos, no por operación core.",
+        "red_flags": [
+          {
+            "flag_id": "RF-01",
+            "categoria": "REVENUE_RECOGNITION",
+            "descripcion": "Explosión de COGS (+73%) sin correlación con ventas (+9%).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.95,
+            "por_que_importa": "Indica pérdida de apalancamiento operativo o cambio en mix de negocio hacia bajo margen.",
+            "evidencias": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "Income Statement FY24 vs FY25",
+                "cita_corta": "COGS 10.5M -> 18.1M",
+                "interpretacion": "Erosión directa de Gross Profit."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "COGS pct revenue vuelve a <15% en Q1 2026",
+              "ventana_meses": {
+                "min": 3,
+                "max": 3
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "RF-03",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Merchant Payables significativos financiando la operación (float riesgoso).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.8,
+            "por_que_importa": "Pasivo contingente oculto; si ventas bajan, el cash outflow es inmediato.",
+            "evidencias": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "Balance Sheet",
+                "cita_corta": "Merchant Payables > Cash en varios periodos",
+                "interpretacion": "Dependencia de ciclo de conversión de efectivo negativo."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Reducción ordenada de payables sin impactar liquidez",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-09",
+            "categoria": "RELATED_PARTIES",
+            "descripcion": "Préstamos a accionistas y activos fiscales complejos (MTE).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Mala gobernanza corporativa y opacidad en valoración de activos.",
+            "evidencias": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "Notes",
+                "cita_corta": "Note receivable from shareholder $4.8M",
+                "interpretacion": "Extracción de valor o estructura inusual."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Repago total del préstamo del accionista",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebit_a_cfo": {
+            "lectura": "Distorsión negativa relevante (-18% en FY25).",
+            "posibles_distorsiones": [
+              "Pago de impuestos",
+              "Variación en Merchant Payables"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Conversión alta (~99%) debido a modelo asset-light con Capex nulo.",
+            "capex_riesgo": "BAJO",
+            "notas": "Riesgo no está en Capex, sino en sostenibilidad del CFO."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": true,
+          "sostenible_por_fcf": "NO",
+          "comentario": "Recompras (13M) >> FCF (5.6M). Destrucción de valor con equity negativo."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "SI",
+          "comentario": "Componente relevante del puente EBIT-CFO."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "Historial mixto (MTE, Jack's Flight Club)."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Transacciones con partes relacionadas sugieren conflictos de interés."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "DS-01",
+            "descripcion": "Espiral de liquidez: Ventas planas + Margen 2% + Recompras continuas.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "Agotamiento de caja en <18 meses",
+              "Incapacidad de pagar Merchant Payables",
+              "Dilución forzada a valoración distressed"
+            ],
+            "indicadores_tempranos": [
+              "Caja < $8M",
+              "Margen Operativo < 5% recurrente",
+              "Aumento de días de pago a merchants"
+            ]
+          }
+        ],
+        "conclusion_downside": "El downside es existencial si no se corrige el rumbo operativo y de capital allocation en 2026."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja total (excl. restricted) < $5,000,000 al cierre de trimestre.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Nivel crítico de insolvencia técnica inminente."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "margen",
+          "definicion": "Margen EBIT reportado < 5% en Q1 2026.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Confirma que el deterioro de 2025 es estructural y no transitorio."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "deuda",
+          "definicion": "Merchant Payables / (Caja + AR) > 1.2",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Indicador de estrés agudo en capital de trabajo."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": "0.0",
+        "condiciones_para_aumentar_tamaño": [
+          "Margen EBIT retorna a >10%",
+          "Cese de recompras mientras Equity sea negativo",
+          "Estabilización de COGS/Revenue"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Violación de cualquier Kill Criteria",
+          "Anuncio de dilución/emisión de acciones",
+          "CFO negativo en Q1 2026"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "detalle_vencimientos_merchant_payables",
+          "por_que_importa": "Para calcular ratio de cobertura de liquidez real.",
+          "como_obtenerlo": "10-K Notas a los estados financieros"
+        },
+        {
+          "item": "covenants",
+          "por_que_importa": "Confirmar inexistencia de restricciones ocultas.",
+          "como_obtenerlo": "10-K Exhibits"
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Análisis basado en datos financieros preliminares de 8-K FY2025 y filings pasados.",
+      "Sin acceso a explicaciones cualitativas de la gerencia sobre la subida de COGS."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

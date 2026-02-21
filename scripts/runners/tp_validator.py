@@ -15,6 +15,7 @@ Confidence score: 100 - 15×FAIL - 5×WARN - 10×SKIP
 """
 
 import json
+import re
 from typing import Optional
 
 
@@ -38,12 +39,40 @@ GATES = [
     {"name": "MARGIN_SANITY",      "tolerance": None,  "critical": False},
     {"name": "TTM_SANITY",         "tolerance": 0.20, "critical": False},
     {"name": "TTM_CONSECUTIVE",    "tolerance": None,  "critical": True},
+    {"name": "RECENCY_SANITY",     "tolerance": None,  "critical": False},
+    {"name": "CORE_FILING_COVERAGE", "tolerance": None, "critical": False},
     {"name": "DATA_COMPLETENESS",  "tolerance": None,  "critical": False},
 ]
 
-# Sector-typical margin ranges for sanity checking
+# Sector-typical margin ranges for sanity checking.
+# Ranges are (min%, max%) for gross, operating, and net margins.
 SECTOR_MARGINS = {
-    "default": {"gross": (-10, 90), "operating": (-50, 60), "net": (-100, 50)},
+    "default":              {"gross": (-10, 90), "operating": (-50, 60), "net": (-100, 50)},
+    # Technology / Software
+    "Software":             {"gross": (50, 95),  "operating": (-30, 55), "net": (-50, 45)},
+    "SaaS":                 {"gross": (55, 95),  "operating": (-40, 50), "net": (-60, 40)},
+    "Semiconductors":       {"gross": (30, 80),  "operating": (-20, 55), "net": (-30, 50)},
+    "Technology Hardware":  {"gross": (15, 65),  "operating": (-15, 35), "net": (-25, 30)},
+    # Healthcare / Biotech
+    "Biotechnology":        {"gross": (40, 95),  "operating": (-200, 50), "net": (-250, 45)},
+    "Pharmaceuticals":      {"gross": (50, 90),  "operating": (-30, 50), "net": (-40, 40)},
+    "Medical Devices":      {"gross": (40, 80),  "operating": (-20, 40), "net": (-30, 35)},
+    "Healthcare Services":  {"gross": (10, 60),  "operating": (-15, 25), "net": (-20, 20)},
+    # Consumer / Retail
+    "Retail":               {"gross": (15, 55),  "operating": (-10, 20), "net": (-15, 15)},
+    "Consumer Staples":     {"gross": (20, 60),  "operating": (0, 25),   "net": (-5, 20)},
+    "Restaurants":          {"gross": (20, 70),  "operating": (-10, 25), "net": (-15, 18)},
+    # Industrial / Energy
+    "Industrials":          {"gross": (15, 55),  "operating": (-10, 25), "net": (-15, 20)},
+    "Energy":               {"gross": (10, 70),  "operating": (-30, 40), "net": (-40, 30)},
+    "Mining":               {"gross": (10, 65),  "operating": (-25, 45), "net": (-35, 35)},
+    # Financial
+    "Financial Services":   {"gross": (20, 95),  "operating": (-20, 55), "net": (-25, 45)},
+    "Insurance":            {"gross": (10, 60),  "operating": (-10, 30), "net": (-15, 25)},
+    "REITs":                {"gross": (20, 80),  "operating": (-10, 50), "net": (-15, 40)},
+    # Other
+    "Telecom":              {"gross": (30, 70),  "operating": (-10, 35), "net": (-20, 25)},
+    "Media & Entertainment": {"gross": (25, 75), "operating": (-20, 35), "net": (-30, 30)},
 }
 
 
@@ -65,6 +94,8 @@ def validate(tp_with_metrics: dict) -> dict:
         "MARGIN_SANITY": _gate_margin_sanity,
         "TTM_SANITY": _gate_ttm_sanity,
         "TTM_CONSECUTIVE": _gate_ttm_consecutive,
+        "RECENCY_SANITY": _gate_recency_sanity,
+        "CORE_FILING_COVERAGE": _gate_core_filing_coverage,
         "DATA_COMPLETENESS": _gate_data_completeness,
     }
 
@@ -126,6 +157,16 @@ def _gate_balance_identity(tp: dict) -> dict:
     equity = _num(bs.get("patrimonio_usd")) or _num(bs.get("equity_usd"))
 
     if assets is None or liabilities is None or equity is None:
+        # Fallback: try to find BS data embedded in the latest annual entry
+        for entry in reversed(tp.get("historico_anual", [])):
+            a = _num(entry.get("activos_totales_usd"))
+            l = _num(entry.get("pasivos_totales_usd"))
+            e = _num(entry.get("patrimonio_usd"))
+            if a is not None and l is not None and e is not None:
+                assets, liabilities, equity = a, l, e
+                break
+
+    if assets is None or liabilities is None or equity is None:
         return {"name": "BALANCE_IDENTITY", "status": "FAIL",
                 "note": "Missing balance sheet data — critical gate cannot be skipped"}
 
@@ -140,14 +181,44 @@ def _gate_balance_identity(tp: dict) -> dict:
         return {"name": "BALANCE_IDENTITY", "status": "FAIL", "note": f"Diff: {diff_pct:.2%} > 2%", "actual_value": diff_pct}
 
 
+def _find_best_cf_entry(annual: list[dict]) -> tuple[Optional[dict], str]:
+    """Find the best annual entry with complete CF data (CFO+CFI+CFF).
+
+    Tries annual[-1] first (latest FY), then falls back to earlier FYs.
+    Returns (entry, source_note) or (None, reason).
+    """
+    if not annual:
+        return None, "No annual data"
+
+    # Try from most recent to oldest, skipping partial periods (H1, 9M, etc.)
+    for i in range(len(annual) - 1, -1, -1):
+        entry = annual[i]
+        # Skip partial periods — they don't represent a full FY
+        if entry.get("_periodo_parcial"):
+            continue
+        cfo = _num(entry.get("cfo_usd"))
+        cfi = _num(entry.get("cfi_usd"))
+        cff = _num(entry.get("cff_usd"))
+        if cfo is not None and cfi is not None and cff is not None:
+            periodo = entry.get("periodo", f"index_{i}")
+            if i == len(annual) - 1:
+                return entry, f"Using latest FY ({periodo})"
+            else:
+                return entry, f"Fallback to {periodo} (latest FY missing CF components)"
+    return None, "No FY has complete CF data (CFO+CFI+CFF)"
+
+
 def _gate_cashflow_identity(tp: dict) -> dict:
-    """CFO + CFI + CFF ≈ ΔCash. Tolerance 5%."""
-    # This requires CFI and CFF which may not always be in the TP
+    """Cash bridge: CFO + CFI + CFF + FX + Other ≈ ΔCash. Tolerance 5%."""
     annual = tp.get("historico_anual", [])
     if not annual:
         return {"name": "CASHFLOW_IDENTITY", "status": "SKIP", "note": "No annual data"}
 
-    fy0 = annual[-1]
+    fy0, source_note = _find_best_cf_entry(annual)
+    if fy0 is None:
+        return {"name": "CASHFLOW_IDENTITY", "status": "FAIL",
+                "note": f"Missing CF components (CFO/CFI/CFF) — {source_note}"}
+
     cfo = _num(fy0.get("cfo_usd"))
     cfi = _num(fy0.get("cfi_usd"))
     cff = _num(fy0.get("cff_usd"))
@@ -156,21 +227,43 @@ def _gate_cashflow_identity(tp: dict) -> dict:
         return {"name": "CASHFLOW_IDENTITY", "status": "FAIL",
                 "note": "Missing CF components (CFO/CFI/CFF) — critical gate cannot be skipped"}
 
-    total_cf = cfo + cfi + cff
-    delta_cash = _num(fy0.get("cambio_caja_usd")) or _num(fy0.get("delta_cash_usd"))
+    # FX and other adjustments: treat None as 0 for the bridge calculation
+    fx = _num(fy0.get("fx_effect_cash_usd")) or 0
+    other = _num(fy0.get("otros_ajustes_caja_usd")) or 0
+    fx_present = _num(fy0.get("fx_effect_cash_usd")) is not None
+    other_present = _num(fy0.get("otros_ajustes_caja_usd")) is not None
+
+    bridge_total = cfo + cfi + cff + fx + other
+    delta_cash = _num(fy0.get("delta_cash_usd")) or _num(fy0.get("cambio_caja_usd"))
 
     if delta_cash is None:
-        return {"name": "CASHFLOW_IDENTITY", "status": "SKIP", "note": "No delta_cash to compare"}
+        return {"name": "CASHFLOW_IDENTITY", "status": "SKIP",
+                "note": (f"CF components present (bridge={bridge_total:,.0f}, "
+                         f"fx={fx:,.0f}, other={other:,.0f}), "
+                         f"but no delta_cash to cross-check. {source_note}")}
 
-    if delta_cash == 0:
-        diff_pct = abs(total_cf) / max(abs(cfo), 1)
-    else:
-        diff_pct = abs(total_cf - delta_cash) / abs(delta_cash)
+    abs_diff = abs(bridge_total - delta_cash)
+    denominator = max(abs(delta_cash), abs(bridge_total), 1)
+    rel_diff = abs_diff / denominator
 
-    if diff_pct <= 0.05:
-        return {"name": "CASHFLOW_IDENTITY", "status": "PASS", "note": f"Diff: {diff_pct:.2%}"}
-    else:
-        return {"name": "CASHFLOW_IDENTITY", "status": "FAIL", "note": f"Diff: {diff_pct:.2%} > 5%"}
+    # Proportional absolute tolerance: larger of $50K or 0.5% of the bigger CF figure
+    absolute_tolerance = max(50_000, 0.005 * denominator)
+
+    # Build audit note
+    audit = (f"bridge={bridge_total:,.0f} (CFO={cfo:,.0f}+CFI={cfi:,.0f}"
+             f"+CFF={cff:,.0f}+FX={fx:,.0f}+Other={other:,.0f}), "
+             f"delta_cash={delta_cash:,.0f}, "
+             f"abs_diff={abs_diff:,.0f}, rel_diff={rel_diff:.2%}. {source_note}")
+
+    if rel_diff <= 0.05 or abs_diff <= absolute_tolerance:
+        return {"name": "CASHFLOW_IDENTITY", "status": "PASS", "note": audit}
+
+    # WARNING: moderate deviation AND both FX/other adjustments are missing
+    if rel_diff <= 0.10 and not fx_present and not other_present:
+        return {"name": "CASHFLOW_IDENTITY", "status": "WARNING",
+                "note": f"Moderate deviation, FX/other adjustments not extracted. {audit}"}
+
+    return {"name": "CASHFLOW_IDENTITY", "status": "FAIL", "note": audit}
 
 
 def _gate_unidades_sanity(tp: dict) -> dict:
@@ -208,10 +301,21 @@ def _gate_ev_sanity(tp: dict) -> dict:
         return {"name": "EV_SANITY", "status": "WARNING", "note": f"Negative EV = {ev:,.0f} (cash > market_cap + debt)"}
 
 
+def _resolve_sector_margins(tp: dict) -> tuple[dict, str]:
+    """Resolve the best margin ranges for this company's sector/industry."""
+    empresa = tp.get("empresa", {})
+    # Try industry first (more specific), then sector, then default
+    for field in ("industria", "industry", "sector"):
+        value = empresa.get(field, "")
+        if value and value in SECTOR_MARGINS:
+            return SECTOR_MARGINS[value], value
+    return SECTOR_MARGINS["default"], "default"
+
+
 def _gate_margin_sanity(tp: dict) -> dict:
     """Márgenes dentro de rangos sectoriales."""
     metricas = tp.get("metricas_derivadas", {})
-    ranges = SECTOR_MARGINS["default"]
+    ranges, sector_used = _resolve_sector_margins(tp)
     issues = []
 
     for metric, key in [("gross", "margen_bruto_pct"), ("operating", "margen_operativo_pct"), ("net", "margen_neto_pct")]:
@@ -219,10 +323,10 @@ def _gate_margin_sanity(tp: dict) -> dict:
         if val is not None:
             lo, hi = ranges[metric]
             if val < lo or val > hi:
-                issues.append(f"{key}={val:.1f}% outside [{lo},{hi}]")
+                issues.append(f"{key}={val:.1f}% outside [{lo},{hi}] (sector={sector_used})")
 
     if not issues:
-        return {"name": "MARGIN_SANITY", "status": "PASS", "note": "Margins within expected ranges"}
+        return {"name": "MARGIN_SANITY", "status": "PASS", "note": f"Margins within expected ranges (sector={sector_used})"}
     else:
         return {"name": "MARGIN_SANITY", "status": "WARNING", "note": "; ".join(issues)}
 
@@ -274,6 +378,77 @@ def _gate_ttm_consecutive(tp: dict) -> dict:
 
     return {"name": "TTM_CONSECUTIVE", "status": "PASS",
             "note": f"TTM passed consecutiveness check. {nota}"}
+
+
+def _extract_year_from_entry(entry: dict) -> Optional[int]:
+    fecha_fin = str(entry.get("fecha_fin", "")).strip()
+    if fecha_fin:
+        m = re.search(r"(19|20)\d{2}", fecha_fin)
+        if m:
+            return int(m.group(0))
+    periodo = str(entry.get("periodo", "")).strip()
+    if periodo:
+        m = re.search(r"(19|20)\d{2}", periodo)
+        if m:
+            return int(m.group(0))
+    return None
+
+
+def _gate_recency_sanity(tp: dict) -> dict:
+    """Warn when the FY base used by TP is too old (>2 years)."""
+    annual = tp.get("historico_anual", [])
+    years = [y for y in (_extract_year_from_entry(a) for a in annual) if y is not None]
+    if not years:
+        return {"name": "RECENCY_SANITY", "status": "SKIP", "note": "No annual period year available"}
+
+    base_year = max(years)
+    current_year = datetime.now(timezone.utc).year
+    age = current_year - base_year
+    if age > 2:
+        return {
+            "name": "RECENCY_SANITY",
+            "status": "WARNING",
+            "note": f"FY base is {age} years old (base={base_year}, current={current_year})",
+            "base_year": base_year,
+        }
+    return {
+        "name": "RECENCY_SANITY",
+        "status": "PASS",
+        "note": f"FY base recency OK (base={base_year}, current={current_year})",
+        "base_year": base_year,
+    }
+
+
+def _gate_core_filing_coverage(tp: dict) -> dict:
+    """Warn when no annual core filing (10-K/20-F) appears in field provenance."""
+    source_types = set()
+    for entry in tp.get("historico_anual", []):
+        for value in entry.get("_field_sources", {}).values():
+            if value:
+                source_types.add(str(value).upper())
+    for entry in tp.get("historico_trimestral", []):
+        for value in entry.get("_field_sources", {}).values():
+            if value:
+                source_types.add(str(value).upper())
+    for value in tp.get("balance_sheet_ultimo", {}).get("_field_sources", {}).values():
+        if value:
+            source_types.add(str(value).upper())
+
+    has_core_annual = any(
+        ("10-K" in s) or ("20-F" in s) or ("ANNUAL_REPORT" in s) or ("ANNUAL REPORT" in s)
+        for s in source_types
+    )
+    if has_core_annual:
+        return {
+            "name": "CORE_FILING_COVERAGE",
+            "status": "PASS",
+            "note": f"Annual core filing present in provenance: {sorted(source_types)[:5]}",
+        }
+    return {
+        "name": "CORE_FILING_COVERAGE",
+        "status": "WARNING",
+        "note": f"No 10-K/20-F/ANNUAL_REPORT found in field provenance (found={sorted(source_types)[:5]})",
+    }
 
 
 def _gate_data_completeness(tp: dict) -> dict:

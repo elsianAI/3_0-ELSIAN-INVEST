@@ -1,0 +1,292 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260221_TZOO",
+  "fecha_corte": "2026-02-21",
+  "ticker": "TZOO",
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1",
+    "truth_pack_status": "PASS",
+    "sources_pack_disponible": false
+  },
+  "red_flags": [
+    {
+      "id": "RF01",
+      "categoria": "Reconocimiento de ingresos / estructura de costos",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual[7].(FY2024), historico_anual[10].(FY2025)",
+      "hallazgo": "El costo unitario de ingresos subió fuertemente sin soporte de cambio de política explícito en los campos canónicos.",
+      "evidencia_cuantitativa": {
+        "fy2024_cogs_ingresos_pct": 12.48,
+        "fy2025_cogs_ingresos_pct": 19.7,
+        "delta_cogs_ingresos_pp": 7.22,
+        "ingresos_yoy_pct": 9.3
+      }
+    },
+    {
+      "id": "RF02",
+      "categoria": "Anomalías de capital de trabajo",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "balance_sheet_ultimo, metricas_derivadas.wc_change, log.limitaciones",
+      "hallazgo": "El capital de trabajo operativo positivo en base canónica contrasta con evidencia de pasivos operativos vinculados a vouchers/merchant payables con vencimientos diferidos, potencialmente fuera de la medición corriente.",
+      "evidencia_cuantitativa": {
+        "cuentas_por_cobrar_usd": 12825000,
+        "cuentas_por_pagar_usd": 6138000,
+        "working_capital_usd": 6687000,
+        "merchant_voucher_obligations_notacion_mercado_usd": {
+          "rango_min": 14800000,
+          "rango_max": 23900000
+        }
+      }
+    },
+    {
+      "id": "RF03",
+      "categoria": "Puente EBIT→CFO con distorsión material",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual[8], historico_anual[9], historico_anual[10], cash_flow",
+      "hallazgo": "Desfase persistente y material entre rentabilidad operativa y caja operativa en los periodos con ambos valores disponibles.",
+      "evidencia_cuantitativa": {
+        "h1_2025": {
+          "ebit_usd": 5864000,
+          "cfo_usd": 4582000,
+          "diferencia_cfo_minus_ebit_usd": -1282000,
+          "distorsion_vs_ebit_pct": -21.87
+        },
+        "fy2025": {
+          "ebit_usd": 6906000,
+          "cfo_usd": 5661000,
+          "diferencia_cfo_minus_ebit_usd": -1245000,
+          "distorsion_vs_ebit_pct": -18.02
+        },
+        "distorsiones_ge_15pct": true
+      }
+    },
+    {
+      "id": "RF04",
+      "categoria": "Puente CFO→FCF y uso de caja por financiación",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "cash_flow, historico_anual[10], log.limitaciones",
+      "hallazgo": "El FCF es positivo por capex mínimo, pero el flujo posterior de financiación (compras/recompras/capital return) absorbe varias veces el FCF.",
+      "evidencia_cuantitativa": {
+        "fy2025_cfo_usd": 5661000,
+        "fy2025_capex_usd": 65000,
+        "fy2025_fcf_usd": 5596000,
+        "fy2025_cff_usd": -13068000,
+        "fcf_vs_cfo_distorsion_pct": -1.15,
+        "fcf_despues_cff_usd": -7472000,
+        "fcf_despues_cff_vs_cfo_pct": -131.9,
+        "distorsion_ge_15pct_relevante": true
+      }
+    },
+    {
+      "id": "RF05",
+      "categoria": "Off-balance y pasivos contingentes",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "balance_sheet_ultimo.deuda_total_usd, lease_data, log.limitaciones",
+      "hallazgo": "No se identifica deuda financiera convencional, pero sí pasivos de arrendamiento operativos significativos y notas de obligaciones de vouchers con vencimiento extendido no totalmente homogeneizadas.",
+      "evidencia_cuantitativa": {
+        "deuda_total_usd": null,
+        "caja_usd": 17064000,
+        "lease_current_usd": 2472000,
+        "lease_longterm_usd": 5646000,
+        "lease_term_years": 4.43
+      }
+    },
+    {
+      "id": "RF06",
+      "categoria": "Goodwill / intangibles y deterioro",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "log.limitaciones (señalamientos de goodwill y activos intangibles), historico_anual[10]",
+      "hallazgo": "Existencia de activos intangibles materialmente significativos y ausencia de deterioros recientes explícitos en años con fuerte compresión de rentabilidad operacional.",
+      "evidencia_cuantitativa": {
+        "goodwill_aprox_usd": 10944000,
+        "intangibles_net_aprox_usd": 1471000,
+        "ebit_fy2024_usd": 18498000,
+        "ebit_fy2025_usd": 6906000,
+        "margen_operativo_fy2024_pct": 22.03,
+        "margen_operativo_fy2025_pct": 7.53
+      }
+    }
+  ],
+  "liquidez": {
+    "caja_disponible": {
+      "fecha_referencia": "2024-12-31",
+      "caja_y_equivalentes_usd": 17064000,
+      "caja_restringida_usd": null,
+      "nota_caja_restringida": "No incluido en caja canónica; reportes del pack citan valores separados por separado de restricted cash"
+    },
+    "creditos_disponibles_usd": null,
+    "runway_meses_estimado": {
+      "metodo_1": {
+        "base_cash_usd": 17064000,
+        "delta_cash_anual_fy2025_usd": -6977000,
+        "runway_meses": 29.4
+      },
+      "metodo_2": {
+        "base_cash_usd": 10087000,
+        "delta_cash_6m_h1_2025_usd": -6542000,
+        "runway_meses": 15.7
+      },
+      "interpretacion": "El runway de supervivencia sin financiación nueva oscila entre ~15.7 y ~29.4 meses bajo ritmo observado de salida neta de caja."
+    },
+    "vencimientos_deuda_12_24m": {
+      "deuda_financiera_convencional": {
+        "total_usd": 0,
+        "nota": "No se reportan importes de deuda financiera tradicional en campos canónicos"
+      },
+      "leasing": {
+        "current_usd": 2472000,
+        "largo_plazo_usd": 5646000,
+        "total_lease_liabilities_usd": 8118000
+      },
+      "obligaciones_fuera_balance_o_atipicas": {
+        "merchant_voucher_payables_rango_usd": {
+          "min": 14800000,
+          "max": 23900000
+        },
+        "horizonte_vencimiento": "12-36 meses (según notas del pack)"
+      }
+    },
+    "riesgo_covenants": {
+      "estado": "no_disponible",
+      "nota": "No hay secciones de covenants financieros ni test de ratios de cumplimiento en los campos proporcionados."
+    },
+    "riesgo_dilucion": {
+      "estado": "potencial",
+      "evidencia": {
+        "equity_2024_usd": 4353000,
+        "cfi_usd_fy2025": -65000,
+        "cff_usd_fy2025": -13068000,
+        "notas_observadas": [
+          "Registros de log señalan equity negativo en cortes parciales de 2025"
+        ]
+      }
+    }
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "definicion": "cfo - ebit",
+      "periodos": [
+        {
+          "periodo": "H1-2025",
+          "fecha_fin": "2025-06-30",
+          "ebit_usd": 5864000,
+          "cfo_usd": 4582000,
+          "diferencia_cfo_minus_ebit_usd": -1282000,
+          "distorsion_pct": -21.87,
+          "componentes_identificados": [
+            "caída fuerte del ingreso operativo vs caja",
+            "ajustes de capital de trabajo no desagregados"
+          ],
+          "umbral_15pct_superado": true
+        },
+        {
+          "periodo": "9M-2025",
+          "fecha_fin": "2025-09-30",
+          "ebit_usd": 6353000,
+          "cfo_usd": 4209000,
+          "diferencia_cfo_minus_ebit_usd": -2144000,
+          "distorsion_pct": -33.75,
+          "umbral_15pct_superado": true
+        },
+        {
+          "periodo": "FY2025",
+          "fecha_fin": "2025-12-31",
+          "ebit_usd": 6906000,
+          "cfo_usd": 5661000,
+          "diferencia_cfo_minus_ebit_usd": -1245000,
+          "distorsion_pct": -18.02,
+          "umbral_15pct_superado": true
+        }
+      ]
+    },
+    "cfo_a_fcf": {
+      "definicion": "fcf = cfo - capex",
+      "periodos": [
+        {
+          "periodo": "H1-2025",
+          "fecha_fin": "2025-06-30",
+          "cfo_usd": 4582000,
+          "capex_usd": 34000,
+          "fcf_usd": 4548000,
+          "distorsion_pct": 0.74,
+          "umbral_15pct_superado": false
+        },
+        {
+          "periodo": "9M-2025",
+          "fecha_fin": "2025-09-30",
+          "cfo_usd": 4209000,
+          "capex_usd": 49000,
+          "fcf_usd": 4160000,
+          "distorsion_pct": 1.16,
+          "umbral_15pct_superado": false
+        },
+        {
+          "periodo": "FY2025",
+          "fecha_fin": "2025-12-31",
+          "cfo_usd": 5661000,
+          "capex_usd": 65000,
+          "fcf_usd": 5596000,
+          "distorsion_pct": 1.15,
+          "umbral_15pct_superado": false
+        }
+      ],
+      "cfo_to_cff_to_cash_disponible": {
+        "periodo": "FY2025",
+        "fcf_usd": 5596000,
+        "cff_usd": -13068000,
+        "fcf_post_cff_usd": -7472000,
+        "distorsion_vs_cfo_pct": -131.9
+      }
+    },
+    "notas": {
+      "distorsion_15pct_relevante": [
+        "EBIT→CFO: sí (H1-2025, 9M-2025, FY2025)"
+      ],
+      "distorsion_15pct_relevante_cfo_to_fcf": []
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "K1",
+      "condicion_objetiva": "Si el delta de caja anual permanece en torno a -6.98M o peor en dos periodos consecutivos y no hay nuevas líneas de liquidez, el efectivo tendería a agotarse en 15.7-29.4 meses desde base de caja observada.",
+      "fuente": "cash_flow, balance_sheet_ultimo",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "ALTA"
+    },
+    {
+      "id": "K2",
+      "condicion_objetiva": "Si las obligaciones de vouchers/merchant payables con vencimientos 12-36 meses (cuadro operativo reportado de 14.8M-23.9M) se aceleran a 12-24 meses mientras se mantiene el gasto neto de caja actual, la empresa enfrenta presión severa de liquidez inmediata.",
+      "fuente": "log.limitaciones, balance_sheet_ultimo, lease_data",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "id": "K3",
+      "condicion_objetiva": "Si se observan 3 trimestres consecutivos con margen EBIT/Ingresos < 10% y CFO trimestral persistentemente bajo 3.0-4.0M, el perfil de generación de caja queda insuficiente para sostener actividad + financiaciones corrientes.",
+      "fuente": "historico_trimestral (Q2-Q4 2025 y H1)",
+      "ventana_temporal": "0-12 meses",
+      "probabilidad": "ALTA"
+    },
+    {
+      "id": "K4",
+      "condicion_objetiva": "Si cff negativo por recompras continúa y supera el FCF anual del año, con patrimonio fino y sin deuda tradicional para cubrir colchones, aumenta probabilidad de emisión de capital o financiación extraordinaria para estabilizar liquidez.",
+      "fuente": "cash_flow, metricas_derivadas, log.limitaciones",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "id": "K5",
+      "condicion_objetiva": "Si el ajuste de COGS/ingresos no se revierte y la caída de margen operativo (7.5% FY2025) persiste por encima de 12 meses, la capacidad de recuperación de cash del modelo se vuelve estructuralmente débil.",
+      "fuente": "historico_anual[7], historico_anual[10]",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "ALTA"
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "SourcesPack_v1 no disponible en este set de entrada; el análisis se ejecuta sobre TruthPack_v1.",
+      "No se reportan líneas de crédito disponibles ni covenants financieros en campos canónicos.",
+      "Los campos de goodwill/intangibles y merchant payables detalladas no están explícitos en la sección canónica; se usan notas del propio pack."
+    ]
+  }
+}

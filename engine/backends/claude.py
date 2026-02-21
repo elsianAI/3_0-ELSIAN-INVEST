@@ -4,10 +4,17 @@ from __future__ import annotations
 
 import subprocess
 import json
+import sys
 import time
 from pathlib import Path
 
 from .base import LLMBackend, DispatchResult
+
+# Module-level cache for auth pre-flight results (shared across instances)
+# Format: {(binary_path, model): (timestamp, is_ok, reason_if_failed)}
+_AUTH_CACHE: dict[tuple[str, str], tuple[float, bool, str | None]] = {}
+_AUTH_CACHE_TTL_OK = 600    # 10 min for successes
+_AUTH_CACHE_TTL_FAIL = 60   # 60s for failures
 
 
 class ClaudeBackend(LLMBackend):
@@ -23,18 +30,30 @@ class ClaudeBackend(LLMBackend):
         cwd: Path | None = None,
         timeout: int = 600,
     ) -> DispatchResult:
-        """
-        Ejecuta claude -p en modo no-interactivo.
-        Lee resultado de stdout (JSON format).
-        
-        NOTA: Claude Code CLI: npm install -g @anthropic-ai/claude-code
-        Este backend se usa como escalation-only (fallback).
-        """
+        """Dispatch to exactly one model. No fallback to different models."""
+        return self._dispatch_single_model(
+            model_name=self.model,
+            prompt=prompt,
+            output_schema=output_schema,
+            cwd=cwd,
+            timeout=timeout,
+        )
+
+    def _dispatch_single_model(
+        self,
+        model_name: str,
+        prompt: str,
+        output_schema: Path | None,
+        cwd: Path | None,
+        timeout: int,
+    ) -> DispatchResult:
+        """Ejecuta claude -p en modo no-interactivo para un modelo concreto."""
         cmd = [
             self.binary_path, "-p", prompt,
-            "--model", self.model,
+            "--model", model_name,
             "--output-format", "json",
             "--no-session-persistence",
+            "--tools", "",  # Disable all tool access
         ]
 
         start = time.time()
@@ -51,45 +70,185 @@ class ClaudeBackend(LLMBackend):
 
             if proc.returncode != 0 and not raw.strip():
                 return DispatchResult(
-                    False, None, raw, self.model, "claude", duration,
-                    f"Non-zero exit code: {proc.returncode}. stderr: {(proc.stderr or '')[:500]}"
+                    False, None, raw, model_name, "claude", duration,
+                    f"Non-zero exit code: {proc.returncode}. stderr: {(proc.stderr or '')[:500]}",
+                    exit_code=proc.returncode,
                 )
 
             # Claude --output-format json wraps result in a JSON envelope
             try:
                 envelope = json.loads(raw)
+                # Check for error envelope FIRST
+                if isinstance(envelope, dict) and envelope.get("is_error"):
+                    error_msg = envelope.get("result", "Unknown Claude CLI error")
+                    if isinstance(error_msg, dict):
+                        error_msg = json.dumps(error_msg)[:500]
+                    return DispatchResult(
+                        False, None, raw, model_name, "claude", duration,
+                        f"Claude CLI error: {str(error_msg)[:500]}",
+                        exit_code=proc.returncode,
+                    )
                 # Claude Code JSON output has a "result" field with the actual content
                 if isinstance(envelope, dict) and "result" in envelope:
                     result_text = envelope["result"]
-                    # Try to parse the result as JSON (the actual artifact)
                     if isinstance(result_text, str):
                         try:
                             output = json.loads(result_text)
-                            return DispatchResult(True, output, raw, self.model, "claude", duration)
+                            return DispatchResult(True, output, raw, model_name, "claude", duration, exit_code=proc.returncode)
                         except json.JSONDecodeError:
-                            # Result is text, not JSON — return envelope
-                            return DispatchResult(True, envelope, raw, self.model, "claude", duration)
+                            import re
+                            md_match = re.search(r"```(?:json)?\s*\n(.*?)\n```", result_text, re.DOTALL)
+                            if md_match:
+                                try:
+                                    output = json.loads(md_match.group(1))
+                                    return DispatchResult(True, output, raw, model_name, "claude", duration, exit_code=proc.returncode)
+                                except json.JSONDecodeError:
+                                    pass
+                            snippet = result_text.strip().replace("\n", " ")[:240]
+                            return DispatchResult(
+                                False, None, raw, model_name, "claude", duration,
+                                f"Claude result is not JSON artifact: {snippet or '<empty>'}",
+                                exit_code=proc.returncode,
+                            )
                     elif isinstance(result_text, dict):
-                        return DispatchResult(True, result_text, raw, self.model, "claude", duration)
-                # Direct JSON output
-                return DispatchResult(True, envelope, raw, self.model, "claude", duration)
+                        return DispatchResult(True, result_text, raw, model_name, "claude", duration, exit_code=proc.returncode)
+                # Accept direct artifact JSON only if it looks like a payload
+                if isinstance(envelope, dict) and (
+                    "version_esquema" in envelope
+                    or "resumen_ejecutivo" in envelope
+                    or "claims" in envelope
+                    or "decision_packet" in envelope
+                ):
+                    return DispatchResult(True, envelope, raw, model_name, "claude", duration, exit_code=proc.returncode)
+                return DispatchResult(
+                    False, None, raw, model_name, "claude", duration,
+                    "Claude JSON envelope did not contain artifact payload",
+                    exit_code=proc.returncode,
+                )
             except json.JSONDecodeError as e:
                 return DispatchResult(
-                    False, None, raw, self.model, "claude", duration,
-                    f"JSON parse error: {e}"
+                    False, None, raw, model_name, "claude", duration,
+                    f"JSON parse error: {e}",
+                    exit_code=proc.returncode,
                 )
 
         except subprocess.TimeoutExpired:
             return DispatchResult(
-                False, None, "", self.model, "claude", timeout, "Timeout"
+                False, None, "", model_name, "claude", timeout, "Timeout",
+                exit_code=124,
             )
 
     def check_available(self) -> bool:
+        """Check if Claude CLI is available AND authenticated.
+
+        Three-phase check (all FREE, zero tokens):
+          1. Quick: binary exists (--version)
+          2. Auth: `claude auth status` — free, no inference
+          3. Cache: result cached (OK=10min, FAIL=60s)
+        """
+        cache_key = (self.binary_path, self.model)
+
+        def _cache_store(ok: bool, reason: str | None = None) -> bool:
+            _AUTH_CACHE[cache_key] = (time.time(), ok, reason)
+            self.last_health_error = None if ok else reason
+            self.last_health_warning = None
+            return ok
+
+        # Phase 0: serve cached result
+        cached = _AUTH_CACHE.get(cache_key)
+        if cached:
+            ts, result, reason = cached
+            ttl = _AUTH_CACHE_TTL_OK if result else _AUTH_CACHE_TTL_FAIL
+            if time.time() - ts < ttl:
+                self.last_health_error = None if result else reason
+                self.last_health_warning = None
+                return result
+
+        # Phase 1: binary exists
         try:
-            result = subprocess.run(
+            ver = subprocess.run(
                 [self.binary_path, "--version"],
                 capture_output=True, text=True, timeout=10,
             )
-            return result.returncode == 0
-        except Exception:
-            return False
+            if ver.returncode != 0:
+                return _cache_store(
+                    False,
+                    f"claude --version failed (exit={ver.returncode})",
+                )
+        except Exception as exc:
+            return _cache_store(False, f"claude --version error: {exc}")
+
+        # Phase 2: auth check via `claude auth status`
+        try:
+            auth = subprocess.run(
+                [self.binary_path, "auth", "status"],
+                capture_output=True, text=True, timeout=15,
+            )
+            status_out = ((auth.stdout or "") + "\n" + (auth.stderr or "")).strip()
+            low = status_out.lower()
+            if auth.returncode != 0:
+                legacy_markers = (
+                    "unknown command",
+                    "unrecognized",
+                    "invalid subcommand",
+                    "invalid choice",
+                    "usage:",
+                )
+                if not any(marker in low for marker in legacy_markers):
+                    short = status_out[:200] if status_out else f"exit={auth.returncode}"
+                    return _cache_store(False, f"claude auth status failed: {short}")
+                print(
+                    f"[claude] auth status unsupported; using fallback probe (model={self.model})",
+                    file=sys.stderr,
+                )
+            else:
+                if "not logged in" in low or "no active" in low:
+                    return _cache_store(False, "claude auth status: not authenticated")
+                return _cache_store(True)
+        except FileNotFoundError:
+            return _cache_store(False, "claude binary not found for auth status check")
+        except subprocess.TimeoutExpired:
+            return _cache_store(False, "claude auth status timeout (15s)")
+        except Exception as exc:
+            print(
+                f"[claude] WARNING: auth status check errored, using fallback probe: {exc}",
+                file=sys.stderr,
+            )
+
+        # Phase 2b: Fallback — lightweight paid prompt (legacy)
+        try:
+            auth = subprocess.run(
+                [self.binary_path, "-p", "respond with ok",
+                 "--model", self.model,
+                 "--output-format", "json", "--max-turns", "1",
+                 "--no-session-persistence"],
+                capture_output=True, text=True, timeout=30,
+            )
+            if auth.returncode != 0:
+                print(f"[claude] Pre-flight check FAILED (model={self.model}): "
+                      f"exit code {auth.returncode}",
+                      file=sys.stderr)
+                return _cache_store(False, f"claude fallback probe failed (exit={auth.returncode})")
+            stdout = (auth.stdout or "").strip()
+            if not stdout:
+                print(f"[claude] Pre-flight check FAILED (model={self.model}): "
+                      f"empty stdout", file=sys.stderr)
+                return _cache_store(False, "claude fallback probe: empty stdout")
+            try:
+                envelope = json.loads(stdout)
+                if isinstance(envelope, dict) and envelope.get("is_error"):
+                    msg = str(envelope.get("result", "unknown error"))[:150]
+                    print(f"[claude] Pre-flight check FAILED (model={self.model}): {msg}",
+                          file=sys.stderr)
+                    return _cache_store(False, f"claude fallback probe error: {msg}")
+            except json.JSONDecodeError:
+                print(f"[claude] Pre-flight check FAILED (model={self.model}): "
+                      f"non-JSON response: {stdout[:150]}", file=sys.stderr)
+                return _cache_store(False, f"claude fallback probe non-JSON: {stdout[:80]}")
+            return _cache_store(True)
+        except subprocess.TimeoutExpired:
+            print(f"[claude] Pre-flight check timed out (model={self.model})",
+                  file=sys.stderr)
+            return _cache_store(False, "claude fallback probe timeout (30s)")
+        except Exception as exc:
+            return _cache_store(False, f"claude fallback probe error: {exc}")

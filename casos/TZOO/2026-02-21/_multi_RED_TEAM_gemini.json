@@ -1,0 +1,443 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260221_TZOO",
+  "fecha_corte": "2026-02-21",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp-1219",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260221_TZOO",
+    "implied_expectations_caso_id": "CASE_20260221_TZOO",
+    "sources_pack_caso_id": "CASE_20260221_TZOO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "El 'upside' depende íntegramente de que el margen operativo revierta del 7.5% actual al 20% histórico; sin embargo, el aumento del 73% en COGS sugiere un deterioro estructural de los unit economics, no un gasto transitorio.",
+      "La posición de 'Caja Neta' es una ilusión contable: al netear los Merchant Payables ($14-23M) contra la Caja ($10-17M), la liquidez neta real es negativa; la empresa se financia con el float de los clientes, un riesgo existencial si las ventas se desaceleran.",
+      "La gerencia está cometiendo 'suicidio de capital' al gastar $13.1M en recompras (FY2025) mientras genera solo $5.6M de FCF, drenando el balance para sostener artificialmente el EPS.",
+      "La tesis Bull de 'valoración a 3.5x normalizado' es una trampa: utiliza un promedio histórico irrelevante que incluye el pico de FY2024; a los márgenes actuales, la acción cotiza a ~6x EV/EBIT con crecimiento de calidad cuestionable.",
+      "Veredicto NO_APTO: Perfil clásico de Value Trap donde el deterioro fundamental (COGS disparado) se disfraza de evento temporal, agravado por una asignación de capital imprudente."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RED_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La liquidez neta ajustada es negativa: Caja ($17M FY24 / ~$10M est. FY25) es inferior a los Merchant Payables ($14-23M), lo que significa que la empresa no tiene 'net cash' real, sino que depende del float de los clientes para operar.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita_corta": "Caja $17.06M vs Merchant Payables (histórico en rango $14-23M según notas Bull).",
+          "interpretacion": "Si el negocio se detuviera hoy, la caja no alcanza para pagar a los merchants. La solvencia depende del crecimiento continuo."
+        }
+      ],
+      "falsacion": {
+        "test": "Caja reportada supera la suma de Merchant Payables + Deuda Financiera en un reporte trimestral.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RED_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La explosión de COGS (+73% YoY vs +9% Revenue) indica una pérdida de poder de negociación con los merchants o un cambio en el mix hacia inventario de menor margen, invalidando la tesis de 'reversión a la media'.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "historico_anual FY2024 vs FY2025",
+          "cita_corta": "COGS pasó de $10.5M a $18.1M (+73%) mientras ingresos crecieron solo 9.3%.",
+          "interpretacion": "Un descalce de esta magnitud rara vez es 'transitorio'. Sugiere que TZOO ahora debe pagar más para conseguir el inventario que vende."
+        }
+      ],
+      "falsacion": {
+        "test": "El margen bruto retorna a niveles >85% (COGS/Ingresos < 15%) en dos trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RED_003",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Las recompras de acciones son insostenibles y destructivas: $13.1M gastados en FY2025 superan en 2.3x el FCF generado ($5.6M), erosionando el balance en un momento de debilidad operativa.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "cash_flow FY2025",
+          "cita_corta": "CFF -$13.1M (principalmente recompras) vs CFO $5.7M y FCF $5.6M.",
+          "interpretacion": "La gerencia está priorizando el soporte del precio de la acción a corto plazo sobre la solvencia a largo plazo."
+        }
+      ],
+      "falsacion": {
+        "test": "El gasto en recompras se reduce a <70% del FCF trimestral o el FCF se triplica para cubrir el ritmo actual.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RED_001",
+      "descripcion": "El margen operativo se mantendrá por debajo del 10% en H1-2026, confirmando la naturaleza estructural de los costos.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Operating Margin GAAP < 10% en 10-Q.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RED_002",
+      "descripcion": "La caja neta reportada caerá por debajo de $8M si continúan las recompras al ritmo actual.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Cash and cash equivalents < $8,000,000 en balance sheet.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Aging de Merchant Payables y condiciones de pago a proveedores.",
+      "por_que_importa": "Determinar cuán rápido podría drenarse la caja si las ventas se desaceleran (unwind del capital de trabajo negativo).",
+      "como_obtenerlo": "10-K Notes to Financial Statements (Payables)."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose de rentabilidad de JFC (Jack's Flight Club) neto de NCI.",
+      "por_que_importa": "Verificar si el crecimiento de JFC es acreutivo para los accionistas de TZOO o si el valor se filtra al interés minoritario (40%).",
+      "como_obtenerlo": "10-K Segment Reporting."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.85,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "Deterioro estructural de márgenes disfrazado de evento temporal, con balance frágil dependiente del float de clientes y gerencia quemando caja en recompras insostenibles."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_BULL_001",
+            "resumen_claim_bull": "Cotiza a 3.5x EV/EBIT normalizado ($12.1M EBIT medio), nivel de liquidación para empresa sin deuda.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.8,
+              "por_que": [
+                "La 'normalización' incluye FY2024 ($18.5M) que parece ser un pico cíclico irrepetible.",
+                "Sobre métricas actuales (FY25), cotiza a ~6x EV/EBIT, que es justo para un negocio con margen de 7% y crecimiento cuestionable.",
+                "Asume 'sin deuda' ignorando los pasivos operativos masivos (Merchant Payables) que financian la caja."
+              ]
+            },
+            "puntos_ciegos": [
+              "Ignora que la liquidez real (Caja - Payables) es negativa.",
+              "Asume reversión a la media en un entorno donde los unit economics (COGS) han cambiado estructuralmente."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "balance_sheet_ultimo",
+                "cita_corta": "Caja $17M vs Merchant Payables ~$14-23M (float negativo neto).",
+                "interpretacion": "No es una empresa 'cash rich', es una empresa financiada por proveedores."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "EBIT TTM se mantiene por debajo de $8M durante los próximos 2 trimestres.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_BULL_002",
+            "resumen_claim_bull": "El colapso de márgenes es por gastos reversibles, no por demanda (ingresos +9%).",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "El aumento de COGS (+73%) es desproporcionado al crecimiento de ingresos.",
+                "Esto huele a 'comprar crecimiento': gastar más en inventario/marketing para mantener el top-line positivo."
+              ]
+            },
+            "puntos_ciegos": [
+              "Calidad del crecimiento: Revenue comprado con margen bruto decreciente destruye valor.",
+              "Posible pérdida de poder de pricing frente a proveedores."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual",
+                "cita_corta": "COGS +73% vs Ingresos +9.3% en FY2025.",
+                "interpretacion": "Unit economics rotos."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "COGS/Ingresos se mantiene >18% en Q1-2026.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 3
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_BULL_005",
+            "resumen_claim_bull": "Modelo asset-light sin deuda, capital de trabajo negativo financia operación.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.4,
+              "por_que": [
+                "El capital de trabajo negativo es una ventaja SOLO mientras creces.",
+                "Si las ventas se estancan o caen, el float se desenrolla y drena efectivo masivamente (pagas vouchers viejos sin entrada de nuevos)."
+              ]
+            },
+            "puntos_ciegos": [
+              "Riesgo de liquidez en escenario de estancamiento.",
+              "Dependencia crítica del ciclo de conversión de efectivo."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [],
+            "test_falsacion_para_el_bull": {
+              "test": "CFO cae a negativo en un trimestre sin pérdidas operativas (unwind de WC).",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Dependencia total de la narrativa de 'normalización' de márgenes sin evidencia operativa reciente.",
+          "Tratamiento del NCI (Jack's Flight Club): Bull celebra el crecimiento de ingresos pero ignora la fuga de valor al socio minoritario (40%).",
+          "Asunción de que los buybacks crean valor per se, ignorando el riesgo de insolvencia que generan."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El modelo de 'push' (email deals) está estructuralmente en declive frente a 'pull' (Google/AI travel planning).",
+          "TZOO debe gastar cada vez más en marketing y COGS solo para mantener los ingresos estables (running to stand still).",
+          "El margen del 7-8% es la nueva realidad competitiva, no un valle cíclico.",
+          "La valoración actual es correcta para un negocio de bajo crecimiento y bajo margen con riesgo de gobernanza."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "Los márgenes no revierten: el aumento de COGS y SGA es el nuevo coste de hacer negocios en un sector saturado.",
+          "El FCF se mantiene anémico ($3-5M anual), insuficiente para justificar el valor actual o sostener los buybacks.",
+          "La gerencia agota la caja en recompras, dejando a la empresa vulnerable a cualquier shock de liquidez (ej. unwind de merchant payables).",
+          "El crecimiento de ingresos se desacelera al 0-3% al cortar el gasto en marketing para proteger la caja.",
+          "Múltiplo se comprime a 4-5x EV/EBIT sobre earnings deprimidos, llevando la acción a ~$3.00."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "Competencia y costes de adquisición de oferta mantienen COGS/Revenue >18%.",
+            "indicadores_tempranos": [
+              "COGS en Q1-2026 sigue alto.",
+              "Guidance de margen débil."
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "Desaceleración de bookings reduce el float, obligando a usar caja propia para pagar a merchants.",
+            "indicadores_tempranos": [
+              "Caída en Merchant Payables en balance sheet.",
+              "CFO < EBIT."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Estancamiento secular. Márgenes al 7-8%, crecimiento 2%. Value trap crónica.",
+            "ventana_meses": {
+              "min": 12,
+              "probable": 24,
+              "max": 36
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "NO_MEJORA",
+                "rango": "7-9%",
+                "justificacion": "Incapacidad de trasladar costes a clientes/merchants."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "Mercado asigna múltiplo de 5x a un negocio sin crecimiento ni margen.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -40,
+                "base": -25,
+                "max": -10
+              },
+              "nota": "Target ~$3.50-$4.00"
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Crisis de liquidez por buybacks + unwind de WC.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 18
+            },
+            "probabilidad_0_1": 0.2,
+            "es_binario": true,
+            "drivers": [
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "Caja < $5M",
+                "justificacion": "Recompras agresivas + pago de pasivos circulantes."
+              }
+            ],
+            "impacto_en_supervivencia": "ALTO",
+            "nota": "Podría requerir dilución forzada o venta distressed."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.8,
+        "razones": [
+          "Múltiplo bajo óptico (basado en pasado o ajustes).",
+          "Deterioro fundamental de métricas clave (Margen, COGS).",
+          "Asignación de capital cuestionable (recompras sin FCF).",
+          "Modelo de negocio amenazado (Legacy Tech).",
+          "Dependencia de 'ajustes' para ver el valor."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "COGS baja rápidamente en Q1.",
+              "Peer group muestra presión similar."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "COGS se mantiene alto pese a acciones de mgmt.",
+              "Peers mantienen márgenes."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "BALANCE",
+          "definicion": "Caja y equivalentes < $8M al cierre de trimestre.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Zona de peligro para insolvencia técnica dado el pasivo circulante."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "TESIS",
+          "definicion": "Margen operativo GAAP < 5% en dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma que el modelo de negocio está roto."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Reversión clara de COGS",
+          "umbral_o_condicion": "COGS/Revenue < 15%",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Freno a recompras",
+          "umbral_o_condicion": "Cese de buybacks hasta recuperar caja >$15M",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0,
+        "si_se_invierte_igual": [
+          "Esperar 2 trimestres de confirmación de márgenes.",
+          "No comprar la narrativa de 'normalización' sin datos.",
+          "Vigilar la caja como un halcón."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Por qué se disparó el COGS un 73%? (Desglose exacto).",
+          "¿Cuál es la posición de liquidez neta REAL (Caja - Payables exigibles)?",
+          "¿Por qué recompran acciones agresivamente con el balance deteriorándose?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta desglose detallado de COGS para confirmar causa raíz.",
+      "No hay datos claros sobre rentabilidad stand-alone de JFC."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

@@ -1,0 +1,557 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260221_TZOO",
+  "fecha_corte": "2026-02-21",
+  "ticker": "TZOO",
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1",
+    "truth_pack_status": "PASS",
+    "sources_pack_disponible": false,
+    "modelos_fusionados": [
+      "codex",
+      "gemini",
+      "claude"
+    ]
+  },
+  "red_flags": [
+    {
+      "id": "RF-01",
+      "categoria": "Reconocimiento de ingresos / estructura de costos",
+      "titulo": "Explosión de COGS sin explicación proporcional en ingresos",
+      "descripcion": "COGS pasó de $10.5M en FY2024 (12.5% de ingresos) a $18.1M en FY2025 (19.7%), un aumento del 73% mientras los ingresos solo crecieron 9%. La aceleración fue progresiva trimestralmente: Q1-2025 18.0%, Q2 21.6%, Q3 20.4%, Q4 22.0%. Representa un cambio estructural en la base de costos sin soporte de cambio de política explícito en los filings.",
+      "severidad_cualitativa": "ALTA",
+      "datos_cuantitativos": {
+        "cogs_fy2024_usd": 10469000,
+        "cogs_fy2025_usd": 18076000,
+        "cogs_pct_revenue_fy2024": 12.5,
+        "cogs_pct_revenue_fy2025": 19.7,
+        "delta_cogs_ingresos_pp": 7.22,
+        "variacion_cogs_yoy_pct": 72.7,
+        "variacion_ingresos_yoy_pct": 9.3
+      },
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2024 vs FY2025, Income Statement — Cost of Revenues"
+        }
+      ]
+    },
+    {
+      "id": "RF-02",
+      "categoria": "Rentabilidad operativa",
+      "titulo": "Colapso del margen operativo trimestral hacia cuasi-cero",
+      "descripcion": "El margen operativo cayó desde 22% (FY2024) hasta 7.5% (FY2025), con deterioro trimestral acelerado: Q3-2025 2.2%, Q4-2025 2.5%. El EBIT se desplomó de $18.5M a $6.9M (-63%). En Q4-2025 el net income fue -$19K, indicando operación al filo de pérdidas. La combinación de COGS creciente y SGA expandido comprimió márgenes desde ambos lados.",
+      "severidad_cualitativa": "ALTA",
+      "datos_cuantitativos": {
+        "ebit_fy2024_usd": 18498000,
+        "ebit_fy2025_usd": 6906000,
+        "margen_op_fy2024_pct": 22.0,
+        "margen_op_fy2025_pct": 7.5,
+        "ebit_q3_2025_usd": 488000,
+        "ebit_q4_2025_usd": 554000,
+        "net_income_q4_2025_usd": -19000
+      },
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2024/FY2025, historico_trimestral Q3-Q4 2025"
+        },
+        {
+          "source_id": "8-K FY2025",
+          "ubicacion": "Income Statement"
+        }
+      ]
+    },
+    {
+      "id": "RF-03",
+      "categoria": "Anomalías de capital de trabajo / Merchant payables",
+      "titulo": "Dependencia del float de merchant payables como pasivo cuasi-contingente",
+      "descripcion": "Merchant payables significativos ($11.8M–$32.6M según período) clasificados como corrientes pero con vencimientos extendidos hasta 12+ meses post-expiración de vouchers. Estos pasivos frecuentemente exceden el efectivo disponible ($17.3M en Q3-2024 vs caja $17.1M). Las oscilaciones dramáticas distorsionan severamente el CFO: en FY2020 el CFO fue $47M sobre EBIT de -$14M (divergencia de $61M por no redención de vouchers durante COVID). El modelo de negocio depende de cobrar antes de pagar; una caída en ventas podría precipitar crisis de liquidez.",
+      "severidad_cualitativa": "ALTA",
+      "datos_cuantitativos": {
+        "merchant_payables_rango_usd": {
+          "min": 11800000,
+          "max": 32600000
+        },
+        "merchant_payables_q3_2024_usd": 17300000,
+        "cuentas_por_cobrar_usd": 12825000,
+        "cuentas_por_pagar_usd": 6138000,
+        "working_capital_usd": 6687000,
+        "anomalia_fy2020": {
+          "cfo_usd": 47019000,
+          "ebit_usd": -14073000,
+          "divergencia_usd": 61092000
+        }
+      },
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo, log.limitaciones (merchant payables en múltiples filings)"
+        },
+        {
+          "source_id": "10-Q Q3-2024",
+          "ubicacion": "Balance Sheet"
+        }
+      ]
+    },
+    {
+      "id": "RF-04",
+      "categoria": "Cash flow operativo",
+      "titulo": "Colapso del CFO y distorsión persistente EBIT→CFO",
+      "descripcion": "El CFO cayó de $21.1M (FY2024) a $5.7M (FY2025), una reducción del 73%. Adicionalmente, existe distorsión persistente y material entre EBIT y CFO superior al umbral del 15%: H1-2025 -21.9%, 9M-2025 -33.8%, FY2025 -18.0%. La D&A es mínima ($303K), por lo que el puente depende fuertemente de impuestos, SBC y variaciones en merchant payables y deferred revenue.",
+      "severidad_cualitativa": "ALTA",
+      "datos_cuantitativos": {
+        "cfo_fy2024_usd": 21100000,
+        "cfo_fy2025_usd": 5661000,
+        "variacion_cfo_yoy_pct": -73.2,
+        "distorsion_ebit_cfo": {
+          "h1_2025": {
+            "ebit_usd": 5864000,
+            "cfo_usd": 4582000,
+            "distorsion_pct": -21.87
+          },
+          "9m_2025": {
+            "ebit_usd": 6353000,
+            "cfo_usd": 4209000,
+            "distorsion_pct": -33.75
+          },
+          "fy2025": {
+            "ebit_usd": 6906000,
+            "cfo_usd": 5661000,
+            "distorsion_pct": -18.02
+          }
+        },
+        "cfo_q4_2025_usd": 1452000,
+        "cfo_q4_2024_usd": 7671000
+      },
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2024/FY2025, cash_flow, historico_trimestral"
+        }
+      ]
+    },
+    {
+      "id": "RF-05",
+      "categoria": "Capital allocation / Recompras agresivas",
+      "titulo": "Buybacks exceden FCF 2.3x, patrimonio negativo resultante",
+      "descripcion": "En FY2025 la empresa gastó $13.1M en recompras contra FCF de $5.6M (ratio 2.3x), consumiendo $7.5M de reservas de caja. El patrimonio pasó de $4.4M (dic-2024) a negativo durante 2025: -$1.1M (mar), -$2.1M (jun), -$3.1M (sep). La caja estimada cayó de $17.1M a ~$10.1M. Un patrimonio negativo en empresa sin deuda tradicional es señal de asignación de capital cuestionable e insostenible si el FCF no se recupera.",
+      "severidad_cualitativa": "ALTA",
+      "datos_cuantitativos": {
+        "cff_fy2025_usd": -13068000,
+        "fcf_fy2025_usd": 5596000,
+        "ratio_buybacks_fcf": 2.33,
+        "caja_dic2024_usd": 17064000,
+        "delta_cash_fy2025_usd": -6977000,
+        "caja_estimada_dic2025_usd": 10087000,
+        "patrimonio_dic2024_usd": 4353000,
+        "patrimonio_mar2025_usd": -1145000,
+        "patrimonio_jun2025_usd": -2100000,
+        "patrimonio_sep2025_usd": -3083000
+      },
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "cash_flow FY2025 (cfo, cff, delta_cash), balance_sheet_ultimo"
+        },
+        {
+          "source_id": "10-Q Q3-2025",
+          "ubicacion": "Statement of Cash Flows, Balance Sheet — Stockholders' Equity"
+        }
+      ]
+    },
+    {
+      "id": "RF-06",
+      "categoria": "Controles internos / Governance",
+      "titulo": "Material weakness en controles internos sobre reporte financiero",
+      "descripcion": "El filing 10-Q de Q3-2023 identificó una material weakness en controles internos sobre el reporte financiero (Item 4). Sugiere riesgo de errores materiales no detectados en períodos anteriores o contemporáneos. No se ha confirmado si fue remediada en filings posteriores, generando riesgo de persistencia o remediación incompleta.",
+      "severidad_cualitativa": "ALTA",
+      "datos_cuantitativos": {},
+      "evidencia": [
+        {
+          "source_id": "TZOO_10-Q_2023-09-30",
+          "ubicacion": "Item 4. Controls and Procedures"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones"
+        }
+      ]
+    },
+    {
+      "id": "RF-07",
+      "categoria": "Goodwill / intangibles y deterioro",
+      "titulo": "Goodwill significativo relativo a equity sin deterioro reciente evidente",
+      "descripcion": "Goodwill de $10.9M e intangibles netos de $1.5M relacionados con adquisiciones previas (MTE dic-2022, Jack's Flight Club). Con equity de $4.4M (dic-2024) y negativo en 2025, el goodwill representa porción desproporcionada de activos netos. El segmento Europa reportó pérdida operativa de -$2.3M en FY2025. Ausencia de deterioros recientes explícitos en años con fuerte compresión de rentabilidad operacional.",
+      "severidad_cualitativa": "MEDIA",
+      "datos_cuantitativos": {
+        "goodwill_usd": 10944000,
+        "intangibles_net_usd": 1471000,
+        "patrimonio_dic2024_usd": 4353000,
+        "ebit_fy2024_usd": 18498000,
+        "ebit_fy2025_usd": 6906000,
+        "perdida_europa_fy2025_usd": -2315000
+      },
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones (Goodwill 10,944 mil, intangible assets net 1,471 mil)"
+        }
+      ]
+    },
+    {
+      "id": "RF-08",
+      "categoria": "Off-balance y pasivos contingentes",
+      "titulo": "Pasivos de arrendamiento operativo y obligaciones fuera de balance",
+      "descripcion": "No se identifica deuda financiera convencional, pero sí pasivos de arrendamiento operativo significativos ($8.1M total: $2.5M corriente, $5.6M largo plazo, vencimiento promedio 4.4 años) y obligaciones de merchant vouchers con vencimiento extendido no totalmente homogeneizadas ($14.8M-$23.9M).",
+      "severidad_cualitativa": "MEDIA",
+      "datos_cuantitativos": {
+        "deuda_total_usd": 0,
+        "caja_usd": 17064000,
+        "lease_current_usd": 2472000,
+        "lease_longterm_usd": 5646000,
+        "lease_total_usd": 8118000,
+        "lease_term_years": 4.43,
+        "merchant_voucher_obligations_rango_usd": {
+          "min": 14800000,
+          "max": 23900000
+        }
+      },
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo.deuda_total_usd, lease_data, log.limitaciones"
+        }
+      ]
+    },
+    {
+      "id": "RF-09",
+      "categoria": "Partes relacionadas / Adquisición MTE",
+      "titulo": "Transacción con accionista y complejidad fiscal de adquisición MTE",
+      "descripcion": "La adquisición de Metaverse Travel Experiences (MTE, dic-2022) incluyó asunción de $64.7M en NOLs con posición fiscal incierta, tax indemnification asset de $9.5M en equity, y note receivable from shareholder de $4.8M como contra-equity. Este tipo de préstamos a partes relacionadas son inusuales en empresas públicas. La complejidad genera opacidad sobre el valor real de los activos fiscales y riesgos de reversión.",
+      "severidad_cualitativa": "ALTA",
+      "datos_cuantitativos": {
+        "nols_mte_usd": 64700000,
+        "tax_indemnification_asset_usd": 9537000,
+        "note_receivable_shareholder_usd": 4753000
+      },
+      "evidencia": [
+        {
+          "source_id": "10-K FY2023",
+          "ubicacion": "Balance Sheet / Equity Section, Notes — Acquisitions / Income Taxes"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones (MTE acquisition, NOLs, tax indemnification)"
+        }
+      ]
+    },
+    {
+      "id": "RF-10",
+      "categoria": "Depreciación / Base de activos",
+      "titulo": "Colapso de depreciación y agotamiento de base de activos productivos",
+      "descripcion": "D&A cayó de $2.3M (FY2020) a $0.3M (FY2025) con capex prácticamente nulo ($65K FY2025). La empresa no está reponiendo activos productivos. Indica dependencia total en activos intangibles no capitalizados (marca, base de miembros, tecnología interna) cuyo deterioro no se refleja en el income statement.",
+      "severidad_cualitativa": "MEDIA",
+      "datos_cuantitativos": {
+        "depreciation_fy2020_usd": 2314000,
+        "depreciation_fy2023_usd": 1893000,
+        "depreciation_fy2024_usd": 907000,
+        "depreciation_fy2025_usd": 303000,
+        "capex_fy2025_usd": 65000
+      },
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2020-FY2025 depreciation_usd, capex_usd"
+        }
+      ]
+    }
+  ],
+  "liquidez": {
+    "caja_disponible": {
+      "fecha_referencia_base": "2024-12-31",
+      "caja_y_equivalentes_usd": 17064000,
+      "delta_cash_fy2025_usd": -6977000,
+      "caja_estimada_dic2025_usd": 10087000,
+      "restricted_cash_usd": 756000,
+      "caja_libre_estimada_dic2025_usd": 9331000,
+      "nota": "Caja a dic-2025 estimada vía delta_cash FY2025. Restricted cash ~$756K excluido de caja libre."
+    },
+    "lineas_credito": {
+      "disponible": false,
+      "nota": "No se identificaron líneas de crédito revolving ni facilidades de crédito en filings disponibles."
+    },
+    "deuda": {
+      "deuda_financiera_total_usd": 0,
+      "deuda_corto_plazo_usd": 0,
+      "deuda_largo_plazo_usd": 0,
+      "nota": "Sin deuda financiera tradicional."
+    },
+    "arrendamientos": {
+      "operating_lease_current_usd": 2472000,
+      "operating_lease_longterm_usd": 5646000,
+      "operating_lease_total_usd": 8118000,
+      "lease_term_promedio_years": 4.43,
+      "nota": "Principal compromiso fijo recurrente."
+    },
+    "merchant_payables": {
+      "rango_usd": {
+        "min": 14800000,
+        "max": 23900000
+      },
+      "horizonte_vencimiento": "12-36 meses según notas del pack",
+      "vencimiento_corriente_estimado_usd": 17000000,
+      "riesgo": "Alto si ventas caen (float negativo)"
+    },
+    "runway_estimado": {
+      "metodo_anual": {
+        "base_cash_usd": 17064000,
+        "delta_cash_anual_usd": -6977000,
+        "runway_meses": 29.4
+      },
+      "metodo_semestral": {
+        "base_cash_usd": 10087000,
+        "delta_cash_6m_h1_2025_usd": -6542000,
+        "runway_meses": 15.7
+      },
+      "metodo_cfo_positivo": {
+        "nota": "CFO positivo ($5.7M FY2025) implica runway operacional indefinido si buybacks se suspenden. Con buybacks al ritmo actual, runway ~16 meses sobre caja libre de $9.3M.",
+        "runway_meses_con_buybacks": 16
+      },
+      "interpretacion": "Runway de supervivencia sin financiación nueva oscila entre ~16 y ~29 meses. Variable principal: continuidad del programa de recompra de acciones."
+    },
+    "riesgo_covenants": {
+      "estado": "no_disponible",
+      "nota": "Sin deuda, no hay covenants financieros tradicionales. Riesgo principal es operacional."
+    },
+    "riesgo_dilucion": {
+      "estado": "potencial",
+      "nota": "La empresa ha sido compradora neta de acciones. Sin embargo, con equity negativo y caja deteriorándose, si necesita capital la dilución sería severa dado market cap ~$59M y equity negativo.",
+      "evidencia": {
+        "equity_dic2024_usd": 4353000,
+        "equity_sep2025_usd": -3083000,
+        "cff_fy2025_usd": -13068000
+      }
+    }
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "definicion": "cfo - ebit",
+      "periodos": [
+        {
+          "periodo": "FY2024",
+          "fecha_fin": "2024-12-31",
+          "ebit_usd": 18498000,
+          "cfo_usd": 21100000,
+          "diferencia_cfo_minus_ebit_usd": 2602000,
+          "distorsion_pct": 14.1,
+          "umbral_15pct_superado": false,
+          "nota": "Dentro de rango normal. D&A ($907K) y otros ajustes no-cash generaron el exceso."
+        },
+        {
+          "periodo": "H1-2025",
+          "fecha_fin": "2025-06-30",
+          "ebit_usd": 5864000,
+          "cfo_usd": 4582000,
+          "diferencia_cfo_minus_ebit_usd": -1282000,
+          "distorsion_pct": -21.87,
+          "umbral_15pct_superado": true
+        },
+        {
+          "periodo": "9M-2025",
+          "fecha_fin": "2025-09-30",
+          "ebit_usd": 6353000,
+          "cfo_usd": 4209000,
+          "diferencia_cfo_minus_ebit_usd": -2144000,
+          "distorsion_pct": -33.75,
+          "umbral_15pct_superado": true
+        },
+        {
+          "periodo": "FY2025",
+          "fecha_fin": "2025-12-31",
+          "ebit_usd": 6906000,
+          "cfo_usd": 5661000,
+          "diferencia_cfo_minus_ebit_usd": -1245000,
+          "distorsion_pct": -18.02,
+          "umbral_15pct_superado": true,
+          "partidas_clave": [
+            {
+              "concepto": "Impuestos pagados/provisión",
+              "impacto_usd": -2679000
+            },
+            {
+              "concepto": "Depreciación y amortización",
+              "impacto_usd": 303000
+            },
+            {
+              "concepto": "Stock-based compensation (est.)",
+              "impacto_usd": 1000000
+            }
+          ]
+        }
+      ],
+      "anomalia_historica": {
+        "periodo": "FY2020",
+        "ebit_usd": -14073000,
+        "cfo_usd": 47019000,
+        "diferencia_usd": 61092000,
+        "distorsion_pct": -434.0,
+        "nota": "Anomalía extrema por colapso de merchant payables durante COVID (inflow masivo de caja al no redimirse vouchers)."
+      }
+    },
+    "cfo_a_fcf": {
+      "definicion": "fcf = cfo - capex",
+      "periodos": [
+        {
+          "periodo": "FY2024",
+          "fecha_fin": "2024-12-31",
+          "cfo_usd": 21100000,
+          "capex_usd": 177000,
+          "fcf_usd": 20923000,
+          "conversion_pct": 99.2,
+          "umbral_15pct_superado": false
+        },
+        {
+          "periodo": "H1-2025",
+          "fecha_fin": "2025-06-30",
+          "cfo_usd": 4582000,
+          "capex_usd": 34000,
+          "fcf_usd": 4548000,
+          "conversion_pct": 99.3,
+          "umbral_15pct_superado": false
+        },
+        {
+          "periodo": "9M-2025",
+          "fecha_fin": "2025-09-30",
+          "cfo_usd": 4209000,
+          "capex_usd": 49000,
+          "fcf_usd": 4160000,
+          "conversion_pct": 98.8,
+          "umbral_15pct_superado": false
+        },
+        {
+          "periodo": "FY2025",
+          "fecha_fin": "2025-12-31",
+          "cfo_usd": 5661000,
+          "capex_usd": 65000,
+          "fcf_usd": 5596000,
+          "conversion_pct": 98.9,
+          "umbral_15pct_superado": false,
+          "nota": "Capex mínimo consistente con modelo puramente digital. Conversión CFO→FCF casi perfecta."
+        }
+      ]
+    },
+    "fcf_deployment": {
+      "fy2024": {
+        "fcf_usd": 20923000,
+        "cff_usd": -18973000,
+        "fcf_post_cff_usd": 1950000,
+        "nota": "Buybacks casi alineados con FCF; excedente de $2.0M."
+      },
+      "fy2025": {
+        "fcf_usd": 5596000,
+        "cff_usd": -13068000,
+        "fcf_post_cff_usd": -7472000,
+        "distorsion_vs_cfo_pct": -131.9,
+        "nota": "Buybacks superaron FCF en 2.3x, consumiendo $7.5M de reservas. Patrón insostenible."
+      }
+    },
+    "resumen_distorsiones": {
+      "ebit_a_cfo_15pct": [
+        "H1-2025 (-21.9%)",
+        "9M-2025 (-33.8%)",
+        "FY2025 (-18.0%)"
+      ],
+      "cfo_a_fcf_15pct": [],
+      "fcf_deployment_insostenible": [
+        "FY2025: payout 233% del FCF"
+      ]
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC-01",
+      "condicion_objetiva": "Caja libre (excluyendo restricted cash) cae por debajo de $5,000,000 al cierre de trimestre sin suspensión del programa de recompra de acciones",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA",
+      "razon": "Caja libre estimada dic-2025 ~$9.3M. Al ritmo de buybacks FY2025 ($13M/año) y con FCF comprimido, la caja caería a ~$2M en 12 meses. $5M cubriría < 1 mes de gastos totales."
+    },
+    {
+      "id": "KC-02",
+      "condicion_objetiva": "Margen EBIT trimestral se mantiene por debajo del 5% durante 3 trimestres consecutivos (Q3/Q4-2025 ya cumplen; confirmación en Q1-2026)",
+      "ventana_temporal": "0-12 meses",
+      "probabilidad": "ALTA",
+      "razon": "Q3-2025 (2.2%) y Q4-2025 (2.5%) ya están por debajo del 5%. Si Q1-2026 no rebota, confirma deterioro estructural del modelo de negocio. El margen ya cayó de 22% a 7.5% anualizado."
+    },
+    {
+      "id": "KC-03",
+      "condicion_objetiva": "Merchant Payables / (Caja + Cuentas por Cobrar) > 1.0 al cierre de trimestre",
+      "ventana_temporal": "Trimestral, próximos 12 meses",
+      "probabilidad": "MEDIA",
+      "razon": "Si los pasivos por vouchers superan los activos líquidos disponibles, la empresa es técnicamente insolvente sin flujo de nuevas ventas. Las obligaciones de $14.8-23.9M con vencimientos 12-36 meses generan presión si ventas caen."
+    },
+    {
+      "id": "KC-04",
+      "condicion_objetiva": "COGS como porcentaje de ingresos supera el 25% en cualquier trimestre",
+      "ventana_temporal": "6-12 meses",
+      "probabilidad": "MEDIA",
+      "razon": "COGS/revenue pasó de 12.5% (FY2024) a 22.0% (Q4-2025). Si la tendencia continúa, cruzar 25% eliminaría la mayor parte del margen operativo y generaría pérdidas operativas sostenidas."
+    },
+    {
+      "id": "KC-05",
+      "condicion_objetiva": "CFO trailing 4 trimestres se torna negativo (CFO < $0)",
+      "ventana_temporal": "12-18 meses",
+      "probabilidad": "BAJA",
+      "razon": "CFO FY2025 fue $5.7M, todavía positivo. Pero tendencia trimestral preocupante (Q4-2025 CFO $1.5M). Si merchant payables se contraen o rentabilidad sigue cayendo, CFO negativo es posible."
+    },
+    {
+      "id": "KC-06",
+      "condicion_objetiva": "La empresa reporta más de 2 trimestres consecutivos con net income negativo",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA",
+      "razon": "Q4-2025 registró net income de -$19K. Si Q1-Q2 2026 también negativos, confirmaría transición a pérdidas recurrentes."
+    },
+    {
+      "id": "KC-07",
+      "condicion_objetiva": "Se registra deterioro de goodwill (impairment) por monto superior a $5M",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "BAJA",
+      "razon": "Goodwill $10.9M con segmento Europa en pérdida (-$2.3M FY2025). Si no mejora, impairment test podría requerir write-down, profundizando déficit patrimonial negativo."
+    },
+    {
+      "id": "KC-08",
+      "condicion_objetiva": "CFF negativo por recompras continúa superando el FCF anual y se requiere emisión de capital o financiación extraordinaria",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA",
+      "razon": "Con patrimonio negativo, caja deteriorándose y ratio buybacks/FCF de 2.3x, la empresa podría verse forzada a emisión dilutiva si no suspende recompras voluntariamente."
+    }
+  ],
+  "log": {
+    "status": "COMPLETED",
+    "modelos_fusionados": [
+      "codex",
+      "gemini",
+      "claude"
+    ],
+    "limitaciones": [
+      "SourcesPack_v1 no disponible; análisis basado exclusivamente en TruthPack_v1 y sus log.limitaciones",
+      "No se reportan líneas de crédito disponibles ni covenants financieros en campos canónicos",
+      "No se verificó estatus definitivo de remediación de material weakness de controles internos (2023) en 10-K FY2024",
+      "Desglose de merchant payables por período de vencimiento no disponible con precisión; rangos estimados",
+      "Caja a dic-2025 es estimada (derivada de delta_cash del 8-K); 10-K FY2025 auditado no publicado",
+      "Stock-based compensation estimada de datos parciales (Q1-2025: $369K); total anual no disponible",
+      "Campos de goodwill/intangibles y merchant payables detalladas no explícitos en sección canónica; se usan notas del pack",
+      "Balance sheet más reciente confirmado es FY2024 (10-K); datos de 2025 provienen de 10-Q y 8-K"
+    ],
+    "areas_revisadas": [
+      "Reconocimiento de ingresos: no se identificaron cambios de política. Ingresos +9% YoY consistente con tendencia.",
+      "Capitalización de capex: no aplica, capex mínimo ($65K FY2025). Sin riesgo de reclasificación opex→capex.",
+      "Capital de trabajo (AR, AP): AR $12.8M, AP $6.1M a dic-2024. Merchant payables dominan la dinámica.",
+      "Goodwill: $10.9M sin deterioro reciente; segmento Europa en pérdida.",
+      "Transacciones relacionadas: note receivable de accionista ($4.8M) y tax indemnification asset ($9.5M) de MTE.",
+      "Off-balance: Operating leases $8.1M; merchant payables cuasi-contingentes.",
+      "Estructura de pasivos: sin deuda tradicional; dominados por merchant payables, leases, deferred revenue.",
+      "Non-controlling interest: 40% en Jack's Flight Club (~$5M); incluido en consolidación."
+    ]
+  }
+}

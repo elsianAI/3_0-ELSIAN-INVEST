@@ -1,0 +1,378 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260221_TZOO",
+  "fecha_corte": "2026-02-21",
+  "agente": {
+    "agent_role": "CATALYST",
+    "agent_nombre": "CATALYST_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260221_TZOO",
+    "implied_expectations_caso_id": "CASE_20260221_TZOO",
+    "sources_pack_caso_id": "CASE_20260221_TZOO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Valuación distressed (EV/EBIT normalizado ~3.5x) descuenta deterioro estructural permanente, ofreciendo asimetría alcista si los márgenes se estabilizan.",
+      "El colapso del margen operativo (22% a 7.5%) en FY2025 es alarmante; la tesis depende críticamente de la reversión de COGS y racionalización de SGA.",
+      "El crecimiento de ingresos por suscripción (Jack's Flight Club +33%) es el driver de calidad más potente para un re-rating del múltiplo.",
+      "La agresiva recompra de acciones ($13M en 9M-2025) sostiene el EPS pero erosiona peligrosamente la liquidez en un periodo de FCF débil.",
+      "Situación binaria: Value Trap si los márgenes del 7% son la nueva norma; Multi-bagger si retornan al rango 12-15%."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.65
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El mercado descuenta una caída del FCF del 5-16% anual, asumiendo que la compresión de márgenes de FY2025 es irreversible.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf",
+          "cita_corta": "CAGR implícito negativo en todos los 24 escenarios del grid",
+          "interpretacion": "Valuación actual implica contracción perpetua del negocio."
+        }
+      ],
+      "falsacion": {
+        "test": "Estabilización del FCF trimestral por encima de $2M en dos trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La expansión de COGS (12.5% a 19.7%) y SGA ha destruido el apalancamiento operativo en FY2025 pese al crecimiento de ingresos.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual",
+          "cita_corta": "COGS 19.7% en FY2025 vs 12.5% en FY2024; Margen operativo 7.5% vs 22.0%",
+          "interpretacion": "Deterioro fundamental de la estructura de costes."
+        }
+      ],
+      "falsacion": {
+        "test": "Reducción del ratio COGS/Ingresos a <16% en Q1/Q2 2026.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Jack's Flight Club reporta ingresos trimestrales superiores a $4.5M.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Dato explícito en desglose de revenue por segmento o comentarios de management.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "El margen operativo GAAP retorna a doble dígito (>10%) en un trimestre.",
+      "probabilidad_0_1": 0.45,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Operating Income / Revenue >= 0.10 en estado de resultados consolidado.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Reducción de acciones diluidas a < 10.5 millones.",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Weighted average shares outstanding (diluted) en portada de 10-Q/10-K.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "COGS como porcentaje de ingresos se mantiene por encima del 18% (no transitorio).",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Calculo directo Cost of Revenue / Total Revenue >= 0.18.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "CFO positivo > $4M en Q1-2026 (estacionalmente fuerte).",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Net cash provided by operating activities > 4,000,000.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose detallado de 'Cost of Revenues'",
+      "por_que_importa": "Es vital distinguir si el aumento de COGS es por merchant fees (estructural) o one-offs.",
+      "como_obtenerlo": "Notas a los estados financieros en 10-K FY2025 (próximo a publicarse)."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Métricas de retención/Churn de Jack's Flight Club",
+      "por_que_importa": "Para validar la calidad del crecimiento de +33% y el LTV del suscriptor.",
+      "como_obtenerlo": "Investor presentation o preguntas específicas en earnings call."
+    }
+  ],
+  "payload": {
+    "payload_version": "CatalystPayload_v1",
+    "contenido": {
+      "mapeo_con_expectativas_implicitas": {
+        "variable_critica_principal": "MARGEN_OPERATIVO",
+        "lectura_en_1_2_frases": "El mercado descuenta que el margen operativo del 7.5% es la nueva normalidad y proyecta declive continuo del FCF. Cualquier estabilización de márgenes hacia el promedio histórico (16%) provocaría un re-rating masivo debido a la baja valoración de partida."
+      },
+      "catalizadores": [
+        {
+          "catalyst_id": "CAT_001",
+          "nombre": "Normalización de COGS",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.4,
+          "mecanismo_cierre_gap": "Retorno de COGS/Ingresos del 19.7% hacia rango 14-16% liberaría ~$4-5M de EBIT directo, casi duplicando el beneficio operativo actual.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_estimada": "+400 bps",
+                "nota": "Crucial para salir de la zona de 'value trap'."
+              },
+              {
+                "driver": "EBIT",
+                "direccion": "SUBE",
+                "magnitud_estimada": "+50%",
+                "nota": "Impacto desproporcionado por la base baja de EBIT actual."
+              }
+            ],
+            "justificacion": "La reversión a la media histórica es la apuesta contrarian principal."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_anual",
+              "cita_corta": "COGS saltó de 12.5% (FY24) a 19.7% (FY25).",
+              "interpretacion": "Deterioro abrupto que sugiere ineficiencia o cambio estructural."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Ratio COGS/Revenue trimestral",
+              "fuente_prevista": "10-Q",
+              "umbral_o_condicion": "< 17%",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Comentarios de management sobre renegociación con merchants.",
+            "Estabilización secuencial del margen bruto."
+          ],
+          "riesgos_de_ejecucion": [
+            "Poder de negociación de merchants obliga a mantener fees altos.",
+            "Competencia fuerza a mantener condiciones costosas.",
+            "Mix de producto estructuralmente más caro (menos publicidad pura, más vouchers)."
+          ],
+          "contra_catalizadores": [
+            "COGS/Revenue supera el 20% en Q1 2026."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Línea 'Cost of Revenues' en Income Statement",
+              "Gross Margin %"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_003",
+          "nombre": "Escalamiento de Membresías (Jack's Flight Club)",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.7,
+          "mecanismo_cierre_gap": "El crecimiento de ingresos recurrentes de alta calidad justifica un múltiplo mayor al actual 3.5x EV/EBIT y reduce la volatilidad del negocio publicitario.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_estimada": "Re-rating hacia 8-10x",
+                "nota": "Negocios de suscripción cotizan con prima sobre transactional media."
+              },
+              {
+                "driver": "INGRESOS",
+                "direccion": "SUBE",
+                "magnitud_estimada": "+15-20% segmento",
+                "nota": "Crecimiento de doble dígito sostenido."
+              }
+            ],
+            "justificacion": "Único segmento mostrando tracción real y 'pricing power'."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_050_TRANSCRIPT",
+              "ubicacion": "TruthPack Log",
+              "cita_corta": "Jack's Flight Club revenue +33% YoY.",
+              "interpretacion": "Fuerte momentum en el negocio de suscripción."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Ingresos por Membership Fees",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "> $4.2M en un trimestre",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Crecimiento de suscriptores pagos.",
+            "Expansión a nuevos mercados geográficos."
+          ],
+          "riesgos_de_ejecucion": [
+            "Saturación del nicho de 'flight deals'.",
+            "Aumento de CAC (Coste de Adquisición de Clientes)."
+          ],
+          "contra_catalizadores": [
+            "Desaceleración del crecimiento JFC < 10% YoY."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Revenue breakdown: Membership fees vs Advertising"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_008",
+          "nombre": "Recompra de Acciones Agresiva",
+          "categoria": "FINANCIERO",
+          "es_no_binario": false,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.85,
+          "mecanismo_cierre_gap": "Reducción mecánica del denominador de acciones incrementa EPS y FCF/share, aprovechando la subvaluación extrema, aunque a costa de liquidez.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "EPS",
+                "direccion": "SUBE",
+                "magnitud_estimada": "+5-8% anual",
+                "nota": "Efecto puramente financiero."
+              }
+            ],
+            "justificacion": "Management ha demostrado compromiso gastando $13M en 9 meses."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "Cash Flow",
+              "cita_corta": "CFF -$13M en 9M-2025 vs Market Cap ~$59M.",
+              "interpretacion": "Yield de recompra anualizado > 20% del market cap."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Continuidad del ritmo de recompras",
+              "fuente_prevista": "10-Q",
+              "umbral_o_condicion": "Shares Outstanding < 10.8M",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Cash Flow from Financing en trimestrales."
+          ],
+          "riesgos_de_ejecucion": [
+            "Agotamiento de caja operativa en escenario de recesión.",
+            "Recompras a precios actuales resultan caras si el negocio implosiona."
+          ],
+          "contra_catalizadores": [
+            "Suspensión del programa de recompras para preservar liquidez."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Weighted average shares outstanding",
+              "Cash balance"
+            ]
+          }
+        }
+      ],
+      "conclusion_catalizadores": {
+        "calidad_catalizador": "MEDIA",
+        "por_que": "Los catalizadores de crecimiento (JFC) y financieros (Buybacks) son sólidos, pero el catalizador crítico (Normalización de COGS) es incierto y binario. Sin reparación del margen operativo, los otros catalizadores no compensan el deterioro estructural.",
+        "si_no_hay_catalizador_apto": false
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta desglose detallado de costes para confirmar tesis de COGS.",
+      "Incertidumbre sobre sostenibilidad de márgenes JFC.",
+      "Datos FY2025 preliminares (8-K)."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

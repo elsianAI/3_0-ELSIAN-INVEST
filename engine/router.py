@@ -6,18 +6,24 @@ Implements §3.5 of PLAN COMPLETO.
 from __future__ import annotations
 
 import concurrent.futures
+import hashlib
 import json
+import os
 import subprocess
 import sys
+import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
 from .config import EngineConfig, get_step_config
 from .state import (
     load_state, save_state, mark_step_done, mark_step_failed,
     mark_step_in_progress, mark_pipeline_status, update_decision_fields,
-    get_next_step, init_state,
+    get_next_step, init_state, resolve_empresa_hints, persist_empresa_hints, read_modify_write,
     PIPELINE_STEPS, SUB_STEPS,
 )
+from .step_contracts import get_primary_schema
 from .dispatcher import (
     dispatch_step, dispatch_multi_and_fuse, dispatch_parallel_filings,
     dispatch_with_escalation,
@@ -46,9 +52,9 @@ STEP_INPUT_ARTIFACTS = {
     "TP_EXTRACTOR_FILING": ["SourcesPack_v1"],
     "IMPLIED": ["TruthPack_v1"],
     "CATALYST_DETECTION": ["TruthPack_v1", "ImpliedExpectations_v1"],
-    "CATALYST_SCORING": ["TruthPack_v1", "ImpliedExpectations_v1"],
+    "CATALYST_SCORING": ["TruthPack_v1", "ImpliedExpectations_v1", "CatalystDetection_v1"],
     "FORENSIC_DETECTION": ["TruthPack_v1", "ImpliedExpectations_v1"],
-    "FORENSIC_SCORING": ["TruthPack_v1", "ImpliedExpectations_v1"],
+    "FORENSIC_SCORING": ["TruthPack_v1", "ImpliedExpectations_v1", "ForensicDetection_v1"],
     "BULL": ["TruthPack_v1", "ImpliedExpectations_v1", "AgentReport_v1_CATALYST", "AgentReport_v1_FORENSIC"],
     "RED_TEAM": ["TruthPack_v1", "AgentReport_v1_BULL"],
     "ARBITRO": ["TruthPack_v1", "AgentReport_v1_BULL", "AgentReport_v1_REDTEAM",
@@ -56,13 +62,221 @@ STEP_INPUT_ARTIFACTS = {
 }
 
 
-def execute_pipeline(config: EngineConfig, case_dir: Path, ticker: str, date_str: str) -> dict:
+def _resolve_python_step_timeout(config: EngineConfig, step_name: str) -> int:
+    """Resolve timeout for python runner steps.
+
+    Priority:
+      1) task_routing[step].timeout
+      2) execution.python_step_timeouts[step]
+      3) fallback 300
+    """
+    routing = config.task_routing.get(step_name, {})
+    if isinstance(routing, dict) and "timeout" in routing:
+        try:
+            return int(routing["timeout"])
+        except (TypeError, ValueError):
+            pass
+
+    step_timeouts = config.execution.get("python_step_timeouts", {})
+    if isinstance(step_timeouts, dict) and step_name in step_timeouts:
+        try:
+            return int(step_timeouts[step_name])
+        except (TypeError, ValueError):
+            pass
+
+    return 300
+
+
+def _cleanup_tp_filing_partials(config: EngineConfig, case_dir: Path) -> int:
+    """Remove TP partial filing temp files unless explicitly preserved."""
+    if bool(config.execution.get("keep_tp_filing_partials", False)):
+        return 0
+
+    removed = 0
+    for old_partial in case_dir.glob("_tmp_tp_filing_*.json"):
+        old_partial.unlink(missing_ok=True)
+        removed += 1
+    return removed
+
+
+def _normalize_country_code(value: object) -> str:
+    raw = str(value or "").strip().upper()
+    if raw in {"USA", "UNITED STATES", "UNITED STATES OF AMERICA"}:
+        return "US"
+    return raw
+
+
+def _infer_exchange_from_text(value: object) -> str:
+    text = str(value or "").strip().upper()
+    if not text:
+        return ""
+    if "NASDAQ" in text or "NASD" in text:
+        return "NASDAQ"
+    if "NYSE" in text:
+        return "NYSE"
+    if "AMEX" in text:
+        return "AMEX"
+    return ""
+
+
+def _load_json_file(path: Path) -> dict:
+    try:
+        payload = json.loads(path.read_text())
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {}
+
+
+def _backfill_us_empresa_hints_from_prefetch(case_dir: Path) -> dict[str, str]:
+    """Best-effort US hint enrichment after PREFETCH when hints are missing.
+
+    Keeps explicit hints untouched and only fills missing keys.
+    """
+    current = resolve_empresa_hints(case_dir)
+    missing_country = not current.get("country")
+    missing_exchange = not current.get("exchange")
+    missing_web_ir = not current.get("web_ir")
+    if not (missing_country or missing_exchange or missing_web_ir):
+        return current
+
+    inferred = {"exchange": "", "country": "", "web_ir": ""}
+
+    sec = _load_json_file(case_dir / "_sec_fetcher_output.json")
+    sec_empresa = sec.get("empresa", {}) if isinstance(sec.get("empresa"), dict) else {}
+    sec_country = _normalize_country_code(sec_empresa.get("pais"))
+    sec_exchange = _infer_exchange_from_text(sec_empresa.get("bolsa"))
+    sec_web_ir = str(sec_empresa.get("web_ir") or "").strip()
+    sec_cik = str(sec_empresa.get("cik") or "").strip()
+
+    if missing_country:
+        if sec_country:
+            inferred["country"] = sec_country
+        elif sec_cik:
+            inferred["country"] = "US"
+    if missing_exchange and sec_exchange:
+        inferred["exchange"] = sec_exchange
+    if missing_web_ir and sec_web_ir:
+        inferred["web_ir"] = sec_web_ir
+
+    market = _load_json_file(case_dir / "_market_data_output.json")
+    market_empresa = market.get("empresa", {}) if isinstance(market.get("empresa"), dict) else {}
+    market_country = _normalize_country_code(market_empresa.get("pais"))
+    market_exchange = _infer_exchange_from_text(market_empresa.get("bolsa"))
+    market_web_ir = str(market_empresa.get("web_ir") or "").strip()
+
+    if missing_country and not inferred["country"] and market_country:
+        inferred["country"] = market_country
+    if missing_exchange and not inferred["exchange"] and market_exchange:
+        inferred["exchange"] = market_exchange
+    if missing_web_ir and not inferred["web_ir"] and market_web_ir:
+        inferred["web_ir"] = market_web_ir
+
+    merged = {
+        "exchange": current.get("exchange") or inferred["exchange"] or "",
+        "country": current.get("country") or inferred["country"] or "",
+        "web_ir": current.get("web_ir") or inferred["web_ir"] or "",
+    }
+    if merged == current:
+        return current
+
+    persist_empresa_hints(case_dir, merged)
+    print(
+        "[router] Auto-inferred empresa_hints from PREFETCH outputs: "
+        f"exchange={merged.get('exchange') or '-'}, "
+        f"country={merged.get('country') or '-'}, "
+        f"web_ir={'set' if merged.get('web_ir') else '-'}",
+        file=sys.stderr,
+    )
+    return merged
+
+
+def _stable_json_hash(path: Path) -> str | None:
+    try:
+        payload = json.loads(path.read_text())
+        normalized = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+        return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+    except Exception:
+        return None
+
+
+def _quarantine_alias_artifacts(case_dir: Path, step_name: str, canonical_path: Path) -> int:
+    """Move alias/phantom artifacts to _deprecated for forensic traceability."""
+    alias_patterns = {
+        "ARBITRO": ["AgentReport_v1_ARBITRO_*.json"],
+        "RED_TEAM": ["AgentReport_v1_RED_TEAM_*.json"],
+    }
+    patterns = alias_patterns.get(step_name, [])
+    if not patterns or not canonical_path.exists():
+        return 0
+
+    canonical_hash = _stable_json_hash(canonical_path)
+    if not canonical_hash:
+        return 0
+
+    multi_hashes = set()
+    for trace in case_dir.glob(f"_multi_{step_name}_*.json"):
+        h = _stable_json_hash(trace)
+        if h:
+            multi_hashes.add(h)
+
+    deprecated_dir = case_dir / "_deprecated"
+    moved = 0
+    for pattern in patterns:
+        for candidate in sorted(case_dir.glob(pattern)):
+            if candidate == canonical_path:
+                continue
+            candidate_hash = _stable_json_hash(candidate)
+            if not candidate_hash:
+                continue
+            if candidate_hash != canonical_hash and candidate_hash not in multi_hashes:
+                continue
+
+            deprecated_dir.mkdir(parents=True, exist_ok=True)
+            stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            target = deprecated_dir / f"{candidate.name}.{stamp}.json"
+            idx = 1
+            while target.exists():
+                target = deprecated_dir / f"{candidate.name}.{stamp}.{idx}.json"
+                idx += 1
+            candidate.replace(target)
+            moved += 1
+            print(
+                f"[router] WARNING: Quarantined alias artifact {candidate.name} -> "
+                f"{target.relative_to(case_dir)}",
+                file=sys.stderr,
+            )
+
+    return moved
+
+
+def execute_pipeline(
+    config: EngineConfig,
+    case_dir: Path,
+    ticker: str,
+    date_str: str,
+    exchange: str = "",
+    country: str = "",
+    web_ir: str = "",
+) -> dict:
     """
     Ejecuta pipeline completo para un caso.
     Supports parallel execution of CATALYST||FORENSIC.
     """
-    # 1. Init state
-    state = init_state(case_dir, ticker, date_str)
+    # 1. Resolve/persist company hints + init state
+    hints = resolve_empresa_hints(
+        case_dir,
+        exchange=exchange,
+        country=country,
+        web_ir=web_ir,
+    )
+    state = init_state(
+        case_dir,
+        ticker,
+        date_str,
+        exchange=hints["exchange"],
+        country=hints["country"],
+        web_ir=hints["web_ir"],
+    )
     mark_pipeline_status(case_dir, "EN_PROGRESO")
     print(f"[pipeline] Initialized case: {state['caso_id']}")
 
@@ -90,16 +304,29 @@ def execute_pipeline(config: EngineConfig, case_dir: Path, ticker: str, date_str
             group = [step_name] + ready_parallels
             print(f"\n[pipeline] ═══ Executing parallel: {' || '.join(group)} ═══")
 
-            parallel_results = _execute_parallel_steps(config, case_dir, group, ticker)
+            parallel_results = _execute_parallel_steps(
+                config, case_dir, group, ticker, hints=hints
+            )
 
             all_ok = True
             for s, res in parallel_results.items():
                 results[s] = res
                 if res.get("success"):
-                    mark_step_done(case_dir, s, model=res.get("model", "unknown"))
+                    mark_step_done(
+                        case_dir,
+                        s,
+                        model=res.get("model", "unknown"),
+                        artefacto=res.get("artifact"),
+                        model_profile=res.get("model_profile"),
+                    )
                     print(f"[pipeline] ✓ {s} completed")
                 else:
-                    mark_step_failed(case_dir, s, res.get("error", "unknown"))
+                    mark_step_failed(
+                        case_dir,
+                        s,
+                        res.get("error", "unknown"),
+                        failure_meta=res.get("failure_ctx"),
+                    )
                     print(f"[pipeline] ✗ {s} failed: {res.get('error')}")
                     all_ok = False
 
@@ -114,17 +341,30 @@ def execute_pipeline(config: EngineConfig, case_dir: Path, ticker: str, date_str
         print(f"\n[pipeline] ═══ Executing: {step_name} ═══")
 
         try:
-            step_result = execute_step(config, case_dir, step_name, ticker)
+            step_result = execute_step(
+                config, case_dir, step_name, ticker, hints=hints
+            )
             results[step_name] = step_result
 
             if step_result.get("success"):
-                mark_step_done(case_dir, step_name, model=step_result.get("model", "unknown"))
+                mark_step_done(
+                    case_dir,
+                    step_name,
+                    model=step_result.get("model", "unknown"),
+                    artefacto=step_result.get("artifact"),
+                    model_profile=step_result.get("model_profile"),
+                )
                 print(f"[pipeline] ✓ {step_name} completed")
                 # Extract decision fields from ARBITRO
                 if step_name == "ARBITRO":
                     _extract_decision_fields(case_dir, step_result)
             else:
-                mark_step_failed(case_dir, step_name, step_result.get("error", "unknown"))
+                mark_step_failed(
+                    case_dir,
+                    step_name,
+                    step_result.get("error", "unknown"),
+                    failure_meta=step_result.get("failure_ctx"),
+                )
                 print(f"[pipeline] ✗ {step_name} failed: {step_result.get('error')}")
                 if config.execution.get("fail_fast", True):
                     print("[pipeline] fail_fast=true — stopping pipeline")
@@ -161,16 +401,28 @@ def execute_pipeline(config: EngineConfig, case_dir: Path, ticker: str, date_str
     return {"state": final_state, "step_results": results}
 
 
-def execute_step(config: EngineConfig, case_dir: Path, step_name: str, ticker: str) -> dict:
+def execute_step(
+    config: EngineConfig,
+    case_dir: Path,
+    step_name: str,
+    ticker: str,
+    hints: dict[str, str] | None = None,
+) -> dict:
     """Ejecuta un step individual (principal o sub-step group)."""
     # Check if step has sub-steps
     if step_name in SUB_STEPS:
-        return _execute_step_group(config, case_dir, step_name, ticker)
+        return _execute_step_group(config, case_dir, step_name, ticker, hints=hints)
 
-    return _execute_single_step(config, case_dir, step_name, ticker)
+    return _execute_single_step(config, case_dir, step_name, ticker, hints=hints)
 
 
-def _execute_step_group(config: EngineConfig, case_dir: Path, group_name: str, ticker: str) -> dict:
+def _execute_step_group(
+    config: EngineConfig,
+    case_dir: Path,
+    group_name: str,
+    ticker: str,
+    hints: dict[str, str] | None = None,
+) -> dict:
     """Execute a group of sub-steps (e.g., SOURCES → PREFETCH + SOURCES_COMPILER).
 
     Skips sub-steps that are already DONE (for continue/retry scenarios).
@@ -178,6 +430,24 @@ def _execute_step_group(config: EngineConfig, case_dir: Path, group_name: str, t
     sub_steps = SUB_STEPS[group_name]
     results = {}
     state = load_state(case_dir)
+    group_artifact = state.get("pipeline", {}).get(group_name, {}).get("artefacto")
+
+    # ── If TRUTH_PACK previously FAILED, reset all sub-steps to PENDING ──
+    # This ensures a full re-run (e.g., TP_EXTRACTOR_FILING) instead of
+    # skipping sub-steps that were marked DONE in the failed attempt.
+    # Scoped to TRUTH_PACK only: SOURCES re-runs are cheap and don't need
+    # this; other LLM-heavy groups benefit from controlled re-extraction.
+    group_estado = state.get("pipeline", {}).get(group_name, {}).get("estado")
+    if group_estado == "FAILED" and group_name == "TRUTH_PACK":
+        def _reset_subs(s: dict) -> None:
+            for sub in sub_steps:
+                if sub in s.get("sub_steps", {}):
+                    s["sub_steps"][sub] = {"status": "PENDING"}
+            s["pipeline"][group_name]["estado"] = "IN_PROGRESS"
+        read_modify_write(case_dir, _reset_subs)
+        state = load_state(case_dir)
+        print(f"[pipeline] Reset sub-steps of {group_name} (was FAILED) → all PENDING",
+              file=sys.stderr)
 
     for sub_step in sub_steps:
         # Skip already-done sub-steps
@@ -190,11 +460,22 @@ def _execute_step_group(config: EngineConfig, case_dir: Path, group_name: str, t
         mark_step_in_progress(case_dir, sub_step)
 
         try:
-            result = _execute_single_step(config, case_dir, sub_step, ticker)
+            result = _execute_single_step(
+                config, case_dir, sub_step, ticker, hints=hints
+            )
             results[sub_step] = result
 
             if result.get("success"):
-                mark_step_done(case_dir, sub_step, model=result.get("model", "python"))
+                sub_artifact = result.get("artifact")
+                if sub_artifact:
+                    group_artifact = sub_artifact
+                mark_step_done(
+                    case_dir,
+                    sub_step,
+                    model=result.get("model", "python"),
+                    artefacto=sub_artifact,
+                    model_profile=result.get("model_profile"),
+                )
                 append_entry(
                     config.get_path("changelog"),
                     ticker, "PIPELINE", sub_step,
@@ -205,9 +486,26 @@ def _execute_step_group(config: EngineConfig, case_dir: Path, group_name: str, t
                 if sub_step == "TP_VALIDATOR":
                     dq_result = _check_truthpack_quality(case_dir, ticker)
                     if dq_result == "FAIL":
-                        mark_step_failed(case_dir, sub_step, "TruthPack data_quality: FAIL")
+                        failure_ctx = {
+                            "step_context": {
+                                "step": sub_step,
+                                "mode": "tp_quality_gate",
+                            },
+                            "last_error": "TruthPack data_quality: FAIL",
+                        }
+                        mark_step_failed(
+                            case_dir,
+                            sub_step,
+                            "TruthPack data_quality: FAIL",
+                            failure_meta=failure_ctx,
+                        )
                         if config.execution.get("fail_fast", True):
-                            return {"success": False, "error": "TruthPack data_quality FAIL", "results": results}
+                            return {
+                                "success": False,
+                                "error": "TruthPack data_quality FAIL",
+                                "failure_ctx": failure_ctx,
+                                "results": results,
+                            }
                     elif dq_result == "PARTIAL":
                         print(f"[pipeline]   ⚠ TruthPack data_quality: PARTIAL — pipeline continúa", file=sys.stderr)
                     elif dq_result is None:
@@ -215,22 +513,83 @@ def _execute_step_group(config: EngineConfig, case_dir: Path, group_name: str, t
                         if gate_missing == "warn":
                             print(f"[pipeline]   ⚠ No se pudo leer data_quality del TruthPack — gate inactivo (tp_quality_gate_missing=warn)", file=sys.stderr)
                         else:
-                            mark_step_failed(case_dir, sub_step, "TruthPack data_quality: no disponible")
+                            failure_ctx = {
+                                "step_context": {
+                                    "step": sub_step,
+                                    "mode": "tp_quality_gate",
+                                },
+                                "last_error": "TruthPack data_quality: no disponible",
+                            }
+                            mark_step_failed(
+                                case_dir,
+                                sub_step,
+                                "TruthPack data_quality: no disponible",
+                                failure_meta=failure_ctx,
+                            )
                             if config.execution.get("fail_fast", True):
-                                return {"success": False, "error": "TruthPack data_quality no disponible — gate fail-closed", "results": results}
+                                return {
+                                    "success": False,
+                                    "error": "TruthPack data_quality no disponible — gate fail-closed",
+                                    "failure_ctx": failure_ctx,
+                                    "results": results,
+                                }
+
+                # Post-merge cleanup for partial filing temp files
+                if sub_step == "TP_EXTRACTOR_MERGER":
+                    removed = _cleanup_tp_filing_partials(config, case_dir)
+                    if removed:
+                        print(
+                            f"[router] Cleaned {removed} TP partial files after TP_EXTRACTOR_MERGER",
+                            file=sys.stderr,
+                        )
+                elif sub_step == "PREFETCH":
+                    _backfill_us_empresa_hints_from_prefetch(case_dir)
             else:
-                mark_step_failed(case_dir, sub_step, result.get("error", "unknown"))
+                mark_step_failed(
+                    case_dir,
+                    sub_step,
+                    result.get("error", "unknown"),
+                    failure_meta=result.get("failure_ctx"),
+                )
                 if config.execution.get("fail_fast", True):
-                    return {"success": False, "error": f"Sub-step {sub_step} failed", "results": results}
+                    return {
+                        "success": False,
+                        "error": f"Sub-step {sub_step} failed",
+                        "failure_ctx": result.get("failure_ctx"),
+                        "results": results,
+                    }
         except Exception as e:
-            mark_step_failed(case_dir, sub_step, str(e))
+            failure_ctx = {
+                "step_context": {
+                    "step": sub_step,
+                    "mode": "sub_step_exception",
+                },
+                "last_error": str(e),
+            }
+            mark_step_failed(
+                case_dir,
+                sub_step,
+                str(e),
+                failure_meta=failure_ctx,
+            )
             if config.execution.get("fail_fast", True):
-                return {"success": False, "error": str(e), "results": results}
+                return {"success": False, "error": str(e), "failure_ctx": failure_ctx, "results": results}
 
-    return {"success": True, "results": results}
+    return {
+        "success": True,
+        "results": results,
+        "artifact": group_artifact,
+        "model": next((r.get("model") for r in reversed(list(results.values())) if isinstance(r, dict) and r.get("model")), "python"),
+    }
 
 
-def _execute_single_step(config: EngineConfig, case_dir: Path, step_name: str, ticker: str) -> dict:
+def _execute_single_step(
+    config: EngineConfig,
+    case_dir: Path,
+    step_name: str,
+    ticker: str,
+    hints: dict[str, str] | None = None,
+) -> dict:
     """Execute a single step (either Python runner or LLM dispatch)."""
     step_cfg = get_step_config(config, step_name)
     backends = step_cfg.get("backends", [])
@@ -250,11 +609,25 @@ def _execute_single_step(config: EngineConfig, case_dir: Path, step_name: str, t
         for w in warnings:
             print(f"[router] ⚠ inter-step warning ({step_name}): {w}", file=sys.stderr)
         if not passed:
-            return {"success": False, "error": f"Inter-step validation failed: {'; '.join(errors)}"}
+            failure_ctx = {
+                "step_context": {
+                    "step": step_name,
+                    "mode": "inter_step_validation",
+                },
+                "last_error": f"Inter-step validation failed: {'; '.join(errors)}",
+                "attempts": [],
+            }
+            return {
+                "success": False,
+                "error": failure_ctx["last_error"],
+                "model": "validation",
+                "backend": "python",
+                "failure_ctx": failure_ctx,
+            }
 
     # Python runner — execute directly
     if "python" in backends:
-        return _run_python_step(config, case_dir, step_name, ticker)
+        return _run_python_step(config, case_dir, step_name, ticker, hints=hints)
 
     # Parallel by filing
     if parallel_by == "filing":
@@ -275,11 +648,16 @@ def _execute_single_step(config: EngineConfig, case_dir: Path, step_name: str, t
     )
 
     # Multi-model dispatch + fusion
+    vote_group_id: str | None = None
     if is_multi:
+        vote_group_id = str(uuid4())
         result = dispatch_multi_and_fuse(
             config, step_name, prompt, instrucciones_dir,
             cwd=case_dir,
         )
+        # Per-model quality voting: vote each backend's individual output
+        # This enables comparing per-model quality vs fusion quality.
+        _vote_per_model(config, case_dir, step_name, vote_group_id=vote_group_id)
     elif config.get_escalation_config(step_name):
         # Use escalation-aware dispatch
         result = dispatch_with_escalation(config, step_name, prompt, cwd=case_dir)
@@ -305,6 +683,9 @@ def _execute_single_step(config: EngineConfig, case_dir: Path, step_name: str, t
             if not is_valid:
                 print(f"[router] WARNING: Artifact validation failed: {errors}", file=sys.stderr)
 
+        # Quarantine known alias/phantom artifacts that duplicate canonical output.
+        _quarantine_alias_artifacts(case_dir, step_name, artifact_path)
+
         # Quality voting (report-only): nunca bloquear pipeline por fallos de voting
         try:
             maybe_vote_step(
@@ -315,27 +696,49 @@ def _execute_single_step(config: EngineConfig, case_dir: Path, step_name: str, t
                 artifact_path=artifact_path,
                 model=result.model,
                 backend=result.backend,
+                vote_group_id=vote_group_id,
             )
         except Exception as exc:
             print(f"[router] WARNING: quality voting failed for {step_name}: {exc}", file=sys.stderr)
 
-        return {
+        ret = {
             "success": True,
             "model": result.model,
             "backend": result.backend,
             "duration_s": result.duration_s,
             "artifact": artifact_name,
+            "backends_used": result.backends_used,
         }
+        if result.model_profile:
+            ret["model_profile"] = result.model_profile
+        if result.transport:
+            ret["transport"] = result.transport
+        return ret
     else:
-        return {
+        ret = {
             "success": False,
             "error": result.error or "No output",
             "model": result.model,
             "backend": result.backend,
         }
+        if result.model_profile:
+            ret["model_profile"] = result.model_profile
+        if result.failure_ctx:
+            ret["failure_ctx"] = result.failure_ctx
+        if result.attempts:
+            ret["attempts"] = result.attempts
+        if result.transport:
+            ret["transport"] = result.transport
+        return ret
 
 
-def _run_python_step(config: EngineConfig, case_dir: Path, step_name: str, ticker: str) -> dict:
+def _run_python_step(
+    config: EngineConfig,
+    case_dir: Path,
+    step_name: str,
+    ticker: str,
+    hints: dict[str, str] | None = None,
+) -> dict:
     """Execute a Python-only runner step."""
     runner_map = {
         "PREFETCH": "scripts/runners/prefetch_runner.py",
@@ -354,21 +757,27 @@ def _run_python_step(config: EngineConfig, case_dir: Path, step_name: str, ticke
         return {"success": False, "error": f"Runner not found: {full_runner_path}"}
 
     # Build args based on step
-    args = _build_runner_args(step_name, case_dir, ticker, config)
+    args = _build_runner_args(step_name, case_dir, ticker, config, hints=hints)
 
     cmd = [sys.executable, str(full_runner_path)] + args
+    timeout_s = _resolve_python_step_timeout(config, step_name)
 
     try:
         proc = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=timeout_s,
             cwd=str(config.workspace),
         )
 
         if proc.returncode == 0:
-            return {"success": True, "model": "python", "output": proc.stdout[:1000]}
+            return {
+                "success": True,
+                "model": "python",
+                "output": proc.stdout[:1000],
+                "artifact": _infer_python_step_artifact(case_dir, step_name, ticker),
+            }
         else:
             return {
                 "success": False,
@@ -376,9 +785,28 @@ def _run_python_step(config: EngineConfig, case_dir: Path, step_name: str, ticke
                 "model": "python",
             }
     except subprocess.TimeoutExpired:
-        return {"success": False, "error": "Runner timeout", "model": "python"}
+        return {
+            "success": False,
+            "error": f"Runner timeout ({step_name}, {timeout_s}s)",
+            "model": "python",
+        }
     except Exception as e:
         return {"success": False, "error": str(e), "model": "python"}
+
+
+def _infer_python_step_artifact(case_dir: Path, step_name: str, ticker: str) -> str | None:
+    """Infer artifact filename produced by Python runner steps."""
+    pattern_map = {
+        "SOURCES_COMPILER": "SourcesPack_v1",
+        "TP_CALCULATOR": "_tp_calculated",
+        "TP_VALIDATOR": "TruthPack_v1",
+        "TP_EXTRACTOR_MERGER": "_tmp_tp_merged",
+    }
+    pattern = pattern_map.get(step_name)
+    if not pattern:
+        return None
+    found = _find_artifact(case_dir, pattern)
+    return found.name if found else None
 
 
 def _select_filings(filings: list[dict], config: EngineConfig) -> list[dict]:
@@ -445,7 +873,18 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
             all_filings.append(source)
 
     if not all_filings:
-        return {"success": False, "error": "No filings with local_path found in SourcesPack"}
+        # Pre-TP coverage gate: no filings to extract → fail fast with guidance
+        print(
+            "[router] Coverage gate (pre-TP): SourcesPack has 0 filings with local_path. "
+            "Skipping TP_EXTRACTOR to avoid wasting LLM tokens.",
+            file=sys.stderr,
+        )
+        return {
+            "success": False,
+            "error": "SourcesPack coverage gate: 0 filings with local_path. "
+                     "For non-US companies, provide --exchange, --country, and/or --web-ir hints. "
+                     "For US companies, verify ticker exists in SEC EDGAR.",
+        }
 
     # Apply filing selection filter
     filings = _select_filings(all_filings, config)
@@ -460,6 +899,8 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
     # Save partial results and validate
     successful = 0
     filing_records = []
+    filing_failures = []
+    filing_attempts: list[dict] = []
     for i, result in enumerate(results):
         if result.success and result.output:
             # Inject filing_type from SourcesPack so merger can attribute fields
@@ -481,9 +922,57 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
             })
             if not is_valid:
                 print(f"[router] WARNING: Partial TP filing {i:03d} inválido: {val_errors}", file=sys.stderr)
+        else:
+            filing_failures.append(
+                {
+                    "index": i,
+                    "model_profile": result.model_profile,
+                    "model": result.model,
+                    "backend": result.backend,
+                    "transport": result.transport,
+                    "error": result.error or "No output",
+                }
+            )
+            if result.failure_ctx:
+                for attempt in result.failure_ctx.get("attempts", []) or []:
+                    if isinstance(attempt, dict):
+                        merged = dict(attempt)
+                        merged.setdefault("model_profile", result.model_profile or result.model)
+                        merged.setdefault("index", i)
+                        filing_attempts.append(merged)
 
     if successful == 0:
-        return {"success": False, "error": "All filing extractions failed"}
+        common_error = ""
+        for failure in filing_failures:
+            if failure.get("error"):
+                common_error = str(failure["error"])
+                break
+        if not common_error:
+            common_error = "All filing extractions failed"
+        failure_ctx = {
+            "step_context": {
+                "step": step_name,
+                "mode": "tp_extractor_filing",
+                "total": len(filings),
+                "successful": successful,
+            },
+            "filings_total": len(filings),
+            "filings_successful": successful,
+            "sample_failures": filing_failures[:3],
+            "attempts": filing_attempts[:30],
+            "common_error": common_error,
+            "last_error": common_error,
+        }
+        return {
+            "success": False,
+            "error": common_error,
+            "backend": filing_failures[0].get("backend") if filing_failures else "unknown",
+            "model": filing_failures[0].get("model") if filing_failures else "unknown",
+            "transport": filing_failures[0].get("transport") if filing_failures else None,
+            "model_profile": filing_failures[0].get("model_profile") if filing_failures else None,
+            "attempts": filing_attempts,
+            "failure_ctx": failure_ctx,
+        }
 
     # Quality voting (report-only): nunca bloquear pipeline por fallos de voting
     try:
@@ -502,9 +991,66 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
     return {
         "success": True,
         "model": first_ok.model if first_ok else "unknown",
+        "model_profile": first_ok.model_profile if first_ok and first_ok.model_profile else None,
         "filings_processed": successful,
         "filings_total": len(filings),
     }
+
+
+def _vote_per_model(
+    config: EngineConfig,
+    case_dir: Path,
+    step_name: str,
+    vote_group_id: str | None = None,
+) -> None:
+    """Vote each backend's individual output for a multi-model step.
+
+    Reads _multi_{step}_{backend}.json traces and runs quality voting on each.
+    This provides per-model quality scores alongside the fusion artifact vote,
+    enabling comparison of individual vs fused quality.
+    """
+    import glob as _glob
+    pattern = str(case_dir / f"_multi_{step_name}_*.json")
+    traces = _glob.glob(pattern)
+    # Exclude raw traces and non-backend files
+    traces = [
+        t for t in traces
+        if "_multi_raw_" not in t and Path(t).name.startswith(f"_multi_{step_name}_")
+    ]
+    if not traces:
+        return
+    for trace_path_str in traces:
+        trace_path = Path(trace_path_str)
+        # Extract backend name from filename: _multi_{STEP}_{backend}.json
+        fname = trace_path.stem  # e.g., _multi_BULL_claude
+        parts = fname.split("_")
+        # Find backend name (last segment after step_name segments)
+        step_parts = step_name.split("_")
+        # Skip "_multi_" prefix (2 parts) + step_name parts
+        backend_name = "_".join(parts[2 + len(step_parts):])
+        if not backend_name:
+            continue
+        try:
+            payload = json.loads(trace_path.read_text())
+            if not isinstance(payload, dict):
+                continue
+            maybe_vote_step(
+                config=config,
+                case_dir=case_dir,
+                step_name=step_name,
+                artifact_payload=payload,
+                artifact_path=trace_path,
+                model=backend_name,
+                backend=backend_name,
+                lookup_step_name=step_name,
+                vote_step_name=f"{step_name}__model_{backend_name}",
+                vote_group_id=vote_group_id,
+            )
+        except Exception as exc:
+            print(
+                f"[router] WARNING: per-model voting failed for {step_name}/{backend_name}: {exc}",
+                file=sys.stderr,
+            )
 
 
 def is_step_ready(case_dir: Path, step_name: str) -> bool:
@@ -542,10 +1088,10 @@ def _check_truthpack_quality(case_dir: Path, ticker: str) -> str | None:
     tp_path = case_dir / f"TruthPack_v1_{ticker}.json"
 
     if not tp_path.exists():
-        # 2. Fallback: buscar por glob, mtime más reciente
+        # 2. Fallback: buscar por glob, deterministic (longest name, then lexicographic last)
         candidates = sorted(
             case_dir.glob("TruthPack_v1_*.json"),
-            key=lambda p: p.stat().st_mtime,
+            key=lambda p: (len(p.name), p.name),
             reverse=True,
         )
         if candidates:
@@ -588,21 +1134,125 @@ def _resolve_input_artifacts(case_dir: Path, step_name: str) -> dict[str, Path]:
         if found:
             artifacts[name] = found
 
+    # Audit trail: log which specific files were resolved for this step
+    if artifacts:
+        resolved_log = {name: path.name for name, path in artifacts.items()}
+        print(f"[router] {step_name} input artifacts resolved: {resolved_log}")
+
+        # For ARBITRO: persist an audit trail file so we can verify which artifacts
+        # were consumed (especially important for RED_TEAM naming ambiguity)
+        if step_name == "ARBITRO":
+            audit_path = case_dir / "_arbitro_input_audit.json"
+            try:
+                audit_data = {
+                    "step": step_name,
+                    "resolved_at_utc": datetime.now(timezone.utc).isoformat(),
+                    "artifacts": {
+                        name: {
+                            "file": path.name,
+                            "size_bytes": path.stat().st_size,
+                        }
+                        for name, path in artifacts.items()
+                    },
+                }
+                fd, tmp_path = tempfile.mkstemp(
+                    dir=str(case_dir),
+                    prefix="._tmp_arbitro_input_",
+                    suffix=".json",
+                )
+                try:
+                    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                        json.dump(audit_data, handle, indent=2, ensure_ascii=False)
+                    Path(tmp_path).replace(audit_path)
+                except Exception:
+                    Path(tmp_path).unlink(missing_ok=True)
+                    raise
+                print(f"[router] Saved ARBITRO input audit: {audit_path.name}")
+            except Exception as exc:
+                print(
+                    f"[router] WARNING: Could not persist ARBITRO input audit "
+                    f"{audit_path.name}: {exc}",
+                    file=sys.stderr,
+                )
+
     return artifacts
 
 
 def _find_artifact(case_dir: Path, pattern: str) -> Path | None:
     """Find an artifact file in case_dir matching the pattern.
 
-    Deterministic: returns the most recently modified match.
+    Resolution order (deterministic, no mtime dependency):
+      1. Exact name match: pattern + ".json"
+      2. Among matches, prefer fusion artifacts (contain _meta.fusion) over non-fusion
+      3. Longest filename among matches (more specific = better)
+      4. Lexicographic last (latest date/model in name convention)
+
+    Also handles alias resolution: REDTEAM ↔ RED_TEAM to avoid naming collisions
+    from legacy runs or individual backend outputs.
     """
-    matches = [
+    # Collect matches for primary + alias patterns
+    primary_matches = [
         f for f in case_dir.iterdir()
         if f.is_file() and f.name.startswith(pattern) and f.suffix == ".json"
     ]
+
+    _ALIASES = {
+        "AgentReport_v1_REDTEAM": "AgentReport_v1_RED_TEAM",
+        "AgentReport_v1_RED_TEAM": "AgentReport_v1_REDTEAM",
+        "CatalystDetection_v1": "_catalyst_detection",
+        "_catalyst_detection": "CatalystDetection_v1",
+        "ForensicDetection_v1": "_forensic_detection",
+        "_forensic_detection": "ForensicDetection_v1",
+    }
+    alias = _ALIASES.get(pattern)
+    alias_matches = []
+    if alias:
+        alias_matches = [
+            f for f in case_dir.iterdir()
+            if f.is_file() and f.name.startswith(alias) and f.suffix == ".json"
+            and f not in primary_matches
+        ]
+
+    matches = primary_matches + alias_matches
     if not matches:
         return None
-    return max(matches, key=lambda p: p.stat().st_mtime)
+    if len(matches) == 1:
+        return matches[0]
+
+    # Prefer fusion artifacts first (across primary+alias)
+    fusion_matches = []
+    for candidate in matches:
+        try:
+            data = json.loads(candidate.read_text())
+            if isinstance(data, dict) and data.get("_meta", {}).get("fusion"):
+                fusion_matches.append(candidate)
+        except Exception:
+            pass
+    if fusion_matches:
+        matches = fusion_matches
+
+    # Within filtered set, prefer primary prefix when available
+    primary_filtered = [m for m in matches if m.name.startswith(pattern)]
+    if primary_filtered:
+        matches = primary_filtered
+
+    # Prefer exact primary name if present
+    exact = case_dir / f"{pattern}.json"
+    if exact in matches:
+        selected = exact
+    else:
+        # Deterministic fallback: most specific name, then lexicographic last
+        selected = max(matches, key=lambda p: (len(p.name), p.name))
+
+    if primary_matches and alias_matches:
+        print(
+            f"[router] WARNING: Found both '{pattern}*' and '{alias}*' artifacts. "
+            f"Primary: {[m.name for m in primary_matches]}, Alias: {[m.name for m in alias_matches]}. "
+            f"Selected: {selected.name}",
+            file=sys.stderr,
+        )
+
+    return selected
 
 
 def _get_artifact_filename(step_name: str, ticker: str, case_dir: Path) -> str:
@@ -620,9 +1270,9 @@ def _get_artifact_filename(step_name: str, ticker: str, case_dir: Path) -> str:
         "TP_CALCULATOR": f"_tp_calculated_{ticker}.json",
         "TP_VALIDATOR": f"TruthPack_v1_{ticker}_{date_str}_{model_str}.json",
         "IMPLIED": f"ImpliedExpectations_v1_{ticker}_{date_str}_{model_str}.json",
-        "CATALYST_DETECTION": f"_catalyst_detection_{ticker}.json",
+        "CATALYST_DETECTION": f"CatalystDetection_v1_{ticker}_{date_str}_{model_str}.json",
         "CATALYST_SCORING": f"AgentReport_v1_CATALYST_{ticker}_{date_str}_{model_str}.json",
-        "FORENSIC_DETECTION": f"_forensic_detection_{ticker}.json",
+        "FORENSIC_DETECTION": f"ForensicDetection_v1_{ticker}_{date_str}_{model_str}.json",
         "FORENSIC_SCORING": f"AgentReport_v1_FORENSIC_{ticker}_{date_str}_{model_str}.json",
         "BULL": f"AgentReport_v1_BULL_{ticker}_{date_str}_{model_str}.json",
         "RED_TEAM": f"AgentReport_v1_REDTEAM_{ticker}_{date_str}_{model_str}.json",
@@ -636,25 +1286,27 @@ def _get_artifact_filename(step_name: str, ticker: str, case_dir: Path) -> str:
 
 def _infer_schema_for_step(step_name: str) -> str | None:
     """Map step to expected output schema name."""
-    schema_map = {
-        "SOURCES_COMPILER": "SourcesPack_v1",
-        "TP_VALIDATOR": "TruthPack_v1",
-        "IMPLIED": "ImpliedExpectations_v1",
-        "CATALYST_SCORING": "AgentReport_v1",
-        "FORENSIC_SCORING": "AgentReport_v1",
-        "BULL": "AgentReport_v1",
-        "RED_TEAM": "AgentReport_v1",
-        "ARBITRO": "DecisionPacket_v2",
-        "MONITOR": "MonitoringUpdate_v1",
-        "SCANNER": "ScannerReport_v1",
-    }
-    return schema_map.get(step_name)
+    return get_primary_schema(step_name)
 
 
-def _build_runner_args(step_name: str, case_dir: Path, ticker: str, config: EngineConfig) -> list[str]:
+def _build_runner_args(
+    step_name: str,
+    case_dir: Path,
+    ticker: str,
+    config: EngineConfig,
+    hints: dict[str, str] | None = None,
+) -> list[str]:
     """Build CLI arguments for a Python runner."""
     if step_name == "PREFETCH":
-        return ["--ticker", ticker, "--case-dir", str(case_dir)]
+        args = ["--ticker", ticker, "--case-dir", str(case_dir)]
+        h = hints or {}
+        if h.get("exchange"):
+            args.extend(["--exchange", h["exchange"]])
+        if h.get("country"):
+            args.extend(["--country", h["country"]])
+        if h.get("web_ir"):
+            args.extend(["--web-ir", h["web_ir"]])
+        return args
     elif step_name == "SOURCES_COMPILER":
         return [ticker, str(case_dir)]
     elif step_name == "TP_CALCULATOR":
@@ -704,6 +1356,7 @@ def _execute_parallel_steps(
     case_dir: Path,
     steps: list[str],
     ticker: str,
+    hints: dict[str, str] | None = None,
 ) -> dict[str, dict]:
     """Execute multiple steps in parallel using ThreadPoolExecutor."""
     max_workers = config.execution.get("max_parallel_backends", 3)
@@ -711,7 +1364,9 @@ def _execute_parallel_steps(
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_step = {
-            executor.submit(execute_step, config, case_dir, step, ticker): step
+            executor.submit(
+                execute_step, config, case_dir, step, ticker, hints=hints
+            ): step
             for step in steps
         }
         for future in concurrent.futures.as_completed(future_to_step):
@@ -719,8 +1374,20 @@ def _execute_parallel_steps(
             try:
                 results[step] = future.result()
             except Exception as e:
-                results[step] = {"success": False, "error": str(e)}
-                mark_step_failed(case_dir, step, str(e))
+                error = str(e)
+                failure_ctx = {
+                    "step_context": {
+                        "step": step,
+                        "mode": "parallel_execution",
+                    },
+                    "last_error": error,
+                }
+                results[step] = {
+                    "success": False,
+                    "error": error,
+                    "failure_ctx": failure_ctx,
+                }
+                mark_step_failed(case_dir, step, error, failure_meta=failure_ctx)
 
     return results
 
@@ -744,32 +1411,98 @@ def _extract_decision_fields(case_dir: Path, step_result: dict) -> None:
         with open(artifact_path) as f:
             data = json.load(f)
 
-        # Try flat format first (legacy / DecisionPacket_v1)
-        decision = data.get("decision", data.get("Decision"))
-        score = data.get("score", data.get("Score"))
-        confianza = data.get("confianza", data.get("Confianza", ""))
-        probabilistica = data.get("probabilistica")
+        # Some ARBITRO outputs wrap everything in a "decision_packet" key;
+        # others put fields at top level.  We search both layers.
+        wrapper = data.get("decision_packet", {}) if isinstance(data.get("decision_packet"), dict) else {}
 
-        # Fall back to DecisionPacket_v2 nested format
-        # Handle both top-level resumen and decision_packet wrapper
-        resumen = data.get("resumen_ejecutivo", {})
-        if not resumen and isinstance(data.get("decision_packet"), dict):
-            resumen = data["decision_packet"].get("resumen_ejecutivo", {})
+        def _to_float(value):
+            if isinstance(value, (int, float)):
+                return float(value)
+            if isinstance(value, str):
+                s = value.strip().replace(",", ".")
+                if not s:
+                    return None
+                try:
+                    return float(s)
+                except ValueError:
+                    return None
+            return None
+
+        def _clamp(value, low, high):
+            return max(low, min(high, value))
+
+        def _get(*keys):
+            """Search key in data top-level first, then inside decision_packet wrapper."""
+            for k in keys:
+                val = data.get(k)
+                if val is not None:
+                    return val
+            for k in keys:
+                val = wrapper.get(k)
+                if val is not None:
+                    return val
+            return None
+
+        # Try flat format first (legacy / DecisionPacket_v1)
+        decision = _get("decision", "Decision")
+        score = _get("score", "Score")
+        confianza = _get("confianza", "Confianza")
+        probabilistica = _get("probabilistica")
+        sizing = None
+        modelo_principal = None
+
+        # Fall back to DecisionPacket_v2 nested format — resumen_ejecutivo
+        resumen = _get("resumen_ejecutivo") or {}
         if isinstance(resumen, dict):
             if decision is None:
                 decision = resumen.get("decision")
             if score is None:
                 score = resumen.get("score_global", resumen.get("score"))
-            if not confianza:
+            if confianza is None:
                 confianza = resumen.get("confianza_global_0_1", resumen.get("confianza", ""))
+            sizing = resumen.get("tamaño_recomendado_pct_cartera")
+
+        # DecisionPacket_v2: score lives in scoring_preliminar.total_0_100
+        if score is None:
+            scoring = _get("scoring_preliminar") or {}
+            if isinstance(scoring, dict):
+                score = scoring.get("total_0_100", scoring.get("total"))
+
+        # DecisionPacket_v2: probabilistica from decision_probabilistica
+        if probabilistica is None:
+            dp = _get("decision_probabilistica") or {}
+            if isinstance(dp, dict) and dp:
+                probabilistica = dp
+
+        # Model provenance from v2 fusion metadata.
+        meta = data.get("_meta", {}) if isinstance(data.get("_meta"), dict) else {}
+        if not meta and isinstance(wrapper.get("_meta"), dict):
+            meta = wrapper.get("_meta")
+        fusion_meta = meta.get("fusion") or {}
+        modelos = fusion_meta.get("modelos_usados") or fusion_meta.get("modelos_utilizados")
+        if isinstance(modelos, list) and modelos:
+            joined = "+".join(str(m) for m in modelos if m)
+            if joined:
+                modelo_principal = joined
+
+        norm_score = _to_float(score)
+        norm_score = int(round(_clamp(norm_score, 0.0, 100.0))) if norm_score is not None else 0
+        norm_confianza = _to_float(confianza)
+        if norm_confianza is not None:
+            norm_confianza = _clamp(norm_confianza, 0.0, 1.0)
+        norm_sizing = _to_float(sizing)
+        if norm_sizing is not None:
+            norm_sizing = _clamp(norm_sizing, 0.0, 100.0)
 
         if decision is not None:
             update_decision_fields(
                 case_dir,
                 decision=str(decision),
-                score=float(score) if score is not None else 0.0,
-                confianza=str(confianza),
+                score=norm_score,
+                confianza=norm_confianza,
                 probabilistica=probabilistica,
+                sizing=norm_sizing,
+                modelo_principal=modelo_principal,
             )
     except (json.JSONDecodeError, OSError, ValueError):
         pass

@@ -35,17 +35,32 @@ python3 -m engine --help
 # Show dashboard (scan all cases)
 python3 -m engine dashboard
 
-# Run full pipeline for a ticker
-python3 -m engine pipeline AAPL --date 2026-02-15 --model Codex
+# Show arbitro decisions summary
+python3 -m engine decisions              # compact table
+python3 -m engine decisions -v           # + sizing, model, agent confidences
+python3 -m engine decisions -vv          # + racional, riesgos, next steps
+python3 -m engine decisions ACVA         # filter by ticker
+python3 -m engine decisions ACVA -vv     # full detail for one ticker
 
+# Run full pipeline for a ticker
+python3 -m engine pipeline AAPL --date 2026-02-15
 # Execute a single step
 python3 -m engine step AAPL SOURCES --date 2026-02-15
 
 # Continue an incomplete pipeline
 python3 -m engine continue AAPL --date 2026-02-15
 
+# Model defaults (persistentes)
+python3 -m engine defaults show
+python3 -m engine defaults set --pipeline-models "1,2,3" --fusion-model claude-opus-4.6
+python3 -m engine defaults step set --step BULL --models claude-opus-4.6,gemini-3-flash --fusion-model claude-sonnet-4.6
+python3 -m engine defaults edit   # asistente interactivo TTY
+
 # Validate artifacts in a case
 python3 -m engine validate AAPL --date 2026-02-15
+
+# Use alternate config file
+python3 -m engine --config /path/to/engine_config.json defaults show
 ```
 
 ---
@@ -108,29 +123,50 @@ python3 -m engine validate AAPL --date 2026-02-15
 - **CATALYST**: `CATALYST_DETECTION` → `CATALYST_SCORING`
 - **FORENSIC**: `FORENSIC_DETECTION` → `FORENSIC_SCORING`
 
+## CLI Commands
+
+Principales comandos:
+
+- `python3 -m engine dashboard`
+- `python3 -m engine decisions [TICKER] [-v|-vv]`
+- `python3 -m engine pipeline TICKER --date YYYY-MM-DD`
+- `python3 -m engine continue TICKER --date YYYY-MM-DD`
+- `python3 -m engine step TICKER STEP_NAME --date YYYY-MM-DD`
+- `python3 -m engine rehacer TICKER STEP_NAME --date YYYY-MM-DD`
+- `python3 -m engine monitor|scanner|scout|outcome|evaluar|benchmark|validate`
+- `python3 -m engine defaults show`
+- `python3 -m engine defaults set --pipeline-models ...`
+- `python3 -m engine defaults step set --step ...`
+- `python3 -m engine defaults edit`
+
 ---
 
 ## Configuration
 
-### `engine_config.json`
+### `engine_config.json` (v2)
 
 ```json
 {
-  "binaries": {
-    "codex": {
-      "default": "/opt/homebrew/bin/codex",
-      "fallback": "/Applications/Codex.app/Contents/Resources/codex",
-      "min_version": "0.101.0"
-    },
-    ...
+  "version": "2.0.0",
+  "model_catalog": {
+    "gpt-5.3-codex-spark": { "...": "..." },
+    "claude-opus-4.6": { "...": "..." },
+    "gemini-3-pro": { "...": "..." }
   },
-  "default_model": "codex",
-  "task_routing": {
-    "TP_EXTRACTOR_FILING": { "model": "codex" },
-    "IMPLIED": { "model": "codex" },
-    "BULL": { "model": "codex" },
-    "ARBITRO": { "model": "codex", "escalate_to": "claude" },
-    ...
+  "pipeline_models": [
+    "gpt-5.3-codex-spark",
+    "claude-opus-4.6",
+    "gemini-3-pro"
+  ],
+  "fusion_model": "claude-opus-4.6",
+  "default_single_model": "gpt-5.3-codex-spark",
+  "step_overrides": {
+    "TP_EXTRACTOR_FILING": {
+      "models": ["gpt-5.3-codex-spark"]
+    },
+    "BULL": {
+      "fusion_model": "claude-opus-4.6"
+    }
   },
   "execution": {
     "max_parallel_filings": 4,
@@ -140,9 +176,22 @@ python3 -m engine validate AAPL --date 2026-02-15
 }
 ```
 
-- **Binary resolution**: `binary` → `binary_fallback` → unavailable
-- **Multi-backend**: `multi_model_tasks` with `"enabled": true` dispatches to all backends in parallel, then fuses via `FUSION` step
+- **Modelo canónico**: ahora usa `model_profile` (ej. `claude-opus-4.6`) y resuelve transporte (`codex` / `claude` / `gemini`).
+- **Defaults persistentes**:
+  - `pipeline_models`: perfiles para pasos multi-modelo por defecto.
+  - `fusion_model`: fusión por defecto para multi-modelo.
+  - `default_single_model`: perfil por defecto para pasos single.
+  - `step_overrides`: overrides persistentes por step (modelos/fusión).
+- **Comandos de defaults**:
+  - `defaults show`: visualizar estado actual.
+  - `defaults set`: actualizar valores globales.
+  - `defaults step set`: actualizar override de un step.
+  - `defaults edit`: editar de forma guiada (interactivo).
+- **Flag global**:
+  - `--config /ruta/engine_config.json` permite apuntar a otra configuración antes de cualquier subcomando.
+- **Binary resolution**: `binary` → `binary_fallback` → unavailable.
 - **Parallel filings**: `TP_EXTRACTOR_FILING` with DAG type `"llm_per_filing"` processes each filing concurrently
+- **Quality voting (v1)**: deterministic, report-only metrics are documented in `_docs/QUALITY_VOTING.md`
 
 ---
 
@@ -320,5 +369,5 @@ Internal project. Not for public distribution.
 - 13 engine modules functional
 - 3 LLM backends (Codex, Gemini, Claude Code)
 - 24 schemas, 30 instructions, 8 runners
-- CLI with 5 commands
+- CLI with 6 commands (incl. `decisions` with 3 verbosity levels)
 - 10/11 functional tests passing

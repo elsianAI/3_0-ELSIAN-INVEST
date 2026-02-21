@@ -58,12 +58,12 @@
     },
     "estado_pipeline": {
       "type": "string",
-      "enum": ["COMPLETO", "INCOMPLETO", "SUPERSEDED", "QUARANTINE", "EXCLUIDO", "LEGACY"],
+      "enum": ["COMPLETO", "INCOMPLETO", "EN_PROGRESO", "FALLIDO", "SUPERSEDED", "QUARANTINE", "EXCLUIDO", "LEGACY"],
       "description": "Estado global del pipeline"
     },
     "decision": {
       "type": ["string", "null"],
-      "enum": ["WATCHLIST", "INVERTIR", "DESCARTAR", null],
+      "enum": ["WATCHLIST", "INVERTIR", "DESCARTAR", "REMEDIATE", "BLOQUEADO", null],
       "description": "Decision del ARBITRO (null si pipeline incompleto)"
     },
     "score": {
@@ -88,6 +88,16 @@
         "ratio_asimetria": { "type": "number" },
         "conviccion": { "type": "number" }
       }
+    },
+    "sizing": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Tamaño recomendado de posición (%)"
+    },
+    "modelo_principal": {
+      "type": ["string", "null"],
+      "description": "Modelo(s) que generaron el artefacto final (ej. gemini+codex)"
     },
     "next_step": {
       "type": ["string", "null"],
@@ -130,7 +140,7 @@
       "properties": {
         "estado": {
           "type": "string",
-          "enum": ["DONE", "PENDING"],
+          "enum": ["DONE", "PENDING", "FAILED", "IN_PROGRESS"],
           "description": "Estado del step"
         },
         "artefacto": {

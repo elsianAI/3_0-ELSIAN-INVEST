@@ -212,6 +212,90 @@ def fetch_yahoo_snapshot(ticker: str, exchange: str) -> Dict[str, Any]:
                 "sector": None, "industry": None, "country": None, "exchange": exchange, "snapshot": {}}
 
 
+def _get_yahoo_crumb_session() -> Tuple[Optional[str], requests.Session]:
+    """Obtain a Yahoo Finance crumb + authenticated session.
+
+    Yahoo's quoteSummary endpoint requires a crumb token obtained via cookie.
+    Steps: 1) hit fc.yahoo.com to get cookies, 2) fetch crumb from /v1/test/getcrumb.
+    """
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    })
+    try:
+        session.get("https://fc.yahoo.com", timeout=15, allow_redirects=True)
+    except Exception:
+        pass  # Expected — sets cookies even on error
+    try:
+        crumb_resp = session.get("https://query2.finance.yahoo.com/v1/test/getcrumb", timeout=15)
+        crumb = crumb_resp.text.strip()
+        if crumb and len(crumb) < 50:
+            return crumb, session
+    except Exception:
+        pass
+    return None, session
+
+
+def _fetch_yahoo_summary(ticker: str, exchange: str) -> Dict[str, Any]:
+    """Fetch market cap, shares, sector/industry from Yahoo Finance quoteSummary.
+
+    The /v8/finance/chart endpoint only returns price/volume.  This endpoint
+    provides the richer fundamental data needed for EV calculation and sector
+    classification of non-US equities.
+
+    Requires crumb authentication (cookie + crumb token).
+    """
+    suffix = YAHOO_SUFFIX.get(exchange.upper(), "")
+    sym = f"{ticker}{suffix}"
+
+    crumb, session = _get_yahoo_crumb_session()
+    if not crumb:
+        return {}
+
+    url = (
+        f"https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+        f"{quote_plus(sym)}?modules=price,summaryProfile&crumb={quote_plus(crumb)}"
+    )
+    try:
+        resp = session.get(url, timeout=TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+        result_data = data.get("quoteSummary", {}).get("result", [])
+        if not result_data:
+            return {}
+        modules = result_data[0]
+
+        price_mod = modules.get("price", {})
+        profile_mod = modules.get("summaryProfile", {})
+
+        out: Dict[str, Any] = {}
+
+        # Market cap
+        mcap_raw = price_mod.get("marketCap", {})
+        mcap = mcap_raw.get("raw") if isinstance(mcap_raw, dict) else None
+        if mcap is not None:
+            out["market_cap"] = mcap
+
+        # Shares outstanding
+        shares_raw = price_mod.get("sharesOutstanding", {})
+        shares = shares_raw.get("raw") if isinstance(shares_raw, dict) else None
+        if shares is not None:
+            out["shares_outstanding"] = shares
+
+        # Sector / Industry / Country
+        if profile_mod.get("sector"):
+            out["sector"] = profile_mod["sector"]
+        if profile_mod.get("industry"):
+            out["industry"] = profile_mod["industry"]
+        if profile_mod.get("country"):
+            out["country"] = profile_mod["country"]
+
+        return out
+    except Exception:
+        return {}
+
+
 def rolling_avg_volume(rows: List[Dict[str, str]], n: int) -> Optional[float]:
     if not rows:
         return None
@@ -279,6 +363,36 @@ def main() -> int:
         ctx = fetch_yahoo_snapshot(ticker, exchange_arg)
         currency = ctx.get("currency", "USD")
         publicador = "Yahoo Finance + Stooq"
+
+        # Enrich with quoteSummary for market_cap, shares, sector/industry
+        summary = _fetch_yahoo_summary(ticker, exchange_arg)
+        snap = ctx.get("snapshot", {})
+        if summary.get("market_cap") and "Market Cap" not in snap:
+            snap["Market Cap"] = str(summary["market_cap"])
+        if summary.get("shares_outstanding") and "Shs Outstand" not in snap:
+            snap["Shs Outstand"] = str(summary["shares_outstanding"])
+        if summary.get("sector") and ctx.get("sector") is None:
+            ctx["sector"] = summary["sector"]
+        if summary.get("industry") and ctx.get("industry") is None:
+            ctx["industry"] = summary["industry"]
+        if summary.get("country") and ctx.get("country") is None:
+            ctx["country"] = summary["country"]
+        ctx["snapshot"] = snap
+
+        # Handle GBp (pence sterling) → GBP conversion for LSE stocks
+        if currency == "GBp":
+            if "Price" in snap:
+                try:
+                    snap["Price"] = str(float(snap["Price"]) / 100)
+                except (ValueError, TypeError):
+                    pass
+            if "Prev Close" in snap:
+                try:
+                    snap["Prev Close"] = str(float(snap["Prev Close"]) / 100)
+                except (ValueError, TypeError):
+                    pass
+            currency = "GBP"
+
         if not ctx.get("snapshot"):
             faltantes.append({
                 "tipo": "MARKET_SNAPSHOT", "prioridad": "CRITICO",
@@ -320,9 +434,15 @@ def main() -> int:
     change_pct = to_float(snapshot.get("Change"))
 
     market_cap = to_float(snapshot.get("Market Cap"))
-    market_cap_m = round(market_cap / 1_000_000, 2) if market_cap is not None else None
-
     shares = to_float(snapshot.get("Shs Outstand"))
+
+    # Fallback: compute missing market_cap or shares from the other + price
+    if market_cap is None and price is not None and shares is not None:
+        market_cap = price * shares
+    elif shares is None and price is not None and price > 0 and market_cap is not None:
+        shares = market_cap / price
+
+    market_cap_m = round(market_cap / 1_000_000, 2) if market_cap is not None else None
     shares_m = round(shares / 1_000_000, 4) if shares is not None else None
 
     vol_last = to_float(snapshot.get("Volume"))

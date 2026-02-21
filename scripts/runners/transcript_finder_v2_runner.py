@@ -16,6 +16,7 @@ import argparse
 import datetime as dt
 import json
 import re
+import sys
 import warnings
 from io import BytesIO
 from pathlib import Path
@@ -61,6 +62,14 @@ IR_PRESENTATION_PATHS = (
     "/events-presentations",
     "/events-and-presentations",
     "/investor-relations/events-and-presentations",
+    "/reports-results-and-presentations",
+    "/results",
+    "/reports",
+    "/financial-results",
+    "/announcements",
+    "/publications",
+    "/news",
+    "/documents",
 )
 IR_DOC_KEYWORDS = (
     "presentation",
@@ -425,6 +434,7 @@ def main() -> int:
     parser.add_argument("--ticker", required=True, help="Ticker, e.g., IBTA")
     parser.add_argument("--case-dir", required=True, help="Case directory, e.g., casos/IBTA/2026-02-13")
     parser.add_argument("--raw-dir", default="", help="Raw filings directory (default: casos/{T}/_raw_filings)")
+    parser.add_argument("--web-ir", default="", help="Investor Relations base URL (override)")
     parser.add_argument("--max-transcripts", type=int, default=8, help="Maximum transcripts to include")
     parser.add_argument("--max-presentations", type=int, default=8, help="Maximum presentations to include")
     args = parser.parse_args()
@@ -451,6 +461,9 @@ def main() -> int:
     for key in ("bolsa", "pais", "sector", "industria"):
         if src_empresa.get(key):
             empresa[key] = src_empresa[key]
+    web_ir_override = normalize_web_ir(args.web_ir)
+    if web_ir_override:
+        empresa["web_ir"] = web_ir_override
 
     out: Dict[str, Any] = {
         "version_esquema": "SourcesPack_v1",
@@ -579,7 +592,25 @@ def main() -> int:
     # --------------------
     presentation_source_idx = 1
     presentation_rows: List[Tuple[str, str, Optional[str], str, str]] = []
-    ir_pages = build_ir_pages(empresa.get("web_ir"))
+    web_ir_to_use = web_ir_override or empresa.get("web_ir")
+    if web_ir_to_use:
+        try:
+            # Import from same directory (runners are launched as subprocesses)
+            import importlib.util as _ilu
+            _spec = _ilu.spec_from_file_location(
+                "ir_url_resolver",
+                str(Path(__file__).resolve().parent / "ir_url_resolver.py"),
+            )
+            _mod = _ilu.module_from_spec(_spec)
+            _spec.loader.exec_module(_mod)
+            resolved = _mod.resolve_ir_base_url(web_ir_to_use, session, timeout=10)
+            if resolved and resolved != normalize_web_ir(web_ir_to_use):
+                print(f"[transcript_finder] Resolved IR: {web_ir_to_use} -> {resolved}", file=sys.stderr)
+                web_ir_to_use = resolved
+                empresa["web_ir"] = resolved
+        except Exception as exc:
+            print(f"[transcript_finder] IR resolver failed: {exc}", file=sys.stderr)
+    ir_pages = build_ir_pages(web_ir_to_use)
     if not ir_pages:
         log_lim(f"Sin web_ir en contexto local para {ticker}; no se pudo intentar scrapeo de presentaciones IR.")
     else:

@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StepVote_v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version_esquema",
+    "caso_id",
+    "ticker",
+    "fecha_caso",
+    "step_name",
+    "operation",
+    "mode",
+    "score_raw_0_100",
+    "rules",
+    "_meta"
+  ],
+  "properties": {
+    "version_esquema": {
+      "type": "string",
+      "const": "StepVote_v1"
+    },
+    "caso_id": { "type": "string", "minLength": 1 },
+    "ticker": { "type": "string", "minLength": 1 },
+    "fecha_caso": { "type": "string", "format": "date" },
+    "step_name": { "type": "string", "minLength": 1 },
+    "operation": { "type": "string", "minLength": 1 },
+    "mode": {
+      "type": "string",
+      "enum": ["deterministic_only", "qualitative_only", "hybrid"]
+    },
+    "subject_type": {
+      "type": "string",
+      "enum": ["single_artifact", "tp_extractor_filing_aggregate"]
+    },
+    "score_raw_0_100": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "schema_name": {
+      "type": ["string", "null"]
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "weight", "score_raw_0_100", "passed"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "weight": { "type": "number", "exclusiveMinimum": 0 },
+          "score_raw_0_100": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "passed": { "type": "boolean" },
+          "details": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "_meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["created_at_utc", "config_hash"],
+      "properties": {
+        "created_at_utc": { "type": "string", "format": "date-time" },
+        "config_hash": { "type": "string", "minLength": 32 },
+        "model": { "type": ["string", "null"] },
+        "backend": { "type": ["string", "null"] },
+        "artifact_file": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ModelQualityRollup_v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version_esquema",
+    "generated_at_utc",
+    "source_log_path",
+    "coverage",
+    "min_samples_per_step_model",
+    "per_model_step_stats",
+    "fusion_comparison",
+    "_meta"
+  ],
+  "properties": {
+    "version_esquema": {
+      "type": "string",
+      "const": "ModelQualityRollup_v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_log_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "events_total",
+        "events_valid",
+        "parse_errors",
+        "cases",
+        "canonical_steps"
+      ],
+      "properties": {
+        "events_total": { "type": "integer", "minimum": 0 },
+        "events_valid": { "type": "integer", "minimum": 0 },
+        "parse_errors": { "type": "integer", "minimum": 0 },
+        "cases": { "type": "integer", "minimum": 0 },
+        "canonical_steps": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "min_samples_per_step_model": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "per_model_step_stats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "canonical_step_name",
+          "backend",
+          "n_votes",
+          "mean",
+          "p25",
+          "median",
+          "p75",
+          "last_seen_utc",
+          "sample_sufficiency",
+          "rules_failed_top"
+        ],
+        "properties": {
+          "canonical_step_name": { "type": "string", "minLength": 1 },
+          "backend": { "type": "string", "minLength": 1 },
+          "n_votes": { "type": "integer", "minimum": 0 },
+          "mean": { "type": "number", "minimum": 0, "maximum": 100 },
+          "p25": { "type": "number", "minimum": 0, "maximum": 100 },
+          "median": { "type": "number", "minimum": 0, "maximum": 100 },
+          "p75": { "type": "number", "minimum": 0, "maximum": 100 },
+          "last_seen_utc": { "type": ["string", "null"], "format": "date-time" },
+          "sample_sufficiency": { "type": "boolean" },
+          "rules_failed_top": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["rule", "count"],
+              "properties": {
+                "rule": { "type": "string", "minLength": 1 },
+                "count": { "type": "integer", "minimum": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "fusion_comparison": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "canonical_step_name",
+          "backend",
+          "n_pairs",
+          "delta_vs_fusion_mean",
+          "wins_vs_fusion_count",
+          "losses_vs_fusion_count",
+          "ties_vs_fusion_count"
+        ],
+        "properties": {
+          "canonical_step_name": { "type": "string", "minLength": 1 },
+          "backend": { "type": "string", "minLength": 1 },
+          "n_pairs": { "type": "integer", "minimum": 0 },
+          "delta_vs_fusion_mean": { "type": "number" },
+          "wins_vs_fusion_count": { "type": "integer", "minimum": 0 },
+          "losses_vs_fusion_count": { "type": "integer", "minimum": 0 },
+          "ties_vs_fusion_count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "_meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["config_hash"],
+      "properties": {
+        "config_hash": { "type": "string", "minLength": 32 }
+      }
+    }
+  }
+}

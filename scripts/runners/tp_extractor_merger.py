@@ -36,12 +36,13 @@ def _dedup(items: list) -> list:
 
 
 FILING_PRIORITY = {
-    "10-K": 1, "20-F": 1,
-    "10-Q": 2, "6-K": 2,
-    "8-K": 3,
+    "10-K": 1, "20-F": 1, "ANNUAL_REPORT": 1,
+    "10-Q": 2, "6-K": 2, "INTERIM_REPORT": 2,
+    "8-K": 3, "REGULATORY_FILING": 3,
     "TRANSCRIPT": 4,
-    "PRESENTATION": 5,
+    "PRESENTATION": 5, "INVESTOR_PRESENTATION": 5,
     "DEF14A": 6,
+    "IR_NEWS": 7, "OTHER": 8,
 }
 
 # Patterns to detect filing type from filenames / source_filing strings
@@ -199,6 +200,28 @@ def _merge_quarterly(extractions: list[dict]) -> list:
     return [by_period[p]["data"] for p in periods]
 
 
+_BS_METADATA_KEYS = {
+    "escala", "scale", "source_filing", "filing_type", "periodo",
+    "fecha_fin", "fecha_corte", "moneda", "currency", "fuente_refs",
+    "tipo_periodo", "duracion", "is_preliminary",
+}
+
+
+def _is_bs_data_field(key: str, value) -> bool:
+    """Return True if this BS field represents real financial data (not metadata/noise)."""
+    if key.startswith("_"):
+        return False
+    if key.lower() in _BS_METADATA_KEYS:
+        return False
+    # Exclude comparativo_* fields (prior-year comparatives, not current BS)
+    if key.lower().startswith("comparativo"):
+        return False
+    # Exclude nested dicts that aren't numeric data
+    if isinstance(value, dict):
+        return False
+    return True
+
+
 def _merge_balance_sheet(extractions: list[dict]) -> dict:
     """Usa el filing más reciente con datos de balance."""
     best = {}
@@ -207,7 +230,10 @@ def _merge_balance_sheet(extractions: list[dict]) -> dict:
 
     for ext in extractions:
         bs = ext.get("balance_sheet_ultimo", {})
-        if not bs or all(v is None for k, v in bs.items() if not k.startswith("_")):
+        if not bs or all(
+            v is None for k, v in bs.items()
+            if _is_bs_data_field(k, v)
+        ):
             continue
 
         filing_type = _resolve_filing_type(ext)

@@ -4,6 +4,25 @@ import json
 import re
 from pathlib import Path
 
+# Default truncation limits (overridable via engine_config.json → truncation_limits)
+_DEFAULT_LIMITS = {
+    "input_artifact_chars": 200_000,
+    "filing_clean_md_chars": 220_000,
+    "filing_raw_chars": 300_000,
+    "fusion_output_chars": 100_000,
+}
+
+# Module-level cache; populated by set_truncation_limits()
+_limits: dict[str, int] = dict(_DEFAULT_LIMITS)
+
+
+def set_truncation_limits(cfg: dict | None) -> None:
+    """Called once at engine startup to inject truncation_limits from config."""
+    if cfg:
+        for key in _DEFAULT_LIMITS:
+            if key in cfg:
+                _limits[key] = int(cfg[key])
+
 # Mapeo step → fichero de instrucciones
 INSTRUCTION_MAP = {
     "SOURCES_COMPILER":    "instrucciones_sources_compiler_V2.md",
@@ -30,10 +49,10 @@ STEP_SCHEMAS = {
     "TP_EXTRACTOR":        ["artefactos/TruthPack_v1.json"],
     "TP_EXTRACTOR_FILING": ["artefactos/TruthPack_v1.json"],
     "IMPLIED":             ["artefactos/ImpliedExpectations_v1.json"],
-    "CATALYST_DETECTION":  ["payloads/CatalystPayload_v1.json"],
-    "CATALYST_SCORING":    ["artefactos/AgentReport_v1.json", "payloads/CatalystPayload_v1.json"],
-    "FORENSIC_DETECTION":  ["payloads/ForensicPayload_v1.json"],
-    "FORENSIC_SCORING":    ["artefactos/AgentReport_v1.json", "payloads/ForensicPayload_v1.json"],
+    "CATALYST_DETECTION":  ["artefactos/CatalystDetection_v1.json"],
+    "CATALYST_SCORING":    ["artefactos/AgentReport_v1.json", "artefactos/CatalystDetection_v1.json", "payloads/CatalystPayload_v1.json"],
+    "FORENSIC_DETECTION":  ["artefactos/ForensicDetection_v1.json"],
+    "FORENSIC_SCORING":    ["artefactos/AgentReport_v1.json", "artefactos/ForensicDetection_v1.json", "payloads/ForensicPayload_v1.json"],
     "BULL":                ["artefactos/AgentReport_v1.json", "payloads/BullPayload_v1.json"],
     "RED_TEAM":            ["artefactos/AgentReport_v1.json", "payloads/RedTeamPayload_v1.json"],
     "ARBITRO":             ["artefactos/DecisionPacket_v2.json"],
@@ -87,8 +106,9 @@ def build_prompt(
             if path.exists():
                 content = path.read_text()
                 # Truncate very large artifacts to avoid exceeding context
-                if len(content) > 200_000:
-                    content = content[:200_000] + "\n\n... [TRUNCATED]"
+                limit = _limits["input_artifact_chars"]
+                if len(content) > limit:
+                    content = content[:limit] + f"\n\n... [TRUNCATED at {limit // 1000}k]"
                 artifact_parts.append(f"### {name}\n```json\n{content}\n```")
         if artifact_parts:
             parts.append(f"# DATOS DE INPUT\n\n" + "\n\n".join(artifact_parts))
@@ -184,6 +204,16 @@ def build_filing_prompt(
                     return True
         return False
 
+    # ── PDF safety: prefer .txt companion over raw PDF binary ──
+    # PDF binaries contain null bytes that crash subprocess.run() when passed
+    # as CLI arguments. Prefer the .txt companion if it has real content.
+    if filing_path.suffix.lower() == ".pdf":
+        txt_candidate = filing_path.with_suffix(".txt")
+        if txt_candidate.exists():
+            _txt_peek = txt_candidate.read_text(errors="replace")
+            if len(_txt_peek) > 200 and not _txt_peek.startswith("[PDF original"):
+                filing_path = txt_candidate
+
     content_path = filing_path
     if not filing_path.name.endswith(".clean.md"):
         clean_candidate = filing_path.parent / (filing_path.stem + ".clean.md")
@@ -194,17 +224,58 @@ def build_filing_prompt(
 
     if content_path.exists():
         content = content_path.read_text(errors="replace")
+        content = content.replace("\x00", "")  # sanitize null bytes (safety net)
         is_clean_md = content_path.name.endswith(".clean.md")
         if is_clean_md:
-            # .clean.md is already pre-filtered and within 220k budget
-            # No truncation — this is the whole point of .clean.md
-            if len(content) > 220_000:
-                content = content[:220_000] + "\n\n... [TRUNCATED at 220k safety cap]"
+            limit = _limits["filing_clean_md_chars"]
+            if len(content) > limit:
+                content = content[:limit] + f"\n\n... [TRUNCATED at {limit // 1000}k safety cap]"
         else:
-            # Legacy .txt / .htm fallback: truncate at 300k
-            if len(content) > 300_000:
-                content = content[:300_000] + "\n\n... [TRUNCATED]"
+            limit = _limits["filing_raw_chars"]
+            if len(content) > limit:
+                content = content[:limit] + f"\n\n... [TRUNCATED at {limit // 1000}k]"
         parts.append(f"# FILING CONTENT\n\n```\n{content}\n```")
+
+    # Canonical field map — tells the LLM exactly what field names to output
+    parts.append(
+        "# CANONICAL FIELD MAP\n\n"
+        "Use EXACTLY these field names in your JSON output. The downstream normalizer "
+        "depends on these exact names. Do NOT invent alternative names.\n\n"
+        "## Income Statement (historico_anual / historico_trimestral)\n"
+        "- `ingresos_usd` — Total revenue / net revenue\n"
+        "- `cogs_usd` — Cost of goods sold / cost of revenues\n"
+        "- `gross_profit_usd` — Gross profit\n"
+        "- `ebit_usd` — Operating income / income from operations\n"
+        "- `net_income_usd` — Net income attributable to company\n"
+        "- `rd_usd` — Research & development expense\n"
+        "- `sga_usd` — Selling, general & administrative expense\n"
+        "- `ga_usd` — General & administrative expense\n"
+        "- `interest_expense_usd` — Interest expense\n"
+        "- `depreciation_usd` — Depreciation & amortization\n"
+        "- `income_tax_usd` — Income tax expense\n\n"
+        "## Cash Flow Statement (historico_anual / historico_trimestral)\n"
+        "- `cfo_usd` — Net cash from operating activities\n"
+        "- `cfi_usd` — Net cash from investing activities (usually negative)\n"
+        "- `cff_usd` — Net cash from financing activities\n"
+        "- `capex_usd` — Capital expenditures (report as NEGATIVE number)\n"
+        "- `delta_cash_usd` — Net increase/decrease in cash and cash equivalents\n"
+        "- `fx_effect_cash_usd` — Effect of exchange rates on cash (common in IFRS/non-US)\n"
+        "- `otros_ajustes_caja_usd` — Other reconciling adjustments affecting cash movement\n\n"
+        "Cash flow reconciliation: `delta_cash_usd = cfo_usd + cfi_usd + cff_usd "
+        "+ fx_effect_cash_usd + otros_ajustes_caja_usd`. "
+        "If a field is not found in the filing, set it to `null` (do NOT assume 0).\n\n"
+        "## Balance Sheet (balance_sheet_ultimo)\n"
+        "- `activos_totales_usd` — Total assets\n"
+        "- `pasivos_totales_usd` — Total liabilities\n"
+        "- `patrimonio_usd` — Total stockholders' equity\n"
+        "- `deuda_total_usd` — Total debt (short-term + long-term)\n"
+        "- `caja_usd` — Cash and cash equivalents\n"
+        "- `cuentas_por_cobrar_usd` — Accounts receivable\n"
+        "- `inventarios_usd` — Inventories\n"
+        "- `cuentas_por_pagar_usd` — Accounts payable\n\n"
+        "IMPORTANT: For each period entry, include `periodo` (format: FY2024 or Q1-2024) "
+        "and `fecha_fin` (format: YYYY-MM-DD). Set values to `null` if not found in the filing.\n"
+    )
 
     # Filing metadata
     filing_type = source_entry.get("form_type", source_entry.get("tipo", "UNKNOWN"))
@@ -226,10 +297,69 @@ def build_filing_prompt(
     return "\n\n---\n\n".join(parts)
 
 
+def _normalize_backend_output(output: dict) -> dict:
+    """Extract artifact payload from backend envelope if needed.
+
+    Defensive layer: even after backend fixes, ensures fusion always
+    receives clean artifact payloads, not CLI envelopes.
+    """
+    if not isinstance(output, dict):
+        return output
+
+    # Reject error envelopes entirely — these should never reach fusion
+    if output.get("is_error") is True:
+        return output  # Return as-is; caller should filter errors before fusion
+
+    # Claude Code envelope: {"type": ..., "result": "```json\n{...}\n```", "modelUsage": ...}
+    if "result" in output and ("modelUsage" in output or "type" in output):
+        result = output["result"]
+        if isinstance(result, str):
+            # Try direct JSON parse
+            try:
+                parsed = json.loads(result)
+                if isinstance(parsed, dict):
+                    return parsed
+            except (json.JSONDecodeError, ValueError):
+                pass
+            # Try markdown extraction
+            md_match = re.search(r"```(?:json)?\s*\n(.*?)\n```", result, re.DOTALL)
+            if md_match:
+                try:
+                    parsed = json.loads(md_match.group(1))
+                    if isinstance(parsed, dict):
+                        return parsed
+                except (json.JSONDecodeError, ValueError):
+                    pass
+        elif isinstance(result, dict):
+            return result
+
+    # Gemini CLI envelope: {"session_id": ..., "response": "```json\n{...}\n```", "stats": ...}
+    if "response" in output and ("session_id" in output or "stats" in output):
+        resp = output["response"]
+        if isinstance(resp, str):
+            try:
+                parsed = json.loads(resp)
+                if isinstance(parsed, dict):
+                    return parsed
+            except (json.JSONDecodeError, ValueError):
+                pass
+            md_match = re.search(r"```(?:json)?\s*\n(.*?)\n```", resp, re.DOTALL)
+            if md_match:
+                try:
+                    parsed = json.loads(md_match.group(1))
+                    if isinstance(parsed, dict):
+                        return parsed
+                except (json.JSONDecodeError, ValueError):
+                    pass
+
+    return output
+
+
 def build_fusion_prompt(
     outputs: dict[str, dict],
     step_name: str,
     instrucciones_dir: Path,
+    fusion_instruction_filename: str | None = None,
 ) -> str:
     """
     Prompt para fusión multi-modelo.
@@ -237,16 +367,18 @@ def build_fusion_prompt(
     parts = []
 
     # Instructions
-    instr_path = instrucciones_dir / INSTRUCTION_MAP["FUSION"]
+    instr_file = fusion_instruction_filename or INSTRUCTION_MAP["FUSION"]
+    instr_path = instrucciones_dir / instr_file
     if instr_path.exists():
         parts.append(f"# INSTRUCCIONES DE FUSIÓN\n\n{instr_path.read_text()}")
 
-    # Outputs to fuse
-    import json
+    # Outputs to fuse — normalize to strip any backend envelopes
     for backend_name, output in outputs.items():
-        output_str = json.dumps(output, indent=2, ensure_ascii=False)
-        if len(output_str) > 100_000:
-            output_str = output_str[:100_000] + "\n... [TRUNCATED]"
+        clean_output = _normalize_backend_output(output)
+        output_str = json.dumps(clean_output, indent=2, ensure_ascii=False)
+        limit = _limits["fusion_output_chars"]
+        if len(output_str) > limit:
+            output_str = output_str[:limit] + f"\n... [TRUNCATED at {limit // 1000}k]"
         parts.append(f"# OUTPUT DE {backend_name.upper()}\n\n```json\n{output_str}\n```")
 
     parts.append(

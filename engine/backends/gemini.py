@@ -4,10 +4,17 @@ from __future__ import annotations
 
 import subprocess
 import json
+import sys
 import time
 from pathlib import Path
 
-from .base import LLMBackend, DispatchResult
+from .base import LLMBackend, DispatchResult, _try_recover_json
+
+# Module-level cache for auth pre-flight results
+# Format: {(binary_path, model): (timestamp, is_ok, reason_if_failed, warning)}
+_AUTH_CACHE: dict[tuple[str, str], tuple[float, bool, str | None, str | None]] = {}
+_AUTH_CACHE_TTL_OK = 600
+_AUTH_CACHE_TTL_FAIL = 60
 
 
 class GeminiBackend(LLMBackend):
@@ -23,16 +30,33 @@ class GeminiBackend(LLMBackend):
         cwd: Path | None = None,
         timeout: int = 600,
     ) -> DispatchResult:
-        """
-        Ejecuta gemini CLI en modo prompt.
-        Lee resultado de stdout.
-        """
+        """Dispatch to exactly one model. No fallback to different models."""
+        return self._dispatch_single_model(
+            model_name=self.model,
+            prompt=prompt,
+            cwd=cwd,
+            timeout=timeout,
+        )
+
+    def _dispatch_single_model(
+        self,
+        model_name: str,
+        prompt: str,
+        cwd: Path | None,
+        timeout: int,
+    ) -> DispatchResult:
+        disable_yolo = self._disable_yolo()
         cmd = [
-            self.binary_path, "-p", prompt,
-            "--model", self.model,
-            "--output-format", "json",
-            "--yolo",
+            self.binary_path,
+            "-p",
+            prompt,
+            "--model",
+            model_name,
+            "--output-format",
+            "json",
         ]
+        if not disable_yolo:
+            cmd.append("--yolo")
 
         start = time.time()
         try:
@@ -45,71 +69,151 @@ class GeminiBackend(LLMBackend):
             )
             duration = time.time() - start
             raw = proc.stdout or ""
+            stderr_text = (proc.stderr or "")[:500]
 
             if proc.returncode != 0 and not raw.strip():
                 return DispatchResult(
-                    False, None, raw, self.model, "gemini", duration,
-                    f"Non-zero exit code: {proc.returncode}. stderr: {(proc.stderr or '')[:500]}"
+                    False, None, raw, model_name, "gemini", duration,
+                    f"Non-zero exit code: {proc.returncode}. stderr: {stderr_text}",
+                    exit_code=proc.returncode,
                 )
 
             # Try to extract JSON from output (gemini may include preamble text)
-            output = _extract_json(raw)
+            output = _try_recover_json(raw)
             if output is not None:
-                return DispatchResult(True, output, raw, self.model, "gemini", duration)
-            else:
+                # Gemini CLI may wrap the artifact in an envelope
+                if (
+                    isinstance(output, dict)
+                    and "response" in output
+                    and ("session_id" in output or "stats" in output)
+                ):
+                    inner = _try_recover_json(str(output["response"]))
+                    if inner is not None and isinstance(inner, dict):
+                        output = inner
                 return DispatchResult(
-                    False, None, raw, self.model, "gemini", duration,
-                    "Could not parse JSON from output"
+                    True, output, raw, model_name, "gemini", duration,
+                    exit_code=proc.returncode,
                 )
 
+            err_suffix = f" (stderr: {stderr_text})" if stderr_text else ""
+            return DispatchResult(
+                False, None, raw, model_name, "gemini", duration,
+                f"Could not parse JSON from output{err_suffix}",
+                exit_code=proc.returncode,
+            )
         except subprocess.TimeoutExpired:
             return DispatchResult(
-                False, None, "", self.model, "gemini", timeout, "Timeout"
+                False, None, "", model_name, "gemini", timeout, "Timeout",
+                exit_code=124,
             )
 
+    def _disable_yolo(self) -> bool:
+        # v2: check model_catalog
+        catalog = (self.config or {}).get("model_catalog", {})
+        for _profile_name, profile_cfg in catalog.items():
+            gemini_cfg = profile_cfg.get("gemini", {})
+            if gemini_cfg.get("model_id") == self.model:
+                return bool(gemini_cfg.get("preflight_disable_yolo"))
+        # v1 compat
+        model_cfg = (self.config or {}).get("models", {}).get("gemini", {})
+        return bool(model_cfg.get("preflight_disable_yolo"))
+
     def check_available(self) -> bool:
+        """Health-check for the model. No fallback-model degraded mode."""
+        cache_key = (self.binary_path, self.model)
+        disable_yolo = self._disable_yolo()
+
+        def _cache_store(
+            ok: bool,
+            reason: str | None = None,
+            warning: str | None = None,
+        ) -> bool:
+            _AUTH_CACHE[cache_key] = (time.time(), ok, reason, warning)
+            self.last_health_error = None if ok else reason
+            self.last_health_warning = warning if ok else None
+            return ok
+
+        # Phase 0: serve cached result
+        cached = _AUTH_CACHE.get(cache_key)
+        if cached:
+            if len(cached) == 4:
+                ts, result, reason, warning = cached
+            else:
+                ts, result, reason = cached
+                warning = None
+            ttl = _AUTH_CACHE_TTL_OK if result else _AUTH_CACHE_TTL_FAIL
+            if time.time() - ts < ttl:
+                self.last_health_error = None if result else reason
+                self.last_health_warning = warning if result else None
+                return result
+
+        self.last_health_error = None
+        self.last_health_warning = None
+
+        # Phase 1: binary exists
         try:
-            result = subprocess.run(
+            ver = subprocess.run(
                 [self.binary_path, "--version"],
                 capture_output=True, text=True, timeout=10,
             )
-            return result.returncode == 0
-        except Exception:
-            return False
+            if ver.returncode != 0:
+                return _cache_store(
+                    False,
+                    f"gemini --version failed (exit={ver.returncode})",
+                )
+        except Exception as exc:
+            return _cache_store(False, f"gemini --version error: {exc}")
 
-
-def _extract_json(text: str) -> dict | None:
-    """Try to extract a JSON object from text that may contain non-JSON preamble."""
-    # First try direct parse
-    text = text.strip()
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-
-    # Try to find JSON block in markdown code fence
-    import re
-    match = re.search(r"```(?:json)?\s*\n(.*?)\n```", text, re.DOTALL)
-    if match:
+        # Phase 2: auth check with actual model
         try:
-            return json.loads(match.group(1))
-        except json.JSONDecodeError:
-            pass
-
-    # Try to find first { ... } block
-    brace_start = text.find("{")
-    if brace_start >= 0:
-        # Find matching closing brace
-        depth = 0
-        for i in range(brace_start, len(text)):
-            if text[i] == "{":
-                depth += 1
-            elif text[i] == "}":
-                depth -= 1
-                if depth == 0:
-                    try:
-                        return json.loads(text[brace_start:i + 1])
-                    except json.JSONDecodeError:
-                        break
-
-    return None
+            preflight_cmd = [
+                self.binary_path, "-p", "respond with ok",
+                "--model", self.model,
+                "--output-format", "json",
+            ]
+            if not disable_yolo:
+                preflight_cmd.append("--yolo")
+            auth = subprocess.run(
+                preflight_cmd,
+                capture_output=True, text=True, timeout=30,
+            )
+            if auth.returncode != 0:
+                stderr_snippet = (auth.stderr or "")[:150]
+                fail_reason = f"gemini preflight failed (exit={auth.returncode}): {stderr_snippet}"
+                print(
+                    f"[gemini] Pre-flight check FAILED (model={self.model}): "
+                    f"exit code {auth.returncode}: {stderr_snippet}",
+                    file=sys.stderr,
+                )
+                return _cache_store(False, fail_reason)
+            stdout = (auth.stdout or "").strip()
+            if not stdout:
+                fail_reason = "gemini preflight: empty stdout"
+                print(
+                    f"[gemini] Pre-flight check FAILED (model={self.model}): empty stdout",
+                    file=sys.stderr,
+                )
+                return _cache_store(False, fail_reason)
+            try:
+                envelope = json.loads(stdout)
+                if isinstance(envelope, dict) and envelope.get("is_error"):
+                    msg = str(envelope.get("result", "unknown error"))[:150]
+                    print(
+                        f"[gemini] Pre-flight check FAILED (model={self.model}): {msg}",
+                        file=sys.stderr,
+                    )
+                    return _cache_store(False, f"gemini preflight error: {msg}")
+            except json.JSONDecodeError:
+                fail_reason = f"gemini preflight non-JSON: {stdout[:80]}"
+                print(
+                    f"[gemini] Pre-flight check FAILED (model={self.model}): "
+                    f"non-JSON response: {stdout[:150]}",
+                    file=sys.stderr,
+                )
+                return _cache_store(False, fail_reason)
+            return _cache_store(True)
+        except subprocess.TimeoutExpired:
+            print(f"[gemini] Pre-flight check timed out (model={self.model})", file=sys.stderr)
+            return _cache_store(False, "gemini preflight timeout (30s)")
+        except Exception as exc:
+            return _cache_store(False, f"gemini preflight error: {exc}")

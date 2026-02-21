@@ -4,9 +4,10 @@ FORENSIC_DETECTION --> Detecta banderas rojas contables y riesgos de supervivenc
 Identificar todas las banderas rojas de contabilidad forense y evaluar supervivencia de 12-24 meses. Documentar puentes críticos (EBIT→CFO→FCF) y candidatos a criterios de liquidación.
 
 ## 2. REGLA ABSOLUTA DE SALIDA
-- Formato de salida: Partial AgentReport (banderas detectadas, análisis de liquidez, puentes CRÍTICOS, SIN puntuaciones ni veredicto)
-- Estructura JSON: {red_flag_id, categoría, descripción, evidencia[], liquidez{}, puentes{}, kill_criteria_candidatos[]}
-- Cada bandera con source_id + ubicación
+- Formato de salida: `ForensicDetection_v1` (detección SIN puntuaciones ni veredicto)
+- Estructura mínima obligatoria: {version_esquema, caso_id, fecha_corte, red_flags[], liquidez{}, puentes{}, kill_criteria_candidatos[]}
+- `version_esquema` debe ser exactamente `ForensicDetection_v1`
+- Cada red flag con source_id + ubicación
 - Sin URLs Markdown
 
 ## 3. PROHIBICIONES
@@ -63,4 +64,4 @@ N5) CANDIDATOS A CRITERIOS DE LIQUIDACIÓN (3-7):
 
 N6) Validar exhaustividad: todas las áreas contables revisadas.
 
-N7) Emitir Partial AgentReport con red_flags[] + liquidity_analysis + bridges + kill_criteria_candidates[] (SIN severidad, SIN veredicto).
+N7) Emitir JSON único `ForensicDetection_v1` con red_flags[] + liquidez + puentes + kill_criteria_candidatos[] (SIN severidad, SIN veredicto).

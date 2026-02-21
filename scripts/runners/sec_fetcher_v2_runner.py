@@ -16,6 +16,7 @@ import argparse
 import datetime as dt
 import json
 import re
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -929,6 +930,23 @@ def main() -> int:
 
     if need_local_fallback:
         local_fallback_attempted = True
+        # Try to resolve/validate web_ir before building pages
+        if web_ir:
+            try:
+                import importlib.util as _ilu
+                _spec = _ilu.spec_from_file_location(
+                    "ir_url_resolver",
+                    str(Path(__file__).resolve().parent / "ir_url_resolver.py"),
+                )
+                _mod = _ilu.module_from_spec(_spec)
+                _spec.loader.exec_module(_mod)
+                resolved = _mod.resolve_ir_base_url(web_ir, client._session, timeout=10)
+                if resolved and resolved != web_ir:
+                    print(f"[sec_fetcher] Resolved IR: {web_ir} -> {resolved}", file=sys.stderr)
+                    web_ir = resolved
+                    out["empresa"]["web_ir"] = resolved
+            except Exception as exc:
+                print(f"[sec_fetcher] IR resolver failed: {exc}", file=sys.stderr)
         pages = build_local_ir_pages(web_ir)
         regulator_code = infer_regulator_code(exchange, country)
 
@@ -972,10 +990,34 @@ def main() -> int:
                 else:
                     out["cache_stats"]["archivos_descargados"] += 1
 
+                # Classify filing type from context (title + URL + snippet)
+                # Works for both PDF and HTML documents
+                _ctx = f"{title.lower()} {doc_url.lower()} {str(cand.get('snippet') or '').lower()}"
+                _url_low = doc_url.lower()
+                _is_media_url = (
+                    "youtube.com" in _url_low
+                    or "youtu.be" in _url_low
+                    or "vimeo.com" in _url_low
+                    or "watch?v=" in _url_low
+                    or _url_low.endswith((".mp4", ".mov", ".avi", ".m3u8"))
+                )
+                if _is_media_url:
+                    _tipo = "OTHER"
+                elif any(w in _ctx for w in ("annual", "full year", "year-end", "year end")):
+                    _tipo = "ANNUAL_REPORT"
+                elif any(w in _ctx for w in ("interim", "half year", "h1 ", "h2 ", "half-year")):
+                    _tipo = "INTERIM_REPORT"
+                elif "rns" in _ctx or "regulatory news" in _ctx or "announcement" in _ctx:
+                    _tipo = "IR_NEWS"
+                elif any(w in _ctx for w in ("results", "financial")):
+                    _tipo = "REGULATORY_FILING"
+                else:
+                    _tipo = "OTHER"
+
                 source: Dict[str, Any] = {
                     "source_id": source_id,
                     "categoria": "REGULATORIO",
-                    "tipo": "IR_NEWS" if ("rns" in doc_url.lower() or "announcement" in title.lower()) else "OTHER",
+                    "tipo": _tipo,
                     "titulo": title,
                     "url": doc_url,
                     "publicador": "Company IR / Local regulator",

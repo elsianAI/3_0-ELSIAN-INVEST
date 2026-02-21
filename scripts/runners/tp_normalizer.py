@@ -57,6 +57,45 @@ FIELD_ALIASES: dict[str, set[str]] = {
         "cash_from_operations", "operating_cash_flow",
         "flujo_caja_operativo", "cfo",
     },
+    "cfi_usd": {
+        "cfi_usd", "cfi", "cash_from_investing",
+        "net_cash_from_investing_activities",
+        "net_cash_used_in_investing_activities",
+        "investing_activities", "flujo_caja_inversion",
+        "cash_used_in_investing_activities",
+    },
+    "cff_usd": {
+        "cff_usd", "cff", "cash_from_financing",
+        "net_cash_from_financing_activities",
+        "net_cash_used_in_financing_activities",
+        "financing_activities", "flujo_caja_financiacion",
+        "cash_used_in_financing_activities",
+    },
+    "delta_cash_usd": {
+        "delta_cash_usd", "delta_cash", "cambio_caja_usd",
+        "net_change_in_cash", "net_increase_in_cash",
+        "net_increase_decrease_in_cash",
+        "net_change_in_cash_and_cash_equivalents",
+        "variacion_neta_efectivo", "variacion_neta_caja",
+        "cambio_neto_caja", "cambio_neto_efectivo",
+        "net_increase_decrease_in_cash_and_cash_equivalents",
+    },
+    "fx_effect_cash_usd": {
+        "fx_effect_cash_usd", "fx_effect_cash",
+        "effect_of_exchange_rates_on_cash",
+        "effect_of_exchange_rate_changes_on_cash",
+        "exchange_rate_effect_on_cash",
+        "forex_effect_on_cash",
+        "efecto_tipo_cambio_caja_usd", "efecto_tipo_cambio_caja",
+        "efecto_cambiario_caja",
+        "variacion_por_tipo_de_cambio_en_caja",
+    },
+    "otros_ajustes_caja_usd": {
+        "otros_ajustes_caja_usd", "otros_ajustes_en_caja",
+        "other_cash_adjustments_usd", "other_cash_adjustments",
+        "other_reconciling_cash_items_usd",
+        "ajustes_otros_cambios_efectivo",
+    },
     "capex_usd": {
         "capex_usd", "capex", "capital_expenditures",
         "purchases_of_property_and_equipment",
@@ -434,7 +473,7 @@ def normalize(tp: dict) -> dict:
         has_data = any(
             normalized.get(k) is not None
             for k in ("ingresos_usd", "ebit_usd", "net_income_usd", "cfo_usd",
-                       "gross_profit_usd", "cogs_usd")
+                       "gross_profit_usd", "cogs_usd", "cfi_usd", "cff_usd")
         )
         if has_data:
             norm_annual.append(normalized)
@@ -496,7 +535,7 @@ def normalize(tp: dict) -> dict:
         has_data = any(
             normalized.get(k) is not None
             for k in ("ingresos_usd", "ebit_usd", "net_income_usd", "cfo_usd",
-                       "gross_profit_usd", "cogs_usd")
+                       "gross_profit_usd", "cogs_usd", "cfi_usd", "cff_usd")
         )
         if has_data:
             norm_quarterly.append(normalized)

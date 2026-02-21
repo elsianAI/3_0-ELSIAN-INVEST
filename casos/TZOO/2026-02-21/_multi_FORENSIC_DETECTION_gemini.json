@@ -1,0 +1,137 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260221_TZOO",
+  "fecha_corte": "2026-02-21",
+  "ticker": "TZOO",
+  "red_flags": [
+    {
+      "tipo": "GOVERNANCE",
+      "riesgo": "Debilidad Material en Controles Internos",
+      "descripcion": "Reportada debilidad material en controles internos sobre reportes financieros en filings de 2023. Riesgo de persistencia o remediación incompleta en periodos subsiguientes.",
+      "severidad_cualitativa": "ALTA",
+      "fuente_id": "TZOO_10-Q_2023-09-30",
+      "ubicacion": "Item 4. Controls and Procedures"
+    },
+    {
+      "tipo": "RELATED_PARTY",
+      "riesgo": "Transacción con Accionista (Note Receivable)",
+      "descripcion": "Nota por cobrar a accionista por $4.753M registrada como contra-equity. Este tipo de préstamos a partes relacionadas son inusuales en empresas públicas de alta gobernanza.",
+      "severidad_cualitativa": "ALTA",
+      "fuente_id": "10-K FY2023",
+      "ubicacion": "Balance Sheet / Equity Section"
+    },
+    {
+      "tipo": "CAPITAL_ALLOCATION",
+      "riesgo": "Recompra de Acciones Agresiva vs FCF",
+      "descripcion": "La empresa gastó ~$13M en recompras durante 9M-2025, superando ampliamente el FCF generado (~$4.2M en 9M-2025) y consumiendo el 40% de la caja disponible al inicio del periodo.",
+      "severidad_cualitativa": "MEDIA",
+      "fuente_id": "10-Q Q3-2025",
+      "ubicacion": "Statement of Cash Flows"
+    },
+    {
+      "tipo": "LIQUIDITY_FLOAT",
+      "riesgo": "Dependencia del Float (Merchant Payables > Cash)",
+      "descripcion": "Pasivos por Merchant Payables ($17.3M en Q3-2024) frecuentemente exceden el efectivo disponible. El modelo de negocio depende de cobrar antes de pagar; una caída en ventas podría precipitar una crisis de liquidez.",
+      "severidad_cualitativa": "ALTA",
+      "fuente_id": "10-Q Q3-2024",
+      "ubicacion": "Balance Sheet"
+    },
+    {
+      "tipo": "PROFITABILITY",
+      "riesgo": "Deterioro Estructural de Márgenes",
+      "descripcion": "El margen EBIT colapsó de 22% en FY2024 a 7.5% en FY2025, mientras los ingresos crecieron 9%. Sugiere pérdida de apalancamiento operativo o aumento estructural en costos de adquisición (COGS +73%).",
+      "severidad_cualitativa": "ALTA",
+      "fuente_id": "8-K FY2025",
+      "ubicacion": "Income Statement"
+    }
+  ],
+  "liquidez": {
+    "caja_disponible_usd": 10100000,
+    "deuda_financiera_usd": 0,
+    "runway_estimado_meses": 24,
+    "estado": "La empresa genera CFO positivo ($5.6M FY2025), lo que técnicamente otorga runway infinito operacionalmente. Sin embargo, la posición de caja se ha deteriorado por recompras agresivas (caja estimada dic-2025 ~$10.1M vs $17.1M dic-2024). No tiene deuda financiera tradicional, pero sí obligaciones por arrendamientos (~$8M) y pasivos comerciales significativos ($17M+).",
+    "vencimientos_proximos": [
+      {
+        "concepto": "Merchant Payables (Vouchers)",
+        "monto_usd": 17000000,
+        "vencimiento": "< 12 meses (Corriente)",
+        "riesgo": "Alto si ventas caen (float negativo)"
+      }
+    ]
+  },
+  "puentes": {
+    "ebit_to_cfo": {
+      "ebit_usd": 6906000,
+      "cfo_usd": 5661000,
+      "conversion_rate_pct": 82.0,
+      "partidas_clave": [
+        {
+          "concepto": "Impuestos Pagados / Provisión",
+          "impacto_usd": -2679000,
+          "nota": "Income Tax Expense significativo reduce conversión"
+        },
+        {
+          "concepto": "Depreciación y Amortización",
+          "impacto_usd": 303000,
+          "nota": "Bajo impacto (Asset-light)"
+        }
+      ]
+    },
+    "cfo_to_fcf": {
+      "cfo_usd": 5661000,
+      "fcf_usd": 5596000,
+      "conversion_rate_pct": 98.8,
+      "partidas_clave": [
+        {
+          "concepto": "Capex",
+          "impacto_usd": -65000,
+          "nota": "Capex mínimo consistente con modelo de negocio puramente digital"
+        }
+      ]
+    },
+    "fcf_to_cash_delta": {
+      "fcf_usd": 5596000,
+      "delta_cash_usd": -6977000,
+      "partidas_clave": [
+        {
+          "concepto": "Recompra de Acciones (Est.)",
+          "impacto_usd": -13068000,
+          "nota": "Principal uso de caja, excediendo generación interna"
+        }
+      ]
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC_LIQUIDITY_CRUNCH",
+      "condicion": "Caja Total < $5,000,000 al cierre de trimestre",
+      "ventana_observacion": "Próximos 12 meses",
+      "probabilidad": "MEDIA",
+      "razonal": "Al ritmo actual de recompras y con márgenes comprimidos, la caja podría caer debajo de niveles operativos seguros ($5M cubriría < 1 mes de gastos totales aprox)."
+    },
+    {
+      "id": "KC_MARGIN_COLLAPSE",
+      "condicion": "Margen EBIT < 5% por 2 trimestres consecutivos",
+      "ventana_observacion": "Q1-2026 a Q2-2026",
+      "probabilidad": "ALTA",
+      "razonal": "El margen ya cayó a 2.5% en Q4-2025. Si no rebota estacionalmente en Q1, el modelo de negocio podría estar roto estructuralmente."
+    },
+    {
+      "id": "KC_FLOAT_UNWIND",
+      "condicion": "Merchant Payables / (Caja + Cuentas por Cobrar) > 1.0",
+      "ventana_observacion": "Trimestral",
+      "probabilidad": "MEDIA",
+      "razonal": "Si los pasivos por vouchers superan los activos líquidos disponibles, la empresa es insolvente sin flujo de nuevas ventas."
+    }
+  ],
+  "report_type": "ForensicDetection_v1",
+  "input_refs": {
+    "truth_pack": "TruthPack_v1",
+    "sources_pack": "SourcesPack_v1"
+  },
+  "log": {
+    "status": "COMPLETED",
+    "notas": "Análisis basado en filings hasta FY2025 (8-K preliminar) y 10-K FY2024. Se identificó deterioro significativo en calidad de beneficios (EBIT) y consumo de caja por recompras.",
+    "limitaciones": "No se verificó estatus definitivo de remediación de debilidad material de controles internos (reportada en 2023) en el 10-K de 2024 por falta de extracción textual específica de ese item."
+  }
+}
