@@ -1,0 +1,450 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260222_KAR",
+  "fecha_corte": "2026-02-22",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "standard",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260222_KAR",
+    "implied_expectations_caso_id": "CASE_20260222_KAR",
+    "sources_pack_caso_id": "CASE_20260222_KAR"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "El ajuste de 'Caja Neta' del Bull ignora US$177.7M de pasivos por arrendamiento (FPSOs); al incluirlos, la posición neta real es de deuda US$170M, no caja neta positiva.",
+      "La tesis de 'normalización de Capex' asume erróneamente que el Capex de mantenimiento es estático; en offshore maduro, el costo de extracción sube exponencialmente, convirtiendo el 'pico' de FY25 en el nuevo suelo.",
+      "La caída de ingresos del 19% en FY25 sin desglose precio/volumen es una 'red flag' de deterioro de reservas; estabilizar ingresos requiere capex creciente, no decreciente.",
+      "Opacidad crítica: la falta de EBIT y el 84% de datos trimestrales nulos impiden verificar la rentabilidad real; el FCF puede ser un espejismo por working capital o capex diferido.",
+      "El descuento del mercado no es irracional: está preceando correctamente un activo de vida corta con riesgo de ejecución en Brasil y sin catalizador real de retorno de capital."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_01",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La supuesta 'Caja Neta Positiva' es una ilusión contable que excluye US$177.7M de pasivos por arrendamiento (leases operativos esenciales como FPSOs); la posición financiera real ajustada es Deuda Neta de ~US$170M.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack lease_data",
+          "cita_corta": "Lease liabilities total: US$177.7M",
+          "interpretacion": "Obligaciones financieras ineludibles para operar (barcos/plataformas) que deben tratarse como deuda."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack balance_sheet_ultimo",
+          "cita_corta": "Caja US$341M vs Deuda Financiera US$333.5M",
+          "interpretacion": "El margen de seguridad de US$7.7M desaparece totalmente al sumar leases."
+        }
+      ],
+      "falsacion": {
+        "test": "La empresa puede cancelar sus contratos de lease sin penalización ni paralización de operaciones (imposible en offshore).",
+        "ventana_meses": {
+          "min": 1,
+          "max": 1
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_02",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CRITICO",
+      "enunciado": "La 'normalización' del Capex a niveles de FY24 (US$135M) provocará un colapso acelerado de la producción (>20%); el nivel de FY25 (US$204M) es el nuevo costo estructural para mantener ingresos planos en activos maduros.",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_008",
+          "ubicacion": "Investor Presentation FY2025",
+          "cita_corta": "Ingresos cayeron 19% (a US$628M) incluso CON capex elevado de US$204M",
+          "interpretacion": "Si con US$204M de inversión los ingresos caen 19%, reducir la inversión aceleraría el declive, no liberaría FCF."
+        }
+      ],
+      "falsacion": {
+        "test": "La empresa reduce Capex a <US$150M y logra mantener la producción plana YoY.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_03",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La opacidad contable (falta de EBIT, huecos trimestrales) no es un descuido, sino un síntoma de 'Governance Discount' estructural; el mercado asigna un múltiplo de liquidación porque no confía en la métrica de rentabilidad real.",
+      "confianza_0_1": 0.75,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "banderas",
+          "cita_corta": "opacidad_alta: true; falta EBIT; historico trimestral 84% null",
+          "interpretacion": "La falta de métricas estándar impide la valoración por múltiplos operativos (EV/EBIT), forzando una valoración por activos/liquidación."
+        }
+      ],
+      "falsacion": {
+        "test": "La empresa publica estados financieros completos con EBIT y el múltiplo permanece comprimido.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "filing"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_01",
+      "descripcion": "Ingresos FY2026 caerán por debajo de US$580M a pesar de cualquier 'esfuerzo' de desarrollo.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Ingresos reportados FY2026 < US$580M.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_02",
+      "descripcion": "El FCF FY2026 no superará los US$150M debido a la persistencia de necesidades de Capex o caída de CFO.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "FCF reportado < US$150M.",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Informe de Reservas 1P/2P auditado con vida útil promedio",
+      "por_que_importa": "Determina si el 'run-off' descontado es matemática actuarial correcta o pesimismo excesivo.",
+      "como_obtenerlo": "Annual Report, Reserves Statement."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.85,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "Trampa de valor clásica: múltiplo bajo en pico de ciclo (o inicio de declive), capex estructural subestimado y deuda ajustada por leases ignorada."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_F01",
+            "resumen_claim_bull": "El mercado descuenta irracionalmente un run-off (FCF CAGR -19% a -28%).",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "El 'run-off' es el estado natural de pozos maduros sin capex masivo.",
+                "La caída de ingresos del 19% en FY25 ya valida parcialmente la tasa de declive.",
+                "El mercado está ajustando por vida de reservas corta (desconocida en TruthPack)."
+              ]
+            },
+            "puntos_ciegos": [
+              "Vida útil real de las reservas 1P.",
+              "Curva de declive natural de los activos actuales."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_008",
+                "ubicacion": "Investor Presentation FY2025",
+                "cita_corta": "Ingresos cayeron 19% YoY en FY2025",
+                "interpretacion": "El declive ya está ocurriendo, no es una proyección teórica."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Ingresos se estabilizan o crecen en los próximos 2 trimestres sin M&A.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_F02",
+            "resumen_claim_bull": "La normalización del capex a niveles FY24 genera FCF incremental mecánico.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.75,
+              "por_que": [
+                "Asume que US$135M (FY24) es el nivel de mantenimiento, cuando podría haber sido subinversión.",
+                "En offshore, a medida que los campos maduran, el capex por barril tiende a subir, no a bajar.",
+                "Si cortan capex, la producción cae más rápido, neutralizando el beneficio en FCF."
+              ]
+            },
+            "puntos_ciegos": [
+              "Inflación de costos en sector servicios offshore.",
+              "Necesidad de 'infill drilling' constante para sostener producción."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_008",
+                "ubicacion": "Investor Presentation",
+                "cita_corta": "Capex FY25 subió 51% a US$204M",
+                "interpretacion": "La tendencia reciente es de aumento de intensidad de capital, no disminución."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Guidance de Capex FY26 se mantiene >US$180M.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_F03",
+            "resumen_claim_bull": "Posición de caja neta positiva elimina riesgo de quiebra.",
+            "evaluacion_red_team": {
+              "estado": "FALSO",
+              "probabilidad_de_fallo_0_1": 0.9,
+              "por_que": [
+                "Ignora US$177.7M de pasivos por arrendamiento (Lease Liabilities).",
+                "Al ajustar, la posición neta es deuda de ~US$170M, no caja neta positiva.",
+                "Los leases de FPSO son deuda operativa real: si no pagas, pierdes el activo productivo."
+              ]
+            },
+            "puntos_ciegos": [
+              "Tratamiento de IFRS 16 / ASC 842 para leases en la valoración de deuda neta."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "TruthPack lease_data",
+                "cita_corta": "Lease liabilities total: US$177.7M",
+                "interpretacion": "Pasivo financiero real con calendario de pagos obligatorio."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Cálculo de covenants bancarios incluye leases como deuda, reduciendo headroom reportado.",
+              "ventana_meses": {
+                "min": 0,
+                "max": 0
+              },
+              "fuente_prevista": "filing"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Normalización de Capex: El Bull asume reversión a la media en una industria (Offshore) donde los costos suelen ser pegajosos al alza.",
+          "Estabilidad de Ingresos: Asumir que la caída del 19% se detendrá por arte de magia (o precio) sin evidencia de producción nueva.",
+          "Valoración de Activos: El Bull ignora que la falta de impairment test explícito en un año de caída de ingresos es sospechosa."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "Las reservas 1P son muy bajas (vida < 5 años), justificando la valoración de liquidación.",
+          "Los activos en Brasil/GoM tienen costos operativos crecientes que comprimirán márgenes permanentemente.",
+          "La administración sabe que el Capex alto es necesario solo para mantener las luces encendidas (treadmill effect).",
+          "Hay pasivos ocultos o contingencias legales/ambientales (abandonment costs) que el mercado está descontando."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "KAR es una trampa de valor clásica: parece barata por múltiplo FCF pasado, pero es cara sobre FCF futuro en declive.",
+          "El ajuste real de deuda (incluyendo leases) elimina el 'colchón de caja', revelando una estructura de capital más apalancada de lo que parece.",
+          "El Capex de FY25 no fue una anomalía, sino el nuevo costo de hacer negocios; su reducción implicaría colapso de producción.",
+          "La opacidad contable (sin EBIT) esconde márgenes reales en deterioro y evita el escrutinio sobre el retorno del capital invertido (ROIC).",
+          "Sin catalizadores de retorno de capital y con ingresos cayendo, el precio de la acción seguirá el declive del valor intrínseco de los activos."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "CAPEX_MANTENIMIENTO_ALTO",
+            "descripcion": "La geología obliga a invertir cada vez más para extraer lo mismo (Red Queen Effect).",
+            "indicadores_tempranos": [
+              "Capex/Barril producido aumentando.",
+              "Decline rates reportados en aumento."
+            ]
+          },
+          {
+            "mecanismo": "COMPRESION_DE_MARGENES",
+            "descripcion": "Costos fijos (leases, operación) sobre una base de ingresos decreciente destruyen el apalancamiento operativo.",
+            "indicadores_tempranos": [
+              "Costos unitarios (opex/bbl) subiendo.",
+              "Margen EBITDA (si se pudiera calcular) cayendo."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Persistencia del declive. Ingresos caen otro 10-15%. Capex se mantiene alto (~US$180M) para intentar frenar la caída. FCF se comprime a US$100M.",
+            "ventana_meses": {
+              "min": 12,
+              "probable": 18,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "US$550M - US$600M",
+                "justificacion": "Tendencia inercial de declive sin nuevos proyectos mayores."
+              },
+              {
+                "variable": "CAPEX",
+                "direccion": "NO_MEJORA",
+                "rango": "US$180M - US$200M",
+                "justificacion": "Necesidad estructural de reinversión."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "EARNINGS_CAEN",
+              "explicacion": "Múltiplo se mantiene bajo (4x) sobre un FCF menor (US$100M) => EV US$400M. Con deuda ajustada, Equity vale poco.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -30,
+                "base": -15,
+                "max": 0
+              },
+              "nota": "Erosión lenta de valor."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Aceleración del deterioro + Shock externo (petróleo cae). Ingresos < US$450M. FCF se vuelve negativo. Leases consumen la caja.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 18
+            },
+            "probabilidad_0_1": 0.2,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "Quema de caja neta",
+                "justificacion": "Opex fijos + Leases altos + Ingresos bajos = Cash Burn."
+              }
+            ],
+            "impacto_en_supervivencia": "MEDIO",
+            "nota": "Riesgo de dilución o reestructuración si la caja se agota."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.75,
+        "razones": [
+          "Bajo múltiplo aparente (EV/FCF 4x) sobre métricas pasadas (TTM/FY24) que no se repetirán.",
+          "Deterioro fundamental del negocio (Ingresos -19%).",
+          "Opacidad contable (sin EBIT) que dificulta el análisis real.",
+          "Industria (Offshore E&P) propensa a trampas de valor por intensidad de capital."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo (Bull)",
+            "evidencia_necesaria": [
+              "Recuperación de precios del crudo.",
+              "Caída de ingresos explicada solo por precio, no volumen."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural (Bear)",
+            "evidencia_necesaria": [
+              "Caída de producción (volumen) consistente.",
+              "Aumento de costos unitarios.",
+              "Necesidad de capex creciente para producción plana."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "Ingresos trimestrales caen por debajo de US$140M en cualquier trimestre de 2026.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirmaría aceleración del declive estructural."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "BALANCE",
+          "definicion": "Posición de Deuda Neta (sin leases) se vuelve positiva >US$50M.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "balance_sheet",
+          "accion_recomendada": "SALIR",
+          "por_que": "Pérdida de disciplina financiera o consumo de caja inesperado."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Guidance de Capex < US$140M CON guía de producción estable/creciente.",
+          "umbral_o_condicion": "Confirmación oficial simultánea de bajo capex y producción.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "investor_presentation"
+        },
+        {
+          "item": "Inicio de programa de recompras significativo (>5% del market cap).",
+          "umbral_o_condicion": "Ejecución real, no solo anuncio.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "filing"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0,
+        "si_se_invierte_igual": [
+          "Limitar posición a 'tracking position' (<2%).",
+          "Esperar a reporte auditado FY25 para verificar FCF real.",
+          "Ajustar valoración restando leases a la caja neta."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Cuál es la vida útil probada (1P) de las reservas actuales a estos niveles de producción?",
+          "¿Por qué se disparó el Capex en FY25 si los ingresos cayeron 19%?",
+          "¿Están los covenants de deuda calculados incluyendo o excluyendo leases?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta de datos de reservas (1P/2P) impide cálculo preciso de vida útil.",
+      "Sin desglose de precio/volumen, la distinción entre declive geológico y de mercado es inferida.",
+      "Modelo asume tratamiento estándar de leases como deuda, que puede diferir de covenants bancarios específicos."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

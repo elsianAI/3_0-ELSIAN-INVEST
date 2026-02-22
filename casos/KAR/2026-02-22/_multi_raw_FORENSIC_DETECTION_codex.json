@@ -1,0 +1,339 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260222_KAR",
+  "fecha_corte": "2026-02-22",
+  "ticker": "KAR",
+  "red_flags": [
+    {
+      "id": "RF-01",
+      "categoria": "Calidad de conversion de resultado a caja",
+      "hallazgo": "La conversion de resultado neto a CFO es materialmente alta y excede el umbral de distorsion del 15%.",
+      "evidencia_cuantitativa": {
+        "FY2024": {
+          "net_income_usd": 127500000,
+          "cfo_usd": 434600000,
+          "delta_usd": 307100000,
+          "delta_pct_sobre_net_income": 240.86
+        },
+        "FY2023": {
+          "net_income_usd": 207900000,
+          "cfo_usd": 442200000,
+          "delta_usd": 234300000,
+          "delta_pct_sobre_net_income": 112.65
+        },
+        "umbral_distorsion_material_pct": 15
+      },
+      "implicacion_forense": "Se requiere desglose adicional para validar sostenibilidad de la caja operativa (capital de trabajo, impuestos pagados y ajustes no-caja).",
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2024].net_income_usd/cfo_usd y TruthPack_v1.historico_anual[periodo=FY2023].net_income_usd/cfo_usd"
+    },
+    {
+      "id": "RF-02",
+      "categoria": "Transparencia operativa (EBIT)",
+      "hallazgo": "No se reporta EBIT/Operating income explicito; el puente EBIT->CFO no puede cerrarse de forma directa.",
+      "evidencia_cuantitativa": {
+        "periodos_con_ebit_null": [
+          "FY2022",
+          "FY2023",
+          "TY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "conteo_periodos_ebit_null": 5
+      },
+      "implicacion_forense": "Limita la auditoria de calidad de ganancias operativas y eleva riesgo de opacidad en reconciliaciones.",
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.historico_anual[*].ebit_usd y TruthPack_v1.log.limitaciones"
+    },
+    {
+      "id": "RF-03",
+      "categoria": "Capitalizacion/medicion de capex",
+      "hallazgo": "El capex FY2025 procede de presentacion de inversores y se indica en base devengo, no como flujo de inversion de caja.",
+      "evidencia_cuantitativa": {
+        "capex_fy2024_usd": 134700000,
+        "capex_fy2025_usd": 203800000,
+        "variacion_capex_yoy_pct": 51.3,
+        "cfo_fy2025_usd": null
+      },
+      "implicacion_forense": "Riesgo de distorsion en el puente CFO->FCF y menor trazabilidad entre devengo y caja.",
+      "source_id": "SRC_008",
+      "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025].capex_usd y TruthPack_v1.log.limitaciones"
+    },
+    {
+      "id": "RF-04",
+      "categoria": "Comparabilidad de ingresos por cambio de periodo",
+      "hallazgo": "Existen periodos FY2023 y TY2023 con misma fecha de cierre y magnitudes distintas, junto a nota de periodo transicional de 6 meses.",
+      "evidencia_cuantitativa": {
+        "FY2023_fecha_fin": "2023-12-31",
+        "TY2023_fecha_fin": "2023-12-31",
+        "ingresos_fy2023_usd": 680000000,
+        "ingresos_ty2023_usd": 412900000,
+        "nota_periodo_transicion_6m": true
+      },
+      "implicacion_forense": "Incrementa riesgo de lectura sesgada de tendencia de ingresos y de conversion a caja entre periodos no comparables.",
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2023] y TruthPack_v1.historico_anual[periodo=TY2023] y TruthPack_v1.log.limitaciones"
+    },
+    {
+      "id": "RF-05",
+      "categoria": "Obligaciones fuera de deuda reportada",
+      "hallazgo": "La deuda total reportada excluye pasivos por arrendamiento materialmente relevantes.",
+      "evidencia_cuantitativa": {
+        "deuda_total_usd": 333500000,
+        "lease_liabilities_total_usd": 177700000,
+        "obligaciones_financieras_ajustadas_usd": 511200000,
+        "incremento_vs_deuda_reportada_pct": 53.28
+      },
+      "implicacion_forense": "Subestima apalancamiento economico si se usa solo deuda financiera reportada.",
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.balance_sheet_ultimo.deuda_total_usd y TruthPack_v1.lease_data.lease_liabilities_total_usd y TruthPack_v1.log.limitaciones"
+    },
+    {
+      "id": "RF-06",
+      "categoria": "Visibilidad de liquidez y cumplimiento",
+      "hallazgo": "No se dispone calendario de vencimientos de deuda financiera 12-24m ni headroom de covenants.",
+      "evidencia_cuantitativa": {
+        "deuda_total_usd": 333500000,
+        "lease_liabilities_current_usd": 51800000,
+        "deuda_financiera_maturities_12_24m_disponible": false,
+        "covenant_headroom_disponible": false
+      },
+      "implicacion_forense": "Riesgo de evento de refinanciacion/covenant no cuantificable con el set actual.",
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.balance_sheet_ultimo.deuda_total_usd y TruthPack_v1.lease_data.lease_liabilities_current_usd y TruthPack_v1.log.limitaciones"
+    },
+    {
+      "id": "RF-07",
+      "categoria": "Opacidad de tendencia trimestral",
+      "hallazgo": "La serie trimestral presenta alta incompletitud y el TTM se estima por FY0_fallback.",
+      "evidencia_cuantitativa": {
+        "historico_trimestral_null_pct": 84,
+        "data_completeness_global_pct": 52.74725274725275,
+        "ttm_metodo": "FY0_fallback",
+        "ttm_fecha_fin": "2024-12-31"
+      },
+      "implicacion_forense": "Reduce capacidad de detectar deterioro temprano de caja en ventanas 12-24 meses.",
+      "source_id": "SRC_008",
+      "ubicacion": "TruthPack_v1.data_quality.validaciones.DATA_COMPLETENESS y TruthPack_v1.ttm.metodo y TruthPack_v1.historico_trimestral"
+    }
+  ],
+  "liquidez": {
+    "fecha_base_financiera": "2024-12-31",
+    "efectivo_disponible_usd": 341200000,
+    "lineas_credito_disponibles_usd": null,
+    "efectivo_total_inmediato_usd_minimo": 341200000,
+    "deuda_total_usd": 333500000,
+    "pasivos_arrendamiento_totales_usd": 177700000,
+    "obligaciones_financieras_ajustadas_usd": 511200000,
+    "deuda_neta_reportada_usd": -7700000,
+    "deuda_neta_ajustada_incl_arrendamientos_usd": 170000000,
+    "coberturas": {
+      "cash_sobre_arrendamiento_corriente_x": 6.59,
+      "cfo_fy2024_sobre_deuda_reportada_x": 1.3,
+      "cfo_fy2024_sobre_obligaciones_ajustadas_x": 0.85
+    },
+    "runway": {
+      "metodo": "base en FCF",
+      "fcf_fy2024_usd": 299900000,
+      "consumo_caja_base_usd_anual": 0,
+      "runway_meses_estimado": "No acotado por consumo en escenario base (FCF positivo); piso analitico de seguimiento 24 meses"
+    },
+    "vencimientos_12_24m": {
+      "deuda_financiera_12m_usd": null,
+      "deuda_financiera_24m_usd": null,
+      "arrendamientos_corrientes_12m_usd": 51800000,
+      "arrendamientos_no_corrientes_usd": 125900000,
+      "nota": "No hay cronograma de maduracion de deuda financiera en el input."
+    },
+    "riesgo_incumplimiento_covenants": {
+      "estado": "No evaluable con datos actuales",
+      "faltantes": [
+        "ratios covenant",
+        "headroom",
+        "frecuencia de test",
+        "eventos de waiver"
+      ]
+    },
+    "riesgo_dilucion_accionaria": {
+      "observacion": "Con caja 341.2m y FCF FY2024 positivo no se infiere necesidad inmediata de equity; el riesgo aumentaria si FCF TTM pasa a negativo con capex elevado.",
+      "capital_disponible_identificado_usd": 341200000
+    }
+  },
+  "puentes": {
+    "periodo_referencia": "FY2024",
+    "ebit_a_cfo": {
+      "estado": "INCOMPLETO_POR_FALTA_DE_EBIT",
+      "ebit_usd": null,
+      "nota_metodologica": "Sin EBIT reportado, se documenta proxy NI->CFO para no omitir el tramo.",
+      "proxy_neto_a_cfo": {
+        "FY2024": {
+          "net_income_usd": 127500000,
+          "cfo_usd": 434600000,
+          "delta_usd": 307100000,
+          "delta_pct_sobre_neto": 240.86,
+          "depreciation_usd": 210000000,
+          "residual_wc_impuestos_otros_usd": 97100000,
+          "distorsion_mayor_15pct": true
+        },
+        "FY2023": {
+          "net_income_usd": 207900000,
+          "cfo_usd": 442200000,
+          "delta_usd": 234300000,
+          "delta_pct_sobre_neto": 112.65,
+          "depreciation_usd": 99600000,
+          "residual_wc_impuestos_otros_usd": 134700000,
+          "distorsion_mayor_15pct": true
+        }
+      },
+      "items_no_disponibles": [
+        "stock_based_compensation",
+        "impuestos_pagados",
+        "desglose completo de variaciones de capital de trabajo"
+      ],
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.historico_anual[periodo in {FY2023,FY2024}] y TruthPack_v1.log.limitaciones"
+    },
+    "cfo_a_fcf": {
+      "definicion": "FCF = CFO - CAPEX",
+      "serie_periodos": {
+        "FY2022": {
+          "cfo_usd": 154200000,
+          "capex_usd": 59600000,
+          "fcf_usd": 94600000,
+          "distorsion_capex_pct_sobre_cfo": 38.65,
+          "distorsion_mayor_15pct": true
+        },
+        "FY2023": {
+          "cfo_usd": 442200000,
+          "capex_usd": 104500000,
+          "fcf_usd": 337700000,
+          "distorsion_capex_pct_sobre_cfo": 23.63,
+          "distorsion_mayor_15pct": true
+        },
+        "TY2023": {
+          "cfo_usd": 303400000,
+          "capex_usd": 10700000,
+          "fcf_usd": 292700000,
+          "distorsion_capex_pct_sobre_cfo": 3.53,
+          "distorsion_mayor_15pct": false
+        },
+        "FY2024": {
+          "cfo_usd": 434600000,
+          "capex_usd": 134700000,
+          "fcf_usd": 299900000,
+          "distorsion_capex_pct_sobre_cfo": 31.0,
+          "distorsion_mayor_15pct": true
+        }
+      },
+      "distorsiones_materiales_ge_15pct": [
+        {
+          "tramo": "CFO->FCF FY2022",
+          "distorsion_pct": 38.65
+        },
+        {
+          "tramo": "CFO->FCF FY2023",
+          "distorsion_pct": 23.63
+        },
+        {
+          "tramo": "CFO->FCF FY2024",
+          "distorsion_pct": 31.0
+        }
+      ],
+      "observaciones": [
+        "Capex FY2025 (203.8m) sin CFO FY2025 impide cerrar puente mas reciente.",
+        "El TruthPack indica capex en base devengo para parte del periodo, no necesariamente caja de inversion."
+      ],
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.historico_anual[*].cfo_usd/capex_usd y TruthPack_v1.log.limitaciones"
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC-01",
+      "condicion_objetiva": "FCF TTM <= 0 durante 2 trimestres consecutivos.",
+      "metrica": "FCF_TTM = CFO_TTM - CAPEX_TTM",
+      "umbral": "<= 0 por 2 trimestres",
+      "ventana_temporal": "2026-02-22 a 2027-02-22",
+      "probabilidad_cualitativa": "MEDIA",
+      "base_cuantitativa": "FCF FY2024 = 299900000; capex FY2025 reportado = 203800000 y el mercado descuenta contraccion fuerte de FCF.",
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.ttm.fcf_usd y TruthPack_v1.historico_anual[periodo=FY2025].capex_usd"
+    },
+    {
+      "id": "KC-02",
+      "condicion_objetiva": "Caja y equivalentes < 90000000 y CFO_TTM <= 0 en el mismo periodo.",
+      "metrica": "Caja de cierre y CFO_TTM",
+      "umbral": "Caja < 90000000 y CFO_TTM <= 0",
+      "ventana_temporal": "2026-02-22 a 2028-02-22",
+      "probabilidad_cualitativa": "BAJA",
+      "base_cuantitativa": "Caja actual = 341200000; arrendamientos corrientes = 51800000; interes FY2024 = 33500000.",
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.balance_sheet_ultimo.caja_usd y TruthPack_v1.lease_data.lease_liabilities_current_usd y TruthPack_v1.historico_anual[periodo=FY2024].interest_expense_usd"
+    },
+    {
+      "id": "KC-03",
+      "condicion_objetiva": "Deuda financiera con vencimiento <=12 meses no refinanciada ni cubierta por caja disponible 90 dias antes del vencimiento.",
+      "metrica": "Monto deuda a vencer 12m vs caja y lineas comprometidas",
+      "umbral": "Cobertura < 1.0x",
+      "ventana_temporal": "2026-02-22 a 2028-02-22",
+      "probabilidad_cualitativa": "MEDIA",
+      "base_cuantitativa": "Deuda total reportada = 333500000; no existe desglose de maturities en el input.",
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.balance_sheet_ultimo.deuda_total_usd y TruthPack_v1.log.limitaciones"
+    },
+    {
+      "id": "KC-04",
+      "condicion_objetiva": "Deuda neta ajustada (deuda + arrendamientos - caja) / CFO_TTM > 1.5x durante 2 trimestres consecutivos.",
+      "metrica": "(Deuda total + lease liabilities total - caja) / CFO_TTM",
+      "umbral": "> 1.5x por 2 trimestres",
+      "ventana_temporal": "2026-02-22 a 2028-02-22",
+      "probabilidad_cualitativa": "BAJA",
+      "base_cuantitativa": "Ratio base aproximado = 170000000 / 434600000 = 0.39x.",
+      "source_id": "SRC_001",
+      "ubicacion": "TruthPack_v1.balance_sheet_ultimo.deuda_total_usd y TruthPack_v1.lease_data.lease_liabilities_total_usd y TruthPack_v1.balance_sheet_ultimo.caja_usd y TruthPack_v1.ttm.cfo_usd"
+    },
+    {
+      "id": "KC-05",
+      "condicion_objetiva": "Ingresos anuales caen >20% YoY y CFO/Ingresos <20% en el mismo ejercicio.",
+      "metrica": "Variacion ingresos YoY y margen CFO",
+      "umbral": "Caida ingresos >20% y margen CFO <20%",
+      "ventana_temporal": "2026-02-22 a 2028-02-22",
+      "probabilidad_cualitativa": "MEDIA",
+      "base_cuantitativa": "FY2025 ingresos reportados = 628500000 vs FY2024 = 776500000 (-19.06%); margen CFO FY2024 = 55.97%.",
+      "source_id": "SRC_008",
+      "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025].ingresos_usd y TruthPack_v1.historico_anual[periodo=FY2024].ingresos_usd/cfo_usd"
+    }
+  ],
+  "report_type": "FORENSIC_DETECTION",
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1_partial",
+    "truth_pack_data_quality_status": "PASS",
+    "sources_pack_disponible": false,
+    "regla_aplicada": "data_quality PASS + SourcesPack NO => ejecucion solo con TruthPack"
+  },
+  "log": {
+    "limitaciones": [
+      "SourcesPack_v1 no disponible; no se revisaron filings directamente en esta ejecucion.",
+      "No hay EBIT explicito para cerrar puente EBIT->CFO de manera canonica.",
+      "No hay calendario de vencimientos de deuda financiera 12-24 meses.",
+      "No hay datos de covenants/headroom.",
+      "TTM se construye con FY0_fallback y la serie trimestral tiene alta incompletitud."
+    ],
+    "exhaustividad_revision": {
+      "liquidez": "REVISADO",
+      "reconocimiento_ingresos": "REVISADO_CON_LIMITACIONES_DE_COMPARABILIDAD",
+      "capitalizacion_capex": "REVISADO",
+      "capital_trabajo": "REVISADO_CON_DESGLOSE_LIMITADO",
+      "goodwill_deterioro": "SIN_DATOS_EN_INPUT",
+      "transacciones_partes_relacionadas": "SIN_DATOS_EN_INPUT",
+      "off_balance_y_garantias": "REVISADO_ARRIENDAMIENTOS",
+      "puente_ebit_cfo": "INCOMPLETO_SIN_EBIT",
+      "puente_cfo_fcf": "REVISADO"
+    }
+  },
+  "_meta": {
+    "metodologia": "ForensicDetection_v1",
+    "moneda": "USD",
+    "fecha_ejecucion": "2026-02-22"
+  }
+}

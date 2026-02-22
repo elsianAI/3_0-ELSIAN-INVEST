@@ -1,0 +1,401 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260222_KAR",
+  "fecha_corte": "2026-02-22",
+  "agente": {
+    "agent_role": "CATALYST",
+    "agent_nombre": "CATALYST_SCORING_v1",
+    "modelo": "CLAUDE_3_5_SONNET",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260222_KAR",
+    "implied_expectations_caso_id": "CASE_20260222_KAR",
+    "sources_pack_caso_id": "CASE_20260222_KAR"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La valoración actual (FCF Yield ~24%) descuenta un escenario catastrófico que ignora la opcionalidad de los activos en desarrollo (Who Dat/Brasil).",
+      "La normalización del Capex (CAT_02) y el ramp-up de producción (CAT_01) son los drivers más tangibles para cerrar el gap de valoración.",
+      "La opacidad financiera (falta de EBIT, métricas trimestrales) penaliza el múltiplo, haciendo de la mejora en disclosure (CAT_06) un catalizador 'soft' pero potente.",
+      "El balance con deuda neta negativa protege contra el downside inmediato, permitiendo paciencia para la ejecución operativa.",
+      "La tesis depende de demostrar que la caída de ingresos FY25 es transitoria y no estructural."
+    ],
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.82
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_01",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El mercado descuenta una contracción estructural del FCF de >20% anual, lo cual es inconsistente con los activos en desarrollo y la vida de reserva.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf",
+          "cita_corta": "CAGR FCF implicito: -28.2% a -18.9%",
+          "interpretacion": "Pricing de run-off acelerado de activos"
+        }
+      ],
+      "falsacion": {
+        "test": "FCF TTM cayendo por debajo de US$200M en los próximos 12 meses",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_02",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El ciclo de inversión intensivo (Capex +51% YoY) oculta la capacidad de generación de caja normalizada.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual",
+          "cita_corta": "Capex FY2025 US$203.8M vs FY2024 US$134.7M",
+          "interpretacion": "Pico de inversión visible en estados financieros"
+        }
+      ],
+      "falsacion": {
+        "test": "Capex manteniéndose >US$200M en FY2026 sin nuevos proyectos sancionados",
+        "ventana_meses": {
+          "min": 12,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Capex trimestral desciende hacia rango US$30-40M (run-rate anual <US$160M)",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Capex reportado en Cash Flow Statement trimestral",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Ingresos trimestrales tocan fondo y rebotan por encima de US$165M",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Revenue line en Income Statement",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Anuncio de retorno de capital (buyback o dividendo especial) dado el exceso de caja",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Press release o sección Capital Allocation en reporte",
+      "fuente_prevista": "PR"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "Publicación de métricas operativas detalladas (EBIT, Opex/bbl) en reporte anual/semestral",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Presencia de tabla de conciliación non-IFRS o segmento operativo",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "Mantenimiento de posición de Deuda Neta Negativa o Neutra",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Caja >= Deuda Total en Balance Sheet",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de Operating Income (EBIT) histórico",
+      "por_que_importa": "Crítico para valorar earnings power real sin distorsión de leases/financiación.",
+      "como_obtenerlo": "Notas a los estados financieros o IR presentation detallada"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Guidance oficial de Producción y Capex FY26",
+      "por_que_importa": "Para confirmar tesis de normalización de inversión y suelo de ingresos.",
+      "como_obtenerlo": "Transcript de earnings call o Outlook slide en presentación"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Conteo de acciones diluidas promedio",
+      "por_que_importa": "Fundamental para métricas por acción precisas (FCF/sh, EPS).",
+      "como_obtenerlo": "Income statement bottom line o nota de EPS"
+    }
+  ],
+  "payload": {
+    "payload_version": "CatalystPayload_v1",
+    "contenido": {
+      "mapeo_con_expectativas_implicitas": {
+        "variable_critica_principal": "CRECIMIENTO_FCF",
+        "lectura_en_1_2_frases": "El mercado asume una destrucción de valor masiva (-20% CAGR FCF). Los catalizadores operativos y de capex atacan directamente esta asunción demostrando sostenibilidad y suelo."
+      },
+      "catalizadores": [
+        {
+          "catalyst_id": "CAT_01",
+          "nombre": "Ramp-up de producción y optimización de activos (Who Dat/Brasil)",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 18
+          },
+          "probabilidad_0_1": 0.75,
+          "mecanismo_cierre_gap": "Estabiliza la línea de ingresos y demuestra que la caída reciente no es terminal, forzando una re-calificación del múltiplo al reducir la percepción de riesgo de activo.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "MEJORA",
+                "magnitud_estimada": "+15-30%",
+                "nota": "Volumen incremental sobre base de costos fijos"
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "SUBE",
+                "magnitud_estimada": "+1.0x - 2.0x",
+                "nota": "Al disipar escenario de 'run-off'"
+              }
+            ],
+            "justificacion": "La mayor producción diluye costos unitarios y frena la caída de ingresos, invalidando la tesis bajista del mercado."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_008",
+              "cita_corta": "Production contributions from Who Dat assets",
+              "interpretacion": "Activos ya operativos y contribuyendo"
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_008",
+              "cita_corta": "Capex FY2025 US$203.8M acelerado",
+              "interpretacion": "Inversión realizada para soportar este ramp-up"
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Ingresos trimestrales >US$170M sostenidos",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Ingresos > 170M USD en Q1/Q2 2026",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Comentarios sobre uptime de FPSO",
+            "Datos de producción mensual (si disponibles)",
+            "Estabilidad en producción de campos maduros (Bauna)"
+          ],
+          "riesgos_de_ejecucion": [
+            "Problemas técnicos en FPSO envejecidos",
+            "Declive de reservorio mayor al esperado en Who Dat",
+            "Retrasos logísticos en Brasil"
+          ],
+          "contra_catalizadores": [
+            "Caída de producción >10% QoQ sin explicación de mantenimiento",
+            "Accidentes operativos mayores"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Línea de Ingresos",
+              "Comentarios operativos sobre producción diaria"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_02",
+          "nombre": "Normalización de Capex post-ciclo de inversión",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 9,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.8,
+          "mecanismo_cierre_gap": "Convierte la fuerte generación de CFO en FCF visible, eliminando la duda sobre la capacidad de generación de caja libre real de la empresa.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_estimada": "+US$50-100M",
+                "nota": "Si Capex baja de ~200M a ~130M"
+              },
+              {
+                "driver": "MARGEN_FCF",
+                "direccion": "MEJORA",
+                "magnitud_estimada": "Recuperación a niveles >40%",
+                "nota": "Retorno a media histórica"
+              }
+            ],
+            "justificacion": "El capex actual es anómalamente alto (casi 2x depreciación en algunos periodos), su reversión es mecánica."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_008",
+              "cita_corta": "Capex Q4-2025 US$44M acelerado vs Q3 US$4.5M",
+              "interpretacion": "Volatilidad típica de fin de proyecto"
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Guidance de Capex FY26 < US$150M",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Capex Anualizado < 150M USD",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Reducción secuencial de Capex en Q1/Q2",
+            "Finalización anunciada de campañas de perforación"
+          ],
+          "riesgos_de_ejecucion": [
+            "Necesidad de 'sidetracks' o remedios técnicos costosos",
+            "Inflación de servicios petroleros",
+            "Nuevos proyectos aprobados prematuramente"
+          ],
+          "contra_catalizadores": [
+            "Anuncio de nueva campaña intensiva de capital sin flujo inmediato",
+            "Capex de mantenimiento estructuralmente más alto"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Cash Flow from Investing",
+              "Guidance updates"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_06",
+          "nombre": "Mejora de Transparencia y Disclosure (Reducción de Prima de Opacidad)",
+          "categoria": "CORPORATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.5,
+          "mecanismo_cierre_gap": "Provee al mercado las métricas estándar (EBIT, EPS diluido) necesarias para modelos de valoración convencionales, reduciendo el descuento por incertidumbre.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "EXPANSION",
+                "magnitud_estimada": "+1.0x - 1.5x",
+                "nota": "Normalización hacia pares con mejor disclosure"
+              }
+            ],
+            "justificacion": "La falta de datos básicos es una bandera roja automática para muchos inversores institucionales."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "ImpliedExpectations_v1",
+              "cita_corta": "opacidad_alta: true; falta EBIT",
+              "interpretacion": "Diagnóstico claro de deficiencia informativa"
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Publicación de EBIT/Operating Income en reporte",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Presencia de línea explícita en P&L",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Nuevas slides en presentación de inversores",
+            "Cambio de CFO o equipo de IR",
+            "Comentarios sobre 'simplificación' de la historia"
+          ],
+          "riesgos_de_ejecucion": [
+            "Management indiferente al precio de la acción",
+            "Estructura corporativa compleja que impide reporte limpio"
+          ],
+          "contra_catalizadores": [
+            "Reducción adicional de información (ej. dejar de reportar por segmento)",
+            "Restatements"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "SEMANAL",
+            "que_mirar": [
+              "Formato de reportes nuevos",
+              "Presentaciones de conferencias"
+            ]
+          }
+        }
+      ],
+      "conclusion_catalizadores": {
+        "calidad_catalizador": "ALTA",
+        "por_que": "La combinación de normalización de Capex y producción estable ataca directamente la tesis bajista extrema del mercado. No se requiere crecimiento heroico, solo estabilidad y disciplina financiera, lo cual es altamente ejecutable dada la posición de caja neta.",
+        "si_no_hay_catalizador_apto": false
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta de EBIT histórico impide calibrar impacto en margen operativo",
+      "Incertidumbre sobre curva de declive de activos maduros",
+      "Dependencia de precios del crudo (factor exógeno)"
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "CATALYST_SCORING_v1",
+    "version": "0.0.410",
+    "timestamp": "2026-02-22T10:48:00Z",
+    "inputs_hash": "KAR_20260222_SCORING"
+  }
+}
