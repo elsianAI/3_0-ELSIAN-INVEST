@@ -1,0 +1,115 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260223_IOSP",
+  "fecha_corte": "2026-02-23",
+  "ticker": "IOSP",
+  "red_flags": [
+    {
+      "tipo": "REVENUE_CONTRACTION",
+      "descripcion": "Contracción sostenida de ingresos por 3 años consecutivos. FY2022 ($1.96B) -> FY2023 ($1.95B) -> FY2024 ($1.85B) -> FY2025 ($1.78B). Caída acumulada del ~9.5% desde el pico.",
+      "severidad_cualitativa": "ALTA",
+      "source_id": "SRC_SEC_001_10-K_FY2025",
+      "ubicacion": "Income Statement",
+      "periodos_afectados": [
+        "FY2023",
+        "FY2024",
+        "FY2025"
+      ]
+    },
+    {
+      "tipo": "MARGIN_EROSION",
+      "descripcion": "Erosión del Margen Bruto de ~220 puntos básicos desde FY2022 (29.9%) a FY2025 (27.7%), sugiriendo pérdida de poder de fijación de precios o incremento de costes no trasladables.",
+      "severidad_cualitativa": "MEDIA",
+      "source_id": "SRC_SEC_001_10-K_FY2025",
+      "ubicacion": "Income Statement",
+      "periodos_afectados": [
+        "FY2025"
+      ]
+    },
+    {
+      "tipo": "INVENTORY_BLOAT",
+      "descripcion": "Aumento de inventarios en valor absoluto ($301M -> $329M) en un año donde el COGS disminuyó ($1.30B -> $1.29B). Esto ha elevado los días de inventario de ~84 a ~93 días, indicando posible acumulación de stock no vendido o ineficiencia.",
+      "severidad_cualitativa": "MEDIA",
+      "source_id": "SRC_SEC_001_10-K_FY2025",
+      "ubicacion": "Balance Sheet",
+      "periodos_afectados": [
+        "FY2025"
+      ]
+    },
+    {
+      "tipo": "OPERATING_WEAKNESS",
+      "descripcion": "El margen EBIT cayó a 7.3% en FY2025 desde 9.6% en FY2024. Se observó una debilidad particular en Q3-2025 con un EBIT de solo $5.9M (margen ~1.3%).",
+      "severidad_cualitativa": "MEDIA",
+      "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+      "ubicacion": "Income Statement (Quarterly)",
+      "periodos_afectados": [
+        "Q3-2025",
+        "FY2025"
+      ]
+    }
+  ],
+  "liquidez": {
+    "estado_general": "ROBUSTA",
+    "caja_disponible_usd": 292500000,
+    "deuda_total_usd": 0,
+    "deuda_neta_usd": -292500000,
+    "runway_estimado_meses": "INFINITO",
+    "comentarios": "La empresa tiene una posición de caja neta sólida ($292.5M) y cero deuda financiera reportada. Genera FCF positivo ($88M en FY2025). No hay riesgo de liquidez o solvencia a corto/medio plazo.",
+    "vencimientos_proximos": [],
+    "ratio_liquidez_inmediata": 2.11
+  },
+  "puentes": {
+    "ebit_to_cfo": {
+      "analisis": "El EBIT ($129.5M) convierte a CFO ($138.3M) de manera saludable (ratio ~1.07x). Las principales partidas de conciliación son D&A (+$43.6M) y cambios negativos en capital de trabajo (Inventarios -$28.3M). Se observan pagos de impuestos de ~$21.5M. No hay anomalías significativas en la conversión.",
+      "distorsion_detectada": false
+    },
+    "cfo_to_fcf": {
+      "analisis": "El CFO ($138.3M) cubre holgadamente el Capex ($50.3M), generando un FCF de $88.0M. El Capex de FY2025 fue más alto que el promedio histórico ($30-40M), lo que comprimió ligeramente el FCF, pero la conversión sigue siendo sólida (FCF/CFO ~64%).",
+      "distorsion_detectada": false
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "criterio": "DETERIORO_MARGEN_OPERATIVO",
+      "condicion": "Margen Operativo (EBIT Margin) cayendo por debajo del 5% en base TTM.",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA",
+      "razonal": "Dada la tendencia negativa (9.6% -> 7.3%) y el débil Q3-2025, una caída adicional pondría en duda la rentabilidad estructural del negocio frente a la inflación de costes."
+    },
+    {
+      "criterio": "CONTRACCION_INGRESOS_ACELERADA",
+      "condicion": "Caída de ingresos > 5% YoY por cuarto año consecutivo.",
+      "ventana_temporal": "FY2026",
+      "probabilidad": "MEDIA",
+      "razonal": "La empresa lleva 3 años decreciendo. Si no logra estabilizar el 'top line', la pérdida de escala operativa erosionará rápidamente los márgenes restantes."
+    },
+    {
+      "criterio": "QUEMA_CAJA_OPERATIVA",
+      "condicion": "FCF negativo durante 2 trimestres consecutivos (excluyendo M&A o Capex extraordinario justificado).",
+      "ventana_temporal": "12-18 meses",
+      "probabilidad": "BAJA",
+      "razonal": "Con un balance tan sólido, el riesgo principal es una destrucción de valor operativa que consuma la caja, aunque actualmente el FCF es positivo."
+    }
+  ],
+  "report_type": "ForensicDetection",
+  "input_refs": {
+    "truth_pack": "TruthPack_v1_partial",
+    "sources_pack": "SourcesPack_v1"
+  },
+  "log": {
+    "analisis_realizado": [
+      "Verificación de tendencias de ingresos y márgenes (3 años de contracción confirmados).",
+      "Análisis de capital de trabajo: Alerta por aumento de días de inventario.",
+      "Revisión de estructura de capital: Balance extremadamente conservador (Caja Neta).",
+      "Conciliación de flujos de caja: Puentes EBIT->CFO->FCF sin partidas oscuras ('Other') significativas."
+    ],
+    "limitaciones": [
+      "No se revisaron notas a los estados financieros (footnotes) en detalle por falta de texto completo extraído en SourcesPack, solo análisis cuantitativo del TruthPack.",
+      "La causa raíz del débil Q3-2025 no está explícita en los datos tabulares."
+    ]
+  },
+  "_meta": {
+    "timestamp": "2026-02-23T22:15:00Z",
+    "agente": "Gemini CLI Forensic Agent"
+  }
+}

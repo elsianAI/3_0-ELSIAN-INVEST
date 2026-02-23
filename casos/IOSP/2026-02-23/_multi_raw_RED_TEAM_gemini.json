@@ -1,0 +1,439 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260223_IOSP",
+  "fecha_corte": "2026-02-23",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "gemini-2.0-flash-thinking",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260223_IOSP",
+    "implied_expectations_caso_id": "CASE_20260223_IOSP",
+    "sources_pack_caso_id": "CASE_20260223_IOSP"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Trampa de valor clásica: 3 años consecutivos de contracción de ingresos (-9.5% acumulado) mientras el mercado paga ~26x EV/FCF real (ajustado por software capitalizado).",
+      "La 'fortaleza' del FCF ($88M) es ilusoria; excluyendo ~$25M anuales de software capitalizado (oculto en Investing Activities), el FCF económico cae a ~$63M.",
+      "La volatilidad del margen (Q3-2025 al 1.3%) revela un apalancamiento operativo negativo brutal; un negocio 'estable' no colapsa a breakeven por una caída moderada de volumen.",
+      "El recorte masivo de SGA ($95M, -25%) en un entorno de ingresos decrecientes huele a 'death spiral': cortar músculo comercial para salvar el margen acelera la caída de ventas.",
+      "Si Fuel Specialties creció 7% (según el Bull), el resto del negocio (químicos, oilfield) debe estar implosionando a doble dígito para arrastrar el total a -3.7%."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El FCF reportado de $88M está inflado artificialmente por la capitalización de software (~$25M estimados); el FCF real disponible para el accionista es ~$63M, implicando una valoración de ~26x EV/FCF.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones y historico_trimestral",
+          "cita_corta": "Internally developed software ($18.6M 9M-2025) es una partida separada de investing no incluida en capex_usd.",
+          "interpretacion": "El Capex real es $50.3M (PPE) + ~$25M (Software) = ~$75M. FCF = $138M - $75M = $63M."
+        }
+      ],
+      "falsacion": {
+        "test": "La empresa deja de capitalizar software o el gasto en software cae por debajo de $10M en FY2026.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La caída de ingresos es estructural, no cíclica. Tres años de contracción (-0.8%, -5.3%, -3.7%) con el segmento 'estrella' (Fuel Specialties) creciendo 7% implica que el core químico está en declive secular acelerado.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual ingresos_usd",
+          "cita_corta": "FY2022 $1,964M -> FY2023 $1,948M -> FY2024 $1,845M -> FY2025 $1,778M.",
+          "interpretacion": "Tendencia bajista clara e ininterrumpida. La divergencia con el segmento de crecimiento confirma podredumbre en el resto."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos FY2026 muestran crecimiento positivo YoY en al menos 2 trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "HIPOTESIS",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Los recortes de SGA ($95M en 2 años) son insostenibles y dañarán la capacidad de generar ingresos futuros; se está sacrificando crecimiento futuro para maquillar el EPS presente.",
+      "confianza_0_1": 0.8,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual sga_usd",
+          "cita_corta": "SGA FY2023 $380M -> FY2025 $285M (-25%) vs Ingresos -4.5%.",
+          "interpretacion": "El recorte de gastos es 5x más agresivo que la caída de ventas. Esto suele indicar subinversión comercial crítica."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos se estabilizan en FY2026 manteniendo SGA <$300M.",
+        "ventana_meses": {
+          "min": 9,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "Ingresos FY2026 continuarán contrayéndose (rango -2% a -5%).",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "Ingresos FY2026 < $1,778M.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "Margen operativo caerá por debajo del 8% en al menos 2 trimestres de FY2026.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT/Ingresos trimestral < 8.0%.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose exacto de software capitalizado en Cash Flow Statement (Investing) para FY2024 y FY2025 completo.",
+      "por_que_importa": "Para confirmar la magnitud exacta del 'FCF fantasma'. La extrapolación de 9M sugiere ~$25M, pero el dato real es crítico para la valoración.",
+      "como_obtenerlo": "10-K Cash Flow Statement, línea 'Additions to internally developed software' o similar."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Performance Chemicals & Oilfield Solutions revenue breakdown.",
+      "por_que_importa": "Si Fuel Specialties crece al 7%, necesitamos saber qué segmento está cayendo al 10-15% para arrastrar el total.",
+      "como_obtenerlo": "10-K Segment reporting."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Demoler la tesis de 'normalización barata' exponiendo la baja calidad del FCF y el declive estructural.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.85,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "Negocio en contracción secular cotizando a múltiplo de crecimiento (~26x FCF real) gracias a contabilidad agresiva de software y recortes de costes insostenibles. La caja neta es el único activo real, pero corre riesgo de ser mal asignada."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_FUS_001",
+            "resumen_claim_bull": "Q3-2025 (1.3% margen) fue una anomalía; run-rate real es ~9.25%.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.7,
+              "por_que": [
+                "Volatilidad extrema (9.6% -> 7.8% -> 1.3% -> 10.3%) indica falta de control operativo.",
+                "Un trimestre de 1.3% destruye la tesis de 'negocio defensivo'.",
+                "El rebote de Q4 puede ser estacional o restocking, no estructural."
+              ]
+            },
+            "puntos_ciegos": [
+              "Apalancamiento operativo negativo: cuando el volumen cae, el margen colapsa desproporcionadamente.",
+              "Dependencia de recortes de SGA para sostener el margen."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_trimestral",
+                "cita_corta": "Q3-2025 margen 1.3% vs Q3-2024 10.3%. Caída de 900bps en un año.",
+                "interpretacion": "Deterioro masivo en un solo año indica fragilidad extrema."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Margen operativo <8% en Q1 o Q2 de FY2026.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_003",
+            "resumen_claim_bull": "EV/EBIT normalizado ~10.7x es barato; FCF ~$100M+.",
+            "evaluacion_red_team": {
+              "estado": "FALSO",
+              "probabilidad_de_fallo_0_1": 0.95,
+              "por_que": [
+                "Ignora ~$25M de Capex oculto (Software) que reduce FCF real a ~$63M.",
+                "EV/FCF real es ~26x, carísimo para un negocio que decrece.",
+                "Normalizar EBIT al alza mientras ventas caen es wishful thinking."
+              ]
+            },
+            "puntos_ciegos": [
+              "Calidad del FCF (conversion rate real es baja si ajustas software).",
+              "Tendencia secular negativa de ingresos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "log.limitaciones",
+                "cita_corta": "Internally developed software ($18.6M 9M-2025) partida separada de investing no incluida en capex.",
+                "interpretacion": "El 'Capex' real es mucho mayor de lo que el Bull asume."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Software capitalizado >$20M en FY2026 y FCF ajustado <$70M.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 15
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_007",
+            "resumen_claim_bull": "Contracción de ingresos se desacelera; Fuel Specialties crece 7%.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "Si Fuel Specialties crece y el total cae, el resto del portfolio (probable >50% ventas) está colapsando.",
+                "La desaceleración de la caída (-5.3% a -3.7%) sigue siendo caída. 3 años seguidos no es un bache, es tendencia."
+              ]
+            },
+            "puntos_ciegos": [
+              "Deterioro acelerado en Performance Chemicals y Oilfield.",
+              "Riesgo de que Fuel Specialties (aditivos combustibles fósiles) sea un 'melting ice cube' a largo plazo pese al rebote puntual."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual",
+                "cita_corta": "Ingresos: FY22 $1963M, FY23 $1948M, FY24 $1845M, FY25 $1778M.",
+                "interpretacion": "Destrucción de valor top-line constante."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Ingresos continúan cayendo en FY2026.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 15
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Asumir que el recorte de SGA ($95M) no tiene coste en ingresos futuros ('free lunch').",
+          "Tratar el Software Capitalizado como inversión de crecimiento y no como coste recurrente de mantenimiento (infla FCF/EBIT).",
+          "Normalizar márgenes al promedio histórico ignorando la pérdida de escala por caída de ventas."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "La caída de ingresos se detiene en seco en H1-2026.",
+          "El margen bruto recupera 29% sostenido (pricing power real).",
+          "El software capitalizado genera nuevos productos de alto margen que compensan el declive legacy.",
+          "La caja se usa para recomprar 10% del float inmediatamente (no ocurre hoy)."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "Deterioro secular del negocio core químico y de oilfield arrastra las ventas (-3% a -5% anual).",
+          "Inflación de costes fijos + menor volumen comprime márgenes operativos al rango 6-7% de forma estructural.",
+          "FCF real se mantiene anémico ($50-60M) por necesidad de alto capex IT/Mantenimiento.",
+          "Valoración comprime a 15x FCF real (~$800-900M EV) + Caja = ~$1.1-1.2B Market Cap.",
+          "Downside ~40% desde precio actual ($1.96B Market Cap)."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "APALANCAMIENTO_OPERATIVO_NEGATIVO",
+            "descripcion": "Menores ventas sobre base de costes fijos (incluso reducida) destruyen margen.",
+            "indicadores_tempranos": [
+              "Margen bruto estancado <28%",
+              "SGA/Ventas subiendo de nuevo"
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Continúa el goteo a la baja de ingresos (-3%). Margen promedio 7.5%. FCF real $55M.",
+            "ventana_meses": {
+              "min": 12,
+              "probable": 18,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.6,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "-2% a -4% CAGR",
+                "justificacion": "Tendencia histórica reciente se mantiene."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "7.0% - 8.0%",
+                "justificacion": "Pérdida de escala."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "Mercado deja de pagar 'recuperación' y paga 'declive'. 12x FCF real.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -40,
+                "base": -25,
+                "max": -10
+              },
+              "nota": "Value trap grind down."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Aceleración de caída (-8%) y competencia de precios. Margen <5%. Dividend cut.",
+            "ventana_meses": {
+              "min": 12,
+              "probable": 18,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.2,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "<5%",
+                "justificacion": "Guerra de precios para mantener volumen."
+              }
+            ],
+            "impacto_en_supervivencia": "BAJO",
+            "nota": "No quiebra por caja neta, pero la acción se vuelve 'dead money' por años."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.85,
+        "razones": [
+          "Ingresos cayendo 3 años consecutivos.",
+          "Valoración óptica barata (EV/EBITDA, EV/FCF reportado) pero cara en métricas reales (EV/FCF ajustado).",
+          "Dependencia de 'ajustes' y 'normalizaciones' para justificar el precio.",
+          "Caja neta que no se devuelve al accionista (riesgo de asignación de capital)."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "Rebote fuerte de precios/volumen en Q1-Q2 2026.",
+              "Competidores reportando recuperación similar."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "Pérdida de cuota de mercado constante.",
+              "Márgenes estructuralmente más bajos que en el ciclo anterior (peak margins lower)."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "Ingresos FY2026 < $1,750M (aceleración de caída).",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma tesis de deterioro secular irreversible."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "CONTABILIDAD",
+          "definicion": "Software capitalizado supera el 50% del Capex reportado.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Deterioro de calidad de beneficios y FCF."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Crecimiento orgánico de ingresos >3% por 2 trimestres.",
+          "umbral_o_condicion": "Sostenible sin M&A.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 9
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Programa agresivo de recompra de acciones (>5% del float).",
+          "umbral_o_condicion": "Ejecución real, no solo anuncio.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "8-K"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0,
+        "si_se_invierte_igual": [
+          "Exigir un descuento de valoración mucho mayor (entrada <$60).",
+          "Monitorizar trimestralmente el 'Real FCF'.",
+          "Stop-loss estricto si ingresos rompen soporte de $1,700M."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Por qué el software capitalizado ha subido 50% YoY? ¿Qué están construyendo?",
+          "¿Cuál es la tasa de declive de los segmentos 'Non-Fuel'? ¿Es recuperable?",
+          "¿El recorte de SGA ha afectado a la fuerza de ventas directa?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta desglose segmental preciso para aislar el 'cáncer' en el portfolio.",
+      "Estimación de software capitalizado FY2025 extrapolada de 9M (aunque conservadora)."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

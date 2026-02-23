@@ -1,0 +1,390 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260223_IOSP",
+  "fecha_corte": "2026-02-23",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "gemini-2.0-flash-thinking",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260223_IOSP",
+    "implied_expectations_caso_id": "CASE_20260223_IOSP",
+    "sources_pack_caso_id": "CASE_YYYYMMDD_TICKER"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Balance fortaleza ('fortress balance sheet') con $292.5M de caja neta y deuda cero garantiza supervivencia a corto/medio plazo.",
+      "Deterioro operativo estructural: 3 años de caída de ingresos (-9.5% acumulado) y compresión de márgenes (7.3% vs 9.6%).",
+      "Calidad de resultados cuestionada por aumento de software capitalizado (+52%) y anomalía severa en márgenes Q3-2025 (1.3%).",
+      "Riesgo de insolvencia prácticamente nulo (Survival Score 4/5), pero riesgo de trampa de valor alto si no revierte tendencia.",
+      "Veredicto APTO por solvencia, pero requiere monitoreo estricto de márgenes para validar tesis de inversión."
+    ],
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.9
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_FOR_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La empresa posee una posición de caja neta de $292.5M sin deuda financiera, cubriendo >2 años de opex ajustado.",
+      "confianza_0_1": 1.0,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025",
+          "ubicacion": "Balance Sheet",
+          "cita_corta": "Cash $292.5M, Total Debt $0",
+          "interpretacion": "Solvencia inmediata indiscutible."
+        }
+      ],
+      "falsacion": {
+        "test": "Aparición de deuda en balance o caída drástica de caja >$100M en un trimestre",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_FOR_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La capitalización agresiva de software ($18.6M, +52% YoY) está inflando artificialmente el CFO y el FCF reportado.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+          "ubicacion": "Investing Activities",
+          "cita_corta": "Additions to internally developed software $18.6M",
+          "interpretacion": "Gasto recurrente tratado como inversión, mejorando óptica de flujo operativo."
+        }
+      ],
+      "falsacion": {
+        "test": "Reducción de la partida de software o write-down de intangibles",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_FOR_001",
+      "descripcion": "Margen operativo TTM se mantendrá por debajo del 8% en los próximos 2 trimestres.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Calculo de EBIT/Ingresos en próximos 10-Q < 0.08",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FOR_002",
+      "descripcion": "La empresa no realizará recompras de acciones significativas (>$20M/trimestre) para proteger caja.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Cash flow from financing (purchase of treasury stock) < $20M",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FOR_003",
+      "descripcion": "Inventarios seguirán creciendo o planos pese a caída de ventas (DIO > 90).",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Días de inventario reportados > 90",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de Goodwill e Intangibles FY2025",
+      "por_que_importa": "Verificar si hubo impairments ocultos o riesgo de write-down dado el deterioro de negocio.",
+      "como_obtenerlo": "Nota específica de Goodwill en 10-K completo."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de 'Other Income/Expense' en Q3-2025",
+      "por_que_importa": "Explicar el margen anormalmente bajo (1.3%) y el beneficio fiscal.",
+      "como_obtenerlo": "MD&A del 10-Q Q3-2025, sección resultados operativos."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "APTO",
+        "confianza_0_1": 0.9,
+        "razon_principal": "Inmunidad financiera a corto plazo por caja neta masiva ($292M) y ausencia de deuda, pese a deterioro operativo."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 24,
+          "max": 36
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 4,
+          "por_que": [
+            "Liquidez excelente: Caja ($292.5M) supera pasivos corrientes totales operativos.",
+            "Deuda cero: Sin riesgo de refinanciación ni covenants.",
+            "CFO positivo ($138M): Cubre capex y dividendos holgadamente.",
+            "Score penalizado (-1) solo por tendencia negativa de ingresos/márgenes y calidad de earnings."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 292500000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "Revolver (undrawn)",
+            "Generación interna de caja (CFO $138M)"
+          ],
+          "runway_meses_estimado": 36,
+          "metodo_estimacion": "Caja actual + CFO proyectado conservador (70% del actual) vs Capex mantenimiento.",
+          "notas": "La empresa es una 'cash cow' en contracción, no una 'cash burner'."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 0,
+          "deuda_neta_usd": -292500000,
+          "coste_deuda_aprox_pct": 0,
+          "coverage_intereses": 999,
+          "net_debt_ebitda": -2.25,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 99,
+            "comentario": "Sin vencimientos de deuda financiera."
+          },
+          "vencimientos": [],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "BAJO",
+            "comentario": "Sin deuda dispuesta, covenants inactivos o irrelevantes."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "BAJO",
+          "motores": [
+            "SBC normal"
+          ],
+          "share_count_yoy_pct": 0,
+          "comentario": "Empresa recompra acciones netas o mantiene flat. Sin necesidad de capital externo."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Deterioro de calidad visible. Aumento de capitalización de software y anomalías en capital de trabajo (inventario up, ventas down) sugieren gestión de resultados para suavizar caída operativa.",
+        "red_flags": [
+          {
+            "flag_id": "F-001",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Inventarios +9.4% vs Ingresos -3.6%. Divergencia clásica de eficiencia o demanda.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.8,
+            "por_que_importa": "Precursor de write-downs de inventario y presión en márgenes futuros.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2025",
+                "ubicacion": "Balance Sheet",
+                "cita_corta": "Inv $329M vs $301M prev",
+                "interpretacion": "Acumulación no deseada."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Reducción de días de inventario a <85 en Q1/Q2 2026",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "F-002",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "Software desarrollado internamente +52% ($18.6M), 52% del capex tradicional.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.7,
+            "por_que_importa": "Infla activo y FCF; es gasto operativo disfrazado de inversión.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+                "ubicacion": "CFI",
+                "cita_corta": "Software additions $18.6M",
+                "interpretacion": "Capitalización agresiva."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Estabilización o caída de esta partida en próximos trimestres",
+              "ventana_meses": {
+                "min": 6,
+                "max": 9
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "F-005",
+            "categoria": "OTHER",
+            "descripcion": "Erosión sostenida de márgenes (Bruto -220bps, Op -230bps) y anomalía Q3 (1.3%).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.95,
+            "por_que_importa": "Cuestiona la ventaja competitiva y poder de fijación de precios.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2025",
+                "ubicacion": "Income Statement",
+                "cita_corta": "Op Margin 7.3% vs 9.6%",
+                "interpretacion": "Pérdida de rentabilidad estructural."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Recuperación de margen operativo >9% en FY2026",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebit_a_cfo": {
+            "lectura": "Conversión saludable en apariencia pero volátil históricamente. Distorsión actual baja (6.8%).",
+            "posibles_distorsiones": [
+              "Capitalización de software (mejora CFO, empeora CFI)",
+              "Variaciones bruscas de WC"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "FCF cae -38.5% por menor CFO y mayor Capex. Capex de mantenimiento podría estar subestimado si software es recurrente.",
+            "capex_riesgo": "MEDIO",
+            "notas": "Capex total subiendo en entorno de ventas bajando es mala señal de eficiencia de capital."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": true,
+          "sostenible_por_fcf": "SI",
+          "comentario": "Caja neta permite recompras agresivas, pero no frenan la dilución totalmente o se usan conservadoramente."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "NO",
+          "comentario": "No reportado como issue mayor en análisis forense."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "Con $292M en caja y crecimiento orgánico negativo, riesgo de compra 'desesperada' aumenta."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Falta dato de ownership."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Espiral de contracción: Ingresos caen 5% anual + Margen EBIT se estabiliza en 5%.",
+            "impacto_en_supervivencia": "BAJO",
+            "mecanismo_de_dolor": [
+              "Compresión de múltiplos (derating)",
+              "FCF se reduce a <$50M"
+            ],
+            "indicadores_tempranos": [
+              "EBIT margin < 6% dos Q seguidos",
+              "Ventas YoY negativas persistentes"
+            ]
+          }
+        ],
+        "conclusion_downside": "El downside es de valoración (trampa de valor), no de quiebra. El suelo lo pone la caja neta (~15% del market cap)."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "margen",
+          "definicion": "Margen operativo trimestral < 5% en 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirmaría que el shock del Q3-2025 no fue aislado y la rentabilidad se ha destruido."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "fcf",
+          "definicion": "CFO anual (TTM) cae por debajo de $100M.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q/10-K",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Pondría en riesgo la capacidad de mantener dividendos/recompras sin quemar caja neta."
+        },
+        {
+          "kc_id": "KC-009",
+          "relacionado_con": "deuda",
+          "definicion": "Emisión de deuda o disposición de revolver > $50M sin adquisición.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "8-K/10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Rompe la tesis de fortaleza de balance y señala estrés de liquidez oculta."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "BAJO",
+        "tamaño_maximo_sugerido_pct_cartera": "100%",
+        "condiciones_para_aumentar_tamaño": [
+          "Estabilización de ingresos (YoY >= 0%)",
+          "Recuperación de margen operativo > 9%",
+          "Reducción de inventarios (DIO < 85)"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Activación de cualquier Kill Criteria",
+          "Deterioro de Goodwill significativo",
+          "Adquisición grande y costosa que consuma toda la caja"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "Goodwill detail",
+          "por_que_importa": "Riesgo de impairment invisible",
+          "como_obtenerlo": "10-K Notes"
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta detalle de notas 10-K para goodwill e intangibles"
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}
