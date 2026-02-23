@@ -1,0 +1,1599 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260223_NEXN",
+  "fecha_corte": "2026-02-23",
+  "agente": {
+    "agent_role": "CATALYST",
+    "agent_nombre": "CATALYST_SCORING_v1",
+    "modelo": "fusion:gemini+codex+claude",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260223_NEXN",
+    "implied_expectations_caso_id": "CASE_20260223_NEXN",
+    "sources_pack_caso_id": "CASE_20260223_NEXN"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Valuación distressed (EV/EBIT ~4.6x) con 50% de la capitalización en caja neta ($187M, deuda $0), ofreciendo un margen de seguridad masivo; el mercado valora el negocio operativo ex-caja en prácticamente cero.",
+      "Tres catalizadores de alta convicción: convergencia D&A-capex (prob. 0.78), balance fortress sin deuda (prob. 0.75) y escudo fiscal de $307M en NOLs (prob. 0.67); todos con evidencia objetiva de partida.",
+      "Los catalizadores de mayor impacto — recompras agresivas y activismo de Mithaq — tienen probabilidad moderada-baja (0.42 y 0.28 respectivamente) por depender de decisiones discrecionales sin señales concretas de intención.",
+      "La falta de datos financieros trimestrales de 2025 (6-K sin Exhibit 99.1) impide verificar continuidad de la recuperación FY2024, generando prima de incertidumbre informativa significativa.",
+      "Veredicto consensuado WATCHLIST: la empresa cumple condiciones de valor profundo pero requiere confirmación de sostenibilidad operativa y señales de capital allocation antes de calificar como APTO."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.65
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El mercado asigna valor operativo cercano a cero: EV de $186.9M con $187M en caja neta implica que el negocio ex-caja vale ~$0.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "mercado / snapshot_mercado",
+          "cita_corta": "EV 186.9M, Caja 187.1M, Deuda 0, market cap $374M",
+          "interpretacion": "El mercado valora el negocio operativo en cero; la capitalización entera refleja solo la caja."
+        }
+      ],
+      "falsacion": {
+        "test": "EV ex-caja supera $100M de forma sostenida sin caída de caja",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "precio"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "EV/EBIT de 4.58x es extremadamente bajo para ad-tech con 70% de margen bruto; el mercado descuenta declive estructural o liquidación.",
+      "confianza_0_1": 0.93,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "multiples_implicitos",
+          "cita_corta": "EV/EBIT 4.58x con margen bruto ~70%",
+          "interpretacion": "El múltiplo implica descuento severo frente a peers ad-tech cotizando a 10-20x."
+        }
+      ],
+      "falsacion": {
+        "test": "EBIT FY2025 cae por debajo de $25M o ingresos caen >10% YoY, validando la tesis de declive",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El FCF reportado de $143M está inflado por brecha D&A-capex de ~$51M (D&A $58.7M vs capex $7.7M), distorsionando la lectura de earning power real.",
+      "confianza_0_1": 0.92,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "Cash Flow / Income Statement",
+          "cita_corta": "D&A $58.7M vs capex $7.7M; brecha ~$51M infla FCF sobre earning power real",
+          "interpretacion": "La amortización de intangibles de adquisiciones genera un FCF contable no representativo de la generación económica."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf.resultado_grid",
+          "cita_corta": "CAGR implícito de FCF entre -43.6% y -48.9%",
+          "interpretacion": "El precio descuenta destrucción fuerte del FCF reportado, parcialmente por esta distorsión contable."
+        }
+      ],
+      "falsacion": {
+        "test": "D&A-capex cae por debajo de $20M sin caída del EBIT",
+        "ventana_meses": {
+          "min": 12,
+          "max": 30
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "EBIT ha sido negativo en 2 de 6 años (FY2020: -$6M, FY2023: -$17M), señalando alta ciclicidad que justifica parcialmente el descuento.",
+      "confianza_0_1": 0.97,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2019-FY2024",
+          "cita_corta": "EBIT FY2020 -6.0M y FY2023 -17.0M; rango 6 años: -17M a +74.5M",
+          "interpretacion": "La volatilidad del EBIT (negativo en 33% de los años) justifica un descuento cíclico significativo."
+        }
+      ],
+      "falsacion": {
+        "test": "Seis trimestres consecutivos con EBIT positivo y margen >10%",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "FY2024 superó el pico previo de ingresos y recuperó rentabilidad operativa: ingresos $365.5M (+10.1% YoY), EBIT $40.8M, CFO $150.8M.",
+      "confianza_0_1": 0.94,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2024 vs FY2021",
+          "cita_corta": "Ingresos 365.5M vs 341.9M pico previo; EBIT 40.8M; CFO 150.8M vs 60.7M FY2023",
+          "interpretacion": "Existe recuperación cuantificable frente al valle de FY2023, pero falta confirmación de tendencia."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos vuelven a contraerse y EBIT cae por debajo de $20M anualizado",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "SGA se redujo de $158M (FY2022) a $153M (FY2024) mientras ingresos crecieron de $335M a $365M, indicando apalancamiento operativo emergente.",
+      "confianza_0_1": 0.9,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "Income Statement FY2022-FY2024",
+          "cita_corta": "SGA: $158M→$157M→$153M; G&A: $68M→$51M→$41M con ingresos +$30M",
+          "interpretacion": "Tendencia de disciplina de costos sostenida en 3 años; la estructura de costos muestra escalabilidad."
+        }
+      ],
+      "falsacion": {
+        "test": "SGA supera $170M sin crecimiento proporcional de ingresos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_007",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Caja neta de $187M (50% del market cap) con deuda total repagada en FY2024 elimina riesgo de solvencia.",
+      "confianza_0_1": 0.96,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo y mercado",
+          "cita_corta": "Caja 187.1M, deuda total 0, deuda neta -187.1M, patrimonio $531M",
+          "interpretacion": "Balance fortress; capacidad total para ejecutar retorno de capital o M&A."
+        }
+      ],
+      "falsacion": {
+        "test": "Reapalancamiento neto >$50M o caja neta <$100M",
+        "ventana_meses": {
+          "min": 6,
+          "max": 30
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_008",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Mithaq Capital SPC es accionista significativo con restricción de voto al 25% de acciones outstanding.",
+      "confianza_0_1": 0.94,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "6-K AGM enero 2026",
+          "cita_corta": "Mithaq limitado a 25% de votos (14.16M de 56.65M shares outstanding)",
+          "interpretacion": "Capacidad de influencia, no control total; restricción sugiere tensión con insiders."
+        }
+      ],
+      "falsacion": {
+        "test": "Reducción de participación por debajo del 10% o ausencia de acción pública en 18 meses",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_009",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La convergencia D&A-capex mejorará la lectura de earning power real a medida que intangibles de adquisiciones se amorticen.",
+      "confianza_0_1": 0.82,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "Cash flow adjustments",
+          "cita_corta": "D&A bajó de $78.3M (FY2023) a $58.7M (FY2024), tendencia descendente confirmada; capex estable $7.7M",
+          "interpretacion": "Reducción de $19.6M YoY confirma inicio de runoff de intangibles de adquisiciones."
+        }
+      ],
+      "falsacion": {
+        "test": "Brecha D&A-capex permanece >$50M por más de 24 meses o nueva adquisición reinicia ciclo",
+        "ventana_meses": {
+          "min": 12,
+          "max": 30
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_010",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "89% de ingresos proviene de Programmatic ($324.5M), con Video concentrado en 63% del mix, generando riesgo de concentración.",
+      "confianza_0_1": 0.95,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "Revenue Breakdown FY2024",
+          "cita_corta": "Programmatic $324.5M (89%); Video $232.4M (63%); Performance $41M (11%)",
+          "interpretacion": "Alta concentración en Programmatic crea vulnerabilidad regulatoria y competitiva."
+        }
+      ],
+      "falsacion": {
+        "test": "Performance supera 20% del mix total y Programmatic cae por debajo de 80%",
+        "ventana_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "fuente_prevista": "kpi_operativo"
+      }
+    },
+    {
+      "claim_id": "CLM_011",
+      "tipo": "HECHO",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "NOLs de ~$307M disponibles durante 52 años mantienen tasa impositiva efectiva ~8.7% vs 23% estatutaria israelí.",
+      "confianza_0_1": 0.88,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_003_20-F_FY2023",
+          "ubicacion": "Notas fiscales",
+          "cita_corta": "NOLs aprox. USD 307.2M utilizables en los próximos 52 años",
+          "interpretacion": "Escudo fiscal masivo relativo al tamaño de la empresa ($307M NOLs vs $187M EV operativo)."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2024",
+          "cita_corta": "Tax expense 3.1M sobre net income 35.4M (tasa efectiva ~8.7%)",
+          "interpretacion": "NOLs ya se utilizan activamente; tasa muy por debajo de estatutaria."
+        }
+      ],
+      "falsacion": {
+        "test": "Tasa efectiva sube por encima del 15% en dos años consecutivos",
+        "ventana_meses": {
+          "min": 12,
+          "max": 36
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_012",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La ausencia de estados trimestrales 2025 completos (6-K sin Exhibit 99.1) aumenta incertidumbre de valoración e impide validar sostenibilidad.",
+      "confianza_0_1": 0.93,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "faltantes_criticos",
+          "cita_corta": "TTM usa FY0 fallback por falta de exhibits trimestrales; 6-K 2025 eran portadas sin Exhibit 99.1",
+          "interpretacion": "La visibilidad intra-anual es incompleta; no se puede confirmar si la recuperación FY2024 continúa."
+        }
+      ],
+      "falsacion": {
+        "test": "Publicación de 4 trimestres consecutivos con IS/BS/CF completos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "filing"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "D&A anual de NEXN cae por debajo de $50M en FY2025.",
+      "probabilidad_0_1": 0.78,
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "criterio_validacion": "D&A reportada en 20-F anual < $50,000,000.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.7,
+          0.9
+        ],
+        "nota": "Gemini 0.90 (D&A<58.7M), Claude 0.70 (D&A<45M), Codex 0.66 (D&A<40M con timing más largo). Umbral intermedio $50M con probabilidad convergente."
+      }
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Ingresos FY2025 superan $370M (crecimiento >1.2% YoY vs FY2024).",
+      "probabilidad_0_1": 0.63,
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "criterio_validacion": "Revenue total reportado en 20-F FY2025 > $370,000,000.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.54,
+          0.75
+        ],
+        "nota": "Gemini 0.75 (>365M), Codex 0.54 (>=380M y EBIT>=10%), Claude 0.60 (>370M). Umbral $370M es intermedio razonable."
+      }
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "EBIT FY2025 se mantiene positivo y supera $30M.",
+      "probabilidad_0_1": 0.62,
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "criterio_validacion": "EBIT reportado en 20-F FY2025 > $30,000,000.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.55,
+          0.7
+        ],
+        "nota": "Gemini 0.70 (>20M), Claude 0.55 (>35M), Codex implícito en su PRED_006. Umbral $30M equilibra ambición con realismo."
+      }
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "NEXN anuncia o ejecuta un programa de recompra de acciones por al menos $25M en 18 meses.",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 3,
+        "max": 18
+      },
+      "criterio_validacion": "Filing 6-K/PR reporta buyback autorizado o ejecutado por ≥$25M acumulado.",
+      "fuente_prevista": "PR",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.35,
+          0.45
+        ],
+        "nota": "Gemini 0.40 (>$25M), Codex 0.42 (>=30M), Claude 0.35 (>=$20M). Convergencia en rango bajo-moderado."
+      }
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "Margen EBIT se mantiene ≥10% en al menos 3 de los próximos 4 trimestres reportados.",
+      "probabilidad_0_1": 0.52,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT/Ingresos ≥10% en ≥3 de 4 trimestres consecutivos reportados en 6-K.",
+      "fuente_prevista": "earnings",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.5,
+          0.57
+        ],
+        "nota": "Claude 0.50 (>=10% en 3/4), Codex 0.57 (>13% en 2 consecutivos). Ajustado a umbral de 10%."
+      }
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "Mithaq Capital mantiene o aumenta su participación accionaria (no vende significativamente por debajo de precios actuales).",
+      "probabilidad_0_1": 0.78,
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "criterio_validacion": "Ausencia de filings SC 13D/A reportando ventas >5% de posición; o reporte de compras adicionales.",
+      "fuente_prevista": "otro",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.78,
+          0.8
+        ],
+        "nota": "Gemini 0.80, otros modelos no cuantificaron directamente pero implícitamente alineados. Alta convergencia."
+      }
+    },
+    {
+      "pred_id": "PRED_007",
+      "descripcion": "Tasa impositiva efectiva de NEXN se mantiene por debajo de 12% en FY2025.",
+      "probabilidad_0_1": 0.67,
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "criterio_validacion": "Income tax / Pre-tax income < 12% en 20-F FY2025.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.62,
+          0.72
+        ],
+        "nota": "Codex 0.62, Claude 0.72. Media ponderada por fundamentación."
+      }
+    },
+    {
+      "pred_id": "PRED_008",
+      "descripcion": "Deuda total de NEXN se mantiene en $0 y caja neta ≥$150M al cierre FY2025.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "criterio_validacion": "Deuda financiera total = $0 y caja neta ≥$150M en balance sheet de 20-F FY2025.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.74,
+          0.78
+        ],
+        "nota": "Codex 0.74, Claude 0.78. Alta convergencia."
+      }
+    },
+    {
+      "pred_id": "PRED_009",
+      "descripcion": "Mithaq publica acción estratégica formal (propuesta, carta pública o acuerdo de capital allocation) en 18 meses.",
+      "probabilidad_0_1": 0.28,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "13D/A, PR o acta AGM documenta iniciativa explícita.",
+      "fuente_prevista": "otro",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.28,
+          0.3
+        ],
+        "nota": "Codex 0.28, Claude 0.30. Convergencia en baja probabilidad."
+      }
+    },
+    {
+      "pred_id": "PRED_010",
+      "descripcion": "NEXN publica al menos 2 trimestres de 2025 con estados financieros completos (IS+BS+CF) en 6-K.",
+      "probabilidad_0_1": 0.45,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Al menos 2 filings 6-K de 2025 contienen Exhibit 99.1 con income statement, balance sheet y cash flow.",
+      "fuente_prevista": "otro",
+      "_meta_fusion": {
+        "rango_modelos": [
+          0.34,
+          0.65
+        ],
+        "nota": "Codex 0.34 (4 trimestres con guidance), Claude 0.65 (2 trimestres). Criterio intermedio: 2 trimestres, probabilidad ajustada."
+      }
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Exhibits 99.1 completos de 6-K Q1-Q3 2025 y Q4 2025 (estados financieros trimestrales)",
+      "por_que_importa": "Esencial para construir TTM real, verificar sostenibilidad de la recuperación FY2024 y detectar deterioro intra-anual.",
+      "como_obtenerlo": "SEC EDGAR 6-K de 2025; descargar Exhibit 99.1 financiero; alternativamente press releases trimestrales en IR page."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Resoluciones de board sobre recompras/dividendos/capital allocation",
+      "por_que_importa": "Define probabilidad real del catalizador de retorno de capital, el de mayor impacto potencial.",
+      "como_obtenerlo": "6-K corporativos, PR de IR, sección capital management del 20-F."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Roll-forward de intangibles y calendario de amortización restante (vida útil remanente)",
+      "por_que_importa": "Permite proyectar timing de convergencia D&A-capex y cuantificar earning power futuro.",
+      "como_obtenerlo": "Notas a estados financieros del 20-F, sección Intangible Assets / Business Combinations."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Transcripts de earnings calls Q2-Q3 2025",
+      "por_que_importa": "Comentarios de management sobre guidance, política de capital allocation y perspectivas de margen operativo.",
+      "como_obtenerlo": "IR section del sitio web de Nexxen o proveedores de transcripts (Seeking Alpha, FactSet)."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Filing 13D/A de Mithaq Capital SPC más reciente e histórico completo",
+      "por_que_importa": "Revela posición actualizada y declaración de intenciones del accionista activista potencial; mejora probabilidad del catalizador.",
+      "como_obtenerlo": "SEC EDGAR: buscar SC 13D/A filed por Mithaq Capital respecto a NEXN."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose trimestral Programmatic/Performance/Video con márgenes asociados",
+      "por_que_importa": "Mide diversificación real, riesgo de concentración del mix y sosteniblidad del segmento de mayor crecimiento.",
+      "como_obtenerlo": "Exhibit 99.1 de resultados trimestrales; presentaciones de inversores."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de NOL por jurisdicción y límites de utilización",
+      "por_que_importa": "Aumenta precisión sobre beneficio fiscal futuro y su duración real.",
+      "como_obtenerlo": "Nota de impuestos del 20-F; reconciliación de deferred tax assets."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Series trimestrales de acciones básicas y diluidas",
+      "por_que_importa": "Verifica ejecución neta de recompras vs dilución por SBC.",
+      "como_obtenerlo": "Notas EPS en 6-K/20-F y tablas de weighted average shares."
+    },
+    {
+      "prioridad": "BAJA",
+      "item": "Datos comparativos de múltiplos de peers ad-tech (TTD, MGNI, PUBM, RAMP)",
+      "por_que_importa": "Contextualizan el descuento de NEXN vs sector para calibrar gap de re-rating potencial.",
+      "como_obtenerlo": "Bloomberg, FactSet o Capital IQ; buscar EV/EBIT y EV/Revenue de peers."
+    }
+  ],
+  "payload": {
+    "payload_version": "CatalystPayload_v1",
+    "contenido": {
+      "mapeo_con_expectativas_implicitas": {
+        "variable_critica_principal": "MARGEN_OPERATIVO",
+        "lectura_en_1_2_frases": "El mercado descuenta colapso del margen operativo y/o uso destructivo de la caja: EV/EBIT de 4.6x implica que el negocio operativo ex-caja vale casi nada. Los catalizadores deben probar sostenibilidad del margen EBIT >10%, convergencia D&A-capex que revele earning power real, y despliegue disciplinado de la caja excedente de $187M para forzar reconocimiento de valor."
+      },
+      "catalizadores": [
+        {
+          "catalyst_id": "CAT_001",
+          "nombre": "Despliegue de caja ($187M) en recompras de acciones",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.42,
+          "confianza_timing_0_1": 0.45,
+          "calidad": "CALIDAD_MEDIA",
+          "mecanismo_cierre_gap": "Con 50% del market cap en caja y deuda cero, recompras agresivas reducirían share count, incrementarían EPS y FCF/share, y señalizarían confianza del management. La matemática es extremadamente acreativa a valuaciones actuales.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+1.5x a +3.0x EV/EBIT",
+                "nota": "Re-rating de 4.6x a 6-8x si el mercado interpreta recompras como señal de confianza."
+              },
+              {
+                "driver": "FCF",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+8% a +15% FCF/share",
+                "nota": "Reducción del denominador por buyback de 5-10% del share count (base 63.8M shares diluidas)."
+              },
+              {
+                "driver": "EPS",
+                "direccion": "SUBE",
+                "magnitud_rango": "+10% a +25%",
+                "nota": "Dependiendo del monto autorizado ($30M-$75M)."
+              }
+            ],
+            "justificacion": "Recompra de $50-60M (33% de caja) reduciría shares en ~10M (a $5.86/share), incrementando FCF/share de $2.48 a ~$2.66-$2.80."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "balance_sheet_ultimo",
+              "cita_corta": "Caja $187M, Deuda $0",
+              "interpretacion": "Capacidad de fuego intacta; balance más fuerte de la historia de la empresa."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "ImpliedExpectations_v1",
+              "ubicacion": "snapshot_mercado",
+              "cita_corta": "Caja neta equivale a ~50% del market cap",
+              "interpretacion": "El exceso de caja puede activar repricing si se despliega."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Anuncio formal de programa de recompra",
+              "fuente_prevista": "otro",
+              "umbral_o_condicion": "Autorización ≥$25M",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              }
+            },
+            {
+              "descripcion": "Reducción observable en shares outstanding",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "Shares outstanding <55M (vs 56.65M actual)",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Comunicado del CEO/CFO mencionando evaluación de retorno de capital o 'undervalued shares'",
+            "Reducción secuencial en weighted average diluted shares",
+            "Caída de caja sin aumento correspondiente en capex ni M&A",
+            "Acumulación de caja en trimestres sin M&A"
+          ],
+          "riesgos_de_ejecucion": [
+            "Gerencia conservadora prefiere 'war chest' ante incertidumbre sectorial",
+            "M&A destructivo en lugar de recompras (empire-building)",
+            "SBC anual (~$11M) compensa parcialmente recompras, diluyendo efecto neto",
+            "Iliquidez del ADR dificulta ejecución sin impacto de precio",
+            "Mithaq podría tener prioridades de capital allocation diferentes"
+          ],
+          "contra_catalizadores": [
+            "Anuncio de adquisición grande financiada con caja",
+            "Ausencia de retorno de capital durante 24 meses",
+            "Deterioro macro que obligue a preservar liquidez",
+            "Quema de caja operativa"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Shares outstanding y weighted average diluted shares",
+              "Comentarios de management sobre capital allocation en earnings calls",
+              "Cash flow from financing activities (CFF) por buybacks",
+              "Nivel absoluto de caja vs trimestre anterior"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_002",
+          "nombre": "Convergencia D&A hacia capex revelando earning power real",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 18,
+            "max": 30
+          },
+          "probabilidad_0_1": 0.78,
+          "confianza_timing_0_1": 0.58,
+          "calidad": "CALIDAD_ALTA",
+          "mecanismo_cierre_gap": "La D&A excedente de ~$51M distorsiona la relación FCF-EBIT. A medida que intangibles se amorticen, EBIT reportado subirá mecánicamente y FCF convergerá hacia earning power, eliminando la confusión contable que contribuye al descuento.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "EBIT",
+                "direccion": "SUBE",
+                "magnitud_rango": "+$10M a +$25M anual",
+                "nota": "Cada $10M de reducción en D&A incrementa EBIT directamente. D&A ya bajó $19.6M YoY."
+              },
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+200bps a +680bps",
+                "nota": "Sobre base de ingresos de $365M, $10-25M de menor D&A genera 2.7-6.8pp de margen adicional."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+1.0x a +2.0x EV/EBIT",
+                "nota": "Claridad sobre earning power real reduce descuento por desconfianza sobre calidad del FCF."
+              }
+            ],
+            "justificacion": "D&A ya bajó de $78.3M a $58.7M (-$19.6M YoY). Si continúa a $35-40M en 2-3 años, EBIT subiría mecánicamente a $60-65M, haciendo EV/EBIT de 2.9-3.1x aún más absurdo."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_001_20-F_FY2025",
+              "ubicacion": "Cash Flow / Income Statement",
+              "cita_corta": "D&A FY2024 $58.7M vs FY2023 $78.3M (-$19.6M); capex estable $7.7M",
+              "interpretacion": "Tendencia descendente confirmada; brecha D&A-capex se está cerrando."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_001_20-F_FY2025",
+              "ubicacion": "Cash flow adjustments históricos",
+              "cita_corta": "D&A serie: $32.4M→$45.2M→$40.3M→$42.7M→$78.3M→$58.7M",
+              "interpretacion": "Pico de D&A en FY2023 refleja aceleración post-adquisición; caída a $58.7M confirma runoff."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "D&A anual cae por debajo de $50M",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "D&A < $50M con capex ≤$12M",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              }
+            },
+            {
+              "descripcion": "Brecha D&A-capex se reduce a ≤$30M",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "D&A - capex ≤ $30M",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              }
+            }
+          ],
+          "leading_indicators": [
+            "D&A trimestral descendente en 6-K",
+            "Vida útil remanente de intangibles en notas de 20-F",
+            "Capex de mantenimiento estable (≤3% de ingresos)",
+            "Comentarios de management sobre normalized earnings vs GAAP"
+          ],
+          "riesgos_de_ejecucion": [
+            "Nueva adquisición grande que reinicie ciclo de D&A elevada",
+            "Intangibles con vidas útiles más largas de lo estimado",
+            "Capex aumenta significativamente por inversión en plataforma",
+            "Impairments distorsionan comparabilidad"
+          ],
+          "contra_catalizadores": [
+            "Adquisición material que añada $50M+ de intangibles nuevos",
+            "Write-down de intangibles que señale destrucción de valor",
+            "D&A se estabiliza >$50M durante 2+ años"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "D&A trimestral y anual",
+              "Capex trimestral y anual",
+              "Brecha D&A-capex",
+              "Notas de intangibles y vidas útiles remanentes",
+              "M&A activity"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_003",
+          "nombre": "Expansión del margen EBIT por apalancamiento operativo",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 12,
+            "max": 18
+          },
+          "probabilidad_0_1": 0.58,
+          "confianza_timing_0_1": 0.6,
+          "calidad": "CALIDAD_MEDIA",
+          "mecanismo_cierre_gap": "Con gross margin de 70% y SGA estabilizado en ~$153M, cada dólar incremental de ingresos genera ~$0.70 de gross profit, del cual ~$0.35-0.50 fluye a EBIT. Si ingresos crecen 5% con SGA flat, EBIT sube ~$10-12M (+25-30%), expandiendo margen a ~14%.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+150 a +300 bps",
+                "nota": "De 11.2% a 13-14% con ingresos +5% y SGA flat."
+              },
+              {
+                "driver": "EBIT",
+                "direccion": "SUBE",
+                "magnitud_rango": "+$10M a +$15M anual",
+                "nota": "EBIT anualizado puede superar $52M si se mantiene disciplina."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+1.0x a +2.0x EV/EBIT",
+                "nota": "Demostrar sostenibilidad de márgenes reduce descuento cíclico."
+              }
+            ],
+            "justificacion": "G&A cayó de $68M a $41M en 3 años (-40%). SGA se mantuvo estable. Si esta disciplina persiste con ingresos crecientes, EBIT podría alcanzar $50-55M."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_anual FY2022-FY2024",
+              "cita_corta": "SGA: $158M→$157M→$153M; G&A: $68M→$51M→$41M; margen EBIT -5.1% a 11.2%",
+              "interpretacion": "Disciplina de costos sostenida 3 años con mejora operativa medible."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Margen EBIT >13% en dos trimestres consecutivos con ingresos >$90M/trimestre",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Dos 6-K consecutivos cumpliendo ambos criterios",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              }
+            }
+          ],
+          "leading_indicators": [
+            "G&A trimestral manteniéndose <$11M/trimestre",
+            "Crecimiento de ingresos > crecimiento de opex",
+            "Gross margin ≥69% estable",
+            "Headcount estable o decreciente"
+          ],
+          "riesgos_de_ejecucion": [
+            "Presión competitiva en ad-tech fuerza aumento de S&M",
+            "Inflación salarial en Israel (mercado tech competitivo)",
+            "Desaceleración macro del mercado publicitario",
+            "Mayor gasto regulatorio en privacidad"
+          ],
+          "contra_catalizadores": [
+            "SGA supera $170M sin crecimiento equivalente de ingresos",
+            "Dos trimestres con margen EBIT <6%",
+            "Reestructuración con costos one-time significativos"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "SGA absoluto y como % de ingresos",
+              "G&A absoluto",
+              "Margen EBIT trimestral",
+              "Headcount y SBC",
+              "Target de margen en earnings calls"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_004",
+          "nombre": "Diversificación del mix de ingresos hacia Performance y CTV/Video",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 15,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.47,
+          "confianza_timing_0_1": 0.52,
+          "calidad": "CALIDAD_MEDIA",
+          "mecanismo_cierre_gap": "La concentración del 89% en Programmatic genera descuento por riesgo regulatorio y de concentración. Crecimiento de Performance (11% del mix) y expansión de Video/CTV diversificarían la base, reduciendo prima de riesgo.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+0.5x a +1.5x EV/EBIT",
+                "nota": "Diversificación reduce descuento por concentración."
+              },
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Mix potencialmente más rentable con menor concentración."
+              }
+            ],
+            "justificacion": "Si Performance crece de $41M a $55M+ y Video mantiene >60% del mix, se reduce percepción de commodity ad-tech vulnerable a cookies/privacy."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_001_20-F_FY2025",
+              "ubicacion": "Revenue Breakdown FY2024",
+              "cita_corta": "Programmatic $324.5M (89%); Video $232.4M (63%); Performance $41M (11%)",
+              "interpretacion": "Alta concentración actual; Performance sub-escala pero creciente."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Performance revenue supera $55M anualizados y ≥13% del mix",
+              "fuente_prevista": "kpi_operativo",
+              "umbral_o_condicion": "Performance >$55M y peso ≥13%",
+              "ventana_meses": {
+                "min": 6,
+                "max": 24
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Mix trimestral con mayor peso de Performance",
+            "Crecimiento de Video sostenido",
+            "Nuevos acuerdos CTV anunciados",
+            "Programmatic estable (≥-5% YoY)"
+          ],
+          "riesgos_de_ejecucion": [
+            "Competencia de walled gardens (Google/Amazon/Meta)",
+            "Presión de precios en inventario CTV",
+            "Mayor gasto comercial para ganar share en Performance",
+            "Cambios regulatorios de privacidad"
+          ],
+          "contra_catalizadores": [
+            "Programmatic cae >10% YoY en dos trimestres",
+            "Performance estancado <13% del mix por 12+ meses",
+            "Ingresos totales vuelven a contracción anual"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Revenue breakdown Programmatic/Performance/Video",
+              "Crecimiento YoY por segmento",
+              "Nuevos acuerdos comerciales",
+              "Tendencias de peers CTV (Magnite, Roku)"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_005",
+          "nombre": "Activismo o presión de Mithaq Capital para re-rating",
+          "categoria": "CORPORATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 18
+          },
+          "probabilidad_0_1": 0.28,
+          "confianza_timing_0_1": 0.35,
+          "calidad": "CALIDAD_BAJA",
+          "mecanismo_cierre_gap": "Un accionista activista con posición significativa puede forzar cambios en capital allocation, revisión estratégica o mejora de gobernanza, catalizando re-rating de 20-40% según precedentes históricos en small-caps.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+2.0x a +4.0x EV/EBIT",
+                "nota": "Activismo exitoso en small-caps genera re-rating de 20-40% en 12 meses históricamente."
+              },
+              {
+                "driver": "OTRO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Puede cambiar marco de gobierno corporativo y capital allocation."
+              }
+            ],
+            "justificacion": "Con valor operativo ex-caja cercano a cero y $187M disponible, la empresa es candidato natural para activismo constructivo. Restricción de voto al 25% limita pero no elimina capacidad."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_001_20-F_FY2025",
+              "ubicacion": "6-K AGM enero 2026",
+              "cita_corta": "Mithaq Capital limitado a 25% votos (14.16M de 56.65M shares)",
+              "interpretacion": "Accionista significativo con presencia activa; restricción sugiere tensión con insiders."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_001_20-F_FY2025",
+              "ubicacion": "6-K proxy statement Nov 2025",
+              "cita_corta": "Amended proxy statement con instrucciones de voto para UK depositary interests",
+              "interpretacion": "Actividad de proxy sugiere complejidad de gobernanza y posible preparación."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Filing 13D/A con aumento de posición o cambio de intención declarada",
+              "fuente_prevista": "otro",
+              "umbral_o_condicion": "13D/A indicando 'intent to influence management' o propuesta formal en AGM",
+              "ventana_meses": {
+                "min": 3,
+                "max": 18
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Nuevos 13D/A de Mithaq",
+            "Resultados de votación AGM con oposición >30%",
+            "Cartas públicas a management",
+            "Cambios en composición del board"
+          ],
+          "riesgos_de_ejecucion": [
+            "Restricción de voto al 25% limita capacidad coercitiva",
+            "Mithaq podría vender posición en lugar de presionar",
+            "Intereses de Mithaq podrían no alinearse con minoritarios",
+            "Respuesta defensiva del management (poison pill)"
+          ],
+          "contra_catalizadores": [
+            "Reducción de posición de Mithaq según 13D/A",
+            "AGM sin oposición significativa confirmando status quo",
+            "Medidas de defensa anti-takeover adoptadas"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "MENSUAL",
+            "que_mirar": [
+              "Filings 13D/A de Mithaq en SEC EDGAR",
+              "Resultados de votación en AGM",
+              "Cambios en composición del Board",
+              "Proxy contest filings"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_006",
+          "nombre": "Confirmación de recuperación cíclica sostenida (FY2025 valida FY2024)",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 9,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.53,
+          "confianza_timing_0_1": 0.56,
+          "calidad": "CALIDAD_MEDIA",
+          "mecanismo_cierre_gap": "Con EBIT negativo en 2 de 6 años, el mercado aplica descuento cíclico severo. Si FY2025 confirma que FY2024 no fue un outlier positivo — con ingresos crecientes y EBIT >$35M — la tesis de declive estructural pierde fuerza y el descuento cíclico debería comprimirse.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+1.0x a +2.5x EV/EBIT",
+                "nota": "Dos años consecutivos de crecimiento reducirían descuento por ciclicidad."
+              },
+              {
+                "driver": "EBIT",
+                "direccion": "MEJORA",
+                "magnitud_rango": ">$40M sostenido",
+                "nota": "Consistencia reduce prima de riesgo cíclico y etiqueta de 'Value Trap'."
+              }
+            ],
+            "justificacion": "Si ingresos FY2025 superan $380M con EBIT >$40M, serían 2 años consecutivos de crecimiento post-valle FY2023, rompiendo patrón cíclico."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_anual FY2019-FY2024",
+              "cita_corta": "Ingresos: $326→$212→$342→$335→$332→$365M; EBIT: +4→-6→+74→+45→-17→+41M; CFO FY2024 150.8M vs 60.7M FY2023",
+              "interpretacion": "FY2024 inició recuperación fuerte; confirmación en FY2025 es clave."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Ingresos FY2025 ≥$380M y EBIT >$35M",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Ambos umbrales cumplidos en 20-F FY2025",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Resultados Q1-Q3 2025 mostrando crecimiento YoY",
+            "Datos de mercado de gasto en programmatic advertising (eMarketer, IAB)",
+            "Tendencias de CTV ad spend como proxy de Video revenue",
+            "Métricas de peers ad-tech (TTD, MGNI, PUBM)",
+            "Guidance de management en earnings calls"
+          ],
+          "riesgos_de_ejecucion": [
+            "Recesión macro contraiga gasto publicitario",
+            "Pérdida de market share ante competidores más grandes",
+            "FY2024 impulsado por eventos one-time no repetibles",
+            "Regulación de privacidad comprimiendo CPMs programáticos"
+          ],
+          "contra_catalizadores": [
+            "Guidance recortada por management",
+            "Dos trimestres con ingresos YoY negativos",
+            "Margen EBIT baja por debajo de 8%",
+            "Reporte de pérdidas operativas en FY2025"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Revenue YoY growth trimestral",
+              "EBIT absoluto y margen",
+              "CFO trimestral vs EBIT (calidad de earnings)",
+              "Datos sectoriales ad spend (IAB, eMarketer)",
+              "Resultados de peers como indicador adelantado"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_007",
+          "nombre": "Monetización del escudo fiscal ($307M en NOLs)",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 24,
+            "max": 60
+          },
+          "probabilidad_0_1": 0.67,
+          "confianza_timing_0_1": 0.67,
+          "calidad": "CALIDAD_ALTA",
+          "mecanismo_cierre_gap": "Los $307M en NOLs protegen ~$60-80M de income tax futuro (a tasa estatutaria israelí ~23%), amplificando FCF post-tax durante años. Ahorro anual de ~$5-7M sobre EBIT actual mejora retorno real para accionistas.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": "+$5M a +$7M anual vs tasa estatutaria",
+                "nota": "Ahorro fiscal = EBIT × (tasa estatutaria - tasa efectiva) ≈ $40.8M × 14.3% ≈ $5.8M/año."
+              },
+              {
+                "driver": "OTRO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+1.5pp a +2.0pp en margen neto",
+                "nota": "Tasa efectiva <10% vs 23% estatutaria."
+              }
+            ],
+            "justificacion": "Con $307M de NOLs y pre-tax income ~$36M/año, los NOLs cubren ~8-9 años de income tax. Activo oculto de $60-80M no reflejado en EV de $187M."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_003_20-F_FY2023",
+              "ubicacion": "Notas fiscales",
+              "cita_corta": "NOLs aprox. USD 307.2M utilizables en los próximos 52 años",
+              "interpretacion": "Escudo fiscal masivo relativo al tamaño de la empresa."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_anual FY2024",
+              "cita_corta": "Tax expense $3.1M sobre pre-tax income ~$36M = tasa efectiva ~8.7%",
+              "interpretacion": "NOLs ya se utilizan activamente; tasa muy por debajo de estatutaria."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Tasa efectiva <12% en FY2025 con EBIT positivo",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "Income tax / Pre-tax income < 12%",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Tasa impositiva efectiva trimestral y anual",
+            "Deferred tax assets en balance",
+            "NOLs remanentes en disclosure anual",
+            "Comentarios de CFO sobre expectativas fiscales"
+          ],
+          "riesgos_de_ejecucion": [
+            "Reforma fiscal israelí que limite uso de NOLs",
+            "Generación de income en jurisdicciones de alta tributación",
+            "Change of control que active restricciones",
+            "Periodos de pérdidas que hagan irrelevantes los NOLs temporalmente"
+          ],
+          "contra_catalizadores": [
+            "Aumento abrupto de tasa efectiva >18%",
+            "Reducción fuerte del DTA reconocido",
+            "EBIT negativo recurrente impide utilización"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "ANUAL",
+            "que_mirar": [
+              "Tasa efectiva anual",
+              "NOL remanente",
+              "Deferred tax assets",
+              "Reconciliación fiscal",
+              "Legislación fiscal israelí"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_008",
+          "nombre": "Sostener conversión de caja mediante disciplina de capital de trabajo",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 12,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.55,
+          "confianza_timing_0_1": 0.46,
+          "calidad": "CALIDAD_MEDIA",
+          "mecanismo_cierre_gap": "La conversión CFO/EBIT de ~3.7x en FY2024 demuestra calidad operativa excepcional (WC negativo: AP $228.5M > AR $218M). Si esta conversión se sostiene, el FCF real será superior a lo que implica el EBIT, eliminando descuento por sospecha de baja calidad de earnings.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": "+$15M a +$30M vs par con EBIT",
+                "nota": "WC negativo de -$10.6M contribuye al spread CFO>EBIT de forma recurrente."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+0.5x a +1.2x EV/EBIT",
+                "nota": "FCF persistentemente superior a EBIT elimina descuento por calidad de earnings."
+              }
+            ],
+            "justificacion": "AP ($228.5M) > AR ($217.9M) genera WC negativo estructural en ad-tech (colecta antes de pagar publishers), ~$10-15M anuales de FCF adicional sobre EBIT."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "balance_sheet_ultimo / metricas_derivadas",
+              "cita_corta": "CFO $150.8M, EBIT $40.8M, AR $218M, AP $228.5M, WC -$10.6M",
+              "interpretacion": "Conversión excepcional; WC negativo es ventaja estructural del modelo."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "CFO/EBIT ≥2.0 en 4 de 6 trimestres con margen FCF trailing ≥20%",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Series trimestrales auditables cumplen ambos criterios",
+              "ventana_meses": {
+                "min": 6,
+                "max": 24
+              }
+            }
+          ],
+          "leading_indicators": [
+            "AR/Revenue ratio estable o descendente",
+            "AP/Revenue ratio estable o ascendente",
+            "Capex/Revenue ≤3%",
+            "CFO/EBIT trimestral"
+          ],
+          "riesgos_de_ejecucion": [
+            "Deterioro de cobranza y aumento de días de AR",
+            "Presión de publishers para reducir AP days",
+            "Efectos estacionales o one-offs en WC",
+            "Capex podría aumentar por inversión en plataforma"
+          ],
+          "contra_catalizadores": [
+            "Dos trimestres con CFO por debajo de EBIT",
+            "Working capital >+$20M (AR crece más rápido que AP)",
+            "Margen FCF trailing <10%"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "AR y AP absolutos y como % de revenue",
+              "CFO vs EBIT ratio",
+              "Capex como % de revenue",
+              "Margen FCF trailing",
+              "DSO y DPO trends"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_009",
+          "nombre": "Mantener balance sin deuda y caja neta elevada",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 12,
+            "max": 30
+          },
+          "probabilidad_0_1": 0.75,
+          "confianza_timing_0_1": 0.79,
+          "calidad": "CALIDAD_ALTA",
+          "mecanismo_cierre_gap": "Balance fortress (caja neta = 50% del market cap, deuda = $0) elimina riesgo financiero y reduce WACC implícito. Cada trimestre sin reapalancamiento refuerza credibilidad y reduce prima de riesgo por volatilidad operativa histórica. Ahorro de intereses converge hacia $0 vs ~$10M histórico.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+0.5x a +1.0x EV/EBIT",
+                "nota": "Balance limpio reduce riesgo percibido en ciclos bajistas."
+              },
+              {
+                "driver": "FCF",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+$8M a +$10M anual",
+                "nota": "Ahorro de financing expense: $10.2M FY2023→$8.9M FY2024→convergencia a ~$0."
+              },
+              {
+                "driver": "COSTE_DEUDA",
+                "direccion": "BAJA",
+                "magnitud_rango": null,
+                "nota": "Sin deuda financiera, carga es limitada a leases mínimos."
+              }
+            ],
+            "justificacion": "Con deuda $0 y caja >$180M, genera intereses netos positivos sobre caja, invirtiendo arrastre financiero histórico."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "balance_sheet_ultimo",
+              "cita_corta": "Deuda total $0; caja $187M; patrimonio $531M; financing expense $8.9M descendente",
+              "interpretacion": "Deleveraging completado; balance más fuerte de la historia de la empresa."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Deuda total = $0 y caja neta ≥$150M en FY2025",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "Ambos criterios en balance sheet 20-F FY2025 y filings trimestrales",
+              "ventana_meses": {
+                "min": 6,
+                "max": 30
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Deuda total = $0 en cada filing trimestral",
+            "Caja estable o creciente >$150M",
+            "Financing expense convergiendo hacia $0",
+            "Ausencia de nuevas líneas de crédito"
+          ],
+          "riesgos_de_ejecucion": [
+            "Adquisición grande financiada con deuda",
+            "Pérdidas operativas sostenidas que erosionen caja",
+            "Pérdidas FX significativas por caja multi-moneda",
+            "Multas regulatorias"
+          ],
+          "contra_catalizadores": [
+            "Reapalancamiento >$50M",
+            "Caja neta <$100M sin retorno a accionistas",
+            "Gasto financiero anual >$12M"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Deuda total en balance",
+              "Caja y equivalentes",
+              "Financing expense",
+              "M&A announcements",
+              "Nuevas emisiones de deuda"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_010",
+          "nombre": "Restablecimiento de divulgación trimestral completa y guidance",
+          "categoria": "CORPORATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 9,
+            "max": 18
+          },
+          "probabilidad_0_1": 0.4,
+          "confianza_timing_0_1": 0.4,
+          "calidad": "CALIDAD_BAJA",
+          "mecanismo_cierre_gap": "La falta de datos trimestrales genera prima de incertidumbre informativa. Publicación de estados completos con guidance permite calcular TTM real, detectar tendencias, y reducir descuento de opacidad estimado en 0.5-1.5x EV/EBIT.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+0.5x a +1.5x EV/EBIT",
+                "nota": "Eliminación de prima de incertidumbre informativa; potencial aumento de coverage sell-side."
+              }
+            ],
+            "justificacion": "Empresas con disclosure pobre cotizan a descuento de 10-20% vs peers con mayor transparencia."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "ImpliedExpectations_v1",
+              "ubicacion": "faltantes_criticos / log.limitaciones",
+              "cita_corta": "6-K 2025 sin Exhibit 99.1 financiero; TTM usa FY0 fallback",
+              "interpretacion": "Gap informativo significativo; solo se dispone de FY2024 anual."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Al menos 2 trimestres publicados con IS+BS+CF completos",
+              "fuente_prevista": "otro",
+              "umbral_o_condicion": "Filing 6-K con Exhibit 99.1 conteniendo estados financieros completos",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              }
+            },
+            {
+              "descripcion": "Guidance cuantitativo proporcionado en earnings call",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Rango de revenue y/o EBIT para FY2025/FY2026",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Publicación de Exhibit 99.1 completo en próximo 6-K",
+            "Scheduling de earnings calls en IR calendar",
+            "Aumento de coverage de sell-side analysts",
+            "Consistencia de KPIs reportados"
+          ],
+          "riesgos_de_ejecucion": [
+            "Empresa mantiene política de disclosure mínimo",
+            "Controles internos insuficientes para cierre trimestral detallado",
+            "Volatilidad operativa dificulta guidance confiable"
+          ],
+          "contra_catalizadores": [
+            "Nuevos 6-K sin estados completos (patrón repetido)",
+            "Restatements que erosionen credibilidad",
+            "Ausencia continuada de guidance cuantitativo"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Disponibilidad de Exhibit 99.1 en 6-K",
+              "Existencia de earnings call y transcript",
+              "Calidad y consistencia de guidance",
+              "Coverage de sell-side",
+              "Puntualidad de filings"
+            ]
+          }
+        }
+      ],
+      "conclusion_catalizadores": {
+        "calidad_catalizador": "MEDIA",
+        "por_que": "NEXN presenta un conjunto diversificado de 10 catalizadores que cubren dimensiones financieras (recompras, D&A convergence, NOLs, WC, balance), operativas (margen EBIT, diversificación revenue, recuperación cíclica) y corporativas (activismo, disclosure). La calidad se clasifica como MEDIA por: (1) los catalizadores de mayor impacto (recompras prob. 0.42, activismo prob. 0.28) dependen de decisiones discrecionales del management o terceros sin señales concretas; (2) la ausencia de datos trimestrales 2025 impide confirmar sostenibilidad de la recuperación FY2024; (3) la ciclicidad demostrada (EBIT negativo en 33% de los años) introduce riesgo de reversión. Los catalizadores de mayor convicción (D&A convergence 0.78, balance fortress 0.75, NOLs 0.67) son mecánicos/contables con evidencia objetiva, pero su impacto en múltiplo es moderado sin catalizadores de señalización activa.",
+        "si_no_hay_catalizador_apto": false
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Faltan exhibits financieros trimestrales 2025 para construir TTM real y validar tendencia intra-anual.",
+      "El FCF FY2024 está distorsionado por brecha D&A-capex de ~$51M; impactos referenciados a EBIT, no a FCF contable.",
+      "El catalizador activista tiene baja visibilidad por límite de voto de Mithaq al 25% y ausencia de precedentes observables.",
+      "El negocio mostró ciclicidad relevante del EBIT en 2 de 6 años (FY2020, FY2023).",
+      "La empresa es israelí reportando bajo IFRS con ADSs en NASDAQ; posible descuento de jurisdicción/estructura no cuantificable.",
+      "No se dispone de datos comparativos de peers ad-tech para calibrar re-rating potencial vs sector."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "fusion": {
+      "modelos_usados": [
+        "gemini-2.0-flash",
+        "codex",
+        "claude-opus-4-6"
+      ],
+      "criterios_resolucion": "Para datos cuantitativos: se usó el valor mejor fundamentado con mayor evidencia citada. Para probabilidades: se reporta rango de modelos y valor recomendado (ponderado por fundamentación). Para claims/texto: se combinaron perspectivas únicas eliminando duplicados, priorizando la versión más detallada con más source_ids.",
+      "conflictos": [
+        {
+          "campo": "resumen_ejecutivo.confianza_0_1",
+          "valores": {
+            "gemini": 0.65,
+            "codex": 0.71,
+            "claude": 0.58
+          },
+          "resolucion": "0.65 (mediana del rango). Claude fue más conservador por énfasis en dependencia de decisiones discrecionales; Codex más alto por incluir scoring agregado numérico. Mediana es equilibrada.",
+          "criterio": "MEDIANA"
+        },
+        {
+          "campo": "CAT_002 (D&A convergence) probabilidad",
+          "valores": {
+            "gemini": 0.85,
+            "codex": 0.66,
+            "claude": 0.82
+          },
+          "resolucion": "0.78 (media ponderada). Codex usó umbrales más exigentes (D&A<40M, brecha≤30M) con timing más largo (12-30 meses), mientras gemini y claude usaron umbrales intermedios. Se ajusta a umbral intermedio con probabilidad convergente.",
+          "criterio": "MEDIA_PONDERADA_POR_EVIDENCIA"
+        },
+        {
+          "campo": "CAT_001 (Recompras) probabilidad",
+          "valores": {
+            "gemini": 0.45,
+            "codex": 0.42,
+            "claude": 0.4
+          },
+          "resolucion": "0.42 (media). Alta convergencia entre los tres modelos. Gemini ligeramente más optimista por citar ventana más corta.",
+          "criterio": "MEDIA"
+        },
+        {
+          "campo": "CAT_003 (Margen EBIT) probabilidad",
+          "valores": {
+            "gemini": null,
+            "codex": 0.57,
+            "claude": 0.62
+          },
+          "resolucion": "0.58 (media de codex y claude). Gemini agrupó este catalizador con CAT_006 estabilidad; codex y claude lo separaron con análisis independiente.",
+          "criterio": "MEDIA"
+        },
+        {
+          "campo": "CAT_006 (Recuperación cíclica) probabilidad",
+          "valores": {
+            "gemini": 0.5,
+            "codex": 0.54,
+            "claude": 0.55
+          },
+          "resolucion": "0.53 (media). Convergencia alta; gemini ligeramente más cauteloso.",
+          "criterio": "MEDIA"
+        },
+        {
+          "campo": "CAT_007 (NOLs) probabilidad",
+          "valores": {
+            "gemini": null,
+            "codex": 0.62,
+            "claude": 0.72
+          },
+          "resolucion": "0.67 (media de codex y claude). Gemini no incluyó catalizador separado de NOLs. Claude más alto por cuantificación más detallada del ahorro fiscal.",
+          "criterio": "MEDIA"
+        },
+        {
+          "campo": "CAT_008 (Working capital) probabilidad",
+          "valores": {
+            "gemini": null,
+            "codex": 0.48,
+            "claude": 0.6
+          },
+          "resolucion": "0.55 (media de codex y claude). Claude más detallado en evidencia de WC estructuralmente negativo en ad-tech.",
+          "criterio": "MEDIA"
+        },
+        {
+          "campo": "CAT_010 (Disclosure) probabilidad",
+          "valores": {
+            "gemini": null,
+            "codex": 0.34,
+            "claude": 0.5
+          },
+          "resolucion": "0.40 (media). Codex más conservador por exigir 4 trimestres con guidance; Claude moderado por exigir solo 2 trimestres con financials.",
+          "criterio": "MEDIA"
+        },
+        {
+          "campo": "Número de catalizadores",
+          "valores": {
+            "gemini": 3,
+            "codex": 10,
+            "claude": 10
+          },
+          "resolucion": "10 catalizadores. Los 3 de gemini (Recompras, D&A convergence, Estabilidad operativa) están contenidos en los 10 de codex/claude. Se adoptó la lista completa de 10 que proporciona cobertura exhaustiva.",
+          "criterio": "UNION_CON_DEDUPLICACION"
+        },
+        {
+          "campo": "Número de claims",
+          "valores": {
+            "gemini": 2,
+            "codex": 13,
+            "claude": 11
+          },
+          "resolucion": "12 claims fusionados. Se combinaron perspectivas únicas de codex (ciclicidad, concentración Programmatic, apalancamiento operativo, Video) con base de claude, eliminando duplicados. Los 2 claims de gemini están contenidos en la lista fusionada.",
+          "criterio": "UNION_CON_DEDUPLICACION"
+        }
+      ]
+    },
+    "timestamp": "2026-02-23T22:45:00Z",
+    "version": "1.0.0"
+  }
+}

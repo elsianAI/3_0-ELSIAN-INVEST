@@ -1,0 +1,99 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260223_NEXN",
+  "fecha_corte": "2026-02-23",
+  "ticker": "NEXN",
+  "red_flags": [
+    {
+      "tipo": "ANOMALIA_CAPITAL_TRABAJO",
+      "descripcion": "Desproporción masiva entre Cuentas por Cobrar ($218M) e Ingresos Netos ($365M).",
+      "detalle": "DSO implícito de ~218 días sobre ingresos netos. Refleja estructura 'Gross Receivables vs Net Revenue' típica de AdTech, pero expone a la empresa a riesgo de crédito de contraparte masivo (sequential liability) no visible en el P&L.",
+      "ubicacion": "Balance Sheet vs Income Statement (FY2024)",
+      "source_id": "TruthPack_v1"
+    },
+    {
+      "tipo": "VOLATILIDAD_OPERATIVA",
+      "descripcion": "Inestabilidad severa en rentabilidad operativa (EBIT).",
+      "detalle": "Historial errático: FY21 $74M -> FY22 $45M -> FY23 -$17M (pérdida) -> FY24 $41M. Dificulta predicción de solvencia operativa a largo plazo y sugiere alta sensibilidad a factores exógenos.",
+      "ubicacion": "Income Statement (Historical Trend)",
+      "source_id": "TruthPack_v1"
+    },
+    {
+      "tipo": "CAPEX_INSUFICIENTE",
+      "descripcion": "Nivel de Capex sospechosamente bajo ($7.7M) vs D&A ($58.7M) e Ingresos.",
+      "detalle": "Capex es solo el 13% de la D&A y 2% de los ingresos. Aunque es un modelo asset-light, existe riesgo de subinversión tecnológica (tech debt) o clasificación agresiva de costos de desarrollo como OpEx (aunque R&D es robusto ~$50M).",
+      "ubicacion": "Cash Flow Statement (Investing)",
+      "source_id": "TruthPack_v1"
+    },
+    {
+      "tipo": "CALIDAD_DE_GANANCIAS",
+      "descripcion": "Brecha excesiva entre CFO ($150M) y EBIT ($41M).",
+      "detalle": "El flujo de caja operativo es 3.7x el beneficio operativo. Dependencia alta de ajustes no monetarios (D&A +$59M) y movimientos de capital de trabajo/otros (+$50M estimados) para generar caja. El beneficio contable no refleja la capacidad de generación de caja (en este caso, la subestima, pero crea opacidad).",
+      "ubicacion": "Cash Flow Reconciliation",
+      "source_id": "TruthPack_v1"
+    }
+  ],
+  "liquidez": {
+    "evaluacion_general": "ROBUSTA",
+    "caja_disponible_usd": 187068000,
+    "deuda_total_usd": 0,
+    "deuda_corto_plazo_usd": 0,
+    "ratio_liquidez_inmediata": "N/A (Sin deuda financiera)",
+    "runway_estimado_meses": ">24",
+    "factores_clave": [
+      "Posición de caja neta positiva ($187M)",
+      "CFO positivo en FY2024 ($150M)",
+      "Ausencia de deuda financiera (solo leases)"
+    ]
+  },
+  "puentes": {
+    "ebit_cfo": {
+      "start_ebit_usd": 40821000,
+      "add_depreciation_amortization_usd": 58676000,
+      "add_sbc_usd": 11460000,
+      "net_working_capital_and_other_usd": 39878000,
+      "end_cfo_usd": 150835000,
+      "comentario": "Conversión EBIT a CFO muy alta (369%). Impulsada por alta D&A (amortización de intangibles históricos) y gestión favorable/timing de WC."
+    },
+    "cfo_fcf": {
+      "start_cfo_usd": 150835000,
+      "less_capex_usd": -7742000,
+      "end_fcf_usd": 143093000,
+      "comentario": "Conversión CFO a FCF del 95%. Modelo de negocio de muy bajo requerimiento de capital físico."
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "condicion": "DSO > 240 días (Net Basis)",
+      "ventana": "Trimestral",
+      "riesgo": "ALTO",
+      "racional": "Un alargamiento adicional del ciclo de cobro podría indicar problemas de pago de clientes o reconocimiento de ingresos ficticios."
+    },
+    {
+      "condicion": "Retorno a EBIT Negativo (LTM)",
+      "ventana": "12 meses",
+      "riesgo": "MEDIO",
+      "racional": "Dada la volatilidad histórica, un nuevo año de pérdidas operativas confirmaría que el modelo de negocio no tiene apalancamiento operativo sostenible."
+    },
+    {
+      "condicion": "Caída de Caja < $100M sin M&A",
+      "ventana": "12-24 meses",
+      "riesgo": "BAJO",
+      "racional": "Con CFO positivo, una caída brusca de caja sin adquisiciones explicaría salidas ocultas o problemas de capital de trabajo no reportados."
+    },
+    {
+      "condicion": "Margen Bruto < 65%",
+      "ventana": "Trimestral",
+      "riesgo": "MEDIO",
+      "racional": "Deterioro del pricing power o mix hacia productos de menor margen (Performance vs Programmatic)."
+    }
+  ],
+  "report_type": "ForensicDetection",
+  "log": {
+    "notas_proceso": [
+      "TruthPack con calidad PASS.",
+      "Analisis basado en FY2024 (auditado) debido a falta de detalles en 6-Ks de 2025.",
+      "Se detectó estructura atípica de Balance Sheet (Gross) vs P&L (Net) común en AdTech pero que requiere vigilancia forense."
+    ]
+  }
+}

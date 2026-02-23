@@ -1,0 +1,374 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260223_NEXN",
+  "fecha_corte": "2026-02-23",
+  "agente": {
+    "agent_role": "CATALYST",
+    "agent_nombre": "CATALYST_SCORING_v1",
+    "modelo": "gemini-2.0-flash",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260223_NEXN",
+    "implied_expectations_caso_id": "CASE_20260223_NEXN",
+    "sources_pack_caso_id": "CASE_20260223_NEXN"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Valuación distressed (EV/EBIT < 5x) con 50% de la capitalización en caja neta ($187M), ofreciendo un margen de seguridad masivo.",
+      "El mercado descuenta un escenario de liquidación o deterioro terminal que contradice el crecimiento del 10% y margen EBIT del 11% en FY2024.",
+      "La falta de datos financieros detallados para 2025 (solo portadas en 6-Ks) impide verificar la continuidad de la recuperación operativa.",
+      "Múltiples vías de re-rating: asignación de capital (recompras), convergencia contable (D&A vs Capex) y posible activismo de Mithaq.",
+      "Veredicto limitado a WATCHLIST hasta confirmar cifras de FY2025; si se confirma estabilidad, es una oportunidad de valor profundo."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.65
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La empresa cotiza a valoración de 'empresa zombie' (EV/EBIT ~4.6x) a pesar de tener $187M en caja neta y cero deuda.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "mercado",
+          "cita_corta": "EV 186.9M, Caja 187M, Deuda 0",
+          "interpretacion": "El mercado valora el negocio operativo en cero."
+        }
+      ],
+      "falsacion": {
+        "test": "Quema de caja masiva en 2025 que reduzca la posición de efectivo por debajo de $100M",
+        "ventana_meses": {
+          "min": 1,
+          "max": 3
+        },
+        "fuente_prevista": "20-F"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La brecha masiva entre FCF reportado y EBIT se cerrará naturalmente al amortizarse intangibles de adquisiciones pasadas.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "Cash flow adjustments",
+          "cita_corta": "D&A $58.7M vs Capex $7.7M",
+          "interpretacion": "Exceso de D&A es puramente contable (no cash)."
+        }
+      ],
+      "falsacion": {
+        "test": "Capex aumenta >$20M o nuevas adquisiciones reinician el ciclo de amortización alta",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Reporte de Ingresos FY2025 (en próximo 20-F) muestra crecimiento positivo vs FY2024 (>365M).",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Revenue FY2025 >= $366M en estado de resultados auditado.",
+      "fuente_prevista": "20-F"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Mithaq Capital mantiene o aumenta su participación accionaria (no vende por debajo de precios actuales).",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "criterio_validacion": "Ausencia de filings SC 13D/A reportando ventas significativas; o reporte de compras adicionales.",
+      "fuente_prevista": "SEC filings"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Anuncio formal de programa de recompra de acciones por al menos $25M.",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Press release o filing 6-K anunciando autorización de buyback.",
+      "fuente_prevista": "PR"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "EBIT reportado para FY2025 se mantiene positivo (>$20M).",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Operating Income (EBIT) en FY2025 > 20,000,000 USD.",
+      "fuente_prevista": "20-F"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "Convergencia D&A: D&A FY2025 es menor que D&A FY2024 ($58.7M).",
+      "probabilidad_0_1": 0.9,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "D&A line item en Cash Flow < 58,700,000 USD.",
+      "fuente_prevista": "20-F"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Estados financieros detallados Q1, Q2 y Q3 2025 (Exhibits 99.1 faltantes)",
+      "por_que_importa": "Esencial para verificar si la recuperación de 2024 se sostuvo en 2025 o si hubo deterioro reciente.",
+      "como_obtenerlo": "Buscar Exhibits 99.1 específicos de los 6-K fechados en mayo, agosto y noviembre 2025."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de vencimiento de contratos de 'Video/CTV'",
+      "por_que_importa": "Validar la sostenibilidad del segmento de mayor crecimiento.",
+      "como_obtenerlo": "Notas del 20-F o presentaciones de inversores."
+    }
+  ],
+  "payload": {
+    "payload_version": "CatalystPayload_v1",
+    "contenido": {
+      "mapeo_con_expectativas_implicitas": {
+        "variable_critica_principal": "MARGEN_OPERATIVO",
+        "lectura_en_1_2_frases": "El mercado descuenta un colapso operativo o uso destructivo de la caja. Los catalizadores deben probar estabilidad operativa y disciplina de capital para cerrar el gap de valoración absurdo."
+      },
+      "catalizadores": [
+        {
+          "catalyst_id": "CAT_001",
+          "nombre": "Despliegue de Caja (Recompras)",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 18
+          },
+          "probabilidad_0_1": 0.45,
+          "mecanismo_cierre_gap": "Con 50% del market cap en caja, recompras agresivas aumentarían drásticamente EPS y FCF/share, forzando una revaluación mecánica.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "EPS",
+                "direccion": "SUBE",
+                "magnitud_rango": "+10% a +25%",
+                "nota": "Dependiendo del monto autorizado ($30M-$75M)."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+2x a +4x",
+                "nota": "Señal de confianza reduce tasa de descuento."
+              }
+            ],
+            "justificacion": "La matemática de recompras a valoraciones tan bajas es extremadamente acreativa."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "balance_sheet_ultimo",
+              "cita_corta": "Caja $187M, Deuda $0",
+              "interpretacion": "Capacidad de fuego intacta."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Anuncio de programa de recompra",
+              "fuente_prevista": "PR/6-K",
+              "umbral_o_condicion": "Autorización >$20M",
+              "ventana_meses": {
+                "min": 1,
+                "max": 6
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Comentarios de CFO sobre 'undervalued shares'",
+            "Acumulación de caja en trimestres sin M&A"
+          ],
+          "riesgos_de_ejecucion": [
+            "Gerencia conservadora prefiere 'war chest'",
+            "M&A destructivo en lugar de recompras",
+            "Iliquidez del ADR dificulta ejecución"
+          ],
+          "contra_catalizadores": [
+            "Anuncio de adquisición grande",
+            "Quema de caja operativa"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Balance de caja",
+              "Statement of Cash Flows (CFF)",
+              "Share count"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_002",
+          "nombre": "Convergencia D&A y FCF Real",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.85,
+          "mecanismo_cierre_gap": "La reducción programada de amortización de intangibles revelará que el FCF no es 'falso' (inflado por D&A), sino sostenible, validando el múltiplo bajo.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+200bps a +400bps",
+                "nota": "Por menor carga de amortización en P&L."
+              }
+            ],
+            "justificacion": "Efecto mecánico contable salvo nuevos intangibles."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_001_20-F_FY2025",
+              "ubicacion": "CF Statement",
+              "cita_corta": "D&A bajó de $78M a $58M",
+              "interpretacion": "Tendencia ya visible y fuerte."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "D&A anualizado cae por debajo de $50M",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "D&A < $50M",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Notas de desglose de intangibles en 20-F"
+          ],
+          "riesgos_ejecucion": [
+            "Nuevas adquisiciones añaden intangibles",
+            "Impairments repentinos"
+          ],
+          "contra_catalizadores": [
+            "M&A significativo"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "ANUAL",
+            "que_mirar": [
+              "D&A line en Cash Flow",
+              "Notas de Intangibles"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_006",
+          "nombre": "Confirmación de Estabilidad Operativa",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.5,
+          "mecanismo_cierre_gap": "Demostrar que FY2024 no fue un pico cíclico aislado, sino un nuevo nivel base de rentabilidad.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "EBIT",
+                "direccion": "MEJORA",
+                "magnitud_rango": ">$40M Sostenido",
+                "nota": "Clave para evitar etiqueta de 'Value Trap'."
+              }
+            ],
+            "justificacion": "La consistencia reduce la prima de riesgo cíclico."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "History",
+              "cita_corta": "EBIT FY24 positivo tras pérdida FY23",
+              "interpretacion": "Recuperación reciente, falta confirmación de tendencia."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Resultados 2025 sin pérdidas operativas",
+              "fuente_prevista": "20-F",
+              "umbral_o_condicion": "EBIT > $20M",
+              "ventana_meses": {
+                "min": 1,
+                "max": 3
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Guidance de management",
+            "Tendencias de industria Ad-Tech (TTD, MGNI)"
+          ],
+          "riesgos_ejecucion": [
+            "Recesión publicitaria",
+            "Pérdida de clientes Programmatic"
+          ],
+          "contra_catalizadores": [
+            "Reporte de pérdidas operativas en 2025"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Operating Income",
+              "Revenue Growth"
+            ]
+          }
+        }
+      ],
+      "conclusion_catalizadores": {
+        "calidad_catalizador": "MEDIA",
+        "por_que": "Los catalizadores son potentes (especialmente el uso de caja y convergencia contable), pero dependen de decisiones de management (allocation) o confirmación de datos ausentes (2025). No hay un evento externo forzoso inminente garantizado, aunque Mithaq ofrece opcionalidad.",
+        "si_no_hay_catalizador_apto": false
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta crítica de datos intermedios de 2025 para validar momentum actual.",
+      "Dependencia alta de la voluntad de la gerencia para activar recompras."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

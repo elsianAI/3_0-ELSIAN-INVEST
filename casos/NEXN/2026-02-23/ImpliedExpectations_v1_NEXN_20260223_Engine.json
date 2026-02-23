@@ -1,0 +1,379 @@
+{
+  "version_esquema": "ImpliedExpectations_v1",
+  "caso_id": "CASE_20260223_NEXN",
+  "fecha_corte": "2026-02-23",
+  "empresa": {
+    "ticker": "NEXN",
+    "nombre": "Nexxen International Ltd.",
+    "bolsa": "NASDAQ",
+    "pais": "IL",
+    "sector": "Technology",
+    "industria": "Advertising Technology (Ad-Tech)"
+  },
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1",
+    "truth_pack_caso_id": "CASE_20260223_NEXN"
+  },
+  "status": "OK",
+  "motivo_blocked": null,
+  "snapshot_mercado": {
+    "fecha": "2026-02-23",
+    "precio_usd": 5.86,
+    "market_cap_usd": 373990000,
+    "enterprise_value_usd": 186922000,
+    "deuda_total_usd": 0,
+    "caja_usd": 187068000,
+    "deuda_neta_usd": -187068000,
+    "acciones_diluidas": 63822000
+  },
+  "metricas_base": {
+    "periodo_base": "FY",
+    "fecha_fin_periodo_base": "2024-12-31",
+    "ingresos_usd": 365477000,
+    "ebit_usd": 40821000,
+    "cfo_usd": 150835000,
+    "capex_usd": -7742000,
+    "fcf_usd": 143093000,
+    "margen_operativo_pct": 11.17,
+    "margen_fcf_pct": 39.15
+  },
+  "seleccion_metodo": {
+    "metodo_principal": "REVERSE_DCF_FCF",
+    "razon": "FCF FY2024 es positivo ($143.1M). Sin embargo, la enorme brecha entre FCF y EBIT ($102M) se debe a D&A de adquisiciones ($58.7M) muy por encima del capex de mantenimiento ($7.7M), lo que infla artificialmente el FCF. Se aplica el método por consistencia pero los resultados deben interpretarse junto con el análisis de Earnings Power.",
+    "metodos_secundarios": [
+      "REVERSE_EARNINGS_POWER",
+      "MULTIPLOS_IMPLICITOS_SOLO"
+    ]
+  },
+  "multiples_implicitos": {
+    "disponible": true,
+    "ev_ebit": 4.58,
+    "ev_fcf": 1.31,
+    "p_fcf": 2.61,
+    "fcf_yield_pct": 38.26,
+    "comentario": "Múltiplos extremadamente bajos. EV/EBIT de 4.6x es muy bajo para ad-tech (sector suele cotizar a 10-20x). EV/FCF de 1.3x es casi absurdo y refleja que el mercado no capitaliza el FCF actual como sostenible: la D&A de $58.7M vs capex de $7.7M infla el FCF ~$51M por encima de la generación económica real."
+  },
+  "parametros_modelo": {
+    "horizonte_anos": 5,
+    "tasa_descuento_grid": [
+      0.08,
+      0.1,
+      0.12
+    ],
+    "crecimiento_terminal_grid": [
+      0.02,
+      0.03
+    ],
+    "multiple_terminal_fcf_grid": [
+      10,
+      12,
+      15,
+      18
+    ],
+    "nota_parametros": "Tasas de descuento 8-12% reflejan el rango para empresas tecnológicas de mediana capitalización con volatilidad operativa significativa (EBIT negativo en 2 de los últimos 6 años). Múltiplos terminales 10-18x cubren desde escenarios conservadores (negocio maduro/en declive) hasta moderadamente optimistas. El crecimiento terminal de 2-3% no afecta el cálculo cuando se usa método de múltiplo de salida, pero se incluye como referencia de perpetuidad implícita.",
+    "convenciones": {
+      "definicion_fcf": "FCF = CFO - CAPEX (usando capex como salida de caja)",
+      "ev_formula": "EV = market_cap + deuda_total - caja",
+      "si_fcf_negativo": "usar earnings power / EBIT y no reverse DCF de FCF"
+    }
+  },
+  "reverse_dcf_fcf": {
+    "aplicable": true,
+    "fcf0_usd": 143093000,
+    "resultado_grid": [
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.456,
+        "fcf_year5_implicito_usd": 6812000,
+        "nota": "FCF debería caer de $143M a ~$6.8M en 5 años; implica destrucción casi total del flujo de caja operativo"
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.456,
+        "fcf_year5_implicito_usd": 6812000,
+        "nota": "Idéntico al anterior — g_terminal no afecta el cálculo con múltiplo de salida"
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.466,
+        "fcf_year5_implicito_usd": 6282000,
+        "nota": "Mayor múltiplo terminal exige mayor caída de FCF para justificar el bajo EV actual"
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.466,
+        "fcf_year5_implicito_usd": 6282000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.478,
+        "fcf_year5_implicito_usd": 5547000,
+        "nota": "FCF cae a ~$5.5M; con múltiplo 15x, TV ≈ $83M, que descontado a 5 años representa la mayor parte del EV"
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.478,
+        "fcf_year5_implicito_usd": 5547000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.489,
+        "fcf_year5_implicito_usd": 4994000,
+        "nota": "Escenario más extremo a 8% descuento: FCF cae a ~$5M, casi eliminando la generación de caja"
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.489,
+        "fcf_year5_implicito_usd": 4994000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.446,
+        "fcf_year5_implicito_usd": 7468000,
+        "nota": "Caso central con M=10: FCF cae a ~$7.5M, implica que la empresa pierde relevancia operativa"
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.446,
+        "fcf_year5_implicito_usd": 7468000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.456,
+        "fcf_year5_implicito_usd": 6854000,
+        "nota": "FCF ~$6.9M en año 5; un negocio de $365M en ingresos generando $7M de FCF implicaría margen FCF <2%"
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.456,
+        "fcf_year5_implicito_usd": 6854000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.468,
+        "fcf_year5_implicito_usd": 6097000,
+        "nota": "Caso central 10%/15x: mercado asume colapso del FCF de ~$143M a ~$6M en 5 años"
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.468,
+        "fcf_year5_implicito_usd": 6097000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.479,
+        "fcf_year5_implicito_usd": 5480000,
+        "nota": "Con mayor múltiplo, la caída implícita es aún más pronunciada"
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.479,
+        "fcf_year5_implicito_usd": 5480000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.436,
+        "fcf_year5_implicito_usd": 8167000,
+        "nota": "Escenario menos negativo del grid: aún así implica caída del 95% en FCF"
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.436,
+        "fcf_year5_implicito_usd": 8167000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.446,
+        "fcf_year5_implicito_usd": 7398000,
+        "nota": "FCF ~$7.4M; empresa pasaría de 39% margen FCF a <2%"
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.446,
+        "fcf_year5_implicito_usd": 7398000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.459,
+        "fcf_year5_implicito_usd": 6632000,
+        "nota": "FCF ~$6.6M en año 5 con descuento 12%"
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.459,
+        "fcf_year5_implicito_usd": 6632000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.47,
+        "fcf_year5_implicito_usd": 5994000,
+        "nota": "Escenario más extremo a 12%: FCF cae a ~$6M"
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.47,
+        "fcf_year5_implicito_usd": 5994000,
+        "nota": "Idéntico al anterior con diferente g_terminal"
+      }
+    ],
+    "sensibilidades": {
+      "ranking_drivers": [
+        {
+          "driver": "cagr_fcf_5y",
+          "importancia": "ALTA"
+        },
+        {
+          "driver": "multiple_terminal",
+          "importancia": "BAJA"
+        },
+        {
+          "driver": "tasa_descuento",
+          "importancia": "BAJA"
+        }
+      ],
+      "observacion": "El CAGR implícito domina totalmente la valoración. El rango de CAGR es -43.6% a -48.9% — variación de solo 5pp entre el escenario más y menos negativo. Ni la tasa de descuento ni el múltiplo terminal alteran la conclusión fundamental: el mercado no capitaliza el FCF actual. La razón es que EV/FCF = 1.3x hace que cualquier combinación de parámetros produzca una caída implícita catastrófica del FCF."
+    },
+    "validaciones_modelo": {
+      "ev_presente": true,
+      "fcf0_presente": true,
+      "resultados_sin_valores_absurdos": false,
+      "detalle": "Todos los CAGR implícitos están entre -43% y -49%, lo cual es matemáticamente correcto pero económicamente absurdo como predicción real. El modelo produce estos valores porque el FCF está artificialmente inflado por D&A de adquisiciones ($58.7M) muy por encima del capex de mantenimiento ($7.7M). El análisis de Earnings Power (EBIT) es más representativo de la realidad económica de la empresa."
+    }
+  },
+  "reverse_earnings_power": {
+    "aplicable": true,
+    "metrica_base": "EBIT",
+    "valor_base_usd": 40821000,
+    "rango_normalizado_usd": {
+      "min": 23500000,
+      "base": 40800000,
+      "max": 55000000
+    },
+    "implied_multiple_sobre_normalizado": {
+      "multiple_min": 3.4,
+      "multiple_base": 4.58,
+      "multiple_max": 7.95
+    },
+    "lectura": "Incluso usando el EBIT normalizado más bajo ($23.5M, promedio de 6 años incluyendo años de pérdidas), el EV/EBIT implícito es solo 7.95x — bajo para una empresa de ad-tech con 70% de margen bruto. Sobre el EBIT base de FY2024 ($40.8M), el múltiplo implícito de 4.58x es extremadamente deprimido. El mercado parece descontar: (1) riesgo significativo de contracción de ingresos por cambios regulatorios o competitivos en programmatic advertising, (2) ciclicidad demostrada del negocio (EBIT negativo en FY2020 y FY2023), y (3) posible descuento por jurisdicción (empresa israelí) y estructura de ADSs.",
+    "supuestos": [
+      "EBIT min ($23.5M) = promedio 6 años FY2019-FY2024, incluyendo dos años de EBIT negativo",
+      "EBIT base ($40.8M) = FY2024 reportado, período de recuperación post-FY2023",
+      "EBIT max ($55M) = punto medio entre FY2024 ($40.8M) y pico FY2021 ($74.5M), asumiendo mejora moderada",
+      "Se usa EBIT, no EBITDA, dado que D&A de $58.7M incluye amortización significativa de intangibles de adquisiciones que representa consumo real de activos"
+    ]
+  },
+  "resumen_expectativas_implicitas": {
+    "enunciados": [
+      "El EV de $186.9M equivale a solo 1.3x el FCF reportado de $143M. Sin embargo, este FCF está inflado por ~$51M de D&A por encima del capex de mantenimiento (amortización de intangibles de adquisiciones históricas). El mercado parece valorar la empresa sobre earning power, no sobre FCF contable.",
+      "Sobre EBIT ($40.8M), el EV/EBIT implícito de 4.6x sugiere que el mercado asume riesgo material de contracción: o bien los márgenes operativos se comprimen, o los ingresos caen, o ambos. Para un negocio de ad-tech con 70% de margen bruto, este múltiplo implica expectativas de declive estructural.",
+      "La caja neta de $187M (50% del market cap) actúa como colchón, pero el mercado asigna valor cercano a cero al negocio operativo ex-caja. El precio implica que el valor operativo es prácticamente nulo o incluso negativo si se ajusta por el valor temporal del dinero.",
+      "Alternativamente, si el EBIT se normaliza a $55M (cercano al promedio de los años buenos), el EV/EBIT sería 3.4x — lo que implicaría que el mercado espera deterioro significativo desde estos niveles."
+    ],
+    "variable_critica_principal": "MARGEN_OPERATIVO",
+    "que_deberia_observarse_en_6_12_meses": [
+      "Evolución del margen EBIT: si se sostiene >10% en FY2025 con ingresos estables, la tesis de declive estructural pierde fuerza",
+      "Tendencia de ingresos programmatic vs performance: el 89% de ingresos proviene de Programmatic ($324.5M); cambios regulatorios (deprecation de cookies, privacy legislation) podrían impactar desproporcionadamente",
+      "Uso de la caja ($187M): recompras de acciones, adquisiciones o retorno al accionista indicarían confianza de la dirección vs acumulación defensiva",
+      "Convergencia D&A-capex: a medida que los intangibles de adquisiciones se amorticen completamente, el FCF debería converger hacia EBIT*(1-t)+capex, revelando la generación real de caja",
+      "Actividad del accionista Mithaq Capital SPC (limitado a 25% de votos): cualquier movimiento activista podría catalizar re-rating"
+    ]
+  },
+  "banderas": {
+    "expectativas_extremas": true,
+    "posible_value_trap": true,
+    "posible_peak_earnings": false,
+    "alto_riesgo_balance": false,
+    "opacidad_alta": false,
+    "notas": [
+      "EV/EBIT de 4.6x y EV/FCF de 1.3x son extremadamente bajos incluso para el cuartil más barato de ad-tech; señal de expectativas implícitas de declive material",
+      "Value trap potencial: métricas baratas pero EBIT ha sido negativo en 2 de los últimos 6 años (FY2020, FY2023), sugiriendo ciclicidad o deterioro competitivo que podría repetirse",
+      "Balance sólido: zero deuda, $187M caja (50% del market cap), sin riesgo de solvencia"
+    ]
+  },
+  "faltantes_criticos": [
+    {
+      "item": "historico_trimestral_reciente",
+      "por_que_importa": "Solo hay trimestres hasta Q1-2021; sin datos trimestrales recientes, el TTM se basa en FY2024 completo y no se puede detectar aceleración o deterioro intra-anual",
+      "como_resolver": "Incorporar datos de los 6-K trimestrales de 2025 (Q1-Q3 2025) cuyos exhibits no fueron incluidos en el SourcesPack"
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "FCF de $143.1M está inflado por $51M de D&A sobre capex (D&A $58.7M vs capex $7.7M), en su mayoría amortización de intangibles de adquisiciones. El reverse DCF sobre FCF produce CAGR implícitos de -44% a -49% que son matemáticamente correctos pero económicamente no informativos.",
+      "TTM basado en FY2024 completo (fallback FY0); no hay trimestres recientes disponibles para calcular TTM real.",
+      "EBIT histórico muy volátil: rango de -$17M a +$74.5M en 6 años, lo que dificulta la normalización.",
+      "Empresa israelí reportando bajo IFRS con ADSs en NASDAQ — posible descuento de jurisdicción/estructura no cuantificable.",
+      "Los 6-K trimestrales de 2025 solo contenían portadas sin los exhibits financieros, por lo que no se dispone de datos post-FY2024."
+    ],
+    "traza_calculo": [
+      "N1: data_quality.status = PASS → prerequisito cumplido",
+      "N2: EV = $186,922,000 (presente), FCF = $143,093,000 (presente), EBIT = $40,821,000 (presente) → inputs mínimos OK",
+      "N3: Snapshot construido desde mercado{} y balance_sheet_ultimo{}. Acciones diluidas = market_cap/precio = 373,990,000/5.86 = 63,822,000",
+      "N4: EV/EBIT = 186,922,000/40,821,000 = 4.58x; EV/FCF = 186,922,000/143,093,000 = 1.31x; P/FCF = 373,990,000/143,093,000 = 2.61x; FCF yield = 143,093,000/373,990,000 = 38.26%",
+      "N5: FCF > 0 → REVERSE_DCF_FCF seleccionado como método principal",
+      "N6: Grid 3×2×4 = 24 combinaciones. TV = FCF5 × M (exit multiple). Resuelto numéricamente para CAGR implícito vía: EV = Σ(t=1..5) FCF0*(1+g)^t/(1+r)^t + FCF0*(1+g)^5*M/(1+r)^5",
+      "N6 verificación: 24 combinaciones con parámetros únicos confirmadas. g_terminal no afecta cálculo con exit multiple → pares con mismo (r,M) tienen resultado idéntico, parámetros distintos",
+      "N7: Variable crítica = MARGEN_OPERATIVO, dado que el EBIT es la métrica más representativa (FCF distorsionado por D&A de adquisiciones)",
+      "N8: Banderas evaluadas: expectativas_extremas=true (EV/EBIT 4.6x), value_trap=true (ciclicidad), peak_earnings=false (FY2024 EBIT < FY2021 pico), balance=false (0 deuda), opacidad=false",
+      "Earnings Power: EBIT normalizado min=$23.5M (avg 6y), base=$40.8M (FY2024), max=$55M (midpoint FY2024-FY2021). Implied EV/EBIT: 7.95x / 4.58x / 3.40x respectivamente"
+    ]
+  }
+}

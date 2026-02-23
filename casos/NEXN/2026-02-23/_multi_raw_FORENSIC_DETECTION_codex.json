@@ -1,0 +1,313 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260223_NEXN",
+  "fecha_corte": "2026-02-23",
+  "ticker": "NEXN",
+  "red_flags": [
+    {
+      "id": "RF-01",
+      "categoria": "Calidad de ganancias (puente EBIT->CFO)",
+      "hallazgo": "Brecha material y recurrente entre EBIT y CFO.",
+      "evidencia_cuantitativa": {
+        "FY2024": {
+          "ebit_usd": 40821000,
+          "cfo_usd": 150835000,
+          "brecha_usd": 110014000,
+          "brecha_pct_sobre_ebit": 269.5,
+          "depreciation_usd": 58676000,
+          "sbc_ajuste_cfo_usd": 11460000,
+          "residual_wc_impuestos_otros_usd": 39878000
+        },
+        "FY2023": {
+          "ebit_usd": -16976000,
+          "cfo_usd": 60741000,
+          "brecha_usd": 77717000,
+          "depreciation_usd": 78285000
+        }
+      },
+      "implicacion_forense": "El CFO depende fuertemente de ajustes no caja y de componentes no desglosados de capital de trabajo/otros.",
+      "source_id": "SRC_SEC_001_20-F_FY2025",
+      "ubicacion": "historico_anual[periodo=FY2024,FY2023].{ebit_usd,cfo_usd,depreciation_usd}; log.limitaciones[SBC from cash flow adjustments: 2024]"
+    },
+    {
+      "id": "RF-02",
+      "categoria": "Capex / reinversión económica",
+      "hallazgo": "Capex reportado muy por debajo de D&A de forma persistente, con riesgo de sobreestimar FCF contable frente a reinversión económica.",
+      "evidencia_cuantitativa": {
+        "FY2024": {
+          "depreciation_usd": 58676000,
+          "capex_usd": 7742000,
+          "ratio_d_and_a_sobre_capex": 7.58,
+          "brecha_usd": 50934000
+        },
+        "FY2023": {
+          "depreciation_usd": 78285000,
+          "capex_usd": 4495000,
+          "ratio_d_and_a_sobre_capex": 17.42,
+          "brecha_usd": 73790000
+        },
+        "FY2022": {
+          "depreciation_usd": 42700000,
+          "capex_usd": 6433000,
+          "ratio_d_and_a_sobre_capex": 6.64
+        }
+      },
+      "implicacion_forense": "El FCF basado en capex reportado puede no reflejar plenamente la reposición económica de activos/intangibles.",
+      "source_id": "SRC_SEC_001_20-F_FY2025",
+      "ubicacion": "historico_anual[periodo=FY2022,FY2023,FY2024].{depreciation_usd,capex_usd}"
+    },
+    {
+      "id": "RF-03",
+      "categoria": "Anomalías de capital de trabajo",
+      "hallazgo": "Cuentas por cobrar y por pagar en niveles atípicamente altos respecto a ingresos/COGS.",
+      "evidencia_cuantitativa": {
+        "FY2024": {
+          "cuentas_por_cobrar_usd": 217960000,
+          "cuentas_por_pagar_usd": 228514000,
+          "ingresos_usd": 365477000,
+          "cogs_usd": 61020000,
+          "ar_sobre_ingresos_pct": 59.6,
+          "ap_sobre_ingresos_pct": 62.5,
+          "dso_dias_aprox": 217.7,
+          "dpo_sobre_cogs_dias_aprox": 1367.2,
+          "working_capital_usd": -10554000
+        }
+      },
+      "implicacion_forense": "Alta sensibilidad del CFO a movimientos de cobros/pagos y a timing de pasivos operativos.",
+      "source_id": "SRC_SEC_001_20-F_FY2025",
+      "ubicacion": "balance_sheet_ultimo.{cuentas_por_cobrar_usd,cuentas_por_pagar_usd}; historico_anual[periodo=FY2024].{ingresos_usd,cogs_usd}; metricas_derivadas.wc_change"
+    },
+    {
+      "id": "RF-04",
+      "categoria": "Reconocimiento de ingresos / comparabilidad",
+      "hallazgo": "Cambio de base de reconocimiento (bruto a neto) afecta comparabilidad histórica de ingresos.",
+      "evidencia_cuantitativa": {
+        "FY2019_ingresos_usd": 325760000,
+        "FY2020_ingresos_usd": 211920000,
+        "variacion_ingresos_yoy_pct": -34.9,
+        "FY2019_gross_profit_usd": 121769000,
+        "FY2020_gross_profit_usd": 132517000,
+        "variacion_gross_profit_yoy_pct": 8.8
+      },
+      "implicacion_forense": "Las series de crecimiento de ingresos pueden inducir conclusiones erróneas sin normalización de política contable.",
+      "source_id": "SRC_SEC_002_20-F_FY2024",
+      "ubicacion": "log.limitaciones['FY2019 revenue ... reconocimiento bruto ... a partir de FY2020 se reconoce en base neta']; historico_anual[periodo=FY2019,FY2020].{ingresos_usd,gross_profit_usd}"
+    },
+    {
+      "id": "RF-05",
+      "categoria": "Obligaciones fijas no capturadas por deuda_total",
+      "hallazgo": "Deuda financiera reportada en cero, pero con pasivos de arrendamiento materiales y pagos anuales relevantes.",
+      "evidencia_cuantitativa": {
+        "deuda_total_usd_fy2024": 0,
+        "lease_liabilities_total_usd": 37197000,
+        "lease_liabilities_current_usd": 14340000,
+        "lease_repayment_cff_usd_fy2024": 15142000
+      },
+      "implicacion_forense": "Si se usa solo deuda_total para solvencia se subestiman compromisos fijos de caja.",
+      "source_id": "SRC_SEC_001_20-F_FY2025",
+      "ubicacion": "balance_sheet_ultimo.deuda_total_usd; lease_data.{total_lease_liabilities_usd,current_lease_liabilities_usd,lease_repayment_cff_usd}"
+    },
+    {
+      "id": "RF-06",
+      "categoria": "Asignación de capital / erosión de caja",
+      "hallazgo": "Salidas de financiación superaron al CFO y al FCF en FY2024, reduciendo caja neta pese a FCF positivo.",
+      "evidencia_cuantitativa": {
+        "FY2024": {
+          "cfo_usd": 150835000,
+          "fcf_usd": 143093000,
+          "cff_usd": -174744000,
+          "abs_cff_sobre_cfo_pct": 115.8,
+          "abs_cff_sobre_fcf_pct": 122.1,
+          "delta_cash_usd": -47240000
+        }
+      },
+      "implicacion_forense": "Si esta política continúa, la resiliencia de liquidez a 12-24 meses se reduce.",
+      "source_id": "SRC_SEC_001_20-F_FY2025",
+      "ubicacion": "historico_anual[periodo=FY2024].{cfo_usd,cff_usd,delta_cash_usd}; ttm.fcf_usd"
+    }
+  ],
+  "liquidez": {
+    "efectivo_disponible": {
+      "caja_usd": 187068000,
+      "lineas_credito_disponibles_usd": null,
+      "liquidez_confirmada_total_usd": 187068000
+    },
+    "runway_meses_estimado": {
+      "escenario_observado_fy2024": {
+        "metodo": "caja_actual / abs(delta_cash_fy2024) * 12",
+        "salida_neta_caja_anual_usd": 47240000,
+        "runway_meses": 47.5
+      },
+      "escenario_estres_cfo_cero": {
+        "metodo": "caja_actual / (capex + repago_arrendamientos + interes_efectivo_aprox) * 12",
+        "supuestos_outflow_anual_usd": {
+          "capex_usd": 7742000,
+          "repago_arrendamientos_usd": 15142000,
+          "interes_efectivo_aprox_usd": 6375000
+        },
+        "outflow_total_anual_usd": 29259000,
+        "runway_meses": 76.7
+      }
+    },
+    "vencimientos_deuda_12_24_meses": {
+      "deuda_financiera_reportada_usd": 0,
+      "arrendamientos_12_meses_usd": 14340000,
+      "arrendamientos_largo_plazo_usd": 22857000,
+      "obligaciones_conocidas_12_meses_usd": 14340000,
+      "nota": "Sin cronograma detallado para separar exactamente el tramo 12-24 meses dentro de pasivos de arrendamiento de largo plazo."
+    },
+    "riesgo_incumplimiento_covenants": {
+      "nivel": "BAJO",
+      "base_cuantitativa": "deuda_total_usd FY2024 = 0 y no hay covenants financieros cuantificados en el TruthPack."
+    },
+    "riesgo_dilucion_accionaria": {
+      "nivel": "BAJO_A_MEDIO",
+      "base_cuantitativa": "caja neta USD 187,068,000 y FCF FY2024 USD 143,093,000 reducen necesidad inmediata de emisión; riesgo subiría con CFF persistentemente negativo."
+    },
+    "supervivencia_12_24m": {
+      "horizonte_12m": "Cobertura de obligaciones conocidas con caja actual y CFO FY2024 positivo.",
+      "horizonte_24m": "Cobertura disponible bajo supuestos base; sensibilidad principal en continuidad de salidas de financiación.",
+      "variables_criticas_a_monitorear": [
+        "caja_usd",
+        "cfo_usd",
+        "cff_usd",
+        "lease_repayment_cff_usd"
+      ]
+    },
+    "source_id": "SRC_SEC_001_20-F_FY2025",
+    "ubicacion": "balance_sheet_ultimo; lease_data; historico_anual[periodo=FY2024]"
+  },
+  "puentes": {
+    "periodo_principal": "FY2024",
+    "ebit_a_cfo": {
+      "ebit_usd": 40821000,
+      "cfo_usd": 150835000,
+      "brecha_usd": 110014000,
+      "brecha_pct_sobre_ebit": 269.5,
+      "componentes_identificados_usd": {
+        "depreciacion_amortizacion": 58676000,
+        "stock_based_comp_ajuste_cfo": 11460000,
+        "residual_wc_impuestos_otros": 39878000
+      },
+      "distorsion_material_ge_15pct": true,
+      "source_id": "SRC_SEC_001_20-F_FY2025",
+      "ubicacion": "historico_anual[periodo=FY2024].{ebit_usd,cfo_usd,depreciation_usd}; log.limitaciones[SBC from cash flow adjustments: 2024]"
+    },
+    "cfo_a_fcf": {
+      "cfo_usd": 150835000,
+      "capex_usd": -7742000,
+      "fcf_usd": 143093000,
+      "brecha_usd": -7742000,
+      "brecha_pct_sobre_cfo": -5.1,
+      "distorsion_material_ge_15pct": false,
+      "ajuste_informativo_arrendamientos_principal_usd": -15142000,
+      "fcf_despues_arrendamientos_usd": 127951000,
+      "source_id": "SRC_SEC_001_20-F_FY2025",
+      "ubicacion": "historico_anual[periodo=FY2024].{cfo_usd,capex_usd}; lease_data.lease_repayment_cff_usd"
+    },
+    "distorsiones_materiales_ge_15pct": [
+      {
+        "etapa": "EBIT->CFO",
+        "periodo": "FY2024",
+        "distorsion_pct": 269.5,
+        "driver_principal": "Ajustes no caja (D&A y SBC) y residual de capital de trabajo/otros."
+      }
+    ],
+    "observaciones": [
+      "En FY2023 también hubo brecha relevante EBIT->CFO: EBIT -16,976,000 vs CFO 60,741,000.",
+      "No se observa distorsión >=15% en CFO->FCF reportado FY2024; la principal distorsión está en EBIT->CFO."
+    ]
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC-01",
+      "criterio": "Deterioro de caja disponible",
+      "condicion_objetiva": "caja_y_equivalentes_usd < 75,000,000 durante 2 trimestres consecutivos",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "BAJA",
+      "base_actual_usd": 187068000
+    },
+    {
+      "id": "KC-02",
+      "criterio": "Ruptura de generación operativa de caja",
+      "condicion_objetiva": "CFO_LTM <= 0 y FCF_LTM <= 0 durante 2 trimestres consecutivos",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "MEDIA",
+      "base_actual_usd": {
+        "cfo_ltm": 150835000,
+        "fcf_ltm": 143093000
+      }
+    },
+    {
+      "id": "KC-03",
+      "criterio": "Deterioro de earnings power",
+      "condicion_objetiva": "EBIT_LTM <= 0 durante 4 trimestres consecutivos o 2 ejercicios anuales consecutivos",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "MEDIA",
+      "base_actual_usd": 40821000
+    },
+    {
+      "id": "KC-04",
+      "criterio": "Estrés de capital de trabajo",
+      "condicion_objetiva": "AR/Ingresos_LTM > 65% o DSO > 240 dias por 2 trimestres consecutivos, junto con caida de CFO YoY > 30%",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA",
+      "base_actual": {
+        "ar_sobre_ingresos_pct": 59.6,
+        "dso_dias_aprox": 217.7
+      }
+    },
+    {
+      "id": "KC-05",
+      "criterio": "Erosion de liquidez por salidas de financiacion",
+      "condicion_objetiva": "abs(CFF_LTM) > 1.2x CFO_LTM y delta_cash_LTM < -75,000,000",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA",
+      "base_actual": {
+        "abs_cff_sobre_cfo_x": 1.16,
+        "delta_cash_ltm_usd": -47240000
+      }
+    },
+    {
+      "id": "KC-06",
+      "criterio": "Cobertura insuficiente de obligaciones fijas de arrendamiento",
+      "condicion_objetiva": "caja_usd / current_lease_liabilities_usd < 1.5x o incumplimiento de pagos de arrendamiento en 2 trimestres",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "BAJA",
+      "base_actual_x": 13.04
+    }
+  ],
+  "report_type": "forensic_detection",
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1_partial",
+    "truth_pack_data_quality": "PASS",
+    "sources_pack_disponible": false,
+    "fuentes_base": [
+      "SRC_SEC_001_20-F_FY2025",
+      "SRC_SEC_002_20-F_FY2024",
+      "SRC_SEC_004_20-F_FY2022"
+    ]
+  },
+  "log": {
+    "limitaciones": [
+      "SourcesPack_v1 no disponible; analisis realizado solo con TruthPack_v1 y sin revision directa de filings completos.",
+      "No hay desglose cuantitativo de goodwill/impairment en los campos estructurados del TruthPack para validar deterioro reciente.",
+      "No hay desglose cuantitativo de transacciones con partes relacionadas (RPT) en el TruthPack.",
+      "No hay calendario detallado de vencimientos de arrendamientos para separar con precision el tramo 12-24 meses."
+    ],
+    "cobertura_areas_contables": {
+      "liquidez": "revisada",
+      "reconocimiento_ingresos": "revisado",
+      "capitalizacion_capex": "revisada",
+      "capital_trabajo": "revisado",
+      "goodwill_y_deterioro": "limitado_por_datos",
+      "partes_relacionadas_rpt": "limitado_por_datos",
+      "off_balance_y_obligaciones": "revisado_parcial"
+    }
+  },
+  "_meta": {
+    "moneda": "USD",
+    "umbral_distorsion_material_pct": 15,
+    "metodo": "Analisis forense cuantitativo basado en TruthPack"
+  }
+}

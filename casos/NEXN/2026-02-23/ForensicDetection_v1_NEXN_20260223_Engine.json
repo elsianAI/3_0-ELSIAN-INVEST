@@ -1,0 +1,378 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260223_NEXN",
+  "fecha_corte": "2026-02-23",
+  "ticker": "NEXN",
+  "report_type": "ForensicDetection",
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1",
+    "sources_pack_disponible": false,
+    "fuentes_base": [
+      "SRC_SEC_001_20-F_FY2025",
+      "SRC_SEC_002_20-F_FY2024",
+      "SRC_SEC_004_20-F_FY2022"
+    ],
+    "modelos_fusionados": [
+      "gemini",
+      "claude",
+      "codex"
+    ]
+  },
+  "red_flags": [
+    {
+      "id": "RF-001",
+      "categoria": "ACQUISITION_HISTORY",
+      "titulo": "Historial de adquisiciones con CFI positivo anomalo y goodwill residual implicito",
+      "descripcion": "FY2019: CFI = +$19.4M (positivo). FY2020: CFI = +$4.9M. Cash adquirido en business combinations supero el precio pagado ($23.7M en FY2019, $6.2M en FY2020). FY2022: CFI = -$233.0M indicando una adquisicion masiva. Esta secuencia explica la D&A elevada de intangibles. Sin datos de goodwill explicitos en el balance, no es posible evaluar si se ha realizado deterioro adecuado, pero la D&A cayendo de $78.3M (FY2023) a $58.7M (FY2024) sugiere que algunos intangibles se estan amortizando completamente.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_004_20-F_FY2022",
+          "ubicacion": "historico_anual, campo cfi_usd FY2019-FY2022; log.limitaciones sobre Acquisition of subsidiaries net of cash acquired"
+        }
+      ]
+    },
+    {
+      "id": "RF-002",
+      "categoria": "CAPITAL_ALLOCATION",
+      "titulo": "Salidas de financiacion superaron CFO y FCF en FY2024 reduciendo caja neta",
+      "descripcion": "FY2024: CFF = -$174.7M vs CFO = $150.8M (ratio 1.16x). Delta cash = -$47.2M pese a FCF positivo de $143M. Las salidas incluyen repago de deuda de $100M, lease repayments de $15.1M y ~$59.6M en otros (probablemente recompras de acciones). Si esta politica de asignacion de capital continua, la resiliencia de liquidez a 12-24 meses se reduce.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "historico_anual[periodo=FY2024].{cfo_usd,cff_usd,delta_cash_usd}; ttm.fcf_usd"
+        }
+      ]
+    },
+    {
+      "id": "RF-003",
+      "categoria": "DA_CAPEX_DIVERGENCE",
+      "titulo": "D&A masivamente superior a capex de forma persistente",
+      "descripcion": "FY2024: D&A = $58.7M vs capex = $7.7M (ratio 7.6x, brecha $50.9M). FY2023: D&A = $78.3M vs capex = $4.5M (ratio 17.4x, brecha $73.8M). FY2022: D&A = $42.7M vs capex = $6.4M (ratio 6.6x). Capex es solo 13% de D&A y 2% de ingresos. Esta brecha sistematica de $37-74M infla el FCF reportado ($143M en FY2024) muy por encima de la generacion economica real. La D&A proviene principalmente de amortizacion de intangibles adquiridos. A medida que estos se amorticen completamente, el FCF convergera hacia niveles mas bajos. El verdadero capex de mantenimiento deberia incluir la reinversion necesaria para sostener los intangibles que generan ingresos.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "historico_anual FY2022-FY2024, campos depreciation_usd y capex_usd"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "Cash Flow Statement (Investing)"
+        }
+      ]
+    },
+    {
+      "id": "RF-004",
+      "categoria": "EARNINGS_QUALITY",
+      "titulo": "Brecha excesiva y recurrente entre EBIT y CFO",
+      "descripcion": "FY2024: CFO ($150.8M) es 3.7x EBIT ($40.8M), brecha de $110M (269.5%). FY2023: EBIT negativo (-$17M) pero CFO positivo ($60.7M), brecha de $77.7M. FY2022: CFO ($83M) vs EBIT ($44.8M), brecha de $38.3M (85.5%). Dependencia alta de ajustes no monetarios (D&A +$58.7M FY2024) y movimientos de capital de trabajo/otros (+$39.9M estimados FY2024). El residual de WC/impuestos/otros de ~$40M en FY2024 no esta completamente desglosado, creando opacidad en la calidad de la generacion de caja.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "historico_anual[periodo=FY2024,FY2023].{ebit_usd,cfo_usd,depreciation_usd}; log.limitaciones[SBC from cash flow adjustments]"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "Cash Flow Reconciliation"
+        }
+      ]
+    },
+    {
+      "id": "RF-005",
+      "categoria": "EARNINGS_VOLATILITY",
+      "titulo": "EBIT extremadamente volatil con perdidas en 2 de 6 anos",
+      "descripcion": "EBIT historico: FY2019 $3.9M, FY2020 -$6.0M, FY2021 $74.5M, FY2022 $44.8M, FY2023 -$17.0M, FY2024 $40.8M. Rango de -$17M a +$74.5M. Los dos anos negativos (FY2020, FY2023) indican que el negocio es altamente ciclico o enfrenta disrupciones competitivas periodicas. La estructura de costos (SGA $153M + R&D $50M = $203M fijos o semifijos) limita la capacidad de ajuste rapido, cuestionando la sostenibilidad de cualquier nivel de EBIT como normalizado.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "historico_anual, campo ebit_usd para FY2019-FY2024"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "Income Statement (Historical Trend)"
+        }
+      ]
+    },
+    {
+      "id": "RF-006",
+      "categoria": "INTEREST_EXPENSE_OPACITY",
+      "titulo": "Gastos financieros incluyen efectos FX no separados",
+      "descripcion": "interest_expense_usd se mapea a Financing expenses que combina gastos financieros puros con efectos de tipo de cambio. FY2024: financing expenses = $8.9M pero intereses pagados en efectivo = $6.4M (diferencia $2.5M). FY2023: financing expenses = $10.2M pero intereses pagados = $8.5M (diferencia $1.7M). Empresa israeli con operaciones globales; la exposicion FX no cubierta podria generar volatilidad adicional no visible en metricas estandar de deuda.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "TruthPack log.limitaciones — referencia a interest_expense_usd mapped to Financing expenses"
+        }
+      ]
+    },
+    {
+      "id": "RF-007",
+      "categoria": "LEASE_OBLIGATIONS",
+      "titulo": "Pasivos de arrendamiento materiales no capturados por deuda total reportada en cero",
+      "descripcion": "Deuda financiera reportada = $0, pero lease liabilities totales = $37.2M ($14.3M corriente + $22.9M largo plazo). Repago anual de arrendamientos en FY2024 = $15.1M. Si se usa solo deuda_total para evaluar solvencia se subestiman compromisos fijos de caja. Estos son los unicos pasivos financieros recurrentes de la empresa.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "balance_sheet_ultimo.deuda_total_usd; lease_data.{total_lease_liabilities_usd,current_lease_liabilities_usd,lease_repayment_cff_usd}"
+        }
+      ]
+    },
+    {
+      "id": "RF-008",
+      "categoria": "REVENUE_CONCENTRATION",
+      "titulo": "Concentracion extrema en Programmatic (89% de ingresos)",
+      "descripcion": "FY2024: Programmatic $324.5M (88.8%) + Performance $41.0M (11.2%) = $365.5M. Dentro de Programmatic: Video $232.4M (63.6%), Display $120.1M (32.8%), Other $13.0M (3.6%). Dependencia del 89% en un solo segmento expone a riesgos regulatorios (deprecation de cookies, legislacion de privacidad) y competitivos (Google, The Trade Desk) que podrian impactar desproporcionadamente los ingresos.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "TruthPack log.limitaciones — Revenue segment breakdown: Programmatic $324,466k + Performance $41,011k"
+        }
+      ]
+    },
+    {
+      "id": "RF-009",
+      "categoria": "REVENUE_RECOGNITION",
+      "titulo": "Cambio historico en reconocimiento de ingresos de bruto a neto",
+      "descripcion": "En FY2019 los ingresos programaticos se reconocian en base bruta ($325.8M). A partir de FY2020 se paso a reconocimiento neto, reduciendo ingresos reportados a $211.9M (-35%). Los ingresos FY2019 as adjusted habrian sido $208.5M. Mientras tanto, gross profit crecio +8.8% (FY2019 $121.8M a FY2020 $132.5M). Este cambio dificulta la comparabilidad historica y puede haber enmascarado la tendencia real de crecimiento organico durante el periodo de transicion.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_004_20-F_FY2022",
+          "ubicacion": "TruthPack log.conversiones_aplicadas — FY2019 revenue as adjusted (non-IFRS) seria 208,459k"
+        },
+        {
+          "source_id": "SRC_SEC_002_20-F_FY2024",
+          "ubicacion": "log.limitaciones[FY2019 revenue reconocimiento bruto a partir de FY2020 base neta]; historico_anual[periodo=FY2019,FY2020].{ingresos_usd,gross_profit_usd}"
+        }
+      ]
+    },
+    {
+      "id": "RF-010",
+      "categoria": "SBC_TRANSPARENCY",
+      "titulo": "Discrepancia en stock-based compensation entre cash flow y equity",
+      "descripcion": "FY2024: SBC desde ajustes de cash flow = $11.5M, pero SBC desde estado de patrimonio = $12.5M. Diferencia de $1.0M (8.7%). Sugiere componentes de compensacion en acciones que no se reflejan uniformemente en ambos estados financieros, posiblemente por diferencias en timing de reconocimiento o vesting de opciones.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "TruthPack log.limitaciones — SBC from cash flow adjustments: $11,460k differs from equity statement SBC of $12,510k"
+        }
+      ]
+    },
+    {
+      "id": "RF-011",
+      "categoria": "WORKING_CAPITAL_ANOMALY",
+      "titulo": "Cuentas por cobrar y por pagar en niveles atipicamente altos respecto a ingresos",
+      "descripcion": "FY2024: AR = $218.0M sobre ingresos de $365.5M, DSO implicito de ~218 dias (vs tipico de 60-90 dias en ad-tech). AP = $228.5M, DPO sobre COGS de ~1367 dias (debido a estructura Gross Receivables vs Net Revenue tipica de AdTech). Working capital neto = -$10.6M. Si bien el modelo de intermediacion hace que WC neto sea minimo, la magnitud absoluta de ambas partidas ($218M AR, $228M AP) crea alta sensibilidad del CFO a movimientos de timing de cobros/pagos y expone a riesgo de credito de contraparte masivo (sequential liability) no visible en el P&L. Un desacoplamiento entre AR y AP seria una senal de alerta critica.",
+      "evidencia": [
+        {
+          "source_id": "SRC_SEC_001_20-F_FY2025",
+          "ubicacion": "balance_sheet_ultimo.{cuentas_por_cobrar_usd,cuentas_por_pagar_usd}; historico_anual[periodo=FY2024].{ingresos_usd,cogs_usd}"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "Balance Sheet vs Income Statement (FY2024)"
+        }
+      ]
+    }
+  ],
+  "liquidez": {
+    "evaluacion_general": "ROBUSTA",
+    "efectivo_disponible_usd": 187068000,
+    "lineas_credito_disponibles_usd": null,
+    "lineas_credito_nota": "No se dispone de datos sobre lineas de credito disponibles; SourcesPack no incluido",
+    "deuda_total_usd": 0,
+    "deuda_neta_usd": -187068000,
+    "deuda_corto_plazo_usd": 0,
+    "runway_estimado_meses": ">24",
+    "runway_detalle": {
+      "escenario_observado_fy2024": {
+        "metodo": "caja_actual / abs(delta_cash_fy2024) * 12",
+        "salida_neta_caja_anual_usd": 47240000,
+        "runway_meses": 47.5
+      },
+      "escenario_estres_cfo_cero": {
+        "metodo": "caja_actual / (capex + repago_arrendamientos + interes_efectivo) * 12",
+        "outflow_total_anual_usd": 29259000,
+        "runway_meses": 76.7
+      }
+    },
+    "vencimientos_proximos_12_24_meses": {
+      "deuda_financiera": "Ninguna — deuda de $100M fue completamente repagada durante FY2024",
+      "lease_liabilities_corrientes_usd": 14340000,
+      "lease_liabilities_largo_plazo_usd": 22857000,
+      "total_lease_liabilities_usd": 37197000,
+      "nota": "Unicos compromisos fijos son lease liabilities. Sin cronograma detallado para separar exactamente el tramo 12-24 meses dentro de pasivos de arrendamiento de largo plazo."
+    },
+    "riesgo_covenants": "BAJO — sin deuda financiera vigente. Las lease liabilities bajo IFRS 16 son los unicos pasivos financieros",
+    "riesgo_dilucion": "BAJO_A_MODERADO — Mithaq Capital SPC es accionista significativo (limitado a 25% de votos sobre 14.2M shares). Planes de incentivos en acciones activos. SBC de $11.5M/ano representa ~3% del FCF y ~2% del market cap. 56.6M ordinary shares outstanding al record date (dic 2025). Riesgo subiria con CFF persistentemente negativo.",
+    "factores_clave": [
+      "Posicion de caja neta positiva ($187M)",
+      "CFO positivo en FY2024 ($150.8M)",
+      "Ausencia de deuda financiera (solo leases de $37.2M)"
+    ],
+    "evaluacion_supervivencia": {
+      "horizonte_12_meses": "SIN RIESGO — $187M caja + CFO positivo de $150.8M + cero deuda. Incluso con CFO = $0, caja cubre >6 anos de obligaciones fijas conocidas",
+      "horizonte_24_meses": "SIN RIESGO — misma logica. El riesgo no es de liquidez sino de destruccion de valor operativo (volatilidad EBIT)"
+    }
+  },
+  "puentes": {
+    "ebit_cfo": {
+      "periodo_principal": "FY2024",
+      "start_ebit_usd": 40821000,
+      "add_depreciation_amortization_usd": 58676000,
+      "add_sbc_usd": 11460000,
+      "less_income_tax_paid_usd": -3095000,
+      "less_interest_paid_usd": -6375000,
+      "net_working_capital_and_other_usd": 49348000,
+      "end_cfo_usd": 150835000,
+      "brecha_usd": 110014000,
+      "brecha_pct_sobre_ebit": 269.5,
+      "distorsion_mayor_15pct": true,
+      "comentario": "Conversion EBIT a CFO muy alta (369%). Impulsada por alta D&A (amortizacion de intangibles historicos), SBC y gestion favorable de WC. El residual WC/otros de ~$49M es elevado y merece investigacion adicional.",
+      "historico": {
+        "FY2023": {
+          "ebit_usd": -16976000,
+          "cfo_usd": 60741000,
+          "brecha_usd": 77717000,
+          "depreciation_usd": 78285000,
+          "nota": "D&A de $78.3M convierte EBIT negativo en CFO positivo"
+        },
+        "FY2022": {
+          "ebit_usd": 44752000,
+          "cfo_usd": 83008000,
+          "brecha_usd": 38256000,
+          "depreciation_usd": 42700000
+        }
+      },
+      "patron_sistematico": "En los 3 anos mas recientes, CFO excede EBIT por $38M-$110M. Causa principal es D&A de intangibles de adquisiciones que no requiere reinversion equivalente en capex. Patron estructural que ira disminuyendo gradualmente (D&A ya cayo de $78.3M a $58.7M entre FY2023 y FY2024)"
+    },
+    "cfo_fcf": {
+      "periodo_principal": "FY2024",
+      "start_cfo_usd": 150835000,
+      "less_capex_usd": -7742000,
+      "end_fcf_usd": 143093000,
+      "conversion_cfo_fcf_pct": 94.9,
+      "ajuste_informativo_lease_repayment_usd": -15142000,
+      "fcf_post_leases_usd": 127951000,
+      "distorsion_mayor_15pct": false,
+      "comentario": "Conversion CFO a FCF del 95%. Modelo de negocio de muy bajo requerimiento de capital fisico. Sin embargo, la alta conversion es parcialmente enganosa: el verdadero capex de mantenimiento deberia incluir la reinversion necesaria para sostener los intangibles que generan ingresos.",
+      "historico": {
+        "FY2023": {
+          "cfo_usd": 60741000,
+          "capex_usd": -4495000,
+          "fcf_usd": 56246000,
+          "conversion_pct": 92.6,
+          "lease_repayment_usd": -17262000,
+          "fcf_post_leases_usd": 38984000
+        }
+      }
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC-001",
+      "condicion": "Caja cae por debajo de $100M sin lineas de credito comprometidas equivalentes",
+      "condicion_objetiva": "caja_y_equivalentes_usd < 100000000 durante 2 trimestres consecutivos",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "base_actual_usd": 187068000,
+      "racional": "Con CFO positivo, una caida brusca de caja sin adquisiciones explicaria salidas ocultas o problemas de capital de trabajo no reportados. Pese a FCF positivo, FY2024 delta_cash fue -$47M."
+    },
+    {
+      "id": "KC-002",
+      "condicion": "CFO LTM negativo o por debajo de $30M anualizado",
+      "condicion_objetiva": "CFO_LTM <= 0 o CFO_LTM < 30000000 durante 2 trimestres consecutivos",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "base_actual_usd": 150835000,
+      "racional": "CFO ha sido consistentemente positivo incluso en anos de EBIT negativo (FY2020: CFO $35M, FY2023: CFO $61M) gracias a D&A alta. Sin embargo, si ingresos caen sustancialmente mientras D&A disminuye (intangibles amortizados), este colchon desapareceria."
+    },
+    {
+      "id": "KC-003",
+      "condicion": "DSO supera 240 dias o AR excede $280M",
+      "condicion_objetiva": "AR/Ingresos_LTM > 65% o DSO > 240 dias por 2 trimestres consecutivos",
+      "ventana_temporal": "12 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "base_actual": {
+        "ar_sobre_ingresos_pct": 59.6,
+        "dso_dias_aprox": 217.7
+      },
+      "racional": "DSO actual ya es elevado (~218 dias). Un alargamiento adicional indicaria problemas de pago de clientes, reconocimiento de ingresos ficticios, o desacoplamiento entre AR y AP."
+    },
+    {
+      "id": "KC-004",
+      "condicion": "EBIT negativo durante dos trimestres consecutivos o EBIT anual negativo en FY2025",
+      "condicion_objetiva": "EBIT_LTM <= 0 durante 4 trimestres consecutivos o 2 ejercicios anuales consecutivos",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "base_actual_usd": 40821000,
+      "racional": "EBIT fue negativo en FY2020 y FY2023. Un tercer episodio confirmaria patron ciclico con downside significativo. Estructura de costos de $203M fijos/semifijos limita capacidad de ajuste rapido."
+    },
+    {
+      "id": "KC-005",
+      "condicion": "Ingresos Programmatic caen por debajo de $260M en cualquier ano fiscal (caida >20% desde FY2024)",
+      "condicion_objetiva": "ingresos_programmatic_ltm_usd < 260000000",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "base_actual_usd": 324466000,
+      "racional": "Programmatic es el 89% de los ingresos. Un deterioro significativo por cambios regulatorios (privacy, cookie deprecation) o perdida de cuota de mercado haria insostenible la estructura de costos actual. El precedente de FY2020 (-35% ingresos) muestra que caidas drasticas son posibles."
+    },
+    {
+      "id": "KC-006",
+      "condicion": "Margen bruto cae por debajo de 60%",
+      "condicion_objetiva": "gross_margin_pct < 60",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "base_actual_pct": 70.3,
+      "racional": "Margen bruto de 70% ha sido estable. Caida a <60% indicaria presion competitiva severa (compresion de TAC rates) o cambio adverso en mix de ingresos. COGS excluye D&A, asi que caida seria indicativa de presion real en la unidad economica."
+    },
+    {
+      "id": "KC-007",
+      "condicion": "Erosion de liquidez por salidas de financiacion persistentes",
+      "condicion_objetiva": "abs(CFF_LTM) > 1.2x CFO_LTM y delta_cash_LTM < -75000000",
+      "ventana_temporal": "12 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "base_actual": {
+        "abs_cff_sobre_cfo_x": 1.16,
+        "delta_cash_ltm_usd": -47240000
+      },
+      "racional": "FY2024 CFF ya fue 1.16x CFO. Si politica de asignacion de capital agresiva continua (recompras, adquisiciones) sin generar retornos, la posicion de caja se deterioraria."
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "SourcesPack no disponible; analisis basado exclusivamente en TruthPack",
+      "No se pudieron verificar notas a los estados financieros directamente (goodwill breakdown, aging de AR, detalle de intangibles)",
+      "Sin datos trimestrales recientes (solo Q1-2020 y Q1-2021); no se puede evaluar tendencia intra-anual 2025",
+      "Los 6-K trimestrales de 2025 solo contenian portadas sin exhibits financieros",
+      "No se dispone de informacion sobre covenants, lineas de credito disponibles, o compromisos off-balance mas alla de leases",
+      "DSO calculado como estimacion simple (AR/Revenue x 365); el DSO real requiere conocer los terminos de pago y la estacionalidad",
+      "No hay desglose cuantitativo de goodwill/impairment en campos estructurados del TruthPack",
+      "No hay desglose cuantitativo de transacciones con partes relacionadas (RPT)",
+      "No hay calendario detallado de vencimientos de arrendamientos para separar con precision el tramo 12-24 meses"
+    ],
+    "areas_revisadas": [
+      "Revenue recognition (cambio bruto a neto)",
+      "D&A vs capex divergence",
+      "EBIT volatility and sustainability",
+      "Working capital (AR, AP, WC net)",
+      "Interest/financing expense transparency",
+      "Acquisition history and intangible amortization",
+      "Stock-based compensation",
+      "Revenue concentration risk",
+      "Liquidity and debt maturity",
+      "Lease obligations",
+      "Dilution risk",
+      "CFO-FCF conversion quality",
+      "Capital allocation and cash erosion"
+    ],
+    "notas_proceso": [
+      "TruthPack con calidad PASS",
+      "Analisis basado en FY2024 (auditado) debido a falta de detalles en 6-Ks de 2025",
+      "Se detecto estructura atipica de Balance Sheet (Gross) vs P&L (Net) comun en AdTech pero que requiere vigilancia forense",
+      "Fusion de 3 modelos (gemini, claude, codex) — red flags deduplicadas por categoria+descripcion normalizada"
+    ]
+  },
+  "_meta": {
+    "moneda": "USD",
+    "umbral_distorsion_material_pct": 15,
+    "timestamp_fusion": "2026-02-23T23:00:00Z"
+  }
+}
