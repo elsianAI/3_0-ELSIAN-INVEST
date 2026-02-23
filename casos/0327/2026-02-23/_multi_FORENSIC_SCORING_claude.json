@@ -1,0 +1,793 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260223_0327",
+  "fecha_corte": "2026-02-23",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "claude-opus-4-6",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260223_0327",
+    "implied_expectations_caso_id": "CASE_20260223_0327",
+    "sources_pack_caso_id": "CASE_20260223_0327"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "PAX Global presenta liquidez excepcionalmente fuerte (caja neta ~3,084M HKD, deuda financiera cero, runway >14 años) que elimina cualquier riesgo de insolvencia en horizonte de 12-24 meses.",
+      "El riesgo dominante no es supervivencia sino destrucción de valor por value trap: 6 banderas ALTO en calidad de earnings, tendencia de ingresos y gobernanza de capital, sin catalizador de reversión visible.",
+      "La conversión EBIT→CFO es crónicamente deficiente (CFO < 50% del EBIT en 4 de 6 periodos analizados), con FY2024 como anomalía puntual por liberación de working capital.",
+      "Los ingresos han caído 25% acumulado desde FY2022 con compresión de margen operativo (17.7% → 14.2%), y H1-2025 confirma que la tendencia no se ha revertido.",
+      "Veredicto WATCHLIST: la empresa sobrevive holgadamente pero la combinación de decline operativo, capex insuficiente, DSO excesivo y cash hoarding sin retorno eficiente configura un perfil de vigilancia activa."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.72
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "PAX Global tiene cero deuda financiera y caja neta de 3,084M HKD, eliminando todo riesgo de insolvencia o liquidación por estrés de deuda en 12-24 meses.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita_corta": "deuda_total_usd = 0; caja_usd = 3,083,598,000 (valores en HKD)",
+          "interpretacion": "La empresa no tiene borrowings y acumula caja equivalente al 60% del market cap."
+        }
+      ],
+      "falsacion": {
+        "test": "La empresa contrae deuda significativa (>500M HKD) o la caja cae por debajo de 1,500M HKD",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La conversión EBIT→CFO es crónicamente deficiente: en 4 de 6 periodos analizados, el CFO representó menos del 50% del EBIT, con FY2024 como excepción por liberación puntual de working capital.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ForensicDetection_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "puentes.ebit_to_cfo",
+          "cita_corta": "CFO/EBIT: 0.27x (FY21), 0.45x (FY22), 0.39x (FY23), 1.36x (FY24), 0.33x (H1-25)",
+          "interpretacion": "El patrón persistente de baja conversión de earnings a caja operativa indica consumo crónico de working capital."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO/EBIT se estabiliza por encima de 0.70x durante dos periodos semestrales consecutivos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Los ingresos de PAX Global han caído tres años consecutivos desde el pico de FY2022 (8,063M→6,045M HKD, -25% acumulado) y H1-2025 confirma continuación del decline (-10% YoY).",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "historico_anual FY2022-FY2024 + historico_trimestral H1-2025",
+          "cita_corta": "Revenue: 8,063M (FY22)→6,709M (FY23)→6,045M (FY24); H1-25: 2,716M vs 3,013M H1-24",
+          "interpretacion": "Tendencia de contracción sostenida sin señales de reversión en el periodo más reciente."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos H2-2025 o FY2025 muestran crecimiento positivo YoY",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El FCF de FY2024 (1,036M HKD) es un outlier estadístico inflado por capex inusualmente bajo (127M vs promedio ~296M) y liberación puntual de WC; el FCF normalizado es significativamente menor (~200-300M).",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ForensicDetection_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "puentes.cfo_to_fcf",
+          "cita_corta": "FCF promedio FY2021-2023: ~199M; FCF FY2024: 1,036M; capex FY24 = 127M vs promedio 296M",
+          "interpretacion": "El FCF base para valoración está distorsionado; usar el FCF de FY2024 sin normalizar sobreestimaría el valor intrínseco."
+        }
+      ],
+      "falsacion": {
+        "test": "FCF FY2025 supera 700M HKD con capex normalizado (>200M HKD)",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La acumulación masiva de caja (60% del market cap) sin retorno eficiente al accionista configura un riesgo de value trap con problemas de agencia, particularmente en una empresa listada en HKEX.",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ForensicDetection_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "red_flags.RF08",
+          "cita_corta": "Caja/Market cap ~60%; EV/EBIT ~2.4x; CFF FY2024 modesto (~570M incluyendo dividendos)",
+          "interpretacion": "El mercado descuenta la caja acumulada, lo que sugiere expectativa de que no será devuelta eficientemente."
+        }
+      ],
+      "falsacion": {
+        "test": "La empresa anuncia programa de recompra >500M HKD o dividendo especial significativo",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "PR"
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El DSO de ~154 días y DIO de ~181 días son excesivamente altos para el sector de terminales de pago electrónico, indicando posible deterioro de calidad de receivables y riesgo de obsolescencia de inventario.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ForensicDetection_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "red_flags.RF04 y RF05",
+          "cita_corta": "DSO ~154 días; DIO ~181 días; CCC ~228 días; AR/Revenue = 42%",
+          "interpretacion": "El ciclo de conversión de efectivo extendido explica parcialmente la baja conversión EBIT→CFO."
+        }
+      ],
+      "falsacion": {
+        "test": "DSO cae por debajo de 120 días y DIO por debajo de 140 días en dos periodos consecutivos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_007",
+      "tipo": "INFERENCIA",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "La expansión anómala del margen bruto (41%→47%) a pesar de caída de ingresos sugiere cambio de mix de productos o pricing agresivo que puede no ser sostenible con volúmenes en decline.",
+      "confianza_0_1": 0.65,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ForensicDetection_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "red_flags.RF07",
+          "cita_corta": "Margen bruto: 41% (FY22)→44% (FY23)→47.2% (FY24) con revenue -25%",
+          "interpretacion": "Divergencia inusual que requiere monitoreo; podría indicar abandono de líneas de bajo margen o pricing insostenible."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen bruto se mantiene >45% con volúmenes estabilizados o en recuperación",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Los ingresos de FY2025 serán inferiores a 5,800M HKD (caída >4% vs FY2024)",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Revenue total reportado en Annual Report FY2025 < 5,800M HKD",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "El CFO de FY2025 será inferior a 600M HKD, confirmando que FY2024 fue una anomalía",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "CFO anual reportado en estado de flujos de efectivo FY2025 < 600M HKD",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "El margen EBIT de H2-2025 o FY2025 caerá por debajo del 14%",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT/Revenue anual o semestral < 14% en reporte HKEX",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "La empresa NO anunciará un programa de recompra significativo (>300M HKD) ni dividendo especial en los próximos 12 meses",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Ausencia de anuncio de buyback o special dividend en HKEX filings/PR",
+      "fuente_prevista": "PR"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "El DSO se mantendrá por encima de 140 días al cierre de FY2025",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Trade receivables / (Revenue/365) > 140 en balance FY2025",
+      "fuente_prevista": "filing"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "La posición de caja neta se mantendrá por encima de 2,500M HKD al cierre de FY2025",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Caja y equivalentes - deuda financiera > 2,500M HKD en balance FY2025",
+      "fuente_prevista": "filing"
+    },
+    {
+      "pred_id": "PRED_007",
+      "descripcion": "El capex de FY2025 se mantendrá por debajo de 150M HKD, confirmando patrón de subinversión",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Purchase of PPE en estado de flujos de efectivo FY2025 < 150M HKD",
+      "fuente_prevista": "filing"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de trade receivables por antigüedad y provisiones de bad debt (FY2024 y H1-2025)",
+      "por_que_importa": "DSO de 154 días requiere análisis de aging para distinguir entre concentración de clientes y deterioro crediticio.",
+      "como_obtenerlo": "Annual Report FY2024 / Interim Report H1-2025, notas sobre trade receivables y credit risk"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de inventarios por categorías y provisiones de obsolescencia",
+      "por_que_importa": "DIO de 181 días en hardware POS requiere verificar si hay acumulación de producto obsoleto.",
+      "como_obtenerlo": "Annual Report FY2024, notas sobre inventories y write-downs"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Opinión de auditoría y going concern language del Annual Report FY2024",
+      "por_que_importa": "Confirmar que no hay reservas del auditor sobre la viabilidad operativa o calidad de estados financieros.",
+      "como_obtenerlo": "Annual Report FY2024, sección de Independent Auditor's Report"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Política de reconocimiento de ingresos y detalle de contratos con clientes bajo IFRS 15",
+      "por_que_importa": "DSO excesivo puede indicar reconocimiento agresivo de ingresos o channel stuffing.",
+      "como_obtenerlo": "Annual Report FY2024, nota de accounting policies y revenue recognition"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de stock-based compensation y dilución de acciones",
+      "por_que_importa": "EPS diluido significativamente inferior al básico (0.658 vs 0.669) sugiere SBC relevante.",
+      "como_obtenerlo": "Annual Report FY2024, notas sobre share option schemes y SBC expense"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Transacciones con partes relacionadas (RPT) y detalle de subsidiarias principales",
+      "por_que_importa": "Riesgo de agencia elevado en empresa HKEX con caja excesiva; RPT pueden ser canal de extracción de valor.",
+      "como_obtenerlo": "Annual Report FY2024, nota de related party transactions"
+    },
+    {
+      "prioridad": "BAJA",
+      "item": "Annual Reports FY2018, FY2019, FY2020 para completar serie histórica",
+      "por_que_importa": "El gap de 3 años limita la normalización de métricas y la detección de patrones de largo plazo.",
+      "como_obtenerlo": "HKEX SEHK website, sección de disclosure de PAX Global (stock code 327)"
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.72,
+        "razon_principal": "La empresa es financieramente indestructible en horizonte de 12-24 meses (caja masiva, deuda cero), pero presenta un perfil de value trap con 6 banderas de severidad ALTA en calidad de earnings, decline operativo y gobernanza de capital que justifican vigilancia activa."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 4,
+          "por_que": [
+            "Caja neta de 3,084M HKD (~395M USD) sin deuda financiera otorga runway superior a 14 años incluso con delta_cash negativo.",
+            "CFO positivo en todos los periodos analizados (mínimo 154M HKD en H1-2025), eliminando riesgo de quema de caja.",
+            "Inexistencia de covenants, vencimientos de deuda o líneas de crédito que puedan restringir operaciones.",
+            "Las banderas ALTO detectadas son de calidad operativa/earnings, no de supervivencia/solvencia.",
+            "Ratio de liquidez inmediata efectivamente infinito (caja >> pasivos totales).",
+            "Riesgo de dilución BAJO: no hay necesidad de capital dado el excedente de caja."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 3083598000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "Short-term bank deposits: 162,490K HKD",
+            "Restricted cash: 24,212K HKD",
+            "Total liquidez ampliada: ~3,270M HKD"
+          ],
+          "runway_meses_estimado": 172,
+          "metodo_estimacion": "Basado en delta_cash H1-2025 anualizado (-215M HKD/año) sobre caja disponible de 3,084M HKD. Escenario conservador asumiendo que CFO no cubre CFF.",
+          "notas": "Nota: todas las cifras etiquetadas _usd están en HKD por convención del esquema del TruthPack. Tipo de cambio peg HKD/USD ~7.80."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 0,
+          "deuda_neta_usd": -3083598000,
+          "coste_deuda_aprox_pct": 0,
+          "coverage_intereses": null,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "No hay deuda financiera. Las únicas obligaciones financieras son lease liabilities de 87,825K HKD, irrelevantes frente a la caja disponible."
+          },
+          "vencimientos": [
+            {
+              "anio": 2025,
+              "importe_usd": 18219000,
+              "tipo": "leasing",
+              "riesgo": "BAJO",
+              "fuente_ref": {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "lease_data"
+              }
+            },
+            {
+              "anio": 2026,
+              "importe_usd": 69606000,
+              "tipo": "leasing",
+              "riesgo": "BAJO",
+              "fuente_ref": {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "lease_data (non-current)"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "BAJO",
+            "comentario": "Sin deuda financiera ni líneas de crédito, no existen covenants aplicables. Riesgo de breach inexistente."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "BAJO",
+          "motores": [
+            "SBC (diferencia EPS básico 0.669 vs diluido 0.658 sugiere opciones/RSU activas)"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "No hay necesidad de emitir capital dado el excedente de caja. La diferencia entre EPS básico y diluido (~1.6%) indica SBC modesta. No se detectan convertibles ni warrants significativos."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "La calidad de earnings es deficiente. La conversión EBIT→CFO es crónicamente baja (CFO < 50% del EBIT en 4 de 6 periodos), indicando consumo persistente de working capital. El FCF de FY2024 está distorsionado por capex inusualmente bajo y liberación puntual de WC. DSO de 154 días y DIO de 181 días son anormalmente altos para el sector de terminales de pago. La expansión del margen bruto (41%→47%) mientras los ingresos caen es una divergencia que requiere investigación adicional.",
+        "red_flags": [
+          {
+            "flag_id": "F-001",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Volatilidad extrema en conversión EBIT→CFO con patrón dominante de CFO < 50% del EBIT, indicando consumo crónico de capital de trabajo.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.9,
+            "por_que_importa": "Invalida el FCF como medida de generación de valor y sugiere que los earnings reportados no se convierten en caja recurrente.",
+            "evidencias": [
+              {
+                "source_id": "ForensicDetection_v1",
+                "ubicacion": "red_flags.RF01 / puentes.ebit_to_cfo",
+                "cita_corta": "CFO/EBIT: 0.27x-0.45x (FY21-23), 1.36x anomalía (FY24), 0.33x (H1-25)",
+                "interpretacion": "El patrón se confirma en H1-2025, validando que FY2024 fue excepción."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "CFO/EBIT se mantiene > 0.70x durante FY2025 completo",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-002",
+            "categoria": "REVENUE_RECOGNITION",
+            "descripcion": "DSO de ~154 días excesivamente alto para sector de terminales de pago electrónico, sugiriendo posible reconocimiento agresivo de ingresos o channel stuffing.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.75,
+            "por_que_importa": "Un DSO > 100 días en hardware POS es anómalo y puede indicar que los ingresos reportados incluyen ventas no cobradas o con alto riesgo de reversión.",
+            "evidencias": [
+              {
+                "source_id": "ForensicDetection_v1",
+                "ubicacion": "red_flags.RF04",
+                "cita_corta": "AR 2,544M / Revenue 6,045M = DSO 154 días; AR/Activos = 28%",
+                "interpretacion": "Necesario desglose de aging para discriminar entre concentración de clientes y deterioro."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "El desglose de aging muestra >80% de AR con menos de 90 días y provisiones de bad debt estables",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "flag_id": "F-003",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "Colapso de capex (345M→127M→56M anualizado) infla artificialmente el FCF y sugiere subinversión en activos productivos.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.85,
+            "por_que_importa": "El FCF de FY2024 está inflado por ~170M HKD solo por la reducción de capex vs promedio histórico, sin contar el efecto WC.",
+            "evidencias": [
+              {
+                "source_id": "ForensicDetection_v1",
+                "ubicacion": "red_flags.RF03",
+                "cita_corta": "Capex: 345M(FY21)→331M(FY22)→213M(FY23)→127M(FY24)→28M(H1-25)",
+                "interpretacion": "Depreciación FY2024 de 98M supera capex de 127M, confirmando que casi todo es mantenimiento sin inversión de crecimiento."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Capex FY2025 supera 200M HKD indicando reanudación de inversión",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "flag_id": "F-004",
+            "categoria": "ONE_OFFS",
+            "descripcion": "Expansión anómala del margen bruto (41%→47%) a pesar de caída del 25% en ingresos, sugiriendo cambio de mix o pricing insostenible.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.6,
+            "por_que_importa": "Si la expansión de margen es por abandono de líneas de bajo margen, el revenue base sostenible es aún menor de lo reportado.",
+            "evidencias": [
+              {
+                "source_id": "ForensicDetection_v1",
+                "ubicacion": "red_flags.RF07",
+                "cita_corta": "Margen bruto: 41%(FY22)→44%(FY23)→47.2%(FY24)",
+                "interpretacion": "Divergencia inusual entre margen creciente y volumen cayendo."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Margen bruto se mantiene >45% con ingresos estabilizados o crecientes en FY2025",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-005",
+            "categoria": "OTHER",
+            "descripcion": "DIO de ~181 días excesivo para hardware tecnológico con riesgo de obsolescencia, especialmente en contexto de ingresos decrecientes.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.65,
+            "por_que_importa": "Inventario acumulado de terminales POS puede requerir write-downs si la demanda no se recupera.",
+            "evidencias": [
+              {
+                "source_id": "ForensicDetection_v1",
+                "ubicacion": "red_flags.RF05",
+                "cita_corta": "Inventarios 1,587M / COGS 3,191M = DIO 181 días",
+                "interpretacion": "Sin desglose de provisiones de inventario, el riesgo de write-down permanece indeterminado."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "DIO cae por debajo de 150 días sin write-down significativo en FY2025",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "filing"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "La distorsión EBIT→CFO es severa y persistente. En 4 de 6 periodos, el CFO representó menos del 50% del EBIT. FY2024 fue una excepción por liberación masiva de working capital (~673M HKD swing vs FY2023) durante contracción del negocio. H1-2025 confirma retorno al patrón deficiente (CFO/EBIT = 0.33x). El puente está dominado por movimientos de capital de trabajo, no por ajustes de depreciación o impuestos.",
+            "posibles_distorsiones": [
+              "Capital circulante (driver principal: DSO 154 días y DIO 181 días consumen caja)",
+              "Liberación puntual de WC en FY2024 (reversión en H1-2025)",
+              "Impuestos pagados vs devengados (no se dispone de detalle)"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "El FCF de FY2024 (1,036M) es un outlier generado por la combinación de CFO excepcionalmente alto y capex excepcionalmente bajo. FCF promedio FY2021-2023 fue ~199M HKD. El capex ha colapsado de 345M (FY2021) a 28M anualizado (H1-2025), sugiriendo subinversión que eventualmente impactará la competitividad del producto.",
+            "capex_riesgo": "ALTO",
+            "notas": "No se dispone de desglose capex mantenimiento vs crecimiento. Depreciación FY2024 = 98M sugiere capex de mantenimiento mínimo ~100M; capex FY2024 de 127M es esencialmente solo mantenimiento."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "UNKNOWN",
+          "comentario": "No se detecta programa de recompra activo. Con caja de 3,084M HKD y deuda cero, la empresa tiene capacidad amplia para recompras significativas, pero no las ejecuta."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "Diferencia EPS básico/diluido (0.669 vs 0.658, ~1.6%) sugiere SBC existente pero no excesiva. No se dispone del monto absoluto de SBC expense."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "No se detectan adquisiciones recientes significativas. Sin embargo, la combinación de caja masiva acumulada, decline operativo y ausencia de recompras/dividendos especiales sugiere riesgo de M&A destructora de valor como alternativa a retorno de capital."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "No se dispone de datos de insider ownership ni transacciones de insiders. Solicitar en peticiones_de_fuentes."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Aceleración del decline de ingresos a -15% anual por obsolescencia de hardware POS ante adopción de software-defined payments y smartphones como terminales.",
+            "impacto_en_supervivencia": "BAJO",
+            "mecanismo_de_dolor": [
+              "Caída de CFO por menor volumen y desapalancamiento operativo",
+              "Write-downs de inventario acumulado",
+              "Compresión de margen operativo a un dígito",
+              "Destrucción de valor de la caja acumulada si se invierte en M&A defensivo"
+            ],
+            "indicadores_tempranos": [
+              "Revenue H2-2025 < 2,600M HKD (< H1-2025)",
+              "Margen bruto empieza a comprimirse (reversión de tendencia expansiva)",
+              "Clientes principales migran a soluciones software-only",
+              "Write-downs de inventario reportados en interim/annual"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Deterioro severo de working capital: DSO supera 180 días y CFO se vuelve negativo por 2+ trimestres mientras los dividendos mantienen el CFF negativo.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "Quema de caja por CFO negativo + dividendos obligados",
+              "Erosión acelerada de la posición de caja neta",
+              "Potencial suspensión de dividendo dañando el precio"
+            ],
+            "indicadores_tempranos": [
+              "CFO H2-2025 negativo",
+              "Provisiones de bad debt superiores a 100M HKD",
+              "DSO cruzando 170 días",
+              "Anuncio de reducción de dividendo interim"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "M&A destructora de valor: la empresa usa la caja acumulada para una adquisición grande (>1,000M HKD) a múltiplos elevados que no genera retorno.",
+            "impacto_en_supervivencia": "BAJO",
+            "mecanismo_de_dolor": [
+              "Pérdida del colchón de caja que protege contra insolvencia",
+              "Goodwill impairment futuro",
+              "Integración que distrae del negocio core en decline"
+            ],
+            "indicadores_tempranos": [
+              "Anuncio de adquisición significativa sin justificación estratégica clara",
+              "Due diligence de targets en sectores no relacionados",
+              "Cambio en lenguaje de management sobre capital allocation"
+            ]
+          }
+        ],
+        "conclusion_downside": "El riesgo de supervivencia/insolvencia es prácticamente nulo incluso en los escenarios adversos más severos, dado el colchón de caja de 3,084M HKD y deuda cero. El downside real es destrucción de valor para el accionista a través de: (1) erosión lenta del negocio operativo sin reversión, (2) acumulación de caja sin retorno eficiente, y (3) posible M&A destructora de valor. El peor escenario realista en 24 meses es una empresa con ~2,500M HKD de caja, ~5,000M HKD de revenue, ~12% de margen operativo, y un precio de acción que sigue reflejando descuento de value trap."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "fcf",
+          "definicion": "CFO anual FY2025 cae por debajo de 300M HKD, confirmando que el CFO de FY2024 (1,163M) fue anomalía y que el negocio no genera caja operativa suficiente para cubrir dividendos (~520M/año).",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "CFO < 300M implica que los dividendos actuales son insostenibles sin consumir caja, transformando la tesis de inversión."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "margen",
+          "definicion": "Margen EBIT cae por debajo del 10% en cualquier periodo semestral o anual reportado.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Margen de un dígito con estructura de costos rígida (SGA 2,090M) señala desapalancamiento operativo irreversible."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "otro",
+          "definicion": "Ingresos FY2025 caen por debajo de 5,200M HKD (caída > 14% vs FY2024), confirmando aceleración del decline.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Aceleración del decline de ingresos confirma pérdida estructural de mercado y obsolescencia del portafolio de productos."
+        },
+        {
+          "kc_id": "KC-004",
+          "relacionado_con": "contabilidad",
+          "definicion": "DSO supera 180 días o se reportan provisiones de bad debt superiores a 200M HKD en cualquier periodo.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "DSO > 180 en hardware POS indica deterioro severo de calidad de receivables o reconocimiento agresivo de ingresos."
+        },
+        {
+          "kc_id": "KC-005",
+          "relacionado_con": "otro",
+          "definicion": "La empresa anuncia adquisición por importe superior a 1,000M HKD sin retorno estratégico evidente.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 24
+          },
+          "fuente_prevista": "PR",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirmaría peor escenario de agencia: destrucción de valor mediante M&A con la caja que protege la valoración actual."
+        },
+        {
+          "kc_id": "KC-006",
+          "relacionado_con": "supervivencia",
+          "definicion": "Write-down de inventario reportado superior a 150M HKD en un solo periodo.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Write-down significativo confirmaría obsolescencia tecnológica de la línea de productos POS con impacto en ingresos futuros."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 3.0,
+        "condiciones_para_aumentar_tamaño": [
+          "Estabilización o crecimiento de ingresos en FY2025 (>6,000M HKD)",
+          "Anuncio de programa de recompra significativo (>500M HKD) o dividendo especial",
+          "CFO/EBIT normalizado sostenido > 0.70x por dos periodos consecutivos",
+          "DSO cayendo por debajo de 130 días confirmando mejora de calidad de receivables",
+          "Capex aumentando a >200M HKD señalando reinversión en competitividad"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "CFO FY2025 < 300M HKD confirmando insostenibilidad de dividendos",
+          "Margen EBIT < 10% señalando desapalancamiento operativo irreversible",
+          "Revenue aceleración del decline (< 5,200M HKD en FY2025)",
+          "M&A destructora de valor > 1,000M HKD",
+          "DSO > 180 días o write-down de inventario > 150M HKD"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "detalle_aging_receivables",
+          "por_que_importa": "DSO de 154 días requiere análisis de aging para discriminar entre concentración de clientes y deterioro crediticio.",
+          "como_obtenerlo": "Annual Report FY2024, notas sobre trade receivables y credit risk management"
+        },
+        {
+          "item": "provisiones_inventario",
+          "por_que_importa": "DIO de 181 días en hardware POS requiere verificar si hay obsolescencia acumulada no provisionada.",
+          "como_obtenerlo": "Annual Report FY2024, notas sobre inventories (raw materials, WIP, finished goods) y write-down policies"
+        },
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Cuantificar la dilución real y el costo de compensación para ajustar el FCF sostenible.",
+          "como_obtenerlo": "Annual Report FY2024, notas sobre share option schemes y equity-settled share-based payments"
+        },
+        {
+          "item": "auditor_opinion",
+          "por_que_importa": "Confirmar calidad de estados financieros y ausencia de going concern language.",
+          "como_obtenerlo": "Annual Report FY2024, sección Independent Auditor's Report"
+        },
+        {
+          "item": "related_party_transactions",
+          "por_que_importa": "Riesgo de agencia elevado por caja masiva; las RPT son canal potencial de extracción de valor.",
+          "como_obtenerlo": "Annual Report FY2024, nota de related party transactions"
+        },
+        {
+          "item": "detalle_capex",
+          "por_que_importa": "Sin desglose capex mantenimiento vs crecimiento, no se puede estimar FCF sostenible con precisión.",
+          "como_obtenerlo": "Annual Report FY2024, nota de property plant & equipment y discussion en MD&A"
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Análisis basado en TruthPack, ImpliedExpectations y ForensicDetection fusionado; no se dispuso de SourcesPack para revisión documental directa.",
+      "Campos _usd del TP contienen HKD (tipo cambio peg ~7.80 no aplicado); ratios internamente consistentes pero valores absolutos no comparables con USD.",
+      "No se dispone de opinión de auditoría, going concern language, RPT ni desglose de SBC.",
+      "Balance sheet histórico no disponible; análisis de evolución de WC limitado al snapshot FY2024.",
+      "Gap de 3 años en serie histórica (FY2018-FY2020) limita profundidad de normalización."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-23T15:45:00Z",
+    "inputs_hash": "ForensicDetection_v1:CASE_20260223_0327+TruthPack_v1:CASE_20260223_0327+ImpliedExpectations_v1:CASE_20260223_0327"
+  }
+}

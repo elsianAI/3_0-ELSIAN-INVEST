@@ -1,82 +1,401 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ForensicDetection_v1",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "version_esquema",
-    "caso_id",
-    "fecha_corte",
-    "red_flags",
-    "liquidez",
-    "puentes",
-    "kill_criteria_candidatos"
-  ],
-  "properties": {
-    "version_esquema": {
-      "type": "string",
-      "const": "ForensicDetection_v1"
-    },
-    "caso_id": {
-      "type": "string",
-      "minLength": 1
-    },
-    "fecha_corte": {
-      "type": "string",
-      "format": "date"
-    },
-    "ticker": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "red_flags": {
-      "type": "array",
-      "items": {
-        "type": "object"
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260223_0327",
+  "fecha_corte": "2026-02-23",
+  "ticker": "0327",
+  "red_flags": [
+    {
+      "id": "RF01",
+      "area": "Riesgo de deterioro económico",
+      "descripcion": "Caída sostenida de ingresos y EBIT entre FY2022 y FY2024 sin reversión visible en los datos intermedios.",
+      "source_id": "TruthPack_v1.historico_anual",
+      "ubicacion": "bloque FY2022, FY2023, FY2024",
+      "evidencia": {
+        "ingresos_FY2022_hkd": 8062702000,
+        "ingresos_FY2024_hkd": 6044878000,
+        "cambio_ingresos_pct": -24.99,
+        "ebit_FY2022_hkd": 1429342000,
+        "ebit_FY2024_hkd": 856163000,
+        "cambio_ebit_pct": -40.13
       }
     },
-    "liquidez": {
-      "type": "object",
-      "additionalProperties": true
-    },
-    "puentes": {
-      "type": "object",
-      "additionalProperties": true
-    },
-    "kill_criteria_candidatos": {
-      "type": "array",
-      "items": {
-        "type": "object"
+    {
+      "id": "RF02",
+      "area": "Puente EBIT→CFO",
+      "descripcion": "Discrepancias de conversión EBIT-CFO de magnitud elevada, con cambio de signo entre FY2023 y FY2024.",
+      "source_id": "TruthPack_v1.historico_anual",
+      "ubicacion": "FY2023 y FY2024 (columnas ebit_usd y cfo_usd)",
+      "evidencia": {
+        "FY2023": {
+          "ebit_hkd": 1254366000,
+          "cfo_hkd": 490017000,
+          "delta_pct": -60.9
+        },
+        "FY2024": {
+          "ebit_hkd": 856163000,
+          "cfo_hkd": 1162691000,
+          "delta_pct": 35.8
+        },
+        "H1_2025": {
+          "ebit_hkd": 470997000,
+          "cfo_hkd": 153656000,
+          "delta_pct": -67.43
+        }
       }
     },
-    "report_type": {
-      "type": [
-        "string",
-        "null"
-      ]
+    {
+      "id": "RF03",
+      "area": "Capex y sostenibilidad de FCF",
+      "descripcion": "La caída abrupta del CAPEX en FY2024 puede inflar FCF de forma mecánica frente a años previos.",
+      "source_id": "TruthPack_v1.historico_anual",
+      "ubicacion": "FY2021-FY2024 capex_usd",
+      "evidencia": {
+        "capex_FY2021_hkd": -344869000,
+        "capex_FY2022_hkd": -330609000,
+        "capex_FY2023_hkd": -213001000,
+        "capex_FY2024_hkd": -126876000,
+        "capex_FY2024_vs_FY2023_pct": -40.42,
+        "capex_FY2024_vs_promedio_pct": -49.98
+      },
+      "limitacion": "No hay desglose de capex en mantenimiento vs crecimiento en el TP."
     },
-    "input_refs": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "additionalProperties": true
+    {
+      "id": "RF04",
+      "area": "Anomalías de capital de trabajo",
+      "descripcion": "Niveles de capital de trabajo neto elevados en el balance 2024; requiere validación de calidad de cobranza y política de inventarios.",
+      "source_id": "TruthPack_v1.balance_sheet_ultimo",
+      "ubicacion": "balance_sheet_ultimo FY2024",
+      "evidencia": {
+        "cuentas_por_cobrar_hkd": 2543884000,
+        "inventarios_hkd": 1587039000,
+        "cuentas_por_pagar_hkd": 937211000,
+        "capital_trabajo_neto_hkd": 3193712000,
+        "capital_trabajo_pct_ingresos": 52.87,
+        "dso_365": 153.7,
+        "inventory_days_365": 181.4,
+        "dpo_365": 107.1,
+        "ccc_365": 228.0
+      }
     },
-    "log": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "additionalProperties": true
+    {
+      "id": "RF05",
+      "area": "Pasivos operativos fuera de deuda financiera",
+      "descripcion": "No hay debt financiero, pero sí obligaciones por lease con costo financiero; requieren seguimiento en estructura contractual/garantías.",
+      "source_id": "TruthPack_v1.lease_data y TruthPack_v1.balance_sheet_ultimo",
+      "ubicacion": "lease_data y balance_sheet_ultimo FY2024",
+      "evidencia": {
+        "deuda_total_usd_label": 0,
+        "lease_liabilities_current_hkd": 18219000,
+        "lease_liabilities_non_current_hkd": 69606000,
+        "lease_liabilities_total_hkd": 87825000,
+        "lease_interest_expense_hkd": 5556000
+      }
     },
-    "_meta": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "additionalProperties": true
+    {
+      "id": "RF06",
+      "area": "Insuficiencia de granularidad forense",
+      "descripcion": "No se dispone de campos canónicos explícitos para pruebas de señal de manipulación como goodwill movement, stock-based comp, impuestos pagados ni desglose de RPT.",
+      "source_id": "TruthPack_v1._field_sources y TruthPack_v1.log.limitaciones",
+      "ubicacion": "limites de cobertura y notas de calidad del TP"
     }
+  ],
+  "liquidez": {
+    "fecha_balance": "2024-12-31",
+    "moneda": "HKD",
+    "caja_hkd": 3083598000,
+    "disponible_adicional_hkd": {
+      "short_term_deposits_hkd": 162490000,
+      "restricted_cash_hkd": 24212000,
+      "total_incluido_adicional_hkd": 3270298000
+    },
+    "deuda_financiera_hkd": 0,
+    "deuda_total_financiera": {
+      "valor_hkd": 0,
+      "observacion": "deuda financiera reportada cero; gastos de interés atribuibles a lease"
+    },
+    "leasings": {
+      "lease_liabilities_current_hkd": 18219000,
+      "lease_liabilities_non_current_hkd": 69606000
+    },
+    "runway_12m": {
+      "metodo": "patrón semestral H1-2025 anualizado",
+      "burn_anual_hkd": -215080000,
+      "runway_meses": 172,
+      "runway_12_a_24_meses": "cubierto con holgura en escenario base"
+    },
+    "vencimientos_12_24m": {
+      "lease_current_12m": 18219000,
+      "otros_vencimientos_financieros": 0
+    },
+    "riesgo_covenants": {
+      "covenants_detectables": false,
+      "fundamento": "sin deuda bancaria/borrowing; no se observan cláusulas de covenants financieras en el TP"
+    },
+    "riesgo_dilucion": {
+      "base": "sin necesidad de financiación externa en base actual de caja",
+      "gatillo_principal": "si CFO y FCF se deterioran simultáneamente y CFF mantiene salidas negativas, podría aumentarse presión de caja/capital raising",
+      "sh_approx": 1061882536
+    }
+  },
+  "puentes": {
+    "ebit_to_cfo": [
+      {
+        "periodo": "FY2021",
+        "ebit_usd": 1277972000,
+        "cfo_usd": 347659000,
+        "delta_cfo_minus_ebit_usd": -930313000,
+        "delta_pct_abs": 72.85,
+        "stock_based_comp_usd": null,
+        "cambios_wc_usd": null,
+        "impuestos_pagados_usd": null,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2021"
+      },
+      {
+        "periodo": "FY2022",
+        "ebit_usd": 1429342000,
+        "cfo_usd": 648527000,
+        "delta_cfo_minus_ebit_usd": -780815000,
+        "delta_pct_abs": 54.6,
+        "stock_based_comp_usd": null,
+        "cambios_wc_usd": null,
+        "impuestos_pagados_usd": null,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2022"
+      },
+      {
+        "periodo": "FY2023",
+        "ebit_usd": 1254366000,
+        "cfo_usd": 490017000,
+        "delta_cfo_minus_ebit_usd": -764349000,
+        "delta_pct_abs": 60.9,
+        "stock_based_comp_usd": null,
+        "cambios_wc_usd": null,
+        "impuestos_pagados_usd": null,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2023"
+      },
+      {
+        "periodo": "FY2024",
+        "ebit_usd": 856163000,
+        "cfo_usd": 1162691000,
+        "delta_cfo_minus_ebit_usd": 306528000,
+        "delta_pct_abs": 35.81,
+        "stock_based_comp_usd": null,
+        "cambios_wc_usd": null,
+        "impuestos_pagados_usd": null,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2024"
+      },
+      {
+        "periodo": "H1-2025",
+        "ebit_usd": 470997000,
+        "cfo_usd": 153656000,
+        "delta_cfo_minus_ebit_usd": -317341000,
+        "delta_pct_abs": 67.4,
+        "stock_based_comp_usd": null,
+        "cambios_wc_usd": null,
+        "impuestos_pagados_usd": null,
+        "source_id": "TruthPack_v1.historico_trimestral",
+        "ubicacion": "H1-2025"
+      }
+    ],
+    "cfo_to_fcf": [
+      {
+        "periodo": "FY2021",
+        "cfo_usd": 347659000,
+        "capex_usd": -344869000,
+        "fcf_usd": 692528000,
+        "delta_fcf_minus_cfo_usd": 344869000,
+        "capex_ratio_al_cfo_pct": 99.2,
+        "mantenimiento_vs_crecimiento_capex": "no separado en fuente",
+        "dividendos_recompras_usd": null,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2021"
+      },
+      {
+        "periodo": "FY2022",
+        "cfo_usd": 648527000,
+        "capex_usd": -330609000,
+        "fcf_usd": 979136000,
+        "delta_fcf_minus_cfo_usd": 330609000,
+        "capex_ratio_al_cfo_pct": 51.0,
+        "mantenimiento_vs_crecimiento_capex": "no separado en fuente",
+        "dividendos_recompras_usd": null,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2022"
+      },
+      {
+        "periodo": "FY2023",
+        "cfo_usd": 490017000,
+        "capex_usd": -213001000,
+        "fcf_usd": 703016000,
+        "delta_fcf_minus_cfo_usd": 213001000,
+        "capex_ratio_al_cfo_pct": 43.5,
+        "mantenimiento_vs_crecimiento_capex": "no separado en fuente",
+        "dividendos_recompras_usd": null,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2023"
+      },
+      {
+        "periodo": "FY2024",
+        "cfo_usd": 1162691000,
+        "capex_usd": -126876000,
+        "fcf_usd": 1035815000,
+        "delta_fcf_minus_cfo_usd": 126876000,
+        "capex_ratio_al_cfo_pct": 10.9,
+        "mantenimiento_vs_crecimiento_capex": "no separado en fuente",
+        "dividendos_recompras_usd": null,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2024"
+      },
+      {
+        "periodo": "H1-2024",
+        "cfo_usd": 430686000,
+        "capex_usd": -115055000,
+        "fcf_usd": 545741000,
+        "delta_fcf_minus_cfo_usd": 115055000,
+        "capex_ratio_al_cfo_pct": 26.7,
+        "mantenimiento_vs_crecimiento_capex": "no separado en fuente",
+        "dividendos_recompras_usd": null,
+        "source_id": "TruthPack_v1.historico_trimestral",
+        "ubicacion": "H1-2024"
+      },
+      {
+        "periodo": "H1-2025",
+        "cfo_usd": 153656000,
+        "capex_usd": -28260000,
+        "fcf_usd": 181916000,
+        "delta_fcf_minus_cfo_usd": 28260000,
+        "capex_ratio_al_cfo_pct": 18.4,
+        "mantenimiento_vs_crecimiento_capex": "no separado en fuente",
+        "dividendos_recompras_usd": null,
+        "source_id": "TruthPack_v1.historico_trimestral",
+        "ubicacion": "H1-2025"
+      }
+    ],
+    "distorsiones_significativas_>=15pct": [
+      {
+        "etapa": "EBIT→CFO",
+        "periodo": "FY2021",
+        "distorsion_pct_abs": 72.85,
+        "cumple_umbral": true,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2021"
+      },
+      {
+        "etapa": "EBIT→CFO",
+        "periodo": "FY2022",
+        "distorsion_pct_abs": 54.6,
+        "cumple_umbral": true,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2022"
+      },
+      {
+        "etapa": "EBIT→CFO",
+        "periodo": "FY2023",
+        "distorsion_pct_abs": 60.9,
+        "cumple_umbral": true,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2023"
+      },
+      {
+        "etapa": "EBIT→CFO",
+        "periodo": "H1-2025",
+        "distorsion_pct_abs": 67.43,
+        "cumple_umbral": true,
+        "source_id": "TruthPack_v1.historico_trimestral",
+        "ubicacion": "H1-2025"
+      },
+      {
+        "etapa": "CFO→FCF (capex)",
+        "periodo": "FY2021",
+        "distorsion_pct_abs": 99.2,
+        "cumple_umbral": true,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2021"
+      },
+      {
+        "etapa": "CFO→FCF (capex)",
+        "periodo": "FY2022",
+        "distorsion_pct_abs": 51.0,
+        "cumple_umbral": true,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2022"
+      },
+      {
+        "etapa": "CFO→FCF (capex)",
+        "periodo": "FY2023",
+        "distorsion_pct_abs": 43.5,
+        "cumple_umbral": true,
+        "source_id": "TruthPack_v1.historico_anual",
+        "ubicacion": "FY2023"
+      },
+      {
+        "etapa": "CFO→FCF (capex)",
+        "periodo": "H1-2024",
+        "distorsion_pct_abs": 26.7,
+        "cumple_umbral": true,
+        "source_id": "TruthPack_v1.historico_trimestral",
+        "ubicacion": "H1-2024"
+      },
+      {
+        "etapa": "CFO→FCF (capex)",
+        "periodo": "H1-2025",
+        "distorsion_pct_abs": 18.4,
+        "cumple_umbral": true,
+        "source_id": "TruthPack_v1.historico_trimestral",
+        "ubicacion": "H1-2025"
+      }
+    ]
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC01",
+      "condicion": "Si en dos semestres consecutivos dentro de los próximos 12-24 meses el CFO semestral cae por debajo de 200,000,000 HKD y el capex vuelve a la horquilla alta de FY2021-FY2022 (>=330,000,000 HKD anual equivalente) sin recuperación de ingresos, el FCF deja de cubrir reinversión y la quema neta de caja anual supera 500,000,000 HKD.",
+      "ventana_12_24_meses": "2026-01-01 a 2027-12-31",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "id": "KC02",
+      "condicion": "Si se repite el patrón de CFF de H1-2025 (salidas de -284,182,000 HKD semestrales) junto con CFO semestral ≤153,656,000 HKD y capex semestral ≥100,000,000 HKD, el flujo neto operativo-financiero cae de forma persistente y la caja se erosiona sin soporte de nuevas líneas de crédito.",
+      "ventana_12_24_meses": "2026-01-01 a 2027-12-31",
+      "probabilidad": "BAJA"
+    },
+    {
+      "id": "KC03",
+      "condicion": "Si el capital de trabajo neto supera 60% de ingresos anuales y la empresa mantiene o amplía esa brecha por dos periodos semestrales (DSO+DI-DPO > 230 días), la tensión de caja operacional puede trasladar la empresa a estrés de liquidez incluso con deuda financiera cero.",
+      "ventana_12_24_meses": "12-24 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "id": "KC04",
+      "condicion": "Si en 12-24 meses se ejecutan salidas de caja de financiación (CFF) por encima de 1,300,000,000 HKD sin compensación operacional de CFO y sin nueva deuda bancaria/acciones, la empresa agotaría el 12-24m de runway bajo el nivel de caja actual.",
+      "ventana_12_24_meses": "2026-2027",
+      "probabilidad": "MEDIA"
+    }
+  ],
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1_partial",
+    "truth_pack_caso_id": "CASE_20260223_0327",
+    "implied_expectations_version": "ImpliedExpectations_v1",
+    "sources_pack_disponible": false,
+    "fuentes_usadas": [
+      "TruthPack_v1.historico_anual",
+      "TruthPack_v1.historico_trimestral",
+      "TruthPack_v1.balance_sheet_ultimo",
+      "TruthPack_v1.lease_data"
+    ]
+  },
+  "log": {
+    "limitaciones": [
+      "No se aportó SourcesPack_v1 para revisión documental adicional; ejecución basada en TruthPack_v1 y metadatos de trazabilidad interna.",
+      "Campos *_usd del TP representan HKD convertidos desde HK$'000 por convención; el tipo de cambio HKD/USD no fue aplicado en este cálculo operativo.",
+      "No hay desglose suficiente de stock-based compensation, impuestos pagados, RPT, goodwill movement, ni separación de capex por mantenimiento y crecimiento."
+    ]
+  },
+  "_meta": {
+    "resumen_metodologico": "ForensicDetection ejecutada con TP.status=PASS y cobertura crítica validada; sin scores de severidad ni veredicto final.",
+    "fecha_generacion": "2026-02-23"
   }
 }

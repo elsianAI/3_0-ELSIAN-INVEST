@@ -1,55 +1,311 @@
 {
-  "type": "result",
-  "subtype": "error_max_turns",
-  "duration_ms": 7125,
-  "duration_api_ms": 7107,
-  "is_error": false,
-  "num_turns": 2,
-  "stop_reason": null,
-  "session_id": "6a6adf85-1e98-4f92-bf33-5c28f8fb1d8f",
-  "total_cost_usd": 0.188015,
-  "usage": {
-    "input_tokens": 3,
-    "cache_creation_input_tokens": 29008,
-    "cache_read_input_tokens": 0,
-    "output_tokens": 268,
-    "server_tool_use": {
-      "web_search_requests": 0,
-      "web_fetch_requests": 0
-    },
-    "service_tier": "standard",
-    "cache_creation": {
-      "ephemeral_1h_input_tokens": 29008,
-      "ephemeral_5m_input_tokens": 0
-    },
-    "inference_geo": "",
-    "iterations": [],
-    "speed": "standard"
-  },
-  "modelUsage": {
-    "claude-opus-4-6": {
-      "inputTokens": 3,
-      "outputTokens": 268,
-      "cacheReadInputTokens": 0,
-      "cacheCreationInputTokens": 29008,
-      "webSearchRequests": 0,
-      "costUSD": 0.188015,
-      "contextWindow": 200000,
-      "maxOutputTokens": 32000
-    }
-  },
-  "permission_denials": [
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260223_0327",
+  "fecha_corte": "2026-02-23",
+  "ticker": "0327",
+  "red_flags": [
     {
-      "tool_name": "mcp__codex-native__codex",
-      "tool_use_id": "toolu_0177XvBzLgVmE2JJSCnFEeD2",
-      "tool_input": {
-        "prompt": "Read the SourcesPack file and any available filing sources for ticker 0327 in this directory. List what files exist in the case directory and _raw_filings directory.\n\nCheck these paths:\n1. ls the current directory for all JSON files\n2. ls the parent _raw_filings directory if it exists\n3. Read SourcesPack_v1_0327_2026-02-23.json (first 200 lines to understand structure)",
-        "cwd": "/Users/ismaelsanchezgarcia/Library/CloudStorage/OneDrive-Personal/ELSIAN_local/3_0-ELSIAN-INVEST/casos/0327/2026-02-23",
-        "approval-policy": "on-failure",
-        "sandbox": "read-only"
-      }
+      "id": "RF_001",
+      "area": "CALIDAD_CFO",
+      "titulo": "Volatilidad extrema en CFO sin explicación clara en working capital reportado",
+      "descripcion": "CFO saltó de 490M (FY2023) a 1,163M (FY2024), un incremento del 137%, mientras el net income cayó de 1,155M a 713M (-38%). En FY2023, CFO era solo el 42% del net income; en FY2024 subió al 163%. Este swing de ~673M en CFO con caída simultánea de earnings implica una liberación masiva de working capital o un cambio contable significativo. En H1-2025, el CFO ya colapsó a 154M (vs 431M en H1-2024), sugiriendo que el efecto FY2024 fue puntual.",
+      "magnitud": "CFO/NI ratio osciló de 0.42x (FY2023) a 1.63x (FY2024); swing de ~673M HKD en CFO",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual FY2023-FY2024, historico_trimestral H1-2025"
+    },
+    {
+      "id": "RF_002",
+      "area": "CUENTAS_POR_COBRAR",
+      "titulo": "Days Sales Outstanding (DSO) excesivamente alto",
+      "descripcion": "Cuentas por cobrar de 2,544M sobre ingresos anuales de 6,045M implican un DSO de ~154 días. Para una empresa de terminales de pago electrónico, un DSO superior a 100 días es anómalo y puede indicar reconocimiento agresivo de ingresos, clientes con dificultades de pago, o channel stuffing. Las AR representan el 28% de los activos totales.",
+      "magnitud": "DSO ~154 días; AR/Revenue = 42%; AR/Activos = 28%",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "balance_sheet_ultimo FY2024"
+    },
+    {
+      "id": "RF_003",
+      "area": "INVENTARIOS",
+      "titulo": "Days Inventory Outstanding (DIO) elevado con riesgo de obsolescencia",
+      "descripcion": "Inventarios de 1,587M sobre COGS de 3,191M implican un DIO de ~181 días. Para hardware de punto de venta (POS), ciclos de inventario superiores a 90-120 días sugieren acumulación de producto no vendido, riesgo de obsolescencia tecnológica, o producción que anticipa demanda que no se materializa. Combinado con ingresos en decline, el inventario puede requerir write-downs futuros.",
+      "magnitud": "DIO ~181 días; Inventario/COGS = 50%; Inventario/Activos = 17%",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "balance_sheet_ultimo FY2024, historico_anual FY2024 (COGS)"
+    },
+    {
+      "id": "RF_004",
+      "area": "TENDENCIA_INGRESOS",
+      "titulo": "Decline persistente de ingresos desde FY2022",
+      "descripcion": "Los ingresos han caído tres años consecutivos: 8,063M (FY2022) → 6,709M (FY2023, -17%) → 6,045M (FY2024, -10%). H1-2025 muestra continuación: 2,716M vs 3,013M en H1-2024 (-10%). La caída acumulada desde el pico es del 25%. Esto ocurre mientras SGA aumenta (1,943M→2,090M en FY2024) y R&D crece (567M→644M→684M), comprimiendo márgenes.",
+      "magnitud": "Revenue CAGR FY2022-FY2024: -13.4%; caída acumulada: -25%",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual FY2022-FY2024, historico_trimestral H1-2024 vs H1-2025"
+    },
+    {
+      "id": "RF_005",
+      "area": "CAPEX",
+      "titulo": "Colapso de capex que infla artificialmente el FCF",
+      "descripcion": "Capex ha caído dramáticamente: 345M (FY2021) → 331M (FY2022) → 213M (FY2023) → 127M (FY2024) → 28M anualizado en H1-2025 (~56M). Esto infla el FCF a 1,036M en FY2024. Si el capex regresara al promedio FY2021-2023 (~296M), el FCF caería a ~867M. Una empresa de hardware/tecnología que reduce capex un 63% en un año o bien está desinvirtiendo agresivamente o posponiendo inversión necesaria de mantenimiento.",
+      "magnitud": "Capex FY2024 = 127M vs promedio FY2021-FY2023 = 296M (-57%); H1-2025 capex = 28M (anualizado ~56M, -82% vs promedio)",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual FY2021-FY2024, historico_trimestral H1-2025"
+    },
+    {
+      "id": "RF_006",
+      "area": "MARGENES",
+      "titulo": "Compresión de margen operativo con gastos crecientes",
+      "descripcion": "Margen operativo cayó de 17.7% (FY2022) a 18.7% (FY2023) a 14.2% (FY2024). El EBIT cayó de 1,429M a 856M (-40%) en dos años. Simultáneamente, SGA creció de 1,846M a 2,090M (+13%) y R&D de 567M a 684M (+21%). La estructura de costos se rigidiza mientras el revenue contrae, patrón que puede acelerar la erosión de márgenes.",
+      "magnitud": "Margen EBIT de 17.7% (FY2022) a 14.2% (FY2024); SGA/Revenue de 24.1% a 34.6%",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual FY2022-FY2024"
+    },
+    {
+      "id": "RF_007",
+      "area": "MONEDA_ETIQUETADO",
+      "titulo": "Discrepancia sistemática de moneda: campos _usd contienen HKD",
+      "descripcion": "Todos los campos etiquetados como _usd en el TruthPack contienen valores en dólares de Hong Kong (HKD), no en USD. El tipo de cambio HKD/USD (~7.80) no fue aplicado. Esto significa que todos los valores absolutos están sobreestimados por un factor de ~7.8x en términos de USD real. Los ratios y múltiplos no se afectan (son internamente consistentes), pero los valores absolutos no son comparables con benchmarks en USD.",
+      "magnitud": "Factor de sobreestimación: ~7.8x en todos los valores absolutos",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "log.conversiones_aplicadas, log.limitaciones — múltiples entradas documentan este problema"
+    },
+    {
+      "id": "RF_008",
+      "area": "CONCENTRACION_CAJA",
+      "titulo": "Caja excesiva sin retorno eficiente al accionista",
+      "descripcion": "Caja de 3,084M HKD representa el 34% de activos totales y el 60% del market cap. La empresa no tiene deuda. A pesar de esta posición de caja masiva, el CFF muestra salidas modestas de 570M (FY2024) incluyendo dividendos. La caja acumulada sin despliegue eficiente genera descuento de gobernanza/agency cost, particularmente en una empresa de HKEX con posible control concentrado.",
+      "magnitud": "Caja/Market cap = 60%; Caja/Activos = 34%; Net cash position = 3,084M HKD (~395M USD)",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "balance_sheet_ultimo FY2024, mercado"
     }
   ],
-  "uuid": "25d68c41-7bde-48b0-b913-670d967e6cf0",
-  "errors": []
+  "liquidez": {
+    "caja_disponible_usd": 3083598000,
+    "nota_moneda": "Valor en HKD, no USD. En USD real: ~395M al tipo de cambio de 7.80",
+    "lineas_credito_disponibles": "No disponible en datos proporcionados; la empresa reporta cero deuda",
+    "deuda_total_usd": 0,
+    "deuda_neta_usd": -3083598000,
+    "lease_liabilities_total_usd": 87825000,
+    "runway_estimado_meses": "No aplica — empresa con caja neta masiva y CFO positivo. Runway teóricamente ilimitado bajo condiciones actuales.",
+    "vencimientos_deuda_12_24_meses": "Sin vencimientos de deuda financiera. Lease liabilities corrientes de 18,219K HKD (vencen dentro de 12 meses).",
+    "riesgo_covenant": "INEXISTENTE — la empresa no tiene deuda financiera ni líneas de crédito con covenants.",
+    "riesgo_dilucion": "BAJO — no hay necesidad de capital dado caja abundante y CFO positivo. No se identifican warrants o convertibles significativos en los datos disponibles.",
+    "current_ratio_estimado": "No calculable con precisión (faltan activos y pasivos corrientes desglosados), pero activos corrientes identificables (caja 3,084M + AR 2,544M + inventarios 1,587M = 7,215M) vs pasivos totales (1,605M) sugieren ratio muy superior a 2x.",
+    "evaluacion": "Posición de liquidez excepcionalmente fuerte. El riesgo no es de liquidez sino de eficiencia en el uso de capital. La caja acumulada genera un costo de oportunidad significativo."
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "periodos_analizados": [
+        "FY2022",
+        "FY2023",
+        "FY2024",
+        "H1-2024",
+        "H1-2025"
+      ],
+      "datos": [
+        {
+          "periodo": "FY2022",
+          "ebit_usd": 1429342000,
+          "net_income_usd": 1264675000,
+          "cfo_usd": 648527000,
+          "ratio_cfo_ebit": 0.45,
+          "ratio_cfo_ni": 0.51,
+          "diferencia_ebit_cfo_usd": -780815000,
+          "diferencia_pct": -54.6,
+          "distorsion_mayor_15pct": true,
+          "nota": "CFO muy inferior a EBIT y NI; implica consumo significativo de capital de trabajo o ajustes no monetarios negativos netos"
+        },
+        {
+          "periodo": "FY2023",
+          "ebit_usd": 1254366000,
+          "net_income_usd": 1155164000,
+          "cfo_usd": 490017000,
+          "ratio_cfo_ebit": 0.39,
+          "ratio_cfo_ni": 0.42,
+          "diferencia_ebit_cfo_usd": -764349000,
+          "diferencia_pct": -60.9,
+          "distorsion_mayor_15pct": true,
+          "nota": "Segundo año consecutivo con CFO representando menos del 50% del EBIT. Patrón persistente de consumo de working capital"
+        },
+        {
+          "periodo": "FY2024",
+          "ebit_usd": 856163000,
+          "net_income_usd": 713427000,
+          "cfo_usd": 1162691000,
+          "ratio_cfo_ebit": 1.36,
+          "ratio_cfo_ni": 1.63,
+          "diferencia_ebit_cfo_usd": 306528000,
+          "diferencia_pct": 35.8,
+          "distorsion_mayor_15pct": true,
+          "nota": "Inversión abrupta: CFO ahora SUPERA EBIT en 36%. Implica liberación masiva de working capital (~673M swing vs FY2023). El stock-based comp, depreciación (98M) y cambios de WC explican parcialmente"
+        },
+        {
+          "periodo": "H1-2024",
+          "ebit_usd": 537525000,
+          "net_income_usd": 454583000,
+          "cfo_usd": 430686000,
+          "ratio_cfo_ebit": 0.8,
+          "ratio_cfo_ni": 0.95,
+          "diferencia_pct": -19.9,
+          "distorsion_mayor_15pct": true,
+          "nota": "Ratio más normalizado en H1 que en FY completo; el efecto WC de FY2024 se concentró en H2"
+        },
+        {
+          "periodo": "H1-2025",
+          "ebit_usd": 470997000,
+          "net_income_usd": 390877000,
+          "cfo_usd": 153656000,
+          "ratio_cfo_ebit": 0.33,
+          "ratio_cfo_ni": 0.39,
+          "diferencia_pct": -67.4,
+          "distorsion_mayor_15pct": true,
+          "nota": "Colapso de CFO respecto a EBIT. El patrón pre-FY2024 se reanuda: CFO muy inferior a earnings, confirmando que FY2024 fue anómalo"
+        }
+      ],
+      "evaluacion": "DISTORSION SEVERA Y PERSISTENTE. El puente EBIT→CFO es altamente inestable: CFO/EBIT ha oscilado entre 0.33x y 1.36x en los últimos 4 periodos. El patrón dominante (FY2022, FY2023, H1-2025) muestra CFO sistemáticamente inferior al 50% del EBIT, sugiriendo que el negocio consume working capital crónico. FY2024 fue una excepción por liberación puntual. Esto es una bandera roja mayor para la calidad de los earnings."
+    },
+    "cfo_a_fcf": {
+      "periodos_analizados": [
+        "FY2021",
+        "FY2022",
+        "FY2023",
+        "FY2024",
+        "H1-2025"
+      ],
+      "datos": [
+        {
+          "periodo": "FY2021",
+          "cfo_usd": 347659000,
+          "capex_usd": -344869000,
+          "fcf_usd": 2790000,
+          "ratio_fcf_cfo": 0.008,
+          "nota": "Capex consume prácticamente todo el CFO; FCF marginal"
+        },
+        {
+          "periodo": "FY2022",
+          "cfo_usd": 648527000,
+          "capex_usd": -330609000,
+          "fcf_usd": 317918000,
+          "ratio_fcf_cfo": 0.49,
+          "nota": "Capex consume 51% del CFO"
+        },
+        {
+          "periodo": "FY2023",
+          "cfo_usd": 490017000,
+          "capex_usd": -213001000,
+          "fcf_usd": 277016000,
+          "ratio_fcf_cfo": 0.57,
+          "nota": "Capex menor pero CFO también menor"
+        },
+        {
+          "periodo": "FY2024",
+          "cfo_usd": 1162691000,
+          "capex_usd": -126876000,
+          "fcf_usd": 1035815000,
+          "ratio_fcf_cfo": 0.89,
+          "nota": "FCF inflado por capex inusualmente bajo (127M vs promedio ~296M) Y CFO excepcionalmente alto"
+        },
+        {
+          "periodo": "H1-2025",
+          "cfo_usd": 153656000,
+          "capex_usd": -28260000,
+          "fcf_usd": 125396000,
+          "ratio_fcf_cfo": 0.82,
+          "nota": "Capex sigue muy bajo pero CFO colapsó; FCF anualizado ~251M, significativamente menor que FY2024"
+        }
+      ],
+      "capex_mantenimiento_vs_crecimiento": "No disponible — no se dispone de desglose en los datos proporcionados. Depreciación FY2024 = 98M sugiere un capex de mantenimiento mínimo de ~100M, lo que haría que el capex FY2024 de 127M sea esencialmente solo mantenimiento sin inversión de crecimiento.",
+      "dividendos_y_recompras": "CFF FY2024: -570M. Incluye dividendos (interim HK$0.24 + final propuesto HK$0.25 = HK$0.49/acción × ~1,062M acciones ≈ 520M HKD). Recompras no cuantificadas en los datos disponibles.",
+      "evaluacion": "El FCF de FY2024 (1,036M) es un outlier estadístico. El FCF promedio FY2021-2023 fue ~199M. La mejora de FY2024 proviene de: (1) capex cortado en 57% vs promedio y (2) CFO inflado por liberación de WC. Un FCF normalizado con capex promedio y CFO promedio sería significativamente menor."
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC_001",
+      "criterio": "Ingresos anuales caen por debajo de 5,000M HKD (~641M USD)",
+      "ventana_temporal": "12-24 meses (reportes H2-2025 y FY2025)",
+      "probabilidad_cualitativa": "MEDIA",
+      "razon": "Revenue en decline desde FY2022 (8,063M → 6,045M). H1-2025 anualizado sería ~5,432M. Una caída adicional del 8% llevaría a este umbral, que marcaría un negocio que ha perdido 38% de su pico. A este nivel, la estructura de costos actual (SGA de 2,090M) sería insostenible.",
+      "metrica_observable": "Revenue anual en HKD reportado en HKEX filings"
+    },
+    {
+      "id": "KC_002",
+      "criterio": "CFO anual cae por debajo de 200M HKD (~26M USD) o se vuelve negativo",
+      "ventana_temporal": "12 meses (FY2025 report)",
+      "probabilidad_cualitativa": "MEDIA",
+      "razon": "H1-2025 CFO = 154M. Si H2-2025 es similar o peor, el CFO anual podría estar en el rango 250-350M, aún positivo. Sin embargo, si la tendencia de FY2022-FY2023 (CFO < 50% de NI) persiste y NI sigue cayendo, CFO podría aproximarse a cero. CFO < 200M implicaría que el modelo de negocio ya no genera caja operativa suficiente.",
+      "metrica_observable": "CFO en estado de flujos de efectivo anual/semestral"
+    },
+    {
+      "id": "KC_003",
+      "criterio": "Margen EBIT cae por debajo del 10%",
+      "ventana_temporal": "12-18 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "razon": "Margen EBIT cayó de 17.7% (FY2022) a 14.2% (FY2024). H1-2025 = 17.3% (mejor que FY2024, potencial estabilización). Sin embargo, si revenue sigue cayendo con costos rígidos (R&D + SGA crecientes), un margen sub-10% indicaría pérdida de viabilidad operativa del modelo actual.",
+      "metrica_observable": "EBIT/Revenue en reportes semestrales y anuales"
+    },
+    {
+      "id": "KC_004",
+      "criterio": "Inventarios superan 180 días de COGS y se registra write-down de inventario superior a 100M HKD",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "razon": "DIO actual ~181 días, ya en el umbral. Si el revenue sigue cayendo pero la producción no se ajusta, el inventario se acumulará. Write-downs de inventario tecnológico serían señal de obsolescencia de la línea de productos y validarían la tesis de disruption secular.",
+      "metrica_observable": "Inventarios en balance y notas sobre provisiones de inventario"
+    },
+    {
+      "id": "KC_005",
+      "criterio": "Cuentas por cobrar superan 180 días de ventas o se registran bad debt provisions superiores a 200M HKD",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "razon": "DSO actual ~154 días, elevado pero no crítico aún. Un DSO > 180 días indicaría deterioro significativo de la calidad crediticia de clientes o acumulación de facturación no cobrable. Provisiones masivas por impago confirmarían reconocimiento agresivo de ingresos previo.",
+      "metrica_observable": "Trade receivables y provisiones en notas a estados financieros"
+    },
+    {
+      "id": "KC_006",
+      "criterio": "La caja neta cae por debajo de 2,000M HKD por distribuciones sin generación operativa compensatoria",
+      "ventana_temporal": "24 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "razon": "Caja actual de 3,084M con salidas de CFF de ~570M/año. Si CFO se deteriora a 200-300M y dividendos se mantienen en ~520M, la caja se consumiría en ~8-10 años. Pero si se añaden recompras agresivas o adquisiciones, el ritmo podría acelerarse. Caer bajo 2,000M eliminaría el colchón de seguridad que sustenta la tesis de inversión.",
+      "metrica_observable": "Posición de caja e inversiones a corto plazo en balance"
+    }
+  ],
+  "report_type": "FORENSIC_DETECTION",
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1",
+    "implied_expectations_version": "ImpliedExpectations_v1",
+    "sources_pack_disponible": false
+  },
+  "log": {
+    "limitaciones": [
+      "SourcesPack no proporcionado; análisis basado exclusivamente en TruthPack e ImpliedExpectations",
+      "Todos los valores _usd están en HKD (tipo de cambio HKD/USD ~7.80 no aplicado). Los ratios son consistentes internamente pero los valores absolutos no son comparables con benchmarks en USD",
+      "No se dispone de desglose de capex (mantenimiento vs crecimiento)",
+      "No se dispone de detalle de provisiones (bad debt, inventarios) para evaluar agresividad contable más allá de los ratios",
+      "Hueco en datos de FY2018-FY2020 limita análisis de tendencia a largo plazo",
+      "No se revisaron filings directamente (solo datos cuantitativos del TruthPack)",
+      "No se dispone de información sobre transacciones con partes relacionadas (RPT), elementos fuera de balance, ni composición del goodwill",
+      "Balance sheet histórico no disponible; análisis de evolución de WC se basa en ratios derivados del balance final FY2024"
+    ],
+    "areas_cubiertas": [
+      "Liquidez y solvencia",
+      "Calidad de CFO y volatilidad",
+      "Working capital (AR, inventarios, AP)",
+      "Tendencia de ingresos y márgenes",
+      "Puentes EBIT→CFO y CFO→FCF",
+      "Capex y su impacto en FCF",
+      "Estructura de costos (SGA, R&D)",
+      "Concentración y uso de caja"
+    ],
+    "areas_no_cubiertas_por_falta_de_datos": [
+      "Goodwill y deterioro de intangibles (no hay datos de goodwill en el balance proporcionado)",
+      "Transacciones con partes relacionadas (RPT) — requiere revisión de notas a EEFF",
+      "Elementos fuera de balance (garantías, compromisos, contingencias) — requiere SourcesPack",
+      "Políticas de reconocimiento de ingresos (ASC 606 / IFRS 15) — requiere revisión de notas contables",
+      "Auditor y opinión de auditoría — no disponible en TruthPack",
+      "Going concern language — requiere revisión directa del filing"
+    ]
+  },
+  "_meta": {
+    "generado": "2026-02-23",
+    "modelo": "ForensicDetection_v1",
+    "nota_moneda": "CRITICO: Todas las cifras en los campos _usd están en HKD (dólares de Hong Kong), no en USD. El tipo de cambio peg es ~7.80 HKD/USD. Para valores aproximados en USD, dividir por 7.80."
+  }
 }
