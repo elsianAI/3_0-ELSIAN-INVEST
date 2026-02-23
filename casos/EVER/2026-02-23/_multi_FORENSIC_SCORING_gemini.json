@@ -1,0 +1,430 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260223_EVER",
+  "fecha_corte": "2026-02-23",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260223_EVER",
+    "implied_expectations_caso_id": "CASE_20260223_EVER",
+    "sources_pack_caso_id": "CASE_20260223_EVER"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Liquidez robusta (~$171M en caja estimada, deuda cero) garantiza supervivencia a corto plazo (>24 meses), pero la calidad de beneficios es cuestionable.",
+      "Gobernanza bajo escrutinio: Recompra de $21M a entidad afiliada al cofundador y aumento de 4x en gastos con partes relacionadas.",
+      "Beneficio fiscal de $37.5M infló artificialmente el Net Income FY2025 en un ~60% frente al EBIT real.",
+      "Dependencia crítica de S&M (55-80% de ventas) y concentración en pocos carriers hacen al modelo altamente cíclico y volátil.",
+      "Veredicto WATCHLIST por riesgos de gobernanza y calidad de beneficios, pese a solvencia financiera inmediata."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_FORENSIC_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El Net Income FY2025 de $99M está inflado por un beneficio fiscal no recurrente de $37.5M; el earning power real es significativamente menor.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_019_8-K_2026-02-23",
+          "ubicacion": "Income Statement FY2025",
+          "cita_corta": "Income tax benefit: 37,488,000; Net Income: 99,311,000",
+          "interpretacion": "El beneficio fiscal representa ~38% del beneficio neto reportado."
+        }
+      ],
+      "falsacion": {
+        "test": "Reporte de tasa impositiva efectiva normalizada (21-25%) en próximos trimestres sin beneficios extraordinarios.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_FORENSIC_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Salida de caja de $21M en FY2025 hacia partes relacionadas (recompra a afiliada), reduciendo la liquidez disponible para operaciones.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007_10-Q_Q3-2025",
+          "ubicacion": "Liquidity and Capital Resources",
+          "cita_corta": "Repurchase of $21.0 million from affiliated entity in August 2025",
+          "interpretacion": "Uso de caja corporativa para liquidez de insiders/afiliados."
+        }
+      ],
+      "falsacion": {
+        "test": "Ausencia de nuevas transacciones con partes relacionadas o recompras a afiliados en próximos 12 meses.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q/8-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_REV_Q1_2026",
+      "descripcion": "Ingresos trimestrales Q1 2026 se mantienen por encima de $150M.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 2,
+        "max": 4
+      },
+      "criterio_validacion": "Revenue reportado en 10-Q Q1-2026 > $150,000,000.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_CFO_H1_2026",
+      "descripcion": "Flujo de caja operativo (CFO) positivo en H1 2026.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 5,
+        "max": 7
+      },
+      "criterio_validacion": "CFO reportado en 10-Q Q2-2026 > 0.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_SM_RATIO",
+      "descripcion": "Gasto de Sales & Marketing se mantiene por debajo del 65% de los ingresos.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "(Sales and Marketing / Revenue) < 0.65 en próximos reportes.",
+      "fuente_prevista": "10-Q/10-K"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle granular de transacciones con partes relacionadas (RPTs) FY2025.",
+      "por_que_importa": "Verificar la naturaleza comercial de los $14.5M en gastos RPT y términos de la recompra.",
+      "como_obtenerlo": "Nota 'Related Party Transactions' en próximo 10-K o Proxy Statement (DEF 14A)."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose de 'Accrued expenses and other current liabilities'.",
+      "por_que_importa": "Identificar provisiones legales específicas no detalladas en el balance resumido.",
+      "como_obtenerlo": "Notas al balance en próximo 10-K."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.85,
+        "razon_principal": "Solvencia inmediata alta ($171M caja, deuda $0) pero severas banderas rojas en gobernanza (RPTs) y calidad de beneficios (tax benefit)."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 3,
+          "por_que": [
+            "Liquidez excepcional: ~$171M en caja estimada vs deuda financiera $0.",
+            "Generación de caja: CFO positivo ($95M TTM) cubre ampliamente capex ($5M).",
+            "Sin deuda: Ausencia de vencimientos financieros o presión de intereses.",
+            "Riesgos de Calidad: 6 banderas rojas de severidad ALTA (RPTs, Tax, Volatilidad) degradan el score de 5 a 3."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 171379000,
+          "linea_credito_disponible_usd": 60000000,
+          "otras_fuentes_liquidez": [
+            "Revolver accordion feature ($25M)"
+          ],
+          "runway_meses_estimado": null,
+          "metodo_estimacion": "No aplica runway por flujo de caja positivo y posición de caja neta masiva.",
+          "notas": "Caja estimada al cierre 2025 proyectando delta cash del 8-K sobre saldo 2024."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 0,
+          "deuda_neta_usd": -171379000,
+          "coste_deuda_aprox_pct": 0,
+          "coverage_intereses": null,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "Sin deuda financiera."
+          },
+          "vencimientos": [],
+          "covenants": {
+            "disponible": true,
+            "tipos_detectados": [
+              "Adjusted Quick Ratio >= 1.30"
+            ],
+            "riesgo_breach": "BAJO",
+            "comentario": "Proxy actual > 2.0x, holgura suficiente salvo colapso de ingresos."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "MEDIO",
+          "motores": [
+            "SBC ($24M/año)",
+            "Posible pago de litigio en acciones"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "Dilución por SBC es constante pero recompras recientes compensan parcialmente."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Calidad baja. Beneficios inflados por impuestos diferidos y RPTs crecientes.",
+        "red_flags": [
+          {
+            "flag_id": "RF-001",
+            "categoria": "ANOMALIA_FISCAL",
+            "descripcion": "Beneficio fiscal de $37.5M infla Net Income FY2025.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Distorsiona valoración basada en P/E; earnings reales son ~40% menores.",
+            "evidencias": [
+              {
+                "source_id": "SRC_019_8-K_2026-02-23",
+                "ubicacion": "Income Statement FY2025",
+                "cita_corta": "Income tax benefit: 37,488,000",
+                "interpretacion": "Ganancia contable no recurrente."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Retorno a tasa impositiva normal (21%) en FY2026.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-013",
+            "categoria": "RELATED_PARTIES",
+            "descripcion": "Gastos con partes relacionadas x4 YoY y recompra a afiliada.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Riesgo de extracción de valor por insiders.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001_10-K_FY2024",
+                "ubicacion": "Note 15",
+                "cita_corta": "RPT expense $14.5M vs $3.6M",
+                "interpretacion": "Aumento injustificado de gastos con afiliados."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Reducción o estabilización de gastos RPT en próximos reportes.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K/Proxy"
+            }
+          },
+          {
+            "flag_id": "RF-003",
+            "categoria": "CONCENTRACION_GASTOS",
+            "descripcion": "S&M > 55% de ingresos, estructura de costos rígida.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Rentabilidad depende totalmente de eficiencia de marketing.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Income Statement",
+                "cita_corta": "S&M ~77% revenue FY2024",
+                "interpretacion": "Alto riesgo operativo."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "S&M bajando como % de ventas (apalancamiento operativo).",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-009",
+            "categoria": "HISTORIAL_PERDIDAS",
+            "descripcion": "Solo 2 años rentables en historial reciente.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Riesgo de que rentabilidad actual sea anomalía cíclica.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Historical Data",
+                "cita_corta": "EBIT negativo 2019-2023",
+                "interpretacion": "Track record débil."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Mantenimiento de EBIT positivo por 4 trimestres más.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebit_a_cfo": {
+            "lectura": "Distorsión persistente (>60%) impulsada por SBC y deferred taxes.",
+            "posibles_distorsiones": [
+              "SBC alto ($24M)",
+              "Impuestos diferidos",
+              "Cambios en WC"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Conversión eficiente (~95%) dada la naturaleza asset-light.",
+            "capex_riesgo": "BAJO",
+            "notas": "Capex mínimo requerido para mantener operaciones."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": true,
+          "sostenible_por_fcf": "SI",
+          "comentario": "Recompras activas ($21M FY2025), pero dirigidas a afiliados (alerta)."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "SI",
+          "comentario": "SBC significativo (~$24M), dilución constante."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "Sin M&A reciente grande, pero historial de pérdidas sugiere cautela."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Transacciones con partes relacionadas sugieren conflictos de interés."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Reversión cíclica de demanda de carriers (similar a FY2023).",
+            "impacto_en_supervivencia": "BAJO",
+            "mecanismo_de_dolor": [
+              "Caída de ingresos >20%",
+              "EBIT negativo",
+              "Cash burn moderado"
+            ],
+            "indicadores_tempranos": [
+              "Desaceleración de revenue trimestral",
+              "Aumento ratio S&M/Rev"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Litigio de sellers resulta en pago masivo.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "Salida de caja >$50M",
+              "Dilución por pago en acciones"
+            ],
+            "indicadores_tempranos": [
+              "Noticias legales",
+              "Aumento de provisiones"
+            ]
+          }
+        ],
+        "conclusion_downside": "El riesgo de quiebra es mínimo por la caja, pero el riesgo de destrucción de valor para el accionista (caída de precio por gobernanza o ciclo) es alto."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "margen",
+          "definicion": "Ingresos trimestrales < $130M por 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Indica fin del ciclo de crecimiento y retorno a escala de pérdidas."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "contabilidad",
+          "definicion": "Nuevas recompras a entidades afiliadas o RPTs > $5M en un trimestre.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "8-K/10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma gobernanza extractiva y conflicto de interés severo."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja y equivalentes caen por debajo de $100M sin M&A estratégico.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "Balance Sheet",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Erosión significativa del buffer de seguridad."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": "2%",
+        "condiciones_para_aumentar_tamaño": [
+          "Estabilización de RPTs y confirmación de independencia de comité de auditoría.",
+          "Mantenimiento de márgenes operativos >8% por 4 trimestres sin beneficios fiscales."
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Violación de Kill Criteria (especialmente RPTs).",
+          "Pérdida de un cliente principal (>10% revenue)."
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "Detalle de covenants actualizados",
+          "por_que_importa": "Confirmar holgura real del Adjusted Quick Ratio.",
+          "como_obtenerlo": "Exhibit del credit agreement en filings."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "No se dispone de desglose completo de impuestos pagados en efectivo.",
+      "Información de RPTs limitada a notas resumidas."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

@@ -1,0 +1,377 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260223_EVER",
+  "fecha_corte": "2026-02-23",
+  "agente": {
+    "agent_role": "CATALYST",
+    "agent_nombre": "CATALYST_SCORING_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260223_EVER",
+    "implied_expectations_caso_id": "CASE_20260223_EVER",
+    "sources_pack_caso_id": "CASE_20260223_EVER"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La valoración actual (EV/FCF < 5x) descuenta una caída del 10% anual en FCF; la mera estabilidad del negocio actual justifica un re-rating significativo.",
+      "El balance ($102M caja neta, deuda cero) ofrece un 'suelo' duro y opcionalidad para buybacks inmediatos no descontados por el mercado.",
+      "La eficiencia en S&M (<78% de ingresos) y el apalancamiento operativo en G&A/R&D están estructuralmente validados tras dos años de rentabilidad.",
+      "El riesgo de 'peak earnings' es la narrativa dominante, pero la magnitud del descuento ofrece un margen de seguridad asimétrico.",
+      "Catalizador principal: Mantenimiento de ingresos >$170M/trimestre en H1-2026 para refutar la tesis de ciclicidad negativa."
+    ],
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_SCO_001",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El mercado está valorando EVER como un negocio en liquidación lenta (-10% CAGR implícito), ignorando la opcionalidad de la caja y la estabilidad de márgenes.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf",
+          "cita_corta": "CAGR FCF implícito -9.5% a 5 años con descuento del 10%",
+          "interpretacion": "Expectativa de contracción severa injustificada por los fundamentales recientes."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos trimestrales cayendo <$150M en Q1/Q2 2026",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_SCO_002",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La estructura de costes ha cambiado fundamentalmente; el apalancamiento operativo en G&A y R&D es real y sostenible con ingresos >$600M.",
+      "confianza_0_1": 0.88,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual",
+          "cita_corta": "G&A y R&D planos en ~$30-34M mientras ingresos se duplicaron FY23-FY25",
+          "interpretacion": "Costes fijos cubiertos, todo margen incremental cae al EBIT."
+        }
+      ],
+      "falsacion": {
+        "test": "Aumento de G&A >15% YoY sin crecimiento de ingresos correlacionado",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "EverQuote reporta ingresos Q1-2026 > $165M",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 2,
+        "max": 3
+      },
+      "criterio_validacion": "Cifra de 'Revenue' en Press Release de Q1 2026",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Anuncio de autorización de recompra de acciones (buyback) >$25M",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "criterio_validacion": "Comunicado en 8-K anunciando programa o incremento de autorización",
+      "fuente_prevista": "PR"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Margen EBIT (GAAP) Q1-2026 > 7.0%",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 2,
+        "max": 3
+      },
+      "criterio_validacion": "Income from operations / Revenue en Q1 2026",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "Sales & Marketing como % de ingresos se mantiene < 78% en Q1-2026",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 2,
+        "max": 3
+      },
+      "criterio_validacion": "Calculo (S&M expense / Revenue) en income statement",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "Caja neta al cierre de Q2-2026 supera $115M (asumiendo no M&A)",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 5,
+        "max": 6
+      },
+      "criterio_validacion": "Cash & Equivalents en balance sheet Q2",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de ingresos por vertical (Auto vs Non-Auto)",
+      "por_que_importa": "Crítico para evaluar CAT_003 y riesgo de concentración en ciclo de auto.",
+      "como_obtenerlo": "Revisar transcripts de earnings calls recientes o Investor Presentation (no incluidos en input)."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de limitaciones Section 382 sobre NOLs",
+      "por_que_importa": "Para modelar con precisión el flujo de caja fiscal real del CAT_006.",
+      "como_obtenerlo": "Nota de 'Income Taxes' en el 10-K completo (buscar texto sobre Section 382)."
+    }
+  ],
+  "payload": {
+    "payload_version": "CatalystPayload_v1",
+    "contenido": {
+      "mapeo_con_expectativas_implicitas": {
+        "variable_critica_principal": "CRECIMIENTO_FCF",
+        "lectura_en_1_2_frases": "El mercado descuenta una contracción del FCF del ~10% anual (Value Trap). Los catalizadores seleccionados atacan directamente esta asunción demostrando estabilidad (revenues) o crecimiento inorgánico (buybacks)."
+      },
+      "catalizadores": [
+        {
+          "catalyst_id": "CAT_004_REVENUE_SUSTAINABILITY",
+          "nombre": "Sostenibilidad del Run-Rate de Ingresos >$700M",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.75,
+          "mecanismo_cierre_gap": "Refuta la tesis de 'peak earnings' y ciclicidad negativa. Si los ingresos se mantienen planos, el múltiplo debe expandirse de 5x a 10-12x.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "Re-rating de 5x a 8-10x EV/FCF",
+                "nota": "Solo requiere estabilidad, no crecimiento agresivo."
+              }
+            ],
+            "justificacion": "La valoración actual asume colapso. La estabilidad fuerza una reevaluación del riesgo terminal."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_019_8-K_2026-02-23",
+              "ubicacion": "Q4-2025 Results",
+              "cita_corta": "Q4 Revenue $195.3M (récord histórico), +38% YoY, acelerando vs Q3.",
+              "interpretacion": "El momentum es positivo entrando en 2026, contradiciendo desaceleración inmediata."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Ingresos Q1-2026 reportados",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Revenue > $165M (considerando estacionalidad) y YoY positivo",
+              "ventana_meses": {
+                "min": 2,
+                "max": 3
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Comentarios de aseguradoras (Progressive, Allstate) sobre presupuestos de marketing en Q1",
+            "Tráfico web a everquote.com (datos externos)",
+            "Volumen de 'quote requests' reportado"
+          ],
+          "riesgos_ejecucion": [
+            "Giro abrupto en el ciclo de hard-market de seguros de auto.",
+            "Competencia agresiva elevando costes de adquisición y reduciendo márgenes."
+          ],
+          "contra_catalizadores": [
+            "Guidance Q2-2026 por debajo de $150M.",
+            "Pérdida de un cliente carrier mayoritario."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Revenue",
+              "Revenue per Quote Request",
+              "Guidance next quarter"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_002_CAPITAL_RETURN_PROGRAM",
+          "nombre": "Programa de Retorno de Capital (Buybacks)",
+          "categoria": "FINANCIERO",
+          "es_no_binario": false,
+          "ventana_meses": {
+            "min": 1,
+            "probable": 6,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.65,
+          "mecanismo_cierre_gap": "Uso de la caja ociosa ($102M, ~20% del Market Cap) para recomprar acciones a valoración deprimida, incrementando FCF/share y señalizando confianza.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "EPS",
+                "direccion": "SUBE",
+                "magnitud_rango": "+5-10%",
+                "nota": "Recompra de $50M reduce share count ~9% a precios actuales."
+              }
+            ],
+            "justificacion": "Matemáticamente acrecitivo dado el FCF yield >16%."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "Balance Sheet",
+              "cita_corta": "Caja $102M, Deuda $0. CFF FY2025 -$21M (indicio incipiente).",
+              "interpretacion": "Capacidad de fuego intacta y subutilizada."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Anuncio de autorización de recompra",
+              "fuente_prevista": "8-K",
+              "umbral_o_condicion": "Autorización > $25M",
+              "ventana_meses": {
+                "min": 1,
+                "max": 6
+              }
+            }
+          ],
+          "leading_indicators": [
+            "CFF negativo en trimestres sin deuda que repagar",
+            "Reducción secuencial del share count en la portada del 10-Q"
+          ],
+          "riesgos_ejecucion": [
+            "Conservadurismo excesivo de la gerencia ante incertidumbre macro.",
+            "Preferencia por M&A (riesgo de asignación de capital)."
+          ],
+          "contra_catalizadores": [
+            "Anuncio de adquisición grande y dilutiva.",
+            "Emisión de acciones (ATM) innecesaria."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Share count",
+              "Cash Flow from Financing",
+              "Press Releases"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_001_EFICIENCIA_SM",
+          "nombre": "Estabilización Estructural de Eficiencia S&M",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 9
+          },
+          "probabilidad_0_1": 0.85,
+          "mecanismo_cierre_gap": "Mantiene el margen operativo >8% demostrando que la reducción de costes de adquisición no fue transitoria.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "Sostener 8-10%",
+                "nota": "Clave para validar el modelo de negocio a largo plazo."
+              }
+            ],
+            "justificacion": "S&M es el 77% del opex; pequeñas mejoras aquí son puro margen."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "Metricas derivadas",
+              "cita_corta": "Margen operativo FY2025 8.42% vs negativo histórico.",
+              "interpretacion": "Cambio de tendencia consolidado en los últimos 4 trimestres."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Ratio S&M sobre Ingresos",
+              "fuente_prevista": "10-Q",
+              "umbral_o_condicion": "< 78% consistentemente",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Variable Marketing Margin (VMM) en earnings calls",
+            "Cost per Lead trends"
+          ],
+          "riesgos_ejecucion": [
+            "Inflación de costes de medios (Google/FB) forzando mayor gasto.",
+            "Guerra de precios con competidores."
+          ],
+          "contra_catalizadores": [
+            "S&M disparándose >82% de ingresos.",
+            "Colapso del margen VMM."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Sales and Marketing expense % Revenue"
+            ]
+          }
+        }
+      ],
+      "conclusion_catalizadores": {
+        "calidad_catalizador": "ALTA",
+        "por_que": "Los catalizadores son endógenos (gestión de costes, uso de caja) o de continuidad (sostener ingresos), no requieren 'milagros' externos. La valoración de entrada es tan baja que el listón para que funcionen es mínimo.",
+        "si_no_hay_catalizador_apto": false
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta de desglose granular de ingresos por vertical impide valorar CAT_003 con precisión.",
+      "Incertidumbre sobre limitaciones fiscales reales de los NOLs (CAT_006)."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "CATALYST_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-23T23:15:00Z",
+    "inputs_hash": "MERGED_INPUTS_20260223"
+  }
+}
