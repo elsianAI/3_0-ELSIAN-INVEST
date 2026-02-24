@@ -46,6 +46,7 @@ class LLMBackend(ABC):
         output_schema: Path | None = None,
         cwd: Path | None = None,
         timeout: int = 600,
+        step_name: str | None = None,
     ) -> DispatchResult:
         """Envía prompt al backend, espera resultado, retorna DispatchResult."""
 
@@ -66,6 +67,12 @@ import re as _re
 
 
 def _try_recover_json(raw: str, error: str | None = None) -> dict | None:
+    """Compat wrapper: return only recovered dict (if any)."""
+    recovered, _ = _try_recover_json_ex(raw, error)
+    return recovered
+
+
+def _try_recover_json_ex(raw: str, error: str | None = None) -> tuple[dict | None, str | None]:
     """Intenta recuperar un dict JSON de texto con formato inválido.
 
     Si se pasa ``error``, actúa como guardia: solo procede si el error es de
@@ -75,16 +82,21 @@ def _try_recover_json(raw: str, error: str | None = None) -> dict | None:
     if error is not None:
         lowered = error.lower()
         if not any(k in lowered for k in ("json", "parse", "decode", "escape")):
-            return None
+            return None, None
 
     if not raw or not raw.strip():
-        return None
+        return None, None
 
     text = raw.strip()
 
+    def _as_obj(parsed: object) -> dict | None:
+        return parsed if isinstance(parsed, dict) else None
+
     # Intento 1: parse directo
     try:
-        return _json.loads(text)
+        out = _as_obj(_json.loads(text))
+        if out is not None:
+            return out, "direct_parse"
     except _json.JSONDecodeError:
         pass
 
@@ -92,7 +104,9 @@ def _try_recover_json(raw: str, error: str | None = None) -> dict | None:
     sanitized = _re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', text)
     if sanitized != text:
         try:
-            return _json.loads(sanitized)
+            out = _as_obj(_json.loads(sanitized))
+            if out is not None:
+                return out, "escape_sanitize"
         except _json.JSONDecodeError:
             pass
 
@@ -100,23 +114,81 @@ def _try_recover_json(raw: str, error: str | None = None) -> dict | None:
     md_match = _re.search(r"```(?:json)?\s*\n(.*?)\n```", text, _re.DOTALL)
     if md_match:
         try:
-            return _json.loads(md_match.group(1))
+            out = _as_obj(_json.loads(md_match.group(1)))
+            if out is not None:
+                return out, "markdown_fence"
         except _json.JSONDecodeError:
             pass
 
     # Intento 4: extraer primer bloque {...} balanceado
     brace_start = text.find("{")
     if brace_start >= 0:
-        depth = 0
+        stack: list[str] = []
+        in_string = False
+        escaped = False
+        malformed = False
+        root_end = None
         for i in range(brace_start, len(text)):
-            if text[i] == "{":
-                depth += 1
-            elif text[i] == "}":
-                depth -= 1
-                if depth == 0:
-                    try:
-                        return _json.loads(text[brace_start:i + 1])
-                    except _json.JSONDecodeError:
-                        break
+            ch = text[i]
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif ch == "\\":
+                    escaped = True
+                elif ch == '"':
+                    in_string = False
+                continue
 
-    return None
+            if ch == '"':
+                in_string = True
+                continue
+            if ch == "{":
+                stack.append("{")
+                continue
+            if ch == "[":
+                stack.append("[")
+                continue
+            if ch == "}":
+                if not stack or stack[-1] != "{":
+                    malformed = True
+                    break
+                stack.pop()
+                if not stack:
+                    root_end = i
+                    break
+                continue
+            if ch == "]":
+                if not stack or stack[-1] != "[":
+                    malformed = True
+                    break
+                stack.pop()
+                if not stack:
+                    root_end = i
+                    break
+                continue
+
+        if root_end is not None:
+            try:
+                out = _as_obj(_json.loads(text[brace_start:root_end + 1]))
+                if out is not None:
+                    return out, "balanced_brace"
+            except _json.JSONDecodeError:
+                pass
+
+        # Intento 5: repair truncation-safe (solo EOF truncado estructural)
+        if not malformed and (in_string or stack):
+            repaired_parts = [text[brace_start:]]
+            if in_string:
+                repaired_parts.append('"')
+            while stack:
+                opener = stack.pop()  # LIFO
+                repaired_parts.append("}" if opener == "{" else "]")
+            repaired_text = "".join(repaired_parts)
+            try:
+                out = _as_obj(_json.loads(repaired_text))
+                if out is not None:
+                    return out, "truncation_repair"
+            except _json.JSONDecodeError:
+                pass
+
+    return None, None

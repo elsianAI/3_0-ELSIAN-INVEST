@@ -1,0 +1,485 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MetaReview_v1",
+  "description": "Meta-review estructurado generado por GPT-5.2 Pro via proyecto ChatGPT. Audita la calidad de la decision del ARBITRO.",
+  "type": "object",
+  "required": [
+    "version_esquema",
+    "caso_id",
+    "fecha_review",
+    "reviewer",
+    "decision_packet_ref",
+    "decision_packet_snapshot",
+    "veredicto_meta",
+    "evaluacion_gates",
+    "evaluacion_supuestos_criticos",
+    "evaluacion_escenarios",
+    "evaluacion_sizing",
+    "coherencia_logica",
+    "puntos_ciegos",
+    "coherencia_probabilistica_categorica",
+    "recomendaciones",
+    "meta_decision"
+  ],
+  "properties": {
+    "version_esquema": {
+      "const": "MetaReview_v1",
+      "description": "Identificador de schema"
+    },
+    "caso_id": {
+      "type": "string",
+      "pattern": "^CASE_\\d{8}_[A-Z0-9]+",
+      "description": "ID del caso revisado"
+    },
+    "fecha_review": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp ISO 8601 del review"
+    },
+    "reviewer": {
+      "type": "object",
+      "required": ["modelo", "plataforma", "proyecto"],
+      "properties": {
+        "modelo": {
+          "type": "string",
+          "description": "Modelo usado (ej. gpt-5.2-pro)"
+        },
+        "plataforma": {
+          "type": "string",
+          "enum": ["chatgpt", "api", "otro"],
+          "description": "Plataforma de ejecucion"
+        },
+        "proyecto": {
+          "type": "string",
+          "description": "Nombre del proyecto ChatGPT"
+        }
+      },
+      "additionalProperties": false
+    },
+    "decision_packet_ref": {
+      "type": "string",
+      "description": "Nombre del fichero DecisionPacket usado como input"
+    },
+    "decision_packet_snapshot": {
+      "type": "object",
+      "required": ["hash_sha256", "timestamp_compilacion"],
+      "properties": {
+        "hash_sha256": {
+          "type": "string",
+          "description": "Hash SHA-256 del DecisionPacket usado para compilar el prompt"
+        },
+        "timestamp_compilacion": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp de cuando se compilo el prompt"
+        },
+        "revision_num": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Numero de revision del review para este caso"
+        }
+      },
+      "additionalProperties": false
+    },
+    "veredicto_meta": {
+      "type": "object",
+      "required": ["estado", "confianza_review_0_1", "resumen_1_parrafo"],
+      "properties": {
+        "estado": {
+          "type": "string",
+          "enum": ["CONFIRMA", "CUESTIONA", "RECHAZA", "NO_EVALUABLE"],
+          "description": "Evaluacion de la calidad de la decision del ARBITRO"
+        },
+        "confianza_review_0_1": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confianza del reviewer en su propio veredicto (0-1)"
+        },
+        "resumen_1_parrafo": {
+          "type": "string",
+          "minLength": 10,
+          "description": "Resumen ejecutivo del review en un parrafo"
+        }
+      },
+      "additionalProperties": false
+    },
+    "evaluacion_gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["gate", "arbitro_dijo", "meta_evaluacion", "justificacion"],
+        "properties": {
+          "gate": {
+            "type": "string",
+            "enum": [
+              "data_quality_gate",
+              "survivability_gate",
+              "mispricing_gate",
+              "catalyst_gate",
+              "non_speculative_gate"
+            ],
+            "description": "Nombre del gate evaluado"
+          },
+          "arbitro_dijo": {
+            "type": "string",
+            "enum": ["PASS", "CONDITIONAL", "FAIL"],
+            "description": "Veredicto original del ARBITRO para este gate"
+          },
+          "meta_evaluacion": {
+            "type": "string",
+            "enum": ["CORRECTO", "CUESTIONABLE", "INCORRECTO"],
+            "description": "Evaluacion del reviewer sobre el veredicto del ARBITRO"
+          },
+          "justificacion": {
+            "type": "string",
+            "minLength": 5,
+            "description": "Justificacion de la evaluacion (1-3 frases)"
+          },
+          "riesgo_oculto": {
+            "type": ["string", "null"],
+            "description": "Riesgo no considerado por el ARBITRO en este gate"
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "description": "Evaluacion de cada uno de los 5 gates del ARBITRO"
+    },
+    "evaluacion_supuestos_criticos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["assumption_id", "enunciado", "arbitro_probabilidad", "meta_evaluacion", "justificacion"],
+        "properties": {
+          "assumption_id": {
+            "type": "string",
+            "pattern": "^A-\\d+",
+            "description": "ID del supuesto en el assumption_ledger"
+          },
+          "enunciado": {
+            "type": "string",
+            "description": "Enunciado del supuesto"
+          },
+          "arbitro_probabilidad": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Probabilidad asignada por el ARBITRO"
+          },
+          "meta_evaluacion": {
+            "type": "string",
+            "enum": ["RAZONABLE", "OPTIMISTA", "PESIMISTA", "INSUFICIENTE_EVIDENCIA"],
+            "description": "Evaluacion del reviewer"
+          },
+          "justificacion": {
+            "type": "string",
+            "description": "Justificacion"
+          },
+          "sugerencia_probabilidad_0_1": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Probabilidad alternativa sugerida (no vinculante)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Evaluacion de supuestos criticos del assumption_ledger"
+    },
+    "evaluacion_escenarios": {
+      "type": "object",
+      "required": ["base", "bull", "bear"],
+      "properties": {
+        "base": { "$ref": "#/$defs/scenario_eval" },
+        "bull": { "$ref": "#/$defs/scenario_eval" },
+        "bear": { "$ref": "#/$defs/scenario_eval" }
+      },
+      "additionalProperties": false,
+      "description": "Evaluacion de los 3 escenarios del ARBITRO"
+    },
+    "evaluacion_sizing": {
+      "type": "object",
+      "required": ["kelly_ajustado_arbitro", "sizing_final_arbitro", "meta_evaluacion", "justificacion"],
+      "properties": {
+        "kelly_ajustado_arbitro": {
+          "type": "number",
+          "description": "Kelly ajustado segun el ARBITRO"
+        },
+        "sizing_final_arbitro": {
+          "type": "number",
+          "description": "Sizing final del ARBITRO (% cartera)"
+        },
+        "meta_evaluacion": {
+          "type": "string",
+          "enum": ["ADECUADO", "EXCESIVO", "CONSERVADOR"],
+          "description": "Evaluacion del sizing"
+        },
+        "justificacion": {
+          "type": "string",
+          "description": "Justificacion"
+        },
+        "sizing_sugerido_0_1": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Sizing alternativo sugerido (no vinculante)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "coherencia_logica": {
+      "type": "object",
+      "required": ["score_0_10", "problemas_detectados"],
+      "properties": {
+        "score_0_10": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Score de coherencia logica (0-10)"
+        },
+        "problemas_detectados": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tipo", "descripcion", "seccion_afectada", "severidad"],
+            "properties": {
+              "tipo": {
+                "type": "string",
+                "enum": ["CONTRADICCION", "SALTO_LOGICO", "EVIDENCIA_DEBIL", "SESGO", "OMISION"],
+                "description": "Tipo de problema"
+              },
+              "descripcion": {
+                "type": "string",
+                "description": "Descripcion del problema"
+              },
+              "seccion_afectada": {
+                "type": "string",
+                "description": "Referencia a la seccion del DecisionPacket"
+              },
+              "severidad": {
+                "type": "string",
+                "enum": ["ALTA", "MEDIA", "BAJA"],
+                "description": "Severidad del problema"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "puntos_ciegos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["descripcion", "impacto_potencial", "sugerencia"],
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "description": "Descripcion del punto ciego"
+          },
+          "impacto_potencial": {
+            "type": "string",
+            "enum": ["ALTO", "MEDIO", "BAJO"],
+            "description": "Impacto potencial"
+          },
+          "sugerencia": {
+            "type": "string",
+            "description": "Sugerencia para abordar el punto ciego"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "coherencia_probabilistica_categorica": {
+      "type": "object",
+      "required": ["alineadas", "justificacion"],
+      "properties": {
+        "alineadas": {
+          "type": "boolean",
+          "description": "Si las probabilidades estan alineadas con la decision categorica"
+        },
+        "incongruencias": {
+          "type": ["array", "null"],
+          "items": { "type": "string" },
+          "description": "Lista de incongruencias detectadas"
+        },
+        "justificacion": {
+          "type": "string",
+          "description": "Justificacion de la evaluacion"
+        }
+      },
+      "additionalProperties": false
+    },
+    "evaluacion_calidad_pipeline": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "required": ["paso", "evaluacion_meta"],
+        "properties": {
+          "paso": {
+            "type": "string",
+            "description": "Nombre del paso del pipeline"
+          },
+          "score_fusion": {
+            "type": ["number", "null"],
+            "description": "Score de fusion del quality voting (si disponible)"
+          },
+          "evaluacion_meta": {
+            "type": "string",
+            "enum": ["ADECUADO", "PREOCUPANTE", "INSUFICIENTE"],
+            "description": "Evaluacion del meta-reviewer"
+          },
+          "comentario": {
+            "type": ["string", "null"],
+            "description": "Comentario adicional"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Evaluacion de la calidad de cada paso del pipeline (opcional)"
+    },
+    "alertas_compilador_respondidas": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "required": ["alerta_original", "respuesta_gpt"],
+        "properties": {
+          "alerta_original": {
+            "type": "string",
+            "description": "Alerta generada automaticamente por el compilador"
+          },
+          "respuesta_gpt": {
+            "type": "string",
+            "description": "Evaluacion de GPT-5.2 Pro sobre esta alerta"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Respuestas a las alertas contextuales generadas por el compilador"
+    },
+    "desacuerdos_agentes": {
+      "type": ["object", "null"],
+      "properties": {
+        "resolucion_arbitro_correcta": {
+          "type": "boolean",
+          "description": "Si la resolucion del ARBITRO de los desacuerdos fue correcta"
+        },
+        "desacuerdos_mal_resueltos": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": ["tema", "problema", "sugerencia"],
+            "properties": {
+              "tema": { "type": "string" },
+              "problema": { "type": "string" },
+              "sugerencia": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "comentarios": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "kill_criteria_evaluacion": {
+      "type": ["object", "null"],
+      "properties": {
+        "completos": { "type": "boolean" },
+        "accionables": { "type": "boolean" },
+        "especificos": { "type": "boolean" },
+        "cubren_bear_scenario": { "type": "boolean" },
+        "comentarios": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "recomendaciones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["prioridad", "accion", "dirigida_a"],
+        "properties": {
+          "prioridad": {
+            "type": "string",
+            "enum": ["ALTA", "MEDIA", "BAJA"]
+          },
+          "accion": {
+            "type": "string",
+            "description": "Accion recomendada"
+          },
+          "dirigida_a": {
+            "type": "string",
+            "enum": ["ARBITRO", "PIPELINE", "OPERADOR"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "meta_decision": {
+      "type": "object",
+      "required": ["accion"],
+      "properties": {
+        "accion": {
+          "type": "string",
+          "enum": ["APROBAR", "APROBAR_CON_CONDICIONES", "REVISAR_MANUALMENTE", "RECHAZAR"],
+          "description": "Accion recomendada por el meta-reviewer"
+        },
+        "condiciones": {
+          "type": ["array", "null"],
+          "items": { "type": "string" },
+          "description": "Condiciones para aprobacion (si aplica)"
+        },
+        "siguiente_paso_sugerido": {
+          "type": ["string", "null"],
+          "description": "Paso sugerido como siguiente accion"
+        }
+      },
+      "additionalProperties": false
+    },
+    "_meta": {
+      "type": "object",
+      "description": "Metadata de generacion e ingesta",
+      "properties": {
+        "motor": { "type": "string" },
+        "plataforma": { "type": "string" },
+        "modelo": { "type": "string" },
+        "proyecto_chatgpt": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "version_protocolo": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "scenario_eval": {
+      "type": "object",
+      "required": ["arbitro_probabilidad", "arbitro_retorno", "meta_evaluacion", "justificacion"],
+      "properties": {
+        "arbitro_probabilidad": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probabilidad asignada por ARBITRO"
+        },
+        "arbitro_retorno": {
+          "type": "number",
+          "description": "Retorno estimado por ARBITRO (%)"
+        },
+        "meta_evaluacion": {
+          "type": "string",
+          "enum": ["REALISTA", "OPTIMISTA", "PESIMISTA"],
+          "description": "Evaluacion del reviewer"
+        },
+        "justificacion": {
+          "type": "string",
+          "description": "Justificacion"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

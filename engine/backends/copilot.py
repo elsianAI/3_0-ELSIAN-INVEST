@@ -83,12 +83,14 @@ class CopilotBackend(LLMBackend):
         output_schema: Path | None = None,
         cwd: Path | None = None,
         timeout: int = 120,
+        step_name: str | None = None,
     ) -> DispatchResult:
         """Ejecuta `copilot -p <prompt> --model <model>` en modo no-interactivo.
 
         El CLI imprime la respuesta del modelo seguida de un footer de stats.
         Extraemos el JSON del bloque de respuesta y descartamos el footer.
         """
+        _ = step_name
         # Official models use --model flag; others use GITHUB_COPILOT_MODEL env var
         # (bypasses CLI validation, same backend pool as VS Code Copilot Chat).
         if self.model in _OFFICIAL_CLI_MODELS:

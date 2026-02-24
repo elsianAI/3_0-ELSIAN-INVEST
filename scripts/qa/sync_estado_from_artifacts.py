@@ -135,6 +135,33 @@ def extract_fields(packet: dict) -> dict[str, Any]:
     if norm_sizing is not None:
         norm_sizing = _clamp(norm_sizing, 0.0, 100.0)
 
+    # ── Monitor fields from salida_para_siguiente_agente + control ──
+    salida = _get_dual(packet, wrapper, "salida_para_siguiente_agente") or {}
+    if not isinstance(salida, dict):
+        salida = {}
+    control = _get_dual(packet, wrapper, "control") or {}
+    if not isinstance(control, dict):
+        control = {}
+
+    raw_next_step = control.get("next_step") or salida.get("next_step")
+    next_step = str(raw_next_step).strip() if raw_next_step else None
+
+    raw_fecha = salida.get("proxima_revision_sugerida")
+    proxima_revision = None
+    if isinstance(raw_fecha, str) and raw_fecha.strip():
+        try:
+            from datetime import date as _date
+            parsed = datetime.strptime(raw_fecha.strip(), "%Y-%m-%d").date()
+            proxima_revision = parsed.isoformat()
+        except ValueError:
+            pass
+
+    raw_estado_caso = salida.get("estado_caso")
+    estado_caso = str(raw_estado_caso).strip() if raw_estado_caso else None
+
+    raw_monitor_input = salida.get("monitor_input_recomendado")
+    monitor_input = str(raw_monitor_input).strip() if raw_monitor_input else None
+
     return {
         "decision": decision,
         "score": norm_score,
@@ -142,6 +169,10 @@ def extract_fields(packet: dict) -> dict[str, Any]:
         "sizing": norm_sizing,
         "modelo_principal": modelo_principal,
         "probabilistica": probabilistica,
+        "next_step": next_step,
+        "proxima_revision": proxima_revision,
+        "estado_caso": estado_caso,
+        "monitor_input": monitor_input,
     }
 
 
@@ -197,9 +228,16 @@ def sync_case(
                 "confianza": extracted.get("confianza"),
                 "sizing": extracted.get("sizing"),
                 "modelo_principal": extracted.get("modelo_principal"),
+                "next_step": extracted.get("next_step"),
+                "proxima_revision": extracted.get("proxima_revision"),
+                "estado_caso": extracted.get("estado_caso"),
+                "monitor_input": extracted.get("monitor_input"),
             }
+            # Fields that are optional and should be skipped if None
+            optional_skip = ("sizing", "modelo_principal", "next_step",
+                             "proxima_revision", "estado_caso", "monitor_input")
             for field, new_val in desired.items():
-                if new_val is None and field in ("sizing", "modelo_principal"):
+                if new_val is None and field in optional_skip:
                     continue
                 old_val = state.get(field)
                 if field == "score":

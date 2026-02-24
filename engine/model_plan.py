@@ -208,9 +208,19 @@ def render_plan_table(
         for model_name in entry.models:
             if model_name in availability:
                 state = availability[model_name]
+                is_copilot_fallback = (
+                    isinstance(state, tuple)
+                    and len(state) >= 3
+                    and state[2] == "copilot_fallback"
+                )
                 if isinstance(state, tuple):
                     state = state[0]
-                model_icons.append("✓" if state else "✗")
+                if state:
+                    model_icons.append("✓")
+                elif is_copilot_fallback:
+                    model_icons.append("↻")
+                else:
+                    model_icons.append("✗")
             else:
                 model_icons.append("—")
         status_text = " ".join(model_icons) if model_icons else "—"

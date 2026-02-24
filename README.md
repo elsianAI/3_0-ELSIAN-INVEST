@@ -63,6 +63,11 @@ python3 -m engine validate AAPL --date 2026-02-15
 python3 -m engine --config /path/to/engine_config.json defaults show
 ```
 
+# Usuario Codex
+```bash
+cat ~/.codex/auth.json | jq -r '.tokens.id_token | split(".")[1] | @base64d | fromjson | "Usuario: \(.email)"'
+```
+
 ---
 
 ## Architecture

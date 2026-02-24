@@ -1,0 +1,411 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260221_ACVA",
+  "fecha_corte": "2026-02-21",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp-01-21",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260221_ACVA",
+    "implied_expectations_caso_id": "CASE_20260221_ACVA",
+    "sources_pack_caso_id": "CASE_20260221_ACVA"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "ACVA es una 'Value Trap' clásica: la 'inflexión de caja' es un espejismo creado por un capital de trabajo masivamente negativo (AP $345M >> AR $168M) y una dilución accionarial agresiva (SBC est. ~$113M) que supera el 100% del FCF reportado.",
+      "La posición de 'caja neta' ($101M) es ilusoria; la liquidez está totalmente comprometida por el float de vendedores ($345M en Cuentas por Pagar), lo que significa que la empresa financia sus pérdidas operativas con el dinero de sus clientes.",
+      "El modelo de negocio es estructuralmente no rentable (EBIT negativo por 6 años consecutivos) y depende de un crecimiento perpetuo de volumen para mantener la bicicleta del float; una desaceleración al 10% podría provocar una crisis de liquidez.",
+      "La valoración de 15x EV/FCF es falsa porque ignora que el 'FCF' es en realidad deuda con proveedores y pago en acciones a empleados; ajustando por SBC y cambios de WC, el flujo de caja económico real es negativo (-$30M est.).",
+      "Veredicto NO_APTO: Riesgo asimétrico negativo donde el accionista paga la factura de la no-rentabilidad a través de una dilución compuesta del ~10% anual."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_R01",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CRITICO",
+      "enunciado": "La estructura de capital de trabajo negativo (AP $345M vs AR $168M) actúa como deuda oculta: si el crecimiento de ingresos baja del 15%, la contracción del float consumirá la caja reportada, revelando la insolvencia técnica.",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Balance Sheet FY2024",
+          "cita_corta": "Pasivos Totales $544M vs Activos Corrientes (Caja $224M + AR $168M = $392M). Déficit de liquidez inmediata si se exige pago de AP.",
+          "interpretacion": "La empresa opera con déficit de capital de trabajo de -$177M; la solvencia depende exclusivamente del flujo continuo de nuevos vendedores."
+        }
+      ],
+      "falsacion": {
+        "test": "Crecimiento de ingresos <10% YoY y CFO se vuelve negativo en el mismo trimestre.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_R02",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La compensación basada en acciones (SBC), estimada en ~$113M (residual EBIT-CFO), supera la generación de caja operativa ($65M-$90M), lo que implica que el negocio destruye valor para el accionista existente a pesar del FCF positivo reportado.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Cash Flow Reconciliation (inferido)",
+          "cita_corta": "CFO $65.4M vs Net Income -$79.7M. Gap de +$145M explicado principalmente por SBC y D&A.",
+          "interpretacion": "Si D&A es $36M, el resto (~$110M) es SBC. Los accionistas son diluidos en ~$110M para generar $65M de caja 'libre'. Negocio ruinoso para el equity."
+        }
+      ],
+      "falsacion": {
+        "test": "Reporte de SBC anual en 10-K es menor a $50M (lo que implicaría que la mejora de CFO es genuinamente operativa y no ajuste de papel).",
+        "ventana_meses": {
+          "min": 1,
+          "max": 3
+        },
+        "fuente_prevista": "10-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_R01",
+      "descripcion": "La compañía reportará SBC superior a $100M en su 10-K FY2024 o FY2025.",
+      "probabilidad_0_1": 0.95,
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "criterio_validacion": "Línea 'Stock-based compensation' en Cash Flow Statement > $100,000,000.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_R02",
+      "descripcion": "El crecimiento de ingresos YoY desacelerará por debajo del 15% en al menos un trimestre de 2025.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Revenue Growth YoY < 15.0%.",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Aging de Cuentas por Pagar (AP)",
+      "por_que_importa": "Determinar qué porcentaje del AP es float transaccional vs deuda comercial vencida. Un aumento en días de pago a vendedores sería una señal de estrés de liquidez oculta.",
+      "como_obtenerlo": "10-K Notes to Financial Statements."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.85,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "Estructura de capital 'Ponzi-like' donde el float de vendedores financia pérdidas operativas crónicas, mientras la dilución masiva (SBC > FCF) erosiona el valor del accionista."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_F01",
+            "resumen_claim_bull": "ACVA ha logrado inflexión de caja operativa (CFO positivo) estructural.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.75,
+              "por_que": [
+                "CFO depende críticamente de que AP ($345M) crezca más rápido que AR ($168M).",
+                "El CFO 'positivo' se financia no pagando a proveedores (vendedores), no por rentabilidad del negocio (Net Income -$80M)."
+              ]
+            },
+            "puntos_ciegos": [
+              "Riesgo de contraparte: si los vendedores perciben riesgo, exigirán pagos más rápidos, colapsando el float.",
+              "La 'calidad' del CFO es bajísima: $1 de CFO cuesta ~$1.5 en SBC dilutiva."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Balance Sheet",
+                "cita_corta": "AP $345M vs AR $168M. Gap de financiación de $177M.",
+                "interpretacion": "El CFO es prestado, no ganado."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "CFO ex-WC changes (Funds from Operations) negativo durante 2 trimestres.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_F05",
+            "resumen_claim_bull": "Posición de caja neta (-$101M deuda neta) protege el downside.",
+            "evaluacion_red_team": {
+              "estado": "FALSO",
+              "probabilidad_de_fallo_0_1": 0.9,
+              "por_que": [
+                "Ignora el pasivo operativo masivo (AP $345M).",
+                "Caja ($224M) + AR ($168M) = $392M. Pasivos Totales > $544M.",
+                "En liquidación, el equity vale cero o negativo. La caja no pertenece a los accionistas, pertenece a los vendedores de autos."
+              ]
+            },
+            "puntos_ciegos": [
+              "La métrica 'Net Cash' estándar es engañosa en modelos de marketplace con float negativo.",
+              "La caja está gravada ('encumbered') por las obligaciones de pago a vendedores."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Balance Sheet",
+                "cita_corta": "Pasivos Totales $544M vs Activos Totales $984M (pero $523M son Goodwill/Intangibles).",
+                "interpretacion": "Activos Tangibles ($461M) < Pasivos Totales ($544M). Valor Libro Tangible Negativo."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Ratio (Caja + AR) / (Deuda + AP) cae por debajo de 0.8.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_F09",
+            "resumen_claim_bull": "Valoración atractiva a 15x EV/FCF.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.85,
+              "por_que": [
+                "El denominador (FCF) es artificialmente alto por SBC.",
+                "Real FCF Yield = (FCF - SBC) / EV. Si FCF=$90M y SBC=$113M, Real FCF es -$23M.",
+                "Estás pagando 15x por perder dinero."
+              ]
+            },
+            "puntos_ciegos": [
+              "El costo real de la SBC para el accionista (dilución).",
+              "El mercado está descontando correctamente la falta de rentabilidad económica real."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [],
+            "test_falsacion_para_el_bull": {
+              "test": "SBC se mantiene > 100% del FCF reportado.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Uso de 'Net Cash' ignorando el déficit masivo de capital de trabajo.",
+          "Foco exclusivo en CFO/FCF sin ajustar por la dilución masiva de SBC.",
+          "Asumir que el float es 'estructural' y seguro, cuando en realidad es deuda de corto plazo con proveedores volátiles.",
+          "Narrativa de 'Tech Growth' para justificar pérdidas GAAP en un negocio que debería tener economías de escala ya demostradas."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El mercado ve a ACVA como un negocio commoditized con márgenes estructuralmente bajos.",
+          "El descuento en valoración refleja correctamente la carga de la SBC y el riesgo del balance.",
+          "La 'inflexión' de caja es vista como temporal o insostenible sin crecimiento perpetuo de volumen."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "ACVA es una máquina de dilución que quema valor económico real: las pérdidas GAAP son la realidad, el CFO positivo es el artefacto del float.",
+          "El balance es una bomba de tiempo: Activos Tangibles < Pasivos Totales; la solvencia depende de que la rueda del volumen siga girando.",
+          "La desaceleración del crecimiento (de 25% a 16%) amenaza el modelo de float negativo; si el volumen se estanca, la caja se evapora.",
+          "La competencia (Copart, IAA) tiene balances fortaleza y rentabilidad real; pueden asfixiar a ACVA en precios o comisiones.",
+          "Resultado: Dilución perpetua del ~10% anual sin retorno de capital real, llevando la acción a un declive secular ('melting ice cube')."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "Si el crecimiento se detiene, el AP deja de crecer o se contrae. Pagar a los vendedores viejos sin el dinero de los nuevos drena la caja rápidamente.",
+            "indicadores_tempranos": [
+              "Crecimiento de ingresos < Crecimiento de AP",
+              "Ratio Cash/AP disminuyendo",
+              "Quejas de vendedores sobre plazos de pago"
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Estancamiento del crecimiento (~10-12%). Márgenes no mejoran lo suficiente para cubrir SBC. La dilución continúa erosionando el EPS/FCF per share.",
+            "ventana_meses": {
+              "min": 12,
+              "probable": 18,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "Crecimiento 10-15%",
+                "justificacion": "Saturación de mercado o competencia."
+              },
+              {
+                "variable": "FCF",
+                "direccion": "EMPEORA",
+                "rango": "FCF real (ex-SBC) sigue negativo",
+                "justificacion": "Costos fijos y SBC se comen el margen bruto."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "El mercado se da cuenta de que es una 'zombie company' que no escala a rentabilidad.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -50,
+                "base": -30,
+                "max": -10
+              },
+              "nota": "Compresión de múltiplo a 8-10x 'Fake FCF'."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Crisis de liquidez por contracción de float. Vendedores exigen pagos rápidos. La empresa debe levantar capital (deuda cara o equity masivo) para cubrir el hueco de WC.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 18
+            },
+            "probabilidad_0_1": 0.2,
+            "es_binario": true,
+            "drivers": [
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "Cash drain > $50M/trimestre",
+                "justificacion": "Unwinding del float."
+              }
+            ],
+            "impacto_en_supervivencia": "ALTO",
+            "nota": "Riesgo de dilución mortal (>50%) o reestructuración."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.85,
+        "razones": [
+          "Divergencia extrema entre CFO (positivo) y Net Income (muy negativo).",
+          "Dependencia crítica de financiación de proveedores (Float).",
+          "SBC masiva (>100% del FCF reportado) oculta el costo real de personal.",
+          "Valor libro tangible negativo.",
+          "Historia de pérdidas operativas crónicas a pesar del crecimiento."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es Value Trap (Estructural)",
+            "evidencia_necesaria": [
+              "SBC sigue creciendo con los ingresos.",
+              "Margen Operativo GAAP no mejora sustancialmente.",
+              "AP sigue siendo 2x+ del AR."
+            ]
+          },
+          {
+            "hipotesis": "Es Turnaround (Ciclo)",
+            "evidencia_necesaria": [
+              "SBC se reduce en términos absolutos o % revenue cae drásticamente.",
+              "EBIT GAAP se vuelve positivo.",
+              "La empresa empieza a reducir AP voluntariamente sin quemar caja."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "DILUCION",
+          "definicion": "SBC anual > 80% del CFO anual reportado.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "SALIR",
+          "por_que": "Significa que el flujo de caja es propiedad de los empleados, no de los accionistas."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "BALANCE",
+          "definicion": "Ratio (Caja + AR) / (Deuda + AP) < 0.7.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Indica riesgo inminente de insolvencia si el float se contrae."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "EBIT GAAP Positivo",
+          "umbral_o_condicion": "Reportar EBIT > $0 por 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Reducción drástica de SBC",
+          "umbral_o_condicion": "SBC < 5% de los ingresos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-K"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0,
+        "si_se_invierte_igual": [
+          "Usar stops ajustados por volatilidad.",
+          "Monitorear obsesivamente el ratio AP/AR y el crecimiento de volumen.",
+          "Salir inmediatamente si el crecimiento de ingresos baja del 12%."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Cuánto de la deuda 'AP' es exigible a corto plazo?",
+          "¿Cuál es el FCF real para el accionista después de restar la dilución de SBC?",
+          "¿Qué pasa con la liquidez si el volumen de transacciones cae un 20%?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "No se tiene el aging real de la deuda de proveedores.",
+      "La estimación de SBC se basa en residuales al no tener el dato explícito en el input, pero es consistente con empresas tech growth."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

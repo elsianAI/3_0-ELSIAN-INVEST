@@ -53,8 +53,10 @@ class CodexBackend(LLMBackend):
         output_schema: Path | None = None,
         cwd: Path | None = None,
         timeout: int = 600,
+        step_name: str | None = None,
     ) -> DispatchResult:
         """Dispatch to exactly one model. No fallback to different models."""
+        _ = step_name
         return self._dispatch_single_model(
             model_name=self.model,
             prompt=prompt,
@@ -128,9 +130,11 @@ class CodexBackend(LLMBackend):
                         )
                     except json.JSONDecodeError:
                         pass
+                # Pass full stderr as raw_output so _is_retryable_dispatch_error
+                # can detect quota/rate-limit/network patterns even when stdout is empty.
                 return DispatchResult(
-                    False, None, raw, model_name, "codex", duration,
-                    f"No output file produced. stderr: {stderr[:500]}",
+                    False, None, raw or stderr, model_name, "codex", duration,
+                    f"No output file produced. stderr: {stderr[:2000]}",
                     exit_code=proc.returncode,
                 )
 

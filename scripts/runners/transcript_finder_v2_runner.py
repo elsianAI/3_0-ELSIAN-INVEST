@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import difflib
+import hashlib
 import json
 import re
 import sys
@@ -55,6 +57,32 @@ ALT_HEADERS = {
 TIMEOUT = 45
 NON_US_EXCHANGES = {"LSE", "AIM", "SEHK", "HKEX", "ASX", "EPA", "TSX", "OTRA"}
 US_COUNTRIES = {"US", "USA", "UNITED STATES", "UNITED STATES OF AMERICA"}
+LEGAL_ENTITY_SUFFIXES = {
+    "inc",
+    "incorporated",
+    "corp",
+    "corporation",
+    "co",
+    "company",
+    "companies",
+    "limited",
+    "ltd",
+    "plc",
+    "llc",
+    "sa",
+    "spa",
+    "ag",
+    "nv",
+    "fpo",
+    "holdings",
+    "holding",
+    "group",
+}
+TITLE_ISSUER_PATTERNS = (
+    re.compile(r"^(.+?)\s*-\s*Earnings Call", re.IGNORECASE),
+    re.compile(r"^(.+?)\s*\(([A-Z]{1,6})\)\s+Q[1-4]", re.IGNORECASE),
+    re.compile(r"^(.+?)\s+Q[1-4]\s+\d{4}\s+Earnings", re.IGNORECASE),
+)
 
 IR_PRESENTATION_PATHS = (
     "/news-events/presentations",
@@ -98,6 +126,34 @@ IR_HTML_HINTS = (
     "press release",
     "regulatory story",
 )
+NAV_HINTS = (
+    "home",
+    "search",
+    "menu",
+    "investor relations",
+    "corporate governance",
+    "cookie",
+    "privacy",
+    "latest news",
+    "announcements",
+    "publications",
+    "financials",
+)
+FIN_HINTS = (
+    "revenue",
+    "income",
+    "profit",
+    "eps",
+    "ebit",
+    "ebitda",
+    "cash flow",
+    "balance sheet",
+    "assets",
+    "liabilities",
+    "equity",
+    "dividend",
+    "capex",
+)
 
 
 def now_utc_iso() -> str:
@@ -110,6 +166,168 @@ def today_iso() -> str:
 
 def clean_ws(text: str) -> str:
     return re.sub(r"\s+", " ", text or "").strip()
+
+
+def normalize_country(value: Optional[str]) -> Optional[str]:
+    if not value:
+        return None
+    raw = clean_ws(value).upper()
+    if not raw:
+        return None
+    if raw in {"USA", "UNITED STATES", "UNITED STATES OF AMERICA"}:
+        return "US"
+    if raw == "AUSTRALIA":
+        return "AU"
+    return raw
+
+
+def normalize_exchange(value: Optional[str]) -> Optional[str]:
+    if not value:
+        return None
+    raw = clean_ws(value).upper()
+    if not raw:
+        return None
+    if "OTC" in raw:
+        return "OTC"
+    return raw
+
+
+def _normalize_entity_name(value: Optional[str]) -> str:
+    text = clean_ws(str(value or "")).lower()
+    if not text:
+        return ""
+    text = re.sub(r"\[[^\]]*\]", " ", text)
+    text = re.sub(r"\([^\)]*\)", " ", text)
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    tokens = []
+    for token in text.split():
+        if token in LEGAL_ENTITY_SUFFIXES:
+            continue
+        tokens.append(token)
+    return " ".join(tokens).strip()
+
+
+def _extract_company_from_title(title: Optional[str]) -> List[str]:
+    t = clean_ws(str(title or ""))
+    if not t:
+        return []
+    out: List[str] = []
+    for pattern in TITLE_ISSUER_PATTERNS:
+        m = pattern.search(t)
+        if not m:
+            continue
+        cand = clean_ws(m.group(1))
+        if cand:
+            out.append(cand)
+    if " - " in t:
+        first = clean_ws(t.split(" - ", 1)[0])
+        if first:
+            out.append(first)
+    deduped: List[str] = []
+    seen = set()
+    for cand in out:
+        norm = _normalize_entity_name(cand)
+        if not norm or norm in seen:
+            continue
+        seen.add(norm)
+        deduped.append(cand)
+    return deduped
+
+
+def _is_weak_target_alias(alias_norm: str, ticker_norm: str) -> bool:
+    if not alias_norm:
+        return True
+    if alias_norm == ticker_norm:
+        return True
+    tokens = alias_norm.split()
+    if len(alias_norm) < 5:
+        return True
+    if len(tokens) == 1 and len(tokens[0]) <= 4:
+        return True
+    return False
+
+
+def _build_target_aliases(
+    ticker: str,
+    empresa: Dict[str, Any],
+    sec_empresa: Dict[str, Any],
+    src_empresa: Dict[str, Any],
+) -> Tuple[List[str], str]:
+    raw_aliases = [
+        empresa.get("nombre"),
+        sec_empresa.get("nombre"),
+        src_empresa.get("nombre"),
+    ]
+    ticker_norm = _normalize_entity_name(ticker)
+    strong_aliases: List[str] = []
+    seen = set()
+    for raw in raw_aliases:
+        norm = _normalize_entity_name(raw)
+        if not norm or norm in seen:
+            continue
+        seen.add(norm)
+        if _is_weak_target_alias(norm, ticker_norm):
+            continue
+        strong_aliases.append(norm)
+    quality = "STRONG" if strong_aliases else "WEAK"
+    return strong_aliases, quality
+
+
+def _score_issuer_pair(target_norm: str, candidate_norm: str) -> float:
+    target_tokens = set(target_norm.split())
+    candidate_tokens = set(candidate_norm.split())
+    union = target_tokens | candidate_tokens
+    jaccard = (len(target_tokens & candidate_tokens) / len(union)) if union else 0.0
+    seq_ratio = difflib.SequenceMatcher(None, target_norm, candidate_norm).ratio()
+    score = max(jaccard, seq_ratio)
+
+    if (
+        len(target_tokens) >= 2
+        and len(candidate_tokens) >= 2
+        and min(len(target_norm), len(candidate_norm)) >= 6
+        and (target_norm in candidate_norm or candidate_norm in target_norm)
+    ):
+        score = max(score, 0.90)
+    return score
+
+
+def _issuer_match_decision(
+    target_aliases: List[str],
+    issuer_candidates: List[str],
+    ticker: str,
+) -> Tuple[str, float, str, str]:
+    if not target_aliases:
+        return "MISMATCH", 0.0, "", "target identity weak: no robust target aliases available"
+    if not issuer_candidates:
+        return "MISMATCH", 0.0, target_aliases[0], "no issuer candidates found in transcript metadata/title"
+
+    best_score = -1.0
+    best_target = ""
+    best_candidate = ""
+    for target_norm in target_aliases:
+        for candidate in issuer_candidates:
+            candidate_norm = _normalize_entity_name(candidate)
+            if not candidate_norm:
+                continue
+            score = _score_issuer_pair(target_norm, candidate_norm)
+            if score > best_score:
+                best_score = score
+                best_target = target_norm
+                best_candidate = candidate_norm
+
+    if best_score < 0:
+        return "MISMATCH", 0.0, target_aliases[0], "issuer candidates normalized to empty values"
+
+    target_token_count = len(best_target.split())
+    threshold = 0.45 if (target_token_count >= 2 or len(best_target) >= 6) else 0.75
+    status = "MATCH" if best_score >= threshold else "MISMATCH"
+    reason = (
+        f"target='{best_target}' candidate='{best_candidate}' "
+        f"score={best_score:.2f} threshold={threshold:.2f}"
+    )
+    if status == "MISMATCH" and _normalize_entity_name(ticker) in {best_target, best_candidate}:
+        reason = f"{reason}; ticker collision detected"
+    return status, best_score, best_target, reason
 
 
 def first_25_words(text: str) -> str:
@@ -316,6 +534,48 @@ def strip_html_to_text(raw: str) -> str:
     return "\n".join(lines)
 
 
+def _normalize_text_for_hash(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text or "")).strip().lower()
+
+
+def _content_hash(text: str) -> str:
+    normalized = _normalize_text_for_hash(text)
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest() if normalized else ""
+
+
+def _is_low_financial_density(text: str, window: int = 2000) -> bool:
+    sample = _normalize_text_for_hash(text)[:window]
+    if not sample:
+        return True
+    fin_hits = sum(1 for k in FIN_HINTS if k in sample)
+    num_hits = len(re.findall(r"\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\b|\b\d+(?:\.\d+)?%\b", sample))
+    return fin_hits < 2 and num_hits < 2
+
+
+def is_navigation_like_source(title: str, text: str, url: str) -> bool:
+    low_url = (url or "").lower()
+    if low_url.endswith(".pdf"):
+        return False
+    sample = _normalize_text_for_hash(text)[:2500]
+    title_low = _normalize_text_for_hash(title)
+    nav_hits = sum(1 for k in NAV_HINTS if k in sample or k in title_low or k in low_url)
+    index_like_url = any(
+        p in low_url
+        for p in (
+            "/investor-relations",
+            "/announcements",
+            "/news",
+            "/publications",
+            "/finance-kit",
+        )
+    )
+    if "search home android smartpos" in sample:
+        return True
+    if index_like_url and _is_low_financial_density(sample):
+        return True
+    return nav_hits >= 4 and _is_low_financial_density(sample)
+
+
 def extract_presentation_rows(ir_html: str, base_url: str) -> List[Tuple[str, str, Optional[str], str, str]]:
     soup = BeautifulSoup(ir_html, "html.parser")
     rows: List[Tuple[str, str, Optional[str], str, str]] = []
@@ -434,6 +694,9 @@ def main() -> int:
     parser.add_argument("--ticker", required=True, help="Ticker, e.g., IBTA")
     parser.add_argument("--case-dir", required=True, help="Case directory, e.g., casos/IBTA/2026-02-13")
     parser.add_argument("--raw-dir", default="", help="Raw filings directory (default: casos/{T}/_raw_filings)")
+    parser.add_argument("--company-name", default="", help="Canonical company name hint for issuer matching")
+    parser.add_argument("--exchange", default="", help="Exchange hint (e.g., ASX, NYSE)")
+    parser.add_argument("--country", default="", help="Country hint (e.g., AU, US)")
     parser.add_argument("--web-ir", default="", help="Investor Relations base URL (override)")
     parser.add_argument("--max-transcripts", type=int, default=8, help="Maximum transcripts to include")
     parser.add_argument("--max-presentations", type=int, default=8, help="Maximum presentations to include")
@@ -452,15 +715,32 @@ def main() -> int:
     sec_empresa = sec_ctx.get("empresa", {}) if isinstance(sec_ctx, dict) else {}
     src_empresa = read_sources_context(case_dir)
 
+    exchange = (
+        normalize_exchange(args.exchange)
+        or normalize_exchange(src_empresa.get("bolsa"))
+        or normalize_exchange(sec_empresa.get("bolsa"))
+    )
+    country = (
+        normalize_country(args.country)
+        or normalize_country(src_empresa.get("pais"))
+        or normalize_country(sec_empresa.get("pais"))
+    )
+
     empresa: Dict[str, Any] = {
         "ticker": ticker,
         "nombre": src_empresa.get("nombre") or sec_empresa.get("nombre") or ticker,
         "cik": sec_empresa.get("cik"),
         "web_ir": normalize_web_ir(src_empresa.get("web_ir")) or normalize_web_ir(sec_empresa.get("web_ir")),
+        "bolsa": exchange,
+        "pais": country,
     }
-    for key in ("bolsa", "pais", "sector", "industria"):
+    if clean_ws(args.company_name):
+        empresa["nombre"] = clean_ws(args.company_name)
+    for key in ("sector", "industria"):
         if src_empresa.get(key):
             empresa[key] = src_empresa[key]
+        elif sec_empresa.get(key):
+            empresa[key] = sec_empresa[key]
     web_ir_override = normalize_web_ir(args.web_ir)
     if web_ir_override:
         empresa["web_ir"] = web_ir_override
@@ -472,6 +752,7 @@ def main() -> int:
         "empresa": empresa,
         "fecha_corte": today_iso(),
         "fuentes": [],
+        "fuentes_descartadas": [],
         "faltantes": [],
         "cache_stats": {
             "archivos_descargados": 0,
@@ -495,18 +776,37 @@ def main() -> int:
     def log_lim(msg: str) -> None:
         out.setdefault("log", {}).setdefault("limitaciones", []).append(msg)
 
+    target_aliases, target_identity_quality = _build_target_aliases(
+        ticker=ticker,
+        empresa=empresa,
+        sec_empresa=sec_empresa if isinstance(sec_empresa, dict) else {},
+        src_empresa=src_empresa if isinstance(src_empresa, dict) else {},
+    )
+    if target_identity_quality == "WEAK":
+        log_lim(
+            "Transcript issuer matching running in fail-closed mode: "
+            "target identity is weak (ticker-only or short alias)."
+        )
+
     # --------------------
     # 1) Earnings transcripts (Fintool)
     # --------------------
     transcript_source_idx = 1
-    try:
-        transcript_index_url = f"https://fintool.com/app/research/companies/{ticker}/documents/transcripts"
-        transcript_index_html = request_text(session, transcript_index_url)
-        periods = extract_transcript_periods(transcript_index_html, ticker)[: args.max_transcripts]
-    except Exception as exc:
+    rejected_transcripts_entity = 0
+    if exchange and exchange in NON_US_EXCHANGES:
         periods = []
-        log_lim(f"No se pudo cargar índice de transcripts Fintool: {exc}")
-
+        log_lim(
+            f"Skipping Fintool transcripts for non-US exchange ({exchange}); "
+            "coverage expected from IR presentations/announcements."
+        )
+    else:
+        try:
+            transcript_index_url = f"https://fintool.com/app/research/companies/{ticker}/documents/transcripts"
+            transcript_index_html = request_text(session, transcript_index_url)
+            periods = extract_transcript_periods(transcript_index_html, ticker)[: args.max_transcripts]
+        except Exception as exc:
+            periods = []
+            log_lim(f"No se pudo cargar índice de transcripts Fintool: {exc}")
     for period_slug in periods:
         source_id = f"SRC_TR_{transcript_source_idx:03d}"
         transcript_source_idx += 1
@@ -517,6 +817,7 @@ def main() -> int:
             html = request_text(session, transcript_url)
             next_data = parse_next_data(html)
             page_props = next_data.get("props", {}).get("pageProps", {})
+            page_ticker = clean_ws(str(page_props.get("ticker") or "")).upper()
 
             display_period = normalize_period(page_props.get("displayPeriod") or period_slug)
             title = clean_ws(str(page_props.get("title") or f"{ticker} Earnings Call Transcript - {display_period}"))
@@ -526,6 +827,71 @@ def main() -> int:
                 else None
             )
             transcript_text = build_transcript_text(page_props)
+            first_line = clean_ws(transcript_text.splitlines()[0]) if transcript_text else ""
+
+            issuer_candidates: List[str] = []
+            company_name = clean_ws(str(page_props.get("companyName") or ""))
+            if company_name:
+                issuer_candidates.append(company_name)
+            issuer_candidates.extend(_extract_company_from_title(title))
+            issuer_candidates.extend(_extract_company_from_title(first_line))
+            deduped_candidates: List[str] = []
+            seen_norm = set()
+            for cand in issuer_candidates:
+                norm = _normalize_entity_name(cand)
+                if not norm or norm in seen_norm:
+                    continue
+                seen_norm.add(norm)
+                deduped_candidates.append(cand)
+            issuer_candidates = deduped_candidates
+
+            if target_identity_quality == "WEAK":
+                rejected_transcripts_entity += 1
+                reject_reason = (
+                    "target identity weak (ticker-only/short alias); "
+                    "fail-closed to avoid ticker collision"
+                )
+                out["fuentes_descartadas"].append(
+                    {
+                        "source_id": source_id,
+                        "url": transcript_url,
+                        "title": title,
+                        "issuer_candidates": issuer_candidates,
+                        "best_target": None,
+                        "best_score": 0.0,
+                        "reason": reject_reason,
+                        "status": "REJECTED_ENTITY_MISMATCH",
+                    }
+                )
+                log_lim(f"{source_id} rejected entity mismatch: {reject_reason}")
+                continue
+
+            issuer_match, issuer_score, issuer_best_target, issuer_reason = _issuer_match_decision(
+                target_aliases=target_aliases,
+                issuer_candidates=issuer_candidates,
+                ticker=ticker,
+            )
+            if issuer_match != "MATCH":
+                rejected_transcripts_entity += 1
+                if page_ticker and page_ticker == ticker:
+                    issuer_reason = f"{issuer_reason}; ticker collision detected (same ticker, different issuer text)"
+                out["fuentes_descartadas"].append(
+                    {
+                        "source_id": source_id,
+                        "url": transcript_url,
+                        "title": title,
+                        "issuer_candidates": issuer_candidates,
+                        "best_target": issuer_best_target or None,
+                        "best_score": round(float(issuer_score or 0.0), 3),
+                        "reason": issuer_reason,
+                        "status": "REJECTED_ENTITY_MISMATCH",
+                    }
+                )
+                log_lim(
+                    f"{source_id} rejected entity mismatch: {issuer_reason} "
+                    f"(candidates={issuer_candidates[:3]})"
+                )
+                continue
 
             base = f"{source_id}_TRANSCRIPT_{safe_slug(display_period)}"
             html_name = f"{base}.html"
@@ -580,6 +946,14 @@ def main() -> int:
                     "contenido_disponible": True,
                     "notas": notes,
                     "extractos": extractos,
+                    "extraction_status": "OK",
+                    "extraction_reason": "",
+                    "extractor": "html_text",
+                    "text_chars": len(transcript_text),
+                    "content_hash": _content_hash(transcript_text),
+                    "issuer_match": issuer_match,
+                    "issuer_match_score": round(issuer_score, 3),
+                    "issuer_match_reason": issuer_reason,
                 }
             )
             out["cache_stats"]["archivos_descargados"] += 1
@@ -672,6 +1046,9 @@ def main() -> int:
                 slide_text = strip_html_to_text(html).strip()
                 if not slide_text:
                     raise ValueError("HTML sin texto extraíble")
+                if is_navigation_like_source(clean_ws(row_text) or period, slide_text, href):
+                    log_lim(f"{source_id} ({href}) descartada por contenido navegación/índice.")
+                    continue
 
                 html_name = f"{base}.html"
                 (raw_dir / html_name).write_text(html, encoding="utf-8")
@@ -704,6 +1081,14 @@ def main() -> int:
                             "tema": infer_tema(slide_text),
                         }
                     ],
+                    "extraction_status": "OK",
+                    "extraction_reason": "",
+                    "extractor": "pypdf" if doc_kind == "pdf" else "html_text",
+                    "text_chars": len(slide_text),
+                    "content_hash": _content_hash(slide_text),
+                    "issuer_match": "UNKNOWN",
+                    "issuer_match_score": 0.0,
+                    "issuer_match_reason": "Not evaluated for investor presentation.",
                 }
             )
             out["cache_stats"]["archivos_descargados"] += 1
@@ -779,6 +1164,14 @@ def main() -> int:
                             "tema": infer_tema(cleaned),
                         }
                     ],
+                    "extraction_status": "OK",
+                    "extraction_reason": "",
+                    "extractor": "sec_cache",
+                    "text_chars": len(cleaned),
+                    "content_hash": _content_hash(cleaned),
+                    "issuer_match": "UNKNOWN",
+                    "issuer_match_score": 0.0,
+                    "issuer_match_reason": "Inherited from SEC cache fallback.",
                 }
             )
             out["cache_stats"]["archivos_descargados"] += 1
@@ -791,12 +1184,20 @@ def main() -> int:
     presentation_count = sum(1 for src in out["fuentes"] if src.get("tipo") == "INVESTOR_PRESENTATION")
 
     if transcript_count == 0:
-        add_missing(
-            "Earnings transcripts",
-            "CRITICO",
-            "No se localizaron transcripts públicas para el ticker.",
-            f"Buscar en IR de {ticker}, Fintool o Seeking Alpha; si hay paywall, solicitar transcript a IR.",
-        )
+        if rejected_transcripts_entity > 0:
+            add_missing(
+                "Earnings transcripts",
+                "ALTO",
+                f"Se rechazaron {rejected_transcripts_entity} transcripts por mismatch de emisor.",
+                f"Verificar ticker/exchange/issuer de {ticker} y revisar manualmente fuentes IR/transcripts.",
+            )
+        else:
+            add_missing(
+                "Earnings transcripts",
+                "CRITICO",
+                "No se localizaron transcripts públicas para el ticker.",
+                f"Buscar en IR de {ticker}, Fintool o Seeking Alpha; si hay paywall, solicitar transcript a IR.",
+            )
     elif transcript_count < 4:
         add_missing(
             "Últimas 4 earnings transcripts",
@@ -824,6 +1225,7 @@ def main() -> int:
                 "output": str(out_path),
                 "sources": len(out["fuentes"]),
                 "transcripts": transcript_count,
+                "transcripts_rejected_entity": rejected_transcripts_entity,
                 "presentations": presentation_count,
                 "downloaded": out["cache_stats"]["archivos_descargados"],
                 "failed": out["cache_stats"]["archivos_fallidos"],

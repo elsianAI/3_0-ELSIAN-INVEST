@@ -1,0 +1,472 @@
+{
+  "version_esquema": "CatalystDetection_v1",
+  "caso_id": "CASE_20260221_ACVA",
+  "fecha_corte": "2026-02-21",
+  "ticker": "ACVA",
+  "claims_list": [
+    {
+      "claim_id": "CL-01",
+      "claim": "El análisis de valor implícito muestra que para sostener el EV actual se requiere, según el grid de sensibilidad, un CAGR de FCF a 5 años entre -2,26% y 11,66%.",
+      "fuentes": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf.resultado_grid",
+          "cita": "El grid reporta cagr_fcf_5y entre -2.26% y 11.66% para empatar el EV."
+        }
+      ]
+    },
+    {
+      "claim_id": "CL-02",
+      "claim": "La base operativa reciente depende de caja, no de utilidad operativa: FY2024 mantiene FCF positivo y margen operativo todavía negativo.",
+      "fuentes": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[FY2024]",
+          "cita": "FY2024: FCF implícito 69.936M USD y EBIT -84.105M USD con margen operativo negativo."
+        }
+      ]
+    },
+    {
+      "claim_id": "CL-03",
+      "claim": "La recaudación trimestral muestra tracción reciente, con ingresos trimestrales superiores y yoy positivo en 2025, sin confirmación aún de que todos los trimestres sostengan la tendencia.",
+      "fuentes": [
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral[Q1-2025] y SRC_006[Q2-2025] y SRC_005[Q3-2025]",
+          "cita": "Q1-2025 182.697M, Q2-2025 193.703M, Q3-2025 199.561M de ingresos."
+        }
+      ]
+    },
+    {
+      "claim_id": "CL-04",
+      "claim": "La estructura de liquidez neta es positiva y reduce estrés financiero inmediato, pero la mejora no está libre de riesgo si aumenta el costo de capital operativo.",
+      "fuentes": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita": "Deuda 123.000M, caja 224.065M y deuda neta -101.065M USD."
+        }
+      ]
+    },
+    {
+      "claim_id": "CL-05",
+      "claim": "Existe opacidad de granularidad trimestral (cogs, capex total y FCF TTM en varios trimestres), lo que eleva riesgo de interpretación sobre la calidad del flujo.",
+      "fuentes": [
+        {
+          "source_id": "TruthPack_v1.log",
+          "ubicacion": "limitaciones",
+          "cita": "No hay estado de flujo 3M completo en varios trimestres y faltan métricas completas de COGS en múltiples fuentes."
+        }
+      ]
+    }
+  ],
+  "catalyst_candidates": [
+    {
+      "catalyst_id": "CAT-01",
+      "descripcion": "Sostener FCF positivo mediante repetición de CFO alto y capex controlado para convertir el FCF anual en base persistente, no puntual. Si el FCF se mantiene por encima de 70M USD en ventana TTM, el descuento por caja transitoria se reduce.",
+      "tipo": "FINANCIERO",
+      "estado_actual": "FY2024 muestra FCF positivo (69.936M). En Q1-2025 y H1-2025 hay FCF operacional positivo, pero no hay secuencia completa de FCF trimestral en todos los trimestres.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[FY2024]",
+          "cita": "FY2024: CFO 65.397M y capex -4.539M; FCF = 69.936M USD."
+        },
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral[Q1-2025]",
+          "cita": "Q1-2025: ingresos 182.697M, CFO 66.624M y capex -10.077M; FCF trimestral cercano a 76.547M."
+        },
+        {
+          "source_id": "SRC_006",
+          "ubicacion": "historico_trimestral[H1-2025]",
+          "cita": "H1-2025: CFO 80.339M, capex -4.205M; FCF semestral ~76.544M USD."
+        }
+      ],
+      "evidencia_confirmada_futura": {
+        "test_medible": "Cuantificar FCF trimestral con reconciliación CFO-CAPEX sin saltos anómalos y sin ajustes extraordinarios.",
+        "umbral": "FCF de 6 trimestres consecutivos: >=35M cada semestre y FCF anualizado >=70M.",
+        "ventana": "8-20 meses"
+      },
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "↑",
+          "magnitud_estimada": "+10% a +25% en 12m si se sostiene"
+        },
+        {
+          "driver": "margen_operativo",
+          "direccion": "↑",
+          "magnitud_estimada": "+1 a +3 p.p. (por apalancamiento positivo de caja)"
+        },
+        {
+          "driver": "deuda",
+          "direccion": "↓",
+          "magnitud_estimada": "Posible reducción de 5% a 20% del flujo de caja destinado a servicio financiero"
+        },
+        {
+          "driver": "múltiplo",
+          "direccion": "↑",
+          "magnitud_estimada": "+1.0x a +2.5x en escenarios de consistencia de FCF"
+        }
+      ],
+      "indicadores_lideres": [
+        "FCF trimestral >=15M en 4 trimestres consecutivos.",
+        "FCF anualizado TTM >=70M USD.",
+        "Relación capex/ingresos trimestral <=10%.",
+        "CFO trimestral positivo sin deterioro secuencial en 2 trimestres.",
+        "No divergencia material entre CFO + CFI + CFF y delta_cash."
+      ],
+      "riesgos_ejecucion": [
+        "Caída de cobros por cliente que reduzca el CFO.",
+        "Capex no recurrente inicial que escale a nivel permanente.",
+        "Cambios contables de presentación de caja que alteren comparabilidad trimestral.",
+        "Aceleración de costes de mantenimiento no planificada."
+      ],
+      "contracatalizadores": [
+        "Dos trimestres consecutivos con FCF negativo.",
+        "Reversa de política de capex con aumento >15M por trimestre.",
+        "Desalineación de inventarios o cuentas por cobrar que absorba caja."
+      ]
+    },
+    {
+      "catalyst_id": "CAT-02",
+      "descripcion": "Mantener la expansión de ingresos con costo incremental controlado. La continuidad de crecimiento trimestral de ventas, sin deterioro de gastos fijos, sería el principal puente entre la narrativa de mercado y un cierre de valoración por caja recurrente.",
+      "tipo": "OPERATIVO",
+      "estado_actual": "La secuencia reciente Q1-Q3-2025 está al alza en términos de ingresos, pero no hay aún continuidad de 12 meses que confirme estabilidad estructural en todos los trimestres.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral[Q1-2025] vs SRC_007[Q1-2024]",
+          "cita": "Q1-2025 182.697M y Q1-2024 145.689M: crecimiento interanual aproximado 25.4%."
+        },
+        {
+          "source_id": "SRC_006",
+          "ubicacion": "historico_trimestral[Q2-2025] vs SRC_006[Q2-2024]",
+          "cita": "Q2-2025 193.703M y Q2-2024 160.624M: crecimiento interanual aproximado 20.6%."
+        },
+        {
+          "source_id": "SRC_005",
+          "ubicacion": "historico_trimestral[Q3-2025] vs SRC_008[Q3-2024]",
+          "cita": "Q3-2025 199.561M y Q3-2024 171.329M: crecimiento interanual aproximado 16.4%."
+        }
+      ],
+      "evidencia_confirmada_futura": {
+        "test_medible": "Confirmar secuencia de ingresos con ritmo de crecimiento en 4 trimestres y margen operativo no deteriorado.",
+        "umbral": "Al menos 2 de 3 trimestres con yoy > 8% y margen operativo no inferior a -15%.",
+        "ventana": "6-18 meses"
+      },
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "↑",
+          "magnitud_estimada": "+12% a +30% en 12-24m vía escala"
+        },
+        {
+          "driver": "margen_operativo",
+          "direccion": "↑",
+          "magnitud_estimada": "+1 a +4 p.p. si gastos crecen menos que ingresos"
+        },
+        {
+          "driver": "deuda",
+          "direccion": "→",
+          "magnitud_estimada": "Neutro inicialmente; mejor caja reduce uso de financiamiento en escenarios de demanda alta."
+        },
+        {
+          "driver": "múltiplo",
+          "direccion": "↑",
+          "magnitud_estimada": "+1.5x a +3x con trazabilidad de top line"
+        }
+      ],
+      "indicadores_lideres": [
+        "Ingresos trimestrales yoy positivos al menos dos trimestres consecutivos.",
+        "Revisión de guía interna de ventas trimestral sin recortes.",
+        "Crecimiento de margen bruto y de EBIT en 4 trimestres.",
+        "CFO trimestral no cae al tiempo que suben ingresos."
+      ],
+      "riesgos_ejecucion": [
+        "Volatilidad de demanda estacional sin soporte de contratos recurrentes.",
+        "Presión competitiva que obligue a descuentos de precio.",
+        "Concentración de clientes afectando el crecimiento puntual.",
+        "Efectos de calendario fiscal sin ajuste de base comparable."
+      ],
+      "contracatalizadores": [
+        "Reducción de ingresos en dos trimestres consecutivos con deterioro >8%.",
+        "Reclasificación de ventas extraordinarias fuera de base recurrente.",
+        "Fuerte caída de ingresos en Q4 con efecto de cola negativo."
+      ]
+    },
+    {
+      "catalyst_id": "CAT-03",
+      "descripcion": "Reducir el peso de SG&A en ingresos para generar apalancamiento operativo. Si SG&A se estabiliza por debajo del 33% con ventas altas, el impacto directo es margen operativo menos negativo y FCF más predecible.",
+      "tipo": "OPERATIVO",
+      "estado_actual": "FY2024 cerró con SG&A de 217.435M sobre ingresos 637.156M (34,1%), similar al año previo pero mejorable; el último trimestre del histórico muestra ligera mejora de eficiencia trimestral.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[FY2024]",
+          "cita": "FY2024: SG&A 217.435M y revenue 637.156M, ratio SG&A/revenue 34,1%."
+        },
+        {
+          "source_id": "SRC_006",
+          "ubicacion": "historico_trimestral[Q2-2024], historico_trimestral[Q2-2025]",
+          "cita": "Q2-2024 SG&A 51.912M/160.624M =32,3%; Q2-2025 52.972M/193.703M =27,4%."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[FY2024]",
+          "cita": "EBIT FY2024 -84.105M con margen operativo -13,2%."
+        }
+      ],
+      "evidencia_confirmada_futura": {
+        "test_medible": "Verificar reducción de SG&A relativa a ventas y mejora de EBIT en promedio móvil.",
+        "umbral": "SG&A/ingresos trimestral <=33% durante al menos 4 trimestres y EBIT margen > -12%.",
+        "ventana": "6-24 meses"
+      },
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "↑",
+          "magnitud_estimada": "+8% a +20% mediante menor consumo operativo"
+        },
+        {
+          "driver": "margen_operativo",
+          "direccion": "↑",
+          "magnitud_estimada": "+2 a +6 p.p."
+        },
+        {
+          "driver": "deuda",
+          "direccion": "↓",
+          "magnitud_estimada": "Menor necesidad de financiación de corto plazo por 5M-20M."
+        },
+        {
+          "driver": "múltiplo",
+          "direccion": "↑",
+          "magnitud_estimada": "+1x a +2.5x con menos riesgo operativo"
+        }
+      ],
+      "indicadores_lideres": [
+        "SG&A/revenue de 4 trimestres consecutivos <=33%.",
+        "Crecimiento de SG&A inferior al crecimiento de ingresos en 2 trimestres.",
+        "EBIT trimestral pierde menos de 1M por trimestre versus prior.",
+        "Tendencia de SG&A absoluta no volátil por ajustes puntuales."
+      ],
+      "riesgos_ejecucion": [
+        "Necesidad de inversión comercial para sostener pipeline reduce capacidad de contención.",
+        "Costes de personal/servicios ligados a crecimiento de volumen.",
+        "Recortes sin respaldo de productividad pueden afectar calidad de ingresos.",
+        "Mayor gasto legal/fiscal imprevisto eleva SG&A."
+      ],
+      "contracatalizadores": [
+        "Incremento de SG&A por encima de ingresos por >2 trimestres.",
+        "Pérdida de personal clave que obligue a rehacer operaciones y costos de transición.",
+        "Reclasificación de gastos en rubros no operativos que distorsione SG&A."
+      ]
+    },
+    {
+      "catalyst_id": "CAT-04",
+      "descripcion": "Imponer disciplina de capex para preservar calidad de FCF. El FCF implícito hoy depende de capex moderado; un alza no justificada podría erosionar la base de caja implícita en la valoración.",
+      "tipo": "FINANCIERO",
+      "estado_actual": "El capex anual FY2024 fue -4.539M (bajo), pero hay trimestres recientes con capex trimestral más alto y cobertura incompleta de detalle capex.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[FY2024]",
+          "cita": "FY2024: capex -4.539M; sobre ingresos representa ~0.7%."
+        },
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral[Q1-2025]",
+          "cita": "Q1-2025 capex -10.077M y revenues 182.697M; capex trimestral ~5.5% de ingresos."
+        },
+        {
+          "source_id": "SRC_006",
+          "ubicacion": "historico_trimestral[H1-2025]",
+          "cita": "H1-2025 capex -4.205M; ingresos 376.400M y FCF semestral aproximado 76.544M."
+        }
+      ],
+      "evidencia_confirmada_futura": {
+        "test_medible": "Monitorear capex trimestral y su relación con ingresos incrementales.",
+        "umbral": "Capex trimestral promedio <=9M y capex/ingresos <=7% en dos ventanas de 6 meses.",
+        "ventana": "6-18 meses"
+      },
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "↑",
+          "magnitud_estimada": "+10% a +25% si capex no sube en tasa fija"
+        },
+        {
+          "driver": "margen_operativo",
+          "direccion": "↑",
+          "magnitud_estimada": "+1 a +3 p.p. al evitar sobreinversión"
+        },
+        {
+          "driver": "deuda",
+          "direccion": "↔",
+          "magnitud_estimada": "Menor presión de financiación si capex se modera."
+        },
+        {
+          "driver": "múltiplo",
+          "direccion": "↑",
+          "magnitud_estimada": "+0.5x a +2x por mayor convertibilidad a FCF"
+        }
+      ],
+      "indicadores_lideres": [
+        "Capex trimestral medio en TTM <=9M.",
+        "Capex no crece si ingresos no aceleran >15%.",
+        "FCF trimestral sin caída de dos dígitos cuando capex sube.",
+        "Inversiones por unidad de ingreso bajo tendencia estable."
+      ],
+      "riesgos_ejecucion": [
+        "Necesidad de inversión en cumplimiento o migración tecnológica.",
+        "Reposición de activos o capex de seguridad no postergable.",
+        "Efecto de inflación en costos de proveedores de equipo.",
+        "Clasificación de capex en otras partidas que oculte el total."
+      ],
+      "contracatalizadores": [
+        "Capex trimestral persistente >12M sin aumento paralelo de ingresos.",
+        "Revisión de capex por mantenimientos preventivos no cubiertos por contratos.",
+        "Pérdida de eficiencia de flujo por mayor inversión no productiva."
+      ]
+    },
+    {
+      "catalyst_id": "CAT-05",
+      "descripcion": "Fortalecer la estructura de capital con gestión de caja y deuda para mantener net cash y mitigar riesgo de costos financieros. Una base líquida estable mejora la tolerancia del mercado a inversiones y volatilidad operativa.",
+      "tipo": "CORPORATIVO",
+      "estado_actual": "Balance FY2024 presenta caja 224.065M y deuda 123.0M, con deuda neta negativa; los gastos por intereses permanecen elevados en algunos periodos aunque con tendencia a reducirse en Q3-2025 vs FY2024 anual.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita": "Deuda total 123.000M; caja 224.065M; deuda neta -101.065M."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[FY2024]",
+          "cita": "FY2024 interest_expense -4.244M; FCF 69.936M y margen operativo -84.105M."
+        },
+        {
+          "source_id": "SRC_005",
+          "ubicacion": "historico_trimestral[Q3-2025]",
+          "cita": "Q3-2025 interest_expense -2.483M con ingresos 199.561M y ebit -23.717M."
+        }
+      ],
+      "evidencia_confirmada_futura": {
+        "test_medible": "Controlar apalancamiento operativo y financiero en reportes trimestrales.",
+        "umbral": "Net debt <= -90M y gasto financiero trimestral sin deterioro de dos trimestres.",
+        "ventana": "6-24 meses"
+      },
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "↑",
+          "magnitud_estimada": "+5% a +15% por menor carga financiera y mayor estabilidad de caja"
+        },
+        {
+          "driver": "margen_operativo",
+          "direccion": "→",
+          "magnitud_estimada": "Efecto indirecto por menor disciplina de costos financieros."
+        },
+        {
+          "driver": "deuda",
+          "direccion": "↓",
+          "magnitud_estimada": "Reducción de deuda o mantenimiento de deuda neta negativa con margen"
+        },
+        {
+          "driver": "múltiplo",
+          "direccion": "↑",
+          "magnitud_estimada": "+0.5x a +1.5x al reducir riesgo de balance"
+        }
+      ],
+      "indicadores_lideres": [
+        "Deuda total vs caja manteniendo net debt negativo.",
+        "Gastos financieros trimestrales no crecientes a dos trimestres corridos.",
+        "Sin emisiones netas de deuda sin destino operativo claro.",
+        "Cobertura de intereses y liquidez operativa preservadas en 9M-2025."
+      ],
+      "riesgos_ejecucion": [
+        "Aumento de tasas de financiamiento o condiciones de refinanciamiento.",
+        "Emisión de deuda para financiar capex extraordinario.",
+        "Compromisos de pagos por arrendamientos no reflejados plenamente.",
+        "Necesidades de liquidez de corto plazo por cambios de clientes o ciclo."
+      ],
+      "contracatalizadores": [
+        "Pérdida de net debt negativo por uso de caja en inversiones no recuperables.",
+        "Subida sostenida del interés trimestral tras refinanciación.",
+        "Deuda neta positiva y caída de caja neta en dos trimestres consecutivos."
+      ]
+    },
+    {
+      "catalyst_id": "CAT-06",
+      "descripcion": "Reducir brechas de transparencia financiera publicando de forma consistente COGS, capex y flujos de caja de 3 meses. La calidad de la información es un catalizador de múltiplo porque permite validar que el FCF no es puntual.",
+      "tipo": "CORPORATIVO",
+      "estado_actual": "El paquete muestra limitaciones de granularidad (COGS, capex detallado y estados de flujo completos faltantes en varios trimestres), lo que incrementa incertidumbre de calidad de caja.",
+      "evidencia_actual": [
+        {
+          "source_id": "TruthPack_v1.log",
+          "ubicacion": "limitaciones",
+          "cita": "No se encontraron estados de flujo de caja completos 3M en varios trimestres y faltan datos explícitos de COGS en múltiples periodos."
+        },
+        {
+          "source_id": "TruthPack_v1.log",
+          "ubicacion": "fuentes_consultadas y conversiones_aplicadas",
+          "cita": "Hay reconstrucción de trimestres y conciliaciones; algunos campos de gastos y flujo dependen de disponibilidad incompleta."
+        },
+        {
+          "source_id": "TruthPack_v1.data_quality",
+          "ubicacion": "DATA_COMPLETENESS",
+          "cita": "Completitud global 66%, con 35% de null en histórico trimestral."
+        }
+      ],
+      "evidencia_confirmada_futura": {
+        "test_medible": "Verificar publicación de estados 10-Q con detalle 3M de CFO, CFI, CFF, capex y COGS.",
+        "umbral": "Cuatro trimestres consecutivos con datos completos y consistentes entre bruto y bridge de caja.",
+        "ventana": "6-12 meses"
+      },
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "↔",
+          "magnitud_estimada": "No cambia mecánicamente; reduce probabilidad de ajustes adversos."
+        },
+        {
+          "driver": "margen_operativo",
+          "direccion": "↔",
+          "magnitud_estimada": "Facilita validar tendencias de margen para decisiones de alza de eficiencia."
+        },
+        {
+          "driver": "deuda",
+          "direccion": "↔",
+          "magnitud_estimada": "Baja incertidumbre en modelado de liquidez y obligaciones."
+        },
+        {
+          "driver": "múltiplo",
+          "direccion": "↑",
+          "magnitud_estimada": "+1x a +3x al reducir descuento por opacidad"
+        }
+      ],
+      "indicadores_lideres": [
+        "Reporte trimestral con cogs, capex y FCF completos en cada 10-Q.",
+        "Convergencia de CFO-CFI-CFF con delta_cash sin ajustes extraordinarios.",
+        "Reducción de diferencias entre guía de gestión y resultados reportados.",
+        "Sin retroactivos o reclasificaciones materiales en 4 trimestres."
+      ],
+      "riesgos_ejecucion": [
+        "Mismos retrasos de datos por procesos internos de consolidación.",
+        "Reclasificación posterior que provoque restatements de flujos.",
+        "Cambios de presentación que dificulten comparabilidad histórica.",
+        "Dependencia de notas legales o no GAAP para visibilidad de caja."
+      ],
+      "contracatalizadores": [
+        "Persistir con reportes incompletos de CFO/CFI/CFF y capex.",
+        "Reaparecer ajustes de caja no explicados en períodos sucesivos.",
+        "Nueva opacidad por cambios de política de presentación de KPI internos."
+      ]
+    }
+  ],
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1",
+    "implied_expectations_version": "ImpliedExpectations_v1"
+  }
+}

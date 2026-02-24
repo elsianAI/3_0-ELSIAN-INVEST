@@ -552,7 +552,59 @@ def normalize(tp: dict) -> dict:
 
     # ── Normalizar balance_sheet_ultimo ──
     raw_bs = result.get("balance_sheet_ultimo", {})
-    if raw_bs:
+    if isinstance(raw_bs, list):
+        # LLM may return multiple balance sheet snapshots.
+        # Prefer latest by ISO date; if no date is available, prefer entry with
+        # more non-null canonical BS fields.
+        candidates: list[tuple[int, dict]] = []
+        for idx, entry in enumerate(raw_bs):
+            if isinstance(entry, dict):
+                candidates.append((idx, _normalize_entry(entry, _BS_ALIAS_INDEX)))
+
+        if not candidates:
+            result["balance_sheet_ultimo"] = {}
+        else:
+            bs_fields = (
+                "activos_totales_usd",
+                "pasivos_totales_usd",
+                "patrimonio_usd",
+                "deuda_total_usd",
+                "caja_usd",
+                "cuentas_por_cobrar_usd",
+                "inventarios_usd",
+                "cuentas_por_pagar_usd",
+            )
+
+            def _date_key(bs_entry: dict) -> str:
+                for key in ("fecha", "fecha_fin", "fecha_corte"):
+                    raw_date = bs_entry.get(key)
+                    if isinstance(raw_date, str):
+                        iso = raw_date.strip()[:10]
+                        if re.match(r"^\d{4}-\d{2}-\d{2}$", iso):
+                            return iso
+                return ""
+
+            def _completeness_key(bs_entry: dict) -> int:
+                return sum(1 for key in bs_fields if bs_entry.get(key) is not None)
+
+            dated_candidates: list[tuple[int, dict, str, int]] = []
+            undated_candidates: list[tuple[int, dict, int]] = []
+            for idx, bs_entry in candidates:
+                dkey = _date_key(bs_entry)
+                ckey = _completeness_key(bs_entry)
+                if dkey:
+                    dated_candidates.append((idx, bs_entry, dkey, ckey))
+                else:
+                    undated_candidates.append((idx, bs_entry, ckey))
+
+            if dated_candidates:
+                # date asc + completeness asc + idx asc => max picks latest and deterministic tie-break.
+                _, best_entry, _, _ = max(dated_candidates, key=lambda t: (t[2], t[3], t[0]))
+            else:
+                # No valid date in any snapshot: prefer richer snapshot, then most recent list position.
+                _, best_entry, _ = max(undated_candidates, key=lambda t: (t[2], t[0]))
+            result["balance_sheet_ultimo"] = best_entry
+    elif isinstance(raw_bs, dict) and raw_bs:
         norm_bs = _normalize_entry(raw_bs, _BS_ALIAS_INDEX)
         result["balance_sheet_ultimo"] = norm_bs
 

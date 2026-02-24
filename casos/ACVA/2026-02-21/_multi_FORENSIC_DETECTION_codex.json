@@ -1,0 +1,402 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260221_ACVA",
+  "fecha_corte": "2026-02-21",
+  "ticker": "ACVA",
+  "red_flags": [
+    {
+      "flag_id": "RF-01",
+      "categoria": "puente_ebit_a_cfo",
+      "source_id": [
+        "SRC_004",
+        "SRC_003",
+        "SRC_002",
+        "SRC_001"
+      ],
+      "ubicacion": "historico_anual[FY2020] a historico_anual[FY2024].ebit_usd y cfo_usd",
+      "descripcion": "La brecha entre EBIT y CFO es persistentemente extrema y no explicada por detalle de ajustes en el extracto.",
+      "evidencia_cuantitativa": {
+        "FY2020": {
+          "ebit_usd": -40647000,
+          "cfo_usd": 10368000,
+          "bridge_usd": 51015000,
+          "bridge_abs_pct_vs_ebit": 125.5
+        },
+        "FY2021": {
+          "ebit_usd": -76805000,
+          "cfo_usd": 85290000,
+          "bridge_usd": 162095000,
+          "bridge_abs_pct_vs_ebit": 211.1
+        },
+        "FY2022": {
+          "ebit_usd": -106209000,
+          "cfo_usd": -75175000,
+          "bridge_usd": -31034000,
+          "bridge_abs_pct_vs_ebit": 29.2
+        },
+        "FY2023": {
+          "ebit_usd": -89677000,
+          "cfo_usd": -17885000,
+          "bridge_usd": -71892000,
+          "bridge_abs_pct_vs_ebit": 80.1
+        },
+        "FY2024": {
+          "ebit_usd": -84105000,
+          "cfo_usd": 65397000,
+          "bridge_usd": 149502000,
+          "bridge_abs_pct_vs_ebit": 177.8
+        }
+      },
+      "indicador": "Distorsiones >=15% presentes en FY2020, FY2021, FY2022, FY2023 y FY2024."
+    },
+    {
+      "flag_id": "RF-02",
+      "categoria": "working_capital_anomalia",
+      "source_id": "SRC_001",
+      "ubicacion": "balance_sheet_ultimo.cuentas_por_cobrar_usd y cuentas_por_pagar_usd",
+      "descripcion": "Capital circulante neto negativo muy amplio sin desglose detallado de rubros, con AP/AR elevado, sugiere dependencia de financiación espontánea del ciclo operativo.",
+      "evidencia_cuantitativa": {
+        "cuentas_por_cobrar_usd": 168770000,
+        "cuentas_por_pagar_usd": 345605000,
+        "working_capital_neto_usd": -176835000,
+        "wc_neto_vs_caja_pct": -78.84
+      },
+      "condicion_efecto": "Riesgo de reversión rápida de AP/AR y deterioro de liquidez si la expansión crediticia de proveedores se revierte."
+    },
+    {
+      "flag_id": "RF-03",
+      "categoria": "reconocimiento_ingresos_y_margen",
+      "source_id": [
+        "SRC_001",
+        "SRC_003",
+        "SRC_004",
+        "SRC_002",
+        "SRC_007",
+        "SRC_008",
+        "SRC_009",
+        "SRC_010",
+        "SRC_011",
+        "SRC_012"
+      ],
+      "ubicacion": "historico_anual y historico_trimestral: cogs_usd y gross_profit_usd",
+      "descripcion": "No se reporta COGS ni gross profit de forma consistente en múltiples periodos, lo que impide verificar la calidad del reconocimiento de ingresos y la composición del margen.",
+      "evidencia_cuantitativa": {
+        "historico_anual_campos_nulos": {
+          "gross_profit_usd": 6,
+          "cogs_usd": 6
+        },
+        "cobertura_cogs_trimestral": {
+          "periodos_con_cogs_no_nulo": 4,
+          "periodos_totales": 13
+        }
+      },
+      "impacto": "No es verificable la relación ingresos-costo ni posibles manipulaciónes de margen sin cambios contables de línea."
+    },
+    {
+      "flag_id": "RF-04",
+      "categoria": "capitalizacion_capex",
+      "source_id": "SRC_001",
+      "ubicacion": "historico_anual.capex_usd y _field_sources.capex_usd",
+      "descripcion": "CAPEX no proviene de un desglose normalizado de gastos de activos fijos; en fuentes del caso se indica proxy de 'purchases of property and equipment'.",
+      "evidencia_cuantitativa": {
+        "capex_usd_fy2019": null,
+        "capex_usd_fy2020": null,
+        "capex_usd_fy2021": -2569000,
+        "capex_usd_fy2022": -3211000,
+        "capex_usd_fy2023": -2330000,
+        "capex_usd_fy2024": -4539000
+      },
+      "impacto": "No se distingue mantenimiento vs crecimiento, lo que reduce trazabilidad de la calidad de FCF."
+    },
+    {
+      "flag_id": "RF-05",
+      "categoria": "goodwill_no_verificado",
+      "source_id": "SRC_001",
+      "ubicacion": "balance_sheet_ultimo y fields no mapeados a goodwill",
+      "descripcion": "No hay campo normalizado de goodwill ni deterioros asociados en los datos extraídos, por lo que no se puede validar deterioro/ajustes del activo intangible.",
+      "evidencia_cuantitativa": {
+        "goodwill_reportado_usd": null
+      },
+      "impacto": "Riesgo de opacidad en calidad patrimonial y ajustes no observados."
+    },
+    {
+      "flag_id": "RF-06",
+      "categoria": "off_balance_y_off_report",
+      "source_id": "SRC_001",
+      "ubicacion": "lease_data y log.limitaciones",
+      "descripcion": "No hay tabla de arrendamientos normalizada ni detalle completo de compromisos; lease_data no contiene partidas estructuradas.",
+      "evidencia_cuantitativa": {
+        "lease_data_lleno": false,
+        "source": "SRC_001"
+      },
+      "impacto": "Posible omisión de obligaciones fuera de balance o no plenamente documentadas."
+    },
+    {
+      "flag_id": "RF-07",
+      "categoria": "opacidad_trazabilidad_RPT",
+      "source_id": "SRC_001",
+      "ubicacion": "log.limitaciones y falta de notas específicas de partes relacionadas",
+      "descripcion": "No se observa información detallada de transacciones entre partes relacionadas en los campos normalizados entregados.",
+      "evidencia_cuantitativa": {
+        "related_party_disclosure_usd": null
+      },
+      "impacto": "Sin evidencia no se confirma integridad ni independencia de operaciones relacionadas."
+    }
+  ],
+  "liquidez": {
+    "corte_analisis": "2026-02-21",
+    "efectivo_disponible_usd": 224065000,
+    "lineas_credito_disponibles_usd": null,
+    "credito_total_inmediato_usd": 224065000,
+    "deuda_total_usd": 123000000,
+    "net_debt_usd": -101065000,
+    "running_cash_debt_free_usd": 224065000,
+    "vencimientos_deuda_12_24m": {
+      "fuente_id": "SRC_001",
+      "dato": null,
+      "estado": "No se encontró desglose de vencimientos en el pack proporcionado."
+    },
+    "runway_meses_estimado": {
+      "escenario_base_fcff_positivo": {
+        "metodo": "FCF FY2024 positivo sostenido en el dato de referencia",
+        "valor": null,
+        "nota": "Sin consumo neto de caja en ese escenario; no se observa agotamiento en horizonte inmediato con base en FY2024."
+      },
+      "escenario_stress_fcff_negativo": {
+        "metodo": "Uso de FCF anual histórico FY2022 (-78.386M) como peor nivel observado de 2 años con dato disponible",
+        "meses": 34.3,
+        "nota": "A este ritmo de consumo, el cash reportado cubre ~34 meses."
+      }
+    },
+    "riesgo_dilucion": {
+      "estado_datos_acciones": "Sin datos de acciones diluidas en input de base cuantitativa",
+      "riesgo_condicional": "Potencial si continuidad de FCF positivo requiere financiación adicional."
+    },
+    "riesgo_covenants": {
+      "ebitda_proxy_fy2024_usd": -47.42,
+      "interes_devengado_fy2024_usd": -4.244,
+      "cobertura_ebitda_interes": -11.18,
+      "nota": "Una covenant de coverage positiva en términos de EBITDA operativo no estaría cubierta con la base presentada."
+    },
+    "observaciones": [
+      "No se identificó detalle de líneas de crédito disponibles en el extracto utilizado.",
+      "No hay calendario explícito de vencimientos de deuda para 12-24 meses."
+    ]
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "metodologia": "bridge = CFO - EBIT (análisis de distorsión entre resultado operativo y flujo operativo)",
+      "periodos": [
+        {
+          "periodo": "FY2019",
+          "source_id": "SRC_004",
+          "ebit_usd": -79282000,
+          "cfo_usd": -72460000,
+          "bridge_usd": 6820000,
+          "bridge_abs_pct_vs_ebit": 8.6
+        },
+        {
+          "periodo": "FY2020",
+          "source_id": "SRC_003",
+          "ebit_usd": -40647000,
+          "cfo_usd": 10368000,
+          "bridge_usd": 51015000,
+          "bridge_abs_pct_vs_ebit": 125.5
+        },
+        {
+          "periodo": "FY2021",
+          "source_id": "SRC_002",
+          "ebit_usd": -76805000,
+          "cfo_usd": 85290000,
+          "bridge_usd": 162095000,
+          "bridge_abs_pct_vs_ebit": 211.1
+        },
+        {
+          "periodo": "FY2022",
+          "source_id": "SRC_001",
+          "ebit_usd": -106209000,
+          "cfo_usd": -75175000,
+          "bridge_usd": -31034000,
+          "bridge_abs_pct_vs_ebit": 29.2
+        },
+        {
+          "periodo": "FY2023",
+          "source_id": "SRC_001",
+          "ebit_usd": -89677000,
+          "cfo_usd": -17885000,
+          "bridge_usd": -71892000,
+          "bridge_abs_pct_vs_ebit": 80.1
+        },
+        {
+          "periodo": "FY2024",
+          "source_id": "SRC_001",
+          "ebit_usd": -84105000,
+          "cfo_usd": 65397000,
+          "bridge_usd": 149502000,
+          "bridge_abs_pct_vs_ebit": 177.8
+        }
+      ],
+      "distorsiones_ge_15pct": [
+        "FY2020 (125.5%)",
+        "FY2021 (211.1%)",
+        "FY2022 (29.2%)",
+        "FY2023 (80.1%)",
+        "FY2024 (177.8%)"
+      ]
+    },
+    "cfo_a_fcf": {
+      "metodologia": "FCF = CFO - CAPEX (capex negativo = salida de caja)",
+      "periodos": [
+        {
+          "periodo": "FY2021",
+          "source_id": "SRC_002",
+          "cfo_usd": 85290000,
+          "capex_usd": -2569000,
+          "fcf_usd": 87859000,
+          "capex_ratio_vs_cfo_pct": 3.0
+        },
+        {
+          "periodo": "FY2022",
+          "source_id": "SRC_001",
+          "cfo_usd": -75175000,
+          "capex_usd": -3211000,
+          "fcf_usd": -78386000,
+          "capex_ratio_vs_cfo_pct": 4.3
+        },
+        {
+          "periodo": "FY2023",
+          "source_id": "SRC_001",
+          "cfo_usd": -17885000,
+          "capex_usd": -2330000,
+          "fcf_usd": -20215000,
+          "capex_ratio_vs_cfo_pct": 13.0
+        },
+        {
+          "periodo": "FY2024",
+          "source_id": "SRC_001",
+          "cfo_usd": 65397000,
+          "capex_usd": -4539000,
+          "fcf_usd": 69936000,
+          "capex_ratio_vs_cfo_pct": 6.9
+        },
+        {
+          "periodo": "Q1-2024",
+          "source_id": "SRC_007",
+          "cfo_usd": 42975000,
+          "capex_usd": -8859000,
+          "fcf_usd": 51834000,
+          "capex_ratio_vs_cfo_pct": 20.6
+        },
+        {
+          "periodo": "Q1-2025",
+          "source_id": "SRC_007",
+          "cfo_usd": 66624000,
+          "capex_usd": -10077000,
+          "fcf_usd": 76701000,
+          "capex_ratio_vs_cfo_pct": 15.1
+        }
+      ],
+      "distorsiones_ge_15pct": [
+        "Q1-2024 (20.6%)",
+        "Q1-2025 (15.1%)"
+      ],
+      "dividendos_recompras": {
+        "fuente": "sin campos específicos detectados en TruthPack_v1",
+        "registro": null
+      }
+    },
+    "fcf_comprobado_FY2024": {
+      "source_id": "SRC_001",
+      "formula": "FCF = CFO - CAPEX",
+      "cfo_usd": 65397000,
+      "capex_usd": -4539000,
+      "fcf_usd": 69936000
+    },
+    "cashflow_bridging_base": {
+      "source_id": "SRC_001",
+      "fcf_validation": "CFO 65.397M + CFI -15.863M + CFF -7.874M + FX -0.166M = 41.494M delta_cash"
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "criterio_id": "KLC-01",
+      "evento": "Agotamiento de caja por generación negativa de caja",
+      "ventana_temporal": "2026-02-21 a 2027-02-21",
+      "condicion_objetiva": "Si el FCF trimestral acumulado en 12 meses (CFO - CAPEX) fuese <= -224065000 USD, el efectivo reportado se agotaría antes de 12 meses sin deuda adicional.",
+      "probabilidad": "ALTA"
+    },
+    {
+      "criterio_id": "KLC-02",
+      "evento": "Persistencia de puente EBIT→CFO extremo con pérdidas operativas",
+      "ventana_temporal": "2026-FY2026 a 2027-FY2027",
+      "condicion_objetiva": "Si dos ejercicios consecutivos mantienen |CFO-EBIT|/|EBIT| >= 100% con EBIT negativo, se confirma que el cash depende de ajustes no operativos o de variación de capital de trabajo; riesgo de reversión acelerada.",
+      "probabilidad": "ALTA"
+    },
+    {
+      "criterio_id": "KLC-03",
+      "evento": "Posible incumplimiento de covenant de cobertura operativa",
+      "ventana_temporal": "próximos 12 meses",
+      "condicion_objetiva": "Si se mantiene EBITDA operativo proxy <= 0 mientras existan gastos financieros y requerimientos de servicio de deuda, cualquier covenant con cobertura mínima positiva quedaría comprometido.",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "criterio_id": "KLC-04",
+      "evento": "Riesgo de liquidez por deuda no reportada en calendario",
+      "ventana_temporal": "2026-2027 (12-24 meses)",
+      "condicion_objetiva": "Si se materializan vencimientos de principal en 12-24 meses superiores a la caja disponible (224.065M) y no existen líneas comprometidas, incremento de riesgo de incumplimiento.",
+      "probabilidad": "ALTA"
+    },
+    {
+      "criterio_id": "KLC-05",
+      "evento": "Dilución por cierre de liquidez",
+      "ventana_temporal": "18 meses",
+      "condicion_objetiva": "Si el FCF no se estabiliza positivo en 8-12 trimestres y no hay acceso a financiación, la empresa puede requerir emisión de capital relevante para sostener liquidez; no hay base de acciones diluidas verificable en inputs.",
+      "probabilidad": "MEDIA"
+    }
+  ],
+  "report_type": "ForensicDetection_v1",
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1_partial",
+    "truth_pack_status": "PASS",
+    "sourcespack_disponible": false,
+    "implied_expectations_version": "ImpliedExpectations_v1",
+    "case_id_implied": "CASE_20260221_ACVA",
+    "fuentes": [
+      "SRC_001",
+      "SRC_002",
+      "SRC_003",
+      "SRC_004",
+      "SRC_005",
+      "SRC_006",
+      "SRC_007",
+      "SRC_008",
+      "SRC_009",
+      "SRC_010",
+      "SRC_011",
+      "SRC_012",
+      "SRC_046"
+    ]
+  },
+  "log": {
+    "limitaciones": [
+      "No se recibió SourcesPack_v1 estructurado; ejecución basada en TruthPack_v1 único.",
+      "No se revisaron filings directamente desde archivos fuente más allá de los campos ya normalizados reportados.",
+      "Falta desglose de inventarios en balance.",
+      "COGS/gross profit/R&D/GA no están normalizados de forma continua.",
+      "CAPEX no siempre desagregado entre mantenimiento y expansión.",
+      "No hay calendario de vencimientos de deuda 12-24 meses ni detalle de líneas de crédito disponibles.",
+      "Datos de RPT y goodwill no normalizados en los campos proporcionados."
+    ],
+    "calculos_clave": [
+      "CFO-CAPEX FY2024 = 69.936M USD.",
+      "Liquidez neta (caja - deuda total) = 101.065M USD.",
+      "Bridge de flujo de caja FY2024 validado: 65.397M + -15.863M + -7.874M + -0.166M = 41.494M delta cash."
+    ],
+    "accion": "No se incluye veredicto de inversión ni puntaje de severidad; solo detección."
+  },
+  "_meta": {
+    "generado_en": "2026-02-21",
+    "esquema_validado": "ForensicDetection_v1",
+    "cumple_esquema_forzado": true
+  }
+}

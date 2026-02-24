@@ -204,9 +204,14 @@ def mark_step_done(
     read_modify_write(case_dir, _modifier)
 
 
-def mark_step_failed(case_dir: Path, step_name: str, error: str, failure_meta: dict | None = None) -> None:
+def mark_step_failed(case_dir: Path, step_name: str, error: str | None, failure_meta: dict | None = None) -> None:
     """Marca step como FAILED con motivo (atomic read-modify-write)."""
     now = datetime.now(timezone.utc).isoformat()
+    normalized_error = (error or "").strip() if isinstance(error, str) else ""
+    if not normalized_error and isinstance(failure_meta, dict):
+        normalized_error = str(failure_meta.get("last_error") or "").strip()
+    if not normalized_error:
+        normalized_error = "unknown error"
     normalized_meta = compact_failure_ctx(failure_meta or {}, max_chars=2000) if failure_meta else None
 
     def _modifier(state: dict) -> None:
@@ -215,7 +220,7 @@ def mark_step_failed(case_dir: Path, step_name: str, error: str, failure_meta: d
             entry = {
                 "status": "FAILED",
                 "timestamp": now,
-                "error": error,
+                "error": normalized_error,
             }
             if normalized_meta:
                 entry["failure_meta"] = normalized_meta
@@ -230,7 +235,7 @@ def mark_step_failed(case_dir: Path, step_name: str, error: str, failure_meta: d
                 state["pipeline"][step_name]["failure_meta"] = normalized_meta
 
             failure_entry = {
-                "error": error,
+                "error": normalized_error,
                 "timestamp": now,
             }
             if normalized_meta:
@@ -377,8 +382,16 @@ def update_decision_fields(
     probabilistica: dict | None = None,
     sizing: float | None = None,
     modelo_principal: str | None = None,
+    next_step: str | None = None,
+    proxima_revision: str | None = None,
+    estado_caso: str | None = None,
+    monitor_input: str | None = None,
 ) -> None:
-    """Update decision/score/confianza(+extras) after ARBITRO (atomic)."""
+    """Update decision/score/confianza(+extras) after ARBITRO (atomic).
+
+    Also persists monitor-related fields extracted from the DecisionPacket:
+    next_step, proxima_revision, estado_caso, monitor_input.
+    """
 
     def _modifier(state: dict) -> None:
         state["decision"] = decision
@@ -390,6 +403,14 @@ def update_decision_fields(
             state["sizing"] = sizing
         if modelo_principal is not None:
             state["modelo_principal"] = modelo_principal
+        if next_step is not None:
+            state["next_step"] = next_step
+        if proxima_revision is not None:
+            state["proxima_revision"] = proxima_revision
+        if estado_caso is not None:
+            state["estado_caso"] = estado_caso
+        if monitor_input is not None:
+            state["monitor_input"] = monitor_input
 
     read_modify_write(case_dir, _modifier)
 
@@ -415,6 +436,41 @@ def load_all_case_states(casos_dir: Path) -> list[dict]:
                 except (json.JSONDecodeError, OSError):
                     pass
     return results
+
+
+def update_meta_review_fields(
+    case_dir: Path,
+    estado: str,
+    artefacto: str | None = None,
+    veredicto: str | None = None,
+    meta_decision: str | None = None,
+    prompt_timestamp: str | None = None,
+    dp_hash: str | None = None,
+    dp_ref: str | None = None,
+) -> None:
+    """Update meta_review fields in _estado.json (atomic read-modify-write).
+
+    Follows the same pattern as update_decision_fields().
+    """
+
+    def _modifier(state: dict) -> None:
+        mr = state.setdefault("meta_review", {})
+        mr["estado"] = estado
+        if artefacto is not None:
+            mr["artefacto"] = artefacto
+        if veredicto is not None:
+            mr["veredicto"] = veredicto
+        if meta_decision is not None:
+            mr["meta_decision"] = meta_decision
+        if prompt_timestamp is not None:
+            mr["prompt_timestamp"] = prompt_timestamp
+        if dp_hash is not None:
+            mr["dp_hash"] = dp_hash
+        if dp_ref is not None:
+            mr["dp_ref"] = dp_ref
+        mr["timestamp"] = datetime.now(timezone.utc).isoformat()
+
+    read_modify_write(case_dir, _modifier)
 
 
 def load_estado_repo(workspace: Path) -> dict:

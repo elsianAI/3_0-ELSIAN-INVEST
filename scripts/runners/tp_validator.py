@@ -233,33 +233,53 @@ def _gate_cashflow_identity(tp: dict) -> dict:
     fx_present = _num(fy0.get("fx_effect_cash_usd")) is not None
     other_present = _num(fy0.get("otros_ajustes_caja_usd")) is not None
 
-    bridge_total = cfo + cfi + cff + fx + other
+    bridge_with_fx = cfo + cfi + cff + fx + other
+    bridge_without_fx = cfo + cfi + cff + other
     delta_cash = _num(fy0.get("delta_cash_usd")) or _num(fy0.get("cambio_caja_usd"))
 
     if delta_cash is None:
         return {"name": "CASHFLOW_IDENTITY", "status": "SKIP",
-                "note": (f"CF components present (bridge={bridge_total:,.0f}, "
+                "note": (f"CF components present (bridge={bridge_with_fx:,.0f}, "
                          f"fx={fx:,.0f}, other={other:,.0f}), "
                          f"but no delta_cash to cross-check. {source_note}")}
 
-    abs_diff = abs(bridge_total - delta_cash)
-    denominator = max(abs(delta_cash), abs(bridge_total), 1)
-    rel_diff = abs_diff / denominator
+    abs_diff_with_fx = abs(bridge_with_fx - delta_cash)
+    denominator_with_fx = max(abs(delta_cash), abs(bridge_with_fx), 1)
+    rel_diff_with_fx = abs_diff_with_fx / denominator_with_fx
 
     # Proportional absolute tolerance: larger of $50K or 0.5% of the bigger CF figure
-    absolute_tolerance = max(50_000, 0.005 * denominator)
+    absolute_tolerance = max(50_000, 0.005 * denominator_with_fx)
 
     # Build audit note
-    audit = (f"bridge={bridge_total:,.0f} (CFO={cfo:,.0f}+CFI={cfi:,.0f}"
+    audit = (f"bridge={bridge_with_fx:,.0f} (CFO={cfo:,.0f}+CFI={cfi:,.0f}"
              f"+CFF={cff:,.0f}+FX={fx:,.0f}+Other={other:,.0f}), "
              f"delta_cash={delta_cash:,.0f}, "
-             f"abs_diff={abs_diff:,.0f}, rel_diff={rel_diff:.2%}. {source_note}")
+             f"abs_diff={abs_diff_with_fx:,.0f}, rel_diff={rel_diff_with_fx:.2%}. {source_note}")
 
-    if rel_diff <= 0.05 or abs_diff <= absolute_tolerance:
+    if rel_diff_with_fx <= 0.05 or abs_diff_with_fx <= absolute_tolerance:
         return {"name": "CASHFLOW_IDENTITY", "status": "PASS", "note": audit}
 
+    # Fallback check for filing presentation ambiguity:
+    # some statements present delta_cash pre-FX. If with-FX fails but without-FX
+    # passes, downgrade to WARNING (do not hard-fail).
+    if abs(fx) > 0:
+        abs_diff_without_fx = abs(bridge_without_fx - delta_cash)
+        denominator_without_fx = max(abs(delta_cash), abs(bridge_without_fx), 1)
+        rel_diff_without_fx = abs_diff_without_fx / denominator_without_fx
+        if rel_diff_without_fx <= 0.05 or abs_diff_without_fx <= absolute_tolerance:
+            return {
+                "name": "CASHFLOW_IDENTITY",
+                "status": "WARNING",
+                "note": (
+                    f"{audit} bridge_without_fx={bridge_without_fx:,.0f}, "
+                    f"abs_diff_without_fx={abs_diff_without_fx:,.0f}, "
+                    f"rel_diff_without_fx={rel_diff_without_fx:.2%}. "
+                    "Possible filing presentation ambiguity: delta_cash appears pre-FX"
+                ),
+            }
+
     # WARNING: moderate deviation AND both FX/other adjustments are missing
-    if rel_diff <= 0.10 and not fx_present and not other_present:
+    if rel_diff_with_fx <= 0.10 and not fx_present and not other_present:
         return {"name": "CASHFLOW_IDENTITY", "status": "WARNING",
                 "note": f"Moderate deviation, FX/other adjustments not extracted. {audit}"}
 

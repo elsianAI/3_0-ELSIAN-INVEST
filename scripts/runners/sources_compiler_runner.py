@@ -73,6 +73,41 @@ def source_key(source: Dict[str, Any]) -> Tuple[str, str]:
     return url_key, acc_key
 
 
+def _normalized_content_hash(source: Dict[str, Any]) -> str:
+    raw = source.get("content_hash")
+    if not isinstance(raw, str):
+        return ""
+    h = raw.strip().lower()
+    if len(h) < 16:
+        return ""
+    return h
+
+
+def _source_selection_score(source: Dict[str, Any]) -> float:
+    try:
+        return float(source.get("selection_score") or 0.0)
+    except Exception:
+        return 0.0
+
+
+def _prefer_source_for_hash(existing: Dict[str, Any], candidate: Dict[str, Any]) -> bool:
+    ex_score = _source_selection_score(existing)
+    cand_score = _source_selection_score(candidate)
+    if cand_score > ex_score:
+        return True
+    if cand_score < ex_score:
+        return False
+
+    ex_estimated = bool(existing.get("fecha_publicacion_estimated"))
+    cand_estimated = bool(candidate.get("fecha_publicacion_estimated"))
+    if ex_estimated != cand_estimated:
+        return not cand_estimated
+
+    ex_id = str(existing.get("source_id") or "~")
+    cand_id = str(candidate.get("source_id") or "~")
+    return cand_id < ex_id
+
+
 # ── Dedup quality helpers ─────────────────────────────────
 _TIPO_PRIORITY: Dict[str, int] = {
     "10-K": 10, "20-F": 10, "ANNUAL_REPORT": 10,
@@ -130,6 +165,17 @@ def _clean_md_is_useful_check(path: Path) -> bool:
     try:
         text = path.read_text(errors="replace")
     except Exception:
+        return False
+    return _clean_md_is_useful_check_text(text)
+
+
+def _clean_md_is_useful_check_text(text: str) -> bool:
+    """Semantic quality gate for .clean.md content (string version).
+
+    Returns True only if the text has markdown tables with numeric rows
+    and at least one valid financial section.
+    """
+    if not text:
         return False
     if text.count("_Section not found in filing._") >= 4:
         return False
@@ -242,7 +288,12 @@ def ensure_source_defaults(source: Dict[str, Any], today: str) -> Dict[str, Any]
     out["titulo"] = out.get("titulo") or f"{out['tipo']} source"
     out["url"] = out.get("url") if isinstance(out.get("url"), str) else ""
     out["publicador"] = out.get("publicador") or "UNKNOWN"
-    out["fecha_publicacion"] = out.get("fecha_publicacion") or today
+    fecha_pub = out.get("fecha_publicacion")
+    out["fecha_publicacion"] = str(fecha_pub) if fecha_pub not in (None, "") else None
+    if "fecha_publicacion_estimated" in out:
+        out["fecha_publicacion_estimated"] = bool(out.get("fecha_publicacion_estimated"))
+    else:
+        out["fecha_publicacion_estimated"] = out["fecha_publicacion"] is None
     out["fecha_recuperacion"] = out.get("fecha_recuperacion") or today
     out["idioma"] = out.get("idioma") or "en"
     out["fiabilidad"] = out.get("fiabilidad") or "B"
@@ -399,6 +450,16 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
         for source in fuentes:
             if not isinstance(source, dict):
                 continue
+            source_type = normalize_type(source.get("tipo"))
+            if source_type == "EARNINGS_TRANSCRIPT":
+                issuer_match = str(source.get("issuer_match") or "").upper()
+                if issuer_match == "MISMATCH":
+                    print(
+                        f"[sources_compiler] WARNING: dropping transcript "
+                        f"{source.get('source_id')} due issuer_match=MISMATCH",
+                        file=sys.stderr,
+                    )
+                    continue
             key = source_key(source)
             # ── URL dedup with quality-aware merge ──
             if key[0] and key[0] in seen:
@@ -446,6 +507,56 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
             merged.append(ensure_source_defaults(source, today))
             first_id = str(source.get("source_id") or "")
             merged_origin_ids.append([first_id] if first_id else [])
+
+    # Optional dedupe by content hash to avoid processing duplicated documents.
+    if merged:
+        dedup_sources: List[Dict[str, Any]] = []
+        dedup_origin_ids: List[List[str]] = []
+        hash_index: Dict[str, int] = {}
+        hash_duplicate_count = 0
+
+        for src, origin_ids in zip(merged, merged_origin_ids):
+            chash = _normalized_content_hash(src)
+            if not chash:
+                dedup_sources.append(src)
+                dedup_origin_ids.append(list(origin_ids))
+                continue
+
+            existing_idx = hash_index.get(chash)
+            if existing_idx is None:
+                hash_index[chash] = len(dedup_sources)
+                dedup_sources.append(src)
+                dedup_origin_ids.append(list(origin_ids))
+                continue
+
+            hash_duplicate_count += 1
+            existing = dedup_sources[existing_idx]
+            if _prefer_source_for_hash(existing, src):
+                print(
+                    "[sources_compiler] Dedup content_hash: replacing "
+                    f"{existing.get('source_id')} with {src.get('source_id')}",
+                    file=sys.stderr,
+                )
+                merged_ids = dedup_origin_ids[existing_idx]
+                for oid in list(origin_ids) + [str(existing.get("source_id") or "")]:
+                    if oid and oid not in merged_ids:
+                        merged_ids.append(oid)
+                dedup_sources[existing_idx] = src
+            else:
+                print(
+                    "[sources_compiler] Dedup content_hash: dropping "
+                    f"{src.get('source_id')} (kept {existing.get('source_id')})",
+                    file=sys.stderr,
+                )
+                merged_ids = dedup_origin_ids[existing_idx]
+                for oid in origin_ids:
+                    if oid and oid not in merged_ids:
+                        merged_ids.append(oid)
+
+        if hash_duplicate_count:
+            duplicate_count += hash_duplicate_count
+        merged = dedup_sources
+        merged_origin_ids = dedup_origin_ids
 
     no_sources = len(merged) == 0
     if no_sources:
@@ -544,11 +655,72 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
 
         final_sources.append(src)
 
-    # ── Fix D: generate .clean.md from .txt for non-US PDF filings ──
-    # The clean_md_extractor only works on HTML. For PDFs with substantial
-    # .txt companions (text extracted from PDF), generate a lightweight
-    # .clean.md by extracting financial sections via keyword matching.
+    # ── Fix D: self-heal .clean.md (prefer HTML extraction, fallback TXT) ──
+    # In the same run, regenerate low-quality/missing .clean.md from HTML
+    # companion when available. If HTML extraction fails, fallback to TXT
+    # extraction (only written when quality gate passes).
     _clean_md_generated = 0
+
+    def _try_regen_from_html(htm_path: Path, clean_path: Path, src_ref: Dict[str, Any]) -> bool:
+        nonlocal _clean_md_generated
+        extract_financial_tables = None
+        import_errors: List[str] = []
+        try:
+            # Script execution context (sys.path[0]=.../scripts/runners).
+            from clean_md_extractor import extract_financial_tables as _extract_financial_tables
+            extract_financial_tables = _extract_financial_tables
+        except Exception as exc:
+            import_errors.append(f"clean_md_extractor.extract_financial_tables: {exc!r}")
+        if extract_financial_tables is None:
+            try:
+                # Package-style fallback.
+                from scripts.runners.clean_md_extractor import extract_financial_tables as _extract_financial_tables
+                extract_financial_tables = _extract_financial_tables
+            except Exception as exc:
+                import_errors.append(f"scripts.runners.clean_md_extractor.extract_financial_tables: {exc!r}")
+        if extract_financial_tables is None:
+            print(
+                "[sources_compiler] WARNING: cannot import HTML clean extractor "
+                f"(cwd={Path.cwd()} sys.path[0]={sys.path[0] if sys.path else ''!r}) "
+                f"errors={'; '.join(import_errors)}",
+                file=sys.stderr,
+            )
+            return False
+        try:
+            result = extract_financial_tables(htm_path)
+        except Exception as exc:
+            print(
+                f"[sources_compiler] WARNING: HTML clean extraction failed ({htm_path.name}): {exc}",
+                file=sys.stderr,
+            )
+            return False
+
+        if not result or not _clean_md_is_useful_check_text(result):
+            print(
+                f"[sources_compiler] HTML clean extraction not useful: {htm_path.name}",
+                file=sys.stderr,
+            )
+            return False
+
+        try:
+            clean_path.write_text(result, encoding="utf-8")
+        except Exception as exc:
+            print(
+                f"[sources_compiler] WARNING: cannot write regenerated clean.md ({clean_path.name}): {exc}",
+                file=sys.stderr,
+            )
+            return False
+
+        _clean_md_generated += 1
+        try:
+            new_rel = str(clean_path.relative_to(REPO_ROOT))
+        except ValueError:
+            pass
+        else:
+            src_ref["local_path"] = new_rel
+        print(f"[sources_compiler] Regenerated .clean.md from HTML: {clean_path.name}", file=sys.stderr)
+        return True
+
     for src in final_sources:
         lp = src.get("local_path", "")
         if not lp:
@@ -560,6 +732,32 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
         else:
             txt_p = p.with_suffix(".txt")
         clean_p = txt_p.with_suffix(".clean.md")
+        htm_companion = txt_p.with_suffix(".htm")
+        if not htm_companion.exists():
+            htm_companion = txt_p.with_suffix(".html")
+
+        # Existing clean.md: keep if useful; otherwise remove and self-heal.
+        if clean_p.exists():
+            if _clean_md_is_useful_check(clean_p):
+                continue
+            try:
+                clean_p.unlink()
+                print(f"[sources_compiler] Removed low-quality .clean.md: {clean_p.name}", file=sys.stderr)
+            except OSError as exc:
+                print(
+                    f"[sources_compiler] WARNING: cannot remove low-quality .clean.md ({clean_p.name}): {exc}",
+                    file=sys.stderr,
+                )
+                continue
+            if htm_companion.exists() and _try_regen_from_html(htm_companion, clean_p, src):
+                continue
+
+        # Missing clean.md but HTML exists: try inline regeneration now.
+        if not clean_p.exists() and htm_companion.exists():
+            if _try_regen_from_html(htm_companion, clean_p, src):
+                continue
+
+        # Fallback to TXT extraction (PDF/no-HTML or HTML regeneration failed).
         if clean_p.exists():
             continue
         if not txt_p.exists() or txt_p.stat().st_size < 5000:
@@ -569,25 +767,20 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
             continue
         result = _generate_clean_md_from_txt(txt_p.stem, txt_content)
         if result:
-            clean_p.write_text(result, encoding="utf-8")
-            _clean_md_generated += 1
-            # Only update local_path if the generated .clean.md passes the
-            # semantic quality gate (markdown tables, numeric rows, etc.).
-            # If it doesn't pass, the .clean.md still exists on disk as a
-            # supplementary file, but prompt_builder will use the .txt instead
-            # (which avoids bypassing the quality gate in prompt_builder).
-            if _clean_md_is_useful_check(clean_p):
+            if _clean_md_is_useful_check_text(result):
+                clean_p.write_text(result, encoding="utf-8")
+                _clean_md_generated += 1
                 try:
                     new_rel = str(clean_p.relative_to(REPO_ROOT))
                 except ValueError:
                     pass
                 else:
                     src["local_path"] = new_rel
-                print(f"[sources_compiler] Generated .clean.md (quality OK): {clean_p.name}", file=sys.stderr)
+                print(f"[sources_compiler] Generated .clean.md from TXT: {clean_p.name}", file=sys.stderr)
             else:
-                print(f"[sources_compiler] Generated .clean.md (quality LOW, keeping .txt): {clean_p.name}", file=sys.stderr)
+                print(f"[sources_compiler] Skipped low-quality .clean.md (not written): {txt_p.stem}", file=sys.stderr)
     if _clean_md_generated:
-        print(f"[sources_compiler] Total .clean.md generated from txt: {_clean_md_generated}", file=sys.stderr)
+        print(f"[sources_compiler] Total .clean.md generated: {_clean_md_generated}", file=sys.stderr)
 
     cobertura = build_cobertura(final_sources)
     faltantes = dedupe_faltantes(sec.get("faltantes"), mkt.get("faltantes"), tr.get("faltantes"))

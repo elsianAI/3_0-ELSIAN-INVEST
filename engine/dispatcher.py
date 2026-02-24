@@ -16,9 +16,9 @@ from pathlib import Path
 
 from .config import EngineConfig, get_step_config, ModelTransport
 from .prompt_builder import build_prompt, build_fusion_prompt, build_filing_prompt, _normalize_backend_output
-from .validator import validate_artifact
-from .step_contracts import get_allowed_schemas
-from .backends.base import DispatchResult, LLMBackend, _try_recover_json
+from .validator import validate_artifact, SCHEMA_MAP
+from .step_contracts import get_allowed_schemas, get_primary_schema
+from .backends.base import DispatchResult, LLMBackend, _try_recover_json_ex
 from .backends.codex import CodexBackend
 from .backends.gemini import GeminiBackend
 from .backends.claude import ClaudeBackend
@@ -57,18 +57,79 @@ _RELAXED_DETECTION_SHAPES: dict[str, dict[str, type]] = {
     },
 }
 
+_TRUNCATION_CONTINUATION_STEPS = {"ARBITRO"}
+
 
 # ── Validation helpers (shared v1/v2) ────────────────────────
+
+
+def _is_viable_recovered_artifact(payload: dict) -> bool:
+    """Check if a recovered JSON looks like a viable artifact, not a sub-fragment.
+
+    All pipeline artifacts have ``version_esquema``.  A recovered object that
+    lacks this key (and has very few top-level keys) is almost certainly a
+    sub-object fragment extracted by balanced_brace rather than a real artifact.
+    """
+    if not isinstance(payload, dict) or not payload:
+        return False
+    if "version_esquema" in payload:
+        return True
+    # Accept objects with enough structure to be plausible artifacts even
+    # without version_esquema (e.g. legacy or ad-hoc outputs).
+    return len(payload) >= 8
 
 
 def _looks_like_transport_envelope(payload: dict) -> bool:
     if not isinstance(payload, dict):
         return False
+    if "version_esquema" in payload:
+        return False
     if "result" in payload and ("modelUsage" in payload or "type" in payload):
-        return "version_esquema" not in payload
+        return True
     if "response" in payload and ("session_id" in payload or "stats" in payload):
-        return "version_esquema" not in payload
+        return True
+    # Claude CLI envelope without "result" key (e.g. error_max_turns, permission_denials)
+    if "session_id" in payload and "modelUsage" in payload:
+        return True
+    if "type" in payload and "subtype" in payload and "session_id" in payload:
+        return True
     return False
+
+
+def _unwrap_transport_envelope(payload: dict) -> tuple[dict | None, str | None]:
+    """Try to extract artifact JSON from inside a transport envelope.
+
+    Claude --output-format json wraps model output in ``{"result": ..., "type": ...}``.
+    When the backend fails to parse the inner ``result`` (e.g. mixed text+JSON from
+    agentic mode), the recovery layer sees only the outer envelope.  This helper
+    dives into ``result`` and tries the same JSON recovery cascade on it.
+
+    Returns ``(artifact_dict, recovery_method)`` or ``(None, None)``.
+    """
+    if not isinstance(payload, dict):
+        return None, None
+
+    result_val = payload.get("result")
+    if result_val is None:
+        # Try "response" key (alternate envelope shapes)
+        result_val = payload.get("response")
+    if result_val is None:
+        return None, None
+
+    # If result is already a dict with version_esquema, use it directly
+    if isinstance(result_val, dict):
+        if "version_esquema" in result_val:
+            return result_val, "envelope_result_dict"
+        return None, None
+
+    if not isinstance(result_val, str) or not result_val.strip():
+        return None, None
+
+    # Apply full JSON recovery cascade on the inner text (no error filter)
+    inner, method = _try_recover_json_ex(result_val, error=None)
+    if inner is not None and not _looks_like_transport_envelope(inner):
+        return inner, f"envelope_unwrap_{method or 'unknown'}"
+    return None, None
 
 
 def _validate_multi_candidate_strict_schema(
@@ -136,6 +197,156 @@ def _validate_multi_candidate(
     if step_name in _RELAXED_DETECTION_SHAPES:
         return _validate_multi_candidate_relaxed_detection(step_name, payload)
     return _validate_multi_candidate_strict_schema(config, step_name, payload)
+
+
+def _resolve_expected_keys(
+    config: EngineConfig, step_name: str | None,
+) -> tuple[str | None, set[str] | None]:
+    """Resolve expected top-level keys for a step from its canonical template."""
+    if not step_name:
+        return None, None
+    schema_name = get_primary_schema(step_name)
+    if not schema_name:
+        return None, None
+    schema_rel = SCHEMA_MAP.get(schema_name)
+    if not schema_rel:
+        return schema_name, None
+    schema_path = config.get_path("schemas") / schema_rel
+    if not schema_path.exists():
+        return schema_name, None
+    try:
+        template = json.loads(schema_path.read_text(encoding="utf-8"))
+    except Exception:
+        return schema_name, None
+    if not isinstance(template, dict):
+        return schema_name, None
+    expected = {
+        key for key in template.keys()
+        if isinstance(key, str) and not key.startswith("_comment")
+    }
+    return schema_name, expected or None
+
+
+def _attempt_truncation_continuation(
+    config: EngineConfig,
+    backend: LLMBackend,
+    model_profile: str,
+    step_name: str,
+    prompt: str,
+    failed_result: DispatchResult,
+    output_schema: Path | None,
+    cwd: Path | None,
+    timeout: int,
+) -> DispatchResult | None:
+    """Try one continuation call for truncated Claude output.
+
+    Returns:
+      - None: continuation not attempted (preconditions unmet)
+      - DispatchResult: continuation attempted (success/failure)
+    """
+    schema_name, expected_keys = _resolve_expected_keys(config, step_name)
+    if not schema_name or not expected_keys:
+        return None
+
+    partial, source_recovery_method = _try_recover_json_ex(
+        failed_result.raw_output or "",
+        error=None,
+    )
+    if partial is None:
+        return None
+    if _looks_like_transport_envelope(partial):
+        return None
+
+    present_keys = {k for k in partial.keys() if isinstance(k, str)}
+    missing_keys = sorted(expected_keys - present_keys)
+    if not missing_keys:
+        return None
+
+    last_key = None
+    for key in reversed(list(partial.keys())):
+        if isinstance(key, str) and not key.startswith("_comment"):
+            last_key = key
+            break
+    requested_keys = list(missing_keys)
+    if last_key and last_key not in requested_keys:
+        requested_keys.append(last_key)
+
+    continuation_prompt = (
+        f"{prompt}\n\n"
+        "# CONTINUATION MODE\n\n"
+        "Tu salida anterior quedó truncada. "
+        "NO repitas el artefacto completo.\n"
+        f"Campos ya presentes: {json.dumps(sorted(present_keys), ensure_ascii=False)}\n"
+        f"Devuelve SOLO estas claves top-level: {json.dumps(requested_keys, ensure_ascii=False)}\n"
+        "Responde únicamente con un objeto JSON, sin markdown ni texto adicional."
+    )
+
+    # Continuation requests a subset of fields; do not enforce full-schema output here.
+    continuation_result = backend.dispatch(
+        continuation_prompt, None, cwd, timeout, step_name=step_name
+    )
+
+    continuation_obj = (
+        continuation_result.output
+        if continuation_result.success and isinstance(continuation_result.output, dict)
+        else None
+    )
+    if continuation_obj is None and continuation_result.raw_output:
+        recovered, _ = _try_recover_json_ex(
+            continuation_result.raw_output, continuation_result.error
+        )
+        if recovered is not None and not _looks_like_transport_envelope(recovered):
+            continuation_obj = recovered
+
+    merged = dict(partial)
+    received_keys: list[str] = []
+    continuation_applied = False
+
+    if isinstance(continuation_obj, dict):
+        for key in requested_keys:
+            if key in continuation_obj:
+                merged[key] = continuation_obj[key]
+                received_keys.append(key)
+
+        merged_keys = {k for k in merged.keys() if isinstance(k, str)}
+        critical_blocks = ("resumen_ejecutivo", "decision_probabilistica", "gates")
+        critical_ok = all(
+            isinstance(merged.get(block), dict) and bool(merged.get(block))
+            for block in critical_blocks
+        )
+        structure_ok = (
+            merged.get("version_esquema") == "DecisionPacket_v2"
+            and expected_keys.issubset(merged_keys)
+            and critical_ok
+        )
+        if structure_ok:
+            continuation_applied = True
+            continuation_result.success = True
+            continuation_result.output = merged
+            continuation_result.error = None
+        else:
+            continuation_result.success = False
+            missing_after = sorted(expected_keys - merged_keys)
+            continuation_result.error = (
+                "Truncation continuation did not produce a structurally valid "
+                "DecisionPacket_v2; "
+                f"missing_after={missing_after[:10]}"
+            )
+    else:
+        continuation_result.success = False
+        if not continuation_result.error:
+            continuation_result.error = "Truncation continuation returned no JSON object"
+
+    continuation_result.model_profile = model_profile
+    continuation_result.failure_ctx = {
+        **(failed_result.failure_ctx or {}),
+        "truncation_detected": True,
+        "continuation_applied": continuation_applied,
+        "continuation_keys_requested": sorted(requested_keys),
+        "continuation_keys_received": sorted(received_keys),
+        "continuation_source_recovery_method": source_recovery_method,
+    }
+    return continuation_result
 
 
 # ── v2: Transport instantiation ──────────────────────────────
@@ -210,8 +421,29 @@ def _is_retryable_dispatch_error(error: str | None, raw_output: str | None = Non
         "502", "504",
         "overloaded", "usage limit",
         "connection reset", "connection aborted", "econnreset",
+        # Gemini-specific quota errors
+        "quota", "terminalquotaerror", "exhausted your capacity", "exhausted capacity",
     )
     return any(p in text for p in patterns)
+
+
+def _is_quality_only_error(error: str | None) -> bool:
+    """Returns True only when the error is clearly a model quality issue.
+
+    Quality errors (bad JSON output, empty artifact) cannot be fixed by switching
+    to a different CLI transport for the same model — copilot fallback is skipped.
+    """
+    if not error:
+        return False
+    text = error.lower()
+    return any(p in text for p in (
+        "json parse error",
+        "could not parse json",
+        "not json artifact",
+        "artifact payload",
+        "schema validation",
+        "result is not json",
+    ))
 
 
 # ── v2: Core dispatch with retry + transport fallback ─────────
@@ -224,6 +456,8 @@ def _dispatch_model_with_retry(
     output_schema: Path | None = None,
     cwd: Path | None = None,
     timeout: int | None = None,
+    step_name: str | None = None,
+    skip_copilot_fallback: bool = False,
 ) -> DispatchResult:
     """Dispatch to a model with retry + copilot transport fallback.
 
@@ -233,7 +467,8 @@ def _dispatch_model_with_retry(
     1. Try primary transport with retries (same model, same CLI)
        - JSON recovery attempted between retries
     2. If all retries fail AND last error was a transport error AND
-       copilot_transport_fallback=true → try same model via copilot CLI (Fix-B)
+       copilot_transport_fallback=true AND skip_copilot_fallback=false
+       → try same model via copilot CLI (Fix-B)
     3. Return final result (success or error)
 
     Fix-B: Copilot is only tried for transport errors (429, 503, timeout, network),
@@ -297,7 +532,9 @@ def _dispatch_model_with_retry(
 
     for attempt in range(1, max_attempts + 1):
         decision_log.append(f"primary:attempt_{attempt}_start")
-        result = backend.dispatch(prompt, output_schema, cwd, effective_timeout)
+        result = backend.dispatch(
+            prompt, output_schema, cwd, effective_timeout, step_name=step_name
+        )
         result.model_profile = model_profile
         result.transport = primary.transport_name
         result.attempt = attempt
@@ -311,13 +548,75 @@ def _dispatch_model_with_retry(
 
         # JSON recovery before retry
         if result.raw_output:
-            recovered = _try_recover_json(result.raw_output, result.error)
+            recovered, recovery_method = _try_recover_json_ex(result.raw_output, result.error)
             if recovered is not None:
-                print(f"[dispatch] JSON recovered for {model_profile} on attempt {attempt}", file=sys.stderr)
+                method = recovery_method or "unknown_recovery"
+                if _looks_like_transport_envelope(recovered):
+                    # Try to unwrap the artifact from inside the envelope
+                    unwrapped, unwrap_method = _unwrap_transport_envelope(recovered)
+                    if unwrapped is not None and _is_viable_recovered_artifact(unwrapped):
+                        print(
+                            f"[dispatch] Artifact unwrapped from transport envelope for "
+                            f"{model_profile} on attempt {attempt} (method={unwrap_method})",
+                            file=sys.stderr,
+                        )
+                        result.success = True
+                        result.output = unwrapped
+                        result.attempts = attempts
+                        attempts[-1]["recovered"] = unwrap_method
+                        return result
+                    result.success = False
+                    result.output = None
+                    result.error = (
+                        f"Recovered output is transport envelope (method={method}); "
+                        "not a valid artifact payload"
+                    )
+                    attempts[-1]["recovered"] = method
+                    if method == "truncation_repair":
+                        attempts[-1]["truncation_repaired"] = True
+                        result.failure_ctx = {
+                            **(result.failure_ctx or {}),
+                            "truncation_repaired": True,
+                            "recovery_method": method,
+                            "model_profile": model_profile,
+                            "backend": primary.transport_name,
+                            "transport": primary.transport_name,
+                            "attempts": attempts,
+                            "decision_log": decision_log,
+                            "last_error": result.error,
+                        }
+                    continue
+                if not _is_viable_recovered_artifact(recovered):
+                    print(
+                        f"[dispatch] Recovered fragment rejected for {model_profile} "
+                        f"(method={method}, keys={len(recovered)}): "
+                        f"no version_esquema, likely sub-object",
+                        file=sys.stderr,
+                    )
+                    attempts[-1]["recovered"] = f"{method}_rejected_fragment"
+                    continue
+                print(
+                    f"[dispatch] JSON recovered for {model_profile} on attempt {attempt} "
+                    f"(method={method})",
+                    file=sys.stderr,
+                )
                 result.success = True
                 result.output = recovered
                 result.attempts = attempts
-                attempts[-1]["recovered"] = True
+                attempts[-1]["recovered"] = method
+                if method == "truncation_repair":
+                    attempts[-1]["truncation_repaired"] = True
+                    result.failure_ctx = {
+                        **(result.failure_ctx or {}),
+                        "truncation_repaired": True,
+                        "recovery_method": method,
+                        "model_profile": model_profile,
+                        "backend": primary.transport_name,
+                        "transport": primary.transport_name,
+                        "attempts": attempts,
+                        "decision_log": decision_log,
+                        "last_error": result.error,
+                    }
                 return result
 
         if attempt < max_attempts and _is_retryable_dispatch_error(result.error, result.raw_output):
@@ -335,15 +634,85 @@ def _dispatch_model_with_retry(
             decision_log.append(f"primary:attempt_{attempt}_stop")
             break
 
+    # Phase 1.5: Truncation continuation for high-volume Claude steps.
+    if (
+        last_result is not None
+        and step_name in _TRUNCATION_CONTINUATION_STEPS
+        and backend.name == "claude"
+        and isinstance(last_result.failure_ctx, dict)
+        and last_result.failure_ctx.get("truncation_detected") is True
+    ):
+        continuation_result = _attempt_truncation_continuation(
+            config=config,
+            backend=backend,
+            model_profile=model_profile,
+            step_name=step_name,
+            prompt=prompt,
+            failed_result=last_result,
+            output_schema=output_schema,
+            cwd=cwd,
+            timeout=effective_timeout,
+        )
+        if continuation_result is not None:
+            continuation_result.transport = primary.transport_name
+            continuation_result.attempt = len(attempts) + 1
+            _record_attempt(
+                "truncation_continuation",
+                continuation_result.attempt,
+                continuation_result,
+                effective_timeout,
+            )
+            if attempts:
+                attempts[-1]["continuation_applied"] = bool(
+                    (continuation_result.failure_ctx or {}).get("continuation_applied")
+                )
+                attempts[-1]["continuation_keys_requested"] = (
+                    (continuation_result.failure_ctx or {}).get("continuation_keys_requested", [])
+                )
+                attempts[-1]["continuation_keys_received"] = (
+                    (continuation_result.failure_ctx or {}).get("continuation_keys_received", [])
+                )
+
+            if continuation_result.success:
+                decision_log.append("truncation_continuation:success")
+                continuation_result.attempts = attempts
+                continuation_result.failure_ctx = {
+                    **(continuation_result.failure_ctx or {}),
+                    "model_profile": model_profile,
+                    "backend": primary.transport_name,
+                    "transport": primary.transport_name,
+                    "attempts": attempts,
+                    "decision_log": decision_log,
+                    "last_error": None,
+                }
+                return continuation_result
+
+            decision_log.append("truncation_continuation:failed")
+            last_result = continuation_result
+
     # Fix-B: Phase 2 (copilot transport fallback) only for transport errors.
     # If the model produced bad JSON (quality failure), using the same model
     # via a different CLI won't help — skip copilot to avoid wasting tokens.
-    last_is_transport_error = (
-        last_result is not None
-        and _is_retryable_dispatch_error(last_result.error, last_result.raw_output)
+    #
+    # A transport error is detected by either:
+    #   a) text-pattern match in error/raw_output (rate limit, quota, timeout, etc.)
+    #   b) non-zero exit_code that is NOT a model quality error (bad JSON, etc.)
+    #      → any non-zero exit without a recognizable quality-error message is
+    #        treated as an infrastructure/transport failure.
+    last_is_transport_error = last_result is not None and (
+        _is_retryable_dispatch_error(last_result.error, last_result.raw_output)
+        or (
+            last_result.exit_code not in (None, 0)
+            and last_result.exit_code != 124  # 124 = timeout, already covered above
+            and not _is_quality_only_error(last_result.error)
+        )
     )
 
-    if config.copilot_transport_fallback and last_is_transport_error:
+    copilot_fallback_skipped = False
+    if skip_copilot_fallback and config.copilot_transport_fallback and last_is_transport_error:
+        decision_log.append("copilot_fallback:skipped_by_caller")
+        copilot_fallback_skipped = True
+    elif (not skip_copilot_fallback) and config.copilot_transport_fallback and last_is_transport_error:
         copilot = spec.copilot_transport
         if copilot and copilot.transport_name != primary.transport_name:
             copilot_backend = _instantiate_transport(copilot, config.raw)
@@ -359,7 +728,7 @@ def _dispatch_model_with_retry(
                 # transport timeout only when caller has not provided one.
                 effective_timeout = timeout if timeout is not None else primary.timeout_seconds
                 copilot_result = copilot_backend.dispatch(
-                    prompt, output_schema, cwd, effective_timeout
+                    prompt, output_schema, cwd, effective_timeout, step_name=step_name
                 )
                 # Preserve logical backend identity (short name)
                 copilot_result.backend = primary.transport_name
@@ -380,15 +749,86 @@ def _dispatch_model_with_retry(
 
                 # JSON recovery on copilot result
                 if copilot_result.raw_output:
-                    recovered = _try_recover_json(copilot_result.raw_output, copilot_result.error)
+                    recovered, recovery_method = _try_recover_json_ex(
+                        copilot_result.raw_output, copilot_result.error
+                    )
                     if recovered is not None:
-                        print(f"[dispatch] JSON recovered for {model_profile} via copilot", file=sys.stderr)
-                        copilot_result.success = True
-                        copilot_result.output = recovered
-                        if attempts:
-                            attempts[-1]["recovered"] = True
-                        copilot_result.attempts = attempts
-                        return copilot_result
+                        if _looks_like_transport_envelope(recovered):
+                            # Try to unwrap artifact from inside the envelope
+                            unwrapped, unwrap_method = _unwrap_transport_envelope(recovered)
+                            if unwrapped is not None and _is_viable_recovered_artifact(unwrapped):
+                                print(
+                                    f"[dispatch] Artifact unwrapped from transport envelope for "
+                                    f"{model_profile} via copilot (method={unwrap_method})",
+                                    file=sys.stderr,
+                                )
+                                copilot_result.success = True
+                                copilot_result.output = unwrapped
+                                if attempts:
+                                    attempts[-1]["recovered"] = unwrap_method
+                                copilot_result.attempts = attempts
+                                return copilot_result
+                            method = recovery_method or "unknown_recovery"
+                            copilot_result.success = False
+                            copilot_result.output = None
+                            copilot_result.error = (
+                                f"Recovered output is transport envelope (method={method}); "
+                                "not a valid artifact payload"
+                            )
+                            if attempts:
+                                attempts[-1]["recovered"] = method
+                                if method == "truncation_repair":
+                                    attempts[-1]["truncation_repaired"] = True
+                                    copilot_result.failure_ctx = {
+                                        **(copilot_result.failure_ctx or {}),
+                                        "truncation_repaired": True,
+                                        "recovery_method": method,
+                                        "model_profile": model_profile,
+                                        "backend": primary.transport_name,
+                                        "transport": "copilot",
+                                        "attempts": attempts,
+                                        "decision_log": decision_log,
+                                        "last_error": copilot_result.error,
+                                    }
+                            last_result = copilot_result
+                        elif not _is_viable_recovered_artifact(recovered):
+                            method = recovery_method or "unknown_recovery"
+                            print(
+                                f"[dispatch] Recovered fragment rejected for {model_profile} via copilot "
+                                f"(method={method}, keys={len(recovered)}): "
+                                f"no version_esquema, likely sub-object",
+                                file=sys.stderr,
+                            )
+                            if attempts:
+                                attempts[-1]["recovered"] = f"{method}_rejected_fragment"
+                            last_result = copilot_result
+                        else:
+                            method = recovery_method or "unknown_recovery"
+                            print(
+                                f"[dispatch] JSON recovered for {model_profile} via copilot "
+                                f"(method={method})",
+                                file=sys.stderr,
+                            )
+                            copilot_result.success = True
+                            copilot_result.output = recovered
+                            if attempts:
+                                attempts[-1]["recovered"] = method
+                                if method == "truncation_repair":
+                                    attempts[-1]["truncation_repaired"] = True
+                            if method == "truncation_repair":
+                                copilot_result.failure_ctx = {
+                                    **(copilot_result.failure_ctx or {}),
+                                    "truncation_repaired": True,
+                                    "recovery_method": method,
+                                    "model_profile": model_profile,
+                                    "backend": primary.transport_name,
+                                    "transport": "copilot",
+                                    "attempts": attempts,
+                                    "decision_log": decision_log,
+                                    "last_error": copilot_result.error,
+                                }
+                            copilot_result.attempts = attempts
+                            return copilot_result
 
                 print(
                     f"[dispatch]   ✗ {model_profile} via copilot also failed: "
@@ -413,11 +853,12 @@ def _dispatch_model_with_retry(
                 "attempts": attempts,
                 "decision_log": decision_log,
                 "last_error": "no result",
+                **({"copilot_fallback_skipped": True} if copilot_fallback_skipped else {}),
             },
         )
 
     last_result.attempts = attempts
-    if last_result.failure_ctx is None:
+    if not isinstance(last_result.failure_ctx, dict):
         last_result.failure_ctx = {
             "model_profile": model_profile,
             "backend": primary.transport_name,
@@ -426,6 +867,8 @@ def _dispatch_model_with_retry(
             "decision_log": decision_log,
             "last_error": last_result.error,
         }
+    if copilot_fallback_skipped:
+        last_result.failure_ctx["copilot_fallback_skipped"] = True
     return last_result
 
 
@@ -478,7 +921,11 @@ def _dispatch_step_v2(
     if step_name == "FUSION":
         fusion_model = config.fusion_model
         print(f"[dispatch] FUSION → {fusion_model} (timeout={timeout}s)")
-        return _dispatch_model_with_retry(config, fusion_model, prompt, output_schema, cwd, timeout)
+        return _dispatch_model_with_retry(
+            config, fusion_model, prompt, output_schema, cwd, timeout,
+            step_name=step_name,
+            skip_copilot_fallback=True,
+        )
 
     if is_multi:
         # Dispatch to ALL models in parallel
@@ -495,8 +942,24 @@ def _dispatch_step_v2(
             transport_name = config.resolve_transport_name(model_profile)
             # Check preflight cache
             if config.preflight_done() and not config.is_backend_available(transport_name):
-                unavailable_models[model_profile] = "startup preflight: unavailable"
-                continue
+                # If copilot_transport_fallback is enabled AND the model has a copilot
+                # transport, don't filter it out here. _dispatch_model_with_retry() will
+                # attempt the primary transport (which will return a 429/transport error),
+                # detect it as retryable, and activate the copilot fallback automatically.
+                has_copilot_path = False
+                if config.copilot_transport_fallback and spec is not None:
+                    copilot = spec.copilot_transport
+                    if copilot and copilot.transport_name != transport_name:
+                        has_copilot_path = True
+                        print(
+                            f"[dispatch] {model_profile} primary transport ({transport_name}) "
+                            f"unavailable per preflight; copilot fallback path enabled — "
+                            f"will attempt dispatch.",
+                            file=sys.stderr,
+                        )
+                if not has_copilot_path:
+                    unavailable_models[model_profile] = "startup preflight: unavailable"
+                    continue
             if transport_name in transport_in_use:
                 print(
                     f"[dispatch] WARNING: Skipping {model_profile} for {step_name}; "
@@ -546,7 +1009,7 @@ def _dispatch_step_v2(
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
         future_to_model = {
             executor.submit(
-                _dispatch_model_with_retry, config, model_profile, prompt, output_schema, cwd, timeout
+                _dispatch_model_with_retry, config, model_profile, prompt, output_schema, cwd, timeout, step_name
             ): model_profile
             for model_profile in dispatch_plan
         }
@@ -630,7 +1093,10 @@ def _dispatch_step_v2(
         transport_name = config.resolve_transport_name(model_profile)
         print(f"[dispatch] {step_name} → {model_profile} via {transport_name} (timeout={timeout}s)")
         t0 = time.monotonic()
-        result = _dispatch_model_with_retry(config, model_profile, prompt, output_schema, cwd, timeout)
+        result = _dispatch_model_with_retry(
+            config, model_profile, prompt, output_schema, cwd, timeout,
+            step_name=step_name,
+        )
         elapsed = time.monotonic() - t0
         status = "✓" if result.success else "✗"
         print(f"[dispatch]   {status} {step_name} done ({result.model}, {result.duration_s:.1f}s, {elapsed:.0f}s wall)")
@@ -663,6 +1129,8 @@ def dispatch_multi_and_fuse(
 
     # Step 2: Collect successful outputs and persist traces
     successful_outputs: dict[str, dict] = {}
+    # model_profile -> candidate payload and original result
+    successful_candidates: dict[str, dict] = {}
     rejected_outputs: dict[str, str] = {}
     for model_profile, result in multi_results.items():
         backend_name = result.backend or model_profile
@@ -684,6 +1152,12 @@ def dispatch_multi_and_fuse(
             is_valid, reason = _validate_multi_candidate(config, step_name, normalized)
             if is_valid:
                 successful_outputs[backend_name] = normalized
+                successful_candidates[model_profile] = {
+                    "model_profile": model_profile,
+                    "backend_name": backend_name,
+                    "output": normalized,
+                    "result": result,
+                }
             else:
                 rejected_outputs[backend_name] = reason or "invalid artifact payload"
                 print(
@@ -697,9 +1171,30 @@ def dispatch_multi_and_fuse(
             # (including _try_recover_json) before returning a failed result. Retrying here
             # would be redundant and potentially confusing.
             recovered = None
+            recovery_method = None
             if not config.is_v2 and result.raw_output:
-                recovered = _try_recover_json(result.raw_output, result.error)
+                recovered, recovery_method = _try_recover_json_ex(result.raw_output, result.error)
             if recovered is not None:
+                if not _is_viable_recovered_artifact(recovered):
+                    method = recovery_method or "unknown_recovery"
+                    print(
+                        f"[dispatcher] Recovered fragment rejected for {backend_name} "
+                        f"(method={method}, keys={len(recovered)}): "
+                        f"no version_esquema, likely sub-object",
+                        file=sys.stderr,
+                    )
+                    recovered = None
+                    recovery_method = None
+            if recovered is not None:
+                if recovery_method and isinstance(result.failure_ctx, dict):
+                    attempts_ctx = result.failure_ctx.get("attempts")
+                    if isinstance(attempts_ctx, list) and attempts_ctx and isinstance(attempts_ctx[-1], dict):
+                        attempts_ctx[-1]["recovered"] = recovery_method
+                        if recovery_method == "truncation_repair":
+                            attempts_ctx[-1]["truncation_repaired"] = True
+                    result.failure_ctx.setdefault("recovery_method", recovery_method)
+                    if recovery_method == "truncation_repair":
+                        result.failure_ctx["truncation_repaired"] = True
                 print(
                     f"[dispatcher] JSON recovered for {backend_name} (model_profile={model_profile}) "
                     f"on {step_name}",
@@ -721,6 +1216,12 @@ def dispatch_multi_and_fuse(
                 is_valid, reason = _validate_multi_candidate(config, step_name, normalized)
                 if is_valid:
                     successful_outputs[backend_name] = normalized
+                    successful_candidates[model_profile] = {
+                        "model_profile": model_profile,
+                        "backend_name": backend_name,
+                        "output": normalized,
+                        "result": result,
+                    }
                 else:
                     rejected_outputs[backend_name] = reason or "invalid artifact payload"
             else:
@@ -731,7 +1232,7 @@ def dispatch_multi_and_fuse(
                     file=sys.stderr,
                 )
 
-    if not successful_outputs:
+    if not successful_candidates:
         failed_details = []
         aggregated_attempts: list[dict] = []
         for name, result in multi_results.items():
@@ -771,29 +1272,44 @@ def dispatch_multi_and_fuse(
         backends_list = (multi_cfg or {}).get("models", [])
         min_backends = (multi_cfg or {}).get("min_backends", len(backends_list))
 
-    if len(successful_outputs) < min_backends:
+    if len(successful_candidates) < min_backends:
         print(
-            f"[dispatch] WARNING: {step_name} has only {len(successful_outputs)} valid output(s) "
+            f"[dispatch] WARNING: {step_name} has only {len(successful_candidates)} valid output(s) "
             f"(min {min_backends}). Proceeding with available outputs.",
             file=sys.stderr,
         )
 
     used = sorted(successful_outputs.keys())
 
-    if len(successful_outputs) == 1:
-        backend_name = list(successful_outputs.keys())[0]
-        original = next(
-            (r for r in multi_results.values() if (r.backend or "") == backend_name),
-            None,
-        )
-        if original is None:
+    def _pick_fallback_candidate() -> dict | None:
+        priority_profiles: list[str] = []
+        if config.is_v2:
+            priority_profiles.extend(config.get_models_for_step(step_name))
+        priority_profiles.extend(list(multi_results.keys()))
+
+        seen: set[str] = set()
+        for profile in priority_profiles:
+            if profile in seen:
+                continue
+            seen.add(profile)
+            candidate = successful_candidates.get(profile)
+            if candidate is not None:
+                return candidate
+
+        return next(iter(successful_candidates.values()), None)
+
+    if len(successful_candidates) == 1:
+        single_candidate = next(iter(successful_candidates.values()))
+        original = single_candidate.get("result")
+        fallback_output = single_candidate.get("output")
+        if original is None or fallback_output is None:
             return DispatchResult(
                 False, None, "", "none", "fusion", 0.0,
                 "Internal dispatch mapping inconsistency"
             )
         return DispatchResult(
             success=original.success,
-            output=successful_outputs[backend_name],
+            output=fallback_output,
             raw_output=original.raw_output,
             model=original.model,
             backend=original.backend,
@@ -818,22 +1334,159 @@ def dispatch_multi_and_fuse(
         fusion_instruction_filename=fusion_instruction,
     )
 
-    # Step 4: Dispatch fusion
+    # Step 4: Dispatch fusion (with model cascade in v2)
+    fusion_timeout = _get_timeout(config, "FUSION")
     if config.is_v2:
-        fusion_model = config.get_fusion_model_for_step(step_name)
-        print(f"[dispatch] Fusion for {step_name} → {fusion_model}")
-        fusion_result = _dispatch_model_with_retry(
-            config, fusion_model, fusion_prompt, output_schema, cwd,
-            _get_timeout(config, "FUSION"),
-        )
+        # Optional cap to avoid very long fusion hangs (especially on transport fallback).
+        cap_raw = (config.raw.get("execution", {}) or {}).get("fusion_timeout_cap_seconds")
+        try:
+            cap_val = int(cap_raw) if cap_raw is not None else None
+        except (TypeError, ValueError):
+            cap_val = None
+        if cap_val and cap_val > 0:
+            fusion_timeout = min(fusion_timeout, cap_val)
+
+    fusion_attempt_results: list[tuple[str, DispatchResult]] = []
+    if config.is_v2:
+        fusion_models: list[str] = []
+        primary_fusion = config.get_fusion_model_for_step(step_name)
+        for candidate in [primary_fusion, *config.get_models_for_step(step_name)]:
+            if candidate and candidate not in fusion_models:
+                fusion_models.append(candidate)
+
+        for idx, fusion_model in enumerate(fusion_models, start=1):
+            print(
+                f"[dispatch] Fusion for {step_name} attempt {idx}/{len(fusion_models)} → {fusion_model}",
+                file=sys.stderr,
+            )
+            fusion_result = _dispatch_model_with_retry(
+                config, fusion_model, fusion_prompt, output_schema, cwd,
+                fusion_timeout,
+                step_name=step_name,
+                skip_copilot_fallback=True,
+            )
+            fusion_attempt_results.append((fusion_model, fusion_result))
     else:
         fusion_result = dispatch_step(config, "FUSION", fusion_prompt, output_schema, cwd)
+        if isinstance(fusion_result, dict):
+            fusion_result = list(fusion_result.values())[0]
+        fusion_attempt_results.append(("FUSION", fusion_result))
 
-    if isinstance(fusion_result, dict):
-        fusion_result = list(fusion_result.values())[0]
+    fusion_attempts_summary: list[dict] = []
+    last_fusion_error: str | None = None
+    had_invalid_fusion_payload = False
+    last_fusion_result: DispatchResult | None = None
 
-    fusion_result.backends_used = used
-    return fusion_result
+    for fusion_model, fusion_result in fusion_attempt_results:
+        last_fusion_result = fusion_result
+        fusion_result.backends_used = used
+
+        attempt_item: dict[str, object] = {
+            "model_profile": fusion_model,
+            "success": bool(fusion_result.success),
+            "transport": fusion_result.transport,
+            "routed_via": fusion_result.routed_via,
+            "duration_s": fusion_result.duration_s,
+            "error": fusion_result.error,
+        }
+
+        if fusion_result.success:
+            fused_output = fusion_result.output if isinstance(fusion_result.output, dict) else None
+            normalized_fused_output = _normalize_backend_output(fused_output) if fused_output else None
+            is_valid_fused, fused_reason = _validate_multi_candidate(
+                config, step_name, normalized_fused_output
+            )
+            if is_valid_fused:
+                if fused_output is not None and normalized_fused_output is not None:
+                    fusion_result.output = normalized_fused_output
+                fusion_attempts_summary.append(attempt_item)
+                base_ctx = fusion_result.failure_ctx if isinstance(fusion_result.failure_ctx, dict) else {}
+                fusion_result.failure_ctx = {
+                    **base_ctx,
+                    "step_context": {
+                        "step": step_name,
+                        "mode": "multi_fusion",
+                    },
+                    "fusion_attempts": fusion_attempts_summary,
+                }
+                return fusion_result
+
+            had_invalid_fusion_payload = True
+            invalid_reason = fused_reason or "fusion_output_invalid"
+            attempt_item["validation_error"] = invalid_reason
+            last_fusion_error = f"Fusion output invalid via {fusion_model}: {invalid_reason}"
+            print(
+                f"[dispatch] WARNING: Fusion output for {step_name} invalid via {fusion_model} "
+                f"({invalid_reason}). Trying next fusion candidate.",
+                file=sys.stderr,
+            )
+        else:
+            last_fusion_error = fusion_result.error or f"Fusion dispatch failed via {fusion_model}"
+
+        fusion_attempts_summary.append(attempt_item)
+
+    # Fallback: fusion failed but we have valid per-model candidates.
+    fallback_candidate = _pick_fallback_candidate()
+    if fallback_candidate is not None:
+        fallback_result = fallback_candidate.get("result")
+        fallback_output = fallback_candidate.get("output")
+        fallback_backend = fallback_candidate.get("backend_name")
+        if fallback_result is not None and fallback_output is not None:
+            fallback_reason = "fusion_output_invalid" if had_invalid_fusion_payload else "fusion_dispatch_failed"
+            print(
+                f"[dispatch] WARNING: Fusion failed for {step_name}; using validated candidate "
+                f"from {fallback_backend} ({fallback_reason}).",
+                file=sys.stderr,
+            )
+            return DispatchResult(
+                True,
+                fallback_output,
+                fallback_result.raw_output or (last_fusion_result.raw_output if last_fusion_result else ""),
+                fallback_result.model,
+                fallback_result.backend,
+                fallback_result.duration_s,
+                None,
+                backends_used=used,
+                routed_via="multi_candidate_fallback",
+                fallback_reason=fallback_reason,
+                model_profile=fallback_result.model_profile,
+                transport=fallback_result.transport,
+                exit_code=fallback_result.exit_code,
+                attempt=fallback_result.attempt,
+                attempts=fallback_result.attempts,
+                failure_ctx={
+                    "step_context": {
+                        "step": step_name,
+                        "mode": "multi_fusion_fallback",
+                        "source": "valid_candidate",
+                    },
+                    "fusion_fallback_backend": fallback_backend,
+                    "fusion_last_error": last_fusion_error,
+                    "fusion_attempts": fusion_attempts_summary,
+                },
+            )
+
+    # Defensive fail-closed (should only happen if no valid candidates exist).
+    return DispatchResult(
+        False,
+        None,
+        last_fusion_result.raw_output if last_fusion_result else "",
+        last_fusion_result.model if last_fusion_result else "none",
+        last_fusion_result.backend if last_fusion_result else "fusion",
+        last_fusion_result.duration_s if last_fusion_result else 0.0,
+        last_fusion_error or f"Fusion failed for {step_name}",
+        backends_used=used,
+        model_profile=last_fusion_result.model_profile if last_fusion_result else None,
+        transport=last_fusion_result.transport if last_fusion_result else None,
+        failure_ctx={
+            "step_context": {
+                "step": step_name,
+                "mode": "multi_fusion",
+            },
+            "fusion_attempts": fusion_attempts_summary,
+            "last_error": last_fusion_error or f"Fusion failed for {step_name}",
+        },
+    )
 
 
 # ── Filing dispatch ───────────────────────────────────────────
@@ -848,7 +1501,7 @@ def _filing_label(filing: dict) -> str:
             period = part
             break
     if not period:
-        period = filing.get("fecha_publicacion", "?")[:10]
+        period = (filing.get("fecha_publicacion") or "?")[:10]
     return f"{ftype} {period}"
 
 
@@ -934,7 +1587,10 @@ def dispatch_parallel_filings(
             # Fix-A: Delegate to the central orchestrator for retry + transport fallback.
             # _dispatch_model_with_retry handles: retry on transport errors, copilot
             # fallback (Fix-B gated), and JSON recovery — all in one consistent place.
-            return _dispatch_model_with_retry(config, model_profile, prompt, cwd=case_dir, timeout=timeout)
+            return _dispatch_model_with_retry(
+                config, model_profile, prompt, cwd=case_dir, timeout=timeout,
+                step_name="TP_EXTRACTOR_FILING",
+            )
         else:
             # v1: Direct backend dispatch with simple retry loop
             attempts = 0
@@ -943,9 +1599,15 @@ def dispatch_parallel_filings(
                 if result.success:
                     return result
                 if not result.success and result.raw_output:
-                    recovered = _try_recover_json(result.raw_output, result.error)
+                    recovered, recovery_method = _try_recover_json_ex(result.raw_output, result.error)
                     if recovered is not None:
                         result.success, result.output = True, recovered
+                        if recovery_method:
+                            if not isinstance(result.failure_ctx, dict):
+                                result.failure_ctx = {}
+                            result.failure_ctx["recovery_method"] = recovery_method
+                            if recovery_method == "truncation_repair":
+                                result.failure_ctx["truncation_repaired"] = True
                         return result
                 if attempts >= max_retries or not _is_retryable_filing_error(result.error):
                     return result
@@ -1217,11 +1879,17 @@ def _dispatch_step_v1(
                 status = "✓" if result.success else "✗"
                 print(f"[dispatch]   {status} {step_name} done ({result.model}, {result.duration_s:.1f}s, {elapsed:.0f}s wall)")
                 if not result.success and result.raw_output:
-                    recovered = _try_recover_json(result.raw_output, result.error)
+                    recovered, recovery_method = _try_recover_json_ex(result.raw_output, result.error)
                     if recovered is not None:
+                        recovery_ctx = None
+                        if recovery_method:
+                            recovery_ctx = {"recovery_method": recovery_method}
+                            if recovery_method == "truncation_repair":
+                                recovery_ctx["truncation_repaired"] = True
                         result = DispatchResult(
                             success=True, output=recovered, raw_output=result.raw_output,
                             model=result.model, backend=result.backend, duration_s=result.duration_s,
+                            failure_ctx=recovery_ctx,
                         )
                 return result
 

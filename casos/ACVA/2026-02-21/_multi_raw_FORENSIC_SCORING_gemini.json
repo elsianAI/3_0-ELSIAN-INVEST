@@ -1,0 +1,403 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260221_ACVA",
+  "fecha_corte": "2026-02-21",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260221_ACVA",
+    "implied_expectations_caso_id": "CASE_20260221_ACVA",
+    "sources_pack_caso_id": "CASE_20260221_ACVA"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Supervivencia a 24 meses probable por caja neta ($101M), pero calidad de resultados crítica (Score 2/5).",
+      "Generación de caja operativa ($65M) es ilusoria: depende 100% de float (AP > AR) y SBC masivo.",
+      "Pérdidas operativas crónicas (-13% margen) sin apalancamiento visible tras multiplicar ingresos x6.",
+      "Riesgo estructural: si el crecimiento baja del 15%, el capital circulante negativo se revierte y drena la caja.",
+      "Contabilidad agresiva: Capex mínimo vs D&A explosiva sugiere sub-inversión o dependencia de adquisiciones."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_FOR_001",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La generación de FCF positiva es artificial y depende de mantener un ciclo de pagos a proveedores (float) agresivo.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Balance Sheet FY2024",
+          "cita_corta": "Cuentas por pagar $345M vs Cuentas por cobrar $168M",
+          "interpretacion": "La empresa se financia con proveedores; ratio AP/AR > 2.0x es anómalo y riesgoso."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_046",
+          "ubicacion": "Earnings Transcript",
+          "cita_corta": "CFO operativo de solo 5M excluyendo cambio trimestral de float",
+          "interpretacion": "El flujo de caja real del negocio es cercano a cero."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO reportado cae por debajo de $10M en un trimestre de crecimiento de ingresos normal.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_FOR_002",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Existe una divergencia masiva entre D&A y Capex que sugiere adquisiciones como sustituto de inversión orgánica.",
+      "confianza_0_1": 0.95,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Cash Flow Statement FY2024",
+          "cita_corta": "D&A $36.7M vs Capex $4.5M",
+          "interpretacion": "Ratio de reposición de 0.12x es insostenible a largo plazo sin deterioro de activos."
+        }
+      ],
+      "falsacion": {
+        "test": "Capex aumenta >100% YoY para converger con D&A.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_FOR_001",
+      "descripcion": "Margen EBIT GAAP se mantiene negativo (peor que -5%) en los próximos 12 meses.",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT reportado en 10-Q/10-K < -5% de ingresos.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_FOR_002",
+      "descripcion": "Cuentas por pagar (AP) crecen o se mantienen > 30% de los activos totales.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "AP / Total Assets > 0.30 en balance.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FOR_003",
+      "descripcion": "SBC se mantiene > 15% de los ingresos (dilución continua).",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Gasto SBC en Cash Flow o Notas > 0.15 * Revenue.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla detallada de vencimientos de deuda",
+      "por_que_importa": "Confirmar si hay amortizaciones 'balloon' ocultas en los $123M de deuda.",
+      "como_obtenerlo": "Nota de Deuda en 10-K completo."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose de Goodwill e Intangibles",
+      "por_que_importa": "Validar riesgo de deterioro tras adquisiciones masivas ($523M).",
+      "como_obtenerlo": "Notas de Balance en 10-K."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.85,
+        "razon_principal": "Solvencia inmediata asegurada por caja, pero modelo de negocio roto (pérdidas crónicas) y dependiente de financiación de proveedores."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 24,
+          "max": 36
+        },
+        "evaluacion": {
+          "resultado": "CONDITIONAL",
+          "score_0_5": 2,
+          "por_que": [
+            "Liquidez actual adecuada ($224M caja vs $123M deuda).",
+            "4 banderas rojas de severidad ALTA (Float, Pérdidas, Bridge EBIT-CFO, WC Anomaly).",
+            "Dependencia estructural de crecimiento continuo para mantener capital de trabajo negativo.",
+            "Calidad de resultados muy baja (SBC y Float explican todo el CFO)."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 224065000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "unknown"
+          ],
+          "runway_meses_estimado": 34,
+          "metodo_estimacion": "Basado en cash burn neto por NI (-$80M/año) vs caja disponible. Si float revierte, el runway colapsa a <12 meses.",
+          "notas": "La caja es alta, pero AP ($345M) supera la caja. Liquidez técnica, no absoluta."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 123000000,
+          "deuda_neta_usd": -101065000,
+          "coste_deuda_aprox_pct": 3.5,
+          "coverage_intereses": -11.1,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "Deuda neta negativa mitiga riesgo de refinanciación inmediato."
+          },
+          "vencimientos": [],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "ALTO",
+            "comentario": "Con EBIT negativo crónico, cualquier covenant de cobertura está en riesgo."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "ALTO",
+          "motores": [
+            "SBC",
+            "adquisiciones pasadas"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "SBC estimado masivo (~$100M+) es la principal fuente de financiación encubierta. Dilución real >5-7% anual probable."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Calidad abismal. Beneficio operativo inexistente; el flujo de caja positivo es una función de diferir pagos a proveedores y pagar empleados con acciones.",
+        "red_flags": [
+          {
+            "flag_id": "RF-03",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Dependencia crítica de float (CFO soportado por Cuentas por Pagar > Cuentas por Cobrar).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.9,
+            "por_que_importa": "Si el crecimiento se detiene, el float se revierte y drena la liquidez.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Balance Sheet",
+                "cita_corta": "AP $345M vs Cash $224M",
+                "interpretacion": "Obligaciones a corto superan efectivo disponible."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Cuentas por pagar disminuyen >10% secuencialmente sin caída de ingresos.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-10",
+            "categoria": "REVENUE_RECOGNITION",
+            "descripcion": "Pérdidas operativas crónicas sin apalancamiento operativo tras multiplicar ingresos x6.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Cuestiona la viabilidad fundamental del modelo de negocio a escala.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Income Statement",
+                "cita_corta": "Margen operativo -13.2% en FY2024",
+                "interpretacion": "No hay convergencia a rentabilidad."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "EBIT positivo en algún trimestre.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "RF-11",
+            "categoria": "OTHER",
+            "descripcion": "Distorsión masiva entre EBIT y CFO (>150% diferencia).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Earnings Quality es nula; el CFO no predice capacidad de generar beneficio futuro.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Bridge EBIT-CFO",
+                "cita_corta": "Bridge $149M sobre EBIT de -$84M",
+                "interpretacion": "Flujo de caja desconectado de la rentabilidad."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Convergencia de EBIT y CFO (margen <20% diferencia).",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "Puente sostenido por SBC y aumento de Cuentas por Pagar. No es calidad operativa.",
+            "posibles_distorsiones": [
+              "capital circulante",
+              "SBC"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "FCF positivo reportado es engañoso debido a Capex extremadamente bajo insostenible.",
+            "capex_riesgo": "ALTO",
+            "notas": "Capex de mantenimiento probablemente subestimado."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "NO",
+          "comentario": "Cualquier recompra sería destrucción de valor dada la dependencia de float."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "SI",
+          "comentario": "Motor principal de la brecha EBIT-CFO."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "ALTO",
+          "comentario": "Historial de $523M en adquisiciones sin lograr rentabilidad operativa."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Riesgo de enriquecimiento vía SBC sin performance real."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Desaceleración de ingresos < 10% YoY.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "caída de CFO",
+              "subida de working capital"
+            ],
+            "indicadores_tempranos": [
+              "Crecimiento ingresos < 15%",
+              "DSO aumentando",
+              "Cuentas por pagar cayendo"
+            ]
+          }
+        ],
+        "conclusion_downside": "Si el crecimiento se para, la caja se evapora por reversión de working capital."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-FLOAT",
+          "relacionado_con": "fcf",
+          "definicion": "CFO trimestral negativo por dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Señal de colapso del modelo de financiación por proveedores."
+        },
+        {
+          "kc_id": "KC-MARGIN",
+          "relacionado_con": "margen",
+          "definicion": "Margen EBIT (TTM) peor que -15%.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Confirmación de nula escalabilidad del modelo de negocio."
+        },
+        {
+          "kc_id": "KC-CASH",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja Neta se vuelve negativa (Deuda > Caja).",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Pérdida del único buffer de seguridad real."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": "1.5%",
+        "condiciones_para_aumentar_tamaño": [
+          "EBITDA positivo real (ex-SBC) por 2 trimestres.",
+          "Convergencia de Capex y D&A.",
+          "Estabilización de ratio AP/AR."
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Cualquier trimestre con crecimiento de ingresos < 10%.",
+          "Deterioro de caja > $20M en un trimestre."
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Cuantificar costo real de personal vs reportado.",
+          "como_obtenerlo": "Statement of Cash Flows (linea específica) en 10-K."
+        },
+        {
+          "item": "vencimientos_deuda",
+          "por_que_importa": "Descartar riesgo de refinanciación a corto plazo.",
+          "como_obtenerlo": "Nota de deuda en 10-K."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "No se revisaron notas a los estados financieros (solo datos extraídos).",
+      "SBC estimado por diferencia en bridge, no dato exacto."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

@@ -1,0 +1,2398 @@
+# Meta-Review: TZOO — 2026-02-21
+
+## Contexto del caso
+- Ticker: TZOO
+- Fecha de análisis: 2026-02-21
+- Pipeline completado: 2026-02-23T09:50:11.402625+00:00
+- Timestamp de compilación: 20260223T105756
+- Modelos utilizados: desconocido
+- Decisión ARBITRO: WATCHLIST (score: 50/100, confianza: 0.55)
+
+---
+
+## Calidad del pipeline (quality votes)
+
+> **Nota anti-sesgo:** Los scores de calidad son una señal de calidad formal del pipeline (validación de schema, completitud de campos, ratio de nulos). No son indicadores de verdad fundamental ni de calidad del razonamiento. Úsalos como contexto, no como juicio previo.
+
+| Paso | Score fusión | Rango modelos |
+|------|-------------|---------------|
+| ARBITRO | 100.0 | — |
+| BULL | 98.8 | — |
+| CATALYST_DETECTION | 100.0 | — |
+| CATALYST_SCORING | 98.4 | — |
+| FORENSIC_DETECTION | 100.0 | — |
+| FORENSIC_SCORING | 98.9 | — |
+| IMPLIED | 99.9 | — |
+| RED_TEAM | 99.2 | — |
+| TP_EXTRACTOR_FILING | 69.4 | — |
+
+---
+
+## Perspectiva BULL
+
+### Resumen ejecutivo
+{"bullets": ["Travelzoo cotiza a EV/EBIT normalizado de 3.5x ($42M EV sobre $12.1M EBIT medio FY2022-FY2025) sin deuda financiera, modelo asset-light con capital de trabajo negativo — valuación de liquidación para negocio con $92M de ingresos creciendo al 9% anual.", "El colapso de márgenes (22% → 7.5%) enmascara crecimiento de ingresos saludable (+9.3%); el problema es de eficiencia de gastos (COGS +73%, SGA ~69% de ingresos en 9M-2025), no de demanda — potencialmente corregible.", "La transición hacia ingresos recurrentes de membresía (JFC +33% YoY, $4.1M en Q4-2025, ~18% del revenue trimestral) ofrece opcionalidad de re-rating si supera el 20% del mix.", "Buybacks agresivos ($13.1M en FY2025, yield >20% del market cap) son mecánicamente accretivos a $5.40/acción pero consumen caja por encima del FCF ($5.6M), generando tensión entre creación de valor per share y preservación de liquidez.", "Veredicto WATCHLIST unánime: la asimetría es atractiva (50-280% upside en escenarios favorables vs downside gradual), pero sin confirmación observable de reversión de márgenes en Q1-Q2 2026, la convicción permanece insuficiente para APTO."], "veredicto_role_local": "WATCHLIST", "confianza_0_1": 0.55}
+
+### Claims principales (CRITICO + IMPORTANTE)
+```json
+[
+  {
+    "claim_id": "CLM_BULL_001",
+    "enunciado": "TZOO cotiza a EV/EBIT normalizado de 3.5x ($42M EV / $12.1M EBIT medio FY2022-FY2025), un nivel extremadamente comprimido para empresa sin deuda con margen bruto histórico ~80% y crecimiento de ingresos del 9.3% en FY2025.",
+    "criticidad": "CRITICO"
+  },
+  {
+    "claim_id": "CLM_BULL_002",
+    "enunciado": "El colapso de EBIT de FY2025 (de $18.5M a $6.9M) fue impulsado por la estructura de costos, no por caída de demanda: los ingresos crecieron 9.3% y la base de miembros sigue expandiéndose, lo que sugiere un problema reversible de disciplina de gastos más que un deterioro fundamental del negocio.",
+    "criticidad": "CRITICO"
+  },
+  {
+    "claim_id": "CLM_BULL_003",
+    "enunciado": "El ratio COGS/ingresos se amplió de 12.5% en FY2024 a 19.7% en FY2025, y Q4-2025 mostró 22.0%, señal inequívoca de presión de costos directos cuya reversión es el mayor vector de upside operativo.",
+    "criticidad": "CRITICO"
+  },
+  {
+    "claim_id": "CLM_BULL_004",
+    "enunciado": "En 9M-2025, SGA absorbió ~69% de ingresos ($47.8M / $69.2M), muy por encima del rango histórico de 41-55%, por lo que una reversión parcial del gasto de estructura cambia de forma directa el resultado operativo.",
+    "criticidad": "CRITICO"
+  },
+  {
+    "claim_id": "CLM_BULL_005",
+    "enunciado": "TZOO no tiene deuda financiera, mantiene ~$10M en caja, genera CFO positivo ($5.7M FY2025) y opera con capital de trabajo negativo (Merchant Payables $14-23M > AR $12.8M), financiando la operación sin coste y eliminando riesgo de quiebra o dilución forzada en 12-18 meses.",
+    "criticidad": "IMPORTANTE"
+  },
+  {
+    "claim_id": "CLM_BULL_006",
+    "enunciado": "El EBIT histórico demuestra capacidad probada de generar $12-18M anuales en períodos normales: FY2022 $7.6M, FY2023 $15.6M, FY2024 $18.5M — la cuestión no es si TZOO puede generar earnings sino si FY2025 fue un trough cíclico.",
+    "criticidad": "IMPORTANTE"
+  },
+  {
+    "claim_id": "CLM_BULL_007",
+    "enunciado": "Los ingresos de membresía mostraron aceleración sostenida en 2025: $2.4M (Q1) → $3.0M (Q2) → $4.1M (Q4), con JFC creciendo +33% YoY, representando un cambio progresivo del mix hacia revenue recurrente de mayor calidad.",
+    "criticidad": "IMPORTANTE"
+  },
+  {
+    "claim_id": "CLM_BULL_008",
+    "enunciado": "Las recompras a $5.40/acción ($13.1M en FY2025, yield >20% del market cap) son mecánicamente accretivas — cada $1M retira ~185K acciones (~1.7% del float) — pero fueron agresivas frente a FCF de solo $5.6M, generando tensión entre creación de valor per share y preservación de liquidez.",
+    "criticidad": "IMPORTANTE"
+  },
+  {
+    "claim_id": "CLM_BULL_009",
+    "enunciado": "Eliminando el lastre del segmento Europa (-$2.3M pérdida operativa FY2025), el EBIT consolidado habría sido ~$9.2M (10% margen), lo que sugiere que el negocio core norteamericano + JFC sigue siendo rentable incluso en el peor año reciente.",
+    "criticidad": "IMPORTANTE"
+  }
+]
+```
+---
+
+## Perspectiva RED_TEAM
+
+### Resumen ejecutivo
+{"bullets": ["El colapso de márgenes NO es un evento puntual: la trayectoria trimestral Q1→Q4-2025 muestra deterioro progresivo (16.4%→8.6%→2.2%→2.5% margen EBIT) y el ratio COGS/ingresos empeoró cada trimestre (18.0%→21.6%→20.4%→22.0%), patrón incompatible con inversión temporal y consistente con cambio estructural de costos.", "La posición de 'Caja Neta' es una ilusión contable: al netear los Merchant Payables ($14-23M histórico) contra la Caja (~$10M estimado FY2025), la liquidez neta real es negativa; la empresa se financia con el float de los clientes, un riesgo existencial si las ventas se desaceleran.", "Management destruyó valor en FY2025 al recomprar $13.1M en acciones con solo $5.6M de FCF (2.3x FCF), consumiendo $7M de caja, llevando el patrimonio a territorio negativo (-$3.1M en Sep-2025) y el CFO a caer 73% YoY — señal de gobernanza deficiente, no de convicción informada.", "La tesis bull de 'EV/EBIT normalizado 3.5x' es una trampa: el EBIT medio de $12.1M incluye un FY2024 pico ($18.5M) posiblemente irrepetible; sobre el run-rate actual H2-2025 (EBIT anualizado ~$2M) el múltiplo real supera 20x, y a métricas de FY2025 completo cotiza a ~6x EV/EBIT.", "Veredicto NO_APTO: Perfil clásico de Value Trap donde revenue creciente (+9.3%) enmascara deterioro acelerado de rentabilidad, con management priorizando buybacks supra-FCF sobre preservación de liquidez, y cero evidencia observable de reversión de costos tras 4 trimestres de degradación continua."], "veredicto_role_local": "NO_APTO", "confianza_0_1": 0.82}
+
+### Claims principales (CRITICO + IMPORTANTE)
+```json
+[
+  {
+    "claim_id": "CLM_RT_001",
+    "enunciado": "El margen operativo trimestral de TZOO se deterioró progresivamente durante todo FY2025: Q1 16.4%, Q2 8.6%, Q3 2.2%, Q4 2.5% — patrón de degradación secuencial incompatible con la narrativa de inversión temporal o gasto puntual; Q4-2025 registró la primera pérdida neta trimestral (-$19K) en al menos 3 años.",
+    "criticidad": "CRITICO"
+  },
+  {
+    "claim_id": "CLM_RT_002",
+    "enunciado": "La explosión de COGS (+73% YoY vs +9% Revenue) con empeoramiento trimestral progresivo (Q1: 18.0%, Q2: 21.6%, Q3: 20.4%, Q4: 22.0%) indica pérdida de poder de negociación con merchants o cambio estructural de mix, invalidando la tesis de 'reversión a la media'. El margen bruto FY2025 cayó a 80.3% desde 87.5% (Q4-2025: 78.0%).",
+    "criticidad": "CRITICO"
+  },
+  {
+    "claim_id": "CLM_RT_003",
+    "enunciado": "Management recompró $13.1M en acciones durante FY2025 con solo $5.6M de FCF (2.3x FCF), consumiendo ~$7M de reservas de caja, reduciendo la posición de efectivo de ~$17M a ~$10M, y llevando el patrimonio a territorio negativo (-$3.1M en Sep-2025) — destrucción activa de balance mientras los márgenes colapsaban.",
+    "criticidad": "CRITICO"
+  },
+  {
+    "claim_id": "CLM_RT_004",
+    "enunciado": "La liquidez neta ajustada es negativa: Caja (~$10M est. FY2025) es inferior a los Merchant Payables (rango histórico $14-23M). La empresa no tiene 'net cash' real sino que depende del float de clientes para operar — riesgo existencial si las ventas se desaceleran y el capital de trabajo negativo se invierte.",
+    "criticidad": "CRITICO"
+  },
+  {
+    "claim_id": "CLM_RT_005",
+    "enunciado": "La combinación de caja declinante (~$10M), patrimonio negativo, buybacks supra-FCF, y CFO en caída ($21.1M→$5.7M en 1 año, -73%) crea un riesgo de crisis de liquidez en 12-18 meses si la tendencia no se revierte — al ritmo actual de consumo, la caja se agota en ~18 meses.",
+    "criticidad": "CRITICO"
+  },
+  {
+    "claim_id": "CLM_RT_006",
+    "enunciado": "El crecimiento de ingresos de membresía (+70% intra-año, JFC +33% YoY) podría estar inflando COGS sin mejorar márgenes: CAC de $38/miembro, NCI del 40% en JFC que captura valor para el minoritario, y sin datos de contribución a EBIT por segmento — podría ser revenue con margen negativo, amplificando el problema de costos.",
+    "criticidad": "IMPORTANTE"
+  },
+  {
+    "claim_id": "CLM_RT_007",
+    "enunciado": "La tesis bull de infravaloración extrema por EV/EBIT '3.5x' es frágil: el denominador $12.1M incluye FY2024 pico ($18.5M) que fue EBIT >$12M solo 2 de 6 años; el EV no está recalculado con caja actual (~$10M vs $17M FY2024); sobre run-rate H2-2025 (EBIT anualizado ~$2M) el múltiplo real es >20x.",
+    "criticidad": "IMPORTANTE"
+  },
+  {
+    "claim_id": "CLM_RT_008",
+    "enunciado": "La compresión de SGA en 9M-2025 (68.9%) es central para la tesis bull, pero su reversibilidad no está observada: no hay desglose que confirme reversión, puede incluir CAC de membresías que el propio bull defiende como inversión, y reducir SGA podría implicar reducir el crecimiento de membresías.",
+    "criticidad": "IMPORTANTE"
+  },
+  {
+    "claim_id": "CLM_RT_009",
+    "enunciado": "La material weakness en controles internos identificada en Q3-2023 no tiene confirmación de remediación en los datos disponibles, lo que compromete la fiabilidad de toda la información financiera sobre la que descansa la tesis bull y los datos del TruthPack.",
+    "criticidad": "IMPORTANTE"
+  }
+]
+```
+---
+
+## Perspectiva CATALYST
+
+### Resumen ejecutivo
+{"bullets": ["TZOO cotiza a EV/EBIT 6.1x y EV/FCF 7.5x sobre un FY2025 con margen operativo comprimido al 7.5% (vs 22% en FY2024); el mercado descuenta declive permanente del FCF entre -5% y -16% CAGR a 5 años — valuación distressed que ofrece asimetría alcista si los márgenes se estabilizan.", "El catalizador dominante es la normalización de COGS/ingresos (19.7% → 12-14%) combinada con racionalización de SGA, que conjuntamente podrían restaurar $8-15M de EBIT incremental sobre la base de ingresos de $92M.", "El escalamiento de membresías (JFC +33% YoY, membership fees $4.1M en Q4-2025) ofrece opcionalidad de re-rating del múltiplo si la recurrencia se consolida por encima del 20% del revenue total; es el único segmento mostrando tracción real y pricing power.", "La política de buybacks ($13M en 9M-2025, 2.3x el FCF del período, yield anualizado >20% del market cap) es altamente accretiva a $5.40/acción pero erosiona peligrosamente el colchón de caja en periodo de FCF débil.", "Situación binaria: Value Trap si los márgenes del 7% son la nueva norma; potencial multi-bagger si retornan al rango 12-16%. Veredicto WATCHLIST: los catalizadores operativos son plausibles pero ninguno tiene confirmación observable aún; se necesitan 2-3 trimestres de datos para promover a APTO."], "veredicto_role_local": "WATCHLIST", "confianza_0_1": 0.6}
+
+---
+
+## Perspectiva FORENSIC
+
+### Resumen ejecutivo
+{"bullets": ["Deterioro estructural severo: margen operativo colapsó de 22% (FY2024) a 7.5% (FY2025) y 2.5% (Q4-2025) por explosión de COGS (+73% vs ingresos +9%), sin explicación cualitativa confirmada de la gerencia.", "Asignación de capital insostenible: recompras de $13.1M en FY2025 (2.3x FCF) consumieron reservas de caja y generaron patrimonio negativo (-$3.1M sept-2025), sin señales de ajuste de política.", "Modelo de negocio bajo estrés de liquidez operativa: dependencia crítica del float de Merchant Payables ($14-23M) con caja declinante (~$10M est. dic-2025), sin deuda financiera pero sin líneas de crédito de respaldo.", "Gobernanza cuestionable: material weakness en controles internos (Q3-2023) sin confirmación de remediación, préstamos a accionistas ($4.8M), activos fiscales inciertos (MTE: $64.7M NOLs) y goodwill $10.9M sobre equity negativo.", "Supervivencia CONDITIONAL (score 2/5): el negocio es viable si suspende recompras y estabiliza márgenes en 6-12 meses; insostenible al ritmo actual. Posición máxima recomendada ≤0.75% cartera."], "veredicto_role_local": "WATCHLIST", "confianza_0_1": 0.8}
+
+---
+
+## DecisionPacket completo (ARBITRO)
+
+```json
+{
+  "version_esquema": "DecisionPacket_v2",
+  "backward_compatible_with": "DecisionPacket_v1",
+  "caso_id": "CASE_20260221_TZOO",
+  "fecha_corte": "2026-02-21",
+  "empresa": {
+    "ticker": "TZOO",
+    "nombre": "Travelzoo",
+    "bolsa": "NASDAQ",
+    "pais": "US",
+    "sector": "Communication Services",
+    "industria": "Internet Content & Information",
+    "precio_actual_usd": 5.4,
+    "market_cap_mm": 59.03,
+    "ev_mm": 42.0,
+    "moneda": "USD"
+  },
+  "input_refs": {
+    "sources_pack_caso_id": "CASE_20260221_TZOO",
+    "truth_pack_caso_id": "CASE_20260221_TZOO",
+    "implied_expectations_caso_id": "CASE_20260221_TZOO",
+    "agent_reports": [
+      {
+        "agent_role": "CATALYST",
+        "agent_nombre": "CATALYST_SCORING_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.6
+      },
+      {
+        "agent_role": "FORENSIC",
+        "agent_nombre": "FORENSIC_SCORING_v1_FUSION",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.8
+      },
+      {
+        "agent_role": "BULL",
+        "agent_nombre": "BULL_v1_FUSION",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.55
+      },
+      {
+        "agent_role": "RED_TEAM",
+        "agent_nombre": "RED_TEAM_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.82
+      }
+    ]
+  },
+  "charter": {
+    "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+    "horizonte_meses": {
+      "min": 6,
+      "max": 30
+    },
+    "restricciones_no_especulativo": [
+      "Evitar tesis binaria",
+      "Evitar dependencia de financiacion salvadora",
+      "Exigir supervivencia 12-24 meses razonable",
+      "Exigir catalizador no binario y medible"
+    ]
+  },
+  "resumen_ejecutivo": {
+    "decision": "WATCHLIST",
+    "tamaño_recomendado_pct_cartera": 0,
+    "confianza_global_0_1": 0.55,
+    "racional_5_lineas": [
+      "Valoración óptica de 'Value' (EV/EBIT ~6x, vs peers 15-25x) esconde un deterioro estructural severo: margen operativo comprimido al 7.5% y explosión de COGS (+73%) sin explicación satisfactoria.",
+      "La asignación de capital es imprudente: $79M acumulados en recompras (2.3x el FCF anual) han generado patrimonio negativo (-$19.3M), debilitando la liquidez operativa en un momento crítico.",
+      "La supervivencia no es inmediata (CFO positivo $5.7M, Cash $22.6M, sin deuda financiera), pero la dependencia del float de proveedores y el patrimonio negativo introducen fragilidad ante cualquier caída de ventas.",
+      "Material Weakness no remediada en controles internos reduce la confianza en la precisión de los datos financieros reportados, añadiendo opacidad inaceptable al análisis.",
+      "Se requiere evidencia empírica de reversión de márgenes (Q1-2026) y disciplina de capital antes de invertir; la asimetría es atractiva pero el riesgo de ejecución es inaceptable hoy."
+    ],
+    "lo_mas_importante_ahora": [
+      "Confirmar si COGS/Ingresos revierte a <17% en Q1-2026 (señal de transitoriedad) o se mantiene >20% (estructural).",
+      "Verificar si management detiene o modera las recompras agresivas para preservar la caja operativa.",
+      "Monitorear la evolución de los Merchant Payables para descartar un 'run on the bank' de capital de trabajo.",
+      "Obtener desglose real de rentabilidad del segmento Jack's Flight Club.",
+      "Confirmar resolución de Material Weakness en 10-K FY2025."
+    ],
+    "principales_riesgos": [
+      "Value Trap: márgenes del 7% se convierten en la nueva norma, justificando la valoración actual.",
+      "Crisis de liquidez por inversión del ciclo de capital de trabajo (ventas caen → float se reduce → caja se agota).",
+      "Dilución forzada si la caja cae por debajo de niveles operativos mínimos ($5M).",
+      "Opacidad en controles internos (Material Weakness no remediada confirmada).",
+      "Declive secular del modelo de deals por email ante competencia de OTAs con más escala."
+    ]
+  },
+  "decision_probabilistica": {
+    "probabilidad_exito_0_1": 0.45,
+    "retorno_esperado_ponderado_pct": 28.5,
+    "escenarios_ponderados": {
+      "base": {
+        "probabilidad_0_1": 0.4,
+        "retorno_estimado_pct": 42
+      },
+      "bull": {
+        "probabilidad_0_1": 0.15,
+        "retorno_estimado_pct": 180
+      },
+      "bear": {
+        "probabilidad_0_1": 0.45,
+        "retorno_estimado_pct": -35
+      }
+    },
+    "sizing_kelly": {
+      "kelly_crudo_pct": 22.0,
+      "factor_ajuste_confianza": 0.4,
+      "kelly_ajustado_pct": 8.8,
+      "tope_maximo_pct": 10,
+      "sizing_preliminar_pct": 8.8,
+      "sizing_final_pct": 0,
+      "nota": "Kelly sugiere posición por asimetría positiva, pero la decisión categórica WATCHLIST fuerza el tamaño a 0% hasta verificar hipótesis de márgenes y resolver gates CONDITIONAL."
+    },
+    "intervalo_confianza_90_pct": {
+      "percentil_5": -55,
+      "percentil_50": 28.5,
+      "percentil_95": 180
+    },
+    "conviccion_0_1": 0.55,
+    "ratio_asimetria": 1.3,
+    "expected_value_anualizado_pct": 19.0,
+    "decision_categorica": "WATCHLIST"
+  },
+  "analisis_sensibilidad": [
+    {
+      "assumption_id": "A-001",
+      "variable": "ratio_cogs_ingresos_2026",
+      "valor_base": 19.7,
+      "rango_test": {
+        "min": 14.0,
+        "max": 22.0,
+        "paso": 2.0
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": 120,
+        "si_max": -30
+      },
+      "impacto_en_decision": "Si ratio < 16% en Q1-2026 → INVERTIR. Si > 20% → DESCARTAR.",
+      "nota": "Variable crítica binaria. Define si es una oportunidad distressed o una trampa de valor."
+    },
+    {
+      "assumption_id": "A-002",
+      "variable": "resolucion_material_weakness",
+      "valor_base": "NO_RESUELTO",
+      "rango_test": {
+        "min": "RESUELTO",
+        "max": "NO_RESUELTO_SIN_PLAN"
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": 60,
+        "si_max": -20
+      },
+      "impacto_en_decision": "Resuelto limpiamente → gate G3 pasa a PASS, scoring sube ~6 pts, más cerca de INVERTIR. No resuelto sin plan → DESCARTAR.",
+      "nota": "Gate blocker principal junto con COGS."
+    },
+    {
+      "assumption_id": "A-003",
+      "variable": "fcf_fy2026",
+      "valor_base": 5.6,
+      "rango_test": {
+        "min": -2.0,
+        "max": 10.0,
+        "paso": 2.0
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": -50,
+        "si_max": 45
+      },
+      "impacto_en_decision": "FCF negativo → kill criteria activada → DESCARTAR. FCF > $8M → scoring S sube, refuerza WATCHLIST.",
+      "nota": "Con patrimonio negativo, FCF positivo es el único soporte de supervivencia."
+    }
+  ],
+  "gates": {
+    "data_quality_gate": {
+      "status": "PASS",
+      "por_que": [
+        "SourcesPack contiene 10-K FY2020-FY2025, 10-Q últimos 12 trimestres, 8-K relevantes, DEF14A, y 8 transcripts de earnings calls.",
+        "TruthPack completo con filings recientes. ImpliedExpectations calculado correctamente.",
+        "Advertencia: Material Weakness en controles internos reduce confianza en precisión fina de datos financieros."
+      ],
+      "faltantes_criticos": []
+    },
+    "non_speculative_gate": {
+      "status": "PASS",
+      "banderas": {
+        "tesis_binaria_detectada": false,
+        "dependencia_financiacion_salvadora": false,
+        "opacidad_inaceptable": true
+      },
+      "por_que": [
+        "Negocio real con $91.7M de ingresos, base de 30M+ miembros, operaciones en 25 países y larga trayectoria.",
+        "No depende de aprobación regulatoria o descubrimiento científico.",
+        "Bandera de opacidad por explicación insuficiente del aumento de COGS y Material Weakness no remediada."
+      ]
+    },
+    "survivability_gate": {
+      "status": "CONDITIONAL",
+      "por_que": [
+        "CFO positivo ($5.7M), Cash $22.6M, y ausencia de deuda financiera evitan quiebra inmediata.",
+        "Patrimonio negativo (-$19.3M) por $79M en recompras acumuladas. Caja < Merchant Payables genera fragilidad.",
+        "Runway estimado ~16 meses al ritmo actual de recompras; sostenible si se suspenden.",
+        "Material weakness reportada en controles internos Q3-2025."
+      ],
+      "condiciones_si_conditional": [
+        "Suspensión o reducción drástica de recompras de acciones.",
+        "Mantenimiento de CFO/FCF positivo.",
+        "Estabilidad en merchant payables (no 'run on the bank').",
+        "Resolución material weakness en 10-K FY2025.",
+        "Patrimonio neto debe dejar de deteriorarse."
+      ]
+    },
+    "mispricing_gate": {
+      "status": "PASS",
+      "por_que": [
+        "EV/EBIT ~6x, EV/FCF ~7.5x, P/E ~12x sobre base normalizada. Peers del sector cotizan a 15-25x EBIT.",
+        "Descuento >50% vs comparables. Search segment con margen >20%.",
+        "Gap de valoración evidente SI los márgenes revierten a la media."
+      ]
+    },
+    "catalyst_gate": {
+      "status": "CONDITIONAL",
+      "por_que": [
+        "Catalysts identificados: (1) Publicación 10-K FY2025 con posible resolución material weakness, (2) Resultados Q1-2026 confirmarán estructura de costos, (3) JFC como driver secundario.",
+        "Sin timeline firme para resolución. Management no ha dado guidance explícito de crecimiento."
+      ],
+      "condiciones_si_conditional": [
+        "Al menos un catalyst debe activarse en próximos 6 meses.",
+        "Management debe comunicar hoja de ruta de crecimiento."
+      ]
+    },
+    "gates_global": "CONDITIONAL",
+    "gates_resumen": "3 PASS + 2 CONDITIONAL (survivability, catalyst). Empresa operativa con mispricing claro, pero estructura de capital frágil y ausencia de catalysts con timeline firme impiden PASS global."
+  },
+  "scoring_preliminar": {
+    "metodo": "Score_0_100",
+    "componentes": {
+      "S_supervivencia_0_25": {
+        "valor": 11,
+        "rango_modelos": [
+          10,
+          13
+        ],
+        "nota": "Cash $22.6M + FCF $5.6M pero patrimonio negativo y material weakness penalizan. Gemini más conservador por dependencia de merchant payables."
+      },
+      "M_mispricing_0_25": {
+        "valor": 19,
+        "rango_modelos": [
+          19,
+          20
+        ],
+        "nota": "Coincidencia sustancial. EV/EBIT ~6x vs peers 15-25x. Descuento >50%."
+      },
+      "C_catalizador_0_20": {
+        "valor": 11,
+        "rango_modelos": [
+          11,
+          12
+        ],
+        "nota": "Catalysts identificados pero sin timeline firme. Ambos modelos penalizan incertidumbre temporal."
+      },
+      "Q_calidad_0_15": {
+        "valor": 7,
+        "rango_modelos": [
+          5,
+          9
+        ],
+        "nota": "Divergencia material. Gemini penaliza más por opacidad COGS. Claude reconoce alineación CEO 47% pero penaliza governance. Valor fusionado pondera ambas perspectivas."
+      },
+      "R_downside_0_15": {
+        "valor": 7,
+        "rango_modelos": [
+          5,
+          10
+        ],
+        "nota": "Divergencia material. Gemini ve downside -40% (BEAR 50% probable); Claude -25% (BEAR 35% probable). Valor fusionado refleja riesgo intermedio."
+      },
+      "V_penalizacion_0_a_menos15": {
+        "valor": -5,
+        "rango_modelos": [
+          -6,
+          -5
+        ],
+        "nota": "Gemini: opacidad COGS -5. Claude: material weakness -2, patrimonio negativo -2, revenue decline -1, recompras agresivas -1."
+      }
+    },
+    "total_0_100": 50,
+    "rango_modelos": [
+      47,
+      56
+    ],
+    "umbral_invertir": 65,
+    "umbral_watchlist": 45,
+    "nota": "Score 50/100 cae en zona WATCHLIST (45-64). Gemini más conservador (47) por mayor peso al riesgo COGS; Claude más constructivo (56) por visión más benigna del downside. Fusión usa punto medio ponderado hacia conservadurismo."
+  },
+  "assumption_ledger": {
+    "reglas": {
+      "id_prefix": "A-",
+      "max_supuestos": 40,
+      "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+    },
+    "supuestos": [
+      {
+        "assumption_id": "A-001",
+        "enunciado": "El aumento de COGS (+73%) en FY2025 es transitorio/reversible y no estructural.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.4,
+        "confianza_0_1": 0.5,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "MARGEN_OPERATIVO",
+          "FCF",
+          "EBIT"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Historico Anual FY2024 vs FY2025",
+            "cita_corta": "COGS pasó de 12.5% a 19.7% de ingresos en un año.",
+            "interpretacion": "El cambio fue abrupto. No hay evidencia directa de reversibilidad en los datos trimestrales (que empeoraron)."
+          }
+        ],
+        "falsacion": {
+          "test": "COGS/Ingresos > 18% en Q1-2026.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_BULL_002"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_002"
+          }
+        ],
+        "notas_arbitro": "Punto de desacuerdo principal entre modelos. Sin desglose de COGS, es una apuesta ciega hoy. Gemini lo identifica como variable binaria definitoria."
+      },
+      {
+        "assumption_id": "A-002",
+        "enunciado": "Material weakness será remediada en 10-K FY2025 filing.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.6,
+        "confianza_0_1": 0.6,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "GOBERNANZA",
+          "CONFIANZA_DATOS",
+          "MULTIPLO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "10-Q Q3-2025",
+            "cita_corta": "Material weakness en controles internos reportada.",
+            "interpretacion": "Sin detalle de naturaleza específica ni timeline de remediación comunicado."
+          }
+        ],
+        "falsacion": {
+          "test": "Material weakness NO resuelta en 10-K FY2025 sin plan de remediación.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "10-K",
+          "accion_si_falla": "DESCARTAR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_FORENSIC_MW"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_MW"
+          }
+        ],
+        "notas_arbitro": "Claude lo identifica como kill criteria; Gemini lo menciona como warning. Fusión adopta postura más estricta de Claude."
+      },
+      {
+        "assumption_id": "A-003",
+        "enunciado": "Management moderará las recompras para alinearlas con el FCF real.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.5,
+        "confianza_0_1": 0.6,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "FCF",
+          "MULTIPLO",
+          "SUPERVIVENCIA"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Cash Flow FY2025",
+            "cita_corta": "Buybacks $13.1M vs FCF $5.6M. $79M acumulados en recompras.",
+            "interpretacion": "Historial reciente muestra indisciplina severa. Patrimonio negativo -$19.3M es consecuencia directa."
+          }
+        ],
+        "falsacion": {
+          "test": "CFF Recompra > FCF en Q1-2026 o Caja < $8M.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_003"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_003"
+          }
+        ],
+        "notas_arbitro": "Ambos modelos coinciden: continuar recompras a este ritmo es suicidio financiero lento. Claude aporta dato de $79M acumulados que contextualiza la gravedad."
+      },
+      {
+        "assumption_id": "A-004",
+        "enunciado": "FCF se mantendrá positivo en FY2026 ($4-6M rango).",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.8,
+        "confianza_0_1": 0.7,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "SUPERVIVENCIA",
+          "CAJA"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Historico FCF",
+            "cita_corta": "FCF positivo $5.6M FY2025. Modelo asset-light.",
+            "interpretacion": "Historicamente consistente, pero compresión de márgenes pone en riesgo."
+          }
+        ],
+        "falsacion": {
+          "test": "FCF negativo en cualquier trimestre FY2026.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "DESCARTAR"
+        },
+        "dependencias": [
+          "A-001"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_FCF"
+          }
+        ],
+        "notas_arbitro": "Con patrimonio negativo, FCF positivo es el único soporte de supervivencia. Kill criteria directa."
+      },
+      {
+        "assumption_id": "A-005",
+        "enunciado": "El crecimiento de Jack's Flight Club es rentable y sostenible.",
+        "tipo": "INFERENCIA",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.5,
+        "confianza_0_1": 0.5,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "INGRESOS",
+          "MARGEN_OPERATIVO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Transcript Q4-2025",
+            "cita_corta": "JFC revenue +33% YoY.",
+            "interpretacion": "Top line crece, pero faltan datos de margen y contribución al EBIT."
+          }
+        ],
+        "falsacion": {
+          "test": "Desaceleración de crecimiento JFC < 15% o revelación de márgenes negativos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "Earnings Call / 10-Q",
+          "accion_si_falla": "REDUCIR_50"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "CATALYST",
+            "claim_id": "CLM_005"
+          }
+        ],
+        "notas_arbitro": "Opcionalidad positiva, pero no carga la tesis por sí sola. Ambos modelos coinciden."
+      },
+      {
+        "assumption_id": "A-006",
+        "enunciado": "Revenue FY2025 será ~$91.7M basado en run-rate de primeros 3 trimestres.",
+        "tipo": "DATO",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.9,
+        "confianza_0_1": 0.85,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "VALORACION",
+          "ESCENARIOS"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "10-Q filings Q1-Q3 2025",
+            "cita_corta": "Run-rate basado en 3 trimestres reportados.",
+            "interpretacion": "Alta probabilidad de confirmación. Pendiente 10-K auditado."
+          }
+        ],
+        "falsacion": {
+          "test": "Revenue FY2025 < $88M.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "10-K",
+          "accion_si_falla": "REVISAR_TESIS"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_REV"
+          }
+        ],
+        "notas_arbitro": "Dato base sobre el que se construyen todos los escenarios."
+      },
+      {
+        "assumption_id": "A-007",
+        "enunciado": "Search segment mantiene margen operativo >20%.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.85,
+        "confianza_0_1": 0.7,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "MARGEN_OPERATIVO",
+          "MOAT",
+          "VALORACION"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Segmento reporting 10-K/10-Q",
+            "cita_corta": "Search segment históricamente con margen >20%.",
+            "interpretacion": "Core business sigue siendo rentable si se aísla de JFC."
+          }
+        ],
+        "falsacion": {
+          "test": "Search segment margen operativo < 15%.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-K/10-Q",
+          "accion_si_falla": "REVISAR_VALORACION"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_SEARCH"
+          }
+        ],
+        "notas_arbitro": "Dato de Claude. Clave para validar si el moat del core business permanece intacto."
+      },
+      {
+        "assumption_id": "A-008",
+        "enunciado": "Múltiplo EV/EBIT de ~6x es genuinamente bajo vs comparables.",
+        "tipo": "INFERENCIA",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.8,
+        "confianza_0_1": 0.7,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "MISPRICING",
+          "RETORNO_ESPERADO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Comparable analysis",
+            "cita_corta": "Peers cotizan a 15-25x EBIT.",
+            "interpretacion": "Descuento >50% evidente, pero puede estar justificado por deterioro."
+          }
+        ],
+        "falsacion": {
+          "test": "Descuento justificado por deterioro permanente de márgenes.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q comparativos",
+          "accion_si_falla": "REDUCIR_RETORNO_ESPERADO"
+        },
+        "dependencias": [
+          "A-001"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_MISPRICING"
+          }
+        ],
+        "notas_arbitro": "Gate mispricing PASS en ambos modelos, pero la validez depende críticamente de A-001."
+      },
+      {
+        "assumption_id": "A-009",
+        "enunciado": "Revenue growth vuelve a positivo en FY2026 (+3-5%).",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.5,
+        "confianza_0_1": 0.5,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "INGRESOS",
+          "NARRATIVA"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Earnings calls",
+            "cita_corta": "Nuevos productos mencionados. 4 trimestres consecutivos de declive YoY.",
+            "interpretacion": "Sin guidance explícito. Declive secular es alternativa real."
+          }
+        ],
+        "falsacion": {
+          "test": "Revenue decline >5% YoY en FY2026.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "DESCARTAR"
+        },
+        "dependencias": [
+          "A-012"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_GROWTH"
+          }
+        ],
+        "notas_arbitro": "Punto de desacuerdo BULL vs RED_TEAM. Sin evidencia para resolver."
+      },
+      {
+        "assumption_id": "A-010",
+        "enunciado": "La estructura de patrimonio negativo no genera problemas regulatorios o contractuales.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.8,
+        "confianza_0_1": 0.65,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "SUPERVIVENCIA",
+          "RECOMPRAS"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "10-K notas legales",
+            "cita_corta": "Patrimonio negativo -$19.3M.",
+            "interpretacion": "No hay evidencia directa de covenants violados, pero riesgo de restricción de recompras o going concern."
+          }
+        ],
+        "falsacion": {
+          "test": "Patrimonio neto < -$30M o auditor emite going concern.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-K auditado",
+          "accion_si_falla": "DESCARTAR"
+        },
+        "dependencias": [
+          "A-003"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_EQUITY"
+          }
+        ],
+        "notas_arbitro": "Riesgo tail que ambos modelos identifican. Claude más explícito con dato de -$19.3M."
+      },
+      {
+        "assumption_id": "A-011",
+        "enunciado": "Insider ownership ~47% de Ralph Bartel es señal de alineación.",
+        "tipo": "CONTEXTUAL",
+        "criticidad": "CONTEXTUAL",
+        "probabilidad_0_1": 0.9,
+        "confianza_0_1": 0.8,
+        "impacto": "BAJO",
+        "drivers_afectados": [
+          "GOBERNANZA",
+          "ALINEACION"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "DEF14A, proxy filings",
+            "cita_corta": "CEO fundador con ~47% ownership.",
+            "interpretacion": "Alineación alta pero riesgo de governance por concentración de poder."
+          }
+        ],
+        "falsacion": {
+          "test": "Ownership cae por debajo del 40%.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "DEF14A / Form 4",
+          "accion_si_falla": "REVISAR_ALINEACION"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_INSIDER"
+          }
+        ],
+        "notas_arbitro": "Dato de Claude. Doble filo: alineación pero también concentración de poder de decisión."
+      },
+      {
+        "assumption_id": "A-012",
+        "enunciado": "Competencia de OTAs no erosiona significativamente el modelo de deals.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.65,
+        "confianza_0_1": 0.55,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "INGRESOS",
+          "MOAT"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Análisis competitivo",
+            "cita_corta": "OTAs con más escala (Booking, Expedia) compiten en el mismo espacio.",
+            "interpretacion": "Revenue ha sido resiliente pero sin crecimiento. Modelo de email deals podría ser anacrónico."
+          }
+        ],
+        "falsacion": {
+          "test": "Revenue decline se acelera >10% YoY.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "DESCARTAR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_COMPETITION"
+          }
+        ],
+        "notas_arbitro": "Riesgo secular que Claude captura explícitamente. Gemini lo aborda indirectamente via COGS."
+      },
+      {
+        "assumption_id": "A-013",
+        "enunciado": "Sector travel mantiene o crece demanda en 2026.",
+        "tipo": "CONTEXTUAL",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.7,
+        "confianza_0_1": 0.6,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "INGRESOS"
+        ],
+        "evidencias": [
+          {
+            "source_id": "MACRO",
+            "ubicacion": "Macro outlook",
+            "cita_corta": "Post-COVID travel recovery continúa.",
+            "interpretacion": "Favorable pero riesgo de recesión no modelado explícitamente."
+          }
+        ],
+        "falsacion": {
+          "test": "Revenue cae >10% por factores macro.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q + datos macro",
+          "accion_si_falla": "REVISAR_ESCENARIOS"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_MACRO"
+          }
+        ],
+        "notas_arbitro": "Dato de Claude. Factor exógeno no controlable."
+      },
+      {
+        "assumption_id": "A-014",
+        "enunciado": "No hay riesgo de delisting o violación de Nasdaq requirements.",
+        "tipo": "DATO",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.95,
+        "confianza_0_1": 0.9,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "SUPERVIVENCIA"
+        ],
+        "evidencias": [
+          {
+            "source_id": "MARKET_DATA",
+            "ubicacion": "Precio y market cap",
+            "cita_corta": "Precio $5.40 > $1, market cap $59M > $35M.",
+            "interpretacion": "Muy lejos de umbrales de delisting."
+          }
+        ],
+        "falsacion": {
+          "test": "Precio < $1 por 30 días consecutivos.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 24
+          },
+          "fuente_prevista": "Market data",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_LISTING"
+          }
+        ],
+        "notas_arbitro": "Riesgo tail muy bajo. Dato de Claude."
+      },
+      {
+        "assumption_id": "A-015",
+        "enunciado": "Base de miembros se mantiene >25M activos.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.85,
+        "confianza_0_1": 0.75,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "MOAT",
+          "INGRESOS"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Reportes trimestrales",
+            "cita_corta": "30M+ miembros registrados.",
+            "interpretacion": "Activo intangible valioso. Relaciones directas con suppliers."
+          }
+        ],
+        "falsacion": {
+          "test": "Base < 20M miembros.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "Earnings calls / 10-K",
+          "accion_si_falla": "DESCARTAR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_MEMBERS"
+          }
+        ],
+        "notas_arbitro": "Moat principal de la empresa según ambos modelos."
+      },
+      {
+        "assumption_id": "A-016",
+        "enunciado": "Expansión internacional contribuirá revenue incremental en 12-18 meses.",
+        "tipo": "INFERENCIA",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.45,
+        "confianza_0_1": 0.4,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "INGRESOS"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "Earnings calls commentary",
+            "cita_corta": "Operaciones en 25 países. Mención de optimización Europa.",
+            "interpretacion": "Aspiracional. Sin métricas de progreso medibles."
+          }
+        ],
+        "falsacion": {
+          "test": "Sin evidencia de crecimiento internacional en 12 meses.",
+          "ventana_meses": {
+            "min": 12,
+            "max": 18
+          },
+          "fuente_prevista": "Earnings calls",
+          "accion_si_falla": "REDUCIR_PROBABILIDAD_BULL"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "CATALYST",
+            "claim_id": "CLM_INTL"
+          }
+        ],
+        "notas_arbitro": "Ambos modelos lo mencionan como driver secundario con baja probabilidad."
+      }
+    ]
+  },
+  "evidence_graph": {
+    "version": "EvidenceGraph_v1",
+    "nodos": [
+      {
+        "node_id": "E-COGS",
+        "tipo": "EVIDENCIA",
+        "label": "COGS +73% FY2025 (12.5% → 19.7%)",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-BUYBACKS",
+        "tipo": "EVIDENCIA",
+        "label": "Buybacks $13.1M vs FCF $5.6M ($79M acumulados)",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-REVENUE",
+        "tipo": "EVIDENCIA",
+        "label": "Revenue $91.7M FY2025 (4Q decline YoY)",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-EBIT",
+        "tipo": "EVIDENCIA",
+        "label": "EBIT $6.9M FY2025 (margen 7.5%)",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-CASH",
+        "tipo": "EVIDENCIA",
+        "label": "Cash $22.6M, FCF $5.6M",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-EQUITY",
+        "tipo": "EVIDENCIA",
+        "label": "Patrimonio negativo -$19.3M",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-MW",
+        "tipo": "EVIDENCIA",
+        "label": "Material Weakness Q3-2025",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-MEMBERS",
+        "tipo": "EVIDENCIA",
+        "label": "30M+ miembros, 25 países",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-CEO",
+        "tipo": "EVIDENCIA",
+        "label": "CEO 47% ownership",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-JFC",
+        "tipo": "EVIDENCIA",
+        "label": "JFC revenue +33% YoY",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-VALUATION",
+        "tipo": "DERIVADO",
+        "label": "EV/EBIT ~6x vs peers 15-25x",
+        "ref": {
+          "source_id": "CALC"
+        }
+      },
+      {
+        "node_id": "E-SEARCH-MARGIN",
+        "tipo": "EVIDENCIA",
+        "label": "Search segment margen >20%",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "A-COGS-REV",
+        "tipo": "SUPUESTO",
+        "label": "A-001 COGS Reversible",
+        "ref": {
+          "assumption_id": "A-001"
+        }
+      },
+      {
+        "node_id": "A-MW-RES",
+        "tipo": "SUPUESTO",
+        "label": "A-002 Material Weakness Resuelta",
+        "ref": {
+          "assumption_id": "A-002"
+        }
+      },
+      {
+        "node_id": "A-CAPITAL",
+        "tipo": "SUPUESTO",
+        "label": "A-003 Disciplina Capital",
+        "ref": {
+          "assumption_id": "A-003"
+        }
+      },
+      {
+        "node_id": "A-FCF",
+        "tipo": "SUPUESTO",
+        "label": "A-004 FCF Positivo",
+        "ref": {
+          "assumption_id": "A-004"
+        }
+      },
+      {
+        "node_id": "A-JFC",
+        "tipo": "SUPUESTO",
+        "label": "A-005 JFC Rentable",
+        "ref": {
+          "assumption_id": "A-005"
+        }
+      },
+      {
+        "node_id": "INF-MISPRICING",
+        "tipo": "INFERENCIA",
+        "label": "Mispricing >50% vs peers",
+        "ref": {}
+      },
+      {
+        "node_id": "INF-SURVIVAL",
+        "tipo": "INFERENCIA",
+        "label": "Supervivencia CONDITIONAL",
+        "ref": {}
+      },
+      {
+        "node_id": "INF-MOAT",
+        "tipo": "INFERENCIA",
+        "label": "Moat moderado por base miembros",
+        "ref": {}
+      },
+      {
+        "node_id": "INF-QUALITY",
+        "tipo": "INFERENCIA",
+        "label": "Calidad management mixta",
+        "ref": {}
+      },
+      {
+        "node_id": "SC-BASE",
+        "tipo": "ESCENARIO",
+        "label": "BASE: +42% (p=0.40)",
+        "ref": {
+          "scenario_id": "BASE"
+        }
+      },
+      {
+        "node_id": "SC-BULL",
+        "tipo": "ESCENARIO",
+        "label": "BULL: +180% (p=0.15)",
+        "ref": {
+          "scenario_id": "BULL"
+        }
+      },
+      {
+        "node_id": "SC-BEAR",
+        "tipo": "ESCENARIO",
+        "label": "BEAR: -35% (p=0.45)",
+        "ref": {
+          "scenario_id": "BEAR"
+        }
+      },
+      {
+        "node_id": "DECISION",
+        "tipo": "DECISION",
+        "label": "WATCHLIST (sizing 0%)",
+        "ref": {
+          "decision": "WATCHLIST"
+        }
+      }
+    ],
+    "aristas": [
+      {
+        "from": "E-COGS",
+        "to": "A-COGS-REV",
+        "relacion": "DEBILITA",
+        "peso_0_1": 0.2,
+        "nota": "Evidencia actual (tendencia alcista Q1→Q4) debilita hipótesis de reversibilidad."
+      },
+      {
+        "from": "E-BUYBACKS",
+        "to": "A-CAPITAL",
+        "relacion": "DEBILITA",
+        "peso_0_1": 0.1,
+        "nota": "Evidencia muestra indisciplina reciente severa ($79M acumulados)."
+      },
+      {
+        "from": "E-BUYBACKS",
+        "to": "E-EQUITY",
+        "relacion": "CAUSA",
+        "peso_0_1": 0.95,
+        "nota": "Recompras acumuladas causan directamente patrimonio negativo."
+      },
+      {
+        "from": "E-CASH",
+        "to": "INF-SURVIVAL",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.7,
+        "nota": "Cash $22.6M + FCF positivo evitan quiebra inmediata."
+      },
+      {
+        "from": "E-EQUITY",
+        "to": "INF-SURVIVAL",
+        "relacion": "DEBILITA",
+        "peso_0_1": 0.6,
+        "nota": "Patrimonio negativo introduce fragilidad estructural."
+      },
+      {
+        "from": "E-MW",
+        "to": "INF-QUALITY",
+        "relacion": "DEBILITA",
+        "peso_0_1": 0.7,
+        "nota": "Material weakness es red flag de governance seria."
+      },
+      {
+        "from": "E-CEO",
+        "to": "INF-QUALITY",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.5,
+        "nota": "47% ownership alinea pero concentra poder."
+      },
+      {
+        "from": "E-MEMBERS",
+        "to": "INF-MOAT",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.7,
+        "nota": "30M+ miembros y relaciones con suppliers."
+      },
+      {
+        "from": "E-SEARCH-MARGIN",
+        "to": "INF-MOAT",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.6,
+        "nota": "Core business mantiene margen saludable."
+      },
+      {
+        "from": "E-EBIT",
+        "to": "E-VALUATION",
+        "relacion": "DETERMINA",
+        "peso_0_1": 0.9,
+        "nota": "EBIT $6.9M → EV/EBIT ~6x."
+      },
+      {
+        "from": "E-VALUATION",
+        "to": "INF-MISPRICING",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.8,
+        "nota": "6x vs peers 15-25x = descuento >50%."
+      },
+      {
+        "from": "A-COGS-REV",
+        "to": "SC-BULL",
+        "relacion": "DEPENDE_DE",
+        "peso_0_1": 0.9,
+        "nota": "BULL es imposible sin reversión de COGS."
+      },
+      {
+        "from": "A-JFC",
+        "to": "SC-BULL",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.4,
+        "nota": "JFC rentable sería driver secundario del bull case."
+      },
+      {
+        "from": "A-COGS-REV",
+        "to": "SC-BEAR",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.8,
+        "nota": "Fallo de A-001 confirma BEAR."
+      },
+      {
+        "from": "E-REVENUE",
+        "to": "SC-BEAR",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.5,
+        "nota": "4Q consecutivos de declive YoY favorecen BEAR."
+      },
+      {
+        "from": "INF-MISPRICING",
+        "to": "SC-BASE",
+        "relacion": "HABILITA",
+        "peso_0_1": 0.7,
+        "nota": "Re-rate parcial en escenario base."
+      },
+      {
+        "from": "INF-SURVIVAL",
+        "to": "DECISION",
+        "relacion": "CONDICIONA",
+        "peso_0_1": 0.8,
+        "nota": "Gate CONDITIONAL impide INVERTIR."
+      },
+      {
+        "from": "SC-BEAR",
+        "to": "DECISION",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.9,
+        "nota": "Alta probabilidad de BEAR (45%) fuerza cautela."
+      },
+      {
+        "from": "INF-MISPRICING",
+        "to": "DECISION",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.6,
+        "nota": "Mispricing evidente mantiene en WATCHLIST (no DESCARTAR)."
+      }
+    ],
+    "validacion_grafo": {
+      "ids_unicos": true,
+      "aristas_referencian_nodos_existentes": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "detalle": "Grafo coherente. 25 nodos, 19 aristas. Dependencia crítica en COGS y Material Weakness."
+    }
+  },
+  "catalizadores_consolidados": [
+    {
+      "catalyst_id": "C-001",
+      "nombre": "Publicación 10-K FY2025 auditado",
+      "es_no_binario": false,
+      "ventana_meses": {
+        "min": 1,
+        "probable": 2,
+        "max": 3
+      },
+      "probabilidad_0_1": 0.95,
+      "mecanismo_cierre_gap": "Resolución material weakness, desglose COGS, patrimonio neto actualizado, auditor opinion. Resolvería gate G3 si limpio.",
+      "supuestos_afectados": [
+        "A-001",
+        "A-002",
+        "A-004",
+        "A-010"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Material weakness resuelta o plan de remediación claro",
+          "fuente_prevista": "10-K",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          }
+        },
+        {
+          "descripcion": "Desglose COGS por componentes",
+          "fuente_prevista": "10-K notas",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          }
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-002",
+      "nombre": "Reporte Q1-2026 (Mayo 2026)",
+      "es_no_binario": false,
+      "ventana_meses": {
+        "min": 3,
+        "probable": 3,
+        "max": 4
+      },
+      "probabilidad_0_1": 1.0,
+      "mecanismo_cierre_gap": "Dato duro sobre reversión de márgenes. Si EBIT > 10% y COGS < 17%, se valida la tesis de reversión. Prueba de fuego para A-001.",
+      "supuestos_afectados": [
+        "A-001",
+        "A-004",
+        "A-009"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Margen EBIT > 10%",
+          "fuente_prevista": "10-Q",
+          "ventana_meses": {
+            "min": 3,
+            "max": 3
+          }
+        },
+        {
+          "descripcion": "COGS/Revenue < 17%",
+          "fuente_prevista": "10-Q",
+          "ventana_meses": {
+            "min": 3,
+            "max": 3
+          }
+        },
+        {
+          "descripcion": "Revenue YoY flat o positivo",
+          "fuente_prevista": "10-Q",
+          "ventana_meses": {
+            "min": 3,
+            "max": 3
+          }
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-003",
+      "nombre": "Suspensión o moderación de recompras",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 1,
+        "probable": 6,
+        "max": 12
+      },
+      "probabilidad_0_1": 0.5,
+      "mecanismo_cierre_gap": "Preservación de caja reduce riesgo de quiebra/dilución, mejorando perfil de riesgo y gate G3.",
+      "supuestos_afectados": [
+        "A-003",
+        "A-010"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Anuncio o dato en CFF mostrando reducción",
+          "fuente_prevista": "8-K/10-Q",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-004",
+      "nombre": "Jack's Flight Club alcanza inflexión de rentabilidad",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 18
+      },
+      "probabilidad_0_1": 0.35,
+      "mecanismo_cierre_gap": "Validaría estrategia de M&A y diversificación. Contribución marginal a EBIT inicialmente pero narrativa positiva y opcionalidad.",
+      "supuestos_afectados": [
+        "A-005"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "JFC break-even o contribución positiva a EBIT",
+          "fuente_prevista": "Earnings Call / 10-Q",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        }
+      ]
+    }
+  ],
+  "escenarios": [
+    {
+      "scenario_id": "BASE",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 12,
+        "probable": 18,
+        "max": 24
+      },
+      "descripcion": "Estabilización Parcial. COGS baja a ~17%, EBIT se recupera a ~$8-9M. Recompras se moderan. Material weakness resuelta. Múltiplo re-rate a 8-9x EV/EBIT.",
+      "drivers_clave": [
+        "A-001",
+        "A-002",
+        "A-003"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 20,
+        "base": 42,
+        "max": 60
+      },
+      "nota_valoracion": "Recuperación de múltiplo a niveles medios-bajos. Rango fusionado: Gemini +50%, Claude +35%. Valor fusionado +42% pondera escenario intermedio."
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.15,
+      "ventana_meses": {
+        "min": 12,
+        "probable": 24,
+        "max": 36
+      },
+      "descripcion": "Turnaround Completo. COGS vuelve a 13-14%, JFC escala rentablemente, revenue reaceleración a $100M+. EBIT >$15M. Re-rating a 10-12x EBIT.",
+      "drivers_clave": [
+        "A-001",
+        "A-005",
+        "A-009"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 100,
+        "base": 180,
+        "max": 250
+      },
+      "nota_valoracion": "Expansión múltiple + crecimiento beneficios. Ambos modelos coinciden en +180%. Probabilidad conservadora 0.15 (Gemini) adoptada."
+    },
+    {
+      "scenario_id": "BEAR",
+      "probabilidad_0_1": 0.45,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 18
+      },
+      "descripcion": "Value Trap / Deterioro. Márgenes se quedan en 7-8% o bajan. Caja se agota por buybacks. Declive secular de revenue. Posible dilución o estancamiento permanente.",
+      "drivers_clave": [
+        "A-001",
+        "A-003",
+        "A-012"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": -70,
+        "base": -35,
+        "max": -10
+      },
+      "nota_valoracion": "Compresión de múltiplo y/o dilución. Gemini: -40% (p=0.50), Claude: -25% (p=0.35). Fusión: -35% (p=0.45) — valor intermedio ponderado hacia Gemini por mayor evidencia de riesgo COGS."
+    }
+  ],
+  "kill_criteria_final": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con_assumption_id": "A-004",
+      "definicion": "Caja libre < $5M",
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "fuente_prevista": "10-Q",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Insolvencia técnica inminente dada la estructura de capital de trabajo y patrimonio negativo."
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con_assumption_id": "A-001",
+      "definicion": "Margen EBIT < 5% por 3 trimestres consecutivos",
+      "ventana_meses": {
+        "min": 1,
+        "max": 9
+      },
+      "fuente_prevista": "10-Q",
+      "accion": "DESCARTAR",
+      "severidad": "ALTA",
+      "por_que": "Confirma deterioro estructural del modelo de negocio."
+    },
+    {
+      "kc_id": "KC-003",
+      "relacionado_con_assumption_id": "A-002",
+      "definicion": "Material weakness NO resuelta en 10-K FY2025 sin plan de remediación",
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "fuente_prevista": "10-K",
+      "accion": "DESCARTAR",
+      "severidad": "ALTA",
+      "por_que": "Governance risk inaceptable sin timeline de remediación."
+    },
+    {
+      "kc_id": "KC-004",
+      "relacionado_con_assumption_id": "A-003",
+      "definicion": "Emisión de acciones o deuda para financiar operaciones",
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "fuente_prevista": "8-K / filing",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Rompe la tesis de auto-financiación. Dilución destructiva dado patrimonio negativo."
+    },
+    {
+      "kc_id": "KC-005",
+      "relacionado_con_assumption_id": "A-004",
+      "definicion": "FCF negativo en cualquier trimestre FY2026",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "fuente_prevista": "10-Q",
+      "accion": "DESCARTAR",
+      "severidad": "ALTA",
+      "por_que": "Patrimonio negativo + FCF negativo = riesgo de supervivencia inmediato."
+    },
+    {
+      "kc_id": "KC-006",
+      "relacionado_con_assumption_id": "A-006",
+      "definicion": "Revenue FY2025 < $88M",
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "fuente_prevista": "10-K",
+      "accion": "REVISAR_TESIS",
+      "severidad": "ALTA",
+      "por_que": "Declive >5% YoY confirma deterioro secular más grave de lo modelado."
+    },
+    {
+      "kc_id": "KC-007",
+      "relacionado_con_assumption_id": "A-010",
+      "definicion": "Patrimonio neto se deteriora más allá de -$30M",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "fuente_prevista": "10-Q / 10-K",
+      "accion": "DESCARTAR",
+      "severidad": "ALTA",
+      "por_que": "Evaluar riesgo regulatorio, going concern, y restricciones contractuales."
+    },
+    {
+      "kc_id": "KC-008",
+      "relacionado_con_assumption_id": "A-011",
+      "definicion": "CEO Ralph Bartel reduce ownership por debajo del 40%",
+      "ventana_meses": {
+        "min": 1,
+        "max": 18
+      },
+      "fuente_prevista": "DEF14A / Form 4",
+      "accion": "REVISAR_ALINEACION",
+      "severidad": "MEDIA",
+      "por_que": "Señal negativa de alineación si fundador con control reduce posición."
+    },
+    {
+      "kc_id": "KC-009",
+      "relacionado_con_assumption_id": "A-015",
+      "definicion": "Base de miembros cae por debajo de 20M",
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "fuente_prevista": "Earnings calls / 10-K",
+      "accion": "DESCARTAR",
+      "severidad": "ALTA",
+      "por_que": "Pérdida de moat principal y poder de negociación con suppliers."
+    },
+    {
+      "kc_id": "KC-010",
+      "relacionado_con_assumption_id": "A-007",
+      "definicion": "Search segment margen operativo < 15%",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "fuente_prevista": "10-Q / 10-K",
+      "accion": "REVISAR_VALORACION",
+      "severidad": "ALTA",
+      "por_que": "Core business ya no genera suficiente margen para justificar tesis."
+    }
+  ],
+  "plan_monitorizacion": {
+    "frecuencias": {
+      "pulso_diario": {
+        "activo": false,
+        "que_mirar": []
+      },
+      "revision_semanal": {
+        "activo": false,
+        "que_mirar": []
+      },
+      "modo_evento": {
+        "activo": true,
+        "que_mirar": [
+          "10-K FY2025 auditado (esperado marzo-abril 2026)",
+          "Earnings Q1 2026 (Mayo 2026)",
+          "Filings 8-K sobre financing/buybacks",
+          "Cambio en management/board",
+          "Anuncio M&A significativo"
+        ]
+      }
+    },
+    "lista_de_checks_por_supuesto": [
+      {
+        "assumption_id": "A-001",
+        "indicadores": [
+          "COGS/Revenue",
+          "EBIT Margin"
+        ],
+        "fuente": "10-Q",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-002",
+        "indicadores": [
+          "Material Weakness status",
+          "Auditor opinion"
+        ],
+        "fuente": "10-K",
+        "frecuencia": "ANUAL"
+      },
+      {
+        "assumption_id": "A-003",
+        "indicadores": [
+          "CFF Repurchase",
+          "Cash Balance",
+          "Treasury Stock"
+        ],
+        "fuente": "10-Q",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-004",
+        "indicadores": [
+          "FCF trimestral",
+          "CFO"
+        ],
+        "fuente": "10-Q",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-005",
+        "indicadores": [
+          "JFC revenue",
+          "JFC margen estimado"
+        ],
+        "fuente": "Earnings Call",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-007",
+        "indicadores": [
+          "Search segment margen"
+        ],
+        "fuente": "10-Q",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-009",
+        "indicadores": [
+          "Revenue YoY growth"
+        ],
+        "fuente": "10-Q",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-010",
+        "indicadores": [
+          "Patrimonio neto",
+          "Auditor going concern"
+        ],
+        "fuente": "10-K",
+        "frecuencia": "ANUAL"
+      }
+    ],
+    "metricas_clave": [
+      "Revenue total y por segmento (Search vs JFC)",
+      "COGS/Revenue ratio",
+      "EBIT margin",
+      "FCF trimestral",
+      "Cash balance",
+      "Patrimonio neto / Book value per share",
+      "Base de miembros activos",
+      "Recompras de acciones ($ y shares)",
+      "Status de material weakness",
+      "Revenue growth YoY por trimestre"
+    ],
+    "umbrales_alerta": [
+      {
+        "tipo": "PRECIO",
+        "condicion": "Caída > 20% sin noticias",
+        "accion": "REVISAR_COMITE",
+        "severidad": "MEDIA"
+      },
+      {
+        "tipo": "PRECIO",
+        "condicion": "Precio < $4.50",
+        "accion": "REVISAR_TESIS",
+        "severidad": "ALTA"
+      }
+    ],
+    "proxima_revision": "2026-04-15"
+  },
+  "predicciones_para_calibracion_consolidadas": [
+    {
+      "pred_id": "CP-001",
+      "descripcion": "Margen operativo GAAP Q1-2026 < 10%",
+      "probabilidad_0_1": 0.72,
+      "ventana_meses": {
+        "min": 1,
+        "max": 4
+      },
+      "criterio_validacion": "EBIT/Revenue en 10-Q",
+      "fuente_prevista": "10-Q",
+      "origen": [
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_001"
+        },
+        {
+          "agent_role": "RED_TEAM",
+          "pred_id": "PRED_RED_001"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-002",
+      "descripcion": "Caja < $8M en Q1-2026",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 1,
+        "max": 4
+      },
+      "criterio_validacion": "Balance Sheet Cash",
+      "fuente_prevista": "10-Q",
+      "origen": [
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_003"
+        }
+      ],
+      "nota_fusion": "Gemini 0.70, pero Claude tiene dato de Cash $22.6M que sugiere probabilidad más baja. Fusión usa 0.55."
+    },
+    {
+      "pred_id": "CP-003",
+      "descripcion": "Revenue FY2025 entre $89M y $94M",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Revenue total en 10-K",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_REV"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-004",
+      "descripcion": "Material weakness mencionada en 10-K FY2025 como resuelta o con plan de remediación",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Auditor opinion / management disclosure en 10-K",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_MW"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-005",
+      "descripcion": "FCF FY2025 entre $4M y $8M",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "FCF en 10-K",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_FCF"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-006",
+      "descripcion": "Precio TZOO entre $4.00 y $8.00 en 3 meses",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Market data",
+      "fuente_prevista": "Market data",
+      "origen": [
+        {
+          "agent_role": "MARKET",
+          "pred_id": "PRED_PRICE"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-007",
+      "descripcion": "Recompras de acciones > $3M en FY2025",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "CFF en 10-K",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_BUYBACK"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-008",
+      "descripcion": "Patrimonio neto FY2025 entre -$25M y -$15M",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Balance Sheet stockholders equity",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_EQUITY"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-009",
+      "descripcion": "Revenue Q1-2026 YoY flat o positivo (>-2%)",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Revenue YoY en 10-Q Q1-2026",
+      "fuente_prevista": "10-Q",
+      "origen": [
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_GROWTH"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-010",
+      "descripcion": "JFC no alcanza break-even en FY2025",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Segment reporting / earnings call",
+      "fuente_prevista": "10-K / Earnings call",
+      "origen": [
+        {
+          "agent_role": "RED_TEAM",
+          "pred_id": "PRED_JFC"
+        }
+      ]
+    }
+  ],
+  "arbitraje": {
+    "decision_categorica": "WATCHLIST",
+    "decision_probabilistica_implicita": "WATCHLIST",
+    "override_aplicado": false,
+    "motivo_override": "Ambos modelos convergen en WATCHLIST. Probabilístico fusionado (p_exito=0.45, retorno esperado 28.5%) no justifica INVERTIR dado gates CONDITIONAL y score 50. No hay override necesario.",
+    "notas_arbitro": [
+      "Decisión WATCHLIST unánime entre ambos modelos, con convergencia en la lógica aunque divergencia en calibración numérica.",
+      "Gemini más conservador (score 47, bear 50%, retorno esperado 22.5%) por enfoque en riesgo COGS; Claude más constructivo (score 56, bear 35%, retorno 43%) por visión más benigna del downside.",
+      "Fusión adopta postura intermedia ponderada hacia conservadurismo en probabilidades (BEAR 45% vs Claude 35%), pero acepta estructura de Claude para datos factuales (Cash $22.6M, patrimonio -$19.3M) por mayor evidencia citada.",
+      "El deterioro de COGS (+73%) — identificado prominentemente por Gemini — es la variable binaria definitoria. Sin desglose, es una apuesta ciega.",
+      "Override al sizing: aunque Kelly fusionado sugiere ~8.8%, se fuerza a 0% hasta verificar hipótesis de márgenes en Q1-2026."
+    ],
+    "desacuerdos_detectados": [
+      {
+        "tema": "Reversibilidad de COGS",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Inversión temporal reversible",
+            "confianza_0_1": 0.68
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "Cambio estructural permanente",
+            "confianza_0_1": 0.93
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "NO_RESUELTO",
+          "decision": "esperar_dato",
+          "por_que": "La evidencia trimestral (empeoramiento Q1→Q4) favorece al Red Team. Se asume riesgo estructural hasta prueba en contrario.",
+          "accion": "Esperar dato Q1-2026 y desglose COGS en 10-K"
+        }
+      },
+      {
+        "tema": "Impacto de Buybacks en valor",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Accretivos a $5.40, reducen share count",
+            "confianza_0_1": 0.83
+          },
+          {
+            "agent_role": "FORENSIC",
+            "posicion": "Destructivos de liquidez (2.3x FCF), generan patrimonio negativo -$19.3M",
+            "confianza_0_1": 0.93
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "RESUELTO",
+          "decision": "penalizar_tamaño",
+          "por_que": "La matemática de liquidez es innegable: caja cae y equity es negativo. La accretividad es teórica, la iliquidez es real.",
+          "accion": "Considerar riesgo de liquidez como dominante"
+        }
+      },
+      {
+        "tema": "Sostenibilidad del revenue",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Revenue estabilizándose con nuevos productos y expansión internacional"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "Declive secular por competencia de OTAs; modelo de deals por email es anacrónico"
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "NO_RESUELTO",
+          "decision": "esperar_dato",
+          "por_que": "Revenue ha sido resiliente pero sin crecimiento. 4Q consecutivos de declive YoY. Sin guidance de management.",
+          "accion": "Monitorear revenue Q1-2026 YoY"
+        }
+      },
+      {
+        "tema": "Potencial de re-rating del múltiplo",
+        "agentes": [
+          {
+            "agent_role": "CATALYST",
+            "posicion": "Re-rate de 6x a 10-12x con resolución de material weakness y revenue estable"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "Descuento justificado por fundamentos deteriorándose; re-rate improbable sin crecimiento"
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "PARCIALMENTE_RESUELTO",
+          "decision": "re_rate_parcial",
+          "por_que": "Re-rate parcial es probable si material weakness se resuelve (6x→8-9x en BASE). Full re-rate a 12x+ requiere evidencia de crecimiento.",
+          "accion": "Escenario BASE asume re-rate moderado, no agresivo"
+        }
+      },
+      {
+        "tema": "Material weakness — severidad e implicaciones",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Problema administrativo resolvible; no afecta operaciones ni cash flows"
+          },
+          {
+            "agent_role": "FORENSIC",
+            "posicion": "Red flag de governance seria; puede indicar problemas sistémicos; afecta confiabilidad de reportes"
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "RESUELTO",
+          "decision": "kill_criteria",
+          "por_que": "Material weakness es seria y justifica gate CONDITIONAL. Cash flows verificables externamente mitigan riesgo de fraude. Resolución en 10-K FY2025 será test definitivo.",
+          "accion": "KC-003 activado: si no se resuelve → DESCARTAR"
+        }
+      }
+    ],
+    "puntos_abiertos": [
+      "Desglose de COGS (no disponible en 8-K/10-Q parciales).",
+      "Rentabilidad real del segmento JFC.",
+      "Remediación de Material Weakness — timeline concreto.",
+      "¿Management reconoce el problema de patrimonio negativo y tiene plan?",
+      "¿Hay guidance explícito de revenue/crecimiento para FY2026?",
+      "¿Existen covenants o restricciones contractuales vinculados a patrimonio neto?",
+      "¿Cuál es la política formal de recompras del Board — hay límite?",
+      "¿Hay riesgo de que auditor emita going concern?",
+      "Impacto de AI/LLMs en modelo de curación de deals no evaluado."
+    ]
+  },
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "CRITICA",
+      "item": "10-K FY2025 Auditado",
+      "por_que_importa": "Desglose COGS, Material Weakness, Notas Legales, Auditor Opinion, Patrimonio neto auditado. Bloquea decisión.",
+      "como_obtenerlo": "SEC EDGAR (esperado marzo-abril 2026)",
+      "bloquea_decision": true
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "10-Q Q1-2026",
+      "por_que_importa": "Prueba de fuego para reversión de márgenes. COGS/Revenue, EBIT margin, FCF, cash balance.",
+      "como_obtenerlo": "SEC EDGAR (Mayo 2026)",
+      "bloquea_decision": false
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Q4-2025 / Q1-2026 Earnings Call Transcript",
+      "por_que_importa": "Management guidance FY2026, commentary sobre material weakness, planes de crecimiento, JFC update.",
+      "como_obtenerlo": "Seeking Alpha / Company IR",
+      "bloquea_decision": false
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Proxy DEF14A 2026",
+      "por_que_importa": "Compensación ejecutiva actualizada, cambios en board, política de recompras.",
+      "como_obtenerlo": "SEC EDGAR (cuando disponible)",
+      "bloquea_decision": false
+    }
+  ],
+  "salida_para_siguiente_agente": {
+    "resumen_ejecutivo": "TZOO es empresa operativa con valuación atractiva (EV/EBIT ~6x vs peers 15-25x) y activos intangibles valiosos (30M+ miembros, marca, relaciones suppliers). Sin embargo, explosión de COGS (+73%), patrimonio negativo (-$19.3M) por recompras imprudentes, material weakness no resuelta, y 4 trimestres de revenue decline impiden recomendación de inversión. WATCHLIST hasta resolución de condiciones, con próxima revisión post 10-K FY2025.",
+    "monitor_input_recomendado": "Vigilar fecha de publicación de 10-K FY2025 y Q1-2026 earnings. Alerta si precio cae < $4.50 o si 8-K material publicado.",
+    "condiciones_para_upgrade": [
+      "Material weakness resuelta en 10-K FY2025",
+      "COGS/Revenue < 17% en Q1-2026",
+      "Revenue FY2025 ≥ $89M confirmado",
+      "FCF positivo mantenido",
+      "Recompras moderadas o suspendidas"
+    ],
+    "condiciones_para_downgrade": [
+      "Material weakness no resuelta sin plan de remediación",
+      "FCF negativo en cualquier trimestre",
+      "COGS/Revenue > 20% en Q1-2026",
+      "Revenue decline > 5% YoY en FY2025",
+      "Patrimonio neto < -$30M",
+      "Emisión de acciones/deuda"
+    ],
+    "estado_caso": "EN_ESPERA",
+    "proxima_revision_sugerida": "2026-04-15"
+  },
+  "log": {
+    "autochequeos": {
+      "decision_respeta_gates": true,
+      "supuestos_criticos_tienen_evidencia": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "kill_criteria_mapeados_a_supuestos": true,
+      "salida_solo_json": true,
+      "probabilidades_escenarios_suman_1": true,
+      "kelly_sizing_dentro_de_tope": true,
+      "intervalo_confianza_coherente_con_escenarios": true,
+      "decision_categorica_coherente_con_probabilistica": true,
+      "sizing_final_igual_preliminar_si_invertir": true,
+      "sensibilidad_cubre_supuestos_criticos": true,
+      "assumption_ledger_min_15": true,
+      "evidence_graph_min_15_nodos": true,
+      "kill_criteria_min_5": true,
+      "desacuerdos_documentados": true,
+      "override_documentado_si_aplica": true
+    },
+    "limitaciones": [
+      "Falta 10-K FY2025 auditado — revenue FY2025 es estimación basada en 3 trimestres reportados.",
+      "Incertidumbre sobre COGS components — sin desglose disponible.",
+      "Opacidad en JFC margins — no reportados separadamente con suficiente detalle.",
+      "Material weakness disclosure limitada a mención en 10-Q sin detalle de naturaleza específica.",
+      "Comparables analysis limitado por falta de peers directos exactos (modelo de email deals es único).",
+      "Impacto de AI/LLMs en modelo de curación de deals no evaluado en profundidad.",
+      "Riesgo macro (recesión, reducción gasto travel) no modelado explícitamente."
+    ],
+    "revision": {
+      "es_revision": false,
+      "revision_num": 1,
+      "decision_packet_anterior_caso_id": null,
+      "monitoring_updates_usados": [],
+      "resumen_cambios": []
+    }
+  },
+  "control": {
+    "estado_flujo": "COMPLETADO",
+    "next_step": "MONITOR",
+    "next_agent_role": "MONITOR",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 2,
+    "issues": [],
+    "work_orders": [
+      {
+        "id": "WO-001",
+        "descripcion": "Re-evaluar caso TZOO cuando 10-K FY2025 esté disponible",
+        "prioridad": "ALTA",
+        "trigger": "Filing 10-K FY2025 en EDGAR",
+        "fecha_limite": "2026-04-30"
+      }
+    ],
+    "dispatch_queue": []
+  },
+  "_meta": {
+    "fusion": {
+      "version": "FUSION_v1",
+      "modelos_fusionados": [
+        "gemini",
+        "claude"
+      ],
+      "step_fusionado": "ARBITRO",
+      "fecha_fusion": "2026-02-21",
+      "criterios_resolucion": {
+        "datos_factuales": "Se adoptan los datos más específicos y mejor evidenciados. Claude aporta Cash $22.6M, patrimonio -$19.3M, $79M recompras acumuladas, market cap $59M — datos con mayor granularidad y source references.",
+        "scores": "Valor fusionado pondera ambos modelos con sesgo conservador. Gemini 47, Claude 56, fusionado 50.",
+        "probabilidades_escenarios": "Fusión intermedia con sesgo hacia Gemini en BEAR (más conservador) y Claude en BASE (más fundamentado). BASE: 0.40 (G:0.35, C:0.45), BULL: 0.15 (G:0.15, C:0.20), BEAR: 0.45 (G:0.50, C:0.35).",
+        "retornos_escenarios": "BASE +42% (G:+50%, C:+35%), BULL +180% (coinciden), BEAR -35% (G:-40%, C:-25%). Valores intermedios excepto BULL donde coinciden.",
+        "assumption_ledger": "Combinación de estructura profunda de Gemini (3 supuestos con falsación detallada) con cobertura amplia de Claude (20 supuestos). Resultado: 16 supuestos fusionados con estructura completa.",
+        "kill_criteria": "Unión de ambos conjuntos sin duplicar. Gemini: 3, Claude: 8, fusionado: 10 (eliminando solapamientos).",
+        "desacuerdos": "Unión completa: 2 de Gemini + 4 de Claude = 5 fusionados (consolidando tema de buybacks que ambos identifican)."
+      },
+      "conflictos_detectados": [
+        {
+          "campo": "scoring_preliminar.total",
+          "valor_gemini": 47,
+          "valor_claude": 56,
+          "valor_fusionado": 50,
+          "resolucion": "Promedio ponderado hacia conservadurismo. Gemini penaliza más Q (5 vs 9) y R (5 vs 10) por mayor peso al riesgo COGS. Claude tiene scoring más granular y documentado. Fusión en 50 refleja incertidumbre genuina."
+        },
+        {
+          "campo": "decision_probabilistica.probabilidad_exito_0_1",
+          "valor_gemini": 0.4,
+          "valor_claude": 0.65,
+          "valor_fusionado": 0.45,
+          "resolucion": "Divergencia material. Gemini tiene BEAR al 50% (vs 35% Claude). La evidencia de COGS empeorada trimestralmente favorece postura conservadora de Gemini. Fusión adopta 0.45 — más cerca de Gemini pero reconociendo datos factuales positivos de Claude (Cash $22.6M)."
+        },
+        {
+          "campo": "escenarios.bear.probabilidad",
+          "valor_gemini": 0.5,
+          "valor_claude": 0.35,
+          "valor_fusionado": 0.45,
+          "resolucion": "Gemini identifica COGS como riesgo binario dominante que Claude subestima. Sin desglose de COGS disponible, se adopta postura intermedia con sesgo conservador."
+        },
+        {
+          "campo": "escenarios.bear.retorno",
+          "valor_gemini": -40,
+          "valor_claude": -25,
+          "valor_fusionado": -35,
+          "resolucion": "Gemini modela dilución forzada en BEAR; Claude asume cushion de valuación. Fusión en -35% refleja riesgo real de compresión de múltiplo sin asumir el peor caso de dilución."
+        },
+        {
+          "campo": "escenarios.base.retorno",
+          "valor_gemini": 50,
+          "valor_claude": 35,
+          "valor_fusionado": 42,
+          "resolucion": "Gemini más optimista en re-rate (8-9x vs Claude 7-8x). Fusión usa 42% como punto intermedio. Ambos asumen estabilización parcial de márgenes."
+        },
+        {
+          "campo": "patrimonio_negativo",
+          "valor_gemini": "-$3.1M",
+          "valor_claude": "-$19.3M",
+          "valor_fusionado": "-$19.3M",
+          "resolucion": "Claude cita $79M en recompras acumuladas como causa directa. Dato de Claude es más consistente con la magnitud de recompras reportada. Se adopta -$19.3M de Claude."
+        },
+        {
+          "campo": "predicciones_cp002_caja_lt_8m",
+          "valor_gemini": 0.7,
+          "valor_claude": "no explícito (pero Cash $22.6M implica menor probabilidad)",
+          "valor_fusionado": 0.55,
+          "resolucion": "Con $22.6M de caja actual, la probabilidad de caer a <$8M en un trimestre requiere burn rate extremo. Se ajusta a 0.55 reconociendo riesgo pero con dato factual de Claude."
+        },
+        {
+          "campo": "gates.catalyst_gate",
+          "valor_gemini": "PASS",
+          "valor_claude": "CONDITIONAL",
+          "valor_fusionado": "CONDITIONAL",
+          "resolucion": "Se adopta la evaluación más restrictiva (Claude). Gemini da PASS porque catalysts existen; Claude penaliza la ausencia de timeline firme. Fusión acuerda: catalysts identificados pero sin confirmación temporal."
+        }
+      ]
+    }
+  }
+}
+```
+
+---
+
+## Solicitud de review
+
+Revisa este caso aplicando los criterios definidos en las instrucciones del proyecto.
+
+**Áreas de especial atención para este caso:**
+
+- El gate "survivability_gate" es CONDITIONAL — evalúa si la justificación es suficiente para no bloquearlo
+- El gate "catalyst_gate" es CONDITIONAL — evalúa si la justificación es suficiente para no bloquearlo
+
+Recuerda finalizar tu análisis con el bloque JSON MetaReview_v1.

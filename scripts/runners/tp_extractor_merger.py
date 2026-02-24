@@ -103,9 +103,23 @@ def merge(partial_extractions: list[dict]) -> dict:
     # Without this, the merge logic can't find values sitting under
     # non-standard keys and the merged result ends up with NULLs.
     normalized_extractions = [_apply_normalization(pe) for pe in partial_extractions]
+    merger_warnings: list[str] = []
 
     if len(normalized_extractions) == 1:
-        return normalized_extractions[0]
+        merged = dict(normalized_extractions[0])
+        local_warnings: list[str] = []
+        merged["balance_sheet_ultimo"] = _normalize_balance_sheet(
+            merged.get("balance_sheet_ultimo"),
+            filing_index=1,
+            warnings=local_warnings,
+        )
+        if local_warnings:
+            log_payload = merged.setdefault("log", {})
+            if isinstance(log_payload, dict):
+                log_payload["merger_warnings"] = _dedup(local_warnings)
+            else:
+                merged["log"] = {"merger_warnings": local_warnings}
+        return merged
 
     # Use first extraction as base template
     base = dict(normalized_extractions[0])
@@ -113,7 +127,7 @@ def merge(partial_extractions: list[dict]) -> dict:
     # Merge sections
     base["historico_anual"] = _merge_annual(normalized_extractions)
     base["historico_trimestral"] = _merge_quarterly(normalized_extractions)
-    base["balance_sheet_ultimo"] = _merge_balance_sheet(normalized_extractions)
+    base["balance_sheet_ultimo"] = _merge_balance_sheet(normalized_extractions, merger_warnings)
     base["lease_data"] = _merge_lease_data(normalized_extractions)
 
     # Merge log/sources
@@ -131,6 +145,7 @@ def merge(partial_extractions: list[dict]) -> dict:
         "conversiones_aplicadas": _dedup(all_conversions),
         "limitaciones": _dedup(all_limitations),
         "merger_note": f"Merged {len(partial_extractions)} filings at {datetime.now(timezone.utc).isoformat()}",
+        "merger_warnings": _dedup(merger_warnings),
     }
 
     return base  # already normalized per-partial
@@ -222,14 +237,72 @@ def _is_bs_data_field(key: str, value) -> bool:
     return True
 
 
-def _merge_balance_sheet(extractions: list[dict]) -> dict:
+def _bs_sort_key(entry: dict) -> tuple[int, str]:
+    """Sort helper for balance sheet snapshots (latest preferred)."""
+    if not isinstance(entry, dict):
+        return (0, "0000-00-00")
+
+    fecha_fin = entry.get("fecha_fin") or entry.get("fecha_fin_utc")
+    if isinstance(fecha_fin, str):
+        m = re.match(r"(\d{4}-\d{2}-\d{2})", fecha_fin)
+        if m:
+            return (1, m.group(1))
+
+    periodo = entry.get("periodo")
+    if isinstance(periodo, str):
+        m = re.search(r"(\d{4}-\d{2}-\d{2})", periodo)
+        if m:
+            return (1, m.group(1))
+        y = re.search(r"(\d{4})", periodo)
+        if y:
+            return (1, f"{y.group(1)}-12-31")
+
+    return (1, "0000-00-00")
+
+
+def _normalize_balance_sheet(value, filing_index: int, warnings: list[str]) -> dict:
+    """Normaliza balance_sheet_ultimo a dict, ignorando entradas no válidas."""
+    if value is None:
+        return {}
+
+    if isinstance(value, dict):
+        return value
+
+    if isinstance(value, list):
+        candidates = [x for x in value if isinstance(x, dict)]
+        if not candidates:
+            warnings.append(
+                f"balance_sheet_ultimo en filing #{filing_index} es list sin dicts; se ignora"
+            )
+            return {}
+        # Prefer latest by fecha_fin / periodo; fallback to input order
+        sorted_candidates = sorted(candidates, key=_bs_sort_key)
+        selected = sorted_candidates[-1]
+        selected_fecha = selected.get("fecha_fin") or selected.get("periodo") or "(sin fecha)"
+        warnings.append(
+            f"balance_sheet_ultimo en filing #{filing_index} venía en formato list; "
+            f"se normalizó al entry más reciente ({selected_fecha})"
+        )
+        return selected
+
+    warnings.append(
+        f"balance_sheet_ultimo en filing #{filing_index} es tipo {type(value).__name__}; se ignora"
+    )
+    return {}
+
+
+def _merge_balance_sheet(extractions: list[dict], warnings: list[str]) -> dict:
     """Usa el filing más reciente con datos de balance."""
     best = {}
     best_priority = 999
     best_filing = "UNKNOWN"
 
-    for ext in extractions:
-        bs = ext.get("balance_sheet_ultimo", {})
+    for idx, ext in enumerate(extractions, start=1):
+        bs = _normalize_balance_sheet(
+            ext.get("balance_sheet_ultimo"),
+            filing_index=idx,
+            warnings=warnings,
+        )
         if not bs or all(
             v is None for k, v in bs.items()
             if _is_bs_data_field(k, v)

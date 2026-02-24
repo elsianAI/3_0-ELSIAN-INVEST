@@ -331,6 +331,127 @@ def _parse_period_sort_key(entry: dict) -> str:
     return periodo
 
 
+def _to_number(v) -> float | None:
+    """Normalize raw numbers and {'valor'/'value': n} wrappers to float."""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    if isinstance(v, dict):
+        inner = v.get("value", v.get("valor"))
+        if isinstance(inner, bool):
+            return None
+        if isinstance(inner, (int, float)):
+            return float(inner)
+    return None
+
+
+def _extract_year_from_annual(entry: dict) -> int | None:
+    """Extract fiscal year from annual entry."""
+    fecha_fin = entry.get("fecha_fin")
+    if isinstance(fecha_fin, str) and re.match(r"\d{4}-\d{2}-\d{2}", fecha_fin):
+        return int(fecha_fin[:4])
+    periodo = str(entry.get("periodo", ""))
+    m = re.search(r"(?:FY)?(\d{4})", periodo)
+    if m:
+        return int(m.group(1))
+    return None
+
+
+def _extract_quarter_year(entry: dict) -> tuple[int | None, int | None]:
+    """Extract (year, quarter_number) from quarter entry."""
+    periodo = str(entry.get("periodo", "")).upper()
+
+    # Q1-2024, Q1 2024, Q1_2024
+    m = re.search(r"\bQ([1-4])[-_/ ]?(\d{4})\b", periodo)
+    if m:
+        return int(m.group(2)), int(m.group(1))
+
+    # 2024-Q1, 2024Q1
+    m = re.search(r"\b(\d{4})[-_/ ]?Q([1-4])\b", periodo)
+    if m:
+        return int(m.group(1)), int(m.group(2))
+
+    fecha_fin = entry.get("fecha_fin")
+    if isinstance(fecha_fin, str) and re.match(r"\d{4}-\d{2}-\d{2}", fecha_fin):
+        year = int(fecha_fin[:4])
+        month = int(fecha_fin[5:7])
+        month_to_q = {3: 1, 6: 2, 9: 3, 12: 4}
+        q = month_to_q.get(month)
+        if q:
+            return year, q
+    return None, None
+
+
+def _build_synthetic_q4_quarters(annual: list[dict], quarters: list[dict]) -> list[dict]:
+    """Create synthetic Q4 entries as FY - (Q1+Q2+Q3) when Q4 is missing."""
+    annual_by_year: dict[int, dict] = {}
+    for a in annual:
+        if a.get("_periodo_parcial"):
+            continue
+        year = _extract_year_from_annual(a)
+        if year is not None:
+            annual_by_year[year] = a
+
+    quarters_by_year: dict[int, dict[int, dict]] = {}
+    for q in quarters:
+        if q.get("_periodo_parcial"):
+            continue
+        year, q_num = _extract_quarter_year(q)
+        if year is None or q_num is None:
+            continue
+        quarters_by_year.setdefault(year, {})
+        existing = quarters_by_year[year].get(q_num)
+        if existing is None or _parse_period_sort_key(q) >= _parse_period_sort_key(existing):
+            quarters_by_year[year][q_num] = q
+
+    synthetic: list[dict] = []
+    synth_fields = [
+        "ingresos_usd",
+        "ebit_usd",
+        "net_income_usd",
+        "cfo_usd",
+        "capex_usd",
+        "cogs_usd",
+        "beneficio_bruto_usd",
+        "gross_profit_usd",
+    ]
+
+    for year, a in annual_by_year.items():
+        q_map = quarters_by_year.get(year, {})
+        if 4 in q_map:
+            continue
+        if not all(qn in q_map for qn in (1, 2, 3)):
+            continue
+
+        q1, q2, q3 = q_map[1], q_map[2], q_map[3]
+        synth_q4 = {
+            "periodo": f"Q4-{year}",
+            "fecha_fin": f"{year}-12-31",
+            "_periodo_parcial": False,
+            "_sintetico_q4": True,
+            "_sintesis_fuente": f"FY{year} - (Q1+Q2+Q3)",
+        }
+
+        for field in synth_fields:
+            annual_val = _to_number(a.get(field))
+            q_values = [_to_number(q.get(field)) for q in (q1, q2, q3)]
+            if annual_val is not None and all(v is not None for v in q_values):
+                synth_q4[field] = annual_val - sum(q_values)
+            else:
+                synth_q4[field] = None
+
+        # Require at least revenue so the quarter is financially meaningful.
+        if synth_q4.get("ingresos_usd") is None:
+            continue
+        synthetic.append(synth_q4)
+
+    if not synthetic:
+        return quarters
+
+    return sorted([*quarters, *synthetic], key=_parse_period_sort_key)
+
+
 def _quarters_are_consecutive(quarters: list[dict], max_gap_days: int = 120) -> bool:
     """Validate that quarters span roughly 12 months with no large gaps."""
     if len(quarters) < 2:
@@ -377,6 +498,8 @@ def _ttm(annual: list, quarters: list) -> dict:
 
     # CRITICAL FIX: sort chronologically, not alphabetically
     quarters_full = sorted(quarters_full, key=_parse_period_sort_key)
+    # If Q4 is missing but FY + Q1..Q3 exist, synthesize Q4 deterministically.
+    quarters_full = _build_synthetic_q4_quarters(annual, quarters_full)
 
     if len(quarters_full) >= 4:
         last_4 = quarters_full[-4:]
@@ -389,7 +512,7 @@ def _ttm(annual: list, quarters: list) -> dict:
         else:
             for field in ["ingresos_usd", "ebit_usd", "net_income_usd", "cfo_usd", "capex_usd",
                          "cogs_usd", "beneficio_bruto_usd", "gross_profit_usd"]:
-                values = [q.get(field) for q in last_4]
+                values = [_to_number(q.get(field)) for q in last_4]
                 if all(v is not None for v in values):
                     result[field] = sum(values)
 
@@ -399,7 +522,16 @@ def _ttm(annual: list, quarters: list) -> dict:
 
             result["metodo"] = "suma_4_trimestres"
             result["fecha_fin"] = last_4[-1].get("fecha_fin")
-            result["nota"] = f"TTM from quarters: {[q.get('periodo', '?') for q in last_4]}"
+            labels = []
+            for q in last_4:
+                label = q.get("periodo", "?")
+                if q.get("_sintetico_q4"):
+                    label = f"{label}*"
+                labels.append(label)
+            if any(q.get("_sintetico_q4") for q in last_4):
+                result["nota"] = f"TTM from quarters: {labels} (*Q4 sintético=FY-(Q1+Q2+Q3))"
+            else:
+                result["nota"] = f"TTM from quarters: {labels}"
 
     elif len(quarters_full) > 0:
         result["nota"] = f"Solo {len(quarters_full)} trimestres completos (necesarios 4)"

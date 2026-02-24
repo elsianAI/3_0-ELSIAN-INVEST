@@ -1,0 +1,408 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_TALO",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp-01-21",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_TALO",
+    "implied_expectations_caso_id": "CASE_20260224_TALO",
+    "sources_pack_caso_id": "CASE_20260224_TALO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Generación de caja robusta (FCF FY24 $454M, FCF Yield >20%) mitiga pérdidas contables masivas por DD&A ($1.0B).",
+      "Liquidez adecuada (~$677M total) con runway estimado >36 meses en escenario base, cubriendo vencimientos inmediatos.",
+      "Riesgo principal: Impairments recurrentes ($284M en 9M-25) erosionan patrimonio y señalan sensibilidad extrema a precios del crudo.",
+      "La estructura de costos (LOE + G&A duplicado) requiere racionalización post-fusión para reducir breakeven.",
+      "Opacidad en balance detallado (AR/AP/Deuda granular) limita análisis de capital de trabajo, aunque conciliación de caja es exacta."
+    ],
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_FOR_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La empresa genera fuerte flujo de caja libre ($454M FY24) a pesar de reportar pérdidas netas contables (-$76M FY24).",
+      "confianza_0_1": 1.0,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024",
+          "ubicacion": "Cash Flow Statement",
+          "cita_corta": "CFO $962.6M vs Net Income -$76.4M",
+          "interpretacion": "Brecha explicada por $1.02B de DD&A non-cash."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO trimestral cae por debajo de $150M sin caída proporcional de precio WTI.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_FOR_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Los impairments recurrentes indican que el valor de reservas está presionado a precios actuales, amenazando la base de endeudamiento.",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+          "ubicacion": "Log/Transcript Analysis",
+          "cita_corta": "Impairments acumulados ~$284M en 9M-2025 por ceiling test.",
+          "interpretacion": "Valor libros > PV-10 a precios trailing."
+        }
+      ],
+      "falsacion": {
+        "test": "Borrowing base redeterminado por debajo de $600M.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "8-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_FOR_001",
+      "descripcion": "Reporte de impairment adicional por ceiling test en Q4-2025 o Q1-2026 si WTI < $70.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 1,
+        "max": 4
+      },
+      "criterio_validacion": "Aparición de 'Impairment of oil and gas properties' > $10M en income statement.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_FOR_002",
+      "descripcion": "Reducción de G&A anualizado por sinergias de integración QuarterNorth.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "G&A trimestral < $45M.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de deuda (Maturity Ladder completa)",
+      "por_que_importa": "Verificar vencimientos específicos de bonos en ventana 2026-2028.",
+      "como_obtenerlo": "Buscar 'Debt' note en 10-K o presentación de inversores reciente."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose de Cuentas por Cobrar y Pagar",
+      "por_que_importa": "Descartar manipulación de capital de trabajo (AR days vs AP days).",
+      "como_obtenerlo": "Balance Sheet detallado en 10-Q completo (no summary)."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "APTO",
+        "confianza_0_1": 0.85,
+        "razon_principal": "Liquidez sólida y FCF positivo cubren servicio de deuda y distorsiones contables."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 24,
+          "max": 36
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 4,
+          "por_que": [
+            "Generación de FCF robusta ($454M FY24) cubre capex e intereses holgadamente.",
+            "Liquidez disponible ~$677M supera necesidades de corto plazo.",
+            "Vencimientos de deuda significativos parecen estar más allá de 2026 (Credit Facility 2030).",
+            "Cobertura de intereses vía CFO es >5x, mitigando la débil cobertura vía EBIT."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 108172000,
+          "linea_credito_disponible_usd": 375000000,
+          "otras_fuentes_liquidez": [
+            "Flujo de caja operativo mensual positivo"
+          ],
+          "runway_meses_estimado": 36,
+          "metodo_estimacion": "Escenario base con FCF positivo sostenido y liquidez actual para cubrir fluctuaciones.",
+          "notas": "Caja incluye restricted cash según notas. Disponibilidad RBL estimada post-redeterminación a $700M."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 1224947000,
+          "deuda_neta_usd": 1116775000,
+          "coste_deuda_aprox_pct": 10.5,
+          "coverage_intereses": 5.13,
+          "net_debt_ebitda": 1.1,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 36,
+            "comentario": "Facilidad de crédito extendida a Enero 2030. Bonos senior probablemente vencen post-2026."
+          },
+          "vencimientos": [
+            {
+              "anio": 2030,
+              "importe_usd": 325000000,
+              "tipo": "revolver",
+              "riesgo": "BAJO",
+              "fuente_ref": {
+                "source_id": "SRC_029_8-K_2025-12-08",
+                "ubicacion": "8-K text"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": true,
+            "tipos_detectados": [
+              "leverage_ratio"
+            ],
+            "riesgo_breach": "BAJO",
+            "comentario": "Leverage ratio reportado ~0.7x vs típico covenant 3.0x. Mucho margen salvo colapso total de EBITDA."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "BAJO",
+          "motores": [
+            "SBC"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "FCF positivo elimina necesidad de equity raises para operaciones. Recompras de acciones ($22M) activas."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Contabilidad 'fea' (pérdidas netas) pero caja 'bonita' (CFO récord). La disonancia es estructural por método Full Cost en entorno de adquisiciones.",
+        "red_flags": [
+          {
+            "flag_id": "RF-07",
+            "categoria": "GOODWILL_IMPAIRMENT",
+            "descripcion": "Impairments de ceiling test ($284M en 2025) por caída de precios/valor reservas.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Destruye valor en libros y señala riesgo de colateral para deuda.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+                "ubicacion": "Log analysis",
+                "cita_corta": "Impairment $224M Q2 + $60M Q3",
+                "interpretacion": "Valor reservas < Valor libros"
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Ausencia de impairments en próximos 2 trimestres.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "RF-12",
+            "categoria": "OTHER",
+            "descripcion": "Opacidad en detalle de balance (AR/AP/Inventarios).",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Impide detectar manipulación de capital de trabajo.",
+            "evidencias": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "Data Quality",
+                "cita_corta": "Campos null balance: AR, AP, Inv",
+                "interpretacion": "Falta granularidad en extracción."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Publicación de 10-K completo con tablas detalladas.",
+              "ventana_meses": {
+                "min": 1,
+                "max": 3
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-06",
+            "categoria": "ONE_OFFS",
+            "descripcion": "G&A duplicado post-adquisición sin eficiencia inmediata.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Reduce margen estructural y eleva breakeven.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Income Statement",
+                "cita_corta": "G&A $201M (FY24) vs $99M (FY22)",
+                "interpretacion": "Inflación de costos corporativos."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Reducción secuencial de G&A.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebit_a_cfo": {
+            "lectura": "Distorsión extrema (456%) dominada por DD&A ($1.02B). EBIT no sirve como proxy de caja.",
+            "posibles_distorsiones": [
+              "DD&A masiva",
+              "Intereses devengados vs pagados",
+              "Impuestos diferidos"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Conversión saludable (~47%). Capex de $500M es alto pero financiable con flujo propio.",
+            "capex_riesgo": "MEDIO",
+            "notas": "Capex incluye desarrollo (Monument) y mantenimiento. Flexible en caso de crisis."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": true,
+          "sostenible_por_fcf": "SI",
+          "comentario": "$22M recomprados en periodo reciente; sostenible dado FCF yield."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "Dato no desglosado en TruthPack."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "Adquisición QuarterNorth disparó deuda y G&A; integración en proceso."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Solicitar proxy statement para verificar ownership."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Caída sostenida de WTI < $55/bbl.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "Compresión de CFO",
+              "Reducción de Borrowing Base",
+              "Impairments masivos",
+              "Breach de covenants si EBITDA colapsa"
+            ],
+            "indicadores_tempranos": [
+              "WTI spot price",
+              "Guidance de producción a la baja",
+              "Aumento de inventarios globales"
+            ]
+          }
+        ],
+        "conclusion_downside": "Talos sobrevive a $60/bbl cómodamente. A <$50/bbl entra en estrés de desapalancamiento. A <$40/bbl quema caja."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-FORENSIC-01",
+          "relacionado_con": "fcf",
+          "definicion": "FCF Trimestral negativo por dos trimestres consecutivos (excluyendo M&A).",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Rompe la tesis de desapalancamiento y sostenibilidad."
+        },
+        {
+          "kc_id": "KC-FORENSIC-02",
+          "relacionado_con": "deuda",
+          "definicion": "Reducción de Borrowing Base a < $500M.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "8-K",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Señal de desconfianza bancaria en valor de activos."
+        },
+        {
+          "kc_id": "KC-FORENSIC-03",
+          "relacionado_con": "supervivencia",
+          "definicion": "WTI promedio trimestral < $50/bbl.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "mercado",
+          "accion_recomendada": "SALIR",
+          "por_que": "Modelo de negocio entra en zona de destrucción de valor."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": "4%",
+        "condiciones_para_aumentar_tamaño": [
+          "Confirmación de fin de impairments.",
+          "Reducción visible de G&A.",
+          "WTI estable > $70."
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Activación de cualquier Kill Criterion.",
+          "Aumento de deuda neta trimestre a trimestre.",
+          "Problemas operativos en activos principales (producción < 85k BOE/d)."
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "tabla_vencimientos",
+          "por_que_importa": "Confirmar calendario exacto de bonos senior.",
+          "como_obtenerlo": "Nota 'Debt' en 10-K completo."
+        },
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Ajustar valoración real de FCF.",
+          "como_obtenerlo": "Cash flow statement (operating activities detail)."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Balance sheet simplificado impide análisis profundo de Working Capital.",
+      "Datos de impairments tomados de transcripts, no de tablas auditadas.",
+      "Sin desglose de SBC."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC",
+    "version": "v1",
+    "timestamp": "2026-02-24T10:05:00Z",
+    "inputs_hash": "CASE_20260224_TALO_FORENSIC_SCORING"
+  }
+}

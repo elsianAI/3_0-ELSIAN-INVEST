@@ -1,0 +1,1206 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_ACLS",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "fusion:gemini+claude+codex",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_ACLS",
+    "implied_expectations_caso_id": "CASE_20260224_ACLS",
+    "sources_pack_caso_id": "CASE_20260224_ACLS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La tesis bull descansa sobre una normalización de EBIT a ~$175M sin soporte en leading indicators (bookings/backlog ausentes); sobre EBIT reportado ($119M) el múltiplo real es ~20x, no 13.4x — argumento circular.",
+      "La conversión de earnings a caja se ha deteriorado gravemente: Q4-2025 CFO negativo (-$6.6M) con $34M de net income, FY2025 CFO/NI ~0.98x, y patrón histórico persistentemente débil (CFO/NI <0.70x en FY2023-FY2024).",
+      "Inventarios en niveles alarmantes ($282M, 33.6% de ventas, ~222 días COGS) sin datos de aging ni reservas de obsolescencia — representan riesgo de write-down, no 'opcionalidad' de rebote.",
+      "G&A creció +18.3% ($70M→$83M) mientras revenue caía -17.5%; sin evidencia de que sea merger-related transitorio, destruye la tesis de apalancamiento operativo y reduce EBIT normalizado a ~$162M.",
+      "La fusión Veeco introduce riesgo binario asimétrico (SAMR pendiente, sin términos económicos conocidos); un bloqueo provocaría doble contracción: fundamental y de arbitraje, dejando a ACLS sin estrategia standalone articulada."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.8
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La 'normalización' de EBIT a $175M es una construcción especulativa sin anclaje en datos forward (bookings, backlog, guidance): la tendencia de 3 años es de deterioro acelerado ($266M→$211M→$119M), y la estructura de costos actual ($190M+ opex anualizado) hace que cualquier retraso en ingresos mantenga el margen comprimido en ~14%.",
+      "confianza_0_1": 0.84,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2023-FY2025",
+          "cita_corta": "EBIT cayó de $266M a $211M a $119M en tres años consecutivos. Margen EBIT de 23.5% a 14.2%.",
+          "interpretacion": "El deterioro es acelerado y no muestra estabilización. Asumir $175M sin leading indicators es wishful thinking; el argumento es circular ('está barato porque el EBIT se normalizará, y se normalizará porque es cíclico')."
+        }
+      ],
+      "falsacion": {
+        "test": "ACLS reporta bookings/backlog que impliquen run-rate de revenue >$950M y EBIT guidance >$160M, o EBIT trimestral supera $45M en 2 trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La conversión de earnings a caja se ha deteriorado severamente: Q4-2025 CFO fue -$6.6M con net income de $34.3M (delta cash -$39M), y el patrón es persistente — CFO/NI fue 0.64x en FY2023 y 0.70x en FY2024, indicando problemas estructurales de calidad de beneficios.",
+      "confianza_0_1": 0.92,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_trimestral Q4-2025",
+          "cita_corta": "Q4-2025: CFO -$6.567M, net income $34.297M. Delta cash -$39M.",
+          "interpretacion": "Un trimestre con CFO negativo pese a rentabilidad positiva es señal de alarma sobre calidad de earnings y acumulación de WC."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2023-FY2024",
+          "cita_corta": "FY2023: CFO $157M vs NI $246M = 0.64x. FY2024: CFO $141M vs NI $201M = 0.70x.",
+          "interpretacion": "El patrón de mala conversión CFO/NI es persistente, no puntual. Incluso en años fuertes la caja generada es inferior a los earnings reportados."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO/NI supera 1.0x durante 3 trimestres consecutivos con inventarios descendiendo.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Los niveles de inventario son tóxicos: $282M representan >33% de ventas TTM y ~222 días de COGS, señalizando producción sin demanda real y riesgo de obsolescencia tecnológica en industria con ciclos rápidos.",
+      "confianza_0_1": 0.88,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo / metricas_derivadas",
+          "cita_corta": "Inventarios $282M vs COGS TTM $462M. DIO ~222 días. Revenue TTM $839M = 33.6%.",
+          "interpretacion": "Sin desglose de aging ni composición (raw vs WIP vs finished), asumir que todo se convertirá en ingresos es optimismo sin base. Históricamente, niveles >180 días en semicap preceden write-downs o descuentos agresivos de precios."
+        }
+      ],
+      "falsacion": {
+        "test": "Inventarios bajan a <$250M sin write-downs >$10M y 10-K FY2025 muestra aging <180 días con reservas por obsolescencia <$10M.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "G&A creció de $70.3M (FY2024) a $83.2M (FY2025, +18.3%) mientras revenue caía -17.5%, con tendencia intra-anual acelerándose (Q3 $23.3M → Q4 $26.2M); si es permanente, destruye la tesis de apalancamiento operativo y reduce el EBIT normalizado a ~$162M.",
+      "confianza_0_1": 0.76,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2024-FY2025 ga_usd",
+          "cita_corta": "G&A FY2024 $70.3M → FY2025 $83.2M (+$12.9M, +18.3%). G&A Q3-2025 $23.3M, Q4-2025 $26.2M — acelerando.",
+          "interpretacion": "El incremento de G&A absorbe una parte material del apalancamiento operativo esperado. La tendencia intra-anual al alza es inconsistente con la hipótesis de costos transitorios de fusión."
+        }
+      ],
+      "falsacion": {
+        "test": "G&A trimestral desciende por debajo de $19M en dos trimestres consecutivos post-cierre o abandono de fusión, o 10-K FY2025 confirma >$10M de G&A merger-related no recurrente.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 18
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_005",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La fusión con Veeco introduce riesgo binario asimétrico: sin conocer precio de oferta ni break-up fee, el catalizador no es cuantificable; un bloqueo de SAMR China (precedente Qualcomm-NXP) no solo mata el catalizador sino que deja costos hundidos, incertidumbre estratégica y posible castigo de mercado por los arbs.",
+      "confianza_0_1": 0.72,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones (merger filings)",
+          "cita_corta": "China SAMR pending como única barrera restante. No se conocen precio de oferta ni break-up fee.",
+          "interpretacion": "Sin conocer los términos económicos del merger, el bull no puede cuantificar ni el upside ni el downside del evento binario. SAMR ha bloqueado deals de semicap antes."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2025 ga_usd",
+          "cita_corta": "G&A subió de $70.3M a $83.2M coincidiendo con el periodo de fusión.",
+          "interpretacion": "Los costos de fusión son reales y materiales, reduciendo earnings while pending."
+        }
+      ],
+      "falsacion": {
+        "test": "SAMR aprueba la fusión sin condiciones materiales y los términos confirman prima clara para accionistas.",
+        "ventana_meses": {
+          "min": 1,
+          "max": 9
+        },
+        "fuente_prevista": "8-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_006",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La expansión contracíclica de margen bruto (43.4%→44.9%, récord 47.0% en Q4) puede ser artefacto de mix por cancelación de órdenes de menor margen, no evidencia de pricing power sostenible; el margen operativo (14.2%) cuenta la historia real.",
+      "confianza_0_1": 0.74,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2025 vs FY2023",
+          "cita_corta": "Revenue cayó 26% ($1.13B→$839M) pero gross margin subió 150bps. Q4-2025 gross margin 47.0% récord en trimestre de menor revenue.",
+          "interpretacion": "Sin desglose Systems vs Service ni por tecnología, no se puede distinguir pricing power de selección adversa de mix. Un margen bruto récord en el trimestre de menor revenue acumulado sugiere efecto composición."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen bruto se mantiene >=44% cuando revenue supere $950M, demostrando que no es efecto mix temporal.",
+        "ventana_meses": {
+          "min": 9,
+          "max": 24
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_007",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La tesis de 'inflexión cíclica' basada en un solo trimestre de mejora secuencial (+11% Q4 vs Q3) es prematura; el patrón previo (Q4-2024 fuerte seguido de caída Q1-2025 a $193M) sugiere estacionalidad, y el preliminary EPS Q1-2026 de $0.38 GAAP sugiere caída secuencial material.",
+      "confianza_0_1": 0.72,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_trimestral Q4-2024, Q1-2025, Q4-2025",
+          "cita_corta": "Q4-2024 $252M → Q1-2025 cayó a $193M (-23% secuencial). Q4-2025 $238M vs Q3-2025 $214M (+11%). Preliminary Q1-2026 EPS $0.38 GAAP.",
+          "interpretacion": "El precedente directo muestra que Q4 fuerte no garantiza Q1 fuerte. Sin datos de bookings, un trimestre de mejora puede ser consumo de backlog, no nueva demanda."
+        }
+      ],
+      "falsacion": {
+        "test": "Revenue Q1-2026 supera $230M, confirmando que Q4-2025 no fue estacional sino inicio de tendencia.",
+        "ventana_meses": {
+          "min": 2,
+          "max": 4
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_008",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El apalancamiento operativo funciona en ambas direcciones: revenue cayó 26% pero EBIT cayó 55% (des-apalancamiento 2.5x), y la base de costos ha crecido estructuralmente (R&D +76%, G&A +108% vs FY2020), elevando el breakeven y reduciendo la elasticidad del próximo upcycle.",
+      "confianza_0_1": 0.75,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2024-FY2025",
+          "cita_corta": "Revenue -17.5% ($1.018B→$839M), EBIT -43.4% ($211M→$119M). Des-apalancamiento operativo 2.5x.",
+          "interpretacion": "La misma palanca que el bull invoca para el upside es la que está destruyendo rentabilidad ahora. Con costos semi-fijos mayores que al inicio del último ciclo, el incremental margin puede ser menor."
+        }
+      ],
+      "falsacion": {
+        "test": "Revenue se recupera a $1.0B y EBIT supera $180M, confirmando que el apalancamiento operativo funciona como en el ciclo previo.",
+        "ventana_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "Revenue Q1-2026 cae por debajo de $225M, repitiendo el patrón estacional de Q1-2025 ($193M) tras Q4 fuerte.",
+      "probabilidad_0_1": 0.45,
+      "ventana_meses": {
+        "min": 2,
+        "max": 4
+      },
+      "criterio_validacion": "Revenue Q1-2026 < $225M en earnings report.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "FY2026 ingresos de ACLS no superan $900M.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "Revenue anual FY2026 < $900M en 10-K.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_003",
+      "descripcion": "Write-down de inventarios >$10M o compresión de margen bruto por liquidación (GM <43% en un trimestre).",
+      "probabilidad_0_1": 0.35,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Cargo por obsolescencia >$10M o Margen Bruto <43% en un trimestre reportado.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_004",
+      "descripcion": "Al menos un trimestre adicional de FY2026 muestra CFO <= 0 con net income positivo.",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "En cualquier 10-Q FY2026 se observa CFO trimestral no positivo y net income > 0.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_005",
+      "descripcion": "G&A trimestral no desciende por debajo de $22M en ningún trimestre de FY2026, invalidando la hipótesis de costos transitorios de fusión.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "G&A >= $22M en todos los trimestres reportados de FY2026.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_006",
+      "descripcion": "La fusión Veeco-ACLS no se cierra antes de septiembre 2026 (por bloqueo SAMR, extensiones o terminación).",
+      "probabilidad_0_1": 0.45,
+      "ventana_meses": {
+        "min": 1,
+        "max": 9
+      },
+      "criterio_validacion": "Ausencia de 8-K confirmando cierre efectivo de la fusión antes de 30-Sep-2026.",
+      "fuente_prevista": "8-K"
+    },
+    {
+      "pred_id": "PRED_RT_007",
+      "descripcion": "EBIT FY2026 no supera $150M, quedando por debajo del $175M 'normalizado' del bull.",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "EBIT FY2026 < $150M en 10-K o earnings release.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_008",
+      "descripcion": "Ningún trimestre FY2026 logra simultáneamente revenue >= $250M y margen EBIT >= 18%.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 6,
+        "max": 15
+      },
+      "criterio_validacion": "Revisar cada trimestre FY2026; falla si no hay ningún trimestre con ambas condiciones.",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Bookings, backlog y book-to-bill Q4-2025 con comparativo histórico",
+      "por_que_importa": "Sin este dato, tanto la tesis bull como la bear carecen de anclaje forward; es el único leading indicator fiable para semicap equipment. Sin él, la tesis de inflexión cíclica es pura fe.",
+      "como_obtenerlo": "Earnings call transcript Q4-2025; buscar 'bookings', 'backlog', 'book-to-bill', 'orders'."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de inventarios: raw materials vs WIP vs finished goods, aging y reservas de obsolescencia",
+      "por_que_importa": "Determina si $282M es opcionalidad vendible o chatarra tecnológica con riesgo de write-down.",
+      "como_obtenerlo": "10-K FY2025, nota de inventarios. Palabras clave: 'obsolescence', 'reserve', 'aging'."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de G&A FY2025: merger-related vs operativo recurrente",
+      "por_que_importa": "Cambia el EBIT normalizado subyacente en ~$13M, material para la valoración.",
+      "como_obtenerlo": "10-K FY2025 MD&A; buscar 'merger', 'transaction', 'acquisition-related' en notas de gastos."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Términos del merger agreement Veeco: precio oferta, break-up fee, outside date, condiciones de SAMR",
+      "por_que_importa": "Sin esta información el catalizador corporativo no es cuantificable en ninguna dirección y el riesgo binario no es modelable.",
+      "como_obtenerlo": "DEFM14A o 8-K original del merger agreement (Sep 2025)."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Revenue por segmento Systems vs CS&I/Service y por tecnología mature vs SiC/advanced",
+      "por_que_importa": "Valida o refuta la hipótesis de que el margen bruto mejora por mix estructural vs selección adversa transitoria.",
+      "como_obtenerlo": "10-K FY2025 revenue disaggregation (ASC 606); earnings call."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Exposición geográfica y de clientes (especialmente China) en pedidos, backlog e inventarios",
+      "por_que_importa": "Evaluar el impacto de posibles restricciones de exportación o represalias si se bloquea el merger.",
+      "como_obtenerlo": "10-K Geographic Information, Item 1A Risk Factors, notas de concentración de clientes."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.8,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "ACLS es un potential value trap cíclico con 3 años consecutivos de deterioro de revenue y EBIT, conversión de caja deteriorándose, inventarios inflados ($282M), base de costos rígida y sin datos forward que confirmen la inflexión que la tesis bull necesita. La fusión Veeco añade riesgo binario no cuantificable sobre un negocio standalone en declive, con perfil de riesgo asimétrico negativo."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_B_001",
+            "resumen_claim_bull": "ACLS cotiza a 13.4x EBIT normalizado mid-cycle (~$175M), múltiplo atractivo para líder semicap.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.58,
+              "por_que": [
+                "El EBIT 'normalizado' de $175M es una construcción sin soporte en leading indicators — no hay datos de bookings, backlog ni guidance que lo anclen.",
+                "El argumento es circular: 'está barato porque el EBIT se normalizará, y se normalizará porque es cíclico'.",
+                "Sobre EBIT actual ($119M) el múltiplo es ~20x, caro para un negocio sin crecimiento visible.",
+                "EBIT cae tres años consecutivos ($266M→$211M→$119M). Llamar al suelo sin datos forward es especulación.",
+                "Si G&A es permanentemente $83M (no $70M), el EBIT normalizado baja a ~$162M y el múltiplo sube a 14.5x — ya no es tan atractivo.",
+                "No se descuenta el riesgo de ejecución de la fusión en el múltiplo aplicado."
+              ]
+            },
+            "puntos_ciegos": [
+              "No se conocen bookings/backlog que validen la hipótesis de normalización.",
+              "El $175M asume G&A transitoriamente alto sin evidencia.",
+              "No se considera el escenario L-shaped donde el trough actual ES el nuevo normal.",
+              "El múltiplo de 13.4x asume que el mercado está equivocado, pero el mercado puede tener información sobre la demanda forward que el bull no tiene.",
+              "La rigidez del Opex ($190M/año) que no bajó con las ventas."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual FY2023-FY2025",
+                "cita_corta": "EBIT: $266M → $211M → $119M, tres años consecutivos de caída. EV/EBIT observado: 19.6x.",
+                "interpretacion": "Sin dato forward que rompa la tendencia, asumir normalización es expectativa, no hecho. El valor observado no muestra descuento claro."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "EBIT TTM no supera $150M en 18 meses o cae por debajo de $110M en 6 meses.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_002",
+            "resumen_claim_bull": "Margen bruto expandido contracíclicamente (43.4%→44.9%) demuestra pricing power estructural y mix enriquecido SiC.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.45,
+              "por_que": [
+                "Sin desglose de ingresos Systems vs Service ni por tecnología, no se puede distinguir pricing power de efecto composición: al caer volumen, las órdenes de menor margen desaparecen primero.",
+                "El componente de servicios (típicamente >50% margen bruto) puede estar representando mayor % del total en downturn, inflando artificialmente el margen global.",
+                "Q4-2025 gross margin 47.0% récord en trimestre de menor revenue acumulado sugiere efecto mix, no pricing power orgánico.",
+                "No basta con gross estable si el resto del P&L se deteriora — margen operativo cayó a 14.2%.",
+                "El test verdadero será si el margen se mantiene cuando el volumen suba; históricamente, rampas de volumen comprimen margen por costos de setup y mix."
+              ]
+            },
+            "puntos_ciegos": [
+              "No hay datos de ingresos Systems vs Service para validar efecto mix.",
+              "Los competidores (AMAT) pueden estar comprando share con precios agresivos.",
+              "El margen bruto de Q4-2025 (47.0%) puede incluir efecto de reversal de reservas.",
+              "Confunde resiliencia de producto con resiliencia del beneficio total."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_trimestral Q4-2025 / historico_anual",
+                "cita_corta": "Q4-2025 gross margin 47.0% ($112M/$238M) — el más alto en toda la serie. Pero EBIT margin FY2025 solo 14.2%.",
+                "interpretacion": "Un margen bruto récord en el trimestre de menor revenue y la desconexión gross-operativo debilitan la tesis de fortaleza estructural."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Margen bruto cae por debajo de 43% en algún trimestre con revenue >$250M, demostrando que la expansión era artefacto de volumen bajo.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_003",
+            "resumen_claim_bull": "Balance fortress: deuda neta -$80M, FCF $107M en fondo de ciclo, elimina riesgo existencial.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.25,
+              "por_que": [
+                "El balance es objetivamente sólido y el riesgo existencial es bajo — esto es correcto.",
+                "Sin embargo, la ausencia de riesgo existencial no equivale a oportunidad de inversión. Una empresa puede sobrevivir indefinidamente mientras destruye valor para el accionista.",
+                "CFO Q4-2025 negativo muestra vulnerabilidad; la 'caja' es menor que el inventario ($123M vs $282M).",
+                "Los $124M de buybacks en FY2025 consumen más caja que el FCF generado, reduciendo el colchón de seguridad.",
+                "La fotografía de balance es FY2024; falta FY2025 auditado completo."
+              ]
+            },
+            "puntos_ciegos": [
+              "Solvencia y tesis de equity no son equivalentes.",
+              "La empresa está devolviendo más caja de la que genera, erosionando lentamente el colchón de balance.",
+              "En escenario de fusión fallida + downturn extendido, gastos de fusión hundidos + buybacks habrán consumido caja significativa.",
+              "Calidad de earnings: CFO/Net Income < 1.0 consistentemente."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual FY2025 cff_usd / historico_trimestral Q4-2025",
+                "cita_corta": "CFF FY2025: -$124.5M (buybacks + dividendos). FCF ~$107M. CFO Q4 -$6.5M.",
+                "interpretacion": "La empresa consume net cash mientras la liquidez real (caja vs inventario) es baja."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Caja cae por debajo de $80M o deuda neta se vuelve positiva.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_004",
+            "resumen_claim_bull": "Apalancamiento operativo generará expansión desproporcionada de EBIT cuando revenue se recupere (precedente FY2020→FY2023).",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.5,
+              "por_que": [
+                "El apalancamiento operativo es espada de doble filo: revenue -26% generó EBIT -55% (des-apalancamiento 2.5x).",
+                "La base de costos ha crecido estructuralmente: R&D de $62M (FY2020) a $109M (+76%), G&A de $40M a $83M (+108%). El breakeven ha subido.",
+                "El precedente FY2020→FY2023 puede no ser repetible con estructura de costos más pesada.",
+                "G&A acelerándose en Q4-2025 ($26.2M vs $17.5M en Q4-2024) sugiere costos que no se controlan automáticamente con volumen.",
+                "Parte de la base de costos podría haberse reescalado al alza permanentemente."
+              ]
+            },
+            "puntos_ciegos": [
+              "No hay prueba de que G&A elevado sea totalmente transitorio.",
+              "No se modela riesgo de crecimiento con menor rentabilidad incremental.",
+              "No se considera que ACLS pudo haber perdido share durante el downturn."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual FY2024-FY2025",
+                "cita_corta": "Revenue -17.5%, EBIT -43.4%. GA sube de $70.3M a $83.2M.",
+                "interpretacion": "El efecto de apalancamiento amplifica caídas 2.5x. La estructura de costos no se ajustó."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Revenue se recupera a $1.0B pero EBIT no supera $180M, indicando base de costos permanentemente más alta.",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_005",
+            "resumen_claim_bull": "Q4-2025 mostró primera señal de inflexión cíclica con revenue +11% secuencial.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.5,
+              "por_que": [
+                "Un solo trimestre de mejora secuencial no confirma inflexión, especialmente con estacionalidad Q4 típicamente más fuerte.",
+                "Precedente inmediato: Q4-2024 ($252M) seguido de caída a Q1-2025 ($193M, -23%). El patrón puede repetirse.",
+                "Preliminary EPS Q1-2026 de $0.38 GAAP vs ~$1.09 de Q4-2025 sugiere caída secuencial fuerte.",
+                "Sin datos de bookings que crezcan, un trimestre de revenue más fuerte puede ser consumo de backlog."
+              ]
+            },
+            "puntos_ciegos": [
+              "No se analiza la estacionalidad Q4 históricamente fuerte en semicap equipment.",
+              "Sin bookings data, no se sabe si el Q4 fuerte fue 'pull-forward' o demanda genuina.",
+              "No hay evidencia de mejora en conversión de caja simultánea."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_trimestral Q4-2024, Q1-2025",
+                "cita_corta": "Q4-2024 revenue $252M → Q1-2025 cayó a $193M (-23% secuencial). Preliminary Q1-2026 EPS $0.38.",
+                "interpretacion": "El precedente directo muestra que Q4 fuerte no garantiza Q1 fuerte; la inercia post-Q4 no queda demostrada."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Revenue Q1-2026 >= $230M y promedio Q1-Q2 2026 >= $235M con EBIT promedio >= $32M.",
+              "ventana_meses": {
+                "min": 2,
+                "max": 9
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_006",
+            "resumen_claim_bull": "Expectativas implícitas moderadas: solo ~8% CAGR FCF requerido a 5 años ($107M→$153M).",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.48,
+              "por_que": [
+                "El FCF base de $107M puede estar inflado: CFO $118M - capex $11M, pero CFO incluye WC timing que puede revertir.",
+                "El propio TruthPack muestra fcf_usd = null. El $107M es cálculo ad-hoc no validado.",
+                "Si la base correcta es menor ($85-90M ajustando WC normalizado), el CAGR requerido sube a 11-12%, que ya no es trivial.",
+                "La calidad de FCF reciente muestra volatilidad por capital de trabajo — Q4-2025 CFO negativo."
+              ]
+            },
+            "puntos_ciegos": [
+              "El FCF base puede no ser sostenible si Q4-2025 refleja problemas de conversión estructurales.",
+              "No se descuenta el costo de oportunidad vs alternativas.",
+              "No usa escenario con conversión caja inferior a utilidad."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "metricas_derivadas",
+                "cita_corta": "fcf_usd = null, fcf_yield_pct = null, ev_fcf = null.",
+                "interpretacion": "El propio TruthPack no calcula FCF limpio. Usar $107M sin validación es asunción optimista."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "FCF FY2026 resulta <$90M, invalidando la base de $107M como sostenible.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 15
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_007",
+            "resumen_claim_bull": "Inventarios elevados representan opcionalidad: si recovery llega, ACLS convierte inventario en ingresos liberando $50-70M de caja.",
+            "evaluacion_red_team": {
+              "estado": "FALSO",
+              "probabilidad_de_fallo_0_1": 0.62,
+              "por_que": [
+                "En tecnología, inventario viejo = pérdida, no activo. 222 días de inventario es gestión deficiente.",
+                "Sin desglose de aging ni composición, la hipótesis de 'opcionalidad' es optimismo sin datos.",
+                "Si la recuperación no llega en 12-18 meses, el riesgo de obsolescencia tecnológica aumenta significativamente.",
+                "Q4-2025 CFO fue NEGATIVO, sugiriendo que WC sigue consumiendo caja, no liberándola.",
+                "Si parte del inventario es para clientes en China, restricciones de exportación pueden convertirlo en stranded asset.",
+                "Riesgo masivo de write-down que impactaría EPS y Book Value."
+              ]
+            },
+            "puntos_ciegos": [
+              "No hay datos de cancellations o pushouts de pedidos que puedan dejar inventario varado.",
+              "El costo de mantener $282M en inventario (oportunidad + storage + seguro) no es trivial.",
+              "La velocidad de cambio tecnológico en semi-cap hace que el aging sea especialmente peligroso."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "balance_sheet_ultimo / historico_trimestral Q4-2025",
+                "cita_corta": "Inventarios $282M / Ventas TTM $839M = 33.6%. CFO Q4 -$6.6M.",
+                "interpretacion": "Ratio peligrosamente alto y WC sigue consumiendo caja. La 'liberación' no se materializa."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Inventarios descienden a <$250M sin write-downs >$10M en los próximos 12 meses.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_008",
+            "resumen_claim_bull": "La fusión con Veeco ofrece catalizador de cristalización de valor con SAMR China como única barrera.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.48,
+              "por_que": [
+                "Sin conocer precio de oferta ni break-up fee, el catalizador no es cuantificable.",
+                "SAMR tiene precedente de bloqueos en semiconductores (Qualcomm-NXP 2018) y retrasos prolongados.",
+                "La fusión absorbe atención del management y genera costos que erosionan rentabilidad while pending.",
+                "Si se bloquea, ACLS queda sin estrategia standalone articulada públicamente.",
+                "El mercado puede estar pricing la probabilidad de fusión — si falla, el downside puede ser material.",
+                "Riesgo de condicionamientos/remedies que reduzcan valor económico."
+              ]
+            },
+            "puntos_ciegos": [
+              "No se sabe si el precio de oferta es premium o discount al intrinsic value.",
+              "Los costos de fusión en G&A pueden seguir acumulándose mientras SAMR decide.",
+              "No hay cuantificación de payoff si se aprueba vs si se bloquea."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual FY2025 ga_usd / log.limitaciones",
+                "cita_corta": "G&A subió de $70.3M a $83.2M coincidiendo con fusión. China SAMR pendiente. Sin términos económicos.",
+                "interpretacion": "Los costos de fusión son reales y materiales. El principal gate regulatorio no está resuelto."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Fusión se cierra con éxito antes de Sep-2026 y los términos confirman prima >15% para accionistas ACLS.",
+              "ventana_meses": {
+                "min": 1,
+                "max": 9
+              },
+              "fuente_prevista": "8-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_009",
+            "resumen_claim_bull": "Inversión contracíclica en R&D ($109M, 13% revenue) posiciona a ACLS para capturar share en próximo upcycle.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.5,
+              "por_que": [
+                "No hay evidencia de design wins o pipeline de productos que validen el retorno de la inversión.",
+                "R&D como % de revenue subió mecánicamente por caída de denominador; el incremento absoluto fue solo +3.3% ($105M→$109M).",
+                "Sin patentes, design wins o revenue atribuible a R&D reciente, es gasto sin output demostrado.",
+                "No se muestra conversión de R&D a backlog avanzado.",
+                "El EBIT actual no refleja retorno inmediato de esa inversión."
+              ]
+            },
+            "puntos_ciegos": [
+              "No se sabe si Applied Materials también invierte a niveles similares o superiores.",
+              "Gastar más no implica ganar cuota sin métricas de resultado.",
+              "No se cuantifica payback temporal del gasto incremental."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual FY2024-FY2025 rd_usd",
+                "cita_corta": "R&D FY2024 $105.5M → FY2025 $109.0M, incremento absoluto de solo $3.5M (+3.3%).",
+                "interpretacion": "El salto de 8.6% a 13% como porcentaje de revenue es mayormente aritmético por caída de revenue, no inversión agresiva genuina."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "ACLS anuncia design wins o SiC bookings que representen >15% del backlog total en 18 meses.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "earnings"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Se usa EBIT mid-cycle de ~$175M sin evidencia directa de backlog que lo sostenga — es proyección del pasado asumiendo ciclicidad, que podría ser cambio estructural.",
+          "El FCF base de $107M se usa como dato firme pero el TruthPack muestra fcf_usd = null y Q4-2025 tuvo CFO negativo — la cifra puede ser artefacto de timing de WC.",
+          "Se asume que G&A ($83M) revertirá a $70M por 'costos de fusión transitorios' sin evidencia — la tendencia intra-anual es ascendente.",
+          "La liberación de inventario ($50-70M) se asume sin aging/reservas públicas; en el trimestre más reciente WC siguió consumiendo caja.",
+          "Se compara el múltiplo 13.4x con peers (AMAT 18x, LRCX 17x) ignorando que ACLS es 1/20 del tamaño de AMAT y tiene concentración de producto significativamente mayor.",
+          "La fusión Veeco se trata como 'opcionalidad positiva' sin cuantificar el downside de fracaso: costos hundidos, incertidumbre estratégica, posible de-rating.",
+          "Se infiere captura de share por mayor R&D sin design wins verificables.",
+          "Se asume que Q4-2025 ($238M rev) es el 'piso' definitivo sin confirmación de bookings ni control de estacionalidad.",
+          "Valoración basada en 'Normalized EBIT' que no existe hoy (wishful thinking valuation)."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "FY2023 fue un pico excepcional y FY2025 está más cerca del nuevo nivel normal de earnings — el mercado puede estar viendo datos forward que indican que el ciclo WFE no se recupera en 2026.",
+          "La demanda de SiC/EV puede estar ralentizándose más de lo esperado (retrasos en adopción EV, competencia de GaN), eliminando el driver secular.",
+          "Applied Materials puede estar ganando share silenciosamente durante el downturn con ofertas integradas que ACLS no puede replicar como pure-play.",
+          "El G&A incrementado puede reflejar que ACLS standalone necesita mayor infraestructura corporativa permanente.",
+          "Los inventarios elevados pueden incluir equipos para clientes chinos que enfrentan restricciones de exportación — stranded assets.",
+          "El mercado puede estar descontando que la fusión se cierre a un precio que no ofrece premium significativo, y que standalone ACLS vale lo que cotiza.",
+          "El costo operativo base quedó más alto, limitando la elasticidad de EBIT en la siguiente subida.",
+          "China aprueba con remedies draconianas que destruyen sinergias esperadas."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "ACLS es una trampa de valor cíclica: 3 años consecutivos de deterioro de revenue ($1.13B→$1.02B→$839M) y EBIT ($266M→$211M→$119M) sin datos forward que confirmen suelo, pagando ~20x EBIT trough.",
+          "La base de costos ha crecido estructuralmente (R&D +76%, G&A +108% vs FY2020), elevando el breakeven y convirtiendo el apalancamiento operativo de potencial upside en destructor actual de rentabilidad.",
+          "La conversión de earnings a caja es persistentemente deficiente (CFO/NI <0.70x en años fuertes, CFO negativo en Q4-2025), con $282M de inventarios (222 días) que pueden requerir write-down y no 'liberación de caja'.",
+          "La fusión Veeco introduce riesgo binario no cuantificable (SAMR pendiente, sin términos conocidos), con costos de transacción reales que erosionan earnings y downside material si fracasa.",
+          "Sin datos de bookings/backlog, comprar es apostar a un ciclo que puede no materializarse; con catalizador corporativo binario y sin términos, el downside no está bien pagado."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "DEMANDA_DEBIL",
+            "descripcion": "El ciclo de WFE spending no se recupera porque los clientes IDM/foundry han over-built capacity durante 2021-2023 y la digestión toma más tiempo del esperado. Revenue se estabiliza en $800-850M, no vuelve a $1B+.",
+            "indicadores_tempranos": [
+              "Revenue Q1-2026 < $220M (patrón estacional repetido)",
+              "Book-to-bill < 1.0x durante 2+ trimestres más",
+              "Peers semicap (AMAT, LRCX, KLAC) no reportan inflexión de bookings en H1-2026",
+              "SEMI WFE forecast no se revisa al alza",
+              "FY2026 ingresos <= $850M"
+            ]
+          },
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "El margen operativo no se recupera porque G&A permanece elevado ($80M+), R&D es semi-fijo (~$110M), y el margen bruto se comprime cuando el volumen sube por mix menos favorable. EBIT se estanca en $120-140M incluso con revenue $900M.",
+            "indicadores_tempranos": [
+              "G&A trimestral sigue >$22M post-resolución de fusión",
+              "Margen bruto cae <44% cuando revenue supera $240M/trimestre",
+              "EBIT margin no supera 16% en ningún trimestre de FY2026",
+              "Incremental margin sobre revenue adicional <25%",
+              "SG&A > $35M/trimestre constante"
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "Los inventarios no se liquidan ordenadamente; se mantienen >$260M mientras la empresa intenta preservar capacidad de respuesta, consumiendo caja y degradando FCF. Posible write-down parcial.",
+            "indicadores_tempranos": [
+              "Inventarios no bajan de $270M en 6 meses",
+              "CFO/NI ratio permanece <0.85x",
+              "Mención de inventory reserves incrementales en notas",
+              "Días de inventario >220 días sostenido",
+              "CFO negativo o < NI por segundo trimestre"
+            ]
+          },
+          {
+            "mecanismo": "COMPETENCIA_PRECIOS",
+            "descripcion": "Applied Materials usa su escala superior y portfolio diversificado para ganar share en implantación iónica durante el downturn, forzando a ACLS a conceder precio en el upcycle.",
+            "indicadores_tempranos": [
+              "Margen bruto cae >200bps cuando revenue se recupera",
+              "ACLS pierde design wins en nodos avanzados",
+              "Revenue de ACLS crece menos que el mercado total de WFE"
+            ]
+          },
+          {
+            "mecanismo": "MERGER_FRACASA",
+            "descripcion": "La fusión con Veeco es bloqueada/retrasada indefinidamente por SAMR o termina en condiciones desfavorables, dejando costos hundidos, incertidumbre estratégica y venta masiva de arbitrajistas.",
+            "indicadores_tempranos": [
+              "Sin decisión SAMR hasta fin de Q3-2026",
+              "Comunicados con remedies regulatorios onerosos",
+              "Ruptura del merger agreement",
+              "Extensiones sucesivas de outside date"
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Recuperación cíclica lenta en L: revenue FY2026 alcanza solo $870-900M con EBIT margin 14-15%, G&A no se normaliza, inventarios se reducen lentamente con posible write-down menor. Fusión se retrasa pero no se cancela.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.4,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "$800M - $900M",
+                "justificacion": "Recovery lento sin catalizador claro. Demanda WFE débil, sin catalizador SiC inmediato."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "NO_MEJORA",
+                "rango": "12%-15%",
+                "justificacion": "G&A permanece elevado; apalancamiento operativo mínimo con mejora marginal de revenue."
+              },
+              {
+                "variable": "FCF",
+                "direccion": "NO_MEJORA",
+                "rango": "$80M-$110M",
+                "justificacion": "Sin normalización de WC significativa; conversión CFO/NI persistentemente débil."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "EARNINGS_CAEN",
+              "explicacion": "Mercado asigna múltiplo de 'no crecimiento' (14-16x) a EBIT que no se recupera materialmente ($120-135M). Sin rerating ni inflexión, posible de-rating si el mercado concluye que la normalización no llega.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -30,
+                "base": -15,
+                "max": 5
+              },
+              "nota": "Precio objetivo rango $55-70 dependiendo del múltiplo asignado."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "SAMR bloquea la fusión Veeco + WFE spending deprimido + write-down de inventarios. ACLS queda standalone sin estrategia clara, con costos hundidos, inventarios dañados y base de costos inflada. De-rating a 12-14x EBIT trough.",
+            "ventana_meses": {
+              "min": 3,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.18,
+            "es_binario": true,
+            "drivers": [
+              {
+                "variable": "OTRO",
+                "direccion": "EMPEORA",
+                "rango": "Bloqueo SAMR + WFE weakness extended + write-down inventarios $20-50M",
+                "justificacion": "Precedente Qualcomm-NXP. Costos de transacción sin beneficio. Inventarios construidos para clientes que posponen indefinidamente."
+              },
+              {
+                "variable": "EBIT",
+                "direccion": "EMPEORA",
+                "rango": "<$90M post write-downs",
+                "justificacion": "Cargo por obsolescencia impacta resultados; revenue estancado en $800M."
+              }
+            ],
+            "impacto_en_supervivencia": "BAJO",
+            "nota": "No hay riesgo de supervivencia gracias al balance sólido, pero destrucción de valor accionarial significativa (-25% a -45%). Precio ~$40-50. 'Dead money' por años."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.62,
+        "razones": [
+          "BASELINE: 0.50 (no hay datos de SCOUT ni MasterCandidateList que demuestren prefilter fuerte y ranking alto).",
+          "AJUSTE AL ALZA (+0.05): Tres años consecutivos de deterioro de revenue ($1.13B→$1.02B→$839M) y EBIT ($266M→$211M→$119M) sin datos forward que confirmen suelo.",
+          "AJUSTE AL ALZA (+0.05): Conversión de earnings a caja persistentemente débil (CFO/NI <0.70x en FY2023-FY2024, CFO negativo Q4-2025).",
+          "AJUSTE AL ALZA (+0.07): Inventarios inflados a 33.6% de revenue (~222 días COGS) sin datos de aging ni reservas que permitan evaluar calidad — ratio peligrosamente alto para semicap.",
+          "AJUSTE AL ALZA (+0.05): Ausencia de bookings/backlog/guidance para validar recuperación — la variable de validación más importante del caso no está observada.",
+          "AJUSTE AL ALZA (+0.03): Dependencia de evento externo (fusión) no cuantificable para cristalizar valor.",
+          "AJUSTE A LA BAJA (-0.05): Balance genuinamente sólido (deuda neta -$80M) elimina riesgo de destrucción permanente de capital por insolvencia.",
+          "AJUSTE A LA BAJA (-0.05): Posición oligopólica real en ion implantation (duopolio con AMAT) — no es commodity, barreras de entrada altísimas.",
+          "AJUSTE A LA BAJA (-0.03): Margen bruto expandiéndose en downturn sugiere que la franquicia no está erosionada (aunque puede ser efecto mix).",
+          "RESULTADO FINAL: 0.50 + 0.05 + 0.05 + 0.07 + 0.05 + 0.03 - 0.05 - 0.05 - 0.03 = 0.62.",
+          "Es cíclico con posición competitiva sólida, pero sin confirmación de inflexión el riesgo de comprar demasiado temprano es alto.",
+          "La fusión Veeco puede ser tanto escape de value trap (si se cierra con prima) como confirmación (management busca M&A porque el negocio standalone no crece)."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo (Bull)",
+            "evidencia_necesaria": [
+              "Book-to-bill ratio supera 1.0x durante 2+ trimestres consecutivos",
+              "Peers semicap (AMAT, LRCX, KLAC) reportan inflexión de bookings simultánea",
+              "SEMI WFE spending forecast se revisa al alza >10% para 2026-2027",
+              "Revenue trimestral supera $260M sostenido durante 3+ trimestres",
+              "Reducción de inventarios por ventas (no write-offs)"
+            ]
+          },
+          {
+            "hipotesis": "Es estructural/Value Trap (Red Team)",
+            "evidencia_necesaria": [
+              "Revenue no supera $900M en FY2026 ni FY2027 pese a recovery general de WFE",
+              "Márgenes EBIT estancados en 14-15% a pesar de leve subida de ventas",
+              "ACLS pierde share medible vs AMAT en ion implantation",
+              "Aumento o estancamiento de días de inventario",
+              "La adopción de SiC se ralentiza materialmente (Wolfspeed/Infineon cortan capex >20%)",
+              "Inventarios persistentemente altos o write-downs materiales"
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "Revenue trimestral promedio de los próximos 3 trimestres reportados cae por debajo de $210M (confirmando que el trough se extiende, no que hubo inflexión).",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Invalidaría completamente la tesis de recuperación cíclica y confirmaría que $839M es el nuevo normal o que hay deterioro adicional."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "CONTABILIDAD",
+          "definicion": "CFO negativo por segundo trimestre consecutivo (Q1-2026) o dos trimestres con CFO <= 0 y net income positivo en FY2026.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Confirma problemas estructurales de capital de trabajo y calidad de beneficio comprometida."
+        },
+        {
+          "kc_id": "KC-RT-003",
+          "tipo": "CONTABILIDAD",
+          "definicion": "Write-down de inventarios >$20M anunciado en cualquier trimestre, evidenciando que los $282M no eran opcionalidad sino activo varado.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Destruye la tesis de liberación de WC y sugiere problemas de calidad de activos no reconocidos."
+        },
+        {
+          "kc_id": "KC-RT-004",
+          "tipo": "CATALIZADOR",
+          "definicion": "SAMR China bloquea formalmente la fusión con Veeco, se anuncia terminación del merger agreement, o no hay decisión hasta Sep-2026 sin plan standalone convincente.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 9
+          },
+          "fuente_prevista": "8-K",
+          "accion_recomendada": "SALIR",
+          "por_que": "Elimina el catalizador corporativo, deja costos hundidos y provoca venta masiva de arbs. Requiere reevaluación completa del standalone case."
+        },
+        {
+          "kc_id": "KC-RT-005",
+          "tipo": "TESIS",
+          "definicion": "Margen bruto < 43% durante dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Invalidaría la principal defensa competitiva del caso alcista (pricing power/franchise quality)."
+        },
+        {
+          "kc_id": "KC-RT-006",
+          "tipo": "BALANCE",
+          "definicion": "Caja cae por debajo de $80M por combinación de recompras, costos de fusión y WC negativo.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Erosión del colchón de seguridad que es pilar de la tesis bull. Indica que los buybacks están destruyendo valor."
+        },
+        {
+          "kc_id": "KC-RT-007",
+          "tipo": "TESIS",
+          "definicion": "G&A trimestral no desciende por debajo de $22M en ningún trimestre de FY2026, confirmando que el incremento es estructural.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Invalida la hipótesis de costos transitorios de fusión y reduce el EBIT normalizado en ~$13M, cambiando la valoración."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Book-to-bill ratio >1.1x durante 2 trimestres consecutivos",
+          "umbral_o_condicion": "B2B >= 1.1x en Q1-2026 y Q2-2026",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Revenue Q1-2026 >= $235M, rompiendo patrón estacional",
+          "umbral_o_condicion": "Revenue reportado >= $235M",
+          "ventana_meses": {
+            "min": 2,
+            "max": 4
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "10-K FY2025 confirma que >$10M de G&A FY2025 fue merger-related y no recurrente",
+          "umbral_o_condicion": "Disclosure explícito de merger costs >$10M en G&A",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "10-K"
+        },
+        {
+          "item": "Inventarios descienden >$20M sin write-downs materiales, demostrando liquidación ordenada",
+          "umbral_o_condicion": "Inventarios < $262M con NI positivo y sin reservas incrementales >$5M",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "CFO/NI supera 1.0x en dos trimestres consecutivos",
+          "umbral_o_condicion": "CFO >= 1.0x NI en Q1 y Q2 2026",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Aprobación incondicional de SAMR con términos claramente accretivos para accionistas ACLS",
+          "umbral_o_condicion": "8-K con documento oficial de aprobación y precio que implique prima clara",
+          "ventana_meses": {
+            "min": 1,
+            "max": 9
+          },
+          "fuente_prevista": "8-K"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 1.0,
+        "si_se_invierte_igual": [
+          "No iniciar posición hasta tener evidencia de bookings con B2B >1.0x — sin este dato la tesis de inflexión es pura fe.",
+          "Esperar a Q1-2026 earnings para confirmar que Q4 no fue estacional. Si revenue Q1 < $220M, no comprar.",
+          "Esperar al 10-K FY2025 para separar G&A recurrente de merger costs antes de modelar apalancamiento operativo.",
+          "Limitar posición máxima a 1.0% de cartera dado value trap probability de 0.62 y riesgo ALTO.",
+          "Si se entra, estructurar en 2-3 tramos por hitos (no por precio): 1er tramo post-Q1 earnings con revenue >$230M y CFO positivo, 2do post-resolución SAMR.",
+          "No incluir la fusión Veeco en el caso base de valoración; tratar como pura opcionalidad con probabilidad asignada.",
+          "Definir stop-loss estricto si revenue promedio trimestral cae debajo de $210M (3 trimestres).",
+          "Monitorear inventarios trimestralmente: si DIO >220 días durante 2 trimestres, escalar preocupación.",
+          "Verificar calidad de caja: exigir CFO positivo y CFO/NI >0.8x antes de aumentar posición.",
+          "Usar opciones (Puts) para cubrir el riesgo de ruptura de fusión si se entra antes de resolución SAMR.",
+          "Aplicar kill criteria ex-ante (KC-RT-001 a KC-RT-007) y congelar nuevas compras ante cualquier gatillo."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Cuál es el bookings/backlog actual y el book-to-bill de Q4-2025? Sin esto, la tesis de inflexión cíclica es pura fe.",
+          "¿Cuánto de los $83M de G&A FY2025 es merger-related? Si <$5M, la base de costos es permanentemente más alta y el EBIT normalizado baja a ~$162M.",
+          "¿Cuál es la composición de los $282M de inventarios (raw/WIP/finished) y el aging? Finished goods >40% con aging >12 meses sería alarma roja.",
+          "¿Cuál es el valor de liquidación real del inventario? ¿Qué plan B tiene la gerencia si Veeco se retira?",
+          "¿Cuál es el precio de oferta de Veeco por ACLS y el break-up fee? Si el precio es <$85/acción, el merger no es catalizador positivo significativo.",
+          "¿Qué proporción de revenue/inventarios está expuesta a clientes en China y potenciales restricciones de exportación?",
+          "¿Qué revenue atribuible tiene el SiC segment y está creciendo o cayendo?",
+          "¿Por qué el CFO fue negativo en Q4-2025 con utilidad positiva, y se revierte en Q1-Q2 2026?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Sin datos de bookings, backlog ni guidance forward; la evaluación de la tesis de recovery depende enteramente de trailing data.",
+      "Sin términos del merger Veeco (precio, break-up fee, outside date), el riesgo binario no es cuantificable con precisión.",
+      "Sin desglose de revenue Systems vs Service ni por tecnología, la hipótesis de mix vs pricing power no se puede resolver.",
+      "Sin desglose de G&A recurrente vs merger-related, el EBIT normalizado tiene un rango de incertidumbre de ~$13M.",
+      "Sin aging de inventarios ni desglose raw/WIP/finished, el riesgo de obsolescencia es evaluado cualitativamente.",
+      "No hay 10-K FY2025 auditado completo con balance final 2025 en el paquete de input."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "fusion": {
+      "modelos_usados": [
+        "gemini-2.0-flash-thinking",
+        "claude-opus-4-6",
+        "GPT-5"
+      ],
+      "step_fusionado": "RED_TEAM",
+      "criterios_de_resolucion": "Para veredicto y probabilidades: se usó consenso ponderado por profundidad de evidencia. Para claims cualitativos: se combinaron perspectivas únicas eliminando duplicados. Para scores numéricos: se reporta valor recomendado dentro del rango de modelos.",
+      "conflictos_detectados": [
+        {
+          "campo": "resumen_ejecutivo.veredicto_role_local",
+          "valores": {
+            "gemini": "NO_APTO",
+            "claude": "WATCHLIST",
+            "codex": "NO_APTO"
+          },
+          "resolucion": "NO_APTO — mayoría 2/3 (gemini, codex). Claude fue el más cauteloso con confianza 0.68 vs gemini 0.85 y codex 0.81. La ausencia de datos forward y la asimetría negativa justifican el veredicto más restrictivo.",
+          "valor_fusionado": "NO_APTO"
+        },
+        {
+          "campo": "resumen_ejecutivo.confianza_0_1",
+          "valores": {
+            "gemini": 0.85,
+            "claude": 0.68,
+            "codex": 0.81
+          },
+          "resolucion": "Se usa 0.80 — ligeramente por debajo del promedio simple (0.78) dado que Claude identificó matices importantes (posición oligopólica, balance sólido) que justifican menor certeza absoluta que gemini.",
+          "valor_fusionado": 0.8
+        },
+        {
+          "campo": "payload.diagnostico_global.confianza_0_1",
+          "valores": {
+            "gemini": 0.85,
+            "claude": 0.68,
+            "codex": 0.82
+          },
+          "resolucion": "0.80 — consistente con veredicto NO_APTO pero reconociendo incertidumbre sobre datos ausentes.",
+          "valor_fusionado": 0.8
+        },
+        {
+          "campo": "value_trap_checklist.probabilidad_value_trap_0_1",
+          "valores": {
+            "gemini": 0.75,
+            "claude": 0.4,
+            "codex": 0.72
+          },
+          "resolucion": "0.62 — Claude aplicó ajustes a la baja más agresivos por posición oligopólica y balance sólido, que son válidos pero insuficientes frente al peso de 3 años de deterioro sin datos forward. Se usa punto medio ponderado que reconoce ambas perspectivas.",
+          "valor_fusionado": 0.62
+        },
+        {
+          "campo": "recomendacion_para_arbitro.tamaño_maximo_sugerido_pct_cartera",
+          "valores": {
+            "gemini": 0,
+            "claude": 2.5,
+            "codex": 1.0
+          },
+          "resolucion": "1.0% — gemini (0%) es demasiado restrictivo para una empresa con balance sólido y sin riesgo existencial; claude (2.5%) es demasiado permisivo dado veredicto NO_APTO y value trap 0.62. Codex (1.0%) balancea correctamente.",
+          "valor_fusionado": 1.0
+        },
+        {
+          "campo": "claims inventario DIO",
+          "valores": {
+            "gemini": "222 días (COGS-based)",
+            "claude": "123 días (revenue-based)",
+            "codex": "implícito alto"
+          },
+          "resolucion": "Se reportan ambas métricas: ~222 días sobre COGS TTM y 33.6% de revenue. Gemini usó COGS (más estándar para DIO), Claude usó revenue. Ambas señalan niveles peligrosamente altos.",
+          "valor_fusionado": "~222 días COGS, 33.6% de revenue"
+        },
+        {
+          "campo": "bear_case.escenarios_bajistas[BEAR_BASE].probabilidad_0_1",
+          "valores": {
+            "gemini": 0.45,
+            "claude": 0.35,
+            "codex": 0.5
+          },
+          "resolucion": "0.40 — promedio ponderado; los tres coinciden en que es el escenario más probable del bear case.",
+          "valor_fusionado": 0.4
+        },
+        {
+          "campo": "bear_case.escenarios_bajistas[BEAR_WORST].probabilidad_0_1",
+          "valores": {
+            "gemini": 0.2,
+            "claude": 0.15,
+            "codex": 0.22
+          },
+          "resolucion": "0.18 — promedio ponderado del rango estrecho de los tres modelos.",
+          "valor_fusionado": 0.18
+        },
+        {
+          "campo": "ataque_a_tesis_bull.CLM_B_001.probabilidad_de_fallo",
+          "valores": {
+            "gemini": 0.6,
+            "claude": 0.45,
+            "codex": 0.67
+          },
+          "resolucion": "0.58 — Claude fue más conservador pero reconoce que el claim es frágil. Gemini y codex aportan más peso a la ausencia de datos forward.",
+          "valor_fusionado": 0.58
+        },
+        {
+          "campo": "ataque_a_tesis_bull.CLM_B_007.estado",
+          "valores": {
+            "gemini": "FALSO",
+            "claude": "FRAGIL",
+            "codex": "FRAGIL"
+          },
+          "resolucion": "FALSO — gemini aporta el argumento más convincente: en tecnología inventario viejo = pérdida. Sin embargo, se ajusta probabilidad de fallo a 0.62 (no 0.80 de gemini) reconociendo que sin aging la certeza absoluta no es posible.",
+          "valor_fusionado": "FALSO con probabilidad_de_fallo 0.62"
+        }
+      ]
+    }
+  }
+}

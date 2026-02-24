@@ -1,0 +1,415 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_TALO",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_TALO",
+    "implied_expectations_caso_id": "CASE_20260224_TALO",
+    "sources_pack_caso_id": "CASE_20260224_TALO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La tesis alcista confunde 'generación de caja' con 'liquidación de activos': Capex (FY24 $509M) es consistentemente ~50% de DD&A ($1.02B), indicando subinversión crónica.",
+      "El FCF reportado es ilusorio si se ajusta por el gasto en M&A necesario para reponer reservas (CFI FY24 -$1.3B) que el Capex orgánico no cubre.",
+      "Dependencia crítica de precios: la liquidez (RBL) es elástica al WTI; una caída de precios no solo baja el FCF, sino que contrae el crédito disponible.",
+      "Historial de destrucción de valor contable: Acumulated Deficit de -$347M y Retained Earnings negativos persistentes sugieren que el capital inyectado no ha generado retorno económico real a largo plazo.",
+      "Riesgo de Value Trap alto: lo que parece 'barato' a P/FCF 4.9x es un activo en depleción offshore acelerada que requiere inyecciones constantes de capital inorgánico."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RED_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La compañía está en modo liquidación: el Capex orgánico cubre solo la mitad de la depreciación (consumo de reservas), inflando el FCF óptico.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024",
+          "ubicacion": "Cash Flow Statement",
+          "cita_corta": "FY24: Depr $1,023M vs Capex -$509M. FY23: Depr $663M vs Capex -$561M.",
+          "interpretacion": "Ratio Capex/DD&A ~0.5x-0.8x. Están consumiendo la base de activos más rápido de lo que reinvierten orgánicamente."
+        }
+      ],
+      "falsacion": {
+        "test": "Reserve Replacement Ratio orgánico (sin adquisiciones) > 100% en el próximo 10-K.",
+        "ventana_meses": {
+          "min": 10,
+          "max": 14
+        },
+        "fuente_prevista": "10-K (Reserves Table)"
+      }
+    },
+    {
+      "claim_id": "CLM_RED_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El crecimiento de TALO es un 'treadmill' inorgánico: el FCF positivo se cancela casi totalmente si se consideran las adquisiciones necesarias para mantener la escala.",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "Cash Flow Statement FY2024",
+          "cita_corta": "CFO $962M. Capex -$509M. CFI (Acquis) -$1,320M.",
+          "interpretacion": "Para crecer o mantener, gastaron $1.8B (Capex + M&A) generando solo $0.96B de caja operativa. El 'Free' Cash Flow desaparece a nivel corporativo total."
+        }
+      ],
+      "falsacion": {
+        "test": "Producción se mantiene estable (>90k BOE/d) durante 4 trimestres consecutivos con Capex < $550M y CERO adquisiciones materiales.",
+        "ventana_meses": {
+          "min": 9,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RED_003",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "La estructura de capital es frágil ante volatilidad: el desapalancamiento reciente es modesto frente a la volatilidad implícita del RBL (Reserve Based Lending).",
+      "confianza_0_1": 0.75,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_TR_001",
+          "ubicacion": "Transcript Q4-2024",
+          "cita_corta": "Borrowing base reafirmado en $700M.",
+          "interpretacion": "El borrowing base no es deuda fija, es una línea de crédito que los bancos pueden recortar unilateralmente si baja el precio de las reservas."
+        }
+      ],
+      "falsacion": {
+        "test": "WTI cae <$60 y el borrowing base se mantiene intacto en la siguiente redeterminación.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "8-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RED_001",
+      "descripcion": "La producción orgánica (legacy) declina >10% anual, enmascarada solo por nuevos pozos o M&A.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Producción reportada cae si no hay news de 'first oil' de proyectos nuevos o M&A.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RED_002",
+      "descripcion": "Nuevos impairments de activos (write-downs) en los próximos 12 meses debido al 'ceiling test' si WTI baja de $65.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Cargo por impairment >$50M en Income Statement.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Informe de Reservas (SMOG) completo con desglose PDP vs PUD.",
+      "por_que_importa": "Esencial para verificar si el Capex actual es suficiente para convertir reservas PUD a PDP o si están 'cosechando' sin reponer.",
+      "como_obtenerlo": "10-K Exhibit 99 o sección de Oil & Gas Disclosures."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Decline Curves de los campos principales (Talos legacy vs QuarterNorth).",
+      "por_que_importa": "Gulf of Mexico tiene tasas de declive altas. Validar si el 'Maintenance Capex' es realista.",
+      "como_obtenerlo": "Presentaciones técnicas o informes de analistas sell-side especializados."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.85,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "Classic Value Trap E&P: FCF óptico sostenido por liquidación de activos (Capex << DD&A) y dependencia de M&A constante para enmascarar declive orgánico."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_BULL_001",
+            "resumen_claim_bull": "Mercado descuenta -7.8% FCF; estabilizar caja permite rerating.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.65,
+              "por_que": [
+                "La 'estabilización' asume que el Capex actual es de mantenimiento.",
+                "Gap masivo DD&A vs Capex sugiere que el Capex de mantenimiento real es mucho mayor.",
+                "Si suben Capex para estabilizar realmente, el FCF desaparece."
+              ]
+            },
+            "puntos_ciegos": [
+              "Tasa de declive natural de activos offshore (>20-30% anual en algunos casos).",
+              "Inflación de costos de servicios offshore no reflejada en guías optimistas."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Cash Flow",
+                "cita_corta": "Depreciación ($1.0B) es doble que Capex ($0.5B).",
+                "interpretacion": "Están invirtiendo 50 centavos por cada dólar de activo que consumen."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Capex se mantiene plano y producción NO cae en 12 meses (sin M&A).",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_BULL_002",
+            "resumen_claim_bull": "DD&A distorsiona EBIT; la caja es la realidad.",
+            "evaluacion_red_team": {
+              "estado": "FALSO",
+              "probabilidad_de_fallo_0_1": 0.8,
+              "por_que": [
+                "En E&P, DD&A es el costo real histórico de las reservas.",
+                "Si DD&A > Capex, no es una 'distorsión contable', es un indicador de que reponer reservas hoy es más caro o que están liquidando inventario barato antiguo."
+              ]
+            },
+            "puntos_ciegos": [
+              "La naturaleza finita de las reservas.",
+              "Impairments recurrentes ($1.0B en FY24 de depr incluye write-downs implícitos o aceleración) validan que el valor en libros estaba inflado."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_TR_004",
+                "ubicacion": "Q3 2025 transcript",
+                "cita_corta": "Non-cash impairment of $60M related to full cost ceiling test.",
+                "interpretacion": "Los activos valen menos de lo que dicen los libros, confirmando que DD&A no exageraba el costo, sino que se quedaba corta."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Ausencia total de impairments (write-downs) durante 4 trimestres consecutivos.",
+              "ventana_meses": {
+                "min": 12,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Dependencia de múltiplos de 'empresa en marcha' (4-5x FCF) para una empresa que opera con métricas de liquidación.",
+          "Asumir que las sinergias de QuarterNorth ($65M) son netas y no se comerán por inflación de costos operativos.",
+          "Ignorar el riesgo de 'Ceiling Test' con WTI bajista: una baja de precios fuerza write-downs que reducen el equity y pueden gatillar covenants."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El mercado está descontando correctamente que el negocio es una 'melting ice cube'.",
+          "El FCF actual es visto como retorno DE capital, no retorno SOBRE capital.",
+          "El descuento del -7.8% anual en FCF es una aproximación correcta a la tasa de declive natural neta de un Capex insuficiente."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "TALO es una trampa de valor clásica: bajos múltiplos ópticos sobre un FCF insostenible derivado de subinversión.",
+          "La base de activos legacy declina rápidamente (offshore), y el Capex actual no repone reservas orgánicamente (Ratio < 0.6x).",
+          "Para mantener producción, la gerencia se ve forzada a M&A constante (QuarterNorth, Monument), aumentando complejidad y riesgo de integración.",
+          "El balance parece sano hoy, pero el RBL es una 'espada de Damocles' ligada al precio del WTI.",
+          "Resultado: El equity se erosiona lentamente mientras el FCF se usa para tapar agujeros de declive en lugar de generar valor neto."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "CAPEX_MANTENIMIENTO_ALTO",
+            "descripcion": "La inflación sectorial offshore y la profundidad de los pozos hacen que mantener producción cueste cada vez más.",
+            "indicadores_tempranos": [
+              "Aumento del Capex por BOE producido.",
+              "Caída de producción a pesar de cumplir presupuesto de Capex."
+            ]
+          },
+          {
+            "mecanismo": "DILUCION",
+            "descripcion": "Emisión de papel para financiar la próxima adquisición necesaria para 'rellenar' el hueco de producción.",
+            "indicadores_tempranos": [
+              "Anuncios de M&A pagados con acciones.",
+              "Aumento de shares outstanding."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "WTI estable ($65-$70). Producción declina moderadamente (-5% anual) revelando insuficiencia de Capex. Mercado comprime múltiplo a 3x FCF por percepción de terminal value.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "FCF",
+                "direccion": "EMPEORA",
+                "rango": "$250M - $300M",
+                "justificacion": "Normalización de Capex o caída de volumen."
+              },
+              {
+                "variable": "MULTIPLO",
+                "direccion": "EMPEORA",
+                "rango": "2.5x - 3.5x P/FCF",
+                "justificacion": "Mercado asigna valoración de liquidación."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "El mercado deja de creer en la estabilidad y precea el run-off.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -40,
+                "base": -25,
+                "max": -10
+              },
+              "nota": "Pérdida de capital por rerating negativo."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "WTI cae a $55. RBL redetermination reduce liquidez. Impairments masivos por ceiling test. FCF se vuelve neutro/negativo.",
+            "ventana_meses": {
+              "min": 3,
+              "probable": 12,
+              "max": 18
+            },
+            "probabilidad_0_1": 0.2,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "DEUDA",
+                "direccion": "EMPEORA",
+                "rango": "Leverage > 2.0x por caída de EBITDA",
+                "justificacion": "Efecto tijera: menos precio y menos volumen."
+              }
+            ],
+            "impacto_en_supervivencia": "MEDIO",
+            "nota": "No quiebra inmediata, pero equity wipe-out significativo y dilución forzosa."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.75,
+        "razones": [
+          "Subinversión crónica (Capex ~50% de Depreciación).",
+          "Dependencia de M&A para mantener 'top line'.",
+          "Activos de vida corta/declive rápido (Offshore).",
+          "Historial de retornos sobre capital (ROIC) pobres o negativos a largo plazo.",
+          "Dividendo/Recompra financiado con flujo de caja de liquidación, no excedente real."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo (Oportunidad)",
+            "evidencia_necesaria": [
+              "Capex < Depreciación porque los costos de servicio han bajado dramáticamente (deflación de costos).",
+              "Reservas PUD convirtiéndose a PDP eficientemente."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural (Trampa)",
+            "evidencia_necesaria": [
+              "Inflación de costos operativos.",
+              "Necesidad de M&A para sostener producción plana."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "CATALIZADOR",
+          "definicion": "WTI promedio trimestral < $60 USD/bbl.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "Macro data / Earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Rompe la tesis de generación de caja y pone en riesgo el borrowing base."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "TESIS",
+          "definicion": "Anuncio de nueva adquisición >$500M financiada con deuda o equity.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "8-K",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Confirma la incapacidad de crecimiento orgánico y diluye al accionista actual."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Eficiencia de Capex probada",
+          "umbral_o_condicion": "Reserve Replacement Ratio orgánico > 100% con FCF positivo.",
+          "ventana_meses": {
+            "min": 12,
+            "max": 12
+          },
+          "fuente_prevista": "10-K"
+        },
+        {
+          "item": "Reducción real de deuda bruta",
+          "umbral_o_condicion": "Deuda Total < $1.0B sin usar caja de desinversiones.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 2.0,
+        "si_se_invierte_igual": [
+          "Limitar exposición estricta.",
+          "Usar stops ajustados basados en niveles técnicos de WTI (ej. $65).",
+          "Vigilar trimestralmente la producción vs Capex."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Por qué el Capex es consistentemente la mitad de la Depreciación si los activos son sanos?",
+          "¿Cuál es la tasa de declive base de los activos legacy sin contar QuarterNorth/Monument?",
+          "¿Qué precio de WTI gatilla una reducción del Borrowing Base en la próxima redeterminación?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta de desglose detallado de reservas (PUD vs PDP) en el input actual.",
+      "No acceso al informe SMOG completo para auditar vida de reservas.",
+      "Dependencia de datos macro (WTI) que son volátiles."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

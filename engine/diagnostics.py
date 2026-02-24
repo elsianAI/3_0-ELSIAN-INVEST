@@ -15,6 +15,8 @@ __all__ = [
     "compact_failure_ctx",
     "save_failure_artifact",
     "get_failure_artifact_path",
+    "is_llm_step",
+    "prune_failure_artifacts",
 ]
 
 
@@ -215,30 +217,63 @@ def _fmt_duration(value: Any) -> str:
     return f"{value:.1f}s"
 
 
-def get_failure_artifact_path(case_dir: Path, step_name: str) -> Path:
-    ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+def get_failure_artifact_path(case_dir: Path, step_name: str, mode: str = "compact") -> Path:
+    ts = datetime.utcnow().strftime("%Y%m%dT%H%M%S%fZ")
     safe_step = step_name.replace(os_sep := "/", "_")
     safe_step = safe_step.replace(" ", "_")
-    return case_dir / "_diagnostics" / "failures" / f"{safe_step}.{ts}.json"
+    safe_mode = mode if mode in {"compact", "full"} else "compact"
+    return case_dir / "_diagnostics" / "failures" / f"{safe_step}.{ts}.{safe_mode}.json"
+
+
+def is_llm_step(config, step_name: str) -> bool:
+    """Return True for DAG steps that run via LLM transports."""
+    dag = config.get_dag("PIPELINE")
+    for step_def in dag:
+        if step_def.get("step") != step_name:
+            continue
+        step_type = step_def.get("type", "llm")
+        return step_type in {"llm", "llm_per_filing"}
+    return False
+
+
+def prune_failure_artifacts(case_dir: Path, max_files: int) -> None:
+    """Keep only the most recent diagnostic artifacts for a case directory."""
+    if max_files <= 0:
+        return
+    base = case_dir / "_diagnostics" / "failures"
+    if not base.exists():
+        return
+    files = sorted([p for p in base.glob("*.json") if p.is_file()], key=lambda p: p.name)
+    overflow = len(files) - max_files
+    if overflow <= 0:
+        return
+    for old_file in files[:overflow]:
+        try:
+            old_file.unlink()
+        except Exception:
+            continue
 
 
 def save_failure_artifact(
     case_dir: Path,
     step_name: str,
     payload: dict[str, Any],
-    include_raw: bool = False,
+    mode: str = "compact",
 ) -> str | None:
-    """Persist a compact failure payload and return written path.
+    """Persist failure payload and return written path.
 
-    If include_raw is False, tries to trim payload raw_output fields so artifacts stay
-    compact while preserving structured context.
+    mode="compact" stores a compacted payload.
+    mode="full" stores full payload for forensic inspection.
     """
-    path = get_failure_artifact_path(case_dir, step_name)
+    if mode not in {"compact", "full"}:
+        mode = "compact"
+
+    path = get_failure_artifact_path(case_dir, step_name, mode=mode)
     artifact_dir = path.parent
     try:
         artifact_dir.mkdir(parents=True, exist_ok=True)
         normalized = dict(payload)
-        if not include_raw:
+        if mode == "compact":
             normalized.pop("raw_output", None)
             normalized.pop("raw_output_truncated", None)
             normalized = compact_failure_ctx(normalized, max_chars=50000)

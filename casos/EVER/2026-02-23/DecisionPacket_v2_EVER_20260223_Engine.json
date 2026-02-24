@@ -1,0 +1,1792 @@
+{
+  "version_esquema": "DecisionPacket_v2",
+  "backward_compatible_with": "DecisionPacket_v1",
+  "caso_id": "CASE_20260223_EVER",
+  "fecha_corte": "2026-02-23",
+  "empresa": {
+    "ticker": "EVER",
+    "nombre": "EverQuote, Inc.",
+    "bolsa": "NASDAQ",
+    "pais": "US",
+    "sector": "Technology",
+    "industria": "Insurance Marketplace / InsurTech"
+  },
+  "input_refs": {
+    "sources_pack_caso_id": "CASE_20260223_EVER",
+    "truth_pack_caso_id": "CASE_20260223_EVER",
+    "implied_expectations_caso_id": "CASE_20260223_EVER",
+    "agent_reports": [
+      {
+        "agent_role": "CATALYST",
+        "agent_nombre": "CATALYST_SCORING_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.72
+      },
+      {
+        "agent_role": "FORENSIC",
+        "agent_nombre": "FORENSIC_SCORING_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.76
+      },
+      {
+        "agent_role": "BULL",
+        "agent_nombre": "BULL_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.75
+      },
+      {
+        "agent_role": "RED_TEAM",
+        "agent_nombre": "RED_TEAM_v1",
+        "report_ref": "AgentReport_v1",
+        "confianza_0_1": 0.79
+      }
+    ]
+  },
+  "charter": {
+    "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+    "horizonte_meses": {
+      "min": 6,
+      "max": 30
+    },
+    "restricciones_no_especulativo": [
+      "Evitar tesis binaria",
+      "Evitar dependencia de financiacion salvadora",
+      "Exigir supervivencia 12-24 meses razonable",
+      "Exigir catalizador no binario y medible"
+    ]
+  },
+  "resumen_ejecutivo": {
+    "decision": "WATCHLIST",
+    "tamaño_recomendado_pct_cartera": 0,
+    "confianza_global_0_1": 0.58,
+    "racional_5_lineas": [
+      "El mispricing cuantitativo existe (EV/FCF ~5x) con caja neta alta y deuda financiera nula, por lo que la asimetria sigue siendo positiva.",
+      "La supervivencia 12-24 meses es robusta por balance y CFO, pero la tesis de rerating depende de sostener S&M y revenue en FY2026.",
+      "Persisten bloqueadores verificables de gobernanza y calidad de datos (10-K FY2025, detalle de NOL/Section 382, RPTs y fairness de recompra afiliada).",
+      "La mejora operativa puede ser estructural o ciclica; el desempate requiere datos de Q1-Q2 2026 y disclosures completos.",
+      "Se mantiene WATCHLIST con sizing 0% hasta cierre documental y confirmacion operativa trimestral."
+    ],
+    "lo_mas_importante_ahora": [
+      "Ingerir 10-K FY2025 completo (NOL, Section 382, concentracion de carriers, RPTs, diluted shares).",
+      "Validar earnings Q1-2026: revenue >=165M y S&M/Revenue <80%.",
+      "Verificar en DEF14A 2026 fairness/oversight de recompra a afiliado y politica de related parties.",
+      "Recalcular FCF normalizado (fiscalidad + SBC + working capital) y rerun de expectativas implicitas."
+    ],
+    "principales_riesgos": [
+      "Concentracion comercial alta en top carrier (~39%).",
+      "Riesgo de value trap por posible pico ciclico en gasto de carriers de auto insurance.",
+      "Riesgo de gobernanza (RPTs elevadas y recompra a afiliado).",
+      "Calidad de beneficios: net income FY2025 inflado por tax benefit y FCF headline afectado por SBC/WC.",
+      "Track record corto de EBIT positivo para afirmar cambio estructural."
+    ]
+  },
+  "_comment_v2_decision_probabilistica": "NUEVO EN V2: bloque probabilistico que complementa la decision categorica",
+  "decision_probabilistica": {
+    "probabilidad_exito_0_1": 0.6,
+    "retorno_esperado_ponderado_pct": 26.0,
+    "escenarios_ponderados": {
+      "base": {
+        "probabilidad_0_1": 0.45,
+        "retorno_estimado_pct": 40
+      },
+      "bull": {
+        "probabilidad_0_1": 0.15,
+        "retorno_estimado_pct": 120
+      },
+      "bear": {
+        "probabilidad_0_1": 0.4,
+        "retorno_estimado_pct": -25
+      }
+    },
+    "sizing_kelly": {
+      "kelly_crudo_pct": 35.0,
+      "factor_ajuste_confianza": 0.42,
+      "kelly_ajustado_pct": 14.7,
+      "tope_maximo_pct": 10,
+      "sizing_preliminar_pct": 10.0,
+      "sizing_final_pct": 0,
+      "nota": "Asimetria matematica positiva, pero la decision categorica WATCHLIST prevalece por bloqueadores verificables aun abiertos."
+    },
+    "intervalo_confianza_90_pct": {
+      "percentil_5": -35,
+      "percentil_50": 26,
+      "percentil_95": 96
+    },
+    "conviccion_0_1": 0.6,
+    "ratio_asimetria": 1.6,
+    "expected_value_anualizado_pct": 17.3,
+    "decision_categorica": "WATCHLIST"
+  },
+  "_comment_v2_sensibilidad": "NUEVO EN V2: analisis de sensibilidad sobre supuestos clave",
+  "analisis_sensibilidad": [
+    {
+      "assumption_id": "A-001",
+      "variable": "sm_revenue_ratio_pct",
+      "valor_base": 78,
+      "rango_test": {
+        "min": 72,
+        "max": 85,
+        "paso": 1
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": 70,
+        "si_max": -30
+      },
+      "impacto_en_decision": "Si S&M/Revenue >82% sostenido, pasa a DESCARTAR; si <75% sostenido, habilita INVERTIR.",
+      "nota": "Variable operativa mas sensible."
+    },
+    {
+      "assumption_id": "A-002",
+      "variable": "revenue_fy2026_usd_M",
+      "valor_base": 700,
+      "rango_test": {
+        "min": 550,
+        "max": 800,
+        "paso": 25
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": -40,
+        "si_max": 80
+      },
+      "impacto_en_decision": "Si revenue <600M, pasa a DESCARTAR por confirmacion de peak cycle.",
+      "nota": "Driver exogeno ligado a presupuestos de carriers."
+    },
+    {
+      "assumption_id": "A-004",
+      "variable": "carrier_concentracion_top1_pct",
+      "valor_base": 39,
+      "rango_test": {
+        "min": 20,
+        "max": 45,
+        "paso": 5
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": 15,
+        "si_max": -20
+      },
+      "impacto_en_decision": "Si concentracion >40% con caida de revenue, mantener WATCHLIST o DESCARTAR.",
+      "nota": "Riesgo de binariedad comercial."
+    },
+    {
+      "assumption_id": "A-006",
+      "variable": "tasa_fiscal_efectiva_fy2026_pct",
+      "valor_base": 15,
+      "rango_test": {
+        "min": 5,
+        "max": 21,
+        "paso": 2
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": 8,
+        "si_max": -5
+      },
+      "impacto_en_decision": "No cambia decision categorica en el corto plazo, pero afecta FCF real y sizing futuro.",
+      "nota": "NOL/Section 382 pendientes de confirmacion."
+    },
+    {
+      "assumption_id": "A-008",
+      "variable": "rpts_annual_usd_M",
+      "valor_base": 15,
+      "rango_test": {
+        "min": 3,
+        "max": 30,
+        "paso": 5
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": 5,
+        "si_max": -15
+      },
+      "impacto_en_decision": "Si RPTs >20M anuales sin fairness opinion, pasa a DESCARTAR.",
+      "nota": "Riesgo principal de gobernanza."
+    }
+  ],
+  "gates": {
+    "data_quality_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Dos de tres modelos (Gemini y Claude) validan consistencia contable base y trazabilidad suficiente para analisis.",
+        "ImpliedExpectations se mantiene en estado OK con gap de expectativas cuantificable.",
+        "Se conserva warning operativo estricto de Codex: el cierre formal total requiere 10-K FY2025 completo."
+      ],
+      "faltantes_criticos": [
+        {
+          "item": "10-K FY2025 completo (notas de impuestos, concentracion y related parties)",
+          "como_resolver": "SEC EDGAR Form 10-K FY2025 de EVER."
+        },
+        {
+          "item": "NOL carryforward y limites Section 382",
+          "como_resolver": "Income Taxes note en 10-K FY2025."
+        },
+        {
+          "item": "shares_diluted_weighted y roll-forward de SBC",
+          "como_resolver": "EPS/Stock compensation notes del 10-K FY2025."
+        },
+        {
+          "item": "terminos y fairness de recompra a afiliado",
+          "como_resolver": "10-K FY2025 + DEF14A 2026."
+        }
+      ]
+    },
+    "survivability_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Caja neta elevada y deuda financiera dispuesta en cero.",
+        "CFO FY2025 positivo y capex bajo.",
+        "Sin muro de vencimientos financieros relevante en 12-24 meses."
+      ],
+      "condiciones_si_conditional": []
+    },
+    "mispricing_gate": {
+      "status": "PASS",
+      "por_que": [
+        "EV/FCF bajo frente a nivel de FCF reciente y balance net cash.",
+        "El reverse DCF implica deterioro exigente de FCF que no esta confirmado por los datos mas recientes.",
+        "El cierre del gap es medible via S&M, revenue y persistencia de EBIT positivo."
+      ]
+    },
+    "catalyst_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Catalizadores no binarios y medibles (S&M, durabilidad de ingresos, gobernanza/capital allocation).",
+        "Ventanas de validacion de 1-12 meses via 10-Q/10-K/earnings."
+      ]
+    },
+    "non_speculative_gate": {
+      "status": "PASS",
+      "banderas": {
+        "tesis_binaria_detectada": true,
+        "dependencia_financiacion_salvadora": false,
+        "opacidad_inaceptable": false
+      },
+      "por_que": [
+        "Existe componente binario parcial por concentracion de carrier, pero la supervivencia no depende de financiacion externa.",
+        "La falsacion de tesis se puede hacer incrementalmente con datos publicos trimestrales."
+      ]
+    }
+  },
+  "scoring_preliminar": {
+    "metodo": "Score_0_100",
+    "componentes": {
+      "S_supervivencia_0_25": 22,
+      "M_mispricing_0_25": 18,
+      "C_catalizador_0_20": 14,
+      "Q_calidad_0_15": 8,
+      "R_downside_0_15": 9,
+      "V_penalizacion_0_a_menos15": -5
+    },
+    "total_0_100": 66,
+    "nota": "Caso con asimetria favorable y supervivencia fuerte, penalizado por incertidumbre de gobernanza/ciclo y disclosures pendientes."
+  },
+  "assumption_ledger": {
+    "reglas": {
+      "id_prefix": "A-",
+      "max_supuestos": 40,
+      "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+    },
+    "supuestos": [
+      {
+        "assumption_id": "A-001",
+        "enunciado": "La eficiencia de S&M se mantendra por debajo del 80% de revenue en FY2026.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.6,
+        "confianza_0_1": 0.55,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "MARGEN_OPERATIVO",
+          "FCF"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_SEC_008_10-Q_Q2-2025",
+            "ubicacion": "Income statement H1-2025",
+            "cita_corta": "S&M/Revenue alrededor de 77.5%",
+            "interpretacion": "Nivel favorable pero aun no prueba estructura plena."
+          },
+          {
+            "source_id": "SRC_SEC_001_10-K_FY2024",
+            "ubicacion": "Income statement FY2024",
+            "cita_corta": "S&M bajo desde 84% a 77.5%",
+            "interpretacion": "Mejora fuerte vs FY2023."
+          }
+        ],
+        "falsacion": {
+          "test": "S&M/Revenue >80% en 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 15
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [
+          "A-002"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_FUSION_003"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_001"
+          },
+          {
+            "agent_role": "CATALYST",
+            "claim_id": "CLM_006"
+          }
+        ],
+        "notas_arbitro": "Conflicto central estructural vs ciclico."
+      },
+      {
+        "assumption_id": "A-002",
+        "enunciado": "Revenue FY2026 se sostendra por encima de 650M sin colapso de ciclo.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.58,
+        "confianza_0_1": 0.5,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "FCF",
+          "MARGEN_OPERATIVO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_019_8-K_2026-02-23",
+            "ubicacion": "Q4-2025/FY2025 results",
+            "cita_corta": "FY2025 692.5M y Q4 record 195.3M",
+            "interpretacion": "Momentum de entrada favorable."
+          },
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "historico_anual FY2021-FY2023",
+            "cita_corta": "Revenue cayo de 418M a 288M en ciclo previo",
+            "interpretacion": "Riesgo ciclico probado."
+          }
+        ],
+        "falsacion": {
+          "test": "Revenue trimestral <140M en 2 trimestres consecutivos o FY2026 <600M.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 15
+          },
+          "fuente_prevista": "earnings",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [
+          "A-011"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_FUSION_001"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_004"
+          },
+          {
+            "agent_role": "CATALYST",
+            "claim_id": "CLM_002"
+          }
+        ],
+        "notas_arbitro": "Dependencia alta del ciclo de gasto de carriers."
+      },
+      {
+        "assumption_id": "A-004",
+        "enunciado": "La concentracion del top carrier no se materializara en perdida abrupta de volumen.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.78,
+        "confianza_0_1": 0.4,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "FCF",
+          "MARGEN_OPERATIVO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_SEC_001_10-K_FY2024",
+            "ubicacion": "Risk factors",
+            "cita_corta": "Top carrier alrededor de 39%",
+            "interpretacion": "Riesgo binario parcial elevado."
+          }
+        ],
+        "falsacion": {
+          "test": "Perdida del carrier principal o caida de ingresos YoY >=25% en 2 trimestres.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_002"
+          },
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_FUSED_004"
+          }
+        ],
+        "notas_arbitro": "Requiere actualizacion FY2025 para cerrar incertidumbre."
+      },
+      {
+        "assumption_id": "A-005",
+        "enunciado": "El modelo asset-light mantiene alta conversion de caja (FCF/EBIT >1.0x).",
+        "tipo": "HECHO",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.88,
+        "confianza_0_1": 0.8,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "FCF"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_019_8-K_2026-02-23",
+            "ubicacion": "Cash flow FY2025",
+            "cita_corta": "CFO 95.4M y capex 5.1M",
+            "interpretacion": "FCF headline robusto."
+          }
+        ],
+        "falsacion": {
+          "test": "FCF/EBIT <0.9x de forma anual o deterioro sostenido de conversion.",
+          "ventana_meses": {
+            "min": 12,
+            "max": 24
+          },
+          "fuente_prevista": "10-K",
+          "accion_si_falla": "REVISAR_COMITE"
+        },
+        "dependencias": [
+          "A-009",
+          "A-010"
+        ],
+        "estado": "CONFIRMADA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_FUSION_004"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_003"
+          }
+        ],
+        "notas_arbitro": "Se usa tambien version ajustada por SBC para valoracion."
+      },
+      {
+        "assumption_id": "A-006",
+        "enunciado": "NOL y fiscalidad efectiva favoreceran caja, sin limite severo de Section 382.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.45,
+        "confianza_0_1": 0.35,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "FCF"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_019_8-K_2026-02-23",
+            "ubicacion": "FY2025 taxes",
+            "cita_corta": "Tax benefit 37.5M",
+            "interpretacion": "Materialidad fiscal alta, duracion incierta."
+          }
+        ],
+        "falsacion": {
+          "test": "Tasa efectiva FY2026 >20% con FCF FY2026 <50M.",
+          "ventana_meses": {
+            "min": 9,
+            "max": 15
+          },
+          "fuente_prevista": "10-K",
+          "accion_si_falla": "REDUCIR_50"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_FUSION_006"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_003"
+          }
+        ],
+        "notas_arbitro": "Bloqueador documental hasta 10-K FY2025."
+      },
+      {
+        "assumption_id": "A-007",
+        "enunciado": "Caja neta se mantendra >100M sin uso destructivo.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.75,
+        "confianza_0_1": 0.55,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "OTRO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_SEC_001_10-K_FY2024",
+            "ubicacion": "Balance + related party note",
+            "cita_corta": "Caja elevada, deuda 0, RPTs en aumento",
+            "interpretacion": "Fortaleza financiera con riesgo de asignacion."
+          }
+        ],
+        "falsacion": {
+          "test": "Caja neta <100M sin retorno equivalente a accionistas y CFO TTM <30M.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [
+          "A-008"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_FUSION_005"
+          },
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_FUSED_003"
+          }
+        ],
+        "notas_arbitro": "Sosten defensivo clave del downside."
+      },
+      {
+        "assumption_id": "A-008",
+        "enunciado": "La gobernanza no implicara extraccion sistematica de valor (RPTs/recompras afiliadas).",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.55,
+        "confianza_0_1": 0.3,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "OTRO",
+          "MULTIPLO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_SEC_001_10-K_FY2024",
+            "ubicacion": "Related party note",
+            "cita_corta": "RPTs 14.5M, crecimiento fuerte interanual",
+            "interpretacion": "Red flag de gobernanza."
+          },
+          {
+            "source_id": "SRC_007_10-Q_Q3-2025",
+            "ubicacion": "Share repurchase disclosure",
+            "cita_corta": "Recompra de 21M a entidad afiliada",
+            "interpretacion": "Posible conflicto de interes."
+          }
+        ],
+        "falsacion": {
+          "test": "Nueva recompra afiliada o RPT trimestral >5M sin proceso independiente.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_005"
+          },
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_FUSED_003"
+          }
+        ],
+        "notas_arbitro": "Bloqueador principal para pasar de WATCHLIST a INVERTIR."
+      },
+      {
+        "assumption_id": "A-009",
+        "enunciado": "El tax benefit FY2025 fue no recurrente; el earning power operativo base es EBIT.",
+        "tipo": "HECHO",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.92,
+        "confianza_0_1": 0.88,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "FCF"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_019_8-K_2026-02-23",
+            "ubicacion": "Income statement FY2025",
+            "cita_corta": "Tax benefit 37.5M y net income por encima de EBIT",
+            "interpretacion": "Consenso de ajuste de calidad de beneficios."
+          }
+        ],
+        "falsacion": {
+          "test": "10-K FY2025 demuestra recurrencia material del beneficio fiscal en magnitud similar.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-K",
+          "accion_si_falla": "REVISAR_COMITE"
+        },
+        "dependencias": [
+          "A-006"
+        ],
+        "estado": "CONFIRMADA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_003"
+          },
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_FUSED_002"
+          },
+          {
+            "agent_role": "CATALYST",
+            "claim_id": "CLM_005"
+          }
+        ],
+        "notas_arbitro": "Anclar valoracion en EBIT y FCF ajustado."
+      },
+      {
+        "assumption_id": "A-010",
+        "enunciado": "La dilucion neta por SBC se mantendra controlada.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.5,
+        "confianza_0_1": 0.35,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "OTRO",
+          "FCF"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_019_8-K_2026-02-23",
+            "ubicacion": "Cash flow FY2025",
+            "cita_corta": "SBC alrededor de 24.3M",
+            "interpretacion": "Costo economico relevante para accionista."
+          }
+        ],
+        "falsacion": {
+          "test": "Diluted shares +5% YoY neto de recompras.",
+          "ventana_meses": {
+            "min": 9,
+            "max": 15
+          },
+          "fuente_prevista": "10-K",
+          "accion_si_falla": "CONGELAR_COMPRAS"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_003"
+          },
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_FUSED_005"
+          }
+        ],
+        "notas_arbitro": "Pendiente de roll-forward oficial de acciones diluidas."
+      },
+      {
+        "assumption_id": "A-011",
+        "enunciado": "El ciclo de auto insurance no revertira severamente en 12-18 meses.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.55,
+        "confianza_0_1": 0.35,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "FCF",
+          "MARGEN_OPERATIVO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "historico_anual FY2019-FY2025",
+            "cita_corta": "Serie de revenue muy volatil",
+            "interpretacion": "Alta sensibilidad al ciclo de gasto de carriers."
+          }
+        ],
+        "falsacion": {
+          "test": "Revenue YoY negativo por 2 trimestres y recorte de gasto de carriers.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "earnings",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_001"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_004"
+          }
+        ],
+        "notas_arbitro": "Factor exogeno principal no completamente observable con datos actuales."
+      }
+    ]
+  },
+  "evidence_graph": {
+    "version": "EvidenceGraph_v1",
+    "nodos": [
+      {
+        "node_id": "E-001",
+        "tipo": "EVIDENCIA",
+        "label": "8-K FY2025: revenue record y EBIT positivo",
+        "ref": {
+          "source_id": "SRC_019_8-K_2026-02-23"
+        }
+      },
+      {
+        "node_id": "E-002",
+        "tipo": "EVIDENCIA",
+        "label": "10-Q/10-K: S&M en banda alta de 70s",
+        "ref": {
+          "source_id": "SRC_SEC_008_10-Q_Q2-2025"
+        }
+      },
+      {
+        "node_id": "E-003",
+        "tipo": "EVIDENCIA",
+        "label": "10-K FY2024: top carrier ~39%",
+        "ref": {
+          "source_id": "SRC_SEC_001_10-K_FY2024"
+        }
+      },
+      {
+        "node_id": "E-004",
+        "tipo": "EVIDENCIA",
+        "label": "10-Q Q3-2025: recompra a afiliado",
+        "ref": {
+          "source_id": "SRC_007_10-Q_Q3-2025"
+        }
+      },
+      {
+        "node_id": "E-005",
+        "tipo": "EVIDENCIA",
+        "label": "ImpliedExpectations: EV/FCF bajo y gap de expectativas",
+        "ref": {
+          "source_id": "ImpliedExpectations_v1"
+        }
+      },
+      {
+        "node_id": "A-001",
+        "tipo": "SUPUESTO",
+        "label": "S&M <80% sostenible",
+        "ref": {
+          "assumption_id": "A-001"
+        }
+      },
+      {
+        "node_id": "A-002",
+        "tipo": "SUPUESTO",
+        "label": "Revenue FY2026 >650M",
+        "ref": {
+          "assumption_id": "A-002"
+        }
+      },
+      {
+        "node_id": "A-004",
+        "tipo": "SUPUESTO",
+        "label": "No perdida abrupta de top carrier",
+        "ref": {
+          "assumption_id": "A-004"
+        }
+      },
+      {
+        "node_id": "A-008",
+        "tipo": "SUPUESTO",
+        "label": "Gobernanza no extractiva",
+        "ref": {
+          "assumption_id": "A-008"
+        }
+      },
+      {
+        "node_id": "SC-BASE",
+        "tipo": "ESCENARIO",
+        "label": "BASE",
+        "ref": {
+          "scenario_id": "BASE"
+        }
+      },
+      {
+        "node_id": "SC-BEAR",
+        "tipo": "ESCENARIO",
+        "label": "BEAR",
+        "ref": {
+          "scenario_id": "BEAR"
+        }
+      },
+      {
+        "node_id": "D-001",
+        "tipo": "DECISION",
+        "label": "WATCHLIST",
+        "ref": {
+          "decision": "WATCHLIST"
+        }
+      }
+    ],
+    "aristas": [
+      {
+        "from": "E-002",
+        "to": "A-001",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.6,
+        "nota": "Eficiencia observada pero aun debatida."
+      },
+      {
+        "from": "E-001",
+        "to": "A-002",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.7,
+        "nota": "Momentum reciente de ingresos."
+      },
+      {
+        "from": "E-003",
+        "to": "A-004",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.4,
+        "nota": "Concentracion alta no actualizada FY2025."
+      },
+      {
+        "from": "E-004",
+        "to": "A-008",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.8,
+        "nota": "Riesgo de gobernanza elevado."
+      },
+      {
+        "from": "A-001",
+        "to": "SC-BASE",
+        "relacion": "DEPENDE_DE",
+        "peso_0_1": 0.8,
+        "nota": "Margen base depende de S&M."
+      },
+      {
+        "from": "A-002",
+        "to": "SC-BASE",
+        "relacion": "DEPENDE_DE",
+        "peso_0_1": 0.7,
+        "nota": "Sostenibilidad de ingresos."
+      },
+      {
+        "from": "A-004",
+        "to": "SC-BEAR",
+        "relacion": "DISPARA",
+        "peso_0_1": 0.6,
+        "nota": "Materializacion de riesgo de concentracion."
+      },
+      {
+        "from": "A-008",
+        "to": "D-001",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.8,
+        "nota": "Bloqueador de pasar a INVERTIR."
+      },
+      {
+        "from": "SC-BASE",
+        "to": "D-001",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.7,
+        "nota": "Asimetria positiva insuficiente sin cierre de bloqueadores."
+      },
+      {
+        "from": "E-005",
+        "to": "SC-BASE",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.7,
+        "nota": "Define el gap de valoracion a cerrar."
+      }
+    ],
+    "validacion_grafo": {
+      "ids_unicos": true,
+      "aristas_referencian_nodos_existentes": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "detalle": "Coherencia estructural valida."
+    }
+  },
+  "catalizadores_consolidados": [
+    {
+      "catalyst_id": "C-001",
+      "nombre": "Estabilizacion de eficiencia S&M (<78-80%)",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 3,
+        "probable": 6,
+        "max": 12
+      },
+      "probabilidad_0_1": 0.6,
+      "mecanismo_cierre_gap": "Sostener S&M en banda objetivo mantiene EBIT positivo y reduce tesis de peak earnings.",
+      "supuestos_afectados": [
+        "A-001",
+        "A-005"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "S&M/Revenue <=78-80% en Q1-Q2 2026 con revenue >=160M",
+          "fuente_prevista": "10-Q",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          }
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-002",
+      "nombre": "Durabilidad de revenue FY2026",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 3,
+        "probable": 6,
+        "max": 12
+      },
+      "probabilidad_0_1": 0.55,
+      "mecanismo_cierre_gap": "Revenue sostenido refuta escenario de colapso implicito y habilita rerating parcial.",
+      "supuestos_afectados": [
+        "A-002",
+        "A-011"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Revenue Q1-2026 >=165M y FY2026 >=700M",
+          "fuente_prevista": "earnings",
+          "ventana_meses": {
+            "min": 1,
+            "max": 15
+          }
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-003",
+      "nombre": "Normalizacion de gobernanza y asignacion de capital",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 24
+      },
+      "probabilidad_0_1": 0.35,
+      "mecanismo_cierre_gap": "Menos RPTs y ausencia de recompras afiliadas reducirian descuento de gobernanza.",
+      "supuestos_afectados": [
+        "A-008",
+        "A-010"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "RPTs estables/decrecientes y sin recompras afiliadas",
+          "fuente_prevista": "filing",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          }
+        }
+      ]
+    }
+  ],
+  "escenarios": [
+    {
+      "scenario_id": "BASE",
+      "probabilidad_0_1": 0.45,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 15,
+        "max": 24
+      },
+      "descripcion": "Revenue estable en 680-740M, S&M en 77-80%, EBIT positivo sostenido y rerating parcial.",
+      "drivers_clave": [
+        "A-001",
+        "A-002",
+        "A-005"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 20,
+        "base": 40,
+        "max": 65
+      },
+      "nota_valoracion": "Rerating a 7-8x EV/FCF con evidencia operativa incremental."
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.15,
+      "ventana_meses": {
+        "min": 12,
+        "probable": 21,
+        "max": 30
+      },
+      "descripcion": "Revenue 750-850M, mejora adicional de S&M, mayor claridad de governance y expansion de multiple.",
+      "drivers_clave": [
+        "A-001",
+        "A-002",
+        "A-005",
+        "A-008"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 80,
+        "base": 120,
+        "max": 180
+      },
+      "nota_valoracion": "Escenario de alta ejecucion y menor descuento de gobernanza."
+    },
+    {
+      "scenario_id": "BEAR",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 24
+      },
+      "descripcion": "Reversion ciclica del gasto de carriers, deterioro de S&M o evento de gobernanza.",
+      "drivers_clave": [
+        "A-001",
+        "A-002",
+        "A-004",
+        "A-011"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": -40,
+        "base": -25,
+        "max": -5
+      },
+      "nota_valoracion": "Caja neta protege parcialmente el downside."
+    }
+  ],
+  "kill_criteria_final": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con_assumption_id": "A-001",
+      "definicion": "S&M/Revenue >80% en 2 trimestres consecutivos de FY2026.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 15
+      },
+      "fuente_prevista": "10-Q",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Rompe el driver principal de margen."
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con_assumption_id": "A-002",
+      "definicion": "Revenue trimestral <140M en 2 trimestres consecutivos o H1-2026 <=310M.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "fuente_prevista": "earnings",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Confirma peak cycle/reversion severa."
+    },
+    {
+      "kc_id": "KC-003",
+      "relacionado_con_assumption_id": "A-005",
+      "definicion": "EBIT negativo durante 2 trimestres consecutivos.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 18
+      },
+      "fuente_prevista": "earnings",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Invalida la tesis de sostenibilidad operativa."
+    },
+    {
+      "kc_id": "KC-004",
+      "relacionado_con_assumption_id": "A-004",
+      "definicion": "Top carrier >45% con caida de volumen o perdida de carrier principal.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 24
+      },
+      "fuente_prevista": "10-Q",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Materializa riesgo binario comercial."
+    },
+    {
+      "kc_id": "KC-005",
+      "relacionado_con_assumption_id": "A-008",
+      "definicion": "Nueva recompra a afiliado o RPT >5M en un trimestre, o >20M anual.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "fuente_prevista": "filing",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Confirma riesgo de gobernanza extractiva."
+    },
+    {
+      "kc_id": "KC-006",
+      "relacionado_con_assumption_id": "A-006",
+      "definicion": "Tasa fiscal efectiva FY2026 >20% AND FCF FY2026 <50M.",
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "fuente_prevista": "10-K",
+      "accion": "REDUCIR_50",
+      "severidad": "MEDIA",
+      "por_que": "Indica que FY2025 no era base de caja recurrente."
+    },
+    {
+      "kc_id": "KC-007",
+      "relacionado_con_assumption_id": "A-007",
+      "definicion": "Caja neta <100M junto a CFO TTM <30M.",
+      "ventana_meses": {
+        "min": 6,
+        "max": 24
+      },
+      "fuente_prevista": "10-Q",
+      "accion": "SALIR",
+      "severidad": "MEDIA",
+      "por_que": "Deteriora el principal colchon de downside."
+    },
+    {
+      "kc_id": "KC-008",
+      "relacionado_con_assumption_id": "A-010",
+      "definicion": "Diluted share count crece >5% YoY neto de recompras.",
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "fuente_prevista": "10-K",
+      "accion": "CONGELAR_COMPRAS",
+      "severidad": "MEDIA",
+      "por_que": "SBC/dilucion supera compensacion por recompras."
+    }
+  ],
+  "plan_monitorizacion": {
+    "frecuencias": {
+      "pulso_diario": {
+        "activo": true,
+        "que_mirar": [
+          "Precio EVER vs umbral de alerta",
+          "8-K relevantes",
+          "Noticias de carriers principales"
+        ]
+      },
+      "revision_semanal": {
+        "activo": true,
+        "que_mirar": [
+          "Estado de supuestos criticos A-001/A-002/A-004/A-008",
+          "Novedades de gobernanza y RPTs",
+          "Indicadores sectoriales de ad spend"
+        ]
+      },
+      "modo_evento": {
+        "activo": true,
+        "que_mirar": [
+          "10-K FY2025",
+          "Earnings Q1-2026 y transcript",
+          "DEF14A 2026",
+          "10-Q FY2026"
+        ]
+      }
+    },
+    "lista_de_checks_por_supuesto": [
+      {
+        "assumption_id": "A-001",
+        "indicadores": [
+          "S&M/Revenue",
+          "Margen EBIT",
+          "Revenue trimestral"
+        ],
+        "fuente": "10-Q",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-002",
+        "indicadores": [
+          "Revenue absoluto",
+          "Revenue YoY",
+          "Guidance FY2026"
+        ],
+        "fuente": "earnings",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-004",
+        "indicadores": [
+          "Top1/top3 carrier pct",
+          "Disclosure de concentracion"
+        ],
+        "fuente": "10-K",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-008",
+        "indicadores": [
+          "RPT trimestral",
+          "Recompras afiliadas",
+          "Fairness process"
+        ],
+        "fuente": "filing",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-010",
+        "indicadores": [
+          "Diluted shares",
+          "SBC",
+          "Recompras netas"
+        ],
+        "fuente": "10-K",
+        "frecuencia": "ANUAL"
+      }
+    ],
+    "umbrales_alerta": [
+      {
+        "tipo": "PRECIO",
+        "condicion": "Precio <11 o caida >20% en 10 dias sin noticia explicita",
+        "accion": "REVISAR_COMITE",
+        "severidad": "MEDIA"
+      },
+      {
+        "tipo": "EVENTO",
+        "condicion": "Publicacion de 10-K FY2025",
+        "accion": "REVISAR_COMITE",
+        "severidad": "ALTA"
+      },
+      {
+        "tipo": "FUNDAMENTAL",
+        "condicion": "S&M/Revenue >80% en 2 trimestres",
+        "accion": "SALIR",
+        "severidad": "ALTA"
+      },
+      {
+        "tipo": "GOBERNANZA",
+        "condicion": "RPT >5M trimestral o recompra afiliada adicional",
+        "accion": "SALIR",
+        "severidad": "ALTA"
+      }
+    ]
+  },
+  "predicciones_para_calibracion_consolidadas": [
+    {
+      "pred_id": "CP-001",
+      "descripcion": "Revenue Q1-2026 >= 165M",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 1,
+        "max": 4
+      },
+      "criterio_validacion": "Revenue GAAP Q1-2026 >= 165,000,000",
+      "fuente_prevista": "earnings",
+      "origen": [
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_FUSION_001"
+        },
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_001"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-002",
+      "descripcion": "Revenue FY2026 >= 700M",
+      "probabilidad_0_1": 0.53,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "Suma Q1-Q4 FY2026 >= 700,000,000",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_FUSION_003"
+        },
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_002"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-003",
+      "descripcion": "EBIT positivo en los 4 trimestres de FY2026",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 15
+      },
+      "criterio_validacion": "EBIT > 0 en cada trimestre FY2026",
+      "fuente_prevista": "10-Q",
+      "origen": [
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_FUSION_002"
+        },
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_007"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-004",
+      "descripcion": "S&M/Revenue <78% en al menos 3 de 4 trimestres FY2026",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 15
+      },
+      "criterio_validacion": "S&M/Revenue <78% en 3+ trimestres FY2026",
+      "fuente_prevista": "10-Q",
+      "origen": [
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_FUSION_005"
+        },
+        {
+          "agent_role": "RED_TEAM",
+          "pred_id": "PRED_RT_002"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-005",
+      "descripcion": "Tasa fiscal efectiva FY2026 >15%",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "Tax expense / pre-tax income FY2026 > 15%",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "RED_TEAM",
+          "pred_id": "PRED_RT_004"
+        },
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_FUSED_003"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-006",
+      "descripcion": "Concentracion del carrier principal FY2025 >35%",
+      "probabilidad_0_1": 0.72,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "10-K FY2025 reporta top customer >35%",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "RED_TEAM",
+          "pred_id": "PRED_RT_005"
+        },
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_FUSED_008"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-007",
+      "descripcion": "FCF FY2026 (CFO-capex) >= 70M",
+      "probabilidad_0_1": 0.52,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "CFO - capex FY2026 >= 70,000,000",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_FUSION_004"
+        },
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_006"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-008",
+      "descripcion": "RPTs FY2025 >= 15M",
+      "probabilidad_0_1": 0.58,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "RPT expense FY2025 >= 15,000,000",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "FORENSIC",
+          "pred_id": "PRED_FUSED_012"
+        }
+      ]
+    }
+  ],
+  "arbitraje": {
+    "notas_arbitro": [
+      "Decision fusionada: WATCHLIST (no INVERTIR, no BLOQUEADO) para preservar asimetria positiva sin ignorar bloqueadores verificables.",
+      "La tesis cuantitativa de mispricing y supervivencia se mantiene valida, pero el riesgo de gobernanza/concentracion y la falta de 10-K FY2025 completo impiden activar posicion.",
+      "Ruta a INVERTIR: cierre documental (10-K/DEF14A), confirmacion de S&M y revenue en Q1-Q2 2026, sin escalada de RPTs.",
+      "Ruta a DESCARTAR: materializacion de kill criteria de S&M, revenue, concentracion o gobernanza."
+    ],
+    "desacuerdos_detectados": [
+      {
+        "tema": "Data quality gate PASS vs FAIL",
+        "agentes": [
+          {
+            "agent_role": "GEMINI",
+            "posicion": "PASS con faltantes puntuales",
+            "confianza_0_1": 0.7
+          },
+          {
+            "agent_role": "CODEX",
+            "posicion": "FAIL por regla estricta de TruthPack PARTIAL",
+            "confianza_0_1": 0.58
+          },
+          {
+            "agent_role": "CLAUDE",
+            "posicion": "PASS con bloqueadores documentales",
+            "confianza_0_1": 0.58
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "RESUELTO",
+          "decision": "pasar_condicional",
+          "por_que": "Se adopta PASS operativo con WATCHLIST obligatorio y remediacion de fuentes ALTA prioridad.",
+          "accion": "No habilitar sizing hasta cierre de faltantes criticos."
+        }
+      },
+      {
+        "tema": "S&M estructural vs ciclico",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Mejora estructural",
+            "confianza_0_1": 0.74
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "Mejora ciclica reversible",
+            "confianza_0_1": 0.82
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "NO_RESUELTO",
+          "decision": "convertir_en_escenario",
+          "por_que": "Faltan datos sectoriales y dos trimestres adicionales para desambiguar.",
+          "accion": "Mantener A-001 como test central con KC-001."
+        }
+      },
+      {
+        "tema": "Severidad de gobernanza (RPTs/recompra afiliada)",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Riesgo monitoreable",
+            "confianza_0_1": 0.65
+          },
+          {
+            "agent_role": "FORENSIC",
+            "posicion": "Red flag severa",
+            "confianza_0_1": 0.76
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "Bloqueador",
+            "confianza_0_1": 0.72
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "NO_RESUELTO",
+          "decision": "pedir_fuente",
+          "por_que": "Sin 10-K FY2025/DEF14A 2026 no hay cierre robusto de fairness y oversight.",
+          "accion": "Mantener KC-005 activo y WATCHLIST."
+        }
+      },
+      {
+        "tema": "Decision final INVERTIR vs BLOQUEADO vs WATCHLIST",
+        "agentes": [
+          {
+            "agent_role": "GEMINI",
+            "posicion": "INVERTIR",
+            "confianza_0_1": 0.7
+          },
+          {
+            "agent_role": "CODEX",
+            "posicion": "BLOQUEADO",
+            "confianza_0_1": 0.58
+          },
+          {
+            "agent_role": "CLAUDE",
+            "posicion": "WATCHLIST",
+            "confianza_0_1": 0.58
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "RESUELTO",
+          "decision": "WATCHLIST",
+          "por_que": "Conserva opcionalidad de upside sin violar warnings de calidad/gobernanza/concentracion.",
+          "accion": "Rearbitrar tras 10-K FY2025 y Q1-2026."
+        }
+      }
+    ],
+    "puntos_abiertos": [
+      "NOL remanente y limites Section 382 exactos.",
+      "Concentracion FY2025 top1/top3 carriers.",
+      "Detalle FY2025 de RPTs y fairness de recompra afiliada.",
+      "Roll-forward de diluted shares y SBC neta.",
+      "Guidance FY2026 y comentarios de management sobre ciclo de ad spend."
+    ]
+  },
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "10-K FY2025 completo (taxes, concentration, RPT, SBC, EPS)",
+      "por_que_importa": "Cierra bloqueadores principales de data quality y governance.",
+      "como_obtenerlo": "SEC EDGAR EVER Form 10-K FY2025"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "DEF14A 2026",
+      "por_que_importa": "Valida fairness y oversight en recompras afiliadas y related parties.",
+      "como_obtenerlo": "SEC EDGAR EVER DEF 14A 2026"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Transcript earnings Q4-2025/FY2025 y Q1-2026",
+      "por_que_importa": "Aporta guidance, comentarios de ciclo y unit economics.",
+      "como_obtenerlo": "IR company site / transcript providers"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Datos de industria de gasto de marketing de auto insurers",
+      "por_que_importa": "Permite separar senal estructural de efecto ciclico.",
+      "como_obtenerlo": "Earnings calls de carriers y reportes sectoriales"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Roll-forward de acciones diluidas y detalle SBC FY2025",
+      "por_que_importa": "Cuantifica FCF por accion y dilucion neta real.",
+      "como_obtenerlo": "10-K FY2025 notes de EPS/stock comp"
+    }
+  ],
+  "salida_para_siguiente_agente": {
+    "monitor_input_recomendado": "Usar este DecisionPacket_v2 como base de monitorizacion y rearbitraje post-disclosures.",
+    "estado_caso": "EN_ESPERA",
+    "proxima_revision_sugerida": "2026-03-10"
+  },
+  "log": {
+    "autochequeos": {
+      "decision_respeta_gates": true,
+      "supuestos_criticos_tienen_evidencia": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "kill_criteria_mapeados_a_supuestos": true,
+      "salida_solo_json": true,
+      "probabilidades_escenarios_suman_1": true,
+      "kelly_sizing_dentro_de_tope": true,
+      "intervalo_confianza_coherente_con_escenarios": true,
+      "decision_categorica_coherente_con_probabilistica": true,
+      "sizing_final_igual_preliminar_si_invertir": true,
+      "sensibilidad_cubre_supuestos_criticos": true
+    },
+    "limitaciones": [
+      "10-K FY2025 completo aun no integrado en el dataset consolidado.",
+      "Sin confirmacion primaria de top1/top3 carrier FY2025.",
+      "Sin cierre documental de fairness/review independiente de recompra afiliada.",
+      "Sin roll-forward final de diluted shares FY2025.",
+      "Sin dataset sectorial completo para calibrar ciclicidad de ad spend."
+    ],
+    "revision": {
+      "es_revision": false,
+      "revision_num": 1,
+      "decision_packet_anterior_caso_id": null,
+      "monitoring_updates_usados": [],
+      "resumen_cambios": [
+        "Fusion de Gemini, Codex y Claude en DecisionPacket_v2 unico."
+      ]
+    }
+  },
+  "control": {
+    "estado_flujo": "ARBITRATE",
+    "next_step": "MONITOR",
+    "next_agent_role": "MONITOR",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 2,
+    "issues": [
+      {
+        "issue_id": "ISS-002",
+        "issue_code": "FY2025_10K_FULL_MISSING",
+        "gate_afectado": "data_quality_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "SOURCES",
+        "descripcion": "Falta integrar 10-K FY2025 completo con notas fiscales, concentracion y related parties."
+      },
+      {
+        "issue_id": "ISS-005",
+        "issue_code": "RPT_FAIRNESS_DISCLOSURE_MISSING",
+        "gate_afectado": "data_quality_gate",
+        "severidad": "MEDIA",
+        "resoluble": true,
+        "owner_agent_role": "SOURCES",
+        "descripcion": "No hay evidencia cerrada de fairness/oversight en recompra afiliada y RPT FY2025."
+      }
+    ],
+    "work_orders": [],
+    "dispatch_queue": []
+  },
+  "_meta": {
+    "fusion": {
+      "step_name": "ARBITRO",
+      "schema_objetivo": "DecisionPacket_v2",
+      "modelos_usados": [
+        "gemini",
+        "codex",
+        "claude"
+      ],
+      "normalizacion_schema": {
+        "gemini": "DecisionPacket_v2",
+        "codex": "ArbitroRemediateKickoff_v1 (se extrajo decision_packet DecisionPacket_v2)",
+        "claude": "DecisionPacket_v2"
+      },
+      "criterios_resolucion": [
+        "Priorizar consistencia de schema DecisionPacket_v2.",
+        "En cuantitativos, usar valor con mayor soporte explicito y/o conservador cuando el conflicto es material.",
+        "No promediar ciegamente; mantener valores presentes en al menos uno de los modelos.",
+        "No ignorar warnings: todos los flags criticos (data quality, concentracion, gobernanza, fiscalidad) se preservan en gates/issues/kill criteria.",
+        "Para probabilidades y scores, reportar rango inter-modelo + valor recomendado."
+      ],
+      "rangos_modelos": {
+        "confianza_global_0_1": {
+          "min": 0.58,
+          "max": 0.7,
+          "recomendado": 0.58
+        },
+        "probabilidad_exito_0_1": {
+          "min": 0.6,
+          "max": 0.65,
+          "recomendado": 0.6
+        },
+        "retorno_esperado_ponderado_pct": {
+          "min": 26.0,
+          "max": 32.6,
+          "recomendado": 26.0
+        },
+        "conviccion_0_1": {
+          "min": 0.45,
+          "max": 0.7,
+          "recomendado": 0.6
+        },
+        "score_total_0_100": {
+          "min": 57,
+          "max": 73,
+          "recomendado": 66
+        },
+        "sizing_final_pct": {
+          "min": 0,
+          "max": 2.5,
+          "recomendado": 0
+        },
+        "escenario_base_prob_0_1": {
+          "min": 0.45,
+          "max": 0.45,
+          "recomendado": 0.45
+        },
+        "escenario_bull_prob_0_1": {
+          "min": 0.15,
+          "max": 0.2,
+          "recomendado": 0.15
+        },
+        "escenario_bear_prob_0_1": {
+          "min": 0.35,
+          "max": 0.4,
+          "recomendado": 0.4
+        }
+      },
+      "conflictos_detectados": [
+        {
+          "tema": "Decision final",
+          "modelos": {
+            "gemini": "INVERTIR",
+            "codex": "BLOQUEADO",
+            "claude": "WATCHLIST"
+          },
+          "resolucion": "WATCHLIST",
+          "justificacion": "Minimiza error de tipo I y conserva opcionalidad; integra warnings de los 3 modelos."
+        },
+        {
+          "tema": "Data quality gate",
+          "modelos": {
+            "gemini": "PASS",
+            "codex": "FAIL",
+            "claude": "PASS"
+          },
+          "resolucion": "PASS con bloqueadores abiertos",
+          "justificacion": "Se adopta validacion mayoritaria con tratamiento conservador via issues y peticiones ALTA prioridad."
+        },
+        {
+          "tema": "S&M estructural vs ciclico",
+          "modelos": {
+            "gemini": "mas estructural",
+            "codex": "indeterminado, requiere remediacion",
+            "claude": "mas ciclico"
+          },
+          "resolucion": "convertir_en_escenario",
+          "justificacion": "No hay evidencia concluyente; se impone falsacion trimestral objetiva."
+        },
+        {
+          "tema": "Severidad de gobernanza",
+          "modelos": {
+            "gemini": "riesgo relevante pero invertible con sizing bajo",
+            "codex": "bloqueador hasta remediar",
+            "claude": "bloqueador verificable"
+          },
+          "resolucion": "bloqueador para pasar a INVERTIR",
+          "justificacion": "RPT/recompra afiliada sin cierre documental suficiente."
+        }
+      ],
+      "warnings_integrados": [
+        "Concentracion top carrier (~39%)",
+        "RPTs elevadas y recompra afiliada",
+        "Falta 10-K FY2025 completo",
+        "Incertidumbre NOL/Section 382 y diluted shares",
+        "Riesgo de reversión ciclica de ad spend"
+      ]
+    }
+  }
+}

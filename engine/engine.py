@@ -27,7 +27,12 @@ from .router import execute_pipeline, execute_step, is_step_ready, get_parallel_
 from .dashboard import generate_dashboard, generate_decisions, build_dashboard, render_dashboard, show_menu
 from .changelog import append_entry
 from .git_utils import stage_case, prepare_commit_message, commit
-from .diagnostics import format_failure_block, save_failure_artifact
+from .diagnostics import (
+    format_failure_block,
+    save_failure_artifact,
+    is_llm_step,
+    prune_failure_artifacts,
+)
 from .model_defaults import (
     collect_persistent_defaults_snapshot,
     build_global_updates,
@@ -108,11 +113,6 @@ Examples:
         action="store_true",
         help="Skip interactive model plan (use defaults)",
     )
-    p_pipeline.add_argument(
-        "--save-raw-on-failure",
-        action="store_true",
-        help="Persist full failure context to _diagnostics/failures on error",
-    )
     _add_empresa_hint_args(p_pipeline)
 
     # continue
@@ -127,11 +127,6 @@ Examples:
         "--no-plan",
         action="store_true",
         help="Skip interactive model plan (use defaults)",
-    )
-    p_continue.add_argument(
-        "--save-raw-on-failure",
-        action="store_true",
-        help="Persist full failure context to _diagnostics/failures on error",
     )
     _add_empresa_hint_args(p_continue)
 
@@ -347,6 +342,34 @@ Examples:
     p_evaluar.add_argument("ticker", type=str)
     p_evaluar.add_argument("--date", type=str, default=None)
 
+    # review — compile meta-review prompt
+    p_review = subparsers.add_parser(
+        "review",
+        help="Genera prompt de meta-review para GPT-5.2 Pro.",
+        description="Compila un prompt optimizado para review via proyecto ChatGPT.",
+    )
+    p_review.add_argument("ticker", type=str, help="Stock ticker")
+    p_review.add_argument("--date", type=str, default=None, help="Date (YYYY-MM-DD)")
+
+    # review_ingest — ingest GPT-5.2 Pro response
+    p_review_ingest = subparsers.add_parser(
+        "review_ingest",
+        help="Ingesta respuesta de meta-review de GPT-5.2 Pro.",
+        description="Parsea, valida y persiste la respuesta del meta-review.",
+    )
+    p_review_ingest.add_argument("ticker", type=str, help="Stock ticker")
+    p_review_ingest.add_argument("--date", type=str, default=None, help="Date (YYYY-MM-DD)")
+    p_review_ingest.add_argument("--response", type=str, default=None, help="Path to response file (optional)")
+
+    # review_status — check meta-review status across cases
+    p_review_status = subparsers.add_parser(
+        "review_status",
+        help="Estado de meta-reviews en todos los casos.",
+        description="Muestra el estado del meta-review para cada caso completado.",
+    )
+    p_review_status.add_argument("ticker", nargs="?", default=None, help="Filter by ticker (optional)")
+    p_review_status.add_argument("--date", type=str, default=None, help="Date (YYYY-MM-DD)")
+
     # benchmark
     p_benchmark = subparsers.add_parser(
         "benchmark",
@@ -436,6 +459,15 @@ Examples:
     elif args.command == "validate":
         _cmd_validate(config, args)
 
+    elif args.command == "review":
+        _cmd_review(config, args)
+
+    elif args.command == "review_ingest":
+        _cmd_review_ingest(config, args)
+
+    elif args.command == "review_status":
+        _cmd_review_status(config, args)
+
     elif args.command in ("monitor", "scanner", "scout", "outcome", "evaluar", "benchmark"):
         _cmd_operation(config, args)
 
@@ -469,6 +501,24 @@ def _run_model_plan_assistant(
     # Initial availability check for the baseline plan.
     checked: set[str] = build_effective_model_set(plan)
     availability = check_model_profiles_availability(config, checked)
+
+    # Enrich availability: mark unavailable models that have a copilot fallback path.
+    if config.copilot_transport_fallback:
+        for _mp, _av in list(availability.items()):
+            _ok = _av[0] if isinstance(_av, tuple) else _av
+            if not _ok:
+                _spec = config.get_model_spec(_mp)
+                if _spec:
+                    _primary = _spec.primary_transport
+                    _copilot = _spec.copilot_transport
+                    if (
+                        _copilot
+                        and _primary
+                        and _copilot.transport_name != _primary.transport_name
+                    ):
+                        _reason = _av[1] if isinstance(_av, tuple) and len(_av) > 1 else None
+                        availability[_mp] = (False, _reason, "copilot_fallback")
+
     profile_catalog = sorted(config.model_catalog.keys())
     profile_set = set(profile_catalog)
 
@@ -545,9 +595,20 @@ def _run_model_plan_assistant(
         print("\n=== Plan de modelos para esta corrida ===")
         print(render_plan_table(plan, availability))
 
-        unavailable = [name for name, (ok, _) in availability.items() if not ok]
+        unavailable = [
+            name for name, v in availability.items()
+            if not (v[0] if isinstance(v, tuple) else v)
+            and not (isinstance(v, tuple) and len(v) >= 3 and v[2] == "copilot_fallback")
+        ]
+        copilot_fallback_models = [
+            name for name, v in availability.items()
+            if not (v[0] if isinstance(v, tuple) else v)
+            and isinstance(v, tuple) and len(v) >= 3 and v[2] == "copilot_fallback"
+        ]
         if unavailable:
             print(f"\n⚠  Modelos no disponibles: {', '.join(unavailable)}")
+        if copilot_fallback_models:
+            print(f"\n↻  Fallback via Copilot: {', '.join(copilot_fallback_models)} (transport principal caído, se usará Copilot CLI automáticamente)")
 
         warnings = []
         for entry in plan:
@@ -1312,12 +1373,12 @@ def _cmd_defaults_step_set(config: EngineConfig, args) -> None:
 
 
 def _report_step_failure(
+    config: EngineConfig,
     case_dir,
     step_name,
     error,
     failure_ctx,
     *,
-    save_raw=False,
     persist_state=True,
     step_result=None,
 ) -> dict:
@@ -1332,22 +1393,39 @@ def _report_step_failure(
     elif not isinstance(failure_ctx, dict):
         failure_ctx = {"last_error": str(failure_ctx), "step_context": {"step": step_name}}
 
-    print(format_failure_block(step_name, failure_ctx, error))
+    normalized_error = (error or "").strip() if isinstance(error, str) else ""
+    if not normalized_error:
+        normalized_error = str(failure_ctx.get("last_error") or "").strip()
+    if not normalized_error:
+        normalized_error = "unknown error"
+
+    print(format_failure_block(step_name, failure_ctx, normalized_error))
+
+    payload = {
+        "step": step_name,
+        "error": normalized_error,
+        "failure_ctx": failure_ctx,
+        "result": step_result,
+    }
+    compact_path = save_failure_artifact(case_dir, step_name, payload, mode="compact")
+    full_path = None
+    if is_llm_step(config, step_name):
+        full_path = save_failure_artifact(case_dir, step_name, payload, mode="full")
+
+    max_files = config.failure_diagnostics.get("max_artifacts_per_case", 30)
+    prune_failure_artifacts(case_dir, max_files=max_files)
 
     persistent_ctx = dict(failure_ctx)
-    if save_raw:
-        payload = {
-            "step": step_name,
-            "error": error,
-            "failure_ctx": failure_ctx,
-            "result": step_result,
-        }
-        artifact_path = save_failure_artifact(case_dir, step_name, payload, include_raw=True)
-        if artifact_path:
-            persistent_ctx["diagnostic_path"] = artifact_path
+    diagnostics_meta = {}
+    if compact_path:
+        diagnostics_meta["compact_path"] = compact_path
+    if full_path:
+        diagnostics_meta["full_path"] = full_path
+    if diagnostics_meta:
+        persistent_ctx["diagnostics"] = diagnostics_meta
 
     if persist_state:
-        mark_step_failed(case_dir, step_name, error, failure_meta=persistent_ctx)
+        mark_step_failed(case_dir, step_name, normalized_error, failure_meta=persistent_ctx)
     return persistent_ctx
 
 
@@ -1379,15 +1457,14 @@ def _cmd_pipeline(config, args):
             if not isinstance(failure_entry, dict):
                 continue
             _report_step_failure(
+                config=config,
                 case_dir=case_dir,
                 step_name=failed_step,
                 error=failure_entry.get("error", "unknown"),
                 failure_ctx=failure_entry.get("failure_meta"),
-                save_raw=getattr(args, "save_raw_on_failure", False),
-                persist_state=False,
+                persist_state=True,
                 step_result=result.get("step_results", {}).get(failed_step),
             )
-            break
     _refresh_quality_stats(config, case_dir)
 
     stage_case(case_dir, config.workspace)
@@ -1504,21 +1581,15 @@ def _cmd_continue(config, args):
                 else:
                     failure_ctx = res.get("failure_ctx")
                     failure_error = res.get("error", "unknown")
-                    mark_step_failed(
-                        case_dir,
-                        s,
-                        failure_error,
-                        failure_meta=failure_ctx,
-                    )
                     print(f"[pipeline] ✗ {s} failed: {failure_error}")
                     all_ok = False
                     _report_step_failure(
+                        config,
                         case_dir,
                         s,
                         failure_error,
                         failure_ctx,
-                        save_raw=getattr(args, "save_raw_on_failure", False),
-                        persist_state=False,
+                        persist_state=True,
                         step_result=res,
                     )
 
@@ -1549,20 +1620,14 @@ def _cmd_continue(config, args):
             else:
                 failure_error = result.get("error", "unknown")
                 failure_ctx = result.get("failure_ctx")
-                mark_step_failed(
-                    case_dir,
-                    step_name,
-                    failure_error,
-                    failure_meta=failure_ctx,
-                )
                 print(f"[pipeline] ✗ {step_name} failed: {failure_error}")
                 _report_step_failure(
+                    config,
                     case_dir,
                     step_name,
                     failure_error,
                     failure_ctx,
-                    save_raw=getattr(args, "save_raw_on_failure", False),
-                    persist_state=False,
+                    persist_state=True,
                     step_result=result,
                 )
                 if config.execution.get("fail_fast", True):
@@ -1571,19 +1636,13 @@ def _cmd_continue(config, args):
         except Exception as e:
             print(f"[pipeline] ✗ {step_name} exception: {e}", file=sys.stderr)
             failure_ctx = {"last_error": str(e), "step_context": {"step": step_name}}
-            mark_step_failed(
-                case_dir,
-                step_name,
-                str(e),
-                failure_meta=failure_ctx,
-            )
             _report_step_failure(
+                config,
                 case_dir,
                 step_name,
                 str(e),
                 failure_ctx,
-                save_raw=getattr(args, "save_raw_on_failure", False),
-                persist_state=False,
+                persist_state=True,
                 step_result={"error": str(e), "failure_ctx": failure_ctx},
             )
             if config.execution.get("fail_fast", True):
@@ -1598,7 +1657,10 @@ def _cmd_continue(config, args):
         final_state.get("pipeline", {}).get(s, {}).get("estado") == "DONE"
         for s in PS
     )
-    if all_done:
+    has_errors = bool(final_state.get("_errors"))
+    if has_errors:
+        mark_pipeline_status(case_dir, "FALLIDO")
+    elif all_done:
         mark_pipeline_status(case_dir, "COMPLETO")
 
     final_state = load_state(case_dir)
@@ -1666,14 +1728,13 @@ def _cmd_step(config, args):
     else:
         failure_error = result.get("error", "unknown")
         failure_ctx = result.get("failure_ctx")
-        mark_step_failed(case_dir, step_name, failure_error, failure_meta=failure_ctx)
         _report_step_failure(
+            config,
             case_dir,
             step_name,
             failure_error,
             failure_ctx,
-            save_raw=False,
-            persist_state=False,
+            persist_state=True,
             step_result=result,
         )
 
@@ -1737,14 +1798,13 @@ def _cmd_rehacer(config, args):
     if not result.get("success"):
         failure_error = result.get("error", "unknown")
         failure_ctx = result.get("failure_ctx")
-        mark_step_failed(case_dir, step_name, failure_error, failure_meta=failure_ctx)
         _report_step_failure(
+            config,
             case_dir,
             step_name,
             failure_error,
             failure_ctx,
-            save_raw=False,
-            persist_state=False,
+            persist_state=True,
             step_result=result,
         )
 
@@ -1796,7 +1856,12 @@ def _cmd_operation(config, args):
             ticker = getattr(args, "ticker", "SYSTEM")
             date_str = getattr(args, "date", None) or date.today().isoformat()
             model = getattr(args, "model", "Codex")
-            case_dir = config.get_path("casos") / ticker.upper() / f"{date_str}_{model}"
+            # System-level operations use their dedicated directories
+            _OP_DEDICATED_PATHS = {"SCANNER": "scanner", "SCOUT": "scout"}
+            if op in _OP_DEDICATED_PATHS:
+                case_dir = config.get_path(_OP_DEDICATED_PATHS[op]) / date_str
+            else:
+                case_dir = config.get_path("casos") / ticker.upper() / f"{date_str}_{model}"
             if not case_dir.exists():
                 case_dir.mkdir(parents=True, exist_ok=True)
             result = execute_step(config, case_dir, step, ticker.upper())
@@ -1846,6 +1911,173 @@ def _run_interactive(config):
                 ))
         else:
             print(f"[engine] Command '{cmd}' — use CLI for full options")
+
+
+def _cmd_review(config, args):
+    """Generate meta-review prompt for GPT-5.2 Pro."""
+    from .review_compiler import compile_review_prompt
+
+    ticker = args.ticker.upper()
+    date_str = args.date
+
+    # Resolve case_dir (latest date if not specified)
+    casos_dir = config.get_path("casos") / ticker
+    if date_str:
+        case_dir = casos_dir / date_str
+    else:
+        case_dir = _resolve_latest_case_dir(casos_dir)
+        if case_dir is None:
+            print(f"[engine] ERROR: No cases found for {ticker}", file=sys.stderr)
+            sys.exit(1)
+
+    if not (case_dir / "_estado.json").exists():
+        print(f"[engine] ERROR: No state file in {case_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        output_path = compile_review_prompt(case_dir)
+        rel_path = output_path.relative_to(config.workspace) if output_path.is_relative_to(config.workspace) else output_path
+        print(f"\n✓ Prompt de review generado: {rel_path}")
+        print(f"\nSiguiente paso:")
+        print(f"  1. Abre el proyecto \"ELSIAN Meta-Review\" en ChatGPT")
+        print(f"  2. Pega el contenido del fichero como mensaje")
+        print(f"  3. Espera la respuesta de GPT-5.2 Pro")
+        # Extract timestamp from filename
+        ts = output_path.stem.replace("_review_prompt_gpt52pro_", "")
+        response_name = f"_review_response_raw_{ts}.md"
+        print(f"  4. Copia la respuesta completa a: {case_dir.relative_to(config.workspace) if case_dir.is_relative_to(config.workspace) else case_dir}/{response_name}")
+        date_flag = f" --date {case_dir.name}" if case_dir.name != date.today().isoformat() else ""
+        print(f"  5. Ejecuta: python3 -m engine review_ingest {ticker}{date_flag}")
+    except (FileNotFoundError, RuntimeError) as e:
+        print(f"[engine] ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def _cmd_review_ingest(config, args):
+    """Ingest GPT-5.2 Pro meta-review response."""
+    from .review_ingest import ingest_review
+
+    ticker = args.ticker.upper()
+    date_str = args.date
+
+    casos_dir = config.get_path("casos") / ticker
+    if date_str:
+        case_dir = casos_dir / date_str
+    else:
+        case_dir = _resolve_latest_case_dir(casos_dir)
+        if case_dir is None:
+            print(f"[engine] ERROR: No cases found for {ticker}", file=sys.stderr)
+            sys.exit(1)
+
+    if not (case_dir / "_estado.json").exists():
+        print(f"[engine] ERROR: No state file in {case_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    response_path = Path(args.response) if args.response else None
+    schemas_dir = config.get_path("schemas")
+
+    try:
+        artifact_path = ingest_review(case_dir, response_path=response_path, schemas_dir=schemas_dir)
+    except (FileNotFoundError, RuntimeError) as e:
+        print(f"[engine] ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def _cmd_review_status(config, args):
+    """Show meta-review status across all completed cases."""
+    import json as _json
+
+    casos_dir = config.get_path("casos")
+    if not casos_dir.exists():
+        print("No cases directory found.")
+        return
+
+    filter_ticker = args.ticker.upper() if args.ticker else None
+    filter_date = args.date if hasattr(args, "date") else None
+
+    rows = []
+    for ticker_dir in sorted(casos_dir.iterdir()):
+        if not ticker_dir.is_dir():
+            continue
+        if filter_ticker and ticker_dir.name.upper() != filter_ticker:
+            continue
+        for case_dir in sorted(ticker_dir.iterdir()):
+            if not case_dir.is_dir() or case_dir.name.startswith("_"):
+                continue
+            if filter_date and case_dir.name != filter_date:
+                continue
+            state_file = case_dir / "_estado.json"
+            if not state_file.exists():
+                continue
+            try:
+                with open(state_file) as f:
+                    state = _json.load(f)
+            except (_json.JSONDecodeError, OSError):
+                continue
+
+            pipeline = state.get("estado_pipeline", "?")
+            mr = state.get("meta_review", {})
+            if not isinstance(mr, dict):
+                mr = {}
+            mr_estado = mr.get("estado", "—")
+            prompt_ts = mr.get("prompt_timestamp", "")
+            prompt_date = prompt_ts[:8] if len(prompt_ts) >= 8 else "—"
+            if prompt_date != "—":
+                prompt_date = f"{prompt_date[4:6]}-{prompt_date[6:8]}"
+
+            # Check if response file exists
+            has_response = "—"
+            if prompt_ts:
+                resp_file = case_dir / f"_review_response_raw_{prompt_ts}.md"
+                if resp_file.exists():
+                    has_response = f"✓ {prompt_date}"
+
+            # Check ingesta
+            ingesta = "—"
+            veredicto = "—"
+            if mr_estado == "DONE":
+                ingesta = f"✓ {prompt_date}"
+                veredicto = mr.get("veredicto", "?")
+            elif mr_estado == "PARCIAL":
+                ingesta = "PARCIAL"
+
+            prompt_col = f"✓ {prompt_date}" if prompt_ts else "—"
+
+            rows.append({
+                "caso": f"{ticker_dir.name} {case_dir.name[5:10] if len(case_dir.name) >= 10 else case_dir.name}",
+                "pipeline": pipeline,
+                "prompt": prompt_col,
+                "respuesta": has_response,
+                "ingesta": ingesta,
+                "veredicto": veredicto,
+            })
+
+    if not rows:
+        msg = "No cases found"
+        if filter_ticker:
+            msg += f" for {filter_ticker}"
+        print(msg + ".")
+        return
+
+    # Print table
+    print(f"{'Caso':<16} {'Pipeline':<12} {'Prompt':<10} {'Respuesta':<12} {'Ingesta':<10} {'Veredicto'}")
+    print("─" * 75)
+    for r in rows:
+        print(
+            f"{r['caso']:<16} {r['pipeline']:<12} {r['prompt']:<10} "
+            f"{r['respuesta']:<12} {r['ingesta']:<10} {r['veredicto']}"
+        )
+
+
+def _resolve_latest_case_dir(ticker_dir: Path) -> Path | None:
+    """Find the most recent case directory for a ticker."""
+    if not ticker_dir.exists():
+        return None
+    candidates = sorted(
+        (d for d in ticker_dir.iterdir() if d.is_dir() and not d.name.startswith("_")),
+        reverse=True,
+    )
+    return candidates[0] if candidates else None
 
 
 if __name__ == "__main__":

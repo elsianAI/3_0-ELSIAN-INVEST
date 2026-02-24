@@ -60,6 +60,8 @@ STEP_SCHEMAS = {
     "SCANNER":             ["scanner/ScannerReport_v1.json"],
 }
 
+_HIGH_VOLUME_OUTPUT_STEPS = {"BULL", "RED_TEAM", "ARBITRO"}
+
 
 def build_prompt(
     step_name: str,
@@ -98,6 +100,13 @@ def build_prompt(
                 schema_parts.append(f"### {sf}\n```json\n{sp.read_text()}\n```")
         if schema_parts:
             parts.append(f"# SCHEMAS DE OUTPUT\n\n" + "\n\n".join(schema_parts))
+            if step_name in _HIGH_VOLUME_OUTPUT_STEPS:
+                parts.append(
+                    "# NOTA DE OUTPUT\n\n"
+                    "Si el JSON resultante es extenso, prioriza completar todos los campos "
+                    "`required` del schema antes que los opcionales. "
+                    "Compacta campos narrativos sin sacrificar datos cuantitativos."
+                )
 
     # 3. Input artifacts
     if input_artifacts:

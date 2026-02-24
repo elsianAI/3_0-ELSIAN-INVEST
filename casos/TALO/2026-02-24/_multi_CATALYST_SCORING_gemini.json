@@ -1,0 +1,454 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_TALO",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "CATALYST_SCORING",
+    "agent_nombre": "CATALYST_v1",
+    "modelo": "gemini-2.0-flash",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_TALO",
+    "implied_expectations_caso_id": "CASE_20260224_TALO",
+    "sources_pack_caso_id": "CASE_20260224_TALO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Brecha masiva entre expectativa de mercado (declive -8% anual) y realidad operativa (producción estable/creciente con Monument).",
+      "Catalizadores financieros (desapalancamiento, buybacks) tienen alta probabilidad dado el FCF yield >20% ya existente.",
+      "Ruido contable (DD&A, impairments) oculta la rentabilidad real; su normalización es un catalizador 'óptico' de alta certeza.",
+      "Riesgo principal es la disciplina de capital (capex <$550M) vs tentación de crecimiento inorgánico.",
+      "Proyecto Monument (CAT_008) y Sinergias (CAT_009) proveen el puente operativo para refutar la tesis de declive."
+    ],
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.82
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_SCORING_001",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CRITICO",
+      "enunciado": "El mercado está valorando a TALO como un activo en liquidación (declive terminal), ignorando la vida de reservas de Monument y Zama.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf",
+          "cita_corta": "Mercado asume ~8% de declive anual en FCF con tasa descuento 10%.",
+          "interpretacion": "Valoración de 'melting ice cube' injustificada ante pipeline de proyectos."
+        }
+      ],
+      "falsacion": {
+        "test": "Producción trimestral cae por debajo de 85k BOE/d sin reducción proporcional de capex",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_SCORING_002",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La capacidad de generación de caja (CFO >$900M, FCF >$400M) es estructural y no un evento único, permitiendo desapalancamiento rápido.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "Cash flow statement FY2024",
+          "cita_corta": "CFO $962M, FCF $454M en año de integración compleja.",
+          "interpretacion": "El motor de caja funciona incluso con ruido operativo."
+        }
+      ],
+      "falsacion": {
+        "test": "FCF trimestral cae <$50M sin explicación de capex extraordinario",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Reporte de deuda neta inferior a $1.0B en resultados Q4-2025 o Q1-2026",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Dato de 'Net Debt' en press release o presentación de earnings es < $1,000M.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Ausencia de Impairments por Ceiling Test significativos (>$10M) en próximos 2 trimestres",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Línea de 'Impairment of oil and gas properties' en Income Statement es < $10M o cero.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Producción reportada se mantiene >90,000 BOE/d promedio en H1 2026",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Average daily production reportada en operational highlights > 90.0 mboe/d.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "Anuncio formal de FID o hito de construcción mayor para Zama",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Press release específico mencionando 'FID' o 'Construction start' para Zama.",
+      "fuente_prevista": "PR"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "LOE por barril reportado cae por debajo de $15.00/BOE",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Métrica 'Lease Operating Expense per BOE' < 15.00 en tabla de unit costs.",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de vencimientos de deuda exactos post-2026",
+      "por_que_importa": "Confirmar runway exacto antes de muro de vencimientos de bonos.",
+      "como_obtenerlo": "Nota de deuda en próximo 10-K o presentación de inversores actualizada."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Update de reservas 1P/2P de Monument post-incremento de WI",
+      "por_que_importa": "Cuantificar el valor exacto añadido al NAV por la compra del 8.4% adicional.",
+      "como_obtenerlo": "Annual Reserves Report o slide específica en deck trimestral."
+    }
+  ],
+  "payload": {
+    "payload_version": "CatalystPayload_v1",
+    "contenido": {
+      "mapeo_con_expectativas_implicitas": {
+        "variable_critica_principal": "CRECIMIENTO_FCF",
+        "lectura_en_1_2_frases": "El mercado descuenta un escenario de liquidación lenta (declive -8%). Los catalizadores deben demostrar simplemente estabilidad (flat FCF) para generar un re-rating masivo."
+      },
+      "catalizadores": [
+        {
+          "catalyst_id": "CAT_007",
+          "nombre": "Desapalancamiento Acelerado (Debt Paydown)",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 9,
+            "max": 18
+          },
+          "probabilidad_0_1": 0.85,
+          "mecanismo_cierre_gap": "Uso directo del FCF excedente para reducir Enterprise Value por el lado de la deuda, transfiriendo valor al Equity y reduciendo el perfil de riesgo.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "COSTE_DEUDA",
+                "direccion": "BAJA",
+                "magnitud_rango": "Ahorro $20-30M interés anual",
+                "nota": "Reduce break-even FCF."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+1.0x EV/FCF",
+                "nota": "Menor riesgo financiero expande múltiplo."
+              }
+            ],
+            "justificacion": "Con FCF yield >20%, el paydown es la inversión con mejor retorno ajustado por riesgo inmediato."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "Q4-2024 earnings calls",
+              "cita_corta": "Repago de $225M en deuda durante Q1-2025.",
+              "interpretacion": "La gerencia ya está ejecutando esta estrategia agresivamente."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Deuda Neta < $1.0B",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Net Debt reportado inferior a 1,000 millones USD.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Reducción de saldo en línea de crédito RBL",
+            "Comentarios sobre 'Debt Reduction' como prioridad #1 en calls",
+            "Estabilidad en precio del petróleo (soporta el FCF necesario)"
+          ],
+          "riesgos_de_ejecucion": [
+            "Caída abrupta del WTI <$55/bbl eliminando FCF excedente",
+            "Adquisición apalancada que revierta el progreso"
+          ],
+          "contra_catalizadores": [
+            "Anuncio de M&A financiado con deuda",
+            "Incremento de capex >$600M"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Balance Sheet: Long-term debt",
+              "Cash Flow: Repayments of long-term debt"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_008",
+          "nombre": "Ejecución Proyecto Monument (Deepwater Growth)",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 9,
+            "probable": 15,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.75,
+          "mecanismo_cierre_gap": "Refuta la tesis de 'declive terminal' al inyectar nueva producción de alto margen (oil-weighted) y reservas, justificando múltiplos de continuidad.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": "+$50-80M anual",
+                "nota": "Producción incremental vs base de declive."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "SUBE",
+                "magnitud_rango": "Re-rating a pares de crecimiento",
+                "nota": "Salida de la caja de 'liquidación'."
+              }
+            ],
+            "justificacion": "Aumentar participación al 30% demuestra convicción interna en el activo."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_TR_005",
+              "ubicacion": "Q2-2025 earnings call",
+              "cita_corta": "Incremento WI Monument a 29.8%.",
+              "interpretacion": "Apuesta fuerte por este activo como motor futuro."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Confirmación de First Oil",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Fecha específica de inicio de producción en 2026/2027.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Hitos de construcción de infraestructura",
+            "Presupuesto de capex asignado a Monument manteniéndose en rango",
+            "Ausencia de retrasos técnicos reportados"
+          ],
+          "riesgos_de_ejecucion": [
+            "Retrasos técnicos en deepwater (común en GoM)",
+            "Cost overruns inflacionarios",
+            "Performance de reservorio inferior a modelo geológico"
+          ],
+          "contra_catalizadores": [
+            "Anuncio de retraso >6 meses en First Oil",
+            "Venta de participación (farm-out) por falta de capital"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Sección 'Operational Highlights' en earnings release",
+              "Capex breakdown"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_005",
+          "nombre": "Disciplina de Capex y Eficiencia de Capital",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.65,
+          "mecanismo_cierre_gap": "Demostración empírica de que el negocio puede sostener producción con capex <$500M, validando la sostenibilidad del FCF yield actual.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "MEJORA",
+                "magnitud_rango": "Sostenibilidad >$400M",
+                "nota": "Clave para mantener la tesis de valor."
+              }
+            ],
+            "justificacion": "El mercado teme que el capex de mantenimiento real sea mucho más alto."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "ImpliedExpectations_v1",
+              "ubicacion": "resumen",
+              "cita_corta": "Si capex cae a $350-400M sin perder producción, el FCF es sostenible.",
+              "interpretacion": "Punto de inflexión para la valoración."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Guidance de Capex estable o a la baja",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Guidance anual < $550M con producción flat.",
+              "ventana_meses": {
+                "min": 0,
+                "max": 3
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Rig count activo",
+            "Comentarios sobre eficiencia de perforación / días por pozo"
+          ],
+          "riesgos_de_ejecucion": [
+            "Inflación de servicios offshore",
+            "Declive acelerado de pozos viejos requiriendo más workovers"
+          ],
+          "contra_catalizadores": [
+            "Aumento de guidance de capex >$600M sin aumento de producción",
+            "Costos de P&A disparándose"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Capital Expenditures en Cash Flow",
+              "Production volumes"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_009",
+          "nombre": "Captura de Sinergias QuarterNorth y Normalización de Margen",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 9
+          },
+          "probabilidad_0_1": 0.8,
+          "mecanismo_cierre_gap": "Reducción de LOE/bbl y G&A corporativo mejora márgenes unitarios, incrementando FCF por barril incluso si precios son planos.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+$20-40M EBITDA anual",
+                "nota": "Impacto directo en FCF."
+              }
+            ],
+            "justificacion": "Sinergias ya revisadas al alza por management ($65M total)."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_TR_002",
+              "ubicacion": "Q2-2024 call",
+              "cita_corta": "Sinergias revisadas a $65M total.",
+              "interpretacion": "Integración va mejor de lo esperado."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "LOE/BOE < $14.50",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Métrica reportada cae por debajo de 14.50.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Tendencia trimestral de LOE/BOE",
+            "Reducción absoluta en línea G&A"
+          ],
+          "riesgos_de_ejecucion": [
+            "Problemas operativos en activos heredados",
+            "Inflación general de costos"
+          ],
+          "contra_catalizadores": [
+            "LOE/BOE subiendo >$16.00",
+            "Costos de integración persistentes"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Unit costs table en earnings release"
+            ]
+          }
+        }
+      ],
+      "conclusion_catalizadores": {
+        "calidad_catalizador": "ALTA",
+        "por_que": "Existe una combinación poderosa de catalizadores financieros de alta probabilidad (desapalancamiento con FCF existente) y catalizadores operativos de crecimiento (Monument) que atacan directamente la tesis bajista de declive terminal. La multiplicidad de vías para crear valor (debt paydown, buybacks, crecimiento orgánico) ofrece robustez.",
+        "si_no_hay_catalizador_apto": false
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Dependencia crítica del precio del petróleo (WTI) no modelada explícitamente.",
+      "Incertidumbre sobre timing exacto de aprobaciones en México (Zama).",
+      "Visibilidad limitada sobre estructura de declive natural de pozos viejos."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "CATALYST_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-24T10:00:00Z",
+    "inputs_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

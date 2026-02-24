@@ -1,0 +1,1102 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_TALO",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "fusion_gemini_codex_claude",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_TALO",
+    "implied_expectations_caso_id": "CASE_20260224_TALO",
+    "sources_pack_caso_id": "CASE_20260224_TALO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "El FCF FY2024 (~$453.7M) no esta probado como regimen: el historico incluye varios anos negativos (FY2019, FY2020, FY2023) y 2025 muestra deterioro operativo.",
+      "La brecha DD&A vs Capex (FY2024: ~$1,023.6M vs ~$508.9M) y DD&A elevada en 2025 sugieren deplecion economica y mayor necesidad de reinversion.",
+      "El riesgo financiero sigue material: FY2024 intereses ($187.6M) superaron EBIT ($172.9M), y en 9M-2025 EBIT fue negativo.",
+      "El borrowing base se ubica en $700M (tras recorte previo de $800M a $700M y posterior reafirmacion), manteniendo sensibilidad a redeterminaciones y precio de crudo.",
+      "La calidad de evidencia es incompleta (completitud ~49%; faltan capex mantenimiento vs crecimiento, debt ladder/covenants y desglose robusto de reservas)."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.79
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El FCF usado por la tesis bull parece de pico y no de regimen; la estabilidad de caja no esta demostrada.",
+      "confianza_0_1": 0.82,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_002_10-K_FY2023",
+          "ubicacion": "cash flow FY2023",
+          "cita_corta": "CFO $519.1M y capex $561.4M implican FCF negativo.",
+          "interpretacion": "El ano inmediatamente previo a FY2024 no confirma estabilidad estructural."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024",
+          "ubicacion": "cash flow FY2024",
+          "cita_corta": "CFO $962.6M y capex $508.9M implican FCF ~$453.7M.",
+          "interpretacion": "La mejora existe, pero es una observacion puntual."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+          "ubicacion": "9M-2025 income statement",
+          "cita_corta": "9M-2025 EBIT -$316.3M y net income -$291.7M.",
+          "interpretacion": "El perfil operativo 2025 no valida una normalizacion robusta."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2019/FY2020",
+          "cita_corta": "FY2019 y FY2020 tambien registraron FCF negativo.",
+          "interpretacion": "La volatilidad de FCF es recurrente, no excepcional."
+        }
+      ],
+      "falsacion": {
+        "test": "FCF TTM >= $400M en 4 reportes consecutivos con capex anualizado <= $500M.",
+        "ventana_meses": {
+          "min": 12,
+          "max": 15
+        },
+        "fuente_prevista": "10-Q/10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La brecha contable-caja no es solo ruido: DD&A/impairments y Capex inferior a DD&A apuntan a deplecion economica y reinversion exigente.",
+      "confianza_0_1": 0.82,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024",
+          "ubicacion": "FY2024 income statement + cash flow",
+          "cita_corta": "DD&A ~$1,023.6M vs capex ~$508.9M.",
+          "interpretacion": "La base de activos se consume mas rapido de lo que se repone organicamente."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual depreciation_usd",
+          "cita_corta": "DD&A: FY2022 $414.6M, FY2023 $663.5M, FY2024 $1,023.6M.",
+          "interpretacion": "La tendencia de deplecion no muestra normalizacion."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_trimestral 9M-2025",
+          "cita_corta": "DD&A 9M-2025: $813.1M (anualizado ~>$1,000M).",
+          "interpretacion": "El consumo economico del activo permanece elevado."
+        }
+      ],
+      "falsacion": {
+        "test": "DD&A rolling 4Q < $900M y Reserve Replacement Ratio organico >100% con FCF positivo.",
+        "ventana_meses": {
+          "min": 9,
+          "max": 15
+        },
+        "fuente_prevista": "10-Q/10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El riesgo de balance/refinanciacion esta subestimado: cobertura de intereses debil y dependencia de RBL sensible a commodity.",
+      "confianza_0_1": 0.78,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024",
+          "ubicacion": "FY2024 income statement",
+          "cita_corta": "Interest expense $187.6M > EBIT $172.9M.",
+          "interpretacion": "Cobertura EBIT/intereses inferior a 1x en FY2024."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+          "ubicacion": "9M-2025",
+          "cita_corta": "EBIT -$316.3M con intereses de $122.6M.",
+          "interpretacion": "La cobertura operativa en 2025 es claramente negativa."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_TR_005",
+          "ubicacion": "Q2-2025 earnings call",
+          "cita_corta": "Borrowing base reducido de $800M a $700M.",
+          "interpretacion": "Senal de prudencia bancaria sobre colateral de reservas."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_029_8-K_2025-12-08",
+          "ubicacion": "credit facility amendment",
+          "cita_corta": "Borrowing base reafirmado en $700M y vencimiento extendido a 2030.",
+          "interpretacion": "Mejora calendario, pero no elimina sensibilidad a redeterminaciones."
+        }
+      ],
+      "falsacion": {
+        "test": "EBIT/intereses >2.0x por 4 trimestres, deuda neta <= $1.0B y borrowing base >= $750M.",
+        "ventana_meses": {
+          "min": 9,
+          "max": 18
+        },
+        "fuente_prevista": "10-Q/10-K/8-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_004",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Los impairments de ceiling test en 2025 son recurrentes y apuntan a destruccion de valor economico en reservas.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones Q2-2025",
+          "cita_corta": "Impairment de $224M relacionado con full cost ceiling test.",
+          "interpretacion": "El valor economico de reservas cayo respecto a libros."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_TR_004",
+          "ubicacion": "Q3-2025 transcript",
+          "cita_corta": "Non-cash impairment de $60M por ceiling test.",
+          "interpretacion": "Segundo evento relevante en el mismo ano."
+        }
+      ],
+      "falsacion": {
+        "test": "Cero impairments de ceiling test por 4 trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q/10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_005",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La calidad del caso esta limitada por datos incompletos (49%), especialmente en deuda/EV y capex de mantenimiento.",
+      "confianza_0_1": 0.84,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1.data_quality",
+          "ubicacion": "DATA_COMPLETENESS",
+          "cita_corta": "Completitud total reportada: 49%.",
+          "interpretacion": "La base para inferencias finas de valoracion es parcial."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1.mercado",
+          "ubicacion": "traza_calculo_ev",
+          "cita_corta": "EV no calculado por deuda_total_usd nula.",
+          "interpretacion": "Falta una referencia central para comparables de valoracion."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "AgentReport_v1_BULL",
+          "ubicacion": "peticiones_de_fuentes",
+          "cita_corta": "El propio bull solicita capex mantenimiento vs crecimiento como dato prioritario.",
+          "interpretacion": "El driver principal de sostenibilidad de FCF no esta cerrado."
+        }
+      ],
+      "falsacion": {
+        "test": "Publicacion de debt ladder 2026-2032, headroom de covenants, EV verificable y capex mantenimiento/crecimiento por activo.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "10-Q/10-K/8-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "FCF TTM cae por debajo de $300M en al menos 2 de los proximos 4 reportes trimestrales.",
+      "probabilidad_0_1": 0.62,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "En cada 10-Q calcular CFO TTM - capex TTM; validar si < $300M en 2 o mas cortes.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "Deuda neta no baja de $1,000M al cierre de FY2026.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "En 10-K FY2026, deuda total - caja reportada > $1,000M.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_003",
+      "descripcion": "Ocurre al menos un impairment adicional de ceiling test >= $50M en los proximos 12 meses.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Cargo de impairment >= $50M reportado en 10-Q o 10-K.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_004",
+      "descripcion": "Produccion trimestral cae por debajo de 90,000 BOE/d en al menos 1 de los proximos 4 trimestres.",
+      "probabilidad_0_1": 0.58,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Conteo de trimestres con produccion <90,000 BOE/d >=1.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_005",
+      "descripcion": "El borrowing base no mejora por encima de $700M y/o cae por debajo de $700M en la proxima redeterminacion.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "8-K confirma borrowing base <=$700M o recorte adicional.",
+      "fuente_prevista": "8-K"
+    },
+    {
+      "pred_id": "PRED_RT_006",
+      "descripcion": "DD&A rolling 4Q permanece por encima de $950M durante los proximos 12 meses.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Suma DD&A de ultimos 4 trimestres >=$950M en cada reporte.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Capex por activo con separacion mantenimiento vs crecimiento (2024, 2025 y guia 2026).",
+      "por_que_importa": "Sin esa separacion no puede medirse FCF estructural ni distinguir ciclo vs deterioro estructural.",
+      "como_obtenerlo": "10-K FY2025, 10-Q, deck de guidance y Q&A de resultados."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla completa de deuda consolidada, vencimientos 2026-2032 y headroom exacto de covenants.",
+      "por_que_importa": "Define riesgo real de refinanciacion, dilucion y margen de capital allocation.",
+      "como_obtenerlo": "Notas de deuda en 10-K/10-Q y credit agreement exhibits en 8-K."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Libro de coberturas y sensibilidades de CFO/FCF a WTI y gas.",
+      "por_que_importa": "Cuantifica fragilidad del caso ante escenarios de precio de commodity.",
+      "como_obtenerlo": "Notas de derivados (10-Q/10-K) y anexos de resultados trimestrales."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Reserve report completo (PDP vs PUD) y reserve replacement organico.",
+      "por_que_importa": "Permite validar si la reinversion actual repone reservas o solo acelera run-off.",
+      "como_obtenerlo": "10-K (Oil & Gas Disclosures) y exhibits tecnicos/SMOG."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Curvas de decline por activo (legacy, QuarterNorth, Monument) y puente trimestral EBIT->CFO con detalle de working capital.",
+      "por_que_importa": "Aclara sostenibilidad de volumen/caja y separa recurrencia de efectos transitorios.",
+      "como_obtenerlo": "10-Q (MD&A cash flow), investor presentation tecnica y transcript con desglose numerico."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Terminos completos del Cooperation Agreement (CEC/familia Slim) y restricciones de asignacion de capital.",
+      "por_que_importa": "Puede limitar recompras, dividendos o decisiones de M&A/desapalancamiento.",
+      "como_obtenerlo": "DEF14A, 8-K exhibits y related party disclosures."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razon correcta para NO invertir: invalidar claims criticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.79,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "La evidencia combinada favorece un riesgo de value trap: FY2024 parece un pico de caja, 2025 exhibe deterioro operativo, y la sostenibilidad del FCF sigue sin comprobarse por falta de capex de mantenimiento y alta sensibilidad a commodity/RBL."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_BULL_001",
+            "resumen_claim_bull": "El mercado descuenta una contraccion severa del FCF y bastaria estabilizar caja para rerating.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.63,
+              "por_que": [
+                "FY2024 no esta demostrado como run-rate sostenible.",
+                "El historico incluye varios anos de FCF negativo.",
+                "9M-2025 muestra perdida operativa y neta."
+              ]
+            },
+            "puntos_ciegos": [
+              "Ancla FY2024 como normalidad sin normalizar ciclicidad.",
+              "No separa caja recurrente de efectos de timing/working capital.",
+              "No cuantifica sensibilidad de FCF a WTI con detalle operativo."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_002_10-K_FY2023",
+                "ubicacion": "cash flow FY2023",
+                "cita_corta": "CFO $519.1M y capex $561.4M.",
+                "interpretacion": "FY2023 tuvo FCF negativo."
+              },
+              {
+                "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+                "ubicacion": "9M-2025",
+                "cita_corta": "EBIT -$316.3M; net income -$291.7M.",
+                "interpretacion": "El deterioro 2025 debilita la tesis de estabilizacion."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "FCF TTM >= $400M en 4 trimestres consecutivos con capex <= $500M anualizado.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 15
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_BULL_002",
+            "resumen_claim_bull": "DD&A e impairments son distorsion contable y no invalidan la caja operativa.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.56,
+              "por_que": [
+                "En E&P, DD&A refleja consumo economico de reservas.",
+                "DD&A sigue alta y con tendencia de aceleracion.",
+                "Impairments de 2025 refuerzan deterioro de valor."
+              ]
+            },
+            "puntos_ciegos": [
+              "Confundir no-cash con irrelevante economicamente.",
+              "No probar normalizacion material de DD&A.",
+              "No cuantificar costo de reemplazo de produccion."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "FY2024",
+                "cita_corta": "DD&A ~$1,023.6M; capex ~$508.9M.",
+                "interpretacion": "El modelo exige reinversion alta para sostener base productiva."
+              },
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "Q2-2025 + Q3-2025",
+                "cita_corta": "Impairments de $224M y $60M en 2025.",
+                "interpretacion": "No parece solo ruido contable transitorio."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "DD&A rolling 4Q < $900M y cero impairments por 3 trimestres consecutivos.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 15
+              },
+              "fuente_prevista": "10-Q/10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_BULL_003",
+            "resumen_claim_bull": "El balance no muestra fragilidad inmediata y el desapalancamiento reduce riesgo de equity.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.61,
+              "por_que": [
+                "Intereses superaron EBIT en FY2024.",
+                "Con EBIT negativo en 2025, la cobertura se degrada aun mas.",
+                "El borrowing base fue recortado y luego reafirmado en un nivel inferior."
+              ]
+            },
+            "puntos_ciegos": [
+              "Extrapola desapalancamiento pasado sin estresar WTI.",
+              "No cuantifica headroom de covenants.",
+              "Confunde extension de plazo con eliminacion de riesgo."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "FY2024",
+                "cita_corta": "Interest expense $187.6M > EBIT $172.9M.",
+                "interpretacion": "Cobertura debil incluso antes del deterioro 2025."
+              },
+              {
+                "source_id": "SRC_TR_005",
+                "ubicacion": "Q2-2025",
+                "cita_corta": "Borrowing base bajo de $800M a $700M.",
+                "interpretacion": "Senal bancaria de mayor prudencia."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Deuda neta <= $1.0B, EBIT/intereses >2x por 4 trimestres y borrowing base >= $750M.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-Q/10-K/8-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_BULL_004",
+            "resumen_claim_bull": "No se requiere crecimiento agresivo; mantener produccion/capex disciplinado bastaria para sostener FCF.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.66,
+              "por_que": [
+                "Falta capex de mantenimiento por activo.",
+                "Ingresos 2025 muestran compresion interanual.",
+                "La eficiencia de capital no esta validada en datos auditados por activo."
+              ]
+            },
+            "puntos_ciegos": [
+              "Asume mantenimiento de volumen sin curva de decline detallada.",
+              "No separa legacy vs nuevos activos en contribucion.",
+              "No incorpora deterioro de margenes en escenarios de precio mas debiles."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1.historico_trimestral",
+                "ubicacion": "Q2-2024 vs Q2-2025",
+                "cita_corta": "Ingresos: $549.2M -> $424.7M.",
+                "interpretacion": "La estabilidad no esta demostrada."
+              },
+              {
+                "source_id": "SRC_SEC_008_10-Q_Q2-2025",
+                "ubicacion": "Q2-2025",
+                "cita_corta": "EBIT -$273.6M.",
+                "interpretacion": "El caso base sin crecimiento tambien puede deteriorarse."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Produccion >=90,000 BOE/d con capex anualizado <=$500M por 4 trimestres.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings/10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_BULL_005",
+            "resumen_claim_bull": "A multiplos bajos de caja, desapalancar y recomprar acciones seria altamente accretivo.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.58,
+              "por_que": [
+                "La accrecion depende de FCF sostenible, hoy no verificado.",
+                "Con cobertura de intereses debil, prioridad racional puede ser balance.",
+                "Sin covenants/headroom completos, el margen para retornos es incierto."
+              ]
+            },
+            "puntos_ciegos": [
+              "Asume buybacks competitivos frente a desapalancamiento en todo escenario.",
+              "No integra plenamente riesgo de RBL/costo de deuda.",
+              "No cierra restricciones potenciales de acuerdos corporativos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "FY2024",
+                "cita_corta": "Intereses mayores que EBIT.",
+                "interpretacion": "El costo de riesgo financiero sigue alto."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Retornos al accionista >$120M anuales por 2 anos sin aumento de deuda neta.",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_BULL_006",
+            "resumen_claim_bull": "Monument y sinergias son opcionalidad alcista, no condicion necesaria del caso base.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.62,
+              "por_que": [
+                "Falta puente cuantitativo de decline legacy vs aporte incremental.",
+                "Sinergias y aportes dependen en gran parte de narrativa de transcript.",
+                "El deterioro 2025 sugiere presion en la base operativa actual."
+              ]
+            },
+            "puntos_ciegos": [
+              "No hay desglose auditado por activo del aporte de Monument/sinergias.",
+              "No hay cronograma financiero completo de impacto neto vs capex.",
+              "No se modela el caso de retraso o menor entrega de catalizadores."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_TR_005",
+                "ubicacion": "Q2-2025 call",
+                "cita_corta": "Monument y sinergias se reportan principalmente via guidance/transcript.",
+                "interpretacion": "La trazabilidad financiera auditada es limitada."
+              },
+              {
+                "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+                "ubicacion": "9M-2025",
+                "cita_corta": "EBIT acumulado negativo.",
+                "interpretacion": "El caso base no luce plenamente autosuficiente hoy."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Aporte incremental auditado >=$75M de EBITDA/FCF sin capex anual >$550M.",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              },
+              "fuente_prevista": "10-Q/10-K/earnings"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Usar FY2024 como ancla estructural pese a FY2023 negativo y alta variabilidad historica.",
+          "Tratar extension del vencimiento del RBL como equivalente a bajo riesgo financiero.",
+          "Asumir DD&A como ruido sin cerrar reposicion de reservas y capex de mantenimiento.",
+          "Presentar buybacks/desapalancamiento como claramente accretivos sin covenants/headroom completos.",
+          "Asumir Monument/sinergias como opcionalidad sin trazabilidad auditada por activo.",
+          "No cuantificar con precision el punto de quiebre de FCF ante WTI bajo."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "FY2024 fue un pico de caja no repetible.",
+          "El negocio enfrenta capex de mantenimiento elevado para sostener volumen.",
+          "La sensibilidad a WTI y a redeterminaciones de RBL mantiene el multiple deprimido.",
+          "Los impairments de 2025 reflejan deterioro economico real de reservas.",
+          "El recorte previo del borrowing base ya incorpora una vision bancaria mas conservadora.",
+          "El descuento de valoracion responde a riesgo real de value trap y no solo a ineficiencia de mercado."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "TALO aparenta bajo multiple de caja, pero la sostenibilidad del FCF no esta cerrada.",
+          "La cuenta de resultados 2025 ya muestra deterioro operativo material.",
+          "DD&A alta, impairments y capex exigente son consistentes con presion estructural sobre la base de activos.",
+          "La cobertura de intereses y la sensibilidad del RBL al commodity limitan margen financiero.",
+          "Sin desglose de mantenimiento/crecimiento y reservas organicas, el descuento del mercado puede estar justificado."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "CAPEX_MANTENIMIENTO_ALTO",
+            "descripcion": "La produccion requiere reinversion alta; si el mantenimiento consume la mayor parte del capex, el FCF economico para equity cae.",
+            "indicadores_tempranos": [
+              "Capex anualizado >$550M",
+              "Produccion estancada o a la baja pese a capex alto",
+              "Ausencia persistente de disclosure mantenimiento vs crecimiento"
+            ]
+          },
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "Con realizaciones y/o costos menos favorables, EBIT y conversion a caja permanecen deprimidos.",
+            "indicadores_tempranos": [
+              "EBIT <=0 en 2 de 3 trimestres",
+              "Net income negativo persistente",
+              "Revenue trimestral sin recuperacion clara"
+            ]
+          },
+          {
+            "mecanismo": "COSTE_DEUDA_Y_LIQUIDEZ",
+            "descripcion": "Cobertura debil y eventual recorte de borrowing base reducen flexibilidad y elevan riesgo de refinanciacion/dilucion.",
+            "indicadores_tempranos": [
+              "EBIT/intereses <1x",
+              "Borrowing base < $700M",
+              "Solicitud de waivers/repricing"
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "Variaciones de working capital pueden inflar temporalmente CFO; al normalizar, el FCF cae.",
+            "indicadores_tempranos": [
+              "CFO trimestral por debajo de $150M en 2 trimestres",
+              "Brecha creciente entre EBITDA no-GAAP y CFO",
+              "Aumento de cuentas por cobrar sin compensacion en caja"
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Sin colapso, pero con normalizacion de caja por debajo de FY2024 y descuento persistente por calidad de FCF/deuda.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "FCF",
+                "direccion": "EMPEORA",
+                "rango": "$200M - $300M anual",
+                "justificacion": "Compatible con capex exigente y menor margen vs FY2024."
+              },
+              {
+                "variable": "CAPEX",
+                "direccion": "NO_MEJORA",
+                "rango": "$450M - $600M anual",
+                "justificacion": "No hay evidencia de mantenimiento estructuralmente bajo."
+              },
+              {
+                "variable": "MULTIPLO",
+                "direccion": "EMPEORA",
+                "rango": "2.5x - 3.5x P/FCF",
+                "justificacion": "Mercado puede seguir priceando calidad de caja baja."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "Con menor visibilidad de caja y mayor prima de riesgo, el rerating puede no ocurrir.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -55,
+                "base": -30,
+                "max": -15
+              },
+              "nota": "Escenario de deterioro gradual, no necesariamente de quiebra."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Coincidencia de commodity debil, mas impairments y tension de credito con riesgo de dilucion defensiva.",
+            "ventana_meses": {
+              "min": 3,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.2,
+            "es_binario": true,
+            "drivers": [
+              {
+                "variable": "OTRO",
+                "direccion": "EMPEORA",
+                "rango": "WTI sostenido < $50-$55/bbl",
+                "justificacion": "Compresion fuerte de caja operativa."
+              },
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "Borrowing base < $600M",
+                "justificacion": "Menor acceso a RBL reduce flexibilidad."
+              },
+              {
+                "variable": "DEUDA",
+                "direccion": "EMPEORA",
+                "rango": "Deuda neta > $1.3B",
+                "justificacion": "Menor caja + capex obligatorio pueden reapalancar."
+              }
+            ],
+            "impacto_en_supervivencia": "ALTO",
+            "nota": "Riesgo de equity wipe-out parcial por dilucion aun sin quiebra inmediata."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.72,
+        "razones": [
+          "FCF historicamente volatil, con anos negativos recientes.",
+          "Deterioro operativo/material en 2025 (EBIT y net income negativos).",
+          "DD&A elevada y persistente sugiere consumo economico relevante.",
+          "Intereses por encima de EBIT en FY2024.",
+          "Capex de mantenimiento no separado de crecimiento.",
+          "Sensibilidad alta a commodity y redeterminaciones de RBL.",
+          "Impairments de ceiling test en 2025.",
+          "Calidad de datos parcial (49%) en variables clave de valoracion."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "FCF TTM >= $400M en 4 trimestres consecutivos.",
+              "Produccion >= 90,000 BOE/d con capex <= $500M anualizado.",
+              "Deuda neta <= $1.0B y EBIT/intereses >2x sostenido.",
+              "Reserve replacement organico >100%."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "FCF TTM < $300M en al menos 2 de 4 trimestres.",
+              "Capex >= $550M sin sostener produccion/volumen.",
+              "Impairments >$300M en 12 meses o nuevo recorte de borrowing base.",
+              "Persistencia de DD&A rolling 4Q >$950M."
+            ]
+          }
+        ],
+        "prior_explicito": {
+          "baseline_utilizado": 0.5,
+          "justificacion_baseline": "Con evidencia parcial y sin cierre de variables clave, se parte de baseline neutral.",
+          "ajustes_al_alza": [
+            {
+              "factor": "Volatilidad de FCF historica",
+              "evidencia_verificable": "FY2023 FCF negativo vs FY2024 positivo",
+              "direccion": "sube",
+              "delta": 0.09
+            },
+            {
+              "factor": "Deterioro operativo 2025",
+              "evidencia_verificable": "9M-2025 EBIT -$316.3M y net income -$291.7M",
+              "direccion": "sube",
+              "delta": 0.08
+            },
+            {
+              "factor": "Cobertura financiera debil",
+              "evidencia_verificable": "FY2024 interest $187.6M > EBIT $172.9M",
+              "direccion": "sube",
+              "delta": 0.06
+            },
+            {
+              "factor": "Opacidad de datos criticos",
+              "evidencia_verificable": "Data completeness 49% y EV incompleto",
+              "direccion": "sube",
+              "delta": 0.04
+            }
+          ],
+          "ajustes_a_la_baja": [
+            {
+              "factor": "Caja operativa aun positiva en 2024/9M-2025",
+              "evidencia_verificable": "CFO FY2024 y CFO 9M-2025 positivos",
+              "direccion": "baja",
+              "delta": -0.05
+            }
+          ],
+          "probabilidad_final": 0.72,
+          "puente_explicativo": "0.50 + 0.09 + 0.08 + 0.06 + 0.04 - 0.05 = 0.72"
+        }
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "FCF TTM < $250M en 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Invalida la premisa central de caja sostenible."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "BALANCE",
+          "definicion": "Borrowing base < $600M o solicitud de waiver de covenants.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "8-K",
+          "accion_recomendada": "SALIR",
+          "por_que": "Senal temprana de presion de liquidez/refinanciacion."
+        },
+        {
+          "kc_id": "KC-RT-003",
+          "tipo": "BALANCE",
+          "definicion": "Deuda neta > $1.3B o aumento >$150M interanual sin mejora de FCF.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q/10-K",
+          "accion_recomendada": "SALIR",
+          "por_que": "Aumenta probabilidad de stress financiero y dilucion."
+        },
+        {
+          "kc_id": "KC-RT-004",
+          "tipo": "CONTABILIDAD",
+          "definicion": "Impairments acumulados > $300M en 12 meses.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q/10-K",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Suele reflejar deterioro economico adicional de activos."
+        },
+        {
+          "kc_id": "KC-RT-005",
+          "tipo": "CATALIZADOR",
+          "definicion": "Produccion <85,000 BOE/d por 2 trimestres con capex anualizado >$550M.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings/10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Confirma mala eficiencia de capital y riesgo estructural."
+        },
+        {
+          "kc_id": "KC-RT-006",
+          "tipo": "CATALIZADOR",
+          "definicion": "WTI promedio trimestral < $60/bbl.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "Macro data / Earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Aumenta riesgo de compresion de caja y tension sobre RBL."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Sostenibilidad de caja demostrada",
+          "umbral_o_condicion": "FCF TTM >= $400M durante 4 trimestres con capex anualizado <= $500M.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 15
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Reposicion organica de reservas",
+          "umbral_o_condicion": "Reserve Replacement Ratio organico >100% con FCF positivo.",
+          "ventana_meses": {
+            "min": 12,
+            "max": 12
+          },
+          "fuente_prevista": "10-K"
+        },
+        {
+          "item": "Mejora financiera material",
+          "umbral_o_condicion": "Deuda neta <= $1.0B y EBIT/intereses >2x por 4 trimestres.",
+          "ventana_meses": {
+            "min": 9,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q/10-K"
+        },
+        {
+          "item": "Senal bancaria de mejora",
+          "umbral_o_condicion": "Borrowing base >= $750M en redeterminacion posterior.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "8-K"
+        },
+        {
+          "item": "Desaparicion de deterioro contable recurrente",
+          "umbral_o_condicion": "Cero impairments de ceiling test en 4 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q/10-K"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0.5,
+        "si_se_invierte_igual": [
+          "Limitar exposicion inicial a <=0.5% y escalar solo con hitos de caja/deuda verificados.",
+          "No promediar a la baja hasta tener disclosure de capex mantenimiento vs crecimiento.",
+          "Activar stop de tesis automatico con KC-RT-001 y KC-RT-002.",
+          "Monitorear cada redeterminacion de borrowing base como indicador adelantado.",
+          "Exigir reporte interno trimestral de cobertura de intereses y puente EBIT->CFO.",
+          "Suspender nuevas compras ante cualquier recorte adicional de BB o waivers."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "Cual es el capex de mantenimiento real por activo para sostener >90k BOE/d?",
+          "Cual es el headroom exacto de covenants bajo escenarios WTI de stress?",
+          "Que parte del CFO reciente proviene de working capital no recurrente?",
+          "Cual es el decline esperado de los activos legacy sin Monument?",
+          "Que sensibilidad exacta tiene FCF a WTI y al libro de coberturas 2026-2027?",
+          "Que prioridad formal tiene management entre deuda, buybacks y M&A?"
+        ],
+        "trazabilidad_sizing": {
+          "metodo": "tamano_maximo = tamano_base_ciclico * (1 - probabilidad_value_trap)",
+          "inputs": {
+            "tamano_base_ciclico_pct": 2.0,
+            "probabilidad_value_trap_0_1": 0.72
+          },
+          "calculo": "2.0% * (1 - 0.72) = 0.56%",
+          "resultado_redondeado_pct": 0.5,
+          "justificacion_adicional": "Se prioriza prudencia por deterioro 2025, cobertura debil y lagunas criticas de disclosure."
+        }
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "TruthPack con completitud parcial (~49%), con faltantes relevantes para EV/deuda en algunos cortes.",
+      "No se incluyo JSON completo de ImpliedExpectations_v1 en el set consolidado.",
+      "Falta desglose de capex mantenimiento vs crecimiento por activo.",
+      "No hay curva completa de decline por activo ni reserva report completo PDP/PUD en el input consolidado.",
+      "Datos de hedging/sensibilidades commodity no cerrados de forma completa.",
+      "Parte de la evidencia operativa/catalizadores proviene de transcripts y no solo de estados auditados."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "fusion": {
+      "step_name": "RED_TEAM",
+      "schema": "AgentReport_v1",
+      "modelos_usados": [
+        "gemini-2.0-flash-thinking-exp",
+        "gpt-5-codex",
+        "claude-sonnet-4-20250514"
+      ],
+      "criterios_resolucion": [
+        "Consenso mayoritario cuando hubo convergencia de tesis.",
+        "En divergencias cuantitativas se priorizo el valor mejor trazado con evidencia de filings (10-K/10-Q/8-K) y mayor soporte cruzado.",
+        "No se promediaron cifras de forma ciega; se selecciono valor recomendado y se reporto rango [min,max].",
+        "Se preservaron todos los warnings/flags criticos aportados por cualquier modelo."
+      ],
+      "conflictos": [
+        {
+          "campo": "resumen_ejecutivo.veredicto_role_local",
+          "valores_modelos": {
+            "gemini": "NO_APTO",
+            "codex": "NO_APTO",
+            "claude": "WATCHLIST"
+          },
+          "resolucion": "NO_APTO",
+          "criterio": "Consenso 2/3 y soporte cuantitativo adicional (EBIT/neto 2025 negativos, cobertura debil)."
+        },
+        {
+          "campo": "payload.contenido.diagnostico_global.riesgo_principal",
+          "valores_modelos": {
+            "gemini": "VALUE_TRAP",
+            "codex": "VALUE_TRAP",
+            "claude": "DETERIORO_FUNDAMENTAL"
+          },
+          "resolucion": "VALUE_TRAP",
+          "criterio": "Mayor coincidencia; se incorporo deterioro fundamental como mecanismo explicativo dentro del bear case."
+        },
+        {
+          "campo": "payload.contenido.value_trap_checklist.probabilidad_value_trap_0_1",
+          "valores_modelos": {
+            "gemini": 0.75,
+            "codex": 0.72,
+            "claude": 0.45
+          },
+          "resolucion": 0.72,
+          "criterio": "Valor recomendado con mayor trazabilidad explicita y coherencia con evidencia de 2025; rango reportado."
+        },
+        {
+          "campo": "payload.contenido.recomendacion_para_arbitro.tamaño_maximo_sugerido_pct_cartera",
+          "valores_modelos": {
+            "gemini": 2.0,
+            "codex": 0.5,
+            "claude": 2.0
+          },
+          "resolucion": 0.5,
+          "criterio": "Se priorizo enfoque conservador por incertidumbre de datos, cobertura debil y riesgo de redeterminacion RBL."
+        },
+        {
+          "campo": "lectura_borrowing_base",
+          "valores_modelos": {
+            "gemini": "Reafirmado en $700M",
+            "codex": "Reafirmado en $700M con sensibilidad a redeterminaciones",
+            "claude": "Recorte previo de $800M a $700M"
+          },
+          "resolucion": "Integrado: recorte historico a $700M y posterior reafirmacion en ese nivel",
+          "criterio": "No son excluyentes; se consolido secuencia temporal completa."
+        },
+        {
+          "campo": "KC de WTI",
+          "valores_modelos": {
+            "gemini": "WTI trimestral < $60",
+            "codex": "No umbral unico duro; foco en BB/covenants",
+            "claude": "WTI < $50 por 2 trimestres"
+          },
+          "resolucion": "WTI trimestral < $60 como trigger temprano",
+          "criterio": "Umbral mas preventivo y alineado con sensibilidad de liquidez/RBL descrita por los tres modelos."
+        }
+      ],
+      "rangos_scores": {
+        "resumen_ejecutivo_confianza_0_1": {
+          "min": 0.65,
+          "max": 0.85,
+          "recomendado": 0.79
+        },
+        "probabilidad_value_trap_0_1": {
+          "min": 0.45,
+          "max": 0.75,
+          "recomendado": 0.72
+        },
+        "escenario_BEAR_BASE_probabilidad_0_1": {
+          "min": 0.35,
+          "max": 0.5,
+          "recomendado": 0.5
+        },
+        "escenario_BEAR_WORST_probabilidad_0_1": {
+          "min": 0.12,
+          "max": 0.22,
+          "recomendado": 0.2
+        },
+        "pred_PRED_RT_001": {
+          "min": 0.5,
+          "max": 0.62,
+          "recomendado": 0.62
+        },
+        "pred_PRED_RT_002": {
+          "min": 0.5,
+          "max": 0.7,
+          "recomendado": 0.7
+        },
+        "pred_PRED_RT_003": {
+          "min": 0.55,
+          "max": 0.6,
+          "recomendado": 0.6
+        },
+        "pred_PRED_RT_004": {
+          "min": 0.45,
+          "max": 0.7,
+          "recomendado": 0.58
+        },
+        "pred_PRED_RT_005": {
+          "min": 0.47,
+          "max": 0.65,
+          "recomendado": 0.65
+        },
+        "pred_PRED_RT_006": {
+          "min": 0.7,
+          "max": 0.7,
+          "recomendado": 0.7
+        }
+      },
+      "flags_integradas": [
+        "Completitud de datos ~49%",
+        "Falta capex mantenimiento vs crecimiento",
+        "Falta debt ladder/covenants consolidado completo",
+        "Sensibilidad alta de RBL a commodity",
+        "Impairments 2025 no deben ignorarse"
+      ]
+    }
+  }
+}

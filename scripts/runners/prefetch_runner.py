@@ -27,7 +27,7 @@ RUNNERS = [
 RUNNER_EXTRA_ARGS = {
     "sec_fetcher_v2_runner.py": ["--exchange", "--country", "--web-ir"],
     "market_data_v1_runner.py": ["--exchange"],
-    "transcript_finder_v2_runner.py": ["--web-ir"],
+    "transcript_finder_v2_runner.py": ["--exchange", "--country", "--web-ir"],
 }
 
 

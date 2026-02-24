@@ -1,0 +1,1087 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260221_ACVA",
+  "fecha_corte": "2026-02-21",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "FUSION(codex,gemini,claude)",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260221_ACVA",
+    "implied_expectations_caso_id": "CASE_20260221_ACVA",
+    "sources_pack_caso_id": "CASE_20260221_ACVA"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Supervivencia 12-24 meses: WATCHLIST (score 2/5). Caja neta positiva ($101M) evita insolvencia inmediata, pero calidad de resultados crítica impide calificación APTO.",
+      "CFO positivo FY2024 ($65.4M) es ilusorio: depende de SBC masiva (~$113M estimada), float de pagos (AP $345M vs AR $169M) y ajustes no monetarios; CFO ex-float real ~$5M/trimestre.",
+      "Pérdidas operativas crónicas: 6 años consecutivos de EBIT negativo (margen -13.2% FY2024) sin apalancamiento operativo visible tras multiplicar ingresos x6.",
+      "Riesgo estructural doble: (1) si el crecimiento se desacelera, el capital circulante negativo se revierte y drena caja; (2) $523M en adquisiciones sin evidencia de retorno ni test de deterioro visible.",
+      "Contabilidad agresiva: Capex mínimo ($4.5M) vs D&A explosiva ($36.7M), bridge EBIT-CFO de 177.8%, costes financieros crecientes 5x en 2 años, y dilución potencial ~10% anual por SBC.",
+      "Recomendación: máximo 2% de cartera con triggers mensuales de FCF ex-float, AP/AR y margen operativo."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.72
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "ACVA ha reportado EBIT negativo durante 6 años consecutivos (FY2019-FY2024) sin convergencia hacia rentabilidad operativa, con margen operativo FY2024 de -13.2% pese a multiplicar ingresos x6.",
+      "confianza_0_1": 0.99,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual[2019-2024].ebit_usd",
+          "cita_corta": "Serie anual de EBIT: -79.3M, -40.6M, -76.8M, -106.2M, -89.7M, -84.1M. Margen operativo FY2024 = -13.2%.",
+          "interpretacion": "El modelo de negocio no demuestra apalancamiento operativo real; no hay prueba de mejora de estructura de costos a escala."
+        }
+      ],
+      "falsacion": {
+        "test": "EBIT trimestral positivo sostenido durante 2 trimestres consecutivos con margen operativo mejorando por encima de -10%.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La generación de CFO positiva es artificial: depende de SBC masiva (~$113M estimada) y float de pagos a proveedores. CFO ex-float real es de solo ~$5M/trimestre (~$20M/año).",
+      "confianza_0_1": 0.88,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "puentes.ebit_a_cfo FY2024",
+          "cita_corta": "EBIT -84.1M, CFO +65.4M, bridge 149.5M (177.8% de |EBIT|). D&A solo 36.7M; residual ~113M presumiblemente SBC.",
+          "interpretacion": "La caja no proviene de rentabilidad operativa recurrente; la brecha es la mayor de la serie histórica."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_046",
+          "ubicacion": "Earnings transcript",
+          "cita_corta": "CFO operativo ex-float de solo ~$5M por trimestre.",
+          "interpretacion": "La generación de caja real sin beneficio del float es marginal."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Balance Sheet FY2024",
+          "cita_corta": "AP $345.6M vs AR $168.8M; ratio AP/AR 2.05x.",
+          "interpretacion": "La empresa se financia con proveedores; ratio AP/AR > 2.0x es anómalo y riesgoso."
+        }
+      ],
+      "falsacion": {
+        "test": "Desglose de SBC en 10-K muestra SBC < $50M anual y CFO ex-float confirmado > $15M/trimestre durante 4 trimestres.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "Las adquisiciones acumuladas de $523M (FY2021-FY2023) generan riesgo material de deterioro de goodwill/intangibles no reconocido; más de la mitad de los activos totales ($984M) pueden ser intangibles adquiridos.",
+      "confianza_0_1": 0.72,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Cash Flow Statement CFI FY2021-FY2023",
+          "cita_corta": "CFI acumulado -$523M en 3 años; activos totales $984M.",
+          "interpretacion": "Con márgenes operativos negativos persistentes, las adquisiciones podrían no generar el retorno esperado y requerir write-downs significativos."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Cash Flow Statement FY2024",
+          "cita_corta": "D&A $36.7M vs Capex $4.5M; ratio de reposición 0.12x.",
+          "interpretacion": "D&A creció 28x en 5 años (1.3M→36.7M) por intangibles adquiridos mientras capex orgánico es mínimo."
+        }
+      ],
+      "falsacion": {
+        "test": "Desglose de goodwill en 10-K muestra valor < $200M o test de deterioro con headroom > 30%.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La solvencia de corto plazo es funcional, pero la liquidez depende del ciclo de capital de trabajo y es vulnerable a reversión si el crecimiento se desacelera.",
+      "confianza_0_1": 0.86,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo, liquidez",
+          "cita_corta": "Caja $224M, deuda $123M, net cash $101M. Pero AP $345.6M supera la caja disponible; WC neto -$176.8M.",
+          "interpretacion": "El buffer de caja puede erosionarse rápidamente si cambia el régimen de pagos o cae el volumen de transacciones."
+        }
+      ],
+      "falsacion": {
+        "test": "AP/AR se mantiene estable y CFO ex-float positivo durante 4 trimestres sin aumento de vencimientos de deuda.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El gasto de intereses se ha multiplicado 5x en dos años y en 9M-2025 alcanza $6.7M (annualizado ~$8.9M), presionando la caja en contexto de pérdidas operativas crónicas.",
+      "confianza_0_1": 0.9,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_005",
+          "ubicacion": "10-Q 9M-2025, Income Statement",
+          "cita_corta": "Interés FY2022 -$979K, FY2024 -$4.2M, 9M-2025 -$6.7M (annualizado ~$8.9M).",
+          "interpretacion": "Apalancamiento creciente en empresa con pérdidas operativas persistentes incrementa presión sobre caja."
+        }
+      ],
+      "falsacion": {
+        "test": "Gasto de intereses anualizado se estabiliza o baja por debajo de $5M con mejora de cobertura positiva.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La dilución accionaria implícita por SBC estimada en ~$113M/año sobre market cap de $1.15B representa erosión potencial de ~10% anual del valor accionarial.",
+      "confianza_0_1": 0.65,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Cálculo derivado: bridge EBIT-CFO residual tras D&A",
+          "cita_corta": "Residual no monetario ~$113M; SBC probablemente componente dominante. CFF FY2021 +$376M evidencia historial de financiación vía equity.",
+          "interpretacion": "Sin dato exacto de SBC, la magnitud del residual y el historial de emisiones sugieren dilución significativa y sostenida."
+        }
+      ],
+      "falsacion": {
+        "test": "SBC reportada en 10-K es < $50M anual y shares diluted muestran dilución < 5% YoY.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_007",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "SG&A se mantiene entre 31-36.5% de ingresos sin tendencia de mejora, con salto abrupto a 36.5% en Q3-2025, evidenciando ausencia de apalancamiento operativo y volatilidad trimestral alta.",
+      "confianza_0_1": 0.9,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_005",
+          "ubicacion": "10-Q Q3-2025",
+          "cita_corta": "SG&A Q3-2025: $72.8M (36.5% revenue) vs Q2-2025: $53M (27.3%). EBIT Q3-2025 -$23.7M vs Q2-2025 -$7.2M.",
+          "interpretacion": "Salto abrupto de costos cuestiona narrativa de apalancamiento operativo; la mejora del Q2 fue puntual."
+        }
+      ],
+      "falsacion": {
+        "test": "SG&A como % de ingresos cae por debajo del 30% durante 2 trimestres consecutivos sin caída de ingresos.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_008",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Sin desglose de COGS/gross profit en múltiples periodos, la calidad del margen operativo y el reconocimiento de ingresos presentan alta opacidad; DSO de ~97 días es elevado para tecnología/servicios.",
+      "confianza_0_1": 0.84,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual campos cogs_usd y gross_profit_usd; balance sheet",
+          "cita_corta": "gross_profit_usd y cogs_usd nulos en 6 años de histórico anual. AR $168.8M / Revenue $637.2M = DSO ~97 días.",
+          "interpretacion": "No se verifica la composición de ingresos y costos de forma consistente; DSO elevado puede indicar reconocimiento agresivo o términos extendidos."
+        }
+      ],
+      "falsacion": {
+        "test": "Incluir COGS y gross profit por periodo en 10-K/10-Q con DSO reduciéndose a < 75 días.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "EBIT se mantiene negativo en FY2025 completo con margen operativo peor que -8%.",
+      "probabilidad_0_1": 0.78,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT FY2025 reportado en 10-K es negativo con margen < -8%.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": "Codex 0.71, Gemini 0.85, Claude 0.75. Recomendado 0.78: convergencia alta, threshold ajustado a -8% como compromiso."
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Bridge EBIT→CFO se mantiene >100% (distorsión masiva entre flujo operativo y rentabilidad) en dos ejercicios consecutivos.",
+      "probabilidad_0_1": 0.73,
+      "ventana_meses": {
+        "min": 6,
+        "max": 24
+      },
+      "criterio_validacion": "Calcular |CFO-EBIT|/|EBIT| en FY2025 y FY2026; validar >=100% en ambos.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": "Codex 0.76, Codex-payload 0.73, Claude 0.70. Recomendado 0.73."
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Dos trimestres consecutivos con CFO excluyendo movimientos de float/capital de trabajo es negativo.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Reconstruir CFO neto excluyendo variación de AP/AR en 10-Q consecutivos; verificar signo negativo.",
+      "fuente_prevista": "10-Q",
+      "_meta_fusion": "Codex 0.58/0.64, Gemini implícito alto, Claude 0.64. Recomendado 0.60: evidencia de transcript sugiere CFO ex-float ya marginal."
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "AP/AR se normaliza a <1.6x por cambios en condiciones de pago, con DSO subiendo >110 días.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Recalcular AP/AR y DSO trimestralmente en cada 10-Q.",
+      "fuente_prevista": "10-Q",
+      "_meta_fusion": "Codex 0.54/0.58, Gemini 0.75 (AP >30% activos), Claude 0.65. Recomendado 0.55: reversión parcial probable pero timing incierto."
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "SBC se mantiene >15% de ingresos, confirmando dilución anual significativa (>5-7%).",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Gasto SBC en Cash Flow o Notas > 0.15 × Revenue; comparar shares diluted YoY.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": "Gemini 0.80, Claude implícito alto (~113M/637M=17.7%). Recomendado 0.75: alta convicción pero SBC es estimada, no confirmada."
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "Gasto de intereses anualizado supera $10M en FY2025.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Interest expense FY2025 > $10M en el 10-K.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": "Solo Claude con 0.70. Dato de 9M-2025 ($6.7M annualizado $8.9M) apoya la tendencia. Recomendado 0.70."
+    },
+    {
+      "pred_id": "PRED_007",
+      "descripcion": "Se registra deterioro de goodwill/intangibles >$25M en los próximos 24 meses.",
+      "probabilidad_0_1": 0.38,
+      "ventana_meses": {
+        "min": 6,
+        "max": 24
+      },
+      "criterio_validacion": "Cargo por deterioro reportado en 10-K o 10-Q.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": "Codex-payload 0.47, Claude 0.30. Recomendado 0.38: riesgo presente pero no hay señal inmediata de trigger."
+    },
+    {
+      "pred_id": "PRED_008",
+      "descripcion": "Crecimiento interanual de ingresos se desacelera por debajo del 20% en al menos un trimestre de los próximos 4.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Revenue YoY < 20% en cualquier trimestre Q4-2025 a Q3-2026.",
+      "fuente_prevista": "earnings",
+      "_meta_fusion": "Solo Claude con 0.55. Gemini enfatiza riesgo de desaceleración. Recomendado 0.55."
+    },
+    {
+      "pred_id": "PRED_009",
+      "descripcion": "Divulgación de covenant restrictivo o calendario de deuda que complica refinanciación en 12-24 meses.",
+      "probabilidad_0_1": 0.37,
+      "ventana_meses": {
+        "min": 6,
+        "max": 24
+      },
+      "criterio_validacion": "Revisar notas de deuda y calendarios de vencimiento; detectar breach o waiver de covenants.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": "Codex 0.39/0.45, Codex-payload 0.34, Claude 0.36(implícito). Recomendado 0.37: deuda neta negativa mitiga, pero opacidad impide descartar."
+    },
+    {
+      "pred_id": "PRED_010",
+      "descripcion": "Capex se mantiene bajo frente a D&A sin reposición real de base de activos en los próximos 24 meses.",
+      "probabilidad_0_1": 0.67,
+      "ventana_meses": {
+        "min": 12,
+        "max": 24
+      },
+      "criterio_validacion": "Comparar CAPEX anualizado vs D&A en 10-K; ratio capex/D&A < 0.3.",
+      "fuente_prevista": "10-K",
+      "_meta_fusion": "Codex 0.67. Coherente con Gemini (insostenible a largo plazo). Recomendado 0.67."
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de SBC (Stock-Based Compensation) anual y trimestral",
+      "por_que_importa": "Cuantificar dilución real y validar si el residual EBIT-CFO (~$113M) se explica por SBC. Sin este dato, la calidad de CFO es inestimable.",
+      "como_obtenerlo": "10-K FY2024, Cash Flow Statement línea SBC / Nota de compensación basada en acciones."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Calendario de vencimientos de deuda y detalle de covenants",
+      "por_que_importa": "Deuda de $123M sin calendario visible ni covenants conocidos. Con EBITDA proxy negativo, cualquier covenant de cobertura estaría comprometido. Crítico para convertir riesgo de refinanciación en probabilidad de quiebra.",
+      "como_obtenerlo": "10-K FY2024, Nota de deuda a largo plazo / credit agreement / tabla de maturities by year."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de goodwill e intangibles y test de deterioro",
+      "por_que_importa": "$523M invertidos en adquisiciones sin verificación de deterioro visible; riesgo de write-down material con márgenes negativos persistentes.",
+      "como_obtenerlo": "10-K FY2024, Nota de goodwill e intangibles / sección de impairment testing."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Número de acciones diluidas y evolución YoY",
+      "por_que_importa": "Sin dato de acciones diluidas no se puede cuantificar dilución exacta ni métricas per-share ni confirmar la estimación de SBC.",
+      "como_obtenerlo": "10-K FY2024, portada / EPS computation / nota de acciones."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Notas de arrendamientos y compromisos off-balance",
+      "por_que_importa": "Puede revelar pasivos fuera de balance que reduzcan runway efectivo y salidas de liquidez no modeladas.",
+      "como_obtenerlo": "10-K FY2024, Anexo de leases con compromisos y garantías pendientes."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose de COGS/gross profit consistente por periodo",
+      "por_que_importa": "Nulos en 6 años de histórico anual; impide validar calidad de ingreso, reconocimiento de ingresos y margen bruto real.",
+      "como_obtenerlo": "10-K/10-Q, estados de resultados con gross margin detallado por trimestre y año."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose de AP entre float operativo y proveedores comerciales",
+      "por_que_importa": "Determinar qué porción de AP ($345.6M) es float de subastas vs deuda comercial real; crítico para estimar reversibilidad.",
+      "como_obtenerlo": "10-K FY2024, Nota de cuentas por pagar / MD&A sección de liquidez."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de transacciones con partes relacionadas",
+      "por_que_importa": "Puede alterar base de liquidez y rentabilidad aparente; riesgo de opacidad sin evidencia cuantificable.",
+      "como_obtenerlo": "10-K, Notas de related party transactions / gobierno corporativo."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "FCF trimestral consistente completo (Q4-2024 a Q3-2025+)",
+      "por_que_importa": "Reduce incertidumbre del runway en ventana 12-24 meses con datos TTM robustos.",
+      "como_obtenerlo": "Estados de flujo de caja trimestrales completos en siguientes 10-Q."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.72,
+        "razon_principal": "La empresa no enfrenta riesgo de solvencia inminente gracias a caja neta positiva ($101M), pero la calidad de la generación de caja es estructuralmente débil: depende de SBC masiva (~$113M), float de pagos y ajustes no monetarios, con 6 años de pérdidas operativas sin convergencia a rentabilidad. El modelo de negocio está roto a nivel operativo pero funciona temporalmente por financiación de proveedores y compensación en acciones."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "CONDITIONAL",
+          "score_0_5": 2,
+          "por_que": [
+            "Posición de caja neta positiva: $224M caja vs $123M deuda = $101M net cash.",
+            "CFO FY2024 positivo ($65.4M) pero calidad cuestionable: ex-float solo ~$5M/trimestre según transcript.",
+            "6 años consecutivos de EBIT negativo sin convergencia; margen operativo FY2024: -13.2%.",
+            "SBC implícita de ~$113M/año distorsiona masivamente el bridge EBIT-CFO (177.8% FY2024).",
+            "AP de $345.6M (2.05x AR) indica dependencia estructural de float; reversión destruiría CFO.",
+            "4 banderas rojas de severidad ALTA convergentes (Float, Pérdidas crónicas, Bridge EBIT-CFO, Goodwill).",
+            "Información crítica faltante (covenants, SBC exacta, goodwill desglosado, lease commitments).",
+            "Runway estimado ~34 meses en escenario stress, pero si float revierte, colapsa a <12 meses."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 224065000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "Créditos de $125M y $200M mencionados en filings 8-K (sin detalle de disponibilidad)",
+            "Float operativo de AP como fuente transitoria de liquidez",
+            "Posibles marketable securities (~$81M según transcript, caja podría llegar a ~$305M)"
+          ],
+          "runway_meses_estimado": 34,
+          "metodo_estimacion": "Escenario stress: caja ($224M) / peor FCF anual histórico (FY2022: -$78.4M = ~$6.5M/mes) = 34 meses. Si float revierte (AP normaliza), runway colapsa a <12 meses. Con CFO positivo actual no hay agotamiento inmediato.",
+          "notas": "La caja es alta pero AP ($345M) supera la caja. Liquidez técnica, no absoluta. El CFO ex-float real es marginal (~$20M/año)."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 123000000,
+          "deuda_neta_usd": -101065000,
+          "coste_deuda_aprox_pct": 3.45,
+          "coverage_intereses": -11.1,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "Deuda neta negativa mitiga riesgo de refinanciación inmediato, pero no se identificó calendario de vencimientos en los datos disponibles. Se mencionan créditos de $125M y $200M en 8-K sin detalle de madurez."
+          },
+          "vencimientos": [
+            {
+              "anio": 2026,
+              "importe_usd": null,
+              "tipo": "unknown",
+              "riesgo": "UNKNOWN",
+              "fuente_ref": {
+                "source_id": "SRC_001",
+                "ubicacion": "limitaciones_de_datos / nota deuda no disponible"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [
+              "leverage_ratio",
+              "interest_coverage",
+              "minimum_liquidity"
+            ],
+            "riesgo_breach": "ALTO",
+            "comentario": "Sin información de covenants en datos disponibles. Con EBITDA proxy negativo (-$47.4M FY2024) y EBIT crónico negativo, cualquier covenant de cobertura de intereses o leverage estaría potencialmente comprometido."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "ALTO",
+          "motores": [
+            "SBC implícita estimada en ~$113M/año (residual bridge EBIT-CFO menos D&A)",
+            "Historial de emisiones de equity masivas (CFF FY2021: +$376M)",
+            "Pérdidas operativas crónicas que podrían requerir capital adicional",
+            "BV/share de $2.56 vs precio $6.66 indica prima dependiente de expectativas"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "Sin dato de acciones diluidas, se estima dilución potencial de ~10% anual basado en SBC implícita de ~$113M sobre market cap de $1.15B. Gemini estima >5-7% anual. La empresa ha financiado crecimiento vía equity históricamente."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Calidad de resultados estructuralmente baja. Beneficio operativo inexistente (6 años de EBIT negativo); el flujo de caja positivo es una función de diferir pagos a proveedores (float) y pagar empleados con acciones (SBC ~$113M). La brecha EBIT-CFO de 177.8% en FY2024 es la más alta de la serie. La falta de desglose de COGS/gross profit en múltiples periodos y DSO de 97 días añaden opacidad al reconocimiento de ingresos.",
+        "red_flags": [
+          {
+            "flag_id": "RF-01",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "CFO positivo dependiente de float de pagos a proveedores. AP $345.6M (2.05x AR); CFO ex-float real ~$5M/trimestre vs $65.4M total FY2024.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.88,
+            "por_que_importa": "Si el crecimiento se detiene o el volumen de transacciones cae, el float se desenrolla y el CFO colapsa. Obligaciones a corto (AP) superan efectivo disponible.",
+            "evidencias": [
+              {
+                "source_id": "SRC_046",
+                "ubicacion": "Earnings transcript",
+                "cita_corta": "CFO operativo ex-float de solo ~$5M por trimestre.",
+                "interpretacion": "La generación de caja real sin float es marginal."
+              },
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Balance Sheet FY2024",
+                "cita_corta": "AP $345.6M vs Cash $224M vs AR $168.8M; DSO ~97 días.",
+                "interpretacion": "Dependencia extrema del float; AP supera caja disponible."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "CFO ex-float > $15M/trimestre durante 4 trimestres consecutivos, o AP reducción >10% sin caída de ingresos.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-02",
+            "categoria": "SBC",
+            "descripcion": "SBC implícita estimada en ~$113M/año (residual del bridge EBIT-CFO tras D&A de $36.7M). Motor principal de la brecha EBIT-CFO y fuente de dilución masiva.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.78,
+            "por_que_importa": "SBC de ~$113M sobre market cap de $1.15B implica dilución potencial de ~10% anual, erosionando valor accionarial real. Es el principal mecanismo de compensación y la causa dominante del CFO positivo artificial.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Cash Flow vs Income Statement FY2024",
+                "cita_corta": "Bridge EBIT-CFO: $149.5M; D&A: $36.7M; residual: ~$113M.",
+                "interpretacion": "El componente dominante del residual es probablemente SBC."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "SBC reportada en 10-K < $50M anual.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-03",
+            "categoria": "OTHER",
+            "descripcion": "Distorsión masiva entre EBIT y CFO: bridge de $149.5M (177.8% de |EBIT|) en FY2024, la mayor de la serie. La serie completa FY2020-FY2024 muestra distorsiones >15% en todos los años.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.95,
+            "por_que_importa": "Earnings Quality es nula; el CFO no predice capacidad de generar beneficio futuro. Sin convergencia, el FCF puede revertirse abruptamente.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "puentes.ebit_a_cfo FY2024",
+                "cita_corta": "EBIT -$84.1M, CFO +$65.4M, bridge $149.5M.",
+                "interpretacion": "Flujo de caja completamente desconectado de la rentabilidad operativa."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Convergencia del bridge EBIT→CFO por debajo de 20% de |EBIT| en 2 ejercicios consecutivos.",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-04",
+            "categoria": "REVENUE_RECOGNITION",
+            "descripcion": "Pérdidas operativas crónicas sin apalancamiento operativo tras multiplicar ingresos x6. Margen -13.2% FY2024. SG&A entre 31-36.5% sin tendencia de mejora.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.92,
+            "por_que_importa": "Cuestiona la viabilidad fundamental del modelo de negocio a escala. Sin rentabilidad, cualquier choque de mercado acelera el agotamiento de caja.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "historico_anual.ebit_usd",
+                "cita_corta": "6 años consecutivos de EBIT negativo; FY2024 -$84.1M, margen -13.2%.",
+                "interpretacion": "No hay mejora estructural operativa."
+              },
+              {
+                "source_id": "SRC_005",
+                "ubicacion": "10-Q Q3-2025",
+                "cita_corta": "SG&A Q3-2025: $72.8M (36.5% revenue). EBIT Q1: -$14.4M, Q2: -$7.2M, Q3: -$23.7M.",
+                "interpretacion": "Volatilidad trimestral alta y reversión de mejoras aparentes."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "EBIT trimestral positivo sostenido 2 trimestres con SG&A <30% de ingresos.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "RF-05",
+            "categoria": "GOODWILL_IMPAIRMENT",
+            "descripcion": "$523M invertidos en adquisiciones FY2021-FY2023 sin evidencia de retorno ni test de deterioro visible. D&A creció 28x (1.3M→36.7M) mientras capex orgánico es mínimo (ratio 0.12x).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.6,
+            "por_que_importa": "Más de la mitad de los activos ($984M) pueden ser goodwill/intangibles adquiridos. Con márgenes negativos persistentes, riesgo material de write-down. Ratio capex/D&A insostenible a largo plazo.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "CFI FY2021-FY2023; capex y D&A",
+                "cita_corta": "CFI acumulado -$523M; activos totales $984M. Capex $4.5M vs D&A $36.7M (ratio 0.12x).",
+                "interpretacion": "Adquisiciones masivas sin retorno visible; base de activos no se repone orgánicamente."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Goodwill desglosado en 10-K muestra headroom >30% en test de deterioro y >80% de D&A es amortización de intangibles adquiridos.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-06",
+            "categoria": "OTHER",
+            "descripcion": "Gasto de intereses creciendo 5x en dos años ($979K FY2022 → $4.2M FY2024 → annualizado $8.9M 9M-2025) en contexto de pérdidas operativas crónicas.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.7,
+            "por_que_importa": "Incrementa presión sobre caja en empresa que no genera beneficio operativo; tendencia de endeudamiento creciente.",
+            "evidencias": [
+              {
+                "source_id": "SRC_005",
+                "ubicacion": "10-Q 9M-2025",
+                "cita_corta": "Interest expense 9M-2025: -$6.7M (annualizado ~$8.9M).",
+                "interpretacion": "Coste financiero acelerándose mientras operación pierde dinero."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Gasto de intereses anualizado se estabiliza < $5M.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-07",
+            "categoria": "REVENUE_RECOGNITION",
+            "descripcion": "DSO implícito ~97 días elevado para tecnología/servicios, combinado con ausencia de COGS/gross profit en múltiples periodos.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.55,
+            "por_que_importa": "DSO elevado puede indicar reconocimiento agresivo de ingresos o términos extendidos que inflan AR. Falta de COGS impide verificar calidad.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Balance Sheet y Income Statement FY2024",
+                "cita_corta": "AR $168.8M / Revenue $637.2M = DSO ~97 días. COGS/gross profit nulos.",
+                "interpretacion": "Posible extensión de términos de cobro o reconocimiento anticipado; opacidad contable."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "DSO se reduce a <75 días en próximo 10-Q sin caída de ingresos; COGS reportado.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "El bridge EBIT-CFO de FY2024 muestra distorsión de 177.8% ($149.5M sobre |EBIT| de $84.1M). De los $149.5M, solo $36.7M se explican por D&A; los ~$113M restantes corresponden presumiblemente a SBC masiva y cambios favorables de capital de trabajo (float). Puente sostenido por SBC y aumento de AP, no por calidad operativa.",
+            "posibles_distorsiones": [
+              "SBC masiva (~$113M estimado)",
+              "Float de capital de trabajo negativo (AP >> AR)",
+              "Otros ajustes no monetarios no desglosados"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "FCF FY2024 de $60.9M muestra conversión CFO-FCF del 93.1% dado capex mínimo ($4.5M). Sin embargo, la calidad del CFO subyacente es cuestionable. Capex de mantenimiento probablemente subestimado. En Q1-2025 capex subió a $10.1M (2.2x el capex anual FY2024), sugiriendo posible aumento futuro.",
+            "capex_riesgo": "ALTO",
+            "notas": "Ratio capex/D&A de 0.12x es insostenible a largo plazo sin deterioro de activos. Si >80% de D&A es amortización de intangibles adquiridos, el bajo capex podría ser natural."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "NO",
+          "comentario": "Sin evidencia de recompras relevantes. Cualquier recompra sería destrucción de valor dada la dependencia de float y las pérdidas crónicas."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "SI",
+          "comentario": "Motor principal de la brecha EBIT-CFO. SBC implícita estimada en ~$113M/año es extremadamente alta relativa al market cap ($1.15B) y a los ingresos ($637M). Principal mecanismo de compensación y causa dominante del CFO positivo artificial. Riesgo de enriquecimiento vía SBC sin performance operativo real."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "ALTO",
+          "comentario": "Historial de $523M en adquisiciones FY2021-FY2023 sin lograr rentabilidad operativa. CFI negativo por adquisiciones sin evidencia de sinergia robusta ni retorno operativo visible."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Sin datos de insider ownership ni transacciones ni participaciones con relacionados. Solicitar en proxy statement."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Desaceleración de volumen de subastas + desenrollamiento de float de AP: el CFO colapsa a negativo y la caja se consume rápidamente.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "Caída de CFO por reducción de float (AP normalizándose)",
+              "Pérdida operativa sin amortiguador de caja",
+              "Presión de intereses crecientes sobre caja",
+              "Necesidad de deuda o emisión dilutiva"
+            ],
+            "indicadores_tempranos": [
+              "Revenue growth YoY < 15%",
+              "CFO trimestral ex-float cae a negativo",
+              "AP/AR ratio cae por debajo de 1.5x",
+              "Cuentas por pagar cayendo secuencialmente",
+              "DSO aumentando >110 días"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Write-down de goodwill/intangibles > $100M + pérdida de confianza del mercado en la narrativa de crecimiento.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "Deterioro masivo reduce patrimonio (actualmente $440M)",
+              "Posible breach de covenants si existen ratios de patrimonio mínimo",
+              "Presión sobre precio de acción reduce capacidad de financiación vía equity"
+            ],
+            "indicadores_tempranos": [
+              "Deterioro parcial reportado en cualquier 10-Q",
+              "Revenue de unidades adquiridas no crece YoY",
+              "Management deja de reportar métricas de integración"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "SG&A no mejora, EBIT margin se deteriora a peor que -15%, forzando emisión dilutiva de equity para mantener operaciones.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "Dilución acelerada por emisión de equity",
+              "Espiral negativa: precio baja → más acciones necesarias → más dilución",
+              "BV/share en $2.56 vs precio $6.66; si la prima desaparece, fundraising se encarece"
+            ],
+            "indicadores_tempranos": [
+              "SG&A como % revenue > 35% sostenido",
+              "Shelf registration o at-the-market offering anunciada",
+              "EBIT margin peor que -15% durante 2 trimestres"
+            ]
+          }
+        ],
+        "conclusion_downside": "El riesgo principal no es de solvencia inmediata sino de calidad estructural. El modelo depende de float y SBC para generar CFO, lo cual es reversible. Si el volumen de subastas se desacelera, el float se desenrolla y el CFO real (ex-float) de ~$20M/año no cubre las pérdidas operativas. Las adquisiciones masivas sin retorno operativo visible amplifican el riesgo de write-downs. La combinación de dilución por SBC (~10%/año), pérdidas operativas crónicas y dependencia de float configura un escenario donde la destrucción de valor accionarial es progresiva aunque la empresa no quiebre."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KCF-001",
+          "relacionado_con": "supervivencia",
+          "definicion": "CFO excluyendo cambios de float (capital de trabajo) es negativo durante 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Confirmaría que la generación de caja real es estructuralmente deficiente sin el beneficio transitorio del float. Señal de colapso del modelo de financiación por proveedores."
+        },
+        {
+          "kc_id": "KCF-002",
+          "relacionado_con": "supervivencia",
+          "definicion": "FCF acumulado 12 meses (CFO - CAPEX) cae a negativo con caja < $150M.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Combinación de consumo de caja + colchón de liquidez reducido señalaría riesgo de refinanciación o emisión dilutiva forzada."
+        },
+        {
+          "kc_id": "KCF-003",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja neta se vuelve negativa (deuda > caja).",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Pérdida del único buffer de seguridad real."
+        },
+        {
+          "kc_id": "KCF-004",
+          "relacionado_con": "margen",
+          "definicion": "Margen EBIT no mejora por encima de -10% en FY2025 completo (o empeora a peor que -15% TTM).",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "7 años de EBIT negativo sin convergencia confirmaría modelo de costos insostenible sin subsidio perpetuo de SBC. Nula escalabilidad."
+        },
+        {
+          "kc_id": "KCF-005",
+          "relacionado_con": "contabilidad",
+          "definicion": "Persistencia de brechas EBIT-CFO >=100% durante 2 ejercicios anuales contiguos adicionales (FY2025-FY2026).",
+          "ventana_meses": {
+            "min": 12,
+            "max": 24
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Aumenta probabilidad de reversión abrupta de caja y confirma calidad de earnings nula."
+        },
+        {
+          "kc_id": "KCF-006",
+          "relacionado_con": "margen",
+          "definicion": "Crecimiento interanual de ingresos cae por debajo del 15% durante 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Sin crecimiento fuerte, el float se reduce y la narrativa de escala colapsa; la valoración pierde su principal soporte."
+        },
+        {
+          "kc_id": "KCF-007",
+          "relacionado_con": "dilucion",
+          "definicion": "Dilución accionaria acumulada > 10% en 12 meses (contando SBC y emisiones) o emisión de equity/convertible material.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Dilución > 10% anual erosiona valor accionarial incluso si la operación mejora."
+        },
+        {
+          "kc_id": "KCF-008",
+          "relacionado_con": "contabilidad",
+          "definicion": "Deterioro de goodwill/intangibles reportado > $50M o divulgación de plan de integración fallido.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 24
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Write-down significativo confirmaría que las adquisiciones no generaron retorno esperado y destrucción de patrimonio."
+        },
+        {
+          "kc_id": "KCF-009",
+          "relacionado_con": "deuda",
+          "definicion": "Gasto de intereses anualizado supera $12M o se reporta incumplimiento/waiver de covenants.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Coste de deuda creciente en empresa no rentable incrementa riesgo de estrés financiero."
+        },
+        {
+          "kc_id": "KCF-010",
+          "relacionado_con": "fcf",
+          "definicion": "Normalización de AP/AR a <1.4x acompañada de DSO >110 días por 2 trimestres indica reversión de float y presión de caja.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Reversión de la fuente principal de liquidez operativa transitoria."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 2.0,
+        "condiciones_para_aumentar_tamaño": [
+          "EBIT trimestral positivo sostenido 2 trimestres consecutivos",
+          "CFO ex-float confirmado > $15M/trimestre de forma recurrente",
+          "SBC reportada < $50M/año, reduciendo dilución a niveles manejables",
+          "Convergencia de bridge EBIT-CFO < 50% en un año completo",
+          "Revenue growth YoY se mantiene > 25% con apalancamiento operativo visible",
+          "Desglose de goodwill muestra headroom sólido en test de deterioro",
+          "Divulgación completa de covenants y calendario de deuda sin alertas"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "CFO ex-float negativo 2 trimestres consecutivos → REDUCIR_50",
+          "FCF acumulado 12M negativo + caja < $150M → SALIR",
+          "Caja neta negativa (deuda > caja) → SALIR",
+          "Goodwill impairment > $50M → REVISAR_COMITE",
+          "Dilución accionaria > 10% anual confirmada → REDUCIR_50",
+          "Revenue growth < 15% YoY sostenido → CONGELAR_COMPRAS",
+          "AP/AR < 1.4x + DSO > 110 días → SALIR",
+          "Cualquier trimestre con deterioro de caja > $20M sin explicación operativa"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Sin SBC explícita no se puede cuantificar dilución real ni validar el bridge EBIT-CFO. Es el dato faltante más crítico del análisis.",
+          "como_obtenerlo": "10-K FY2024, Cash Flow Statement línea SBC / Nota de compensación."
+        },
+        {
+          "item": "tabla_vencimientos_y_covenants",
+          "por_que_importa": "Deuda de $123M sin calendario visible ni covenants conocidos. Con EBITDA proxy negativo, covenants podrían estar comprometidos.",
+          "como_obtenerlo": "10-K FY2024, Nota de deuda a largo plazo / credit agreement / tabla de maturities."
+        },
+        {
+          "item": "acciones_diluidas",
+          "por_que_importa": "Sin dato de acciones diluidas no se puede calcular dilución exacta ni métricas per-share.",
+          "como_obtenerlo": "10-K FY2024, portada / nota de EPS / Share-based compensation note."
+        },
+        {
+          "item": "detalle_goodwill_intangibles",
+          "por_que_importa": "$523M en adquisiciones sin desglose de goodwill ni test de deterioro visible. Riesgo de destrucción de patrimonio.",
+          "como_obtenerlo": "10-K FY2024, Nota de goodwill e intangibles / sección de impairment testing."
+        },
+        {
+          "item": "lease_commitments",
+          "por_que_importa": "Puede introducir pasivos no reflejados en caja inmediata y reducir runway efectivo.",
+          "como_obtenerlo": "10-K FY2024, Anexo de leases con compromisos y garantías pendientes."
+        },
+        {
+          "item": "fcf_trimestral_completo",
+          "por_que_importa": "Ajusta el runway y la estabilidad de caja con datos TTM robustos.",
+          "como_obtenerlo": "Estados de flujo de caja trimestrales completos Q4-2024 a Q3-2025+."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "SBC no desglosada en datos disponibles; estimación de ~$113M basada en residual del bridge EBIT-CFO tras D&A (método de Claude, validado por Gemini).",
+      "Goodwill e intangibles no desglosados; riesgo estimado por volumen de CFI en adquisiciones ($523M).",
+      "Sin calendario de vencimientos de deuda ni detalle de covenants en ningún input.",
+      "COGS/gross profit no disponibles para FY2022-FY2024; análisis de márgenes limitado a EBIT.",
+      "CFO ex-float basado en mención de transcript (SRC_046), no en estado financiero auditado.",
+      "Acciones diluidas no normalizadas en el pack; dilución estimada por métodos indirectos.",
+      "Flujos trimestrales incompletos en varios periodos para FCF robusto TTM."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-21T00:00:00Z",
+    "inputs_hash": "CASE_20260221_ACVA|TruthPack_v1|ImpliedExpectations_v1|ForensicDetection_v1",
+    "fusion": {
+      "modelos_fusionados": [
+        "codex",
+        "gemini",
+        "claude"
+      ],
+      "criterios_de_resolucion": [
+        "Para veredicto: consenso unánime WATCHLIST y CONDITIONAL; score 2/5 por mayoría (Codex 2, Gemini 2, Claude 3 → mayoría 2).",
+        "Para confianza: rango [0.65, 0.85]; recomendado 0.72 ponderando conservadoramente dado datos faltantes críticos.",
+        "Para claims: fusionados por afinidad temática eliminando duplicados; texto combinando perspectivas únicas de cada modelo.",
+        "Para datos cuantitativos coincidentes: usados directamente (caja $224M, deuda $123M, EBIT -$84.1M, bridge $149.5M).",
+        "Para red flags: unificados y renumerados; severidades convergentes usadas directamente.",
+        "Para predicciones: rango [min, max] de probabilidades de los modelos documentado; valor recomendado seleccionado por evidencia.",
+        "Para kill criteria: superset de los tres modelos eliminando redundancias y tomando umbrales más evidenciados.",
+        "Para max_position_size: rango [1.5%, 2%]; recomendado 2% (mayoría Codex + Claude)."
+      ],
+      "conflictos_detectados": [
+        {
+          "campo": "supervivencia.score_0_5",
+          "valores": {
+            "codex": 2,
+            "gemini": 2,
+            "claude": 3
+          },
+          "resolucion": "Adoptado 2 por mayoría. Claude argumenta 3 por caja neta positiva y runway >24 meses, pero Codex y Gemini enfatizan que la calidad de esa caja es cuestionable (dependencia de float y SBC). Se prioriza la señal de calidad sobre la cantidad de caja.",
+          "justificacion": "Los 4 red flags de severidad ALTA convergentes y la dependencia estructural de ajustes no operativos justifican score 2 sobre 3."
+        },
+        {
+          "campo": "confianza_0_1",
+          "valores": {
+            "codex": 0.68,
+            "gemini": 0.85,
+            "claude": 0.65
+          },
+          "resolucion": "Adoptado 0.72. Gemini expresa confianza alta (0.85) por claridad del diagnóstico; Codex y Claude son más conservadores por datos faltantes críticos (SBC, covenants, goodwill).",
+          "justificacion": "Los datos faltantes limitan la confianza plena, pero el diagnóstico convergente la eleva por encima del mínimo."
+        },
+        {
+          "campo": "supervivencia.horizonte_meses.max",
+          "valores": {
+            "codex": 24,
+            "gemini": 36,
+            "claude": 24
+          },
+          "resolucion": "Adoptado max=24. Gemini extiende a 36 por runway aritmético de caja, pero Codex y Claude argumentan que la calidad de caja limita el horizonte evaluable.",
+          "justificacion": "Mantener horizonte conservador de 24 meses mientras no se confirme la sostenibilidad del CFO ex-float."
+        },
+        {
+          "campo": "max_position_size",
+          "valores": {
+            "codex": "2%",
+            "gemini": "1.5%",
+            "claude": "2%"
+          },
+          "resolucion": "Adoptado 2% por mayoría. Gemini sugiere 1.5% por mayor convicción en la fragilidad del modelo.",
+          "justificacion": "2% con triggers mensuales estrictos permite exposición táctica controlada sin exceder riesgo."
+        },
+        {
+          "campo": "SBC estimación",
+          "valores": {
+            "codex": "no cuantificada explícitamente",
+            "gemini": ">15% ingresos (~$100M+)",
+            "claude": "~$113M"
+          },
+          "resolucion": "Adoptado ~$113M (estimación de Claude) validado por rango de Gemini (>$100M). Codex identifica el residual del bridge pero no lo cuantifica.",
+          "justificacion": "Claude ofrece la derivación más explícita: bridge $149.5M - D&A $36.7M = ~$113M residual. Gemini corrobora orden de magnitud."
+        },
+        {
+          "campo": "riesgo_dilucion.nivel",
+          "valores": {
+            "codex": "MEDIO-ALTO",
+            "gemini": "ALTO",
+            "claude": "ALTO"
+          },
+          "resolucion": "Adoptado ALTO por mayoría. La magnitud estimada de SBC (~$113M) sobre market cap ($1.15B) justifica nivel ALTO.",
+          "justificacion": "Dilución potencial de ~10% anual es material por cualquier estándar."
+        },
+        {
+          "campo": "KCF-001 accion_recomendada para CFO ex-float negativo",
+          "valores": {
+            "codex": "REDUCIR_50",
+            "gemini": "SALIR",
+            "claude": "REDUCIR_50"
+          },
+          "resolucion": "Adoptado REDUCIR_50 por mayoría. Gemini propone SALIR directamente, pero CFO negativo ex-float por 2 trimestres puede ser transitorio.",
+          "justificacion": "Reducción de 50% permite mantener exposición vigilante; SALIR se reserva para señales más severas (caja neta negativa, FCF negativo con caja <$150M)."
+        },
+        {
+          "campo": "KCF-004 threshold margen EBIT",
+          "valores": {
+            "codex": "-10%",
+            "gemini": "-15%",
+            "claude": "-10%"
+          },
+          "resolucion": "Adoptado combinado: -10% como umbral de CONGELAR_COMPRAS (mayoría), con nota de que deterioro a peor que -15% (Gemini) refuerza la señal.",
+          "justificacion": "Dado que margen actual es -13.2%, el threshold de -10% ya implica mejora necesaria; -15% sería deterioro adicional."
+        }
+      ]
+    }
+  }
+}

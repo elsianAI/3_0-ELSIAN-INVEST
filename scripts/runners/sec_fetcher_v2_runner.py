@@ -14,17 +14,25 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
+import importlib
 import json
+import os
 import re
 import sys
 import time
 from dataclasses import dataclass
+from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+try:
+    from pypdf import PdfReader
+except Exception:
+    PdfReader = None  # type: ignore[assignment]
 
 
 USER_AGENT = "ELSIAN-INVEST-Bot/1.0 (research; bot@elsian-invest.local)"
@@ -92,6 +100,57 @@ LOCAL_FILING_NEGATIVE = (
     "linkedin",
     "twitter.com",
     "facebook.com",
+)
+LOCAL_IR_DISCOVERY_HINTS = (
+    "investor",
+    "financial",
+    "results",
+    "reports",
+    "report",
+    "announcement",
+    "news",
+    "regulatory",
+    "finance kit",
+    "financials",
+)
+LOCAL_FALLBACK_MAX_PAGES = 12
+LOCAL_FALLBACK_MAX_LINKS_PER_PAGE = 80
+LOCAL_FALLBACK_MAX_TOTAL = 12
+LOCAL_FALLBACK_PER_TYPE = {
+    "ANNUAL_REPORT": 4,
+    "INTERIM_REPORT": 4,
+    "REGULATORY_FILING": 4,
+    "IR_NEWS": 3,
+    "_default": 2,
+}
+DATE_DEBUG = os.getenv("SEC_FETCHER_DATE_DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
+_NAV_HINTS = (
+    "search home",
+    "cookie",
+    "privacy policy",
+    "investor relations",
+    "latest news",
+    "products",
+    "smartpos",
+    "newsletter",
+)
+_FIN_HINTS = (
+    "revenue",
+    "profit",
+    "income",
+    "cash flow",
+    "assets",
+    "liabilities",
+    "equity",
+    "ebit",
+    "ebitda",
+    "dividend",
+    "capex",
+    "hk$",
+    "usd",
+    "rmb",
+    "cny",
+    "%",
 )
 
 
@@ -255,20 +314,167 @@ def infer_regulator_code(exchange: Optional[str], country: Optional[str]) -> str
 
 
 def parse_date_loose(text: str) -> Optional[str]:
-    m_iso = re.search(r"(20\d{2}-\d{2}-\d{2})", text)
-    if m_iso:
-        return m_iso.group(1)
+    value = re.sub(r"\s+", " ", str(text or "")).strip()
+    if not value:
+        return None
+
+    for m in re.finditer(r"\b((?:19|20)\d{2})[-/](\d{1,2})[-/](\d{1,2})\b", value):
+        try:
+            y, mo, day = int(m.group(1)), int(m.group(2)), int(m.group(3))
+            return dt.date(y, mo, day).isoformat()
+        except ValueError:
+            continue
+
+    for m in re.finditer(r"(?<!\d)((?:19|20)\d{2})(\d{2})(\d{2})(?!\d)", value):
+        try:
+            y, mo, day = int(m.group(1)), int(m.group(2)), int(m.group(3))
+            return dt.date(y, mo, day).isoformat()
+        except ValueError:
+            continue
+
     for pattern in (r"([A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})", r"(\d{1,2}\s+[A-Za-z]{3,9}\s+20\d{2})"):
-        m = re.search(pattern, text)
+        m = re.search(pattern, value, flags=re.IGNORECASE)
         if not m:
             continue
-        raw = m.group(1)
+        raw = m.group(1).strip()
+        normalized = raw.title()
         for fmt in ("%B %d, %Y", "%b %d, %Y", "%d %B %Y", "%d %b %Y"):
             try:
-                return dt.datetime.strptime(raw, fmt).date().isoformat()
+                return dt.datetime.strptime(normalized, fmt).date().isoformat()
             except ValueError:
                 continue
     return None
+
+
+def _date_debug(msg: str) -> None:
+    if DATE_DEBUG:
+        print(f"[sec_fetcher][date-debug] {msg}", file=sys.stderr)
+
+
+def parse_year_hint(text: str) -> Optional[int]:
+    low = re.sub(r"\s+", " ", str(text or "")).lower()
+    if not low:
+        return None
+    if not any(k in low for k in ("annual", "interim", "year", "fy", "report", "results")):
+        return None
+    years = [int(m.group(0)) for m in re.finditer(r"(?<!\d)(?:19|20)\d{2}(?!\d)", low)]
+    if not years:
+        return None
+    return max(years)
+
+
+def _normalize_text_for_hash(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text or "")).strip().lower()
+
+
+def _content_hash(text: str) -> str:
+    normalized = _normalize_text_for_hash(text)
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest() if normalized else ""
+
+
+def _extract_largest_text_block(soup: BeautifulSoup) -> str:
+    candidates = soup.find_all(["main", "article", "section", "div"])
+    best = ""
+    for node in candidates:
+        txt = re.sub(r"\s+", " ", node.get_text(" ", strip=True)).strip()
+        if len(txt) > len(best):
+            best = txt
+    return best
+
+
+def strip_html_boilerplate(raw_html: str) -> str:
+    soup = BeautifulSoup(raw_html, "html.parser")
+    for tag in soup(["script", "style", "noscript", "meta", "link", "nav", "header", "footer", "aside"]):
+        tag.decompose()
+
+    regex = re.compile(r"(menu|navbar|sidebar|cookie|breadcrumb)", re.IGNORECASE)
+    for node in soup.find_all(attrs={"class": regex}):
+        node.decompose()
+    for node in soup.find_all(attrs={"id": regex}):
+        node.decompose()
+
+    text = strip_html_to_text(str(soup)).strip()
+    if len(text) >= 600:
+        return str(soup)
+
+    # fallback: keep only the largest textual block when global text is too noisy/thin
+    block = _extract_largest_text_block(soup)
+    if block and len(block) > len(text):
+        shell = BeautifulSoup("<html><body></body></html>", "html.parser")
+        shell.body.string = block  # type: ignore[union-attr]
+        return str(shell)
+    return str(soup)
+
+
+def _extract_pattern_date_from_pdf_text(text: str) -> Optional[str]:
+    probe = re.sub(r"\s+", " ", str(text or "")).strip()
+    if not probe:
+        return None
+    patterns = (
+        r"(?:for the|for)\s+year\s+ended\s+([A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})",
+        r"year\s+ended\s+([A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})",
+        r"for the period ended\s+([A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})",
+        r"(?:for the|for)\s+year\s+ended\s+((?:19|20)\d{2}-\d{2}-\d{2})",
+    )
+    for pat in patterns:
+        m = re.search(pat, probe, flags=re.IGNORECASE)
+        if not m:
+            continue
+        parsed = parse_date_loose(m.group(1))
+        if parsed:
+            return parsed
+    return None
+
+
+def _is_low_financial_density(text: str, window: int = 2000) -> bool:
+    sample = _normalize_text_for_hash(text)[:window]
+    if not sample:
+        return True
+    fin_hits = sum(1 for k in _FIN_HINTS if k in sample)
+    num_hits = len(re.findall(r"\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\b|\b\d+(?:\.\d+)?%\b", sample))
+    return fin_hits < 2 and num_hits < 2
+
+
+def is_navigation_like_source(title: str, cleaned_text: str, url: str) -> bool:
+    low_url = (url or "").lower()
+    is_pdf = low_url.endswith(".pdf")
+    if is_pdf:
+        return False
+    sample = _normalize_text_for_hash(cleaned_text)[:2500]
+    title_low = _normalize_text_for_hash(title)
+    nav_hits = sum(1 for k in _NAV_HINTS if k in sample or k in title_low or k in low_url)
+    index_like_url = any(p in low_url for p in (
+        "/investor-relations",
+        "/latest-news",
+        "/announcements",
+        "/news",
+        "/finance-kit",
+        "/publications",
+    ))
+    if "search home android smartpos" in sample:
+        return True
+    if index_like_url and _is_low_financial_density(sample):
+        return True
+    return nav_hits >= 4 and _is_low_financial_density(sample)
+
+
+def _prefer_new_candidate(prev: Dict[str, Any], candidate: Dict[str, Any]) -> bool:
+    prev_score = int(prev.get("score", 0))
+    new_score = int(candidate.get("score", 0))
+    if new_score > prev_score:
+        # protect a date-carrying candidate from a date-less overwrite unless score delta is meaningful
+        if prev.get("fecha_publicacion") and not candidate.get("fecha_publicacion"):
+            return (new_score - prev_score) >= 2
+        return True
+    if new_score < prev_score:
+        return False
+    prev_has_date = bool(prev.get("fecha_publicacion"))
+    new_has_date = bool(candidate.get("fecha_publicacion"))
+    if new_has_date and not prev_has_date:
+        return True
+    if prev_has_date and not new_has_date:
+        return False
+    return float(candidate.get("selection_score", 0.0)) > float(prev.get("selection_score", 0.0))
 
 
 def read_sources_context(case_dir: Path) -> Dict[str, Any]:
@@ -302,6 +508,10 @@ def build_local_ir_pages(web_ir: Optional[str]) -> List[str]:
         "",
         "/investor-relations",
         "/investors",
+        "/finance-kit",
+        "/financial-reports",
+        "/annual-reports",
+        "/company-announcements",
         "/news",
         "/news-events",
         "/announcements",
@@ -317,6 +527,168 @@ def build_local_ir_pages(web_ir: Optional[str]) -> List[str]:
             continue
         pages.append(urljoin(base + "/", suffix.lstrip("/")))
     return list(dict.fromkeys(pages))
+
+
+def _is_same_domain(base_url: str, candidate_url: str) -> bool:
+    base_host = urlparse(base_url).netloc.lower()
+    cand_host = urlparse(candidate_url).netloc.lower()
+    return bool(base_host and cand_host and base_host == cand_host)
+
+
+def discover_ir_subpages(
+    html: str,
+    base_url: str,
+    exchange: Optional[str],
+    max_links: int = LOCAL_FALLBACK_MAX_LINKS_PER_PAGE,
+) -> List[str]:
+    soup = BeautifulSoup(html, "html.parser")
+    ex = (exchange or "").upper()
+    hints = set(LOCAL_IR_DISCOVERY_HINTS)
+    hints.update(LOCAL_FILING_KEYWORDS_BY_EXCHANGE.get(ex, ()))
+
+    out: List[str] = []
+    seen = set()
+    for a in soup.find_all("a", href=True):
+        href = (a.get("href") or "").strip()
+        if not href:
+            continue
+        full_url = urljoin(base_url, href)
+        if not full_url.startswith(("http://", "https://")):
+            continue
+        if not _is_same_domain(base_url, full_url):
+            continue
+
+        low_url = full_url.lower()
+        if any(neg in low_url for neg in LOCAL_FILING_NEGATIVE):
+            continue
+        if low_url.endswith((".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip", ".ppt", ".pptx")):
+            continue
+
+        text = re.sub(r"\s+", " ", a.get_text(" ", strip=True)).strip()
+        context_norm = re.sub(r"[-_/]+", " ", f"{text} {low_url}".lower())
+        if not any(h in context_norm for h in hints):
+            continue
+
+        if full_url in seen:
+            continue
+        seen.add(full_url)
+        out.append(full_url)
+        if len(out) >= max_links:
+            break
+    return out
+
+
+def _classify_local_filing_type(title: str, doc_url: str, snippet: str) -> str:
+    _ctx = f"{title.lower()} {doc_url.lower()} {snippet.lower()}"
+    _url_low = doc_url.lower()
+    _is_media_url = (
+        "youtube.com" in _url_low
+        or "youtu.be" in _url_low
+        or "vimeo.com" in _url_low
+        or "watch?v=" in _url_low
+        or _url_low.endswith((".mp4", ".mov", ".avi", ".m3u8"))
+    )
+    if _is_media_url:
+        return "OTHER"
+    if any(w in _ctx for w in ("annual", "full year", "year-end", "year end")):
+        return "ANNUAL_REPORT"
+    if any(w in _ctx for w in ("interim", "half year", "h1 ", "h2 ", "half-year")):
+        return "INTERIM_REPORT"
+    if "rns" in _ctx or "regulatory news" in _ctx or "announcement" in _ctx:
+        return "IR_NEWS"
+    if any(w in _ctx for w in ("results", "financial")):
+        return "REGULATORY_FILING"
+    return "OTHER"
+
+
+def _resolve_local_candidate_date(
+    anchor_text: str,
+    row_text: str,
+    full_url: str,
+) -> Tuple[Optional[str], str, bool]:
+    anchor_dbg = re.sub(r"\s+", " ", str(anchor_text or "")).strip()
+    row_dbg = re.sub(r"\s+", " ", str(row_text or "")).strip()
+    _date_debug(
+        "_resolve_local_candidate_date "
+        f"anchor='{anchor_dbg[:100]}' row='{row_dbg[:120]}' url='{full_url[:180]}'"
+    )
+    for source_name, chunk in (
+        ("context", f"{anchor_text} {row_text}"),
+        ("url", full_url),
+    ):
+        date_guess = parse_date_loose(chunk)
+        if date_guess:
+            estimated = source_name != "context"
+            _date_debug(f"  -> parsed date {date_guess} from {source_name}")
+            return date_guess, source_name, estimated
+    for source_name, chunk in (
+        ("title_year", f"{anchor_text} {row_text}"),
+        ("url_year", full_url),
+    ):
+        year_hint = parse_year_hint(chunk)
+        if year_hint:
+            inferred = f"{int(year_hint):04d}-12-31"
+            _date_debug(f"  -> inferred year-only date {inferred} from {source_name}")
+            return inferred, source_name, True
+    _date_debug("  -> no date inferred")
+    return None, "unknown", True
+
+
+def _extract_date_from_html_document(html: str, doc_url: str) -> Tuple[Optional[str], str]:
+    soup = BeautifulSoup(html, "html.parser")
+    meta_selectors = (
+        ("html_meta", {"property": "article:published_time"}),
+        ("html_meta", {"name": "date"}),
+        ("html_meta", {"name": "publishdate"}),
+        ("html_meta", {"name": "publication_date"}),
+        ("html_meta", {"name": "dc.date"}),
+    )
+    for source_name, attrs in meta_selectors:
+        tag = soup.find("meta", attrs=attrs)
+        if tag and tag.get("content"):
+            parsed = parse_date_loose(str(tag.get("content")))
+            if parsed:
+                return parsed, source_name
+
+    for t in soup.find_all("time"):
+        text = str(t.get("datetime") or t.get_text(" ", strip=True) or "")
+        parsed = parse_date_loose(text)
+        if parsed:
+            return parsed, "html_time_tag"
+
+    if soup.title and soup.title.get_text():
+        parsed = parse_date_loose(soup.title.get_text(" ", strip=True))
+        if parsed:
+            return parsed, "html_title"
+
+    parsed = parse_date_loose(doc_url)
+    if parsed:
+        return parsed, "url"
+    return None, "unknown"
+
+
+def _select_local_fallback_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    ordered = sorted(
+        candidates,
+        key=lambda x: (
+            float(x.get("selection_score", 0.0)),
+            x.get("fecha_publicacion") or "0000-00-00",
+        ),
+        reverse=True,
+    )
+
+    selected: List[Dict[str, Any]] = []
+    counts: Dict[str, int] = {}
+    for cand in ordered:
+        ctype = str(cand.get("tipo_guess") or "OTHER").upper()
+        limit = int(LOCAL_FALLBACK_PER_TYPE.get(ctype, LOCAL_FALLBACK_PER_TYPE["_default"]))
+        if counts.get(ctype, 0) >= limit:
+            continue
+        selected.append(cand)
+        counts[ctype] = counts.get(ctype, 0) + 1
+        if len(selected) >= LOCAL_FALLBACK_MAX_TOTAL:
+            break
+    return selected
 
 
 def extract_local_filing_candidates(
@@ -341,7 +713,8 @@ def extract_local_filing_candidates(
         text = re.sub(r"\s+", " ", a.get_text(" ", strip=True)).strip()
         parent = a.find_parent(["li", "tr", "div", "section", "article"])
         row_text = re.sub(r"\s+", " ", parent.get_text(" ", strip=True)).strip() if parent else text
-        context = f"{text} {row_text} {full_url}".lower()
+        context_raw = f"{text} {row_text} {full_url}"
+        context = context_raw.lower()
         # Normalize common URL/slug separators so keyword matching catches
         # forms like "annual-report" / "interim_report".
         context_norm = re.sub(r"[-_/]+", " ", context)
@@ -365,24 +738,52 @@ def extract_local_filing_candidates(
             score += 2
 
         title = text or Path(urlparse(full_url).path).name or "Local filing"
-        date_guess = parse_date_loose(context)
+        date_guess, date_source, date_estimated = _resolve_local_candidate_date(text, row_text, full_url)
+        filing_type = _classify_local_filing_type(title, full_url, row_text)
+        selection_score = float(score)
+        if filing_type == "ANNUAL_REPORT":
+            selection_score += 4.0
+        elif filing_type == "INTERIM_REPORT":
+            selection_score += 3.0
+        elif filing_type == "REGULATORY_FILING":
+            selection_score += 2.0
+        elif filing_type == "IR_NEWS":
+            selection_score += 1.0
+        if date_guess:
+            selection_score += 0.5
 
+        candidate = {
+            "url": full_url,
+            "titulo": title[:240],
+            "score": score,
+            "fecha_publicacion": date_guess,
+            "fecha_source": date_source,
+            "fecha_publicacion_estimated": date_estimated,
+            "snippet": row_text[:280] if row_text else title[:280],
+            "tipo_guess": filing_type,
+            "selection_score": selection_score,
+        }
         prev = by_url.get(full_url)
-        if prev is None or score > int(prev["score"]):
-            by_url[full_url] = {
-                "url": full_url,
-                "titulo": title[:240],
-                "score": score,
-                "fecha_publicacion": date_guess,
-                "snippet": row_text[:280] if row_text else title[:280],
-            }
+        if prev is None:
+            by_url[full_url] = candidate
+            continue
+        if _prefer_new_candidate(prev, candidate):
+            if prev.get("fecha_publicacion") and not candidate.get("fecha_publicacion"):
+                _date_debug(
+                    f"candidate replacement preserved? prev had date={prev.get('fecha_publicacion')} "
+                    f"new had none (url={full_url})"
+                )
+            by_url[full_url] = candidate
 
     candidates = sorted(
         by_url.values(),
-        key=lambda x: (int(x["score"]), x.get("fecha_publicacion") or "0000-00-00"),
+        key=lambda x: (
+            float(x.get("selection_score", 0.0)),
+            x.get("fecha_publicacion") or "0000-00-00",
+        ),
         reverse=True,
     )
-    return candidates[:6]
+    return candidates[:20]
 
 
 def strip_html_to_text(raw: str) -> str:
@@ -392,6 +793,13 @@ def strip_html_to_text(raw: str) -> str:
     lines = [line.strip() for line in soup.get_text("\n").splitlines()]
     lines = [line for line in lines if line]
     return "\n".join(lines)
+
+
+def _alpha_ratio(text: str) -> float:
+    if not text:
+        return 0.0
+    alpha = sum(1 for ch in text if ch.isalpha())
+    return alpha / max(1, len(text))
 
 
 def first_25_words(text: str) -> str:
@@ -476,20 +884,122 @@ def find_exhibit_99_file(client: SecClient, cik_int: int, rec: FilingRecord) -> 
     return None
 
 
-def get_doc_text(client: SecClient, url: str) -> Tuple[bytes, str]:
+def get_doc_text(client: SecClient, url: str) -> Tuple[bytes, str, Dict[str, Any]]:
     resp = client.get(url, binary=True)
     content = resp.content
     ctype = resp.headers.get("Content-Type", "").lower()
     if "application/pdf" in ctype or url.lower().endswith(".pdf"):
-        # Keep text extraction simple and deterministic for SEC fetcher use.
-        text = "[PDF original descargado; extracción de texto no disponible en este runner]"
-        return content, text
+        if PdfReader is None:
+            return content, "", {
+                "extraction_status": "NON_EXTRACTABLE_PDF",
+                "extraction_reason": "pypdf no disponible para extraer texto embebido de PDF.",
+                "extractor": "none",
+                "text_chars": 0,
+                "inferred_date": None,
+                "date_source": "unknown",
+                "text_sample": "",
+                "content_hash": "",
+            }
+        try:
+            reader = PdfReader(BytesIO(content))
+            chunks: List[str] = []
+            for page in reader.pages:
+                page_text = page.extract_text() or ""
+                page_text = re.sub(r"\s+", " ", page_text).strip()
+                if page_text:
+                    chunks.append(page_text)
+            text = "\n\n".join(chunks).strip()
+            text_probe = text[:20000]
+            inferred_date = None
+            date_source = "unknown"
+            metadata = getattr(reader, "metadata", None) or {}
+            for key in ("/ModDate", "/CreationDate", "ModDate", "CreationDate"):
+                raw_date = metadata.get(key) if hasattr(metadata, "get") else None
+                parsed = parse_date_loose(str(raw_date or ""))
+                if parsed:
+                    inferred_date = parsed
+                    date_source = "pdf_metadata"
+                    break
+            if inferred_date is None:
+                parsed = _extract_pattern_date_from_pdf_text(text_probe)
+                if parsed:
+                    inferred_date = parsed
+                    date_source = "pdf_text_pattern"
+            if inferred_date is None:
+                parsed = parse_date_loose(text_probe)
+                if parsed:
+                    inferred_date = parsed
+                    date_source = "pdf_text_general"
+        except Exception as exc:
+            return content, "", {
+                "extraction_status": "NON_EXTRACTABLE_PDF",
+                "extraction_reason": f"Error extrayendo PDF con pypdf: {exc}",
+                "extractor": "pypdf",
+                "text_chars": 0,
+                "inferred_date": None,
+                "date_source": "unknown",
+                "text_sample": "",
+                "content_hash": "",
+            }
+        text_chars = len(text)
+        alpha_ratio = _alpha_ratio(text)
+        content_hash = _content_hash(text)
+        text_sample = text[:4000]
+        if text_chars >= 500 and alpha_ratio >= 0.30:
+            reason = ""
+            if text_chars < 10000:
+                reason = (
+                    f"Texto PDF extraído pero bajo para filing anual "
+                    f"({text_chars} chars, alpha_ratio={alpha_ratio:.2f})."
+                )
+            return content, text, {
+                "extraction_status": "OK",
+                "extraction_reason": reason,
+                "extractor": "pypdf",
+                "text_chars": text_chars,
+                "inferred_date": inferred_date,
+                "date_source": date_source,
+                "text_sample": text_sample,
+                "content_hash": content_hash,
+            }
+        return content, text, {
+            "extraction_status": "NON_EXTRACTABLE_PDF",
+            "extraction_reason": (
+                "PDF sin texto embebido suficiente "
+                f"(chars={text_chars}, alpha_ratio={alpha_ratio:.2f})."
+            ),
+            "extractor": "pypdf",
+            "text_chars": text_chars,
+            "inferred_date": inferred_date,
+            "date_source": date_source,
+            "text_sample": text_sample,
+            "content_hash": content_hash,
+        }
     try:
         decoded = content.decode(resp.encoding or "utf-8", errors="replace")
     except Exception:
         decoded = content.decode("utf-8", errors="replace")
-    text = strip_html_to_text(decoded)
-    return content, text
+    clean_html = strip_html_boilerplate(decoded)
+    inferred_date, date_source = _extract_date_from_html_document(clean_html, url)
+    text = strip_html_to_text(clean_html).strip()
+    if len(text) < 200:
+        raw_soup = BeautifulSoup(decoded, "html.parser")
+        fallback_block = _extract_largest_text_block(raw_soup)
+        if fallback_block and len(fallback_block) > len(text):
+            text = fallback_block
+    text_chars = len(text)
+    content_hash = _content_hash(text)
+    text_sample = text[:4000]
+    return content, text, {
+        "extraction_status": "OK" if text_chars > 0 else "FETCH_ERROR",
+        "extraction_reason": "" if text_chars > 0 else "Documento sin texto extraible tras limpieza HTML.",
+        "extractor": "html_text",
+        "text_chars": text_chars,
+        "inferred_date": inferred_date,
+        "date_source": date_source,
+        "text_sample": text_sample,
+        "content_hash": content_hash,
+    }
 
 
 def detect_credit_exhibits(
@@ -560,6 +1070,50 @@ def raw_dir_local_path(raw_dir: Path, filename: str) -> str:
         return f"_raw_filings/{filename}"
 
 
+_EXTRACTORS_CACHE: Optional[Tuple[Any, Any]] = None
+
+
+def _resolve_extractor_or_raise(local_module: str, package_module: str, attr: str) -> Any:
+    errors: List[str] = []
+    try:
+        mod = importlib.import_module(local_module)
+        return getattr(mod, attr)
+    except Exception as exc:
+        errors.append(f"{local_module}.{attr}: {exc!r}")
+
+    try:
+        mod = importlib.import_module(package_module)
+        return getattr(mod, attr)
+    except Exception as exc:
+        errors.append(f"{package_module}.{attr}: {exc!r}")
+
+    path0 = sys.path[0] if sys.path else ""
+    raise RuntimeError(
+        "Extractor import failed (both local+package paths). "
+        f"runner={Path(__file__).name} cwd={Path.cwd()} sys.path[0]={path0!r} "
+        f"errors={'; '.join(errors)}"
+    )
+
+
+def _load_financial_extractors_or_raise() -> Tuple[Any, Any]:
+    global _EXTRACTORS_CACHE
+    if _EXTRACTORS_CACHE is not None:
+        return _EXTRACTORS_CACHE
+
+    extract_ixbrl_facts = _resolve_extractor_or_raise(
+        "ixbrl_extractor",
+        "scripts.runners.ixbrl_extractor",
+        "extract_ixbrl_facts",
+    )
+    extract_financial_tables = _resolve_extractor_or_raise(
+        "clean_md_extractor",
+        "scripts.runners.clean_md_extractor",
+        "extract_financial_tables",
+    )
+    _EXTRACTORS_CACHE = (extract_ixbrl_facts, extract_financial_tables)
+    return _EXTRACTORS_CACHE
+
+
 def write_raw_files(
     client: SecClient,
     raw_dir: Path,
@@ -567,11 +1121,16 @@ def write_raw_files(
     tipo: str,
     period: str,
     url: str,
-) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+) -> Tuple[Optional[str], Optional[str], Optional[str], Dict[str, Any]]:
     try:
-        binary, text = get_doc_text(client, url)
+        binary, text, extraction_meta = get_doc_text(client, url)
     except Exception as e:
-        return None, None, f"descarga fallida: {e}"
+        return None, None, f"descarga fallida: {e}", {
+            "extraction_status": "FETCH_ERROR",
+            "extraction_reason": f"descarga fallida: {e}",
+            "extractor": "none",
+            "text_chars": 0,
+        }
 
     ext = url_ext(url, fallback="htm")
     base = f"{source_id}_{safe_slug(tipo.upper())}_{safe_slug(period)}"
@@ -586,8 +1145,9 @@ def write_raw_files(
     tipo_upper = tipo.upper().replace(" ", "")
     is_financial = any(ft in tipo_upper for ft in ("10-K", "10K", "20-F", "20F", "10-Q", "10Q", "6-K", "6K"))
     if is_financial and ext in ("htm", "html"):
+        # Structural import failures must be explicit (fail-fast), not silent.
+        extract_ixbrl_facts, extract_financial_tables = _load_financial_extractors_or_raise()
         try:
-            from scripts.runners.ixbrl_extractor import extract_ixbrl_facts
             ixbrl_data = extract_ixbrl_facts(htm_path)
             ixbrl_name = f"{base}.ixbrl.json"
             import json as _json
@@ -597,7 +1157,6 @@ def write_raw_files(
             print(f"WARNING: iXBRL extraction failed for {original_name}: {e}", file=sys.stderr)
 
         try:
-            from scripts.runners.clean_md_extractor import extract_financial_tables
             clean_md = extract_financial_tables(htm_path)
             if clean_md:  # empty string = quality gate rejected
                 clean_name = f"{base}.clean.md"
@@ -605,7 +1164,7 @@ def write_raw_files(
         except Exception as e:
             print(f"WARNING: clean.md extraction failed for {original_name}: {e}", file=sys.stderr)
 
-    return raw_dir_local_path(raw_dir, txt_name), first_25_words(text), None
+    return raw_dir_local_path(raw_dir, txt_name), first_25_words(text), None, extraction_meta
 
 
 def main() -> int:
@@ -685,7 +1244,7 @@ def main() -> int:
                 is_earnings = True
             else:
                 try:
-                    _, text = get_doc_text(client, build_doc_url(cik_int, rec))
+                    _, text, _ = get_doc_text(client, build_doc_url(cik_int, rec))
                     low = text.lower()
                     if "item 2.02" in low or "results of operations and financial condition" in low:
                         is_earnings = True
@@ -771,11 +1330,33 @@ def main() -> int:
         source_id = f"SRC_SEC_{source_counter:03d}"
         source_counter += 1
 
-        local_path, quote, err = write_raw_files(client, raw_dir, source_id, tipo, period, doc_url)
+        local_path, quote, err, extraction_meta = write_raw_files(
+            client, raw_dir, source_id, tipo, period, doc_url
+        )
         if err:
             out["cache_stats"]["archivos_fallidos"] += 1
         else:
             out["cache_stats"]["archivos_descargados"] += 1
+
+        extraction_status = str(
+            extraction_meta.get("extraction_status") or ("OK" if local_path else "FETCH_ERROR")
+        ).upper()
+        extraction_reason = str(extraction_meta.get("extraction_reason") or "")
+        extractor = str(extraction_meta.get("extractor") or "none")
+        try:
+            text_chars = int(extraction_meta.get("text_chars") or 0)
+        except Exception:
+            text_chars = 0
+
+        annual_like = {"10-K", "20-F", "40-F", "ANNUAL_REPORT"}
+        if tipo.upper() in annual_like and extraction_status == "OK" and text_chars < 10000:
+            low_text_note = (
+                f"Annual filing with low extracted text volume ({text_chars} chars)."
+            )
+            extraction_reason = f"{extraction_reason} {low_text_note}".strip()
+            out.setdefault("log", {}).setdefault("limitaciones", []).append(
+                f"{source_id} ({tipo}) warning: {low_text_note}"
+            )
 
         source: Dict[str, Any] = {
             "source_id": source_id,
@@ -788,6 +1369,12 @@ def main() -> int:
             "fecha_recuperacion": dt.date.today().isoformat(),
             "publicador": "SEC",
             "cita_rapida": quote or "",
+            "extraction_status": extraction_status,
+            "extraction_reason": extraction_reason,
+            "extractor": extractor,
+            "text_chars": text_chars,
+            "content_hash": str(extraction_meta.get("content_hash") or ""),
+            "contenido_disponible": extraction_status == "OK",
         }
         if ubicacion_relevante:
             source["ubicacion_relevante"] = ubicacion_relevante
@@ -798,6 +1385,10 @@ def main() -> int:
         if err:
             out.setdefault("log", {}).setdefault("limitaciones", []).append(
                 f"{source_id} ({tipo}) sin local_path: {err}"
+            )
+        elif extraction_status != "OK":
+            out.setdefault("log", {}).setdefault("limitaciones", []).append(
+                f"{source_id} ({tipo}) extraction_status={extraction_status}: {extraction_reason or 'sin detalle'}"
             )
 
     for rec in annual:
@@ -954,65 +1545,115 @@ def main() -> int:
             local_fallback_errors.append("web_ir no disponible para intentar fallback local.")
         else:
             collected: Dict[str, Dict[str, Any]] = {}
-            for page in pages:
+            queue = list(pages)
+            visited = set()
+            while queue and len(visited) < LOCAL_FALLBACK_MAX_PAGES:
+                page = queue.pop(0)
+                if page in visited:
+                    continue
+                visited.add(page)
                 try:
                     html = client.get(page).text
                 except Exception as exc:
                     local_fallback_errors.append(f"No se pudo cargar {page}: {exc}")
                     continue
 
+                for subpage in discover_ir_subpages(
+                    html,
+                    page,
+                    exchange,
+                    max_links=LOCAL_FALLBACK_MAX_LINKS_PER_PAGE,
+                ):
+                    if subpage in visited or subpage in queue:
+                        continue
+                    if len(visited) + len(queue) >= LOCAL_FALLBACK_MAX_PAGES:
+                        break
+                    queue.append(subpage)
+
                 for candidate in extract_local_filing_candidates(html, page, exchange):
                     url = str(candidate.get("url") or "")
                     if not url:
                         continue
+                    candidate["discovered_from"] = page
                     prev = collected.get(url)
-                    if prev is None or int(candidate.get("score", 0)) > int(prev.get("score", 0)):
+                    if prev is None:
+                        collected[url] = candidate
+                        continue
+                    if _prefer_new_candidate(prev, candidate):
+                        if prev.get("fecha_publicacion") and not candidate.get("fecha_publicacion"):
+                            _date_debug(
+                                "collected candidate replacement would drop date "
+                                f"(url={url}, prev_date={prev.get('fecha_publicacion')})"
+                            )
                         collected[url] = candidate
 
-            selected = sorted(
-                collected.values(),
-                key=lambda x: (int(x.get("score", 0)), x.get("fecha_publicacion") or "0000-00-00"),
-                reverse=True,
-            )[:4]
+            selected = _select_local_fallback_candidates(list(collected.values()))
 
             for cand in selected:
                 source_id = f"SRC_SEC_{source_counter:03d}"
                 source_counter += 1
                 doc_url = str(cand.get("url", ""))
                 title = str(cand.get("titulo") or "Local regulatory filing")
-                fecha_pub = str(cand.get("fecha_publicacion") or dt.date.today().isoformat())
-                period = fecha_pub
+                # Classify filing type from context (title + URL + snippet)
+                _tipo = str(cand.get("tipo_guess") or _classify_local_filing_type(
+                    title, doc_url, str(cand.get("snippet") or "")
+                ))
+                if is_navigation_like_source(title, str(cand.get("snippet") or ""), doc_url):
+                    local_fallback_errors.append(
+                        f"{source_id} descartada por patrón de navegación/índice ({doc_url})"
+                    )
+                    continue
 
-                local_path_val, quote, err = write_raw_files(client, raw_dir, source_id, "IR_NEWS", period, doc_url)
+                fecha_pub = cand.get("fecha_publicacion")
+                fecha_source = str(cand.get("fecha_source") or "unknown")
+                fecha_estimated = bool(cand.get("fecha_publicacion_estimated", True))
+                period = str(fecha_pub or "UNDATED")
+
+                local_path_val, quote, err, extraction_meta = write_raw_files(
+                    client, raw_dir, source_id, _tipo, period, doc_url
+                )
                 if err:
                     out["cache_stats"]["archivos_fallidos"] += 1
                     local_fallback_errors.append(f"{source_id} fallback local sin descarga: {err}")
-                else:
-                    out["cache_stats"]["archivos_descargados"] += 1
 
-                # Classify filing type from context (title + URL + snippet)
-                # Works for both PDF and HTML documents
-                _ctx = f"{title.lower()} {doc_url.lower()} {str(cand.get('snippet') or '').lower()}"
-                _url_low = doc_url.lower()
-                _is_media_url = (
-                    "youtube.com" in _url_low
-                    or "youtu.be" in _url_low
-                    or "vimeo.com" in _url_low
-                    or "watch?v=" in _url_low
-                    or _url_low.endswith((".mp4", ".mov", ".avi", ".m3u8"))
-                )
-                if _is_media_url:
-                    _tipo = "OTHER"
-                elif any(w in _ctx for w in ("annual", "full year", "year-end", "year end")):
-                    _tipo = "ANNUAL_REPORT"
-                elif any(w in _ctx for w in ("interim", "half year", "h1 ", "h2 ", "half-year")):
-                    _tipo = "INTERIM_REPORT"
-                elif "rns" in _ctx or "regulatory news" in _ctx or "announcement" in _ctx:
-                    _tipo = "IR_NEWS"
-                elif any(w in _ctx for w in ("results", "financial")):
-                    _tipo = "REGULATORY_FILING"
-                else:
-                    _tipo = "OTHER"
+                extraction_status = str(
+                    extraction_meta.get("extraction_status") or ("OK" if local_path_val else "FETCH_ERROR")
+                ).upper()
+                extraction_reason = str(extraction_meta.get("extraction_reason") or "")
+                extractor = str(extraction_meta.get("extractor") or "none")
+                text_sample = str(extraction_meta.get("text_sample") or "")
+                if not err and extraction_status == "OK" and is_navigation_like_source(title, text_sample, doc_url):
+                    local_fallback_errors.append(
+                        f"{source_id} descartada tras extracción por contenido navegación/índice ({doc_url})"
+                    )
+                    if local_path_val:
+                        try:
+                            lp = Path(local_path_val)
+                            lp_abs = lp if lp.is_absolute() else (REPO_ROOT / lp)
+                            txt_abs = lp_abs if lp_abs.suffix.lower() == ".txt" else lp_abs.with_suffix(".txt")
+                            raw_abs = txt_abs.with_suffix(f".{url_ext(doc_url, fallback='htm')}")
+                            if txt_abs.exists():
+                                txt_abs.unlink()
+                            if raw_abs.exists():
+                                raw_abs.unlink()
+                        except Exception:
+                            pass
+                    continue
+                if not err:
+                    out["cache_stats"]["archivos_descargados"] += 1
+                try:
+                    text_chars = int(extraction_meta.get("text_chars") or 0)
+                except Exception:
+                    text_chars = 0
+                inferred_date = extraction_meta.get("inferred_date")
+                if not fecha_pub and inferred_date:
+                    fecha_pub = str(inferred_date)
+                    fecha_source = str(extraction_meta.get("date_source") or "document")
+                    fecha_estimated = False
+                elif not fecha_pub:
+                    fecha_pub = None
+                    fecha_source = "unknown"
+                    fecha_estimated = True
 
                 source: Dict[str, Any] = {
                     "source_id": source_id,
@@ -1022,19 +1663,40 @@ def main() -> int:
                     "url": doc_url,
                     "publicador": "Company IR / Local regulator",
                     "fecha_publicacion": fecha_pub,
+                    "fecha_publicacion_estimated": fecha_estimated,
+                    "fecha_source": fecha_source,
                     "fecha_recuperacion": dt.date.today().isoformat(),
                     "idioma": "en",
                     "fiabilidad": "B",
                     "relevancia": "ALTA",
                     "notas": f"Fallback local no-US ({regulator_code}).",
                     "cita_rapida": quote or str(cand.get("snippet") or "")[:180],
+                    "selection_score": float(cand.get("selection_score", 0.0)),
+                    "discovered_from": str(cand.get("discovered_from") or ""),
                     "origen_regulatorio_local": True,
                     "regulator_code": regulator_code,
+                    "extraction_status": extraction_status,
+                    "extraction_reason": extraction_reason,
+                    "extractor": extractor,
+                    "text_chars": text_chars,
+                    "content_hash": str(extraction_meta.get("content_hash") or ""),
+                    "contenido_disponible": extraction_status == "OK",
                 }
                 if local_path_val:
                     source["local_path"] = local_path_val
                 out["fuentes"].append(source)
                 local_fallback_added += 1
+
+                if _tipo in {"ANNUAL_REPORT", "10-K", "20-F", "40-F"} and extraction_status == "OK" and text_chars < 10000:
+                    low_text_note = (
+                        f"Annual filing with low extracted text volume ({text_chars} chars)."
+                    )
+                    source["extraction_reason"] = f"{source.get('extraction_reason', '')} {low_text_note}".strip()
+                    local_fallback_errors.append(f"{source_id} warning: {low_text_note}")
+                elif extraction_status != "OK":
+                    local_fallback_errors.append(
+                        f"{source_id} extraction_status={extraction_status}: {extraction_reason or 'sin detalle'}"
+                    )
 
         if local_fallback_added == 0:
             add_missing(

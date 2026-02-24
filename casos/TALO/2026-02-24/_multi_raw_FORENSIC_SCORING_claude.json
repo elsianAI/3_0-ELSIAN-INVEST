@@ -1,0 +1,821 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_TALO",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "claude-opus-4-6",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_TALO",
+    "implied_expectations_caso_id": "CASE_20260224_TALO",
+    "sources_pack_caso_id": "CASE_20260224_TALO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Supervivencia PASS (score 3/5): liquidez amplia (~$960M) y CFO robusto ($963M FY2024) compensan EBIT negativo recurrente y pérdidas netas acumuladas.",
+      "La divergencia EBIT-CFO es estructural (DD&A $1.024B FY2024) y no indicativa de fraude, pero hace métricas GAAP inutilizables para evaluar salud operativa.",
+      "Dos banderas de severidad ALTA (impairments recurrentes $284M en 2025 y cobertura de intereses por EBIT <1x) requieren monitoreo activo pero no comprometen supervivencia a 12-24 meses.",
+      "Tamaño máximo recomendado: 3-4% de cartera dado el riesgo de commodity y la opacidad parcial del balance.",
+      "Veredicto WATCHLIST: empresa viable operativamente pero con fragilidad contable y dependencia de precios de petróleo que exige vigilancia trimestral."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.68
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La DD&A se duplicó de $664M (FY2023) a $1,024M (FY2024) por amortización acelerada de activos adquiridos (QuarterNorth), comprimiendo el EBIT a $173M pese a ingresos de $1,974M.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Income statement — DD&A line item",
+          "cita_corta": "DD&A FY2024: $1,023,558k vs FY2023: $663,534k, incremento 54%",
+          "interpretacion": "La amortización acelerada post-adquisición es la causa principal de la compresión de EBIT; no indica deterioro operativo real."
+        }
+      ],
+      "falsacion": {
+        "test": "Si DD&A normaliza a <$750M anuales en FY2025/FY2026 sin pérdida de producción, confirma que la distorsión es transitoria",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El CFO de $963M en FY2024 y $734M en 9M-2025 demuestra capacidad de generación de caja operativa robusta, independiente de las distorsiones contables del EBIT.",
+      "confianza_0_1": 0.93,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Cash flow statement — operating activities",
+          "cita_corta": "CFO FY2024: $962,593k; 9M-2025: $734,046k",
+          "interpretacion": "La caja operativa confirma que el negocio subyacente genera valor; las pérdidas contables son artifact de DD&A e impairments non-cash."
+        }
+      ],
+      "falsacion": {
+        "test": "Si CFO trimestral cae por debajo de $150M durante 2 trimestres consecutivos sin ser estacional, indicaría deterioro operativo real",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Los impairments de ceiling test acumularon ~$284M en los primeros 9 meses de 2025 ($224M Q2 + $60M Q3), erosionando patrimonio sin afectar caja.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "Income statement — impairment line; earnings transcripts",
+          "cita_corta": "Ceiling test write-downs: $224M Q2-2025, ~$60M Q3-2025",
+          "interpretacion": "Si precios de petróleo no se recuperan, habrá impairments adicionales que podrían erosionar patrimonio hacia niveles problemáticos para covenants."
+        }
+      ],
+      "falsacion": {
+        "test": "Si WTI trailing 12-month average sube por encima de $70/bbl, los impairments cesarían y podrían revertirse parcialmente",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La liquidez total estimada de $677M-$960M (caja + revolver disponible) y el FCF positivo de ~$454M-$568M TTM proporcionan runway superior a 36 meses en escenario base.",
+      "confianza_0_1": 0.78,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_029_8-K_2025-12-08",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-08",
+          "ubicacion": "Borrowing base reaffirmation",
+          "cita_corta": "Borrowing base reafirmado en $700M, vencimiento extendido a 2030-01-20",
+          "interpretacion": "La extensión del facility a 2030 y el borrowing base de $700M confirman confianza de los bancos en la base de reservas."
+        }
+      ],
+      "falsacion": {
+        "test": "Reducción del borrowing base por debajo de $500M en próxima redeterminación indicaría deterioro de confianza bancaria",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "8-K"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "INFERENCIA",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "El G&A se duplicó en dos años ($100M→$202M) mientras ingresos crecieron solo 19.5%, sugiriendo inflación de costos corporativos post-adquisición que aún no se ha racionalizado.",
+      "confianza_0_1": 0.8,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Income statement — G&A line item",
+          "cita_corta": "G&A FY2022: $99.8M (6.0% ingresos) → FY2024: $201.5M (10.2%)",
+          "interpretacion": "La integración de QuarterNorth aún no ha producido racionalización; sinergias de $65M target pueden reducir esto parcialmente."
+        }
+      ],
+      "falsacion": {
+        "test": "Si G&A cae por debajo del 8% de ingresos en FY2025/FY2026, confirmaría racionalización exitosa",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "HIPOTESIS",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La relación con Control Empresarial de Capitales (familia Slim) extendida hasta dic-2026 carece de detalle económico público, representando un riesgo de gobernanza y transparencia no cuantificable.",
+      "confianza_0_1": 0.55,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_021_8-K",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "8-K — Cooperation Agreement extension",
+          "cita_corta": "Extensión Cooperation Agreement con CEC (Carlos Slim) hasta 2026-12-16",
+          "interpretacion": "Sin detalle de términos económicos, no se puede evaluar si la relación genera valor o extrae renta del accionista minoritario."
+        }
+      ],
+      "falsacion": {
+        "test": "Divulgación completa de términos del Cooperation Agreement en proxy statement o 10-K con cuantificación de flujos",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "filing"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "TALO reportará FCF positivo (CFO - capex > 0) en FY2025 completo",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "FCF = CFO anual - abs(capex anual) > 0 en el 10-K FY2025",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Se registrarán impairments adicionales de ceiling test en Q4-2025 o Q1-2026 si WTI trailing 12-month average permanece por debajo de $65/bbl",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Impairment de ceiling test > $0 reportado en income statement de Q4-2025 o Q1-2026",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Producción trimestral se mantendrá por encima de 85,000 BOE/d durante los próximos 4 trimestres",
+      "probabilidad_0_1": 0.72,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Producción reportada en earnings releases o 10-Q > 85,000 BOE/d en cada uno de los próximos 4 trimestres",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "Leverage ratio se mantendrá por debajo de 1.5x EBITDA durante los próximos 12 meses",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Net debt / EBITDA reportado o calculable < 1.5x en cada cierre trimestral",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "G&A como porcentaje de ingresos comenzará a normalizarse por debajo del 9% en H2-2025 o FY2025",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "G&A / ingresos < 9% en FY2025 según 10-K o en H2-2025 según derivación de datos trimestrales",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "Borrowing base se mantendrá en $700M o superior en la próxima redeterminación semestral",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "8-K anunciando resultado de redeterminación con borrowing base >= $700M",
+      "fuente_prevista": "8-K"
+    },
+    {
+      "pred_id": "PRED_007",
+      "descripcion": "El patrimonio neto no caerá por debajo de $2,000M al cierre de FY2025 pese a impairments acumulados",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Total stockholders' equity > $2,000M en balance sheet del 10-K FY2025",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_008",
+      "descripcion": "No habrá emisión de equity dilutiva (oferta pública de acciones) en los próximos 12 meses",
+      "probabilidad_0_1": 0.82,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Ausencia de S-1, S-3 registration o 8-K anunciando oferta pública de acciones ordinarias",
+      "fuente_prevista": "otro"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla completa de vencimientos de deuda (maturity schedule) con detalle de bonos y term loans",
+      "por_que_importa": "Sin ella no se puede evaluar el muro de vencimientos 12-24 meses ni riesgo de refinanciamiento.",
+      "como_obtenerlo": "10-K FY2024 o 10-Q más reciente, sección 'Contractual Obligations' o nota de deuda a largo plazo"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Deuda total consolidada (current + long-term) con desglose de instrumentos",
+      "por_que_importa": "El balance_sheet_ultimo carece de deuda_total; impide cálculo preciso de EV y análisis de apalancamiento.",
+      "como_obtenerlo": "Balance sheet consolidado del 10-K FY2024, líneas 'Current portion of long-term debt' + 'Long-term debt, net'"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de covenants financieros de la credit facility (leverage ratio max, minimum liquidity, etc.)",
+      "por_que_importa": "No se puede evaluar cercanía a breach de covenants sin conocer los umbrales contractuales específicos.",
+      "como_obtenerlo": "10-K FY2024, nota de deuda / credit agreement summary; o 8-K del credit agreement amendment"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Stock-based compensation expense anual y trimestral",
+      "por_que_importa": "Necesario para desagregar completamente el puente EBIT→CFO y evaluar dilución real.",
+      "como_obtenerlo": "10-K FY2024, nota de compensación basada en acciones o cash flow statement (non-cash items)"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle del Cooperation Agreement con Control Empresarial de Capitales (familia Slim)",
+      "por_que_importa": "Riesgo de gobernanza no cuantificable sin conocer términos económicos de la relación.",
+      "como_obtenerlo": "DEF14A (proxy statement) sección Related Party Transactions; o Exhibit 10.x del 8-K/10-K"
+    },
+    {
+      "prioridad": "BAJA",
+      "item": "Asset Retirement Obligation (ARO) detallada por plataforma/campo",
+      "por_que_importa": "Las obligaciones de P&A en GoM son material off-balance; $40-45M/año en surety bonds es solo colateral parcial.",
+      "como_obtenerlo": "10-K FY2024, nota de Asset Retirement Obligations"
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.68,
+        "razon_principal": "Empresa operativamente viable con CFO robusto ($963M FY2024) y liquidez amplia (~$960M), pero con fragilidad contable severa (EBIT negativo recurrente, impairments $284M, cobertura de intereses por EBIT <1x) y dependencia material de precios de commodity que requiere vigilancia trimestral activa."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 3,
+          "por_que": [
+            "CFO FY2024 de $963M y 9M-2025 de $734M demuestran capacidad de generación de caja operativa muy sólida.",
+            "Liquidez total estimada de $677M-$960M (caja ~$302M + disponibilidad revolver ~$375-658M) con credit facility extendido a 2030.",
+            "FCF positivo de ~$454M FY2024 y ~$372M 9M-2025 — empresa autofinanciada sin necesidad de mercados de capital.",
+            "Leverage ratio de 0.7x EBITDA es conservador y muy holgado respecto a típicos covenants E&P (3.0-3.5x).",
+            "Dos banderas ALTAS (impairments recurrentes y cobertura EBIT/intereses <1x) impiden score de 4; ambas son contables, no de caja.",
+            "Riesgo commodity material: si WTI cae sostenidamente por debajo de $50/bbl, el CFO se comprimiría a niveles que comprometerían el desapalancamiento."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 302149000,
+          "linea_credito_disponible_usd": 375000000,
+          "otras_fuentes_liquidez": [
+            "Revolver con borrowing base de $700M (vencimiento 2030-01-20)",
+            "FCF orgánico positivo (~$454M FY2024 anualizado)"
+          ],
+          "runway_meses_estimado": 36,
+          "metodo_estimacion": "Con CFO anualizado de ~$978M (9M-2025 extrapolado), capex de ~$482M, intereses de ~$163M y leases de ~$119M, el FCF orgánico cubre todas las obligaciones con excedente de ~$214M/año. Runway efectivamente indefinido mientras CFO >0.",
+          "notas": "La caja reportada de $302M es estimación (caja FY2024 $108M + delta_cash 9M-2025 $194M). Los transcripts mencionan caja de $333M a cierre Q3-2025, ligeramente superior."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 1224947000,
+          "deuda_neta_usd": 922798000,
+          "coste_deuda_aprox_pct": 10.2,
+          "coverage_intereses": 5.13,
+          "net_debt_ebitda": 0.7,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "No se detecta muro de vencimientos inminente. Credit facility extendido a 2030. Falta ladder completa de bonos para confirmar ausencia de vencimientos en 2026-2028."
+          },
+          "vencimientos": [
+            {
+              "anio": 2030,
+              "importe_usd": null,
+              "tipo": "revolver",
+              "riesgo": "BAJO",
+              "fuente_ref": {
+                "source_id": "SRC_029_8-K_2025-12-08",
+                "ubicacion": "Borrowing base reaffirmation 8-K"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [
+              "leverage_ratio"
+            ],
+            "riesgo_breach": "BAJO",
+            "comentario": "Leverage ratio de 0.7x reportado por management vs típicos límites de 3.0-3.5x. Holgura muy amplia. Sin embargo, detalle contractual de covenants no disponible en datos proporcionados; riesgo de covenants basados en equity/patrimonio no evaluable sin los términos específicos."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "BAJO",
+          "motores": [
+            "SBC (no cuantificada pero presente)",
+            "No se detecta necesidad de emisión de equity dado FCF positivo"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "Con FCF positivo de ~$454M y CFF negativo en 9M-2025 (-$135M), la empresa está devolviendo capital, no emitiendo. Shares outstanding ~170M diluidas. El riesgo de dilución solo se activaría con FCF negativo sostenido + agotamiento de línea de crédito, escenario de baja probabilidad a 12-24 meses."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "La calidad de resultados GAAP es pobre: EBIT negativo recurrente, divergencia CFO/EBIT de >400%, e impairments de ceiling test de $284M en 2025. Sin embargo, la calidad de generación de caja es alta: CFO de ~$963M FY2024 y FCF de ~$454M son robustos y verificables. La distorsión es structural e inherente al full cost accounting de E&P con activos recientemente adquiridos, no indicativa de manipulación.",
+        "red_flags": [
+          {
+            "flag_id": "F-001",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "DD&A se duplicó de $664M a $1,024M en un año por amortización acelerada de activos adquiridos (QuarterNorth). Ratio DD&A/EBIT de 5.92x convierte al EBIT en métrica inutilizable.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.9,
+            "por_que_importa": "Hace que cualquier análisis basado en EBIT o net income sea severamente distorsionado; métricas de caja (CFO, FCF) son las únicas fiables.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Income statement — DD&A",
+                "cita_corta": "DD&A FY2024: $1,024M vs FY2023: $664M; ratio DD&A/EBIT: 5.92x",
+                "interpretacion": "Structural para E&P post-adquisición bajo full cost; esperar normalización gradual en 2-3 años."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "DD&A normaliza a <$800M anuales en FY2026 sin pérdida de producción",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "F-002",
+            "categoria": "GOODWILL_IMPAIRMENT",
+            "descripcion": "Impairments de ceiling test acumulados de ~$284M en 2025 ($224M Q2 + $60M Q3). Indican que el valor en libros de activos excede el valor presente de reservas a precios actuales.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.85,
+            "por_que_importa": "Erosiona patrimonio ($2.76B → probablemente ~$2.47B post-impairments). Si precios commodity no se recuperan, impairments adicionales podrían comprometer covenants de patrimonio mínimo.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+                "ubicacion": "Income statement — ceiling test write-down",
+                "cita_corta": "Full cost ceiling test impairments: $224M Q2-2025, $60M Q3-2025",
+                "interpretacion": "Non-cash pero reflejan destrucción de valor contable; riesgo de recurrencia si WTI trailing 12m avg permanece bajo."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Cero impairments adicionales de ceiling test durante 2 trimestres consecutivos",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "F-003",
+            "categoria": "OTHER",
+            "descripcion": "Cobertura EBIT/intereses de 0.92x en FY2024 y -2.58x en 9M-2025. El gasto financiero ($188M FY2024) excede el EBIT, aunque la cobertura por CFO es 5.13x.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.9,
+            "por_que_importa": "Señal de alarma para prestamistas que usen métricas GAAP. Si los covenants incluyen cobertura por EBIT (no EBITDA), podría haber incumplimiento técnico.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Income statement — EBIT vs interest expense",
+                "cita_corta": "EBIT $173M vs interest $188M = cobertura 0.92x; CFO/intereses = 5.13x",
+                "interpretacion": "La fragilidad es contable, no de caja. Pero los prestamistas pueden tener covenants GAAP-based."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Cobertura EBIT/intereses supera 1.5x en dos trimestres consecutivos (requiere normalización de DD&A o reducción de deuda)",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "F-004",
+            "categoria": "ONE_OFFS",
+            "descripcion": "CFI de -$1,320M en FY2024 con capex de solo -$509M; diferencia de ~$811M por adquisición de QuarterNorth. Financiado con CFF de +$436M, creando dependencia puntual de mercados de capital.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.95,
+            "por_que_importa": "La adquisición incrementó la deuda y creó la DD&A acelerada; los retornos aún no están validados y los impairments sugieren posible overpayment.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Cash flow statement — investing activities",
+                "cita_corta": "CFI FY2024: -$1,320M; capex: -$509M; diferencia adquisiciones: ~$811M",
+                "interpretacion": "One-off de inversión; el riesgo residual es si los activos adquiridos generan los retornos esperados."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Producción de activos ex-QuarterNorth alcanza targets de integración y sinergias de $65M se materializan",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-005",
+            "categoria": "SBC",
+            "descripcion": "G&A se duplicó de $100M (FY2022) a $202M (FY2024) mientras ingresos crecieron 19.5%. Ratio G&A/ingresos pasó de 6.0% a 10.2%.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.8,
+            "por_que_importa": "Inflación de costos corporativos post-adquisición reduce la eficiencia operativa. Si no se racionaliza, comprime FCF de forma permanente.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Income statement — G&A",
+                "cita_corta": "G&A: $100M FY2022 → $158M FY2023 → $202M FY2024 (6.0% → 10.2% ingresos)",
+                "interpretacion": "Management citó sinergias target de $65M; aún no materializadas en datos disponibles."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "G&A/ingresos cae por debajo del 8% en FY2025 o FY2026",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "F-006",
+            "categoria": "LEASES",
+            "descripcion": "Short-term lease costs saltaron de $2.7M (Q3-2024) a $69.8M (Q3-2025), un aumento de ~25x. Coste total de leases FY2024: $119M, con 85% en short-term.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.75,
+            "por_que_importa": "Compromisos cuasi-fijos de ~$100M+/año fuera de deuda financiera. El salto de 25x podría indicar cambio operativo material o reclasificación para mantener obligaciones off-balance.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Lease disclosures",
+                "cita_corta": "Short-term leases: $100.9M (84.7% del total $119.1M); Q3-2024 $2.7M → Q3-2025 $69.8M",
+                "interpretacion": "Requiere investigación adicional para determinar si es cambio operativo (rigs adicionales) o reclasificación contable."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Short-term lease costs se estabilizan o disminuyen en FY2025; management explica el salto en earnings call",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "F-007",
+            "categoria": "RELATED_PARTIES",
+            "descripcion": "Cooperation Agreement con Control Empresarial de Capitales (familia Slim) extendido hasta dic-2026 sin cuantificación de términos económicos en 8-K.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.4,
+            "por_que_importa": "Riesgo de gobernanza y transparencia; imposible evaluar si la relación genera o extrae valor para accionistas minoritarios.",
+            "evidencias": [
+              {
+                "source_id": "SRC_021_8-K",
+                "ubicacion": "8-K Cooperation Agreement extension",
+                "cita_corta": "Extensión Cooperation Agreement con CEC hasta 2026-12-16; sin detalle económico",
+                "interpretacion": "Sin cuantificación, el riesgo es de opacidad más que de impacto financiero demostrado."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Proxy statement (DEF14A) detalla términos completos y comité independiente aprueba como arm's-length",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "filing"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "La brecha EBIT→CFO es de $790M en FY2024 (distorsión 457%), explicada casi en su totalidad por DD&A non-cash ($1,024M). El puente es estructural y propio de E&P con activos recientemente adquiridos bajo full cost accounting. No hay indicios de manipulación; la distorsión es mecánica.",
+            "posibles_distorsiones": [
+              "DD&A non-cash ($1,024M) — driver dominante",
+              "Impairments non-cash (no cuantificados individualmente para FY2024 vs 2025)",
+              "SBC (no disponible, probablemente <$30M)",
+              "Cambios en capital de trabajo (no desagregables con datos disponibles)",
+              "Impuestos diferidos (tax expense mínimo vs beneficios diferidos)"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Conversión CFO→FCF del 47% en FY2024 ($963M → $454M). Capex de $509M incluye mantenimiento (~$350M) y crecimiento (~$160M Monument). En 9M-2025 la conversión mejora a 51% ($734M → $372M, capex $362M). Si capex de crecimiento se reduce, FCF puede expandirse significativamente.",
+            "capex_riesgo": "MEDIO",
+            "notas": "Capex de mantenimiento es ineludible en E&P offshore; pero capex de crecimiento (Monument, exploración) es discretionary. P&A (~$10-29M/trimestre) es costo adicional no capturado en capex estándar."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": true,
+          "sostenible_por_fcf": "SI",
+          "comentario": "Se reportaron $22M en recompras de acciones (3.8M shares) en Q2-2024 y >$100M en retornos acumulados al accionista en 2025. Con FCF de $454M, las recompras son sostenibles."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "SBC no desglosada en TruthPack; el proxy (DEF14A) menciona ajusted FCF de $447M FY2024 como métrica de compensación. Se necesita dato explícito de SBC anual."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "La adquisición de QuarterNorth ($811M estimados) incrementó deuda y creó DD&A acelerada. Los impairments de 2025 ($284M) sugieren posible overpayment o deterioro de valor de reservas adquiridas. Sin embargo, la producción incrementada a ~95,000 BOE/d valida parcialmente la estrategia."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "La relación con familia Slim (accionista significativo via CEC) añade complejidad. No hay datos de insider ownership disponibles en el TruthPack; DEF14A sería la fuente."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Colapso de precios de petróleo: WTI cae a $45-50/bbl sostenido durante 4+ trimestres. Producción se mantiene pero ingresos y márgenes se comprimen severamente.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "CFO cae de ~$960M a ~$350-400M anualizado",
+              "FCF se vuelve negativo si capex no se recorta",
+              "Impairments adicionales de ceiling test >$500M erosionan patrimonio",
+              "Borrowing base reducido en próxima redeterminación"
+            ],
+            "indicadores_tempranos": [
+              "WTI spot < $55/bbl durante 30 días",
+              "WTI forward curve < $55/bbl para los próximos 12 meses",
+              "Management anuncia recorte de capex guidance",
+              "Borrowing base reducido en redeterminación"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Declive acelerado de producción: producción cae por debajo de 80,000 BOE/d por problemas técnicos, deplección más rápida que proyectada, o retrasos en Monument sin incremento compensatorio de capex.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "Ingresos caen proporcionalmente (~15-20%)",
+              "CFO se comprime a ~$650-750M",
+              "FCF aún positivo pero margen para desapalancamiento desaparece",
+              "Leverage ratio sube hacia 1.5x+"
+            ],
+            "indicadores_tempranos": [
+              "Producción trimestral reportada < 88,000 BOE/d",
+              "Management reduce guidance de producción anual",
+              "Incremento de capex de mantenimiento sin incremento de producción",
+              "Disminución de reservas probadas en disclosures anuales"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "Refinanciamiento fallido: bonos no se refinancian en condiciones aceptables por deterioro crediticio o condiciones de mercado adversas. Costo de deuda sube significativamente.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "Gasto financiero sube de $188M a >$250M anuales",
+              "FCF se comprime por mayor servicio de deuda",
+              "Posible downgrade crediticio",
+              "Restricción de acceso a mercados de capital para M&A"
+            ],
+            "indicadores_tempranos": [
+              "Spread de crédito de bonos TALO se amplía >200bps",
+              "Rating agencies ponen perspectiva negativa",
+              "Vencimiento significativo dentro de 12-18 meses sin plan de refinanciamiento anunciado"
+            ]
+          }
+        ],
+        "conclusion_downside": "El riesgo principal es el precio del commodity (D-001), que podría comprimir CFO hasta hacer el servicio de deuda y capex insostenibles sin FCF positivo. El declive de producción (D-002) es el segundo riesgo material pero más gradual y parcialmente controlable. El riesgo de refinanciamiento (D-003) es bajo a corto plazo dado que la credit facility vence en 2030, pero depende de la ladder completa de bonos que no está disponible. En conjunto, TALO tiene colchón suficiente para absorber un escenario moderadamente adverso, pero un colapso de commodity prolongado sería existencialmente amenazante."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "supervivencia",
+          "definicion": "Precio WTI promedio trimestral sostenido por debajo de $50/bbl durante 2 o más trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 18
+          },
+          "fuente_prevista": "kpi_operativo",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Por debajo de $50/bbl el breakeven operativo se compromete y el FCF se vuelve negativo."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "fcf",
+          "definicion": "FCF TTM (CFO - abs(capex)) negativo durante dos cierres trimestrales consecutivos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "FCF negativo sostenido elimina la capacidad de desapalancamiento y activa riesgo de dilución."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "supervivencia",
+          "definicion": "Producción trimestral cae por debajo de 75,000 BOE/d sin compensación de precios (WTI avg < $70/bbl).",
+          "ventana_meses": {
+            "min": 3,
+            "max": 24
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Caída de producción >20% sin aumento de precios indica deterioro fundamental de la base de activos."
+        },
+        {
+          "kc_id": "KC-004",
+          "relacionado_con": "deuda",
+          "definicion": "Borrowing base reducido por debajo de $500M en próxima redeterminación semestral.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 18
+          },
+          "fuente_prevista": "otro",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Reducción de $700M a <$500M indicaría pérdida de confianza bancaria en la base de reservas."
+        },
+        {
+          "kc_id": "KC-005",
+          "relacionado_con": "contabilidad",
+          "definicion": "Impairments de ceiling test acumulados adicionales >$500M en los próximos 12 meses (sobre los $284M ya registrados en 2025).",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Erosionaría patrimonio significativamente y podría activar covenants de patrimonio mínimo."
+        },
+        {
+          "kc_id": "KC-006",
+          "relacionado_con": "supervivencia",
+          "definicion": "Liquidez total (caja + disponibilidad revolver) cae por debajo de $400M (< 6 meses de obligaciones fijas anualizadas).",
+          "ventana_meses": {
+            "min": 3,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Liquidez inferior a 6 meses de obligaciones indicaría estrés financiero inminente."
+        },
+        {
+          "kc_id": "KC-007",
+          "relacionado_con": "deuda",
+          "definicion": "Cobertura CFO/intereses cae por debajo de 2.0x en dos periodos trimestrales anualizados consecutivos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Cobertura <2x indicaría deterioro severo de la capacidad de servicio de deuda por caja."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 3.5,
+        "condiciones_para_aumentar_tamaño": [
+          "Producción se estabiliza por encima de 90,000 BOE/d durante 3+ trimestres",
+          "WTI se mantiene por encima de $65/bbl con forward curve >$60 a 12 meses",
+          "Leverage ratio baja por debajo de 0.5x EBITDA",
+          "Impairments de ceiling test cesan durante 2+ trimestres consecutivos",
+          "G&A/ingresos normaliza por debajo del 8%, confirmando sinergias de integración"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "FCF TTM se vuelve negativo durante 2 trimestres consecutivos → SALIR",
+          "WTI promedio trimestral <$50/bbl durante 2+ trimestres → REDUCIR 50%",
+          "Producción <75,000 BOE/d + WTI <$70/bbl → REDUCIR 50%",
+          "Borrowing base reducido a <$500M → REVISAR y posiblemente SALIR",
+          "Impairments adicionales >$500M en 12 meses → CONGELAR COMPRAS y REVISAR"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "tabla_vencimientos",
+          "por_que_importa": "Sin ladder de deuda no se puede evaluar muro de vencimientos 12-24 meses ni riesgo de refinanciamiento.",
+          "como_obtenerlo": "10-K FY2024, nota de deuda a largo plazo, tabla de vencimientos contractuales"
+        },
+        {
+          "item": "covenants",
+          "por_que_importa": "No se puede evaluar cercanía a breach sin conocer umbrales contractuales específicos (leverage, liquidity, equity).",
+          "como_obtenerlo": "10-K FY2024, nota de deuda / credit agreement; 8-K del amendment más reciente"
+        },
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Necesario para desagregar puente EBIT→CFO y evaluar dilución real por compensación.",
+          "como_obtenerlo": "10-K FY2024, nota de compensación basada en acciones"
+        },
+        {
+          "item": "acciones_diluidas",
+          "por_que_importa": "Shares outstanding exactas (~170M estimado) necesarias para calcular dilución YoY y métricas per-share.",
+          "como_obtenerlo": "10-K FY2024, balance sheet / nota de capital"
+        },
+        {
+          "item": "revolver_disponible",
+          "por_que_importa": "Disponibilidad exacta de la credit facility necesaria para liquidez real vs estimada ($375M-$658M rango).",
+          "como_obtenerlo": "10-Q más reciente, nota de credit facility o 8-K con borrowing base"
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "TruthPack en estado PARTIAL (49% completeness); balance sheet sin deuda_total, AR, AP, inventarios.",
+      "No se recibió SourcesPack_v1 para lectura directa de filings; análisis basado en datos pre-extraídos.",
+      "Datos de impairments y métricas operativas provenientes de transcripts con cifras aproximadas.",
+      "SBC no desglosada; no se puede completar el puente EBIT→CFO al 100%.",
+      "Ladder de vencimientos de bonos y detalle de covenants no disponibles en datos proporcionados."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-24T10:15:00Z",
+    "inputs_hash": "TruthPack_v1_TALO_20260224+ImpliedExpectations_v1_TALO_20260224+ForensicDetection_v1_TALO_20260224"
+  }
+}

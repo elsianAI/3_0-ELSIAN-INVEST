@@ -1,0 +1,95 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260221_ACVA",
+  "fecha_corte": "2026-02-21",
+  "ticker": "ACVA",
+  "red_flags": [
+    {
+      "tipo": "ACCOUNTING_DIVERGENCE",
+      "descripcion": "Discrepancia masiva entre Pérdida Operativa (EBIT -$84M) y Flujo de Caja Operativo (CFO +$65M). La generación de caja depende enteramente de partidas no monetarias (SBC) y/o gestión agresiva de capital de trabajo.",
+      "severidad_cualitativa": "ALTA",
+      "source_id": "SRC_001",
+      "ubicacion": "Statement of Cash Flows FY2024 vs Income Statement"
+    },
+    {
+      "tipo": "WORKING_CAPITAL_ANOMALY",
+      "descripcion": "Cuentas por pagar ($345M) superan significativamente a las Cuentas por cobrar ($168M) y representan >50% de los ingresos anuales. Sugiere dependencia estructural del 'float' (dinero de clientes/vendedores) para financiar operaciones.",
+      "severidad_cualitativa": "MEDIA",
+      "source_id": "SRC_001",
+      "ubicacion": "Balance Sheet FY2024"
+    },
+    {
+      "tipo": "PROFITABILITY_STRUCTURE",
+      "descripcion": "Margen Operativo negativo (-13.2%) persistente a pesar del crecimiento de ingresos (+32%). No hay evidencia de apalancamiento operativo real en la línea de EBIT.",
+      "severidad_cualitativa": "ALTA",
+      "source_id": "SRC_001",
+      "ubicacion": "Income Statement FY2024"
+    },
+    {
+      "tipo": "LIQUIDITY_QUALITY",
+      "descripcion": "Si las Cuentas por Pagar ($345M) corresponden a obligaciones con vendedores de subastas, la posición de Caja ($224M) podría ser insuficiente para cubrir obligaciones inmediatas si el volumen de transacciones se desacelera (riesgo de 'run on the bank' operativo).",
+      "severidad_cualitativa": "ALTA",
+      "source_id": "SRC_001",
+      "ubicacion": "Balance Sheet FY2024"
+    }
+  ],
+  "liquidez": {
+    "caja_total_usd": 224065000,
+    "deuda_total_usd": 123000000,
+    "deuda_neta_usd": -101065000,
+    "quick_ratio": 0.65,
+    "current_ratio": null,
+    "runway_meses": "INFINITO (CFO Positivo)",
+    "comentario": "Liquidez técnica saludable por Caja > Deuda, pero el Quick Ratio (Caja+AR / Pasivo Corriente estimado en al menos Payables) es bajo (0.65). La solvencia a corto plazo depende de la rotación continua del inventario/subastas."
+  },
+  "puentes": {
+    "ebit_to_cfo": {
+      "ebit_usd": -84105000,
+      "depreciacion_amortizacion_usd": 36685000,
+      "ajustes_no_monetarios_usd": 112817000,
+      "variacion_capital_trabajo_usd": 0,
+      "cfo_usd": 65397000,
+      "nota": "El ajuste de ~$113M (excluyendo D&A) es presumiblemente Stock-Based Compensation y cambios en WC favorable, cubriendo las pérdidas operativas.",
+      "gap_pct": 277.0
+    },
+    "cfo_to_fcf": {
+      "cfo_usd": 65397000,
+      "capex_usd": -4539000,
+      "fcf_usd": 60858000,
+      "conversion_rate_pct": 93.0,
+      "nota": "Conversión CFO->FCF alta debido a modelo de negocio ligero en activos (Capex < 1% de ventas)."
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "nombre": "Estancamiento de Crecimiento de Ingresos",
+      "descripcion": "Si el crecimiento YoY cae por debajo del 15%, el beneficio del 'float' (capital de trabajo negativo) se revierte, consumiendo caja rápidamente.",
+      "ventana_observacion": "6-12 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "nombre": "Deterioro del ratio Payables/Receivables",
+      "descripcion": "Cualquier normalización en los términos de pago a vendedores (reducción de días por pagar) destruiría el FCF actual.",
+      "ventana_observacion": "12-24 meses",
+      "probabilidad": "BAJA"
+    },
+    {
+      "nombre": "Falta de convergencia EBIT a positivo",
+      "descripcion": "Incapacidad de lograr EBIT positivo en FY2026 indicaría que el modelo de costes es insostenible sin subsidio perpetuo de accionistas (SBC).",
+      "ventana_observacion": "18-24 meses",
+      "probabilidad": "ALTA"
+    }
+  ],
+  "report_type": "FORENSIC_SUMMARY",
+  "input_refs": {
+    "truth_pack_id": "CASE_20260221_ACVA",
+    "sources_pack_id": "SRC_001"
+  },
+  "log": {
+    "limitaciones": [
+      "No se pudo verificar el monto exacto de Stock-Based Compensation (SBC) por falta de acceso al texto raw del 10-K, se infiere por diferencial EBIT-CFO.",
+      "No se dispone de desglose detallado de 'Otros Pasivos' para confirmar composición exacta de la deuda."
+    ],
+    "analysis_timestamp": "2026-02-21T16:55:00Z"
+  }
+}

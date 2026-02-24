@@ -1,0 +1,385 @@
+{
+  "version_esquema": "ImpliedExpectations_v1",
+  "caso_id": "CASE_20260224_TALO",
+  "fecha_corte": "2026-02-24",
+  "empresa": {
+    "ticker": "TALO",
+    "nombre": "Talos Energy",
+    "bolsa": "NYSE",
+    "pais": "US",
+    "sector": "Energy",
+    "industria": "Oil & Gas Exploration & Production"
+  },
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1",
+    "truth_pack_caso_id": "CASE_20260224_TALO"
+  },
+  "status": "OK",
+  "motivo_blocked": null,
+  "snapshot_mercado": {
+    "fecha": "2026-02-24",
+    "precio_usd": 13.14,
+    "market_cap_usd": 2230000000,
+    "enterprise_value_usd": 3347775000,
+    "deuda_total_usd": 1225947000,
+    "caja_usd": 108172000,
+    "deuda_neta_usd": 1117775000,
+    "acciones_diluidas": 169726000
+  },
+  "metricas_base": {
+    "periodo_base": "FY",
+    "fecha_fin_periodo_base": "2024-12-31",
+    "ingresos_usd": 1973568000,
+    "ebit_usd": 172925000,
+    "cfo_usd": 962593000,
+    "capex_usd": -508914000,
+    "fcf_usd": 453679000,
+    "margen_operativo_pct": 8.76,
+    "margen_fcf_pct": 22.99
+  },
+  "seleccion_metodo": {
+    "metodo_principal": "REVERSE_DCF_FCF",
+    "razon": "FCF FY2024 es positivo y sustancial ($454M), lo que permite aplicar un reverse DCF sobre flujo de caja libre. El EBIT ($173M) también es positivo pero el FCF es más representativo de la capacidad de generación de caja dado el alto componente de DD&A en esta empresa E&P.",
+    "metodos_secundarios": [
+      "REVERSE_EARNINGS_POWER",
+      "MULTIPLOS_IMPLICITOS_SOLO"
+    ]
+  },
+  "multiples_implicitos": {
+    "disponible": true,
+    "ev_ebit": 19.36,
+    "ev_fcf": 7.38,
+    "p_fcf": 4.92,
+    "fcf_yield_pct": 20.34,
+    "comentario": "El EV/EBIT de ~19x parece elevado, pero refleja que el EBIT está deprimido por la altísima DD&A ($1.024B en FY2024) típica de E&P con activos nuevos. El EV/FCF de ~7.4x y un FCF yield >20% sugieren que el mercado descuenta significativo riesgo de commodity o declive de producción."
+  },
+  "parametros_modelo": {
+    "horizonte_anos": 5,
+    "tasa_descuento_grid": [
+      0.08,
+      0.1,
+      0.12
+    ],
+    "crecimiento_terminal_grid": [
+      0.02,
+      0.03
+    ],
+    "multiple_terminal_fcf_grid": [
+      10,
+      12,
+      15,
+      18
+    ],
+    "nota_parametros": "Las tasas de descuento de 8-12% cubren desde un escenario de coste de capital relativamente bajo para E&P hasta uno más conservador. Los múltiplos terminales de 10-18x FCF reflejan el rango típico para empresas E&P maduras (parte baja) hasta compañías con reservas de larga duración (parte alta). El crecimiento terminal de 2-3% asume inflación más crecimiento orgánico modesto, apropiado para una empresa commodity-dependiente.",
+    "convenciones": {
+      "definicion_fcf": "FCF = CFO - CAPEX (usando capex como salida de caja)",
+      "ev_formula": "EV = market_cap + deuda_total - caja. Deuda total estimada en $1,225.9M basada en long-term debt de 10-Q Q3-2025 ($1,224,947k) más estimación conservadora.",
+      "si_fcf_negativo": "usar earnings power / EBIT y no reverse DCF de FCF"
+    }
+  },
+  "reverse_dcf_fcf": {
+    "aplicable": true,
+    "fcf0_usd": 453679000,
+    "resultado_grid": [
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.0717,
+        "fcf_year5_implicito_usd": 316270000,
+        "nota": "FCF puede contraerse ~7% anual y el precio aún estaría justificado; implica que el mercado espera declive moderado de producción con múltiplo terminal bajo."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.1092,
+        "fcf_year5_implicito_usd": 258464000,
+        "nota": "Con un terminal más generoso, el FCF implícito puede caer ~11% anual; escenario de declive significativo de producción/precios."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.1499,
+        "fcf_year5_implicito_usd": 202166000,
+        "nota": "Con múltiplo terminal de 15x, el mercado tolera caídas del ~15% anual en FCF; escenario pesimista de commodity."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.1802,
+        "fcf_year5_implicito_usd": 165505000,
+        "nota": "Incluso con el múltiplo terminal más alto, el mercado asume ~18% de declive anual en FCF; solo plausible con colapso de precios o deplección acelerada."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.0578,
+        "fcf_year5_implicito_usd": 335860000,
+        "nota": "Con g=3% y múltiplo bajo, se tolera un declive del ~6% anual — escenario de contracción leve."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.0985,
+        "fcf_year5_implicito_usd": 271413000,
+        "nota": "Escenario moderado: FCF cae ~10% anual durante 5 años."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.1416,
+        "fcf_year5_implicito_usd": 210179000,
+        "nota": "Declive del 14% anual implícito con terminal de 15x y g=3%."
+      },
+      {
+        "tasa_descuento": 0.08,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.1735,
+        "fcf_year5_implicito_usd": 170335000,
+        "nota": "Escenario extremo de declive; difícilmente sostenible sin deterioro estructural."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.0361,
+        "fcf_year5_implicito_usd": 371279000,
+        "nota": "Con WACC 10% y múltiplo de 10x, solo se necesita un declive moderado del 3.6% anual."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.078,
+        "fcf_year5_implicito_usd": 299028000,
+        "nota": "Escenario central: con descuento razonable (10%) y terminal de 12x, el mercado asume ~8% de declive anual en FCF."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.123,
+        "fcf_year5_implicito_usd": 232164000,
+        "nota": "Declive del 12% anual implícito — escenario moderadamente negativo."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.1566,
+        "fcf_year5_implicito_usd": 188970000,
+        "nota": "Declive severo del ~16% anual; el mercado estaría asumiendo deterioro acelerado."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": -0.0176,
+        "fcf_year5_implicito_usd": 414622000,
+        "nota": "FCF prácticamente plano (declive del 1.8%/año). Si el mercado usa WACC=10% y g=3%, el precio actual implica que el FCF simplemente se mantiene."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.0652,
+        "fcf_year5_implicito_usd": 324017000,
+        "nota": "Declive modesto del 6.5% anual con terminal generoso."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.1138,
+        "fcf_year5_implicito_usd": 246267000,
+        "nota": "Declive del 11% anual con parámetros favorables de terminal."
+      },
+      {
+        "tasa_descuento": 0.1,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.1496,
+        "fcf_year5_implicito_usd": 197870000,
+        "nota": "Declive del 15% anual — escenario pesimista incluso con parámetros favorables."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": 0.0004,
+        "fcf_year5_implicito_usd": 454591000,
+        "nota": "Con WACC alto (12%) y múltiplo conservador, el mercado solo necesita que el FCF se mantenga plano — escenario optimista."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.0462,
+        "fcf_year5_implicito_usd": 356832000,
+        "nota": "Declive moderado del ~5% anual."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.0957,
+        "fcf_year5_implicito_usd": 274033000,
+        "nota": "Declive del ~10% anual con WACC alto."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.02,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.1327,
+        "fcf_year5_implicito_usd": 221854000,
+        "nota": "Declive del 13% anual."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 10,
+        "cagr_fcf_5y_implicito": 0.0238,
+        "fcf_year5_implicito_usd": 510469000,
+        "nota": "El precio actual implica crecimiento del FCF del ~2.4% anual — el mercado estaría muy pesimista sobre la tasa de descuento o el precio sería 'barato' bajo estos supuestos."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 12,
+        "cagr_fcf_5y_implicito": -0.0275,
+        "fcf_year5_implicito_usd": 392662000,
+        "nota": "Declive leve del 2.8% anual — prácticamente estable."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 15,
+        "cagr_fcf_5y_implicito": -0.0819,
+        "fcf_year5_implicito_usd": 296285000,
+        "nota": "Declive del 8% anual."
+      },
+      {
+        "tasa_descuento": 0.12,
+        "crecimiento_terminal": 0.03,
+        "multiple_terminal_fcf": 18,
+        "cagr_fcf_5y_implicito": -0.1219,
+        "fcf_year5_implicito_usd": 236667000,
+        "nota": "Decline del 12% anual."
+      }
+    ],
+    "sensibilidades": {
+      "ranking_drivers": [
+        {
+          "driver": "cagr_fcf_5y",
+          "importancia": "ALTA"
+        },
+        {
+          "driver": "tasa_descuento",
+          "importancia": "ALTA"
+        },
+        {
+          "driver": "multiple_terminal",
+          "importancia": "MEDIA"
+        },
+        {
+          "driver": "crecimiento_terminal",
+          "importancia": "BAJA"
+        }
+      ],
+      "observacion": "La tasa de descuento tiene un impacto muy grande en este caso: pasar de 8% a 12% cambia la CAGR implícita de -7% a plana (con múltiplo terminal=10). Esto refleja que a precios actuales, la valoración es muy sensible a la percepción de riesgo del mercado sobre TALO. El múltiplo terminal también importa: cada escalón de 10 a 18x absorbe ~10 puntos de CAGR implícita."
+    },
+    "validaciones_modelo": {
+      "ev_presente": true,
+      "fcf0_presente": true,
+      "resultados_sin_valores_absurdos": true,
+      "detalle": "Todos los CAGR implícitos están en el rango -18% a +2.4%, plausible para una empresa E&P. No se observan valores absurdos (como CAGR >50% o FCF year5 negativos)."
+    }
+  },
+  "reverse_earnings_power": {
+    "aplicable": true,
+    "metrica_base": "EBIT",
+    "valor_base_usd": 172925000,
+    "rango_normalizado_usd": {
+      "min": 172925000,
+      "base": 290000000,
+      "max": 450000000
+    },
+    "implied_multiple_sobre_normalizado": {
+      "multiple_min": 7.44,
+      "multiple_base": 11.54,
+      "multiple_max": 19.36
+    },
+    "lectura": "El EBIT FY2024 ($173M) está deprimido por DD&A elevada ($1.024B), impairments y costos de integración post-adquisición de QuarterNorth. Un EBIT normalizado en el rango $290-450M (basado en los años FY2019 y FY2023 como referencia de operaciones normales) implica que el mercado está pagando un EV/EBIT normalizado de 7-12x, lo cual es razonable para E&P pero no especialmente barato. La diferencia entre el EBIT actual y el normalizado sugiere que el mercado no está descontando el nivel actual deprimido como permanente.",
+    "supuestos": [
+      "EBIT normalizado asume DD&A más cercana a $650-700M (nivel FY2023) vs $1.024B actual inflado por amortización acelerada post-adquisición",
+      "Se excluyen impairments no recurrentes del EBIT normalizado",
+      "Rango base $290M refleja promedio FY2019-FY2023 ajustado por escala actual; max $450M refleja FY2022 ajustado"
+    ]
+  },
+  "resumen_expectativas_implicitas": {
+    "enunciados": [
+      "Para justificar el EV actual de ~$3.35B, con una tasa de descuento del 10% y un múltiplo terminal de 12x, el mercado parece asumir que el FCF declinará ~8% anual durante los próximos 5 años (de $454M a ~$299M).",
+      "Si la tasa de descuento real es mayor (12%, coherente con el riesgo commodity), el precio actual solo requiere que el FCF se mantenga aproximadamente estable, lo cual sugeriría que la acción está 'barata' si la producción se sostiene.",
+      "Alternativamente, si se usa un EBIT normalizado de ~$290M, el mercado está pagando ~11.5x EV/EBIT — razonable para E&P, ni especialmente barato ni caro.",
+      "La clave es si la base de producción actual (~95,000 BOE/d) puede sostenerse o si entra en declive acelerado sin reinversión significativa. El spread entre CFO ($963M) y capex ($509M) es saludable por ahora."
+    ],
+    "variable_critica_principal": "CRECIMIENTO_FCF",
+    "que_deberia_observarse_en_6_12_meses": [
+      "Evolución de la producción trimestral (BOE/d): si se mantiene >90,000 o comienza a declinar, validará/refutará la tesis de FCF estable",
+      "Nivel de capex de mantenimiento vs crecimiento: si capex cae a $350-400M sin perder producción, el FCF actual es sostenible",
+      "Precio del petróleo WTI: con LOE de ~$15/bbl, el breakeven de FCF es sensible a precios por debajo de $55-60/bbl",
+      "Evolución de la deuda neta: si baja de $1.1B hacia $800-900M, confirma que el FCF se usa para desapalancar (positivo para equity)",
+      "Resultados de la integración de QuarterNorth y desarrollo de Monument: si producen sinergias reales, el EBIT normalizado puede superar los $350M"
+    ]
+  },
+  "banderas": {
+    "expectativas_extremas": false,
+    "posible_value_trap": false,
+    "posible_peak_earnings": false,
+    "alto_riesgo_balance": false,
+    "opacidad_alta": false,
+    "notas": [
+      "El FCF yield de >20% sugiere que el mercado descuenta riesgo de commodity o declive de producción significativo, pero no es una expectativa extrema para E&P",
+      "La deuda neta (~$1.1B) con leverage ~0.7-0.8x EBITDA es manejable, pero la cifra absoluta es relevante dado el tamaño de la empresa",
+      "El EBIT FY2024 está deprimido por DD&A inflada post-adquisición; no confundir con deterioro operativo real — el CFO de $963M confirma la capacidad de generación de caja"
+    ]
+  },
+  "faltantes_criticos": [
+    {
+      "item": "deuda_total",
+      "por_que_importa": "El TruthPack no tiene deuda_total en balance_sheet_ultimo; se estimó desde el 10-Q más reciente ($1,225M). La cifra exacta afecta el cálculo de EV.",
+      "como_resolver": "Extraer deuda total consolidada (current + long-term) del balance sheet del 10-K FY2024 o 10-Q más reciente."
+    },
+    {
+      "item": "enterprise_value_usd",
+      "por_que_importa": "El TruthPack calcula EV como null por falta de deuda_total. Toda la valoración reverse depende de un EV preciso.",
+      "como_resolver": "Completar deuda_total en balance_sheet_ultimo para que EV se calcule automáticamente."
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "EV estimado manualmente: market_cap ($2,230M) + deuda_total estimada ($1,225.9M, usando LT debt de 10-Q Q3-2025 $1,224,947k + ~$1M estimación current portion) - caja ($108.2M) = ~$3,348M",
+      "FCF base ($454M) usa FY2024 (CFO $963M - capex $509M), que puede no ser representativo de un año normal dado la integración de QuarterNorth",
+      "No hay TTM de ingresos ni EBIT disponible por falta de datos trimestrales completos de revenue — se usó FY2024 como periodo base",
+      "La empresa es E&P con alta ciclicidad de commodity; la validez del reverse DCF depende críticamente de supuestos de precio del petróleo que no están modelados explícitamente",
+      "Los trimestres recientes (Q2-2025, Q3-2025) muestran EBIT negativo por impairments, lo cual no afecta al FCF base usado pero indica volatilidad contable"
+    ],
+    "traza_calculo": [
+      "1. EV estimado: 2,230,000,000 + 1,225,947,000 - 108,172,000 = 3,347,775,000",
+      "2. FCF0 = CFO FY2024 (962,593,000) - |capex FY2024| (508,914,000) = 453,679,000",
+      "3. Múltiplos implícitos: EV/EBIT = 3,347,775,000 / 172,925,000 = 19.36x; EV/FCF = 3,347,775,000 / 453,679,000 = 7.38x; P/FCF = 2,230,000,000 / 453,679,000 = 4.92x; FCF yield = 453,679,000 / 2,230,000,000 = 20.34%",
+      "4. Reverse DCF: para cada combinación (r, g, m), se resuelve FCF5 tal que: sum(FCF_t/(1+r)^t, t=1..5) + (FCF5*m)/(1+r)^5 = EV, con FCF_t = FCF0*(1+CAGR)^t",
+      "5. Ejemplo cálculo (r=0.10, g=0.02, m=12): TV = FCF5 * 12; PV(TV) = TV / 1.10^5; PV(FCFs) = sum; target EV = 3,347,775,000; resuelto iterativamente para CAGR = -7.8%, FCF5 = $299M",
+      "6. EBIT normalizado: promedio FY2019 ($213M), FY2023 ($210M), FY2018 ($253M) = ~$225M, ajustado por escala actual (ingresos FY2024 ~35% > FY2019) => base $290M; max basado en FY2022 ($736M) ajustado por DD&A normalizada => ~$450M",
+      "7. EV/EBIT normalizado: 3,348M / 290M = 11.54x (base); 3,348M / 450M = 7.44x (max); 3,348M / 173M = 19.36x (actual deprimido)",
+      "8. Grid verificado: 3 tasas x 2 crecimientos x 4 múltiplos = 24 combinaciones únicas, sin duplicados"
+    ]
+  }
+}

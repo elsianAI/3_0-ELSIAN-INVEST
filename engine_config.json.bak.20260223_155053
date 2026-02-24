@@ -1,0 +1,542 @@
+{
+  "_GUIA_RAPIDA": {
+    "modelos_base_multi_modelo": "pipeline_models (array de 3 model profile IDs)",
+    "modelo_integrador_fusion": "fusion_model (model profile ID)",
+    "modelo_steps_single": "default_single_model (model profile ID para steps no multi)",
+    "qué_steps_son_multi": "multi_model_steps → steps (lista explícita)",
+    "override_modelo_de_un_step": "step_overrides → <STEP> → models / fusion_model",
+    "reintentos": "retry → max_attempts, backoff_seconds",
+    "fallback_transporte_copilot": "copilot_transport_fallback (bool)",
+    "ver_estructura_del_pipeline": "pipeline_dag → PIPELINE (al final del fichero)"
+  },
+  "version": "2.0.0",
+  "workspace": ".",
+  "model_catalog": {
+    "gpt-5.3-codex": {
+      "transports": [
+        "codex",
+        "copilot"
+      ],
+      "codex": {
+        "binary": "/opt/homebrew/bin/codex",
+        "binary_fallback": "/Applications/Codex.app/Contents/Resources/codex",
+        "min_version": "0.101.0",
+        "model_id": "gpt-5.3-codex",
+        "reasoning_effort": "xhigh",
+        "timeout_seconds": 3600,
+        "command_suffix": [
+          "exec"
+        ],
+        "flags": [
+          "--full-auto"
+        ],
+        "output_file_flag": "--output-last-message",
+        "output_schema_flag": "--output-schema",
+        "version_flag": "--version"
+      },
+      "copilot": {
+        "model_id": "gpt-5.3-codex"
+      }
+    },
+    "gpt-5.3-codex-spark": {
+      "transports": [
+        "codex",
+        "copilot"
+      ],
+      "codex": {
+        "binary": "/opt/homebrew/bin/codex",
+        "binary_fallback": "/Applications/Codex.app/Contents/Resources/codex",
+        "min_version": "0.101.0",
+        "model_id": "gpt-5.3-codex-spark",
+        "reasoning_effort": "xhigh",
+        "timeout_seconds": 3600,
+        "command_suffix": [
+          "exec"
+        ],
+        "flags": [
+          "--full-auto"
+        ],
+        "output_file_flag": "--output-last-message",
+        "output_schema_flag": "--output-schema",
+        "version_flag": "--version"
+      },
+      "copilot": {
+        "model_id": "gpt-5.3-codex-spark"
+      }
+    },
+    "claude-opus-4.6": {
+      "transports": [
+        "claude",
+        "copilot"
+      ],
+      "claude": {
+        "binary": "claude",
+        "min_version": "2.0.0",
+        "model_id": "opus",
+        "timeout_seconds": 3600,
+        "command_suffix": [
+          "-p"
+        ],
+        "flags": [
+          "--output-format",
+          "json",
+          "--no-session-persistence"
+        ],
+        "output_file_flag": null,
+        "output_schema_flag": "--json-schema",
+        "version_flag": "--version"
+      },
+      "copilot": {
+        "model_id": "claude-opus-4.6"
+      }
+    },
+    "claude-sonnet-4.6": {
+      "transports": [
+        "claude",
+        "copilot"
+      ],
+      "claude": {
+        "binary": "claude",
+        "min_version": "2.0.0",
+        "model_id": "sonnet",
+        "timeout_seconds": 3600,
+        "command_suffix": [
+          "-p"
+        ],
+        "flags": [
+          "--output-format",
+          "json",
+          "--no-session-persistence"
+        ],
+        "output_file_flag": null,
+        "output_schema_flag": "--json-schema",
+        "version_flag": "--version"
+      },
+      "copilot": {
+        "model_id": "claude-sonnet-4.6"
+      }
+    },
+    "claude-haiku-4.5": {
+      "transports": [
+        "claude",
+        "copilot"
+      ],
+      "claude": {
+        "binary": "claude",
+        "min_version": "2.0.0",
+        "model_id": "haiku",
+        "timeout_seconds": 3600,
+        "command_suffix": [
+          "-p"
+        ],
+        "flags": [
+          "--output-format",
+          "json",
+          "--no-session-persistence"
+        ],
+        "output_file_flag": null,
+        "output_schema_flag": "--json-schema",
+        "version_flag": "--version"
+      },
+      "copilot": {
+        "model_id": "claude-haiku-4.5"
+      }
+    },
+    "gemini-3-pro": {
+      "transports": [
+        "gemini",
+        "copilot"
+      ],
+      "gemini": {
+        "binary": "/opt/homebrew/bin/gemini",
+        "min_version": "0.28.0",
+        "model_id": "gemini-3-pro-preview",
+        "preflight_disable_yolo": true,
+        "timeout_seconds": 3600,
+        "command_suffix": [
+          "-p"
+        ],
+        "flags": [
+          "--output-format",
+          "json",
+          "--yolo"
+        ],
+        "output_file_flag": null,
+        "output_schema_flag": null,
+        "version_flag": "--version"
+      },
+      "copilot": {
+        "model_id": "gemini-3-pro-preview"
+      }
+    },
+    "gemini-3-flash": {
+      "transports": [
+        "gemini",
+        "copilot"
+      ],
+      "gemini": {
+        "binary": "/opt/homebrew/bin/gemini",
+        "min_version": "0.28.0",
+        "model_id": "gemini-3-flash-preview",
+        "preflight_disable_yolo": true,
+        "timeout_seconds": 3600,
+        "command_suffix": [
+          "-p"
+        ],
+        "flags": [
+          "--output-format",
+          "json",
+          "--yolo"
+        ],
+        "output_file_flag": null,
+        "output_schema_flag": null,
+        "version_flag": "--version"
+      },
+      "copilot": {
+        "model_id": "gemini-3-flash-preview"
+      }
+    }
+  },
+  "copilot_transport": {
+    "_auth": "Autenticación via extensión GitHub Copilot Chat de VS Code (no requiere token exchange)",
+    "binary": "/Users/ismaelsanchezgarcia/Library/Application Support/Code - Insiders/User/globalStorage/github.copilot-chat/copilotCli/copilot",
+    "min_version": "0.0.400"
+  },
+  "pipeline_models": [
+    "gpt-5.3-codex",
+    "claude-opus-4.6",
+    "gemini-3-pro"
+  ],
+  "fusion_model": "claude-opus-4.6",
+  "default_single_model": "gpt-5.3-codex",
+  "retry": {
+    "max_attempts": 2,
+    "backoff_seconds": 5
+  },
+  "failure_diagnostics": {
+    "max_artifacts_per_case": 30
+  },
+  "copilot_transport_fallback": true,
+  "step_overrides": {
+    "TP_EXTRACTOR_FILING": {
+      "models": [
+        "gpt-5.3-codex"
+      ]
+    }
+  },
+  "multi_model_steps": {
+    "min_backends": 3,
+    "steps": {
+      "CATALYST_DETECTION": {
+        "fusion_instruction": "instrucciones_fusion_catalyst_detection_V1.md"
+      },
+      "FORENSIC_DETECTION": {
+        "fusion_instruction": "instrucciones_fusion_forensic_detection_V1.md"
+      },
+      "CATALYST_SCORING": {
+        "fusion_instruction": "instrucciones_fusion_V1.md"
+      },
+      "FORENSIC_SCORING": {
+        "fusion_instruction": "instrucciones_fusion_V1.md"
+      },
+      "BULL": {
+        "fusion_instruction": "instrucciones_fusion_V1.md"
+      },
+      "RED_TEAM": {
+        "fusion_instruction": "instrucciones_fusion_V1.md"
+      },
+      "ARBITRO": {
+        "fusion_instruction": "instrucciones_fusion_V1.md",
+        "min_backends": 2
+      }
+    }
+  },
+  "escalation": {
+    "enabled": false,
+    "_nota": "Deprecado en v2. Mantener flag durante una release para rollback seguro."
+  },
+  "execution": {
+    "codex_approval_policy": "full-auto",
+    "codex_sandbox": "false",
+    "max_parallel_filings": 8,
+    "max_parallel_backends": 3,
+    "tp_extractor_per_filing_timeout": 300,
+    "python_step_timeouts": {
+      "PREFETCH": 900
+    },
+    "keep_tp_filing_partials": false,
+    "fail_fast": true,
+    "tp_quality_gate_missing": "fail"
+  },
+  "truncation_limits": {
+    "input_artifact_chars": 200000,
+    "filing_clean_md_chars": 220000,
+    "filing_raw_chars": 300000,
+    "fusion_output_chars": 100000
+  },
+  "prefetch_validation": {
+    "sec_fetcher": {
+      "min_sources": 3,
+      "require_annual": true,
+      "require_quarterly": true
+    },
+    "market_data": {
+      "min_sources": 1,
+      "require_current_price": true
+    },
+    "transcript_finder": {
+      "min_sources": 1
+    }
+  },
+  "quality_voting": {
+    "enabled": true,
+    "include_operations": false,
+    "mode": "deterministic_only",
+    "policy": "report_only",
+    "global_log_path": "_evaluacion/votes_log_v1.jsonl",
+    "per_case_dirname": "_votes",
+    "thresholds_enabled": false,
+    "min_runs_for_stats": 20,
+    "multi_subjects": {
+      "enabled": false,
+      "missing_policy": "partial_skipped"
+    },
+    "model_stats": {
+      "enabled": true,
+      "global_rollup_path": "_evaluacion/model_quality_rollup_v1.json",
+      "global_history_jsonl_path": "_evaluacion/model_quality_history_v1.jsonl",
+      "per_case_filename": "model_quality_case_v1.json",
+      "min_samples_per_step_model": 20
+    },
+    "critical_fields": {
+      "AgentReport_v1": [
+        "resumen_ejecutivo.veredicto_role_local",
+        "resumen_ejecutivo.confianza_0_1",
+        "claims",
+        "log.autochequeos"
+      ],
+      "ImpliedExpectations_v1": [
+        "status",
+        "snapshot_mercado.market_cap_usd",
+        "metricas_base.ingresos_usd",
+        "resumen_expectativas_implicitas.enunciados"
+      ],
+      "DecisionPacket_v2": [
+        "resumen_ejecutivo.decision",
+        "resumen_ejecutivo.confianza_global_0_1",
+        "gates.data_quality_gate.status",
+        "gates.non_speculative_gate.status",
+        "decision_probabilistica.probabilidad_exito_0_1"
+      ]
+    }
+  },
+  "naming": {
+    "caso_id_format": "CASE_{D_ID}_{T}",
+    "artefacto_format": "{Schema}_{T}_{D}.json",
+    "directory_format": "casos/{T}/{D}"
+  },
+  "paths": {
+    "workspace": ".",
+    "casos": "casos",
+    "schemas": "_schemas",
+    "instrucciones": "_instrucciones/activas",
+    "scanner": "_scanner",
+    "scout": "_scout",
+    "candidatos": "candidatos",
+    "tmp": "tmp",
+    "changelog": "CHANGELOG.md",
+    "estado_repo": "ESTADO_REPO.json",
+    "fechas_clave": "_docs/FECHAS_CLAVE.md"
+  },
+  "tp_extractor_filing_priority": [
+    "10-K",
+    "20-F",
+    "10-Q",
+    "6-K",
+    "8-K",
+    "DEF14A",
+    "transcript",
+    "presentation"
+  ],
+  "tp_extractor_max_per_type": {
+    "10-K": 5,
+    "20-F": 5,
+    "10-Q": 8,
+    "6-K": 8,
+    "8-K": 4,
+    "DEF14A": 1,
+    "ANNUAL_REPORT": 4,
+    "INTERIM_REPORT": 4,
+    "REGULATORY_FILING": 3,
+    "IR_NEWS": 3,
+    "INVESTOR_PRESENTATION": 3,
+    "EARNINGS_TRANSCRIPT": 6,
+    "TRANSCRIPT": 6,
+    "PRESENTATION": 3,
+    "_default": 3
+  },
+  "pipeline_dag": {
+    "PIPELINE": [
+      {
+        "step": "PREFETCH",
+        "type": "python",
+        "runners": [
+          "sec_fetcher",
+          "market_data",
+          "transcript_finder"
+        ],
+        "parallel": true,
+        "pipeline_key": "SOURCES"
+      },
+      {
+        "step": "SOURCES_COMPILER",
+        "type": "python",
+        "runner": "sources_compiler",
+        "pipeline_key": "SOURCES"
+      },
+      {
+        "step": "TP_EXTRACTOR_FILING",
+        "type": "llm_per_filing",
+        "instruction": "instrucciones_tp_extractor_filing_V1.md",
+        "pipeline_key": "TRUTH_PACK"
+      },
+      {
+        "step": "TP_EXTRACTOR_MERGER",
+        "type": "python",
+        "runner": "tp_extractor_merger",
+        "pipeline_key": "TRUTH_PACK"
+      },
+      {
+        "step": "TP_CALCULATOR",
+        "type": "python",
+        "runner": "tp_calculator",
+        "pipeline_key": "TRUTH_PACK"
+      },
+      {
+        "step": "TP_VALIDATOR",
+        "type": "python",
+        "runner": "tp_validator",
+        "pipeline_key": "TRUTH_PACK"
+      },
+      {
+        "step": "IMPLIED",
+        "type": "llm",
+        "instruction": "instrucciones_implied_V4.md",
+        "pipeline_key": "IMPLIED"
+      },
+      {
+        "step": "CATALYST_DETECTION",
+        "type": "llm",
+        "instruction": "instrucciones_catalyst_detection_V1.md",
+        "pipeline_key": "CATALYST",
+        "parallel_group": "CATFOR"
+      },
+      {
+        "step": "CATALYST_SCORING",
+        "type": "llm",
+        "instruction": "instrucciones_catalyst_scoring_V1.md",
+        "pipeline_key": "CATALYST",
+        "depends_on": "CATALYST_DETECTION"
+      },
+      {
+        "step": "FORENSIC_DETECTION",
+        "type": "llm",
+        "instruction": "instrucciones_forensic_detection_V1.md",
+        "pipeline_key": "FORENSIC",
+        "parallel_group": "CATFOR"
+      },
+      {
+        "step": "FORENSIC_SCORING",
+        "type": "llm",
+        "instruction": "instrucciones_forensic_scoring_V1.md",
+        "pipeline_key": "FORENSIC",
+        "depends_on": "FORENSIC_DETECTION"
+      },
+      {
+        "step": "BULL",
+        "type": "llm",
+        "instruction": "instrucciones_bull_V4.md",
+        "pipeline_key": "BULL"
+      },
+      {
+        "step": "RED_TEAM",
+        "type": "llm",
+        "instruction": "instrucciones_red_team_V4.md",
+        "pipeline_key": "RED_TEAM"
+      },
+      {
+        "step": "ARBITRO",
+        "type": "llm",
+        "instruction": "instrucciones_arbitro_V6.md",
+        "pipeline_key": "ARBITRO"
+      },
+      {
+        "step": "QUALITY_AUDIT",
+        "type": "python",
+        "runner": "quality_audit",
+        "pipeline_key": null
+      }
+    ],
+    "MONITOR": [
+      {
+        "step": "MONITOR",
+        "type": "llm",
+        "instruction": "instrucciones_monitor_V2.md",
+        "pipeline_key": null
+      }
+    ],
+    "SCANNER": [
+      {
+        "step": "SCANNER",
+        "type": "llm",
+        "instruction": "instrucciones_scanner_V1.md",
+        "pipeline_key": null
+      }
+    ],
+    "SCOUT": [
+      {
+        "step": "SCOUT_PREFILTRO",
+        "type": "llm",
+        "instruction": "instrucciones_prefiltro_V1.md"
+      },
+      {
+        "step": "SCOUT_Q",
+        "type": "llm",
+        "instruction": "instrucciones_scoutQ_V3.md",
+        "parallel_group": "SCOUT_QE"
+      },
+      {
+        "step": "SCOUT_E",
+        "type": "llm",
+        "instruction": "instrucciones_scoutE_V3.md",
+        "parallel_group": "SCOUT_QE"
+      },
+      {
+        "step": "SCOUT_SELECTOR",
+        "type": "llm",
+        "instruction": "instrucciones_scout-Selector_V4.md"
+      }
+    ],
+    "OUTCOME": [
+      {
+        "step": "OUTCOME",
+        "type": "llm",
+        "instruction": "instrucciones_outcome_builder_V2.md"
+      }
+    ],
+    "EVALUAR": [
+      {
+        "step": "EVALUADOR",
+        "type": "llm",
+        "instruction": "instrucciones_evaluador_V2.md"
+      }
+    ],
+    "BENCHMARK": [
+      {
+        "step": "COMPARADOR",
+        "type": "llm",
+        "instruction": "instrucciones_comparador_V1.md"
+      }
+    ]
+  }
+}

@@ -16,6 +16,49 @@ _AUTH_CACHE: dict[tuple[str, str], tuple[float, bool, str | None]] = {}
 _AUTH_CACHE_TTL_OK = 600    # 10 min for successes
 _AUTH_CACHE_TTL_FAIL = 60   # 60s for failures
 
+_TOOLS_ENABLED_STEPS = {
+    "MONITOR",
+    "SCANNER",
+    "SCOUT_PREFILTRO",
+    "SCOUT_Q",
+    "SCOUT_E",
+    "OUTCOME",
+}
+
+
+def _extract_truncation_meta(envelope: dict) -> dict:
+    """Best-effort truncation diagnostics from Claude envelope."""
+    meta: dict = {
+        "num_turns": None,
+        "output_tokens": None,
+        "max_output_tokens": None,
+        "truncation_detected": False,
+    }
+    if not isinstance(envelope, dict):
+        return meta
+
+    turns = envelope.get("num_turns")
+    if isinstance(turns, (int, float)):
+        meta["num_turns"] = int(turns)
+
+    model_usage = envelope.get("modelUsage")
+    if isinstance(model_usage, dict):
+        for usage in model_usage.values():
+            if not isinstance(usage, dict):
+                continue
+            output_tokens = usage.get("outputTokens")
+            max_output_tokens = usage.get("maxOutputTokens")
+            if isinstance(output_tokens, (int, float)):
+                meta["output_tokens"] = int(output_tokens)
+            if isinstance(max_output_tokens, (int, float)):
+                meta["max_output_tokens"] = int(max_output_tokens)
+            if meta["output_tokens"] is not None or meta["max_output_tokens"] is not None:
+                break
+
+    if meta["output_tokens"] is not None and meta["max_output_tokens"] is not None:
+        meta["truncation_detected"] = meta["output_tokens"] >= meta["max_output_tokens"]
+    return meta
+
 
 class ClaudeBackend(LLMBackend):
 
@@ -29,6 +72,7 @@ class ClaudeBackend(LLMBackend):
         output_schema: Path | None = None,
         cwd: Path | None = None,
         timeout: int = 600,
+        step_name: str | None = None,
     ) -> DispatchResult:
         """Dispatch to exactly one model. No fallback to different models."""
         return self._dispatch_single_model(
@@ -37,6 +81,7 @@ class ClaudeBackend(LLMBackend):
             output_schema=output_schema,
             cwd=cwd,
             timeout=timeout,
+            step_name=step_name,
         )
 
     def _dispatch_single_model(
@@ -46,15 +91,25 @@ class ClaudeBackend(LLMBackend):
         output_schema: Path | None,
         cwd: Path | None,
         timeout: int,
+        step_name: str | None,
     ) -> DispatchResult:
         """Ejecuta claude -p en modo no-interactivo para un modelo concreto."""
+        step_key = (step_name or "").strip().upper()
+        tools_enabled = step_key in _TOOLS_ENABLED_STEPS
+
         cmd = [
             self.binary_path, "-p", prompt,
             "--model", model_name,
             "--output-format", "json",
+            "--max-turns", "10" if tools_enabled else "1",
             "--no-session-persistence",
-            "--tools", "",  # Disable all tool access
         ]
+        if not tools_enabled:
+            cmd.extend(["--tools", ""])  # Disable all tool access
+        cmd.extend([
+            "--disallowedTools", "mcp__*",  # Block MCP servers from .mcp.json
+            "--strict-mcp-config",  # Ignore all MCP configs (no --mcp-config → zero servers)
+        ])
 
         start = time.time()
         try:
@@ -67,17 +122,21 @@ class ClaudeBackend(LLMBackend):
             )
             duration = time.time() - start
             raw = proc.stdout or ""
+            stderr_full = proc.stderr or ""
 
             if proc.returncode != 0 and not raw.strip():
+                # Pass full stderr as raw_output so _is_retryable_dispatch_error
+                # can detect quota/rate-limit/network patterns.
                 return DispatchResult(
-                    False, None, raw, model_name, "claude", duration,
-                    f"Non-zero exit code: {proc.returncode}. stderr: {(proc.stderr or '')[:500]}",
+                    False, None, stderr_full, model_name, "claude", duration,
+                    f"Non-zero exit code: {proc.returncode}. stderr: {stderr_full[:2000]}",
                     exit_code=proc.returncode,
                 )
 
             # Claude --output-format json wraps result in a JSON envelope
             try:
                 envelope = json.loads(raw)
+                trunc_meta = _extract_truncation_meta(envelope)
                 # Check for error envelope FIRST
                 if isinstance(envelope, dict) and envelope.get("is_error"):
                     error_msg = envelope.get("result", "Unknown Claude CLI error")
@@ -87,6 +146,10 @@ class ClaudeBackend(LLMBackend):
                         False, None, raw, model_name, "claude", duration,
                         f"Claude CLI error: {str(error_msg)[:500]}",
                         exit_code=proc.returncode,
+                        failure_ctx={
+                            **trunc_meta,
+                            "parse_stage": "envelope_error",
+                        },
                     )
                 # Claude Code JSON output has a "result" field with the actual content
                 if isinstance(envelope, dict) and "result" in envelope:
@@ -106,9 +169,13 @@ class ClaudeBackend(LLMBackend):
                                     pass
                             snippet = result_text.strip().replace("\n", " ")[:240]
                             return DispatchResult(
-                                False, None, raw, model_name, "claude", duration,
+                                False, None, result_text, model_name, "claude", duration,
                                 f"Claude result is not JSON artifact: {snippet or '<empty>'}",
                                 exit_code=proc.returncode,
+                                failure_ctx={
+                                    **trunc_meta,
+                                    "parse_stage": "result_text_json_parse",
+                                },
                             )
                     elif isinstance(result_text, dict):
                         return DispatchResult(True, result_text, raw, model_name, "claude", duration, exit_code=proc.returncode)
@@ -124,12 +191,23 @@ class ClaudeBackend(LLMBackend):
                     False, None, raw, model_name, "claude", duration,
                     "Claude JSON envelope did not contain artifact payload",
                     exit_code=proc.returncode,
+                    failure_ctx={
+                        **trunc_meta,
+                        "parse_stage": "envelope_payload_missing",
+                    },
                 )
             except json.JSONDecodeError as e:
                 return DispatchResult(
                     False, None, raw, model_name, "claude", duration,
                     f"JSON parse error: {e}",
                     exit_code=proc.returncode,
+                    failure_ctx={
+                        "num_turns": None,
+                        "output_tokens": None,
+                        "max_output_tokens": None,
+                        "truncation_detected": False,
+                        "parse_stage": "envelope_json_parse",
+                    },
                 )
 
         except subprocess.TimeoutExpired:
@@ -221,7 +299,10 @@ class ClaudeBackend(LLMBackend):
                 [self.binary_path, "-p", "respond with ok",
                  "--model", self.model,
                  "--output-format", "json", "--max-turns", "1",
-                 "--no-session-persistence"],
+                 "--no-session-persistence",
+                 "--tools", "",
+                 "--disallowedTools", "mcp__*",
+                 "--strict-mcp-config"],
                 capture_output=True, text=True, timeout=30,
             )
             if auth.returncode != 0:

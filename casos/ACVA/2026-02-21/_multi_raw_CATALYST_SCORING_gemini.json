@@ -1,0 +1,481 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260221_ACVA",
+  "fecha_corte": "2026-02-21",
+  "agente": {
+    "agent_role": "CATALYST_SCORING",
+    "agent_nombre": "CATALYST_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp-01-21",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260221_ACVA",
+    "implied_expectations_caso_id": "CASE_20260221_ACVA",
+    "sources_pack_caso_id": "CASE_20260221_ACVA"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Valuación EV/FCF ~15x atractiva para un crecimiento de ingresos del ~20% si el FCF es sostenible.",
+      "Punto de inflexión en rentabilidad operativa (EBIT) cercano, reduciendo riesgo de dependencia de float.",
+      "Estructura de capital sólida (Caja Neta) ofrece protección contra volatilidad macro.",
+      "Riesgo principal: Calidad del flujo de caja dependiente de capital de trabajo negativo (float).",
+      "Opacidad en reportes trimestrales (COGS/Capex) limita visibilidad fina, pero tendencia macro es positiva."
+    ],
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_SCORING_01",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La generación de FCF actual (~$70M) es estructural gracias al modelo de float negativo, permitiendo autofinanciación.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Balance Sheet FY2024",
+          "cita_corta": "AP $345.6M vs AR $168.8M, capital de trabajo neto -$177M.",
+          "interpretacion": "El exceso de cuentas por pagar sobre cobrar financia la operación."
+        }
+      ],
+      "falsacion": {
+        "test": "Contracción de días de pago a proveedores (DPO) o reducción de saldo AP > 10% secuencial.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_SCORING_02",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El apalancamiento operativo es real: SG&A/Ingresos ha caído consistentemente, acercando el EBIT GAAP a positivo.",
+      "confianza_0_1": 0.9,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Income Statement",
+          "cita_corta": "FY2024 SG&A 34.1% vs FY2019 58%.",
+          "interpretacion": "Tendencia secular de dilución de costes fijos."
+        }
+      ],
+      "falsacion": {
+        "test": "Aumento de ratio SG&A/Ingresos en dos trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "ACVA reportará EBIT GAAP positivo en al menos un trimestre del FY2026.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Operating Income > 0 en estado de resultados GAAP.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "El crecimiento de ingresos se mantendrá por encima del 15% interanual en los próximos 2 reportes.",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Revenue Growth YoY > 15%.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "El FCF TTM se mantendrá por encima de $60M, validando la sostenibilidad del float.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "CFO - Capex (TTM) > $60M.",
+      "fuente_prevista": "10-K"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose trimestral histórico completo de Cash Flow (CFO, CFI, CFF)",
+      "por_que_importa": "Esencial para validar estacionalidad del capital de trabajo y calidad del FCF trimestral.",
+      "como_obtenerlo": "Revisión manual de 10-Qs pasados o data provider financiero detallado."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose explícito de COGS vs Gross Profit",
+      "por_que_importa": "Falta visibilidad sobre si la mejora de margen viene de eficiencia bruta o solo dilución de SG&A.",
+      "como_obtenerlo": "Notas a los estados financieros o transcripts de earnings."
+    }
+  ],
+  "payload": {
+    "payload_version": "CatalystPayload_v1",
+    "contenido": {
+      "mapeo_con_expectativas_implicitas": {
+        "variable_critica_principal": "CRECIMIENTO_FCF",
+        "lectura_en_1_2_frases": "El mercado descuenta un escenario base donde el FCF actual es sostenible y crece moderadamente. Los catalizadores operativos (EBIT, apalancamiento) son el mecanismo para confirmar esta sostenibilidad y justificar una revalorización."
+      },
+      "catalizadores": [
+        {
+          "catalyst_id": "CAT-01",
+          "nombre": "Apalancamiento operativo en SG&A",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.85,
+          "mecanismo_cierre_gap": "Dilución de gastos fijos sobre una base de ingresos creciente expande márgenes y valida la rentabilidad del modelo de negocio.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+200 a +400 bps",
+                "nota": "Continuación de tendencia histórica."
+              }
+            ],
+            "justificacion": "Ratio SG&A/Revenue ha caído de 58% a 34%; objetivo 28-30% es realista."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_001",
+              "ubicacion": "Income Statement",
+              "cita_corta": "FY2024 SG&A 34.1% vs FY2019 58%.",
+              "interpretacion": "Tendencia clara de eficiencia."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "SG&A como % de ventas baja del 32% en promedio móvil.",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "SG&A/Revenue < 32%",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Crecimiento de OpEx < Crecimiento de Ingresos.",
+            "Headcount growth vs Revenue growth."
+          ],
+          "riesgos_de_ejecucion": [
+            "Inflación salarial.",
+            "Necesidad de aumentar fuerza de ventas para sostener crecimiento de top-line."
+          ],
+          "contra_catalizadores": [
+            "Re-aceleración de gastos SG&A.",
+            "Pérdida de eficiencia en ventas."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Ratio SG&A/Ingresos",
+              "Comentarios sobre hiring plan"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT-02",
+          "nombre": "Cruce a EBIT positivo",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 18
+          },
+          "probabilidad_0_1": 0.7,
+          "mecanismo_cierre_gap": "Elimina el descuento por 'empresa no rentable' y habilita valoración por múltiplos de beneficio operativo, atrayendo nuevos inversores.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "SUBE",
+                "magnitud_rango": "+2x a +4x EV/EBITDA",
+                "nota": "Re-rating por calidad de beneficios."
+              }
+            ],
+            "justificacion": "El mercado paga premium por rentabilidad GAAP."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_006",
+              "ubicacion": "10-Q Q2-2025",
+              "cita_corta": "EBIT -$7.2M, mejor trimestre histórico.",
+              "interpretacion": "Convergencia visible hacia cero."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Primer trimestre con Operating Income positivo.",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "EBIT > $0",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Reducción secuencial de pérdidas operativas.",
+            "Mejora de Gross Margin."
+          ],
+          "riesgos_de_ejecucion": [
+            "Estacionalidad fuerte en Q3/Q4.",
+            "Costos inesperados de integración o legales."
+          ],
+          "contra_catalizadores": [
+            "Estancamiento de pérdidas operativas.",
+            "Deterioro de margen bruto."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Operating Income (Loss)",
+              "Margen Operativo"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT-03",
+          "nombre": "Consolidación de FCF Recurrente",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 9,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.75,
+          "mecanismo_cierre_gap": "Confirma que la generación de caja no es un evento único de capital de trabajo, validando el DCF implícito.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "MEJORA",
+                "magnitud_rango": "> $80M anualizado",
+                "nota": "Sostener niveles actuales con crecimiento."
+              }
+            ],
+            "justificacion": "Validación del modelo de float negativo."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_001",
+              "ubicacion": "Cash Flow Statement",
+              "cita_corta": "FY2024 CFO $65M, 9M-2025 CFO $91M.",
+              "interpretacion": "Tendencia de caja robusta."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Mantenimiento de FCF TTM > $70M.",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "FCF TTM > $70M",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              }
+            }
+          ],
+          "leading_indicators": [
+            "CFO trimestral estable.",
+            "Estabilidad en DPO (Días de pago a proveedores)."
+          ],
+          "riesgos_de_ejecucion": [
+            "Desaceleración de ingresos que revierta el float.",
+            "Cambios en términos de pago con clientes/proveedores."
+          ],
+          "contra_catalizadores": [
+            "Consumo de caja operativo significativo.",
+            "Contracción de cuentas por pagar."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Operating Cash Flow",
+              "Cambios en Working Capital"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT-04",
+          "nombre": "Crecimiento de Ingresos Sostenido",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.8,
+          "mecanismo_cierre_gap": "El crecimiento de top-line es el motor del float y del apalancamiento operativo. Mantener >15% justifica múltiplos actuales.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": "Lineal con ingresos",
+                "nota": "Mayor volumen = mayor float."
+              }
+            ],
+            "justificacion": "Escala necesaria para rentabilidad."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_007",
+              "ubicacion": "Q1-Q3 2025",
+              "cita_corta": "Crecimiento YoY consistente: +25%, +20%, +16%.",
+              "interpretacion": "Demanda saludable pese a desaceleración macro."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Crecimiento de ingresos YoY > 15%.",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Revenue Growth > 15%",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Volumen de transacciones (GMV).",
+            "Adopción de nuevos clientes."
+          ],
+          "riesgos_de_ejecucion": [
+            "Competencia agresiva en precios.",
+            "Saturación de mercado."
+          ],
+          "contra_catalizadores": [
+            "Crecimiento de un solo dígito.",
+            "Pérdida de cuota de mercado."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Revenue Growth",
+              "Market Share metrics"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT-05",
+          "nombre": "Disciplina de Capex",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.9,
+          "mecanismo_cierre_gap": "Mantener modelo asset-light asegura alta conversión de CFO a FCF.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "CAPEX",
+                "direccion": "BAJA",
+                "magnitud_rango": "< 2% de ventas",
+                "nota": "Mantener ratio actual."
+              }
+            ],
+            "justificacion": "Modelo de negocio digital no requiere infraestructura pesada."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_001",
+              "ubicacion": "Cash Flow Statement",
+              "cita_corta": "Capex < 1% de ingresos en FY2024.",
+              "interpretacion": "Alta eficiencia de capital."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Capex anualizado se mantiene bajo.",
+              "fuente_prevista": "10-K",
+              "umbral_o_condicion": "Capex < 2% Revenue",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Guidance de Capex.",
+            "Proyectos de inversión anunciados."
+          ],
+          "riesgos_de_ejecucion": [
+            "Necesidad de inversión tecnológica inesperada.",
+            "Adquisiciones intensivas en capital."
+          ],
+          "contra_catalizadores": [
+            "Cambio de modelo de negocio hacia asset-heavy.",
+            "Aumento estructural de Capex."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Capital Expenditures",
+              "Capex % Revenue"
+            ]
+          }
+        }
+      ],
+      "conclusion_catalizadores": {
+        "calidad_catalizador": "ALTA",
+        "por_que": "Los catalizadores son endógenos (gestión, eficiencia) y están alineados con la tendencia actual de los datos. No dependen de eventos exógenos improbables.",
+        "si_no_hay_catalizador_apto": false
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta de detalle en COGS impide análisis profundo de margen bruto.",
+      "Dependencia de float introduce riesgo si crecimiento se detiene."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "CATALYST_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-21T16:55:00Z",
+    "inputs_hash": "ACVA_CAT_SCORING_V1"
+  }
+}

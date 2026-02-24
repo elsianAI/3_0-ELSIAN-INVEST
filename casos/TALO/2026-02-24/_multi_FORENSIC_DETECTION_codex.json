@@ -1,0 +1,445 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260224_TALO",
+  "fecha_corte": "2026-02-24",
+  "ticker": "TALO",
+  "red_flags": [
+    {
+      "id": "RF-01",
+      "categoria": "Puente EBIT a CFO distorsionado",
+      "descripcion": "La conversion de EBIT a CFO muestra distorsiones muy por encima del umbral del 15% en periodos recientes.",
+      "evidencia_cuantitativa": {
+        "FY2024": {
+          "ebit_usd": 172925000,
+          "cfo_usd": 962593000,
+          "distorsion_usd": 789668000,
+          "distorsion_pct_sobre_ebit": 456.65
+        },
+        "9M-2025": {
+          "ebit_usd": -316322000,
+          "cfo_usd": 734046000,
+          "distorsion_usd": 1050368000,
+          "distorsion_pct_sobre_ebit_abs": 332.06
+        }
+      },
+      "implicacion_forense": "La lectura de utilidad operativa no explica la caja operativa; alta dependencia de ajustes no caja y partidas no desagregadas.",
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "historico_anual[periodo=FY2024].{ebit_usd,cfo_usd}; historico_trimestral[periodo=9M-2025] (source_filing: SRC_SEC_007_10-Q_Q3-2025)"
+    },
+    {
+      "id": "RF-02",
+      "categoria": "Riesgo de capitalizacion y estimaciones de activos (DD&A elevada)",
+      "descripcion": "DD&A supera ampliamente el EBIT reportado y amplifica la sensibilidad de resultados a supuestos de reservas/valoracion.",
+      "evidencia_cuantitativa": {
+        "FY2024": {
+          "depreciation_usd": 1023558000,
+          "ebit_usd": 172925000,
+          "depreciation_sobre_ebit_x": 5.92
+        },
+        "9M-2025": {
+          "depreciation_usd": 813059000,
+          "ebit_usd": -316322000
+        }
+      },
+      "implicacion_forense": "Mayor riesgo de write-downs adicionales y volatilidad contable si el entorno de commodity se debilita.",
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "historico_anual[periodo=FY2024].depreciation_usd; historico_trimestral[periodo=9M-2025].depreciation_usd (source_filing: SRC_SEC_007_10-Q_Q3-2025)"
+    },
+    {
+      "id": "RF-03",
+      "categoria": "Cobertura de intereses contable debilitada",
+      "descripcion": "El EBIT no cubre con holgura el gasto financiero y pasa a negativo en 2025 acumulado.",
+      "evidencia_cuantitativa": {
+        "FY2024": {
+          "ebit_usd": 172925000,
+          "interest_expense_usd": 187638000,
+          "ebit_sobre_intereses_x": 0.92
+        },
+        "9M-2025": {
+          "ebit_usd": -316322000,
+          "interest_expense_usd": 122585000,
+          "ebit_sobre_intereses_x": -2.58
+        },
+        "cfo_sobre_intereses_x": {
+          "FY2024": 5.13,
+          "9M-2025": 5.99
+        }
+      },
+      "implicacion_forense": "La cobertura por caja sigue solida, pero la cobertura por EBIT refleja fragilidad de resultados GAAP.",
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "historico_anual[periodo=FY2024].{ebit_usd,interest_expense_usd,cfo_usd}; historico_trimestral[periodo=9M-2025].{ebit_usd,interest_expense_usd,cfo_usd}"
+    },
+    {
+      "id": "RF-04",
+      "categoria": "Volatilidad material del puente CFO a FCF",
+      "descripcion": "El FCF oscila de negativo a positivo por intensidad de capex; distorsion de conversion de caja superior al 15% de forma persistente.",
+      "evidencia_cuantitativa": {
+        "FY2023": {
+          "cfo_usd": 519069000,
+          "capex_usd": -561434000,
+          "fcf_usd": -42365000,
+          "distorsion_cfo_a_fcf_pct": -108.16
+        },
+        "FY2024": {
+          "cfo_usd": 962593000,
+          "capex_usd": -508914000,
+          "fcf_usd": 453679000,
+          "distorsion_cfo_a_fcf_pct": -52.87
+        },
+        "9M-2025": {
+          "cfo_usd": 734046000,
+          "capex_usd": -361637000,
+          "fcf_usd": 372409000,
+          "distorsion_cfo_a_fcf_pct": -49.27
+        }
+      },
+      "implicacion_forense": "La supervivencia depende del ritmo de inversion; recortes o aumentos de capex cambian rapidamente el FCF.",
+      "source_id": "SRC_SEC_002_10-K_FY2023",
+      "ubicacion": "historico_anual[periodo=FY2023,FY2024].{cfo_usd,capex_usd}; historico_trimestral[periodo=9M-2025] (source_filing: SRC_SEC_007_10-Q_Q3-2025)"
+    },
+    {
+      "id": "RF-05",
+      "categoria": "Pasivos economicos fuera de balance (arrendamientos)",
+      "descripcion": "El costo total de leases es alto y concentrado en arrendamientos de corto plazo.",
+      "evidencia_cuantitativa": {
+        "total_lease_cost_usd": 119078000,
+        "short_term_lease_cost_usd": 100895000,
+        "short_term_sobre_total_pct": 84.73
+      },
+      "implicacion_forense": "Compromisos cuasi-fijos relevantes no capturados en deuda financiera tradicional.",
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "lease_data.{total_lease_cost_usd,short_term_lease_cost_usd}"
+    },
+    {
+      "id": "RF-06",
+      "categoria": "Opacidad en capital de trabajo y deuda consolidada",
+      "descripcion": "Faltan lineas criticas para pruebas forenses de ingresos y working capital (AR, AP, inventarios, deuda total actualizados).",
+      "evidencia_cuantitativa": {
+        "campos_nulos_balance_sheet_ultimo": [
+          "deuda_total_usd",
+          "cuentas_por_cobrar_usd",
+          "inventarios_usd",
+          "cuentas_por_pagar_usd"
+        ],
+        "data_completeness_pct": 48.55
+      },
+      "implicacion_forense": "No permite cerrar pruebas completas de reconocimiento de ingresos ni anomalias de capital de trabajo con granularidad consolidada.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "balance_sheet_ultimo y data_quality.validaciones.DATA_COMPLETENESS"
+    },
+    {
+      "id": "RF-07",
+      "categoria": "Relacion con parte vinculada sin detalle economico en el 8-K citado",
+      "descripcion": "Se informa extension de Cooperation Agreement con entidad controlada por la familia de Carlos Slim hasta 2026-12-16 sin cuantificacion financiera en el extracto usado.",
+      "evidencia_cuantitativa": {
+        "fecha_extension": "2026-12-16",
+        "importe_divulgado_usd": null
+      },
+      "implicacion_forense": "Riesgo de transparencia en terminos economicos de RPT y gobernanza.",
+      "source_id": "SRC_021_8-K",
+      "ubicacion": "log.limitaciones (entrada sobre extension del Cooperation Agreement)"
+    }
+  ],
+  "liquidez": {
+    "fecha_referencia_analisis": "2025-09-30",
+    "efectivo_disponible": {
+      "caja_fy2024_usd": 108172000,
+      "caja_estimada_2025_09_30_usd": 302149000,
+      "metodo_estimacion": "caja_2024_12_31 + delta_cash_9M2025",
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "balance_sheet_ultimo.caja_usd y historico_trimestral[periodo=9M-2025].delta_cash_usd"
+    },
+    "lineas_credito": {
+      "borrowing_base_usd": 700000000,
+      "maturity": "2030-01-20",
+      "disponibilidad_estimada_min_usd": 375000000,
+      "metodo_disponibilidad": "700M borrowing base - uso aproximado revolver 325M (dato de transcript consolidado en TruthPack.log)",
+      "source_id": "SRC_029_8-K_2025-12-08",
+      "ubicacion": "log.limitaciones (borrowing base reafirmado y maturity extendido)"
+    },
+    "liquidez_total_estimada_min_usd": 677149000,
+    "runway_meses": {
+      "escenario_base": ">24 (FCF positivo)",
+      "escenario_estres_cfo_cero_con_capex_runrate": {
+        "meses": 10.63,
+        "supuestos": {
+          "capex_anualizado_usd": 482182667,
+          "intereses_anualizados_usd": 163446667,
+          "lease_cost_anual_usd": 119078000
+        }
+      },
+      "escenario_estres_cfo_cero_solo_obligaciones_fijas": {
+        "meses": 28.76,
+        "supuestos": {
+          "intereses_anualizados_usd": 163446667,
+          "lease_cost_anual_usd": 119078000
+        }
+      }
+    },
+    "deuda_y_cobertura": {
+      "deuda_total_referencial_usd": 1224947000,
+      "deuda_neta_estimada_usd": 922798000,
+      "deuda_sobre_cfo_anualizado_x": 1.25,
+      "cfo_sobre_intereses_x": {
+        "FY2024": 5.13,
+        "9M-2025_anualizado": 5.99
+      },
+      "ebit_sobre_intereses_x": {
+        "FY2024": 0.92,
+        "9M-2025": -2.58
+      }
+    },
+    "vencimientos_deuda_12_24_meses": {
+      "ventana": "2026-02-24 a 2028-02-24",
+      "hechos_verificados": [
+        {
+          "item": "Credit facility",
+          "vencimiento": "2030-01-20",
+          "dentro_de_ventana": false,
+          "source_id": "SRC_029_8-K_2025-12-08",
+          "ubicacion": "log.limitaciones (borrowing base reafirmado y maturity extendido)"
+        },
+        {
+          "item": "Maturity ladder completa de bonos y current portion",
+          "estado": "no disponible en TruthPack",
+          "impacto": "riesgo de ceguera sobre muro de vencimientos 12-24 meses",
+          "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+          "ubicacion": "log.limitaciones (deuda_total_usd refleja solo long-term debt line item)"
+        }
+      ]
+    },
+    "riesgo_incumplimiento_covenants": {
+      "estado_actual": "MEDIA",
+      "base_cuantitativa": "Cobertura por CFO robusta (~5-6x), pero cobertura por EBIT debil/negativa (0.92x en FY2024 y -2.58x en 9M-2025).",
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "historico_anual[periodo=FY2024] y historico_trimestral[periodo=9M-2025]"
+    },
+    "riesgo_dilucion_accionaria": {
+      "estado_actual": "BAJA",
+      "base_cuantitativa": "9M-2025 FCF positivo (372,409,000) y CFF negativo (-135,382,000), sin evidencia en este set de necesidad inmediata de emision.",
+      "triggers_de_cambio": "FCF TTM <= 0 junto con liquidez total < 12 meses de obligaciones de caja.",
+      "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+      "ubicacion": "historico_trimestral[periodo=9M-2025].{cfo_usd,capex_usd,cff_usd}"
+    }
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "metodologia": "Distorsion = (CFO - EBIT) / abs(EBIT). Umbral material: 15%.",
+      "componentes_requeridos_y_disponibilidad": {
+        "stock_based_comp": "no disponible en TruthPack",
+        "cambios_capital_trabajo": "no disponible de forma consolidada (AR/AP/inventarios incompletos)",
+        "impuestos_pagados": "no disponible; solo income_tax_usd de devengo"
+      },
+      "periodos": [
+        {
+          "periodo": "FY2022",
+          "ebit_usd": 736119000,
+          "cfo_usd": 709739000,
+          "distorsion_usd": -26380000,
+          "distorsion_pct": -3.58,
+          "distorsion_material": false
+        },
+        {
+          "periodo": "FY2023",
+          "ebit_usd": 209790000,
+          "cfo_usd": 519069000,
+          "distorsion_usd": 309279000,
+          "distorsion_pct": 147.42,
+          "distorsion_material": true
+        },
+        {
+          "periodo": "FY2024",
+          "ebit_usd": 172925000,
+          "cfo_usd": 962593000,
+          "distorsion_usd": 789668000,
+          "distorsion_pct": 456.65,
+          "distorsion_material": true
+        },
+        {
+          "periodo": "9M-2024",
+          "ebit_usd": 145760000,
+          "cfo_usd": 613256000,
+          "distorsion_usd": 467496000,
+          "distorsion_pct": 320.73,
+          "distorsion_material": true
+        },
+        {
+          "periodo": "9M-2025",
+          "ebit_usd": -316322000,
+          "cfo_usd": 734046000,
+          "distorsion_usd": 1050368000,
+          "distorsion_pct": 332.06,
+          "distorsion_material": true
+        }
+      ],
+      "distorsiones_mayores_15pct": [
+        "FY2023",
+        "FY2024",
+        "9M-2024",
+        "9M-2025"
+      ],
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "historico_anual y historico_trimestral (9M-2024/9M-2025, source_filing: SRC_SEC_007_10-Q_Q3-2025)"
+    },
+    "cfo_a_fcf": {
+      "metodologia": "FCF = CFO - abs(capex). Distorsion = (FCF - CFO)/CFO.",
+      "periodos": [
+        {
+          "periodo": "FY2022",
+          "cfo_usd": 709739000,
+          "capex_usd": -323164000,
+          "fcf_usd": 386575000,
+          "distorsion_pct": -45.53,
+          "distorsion_material": true
+        },
+        {
+          "periodo": "FY2023",
+          "cfo_usd": 519069000,
+          "capex_usd": -561434000,
+          "fcf_usd": -42365000,
+          "distorsion_pct": -108.16,
+          "distorsion_material": true
+        },
+        {
+          "periodo": "FY2024",
+          "cfo_usd": 962593000,
+          "capex_usd": -508914000,
+          "fcf_usd": 453679000,
+          "distorsion_pct": -52.87,
+          "distorsion_material": true
+        },
+        {
+          "periodo": "9M-2024",
+          "cfo_usd": 613256000,
+          "capex_usd": -355197000,
+          "fcf_usd": 258059000,
+          "distorsion_pct": -57.92,
+          "distorsion_material": true
+        },
+        {
+          "periodo": "9M-2025",
+          "cfo_usd": 734046000,
+          "capex_usd": -361637000,
+          "fcf_usd": 372409000,
+          "distorsion_pct": -49.27,
+          "distorsion_material": true
+        }
+      ],
+      "distorsiones_mayores_15pct": [
+        "FY2022",
+        "FY2023",
+        "FY2024",
+        "9M-2024",
+        "9M-2025"
+      ],
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "historico_anual.{cfo_usd,capex_usd} y historico_trimestral[periodo=9M-2024,9M-2025].{cfo_usd,capex_usd}"
+    },
+    "resumen_critico": {
+      "FY2024": {
+        "ebit_usd": 172925000,
+        "cfo_usd": 962593000,
+        "fcf_usd": 453679000,
+        "ebit_a_cfo_distorsion_pct": 456.65,
+        "cfo_a_fcf_distorsion_pct": -52.87
+      },
+      "TTM_hasta_2025_09_30": {
+        "metodo": "Q4-2024 derivado + 9M-2025 reportado",
+        "ebit_usd": -289157000,
+        "cfo_usd": 1083383000,
+        "fcf_usd": 568029000,
+        "ebit_a_cfo_distorsion_pct": 474.65,
+        "cfo_a_fcf_distorsion_pct": -47.57
+      }
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC-01",
+      "criterio": "Liquidez total insuficiente para 12 meses de caja",
+      "condicion_objetiva": "(caja + disponibilidad revolver) < 764707333",
+      "metrica": "Obligaciones anualizadas = capex_runrate + intereses_runrate + lease_cost",
+      "ventana_evaluacion": "revision trimestral entre 2026-03-31 y 2028-03-31",
+      "probabilidad_cualitativa": "MEDIA",
+      "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+      "ubicacion": "historico_trimestral[periodo=9M-2025] y lease_data; borrowing base en SRC_029_8-K_2025-12-08"
+    },
+    {
+      "id": "KC-02",
+      "criterio": "Quiebre del puente CFO a FCF",
+      "condicion_objetiva": "FCF TTM <= 0 durante dos cierres trimestrales consecutivos",
+      "metrica": "FCF = CFO - abs(capex)",
+      "ventana_evaluacion": "2026-Q1 a 2027-Q4",
+      "probabilidad_cualitativa": "MEDIA",
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "historico_anual y historico_trimestral (9M-2025)"
+    },
+    {
+      "id": "KC-03",
+      "criterio": "Tension de servicio de deuda por caja",
+      "condicion_objetiva": "CFO/intereses < 2.0x en dos periodos consecutivos",
+      "metrica": "Cobertura de intereses por CFO",
+      "ventana_evaluacion": "2026-Q1 a 2027-Q4",
+      "probabilidad_cualitativa": "BAJA",
+      "source_id": "SRC_SEC_001_10-K_FY2024",
+      "ubicacion": "historico_anual[periodo=FY2024] y historico_trimestral[periodo=9M-2025]"
+    },
+    {
+      "id": "KC-04",
+      "criterio": "Desapalancamiento fallido",
+      "condicion_objetiva": "deuda_neta > 1200000000 y FCF TTM <= 0",
+      "metrica": "deuda_neta = deuda_total - caja_estimada; FCF TTM por CFO-capex",
+      "ventana_evaluacion": "2026-Q1 a 2027-Q4",
+      "probabilidad_cualitativa": "MEDIA",
+      "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+      "ubicacion": "log.limitaciones (long-term debt 1,224,947K) y historico_trimestral"
+    },
+    {
+      "id": "KC-05",
+      "criterio": "Deterioro contable persistente de activos",
+      "condicion_objetiva": "EBIT negativo en 4 trimestres consecutivos y ratio DD&A/capex > 1.5x en el mismo periodo",
+      "metrica": "EBIT trimestral y DD&A vs capex acumulado",
+      "ventana_evaluacion": "2026-Q1 a 2027-Q4",
+      "probabilidad_cualitativa": "MEDIA",
+      "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+      "ubicacion": "historico_trimestral[periodo=9M-2025] y historico_anual[periodo=FY2024]"
+    }
+  ],
+  "report_type": "forensic_detection_sin_scoring",
+  "input_refs": {
+    "truthpack_version_esquema": "TruthPack_v1_partial",
+    "truthpack_data_quality": "PARTIAL",
+    "sourcespack_v1": null,
+    "fuentes_principales": [
+      "SRC_SEC_001_10-K_FY2024",
+      "SRC_SEC_002_10-K_FY2023",
+      "SRC_SEC_007_10-Q_Q3-2025",
+      "SRC_029_8-K_2025-12-08",
+      "SRC_021_8-K"
+    ]
+  },
+  "log": {
+    "limitaciones": [
+      "TruthPack en estado PARTIAL (no PASS/FAIL de matriz). Se ejecuto con datos cuantitativos disponibles y evidencia preextraida.",
+      "No se recibio SourcesPack_v1 en bruto para lectura directa de filings; se uso trazabilidad de source_id en TruthPack.",
+      "No hay desglose consolidado completo de AR/AP/inventarios/deuda corriente en balance_sheet_ultimo.",
+      "No hay stock-based compensation ni impuestos pagados para desagregar completamente EBIT a CFO.",
+      "No hay ladder completa de vencimientos de bonos en ventana 12-24 meses dentro del set estructurado."
+    ],
+    "exhaustividad": {
+      "liquidez": "REVISADO",
+      "reconocimiento_ingresos": "REVISADO_CON_LIMITACION_DE_DATOS",
+      "capitalizacion_capex": "REVISADO",
+      "capital_trabajo": "REVISADO_CON_LIMITACION_DE_DATOS",
+      "goodwill_deterioro": "REVISADO_CON_LIMITACION_DE_DATOS",
+      "rpt": "REVISADO",
+      "off_balance": "REVISADO",
+      "puentes_ebit_cfo_fcf": "REVISADO"
+    }
+  },
+  "_meta": {
+    "moneda": "USD",
+    "convencion_signos": "capex_usd negativo en origen; FCF calculado como CFO - abs(capex)",
+    "timestamp_analisis": "2026-02-24"
+  }
+}

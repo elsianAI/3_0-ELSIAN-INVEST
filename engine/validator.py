@@ -47,6 +47,7 @@ SCHEMA_MAP = {
     "OrchestratorDirective_v1": "remediation/OrchestratorDirective_v1.json",
     "ArbitroRemediateKickoff_v1": "remediation/ArbitroRemediateKickoff_v1.json",
     "DecisionPacketRef_v1": "remediation/DecisionPacketRef_v1.json",
+    "MetaReview_v1": "review/MetaReview_v1.json",
 }
 
 

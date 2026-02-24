@@ -299,12 +299,19 @@ def _render_case_hygiene(workspace: Path) -> str:
                         if isinstance(art, str) and art:
                             referenced.add(art)
 
+            # Sub-step intermediate artifacts consumed within the pipeline
+            # (e.g. CatalystDetection → CatalystScoring) are not tracked in
+            # _estado.json but are legitimate pipeline outputs.
+            sub_step_prefixes = ("CatalystDetection_v1_", "ForensicDetection_v1_")
+
             orphan_count = 0
             for candidate in case_dir.glob("*.json"):
                 name = candidate.name
                 if name.startswith("_"):
                     continue
                 if name in referenced:
+                    continue
+                if name.startswith(sub_step_prefixes):
                     continue
                 if name.startswith(artifact_prefixes):
                     orphan_count += 1
@@ -484,6 +491,10 @@ def _extract_decision_info(state: dict) -> dict:
         "proxima_revision": state.get("proxima_revision"),
         "monitoring_count": len(state.get("monitoring", [])),
         "case_dir": state.get("_case_dir"),
+        "next_step": state.get("next_step"),
+        "estado_caso": state.get("estado_caso"),
+        "monitor_input": state.get("monitor_input"),
+        "meta_review": state.get("meta_review"),
     }
 
     def _to_float(value):
@@ -528,6 +539,8 @@ def _extract_decision_info(state: dict) -> dict:
         or info.get("sizing") is None
         or not info.get("modelo")
         or info.get("modelo") == "?"
+        or not info.get("proxima_revision")
+        or not info.get("next_step")
     )
     if needs_dp:
         dp = _load_decision_packet(info.get("case_dir"))
@@ -558,7 +571,54 @@ def _extract_decision_info(state: dict) -> dict:
                 if isinstance(modelos, list) and modelos:
                     info["modelo"] = "+".join(str(m) for m in modelos if m) or "?"
 
+            # Fallback for monitor fields from DP
+            salida = dp.get("salida_para_siguiente_agente", {})
+            if not isinstance(salida, dict):
+                salida = {}
+            control = dp.get("control", {})
+            if not isinstance(control, dict):
+                control = {}
+
+            if not info.get("proxima_revision") and salida.get("proxima_revision_sugerida"):
+                info["proxima_revision"] = salida["proxima_revision_sugerida"]
+            if not info.get("next_step"):
+                info["next_step"] = control.get("next_step") or salida.get("next_step")
+            if not info.get("estado_caso") and salida.get("estado_caso"):
+                info["estado_caso"] = salida["estado_caso"]
+            if not info.get("monitor_input") and salida.get("monitor_input_recomendado"):
+                info["monitor_input"] = salida["monitor_input_recomendado"]
+
     return info
+
+
+def _format_mr_tag(mr: dict | None) -> str:
+    """Format the [MR:X] tag for meta-review display.
+
+    Mapping (veredicto_meta.estado → tag):
+      CONFIRMA      → [MR:CONFIRMA]
+      CUESTIONA     → [MR:CUESTIONA]
+      RECHAZA       → [MR:RECHAZA]
+      NO_EVALUABLE  → [MR:NO_EVAL]
+      PROMPT_GENERADO → [MR:PEND]
+      (no review)   → ""
+    """
+    if not isinstance(mr, dict):
+        return ""
+    estado = mr.get("estado", "")
+    if estado == "DONE":
+        veredicto = mr.get("veredicto", "?")
+        tag_map = {
+            "CONFIRMA": "MR:CONFIRMA",
+            "CUESTIONA": "MR:CUESTIONA",
+            "RECHAZA": "MR:RECHAZA",
+            "NO_EVALUABLE": "MR:NO_EVAL",
+        }
+        return f"[{tag_map.get(veredicto, f'MR:{veredicto}')}]"
+    if estado == "PROMPT_GENERADO":
+        return "[MR:PEND]"
+    if estado == "PARCIAL":
+        return "[MR:PARCIAL]"
+    return ""
 
 
 def _load_decision_packet(case_dir_str: str) -> dict | None:
@@ -659,9 +719,16 @@ def generate_decisions(workspace: Path, verbosity: int = 0, filter_ticker: str |
                 if c["proxima_revision"] <= today:
                     mon = f"VENCIDO {c['proxima_revision']}"
                 else:
-                    mon = f"→ {c['proxima_revision']}"
+                    estado_tag = f" ({c['estado_caso']})" if c.get("estado_caso") else ""
+                    mon = f"→ {c['proxima_revision']}{estado_tag}"
+            elif c.get("next_step"):
+                mon = f"{c['next_step']}"
             elif c.get("monitoring_count", 0) > 0:
                 mon = f"{c['monitoring_count']} updates"
+            # Meta-review tag
+            mr_tag = _format_mr_tag(c.get("meta_review"))
+            if mr_tag:
+                mon = f"{mon} {mr_tag}" if mon else mr_tag
             lines.append(
                 f"{c['ticker']:<7} {c['fecha']:<12} {str(c['decision']):<14} "
                 f"{score_str:>5} {conf_str:>5} {mon}"
@@ -689,7 +756,26 @@ def generate_decisions(workspace: Path, verbosity: int = 0, filter_ticker: str |
                     mon_parts.append(f"VENCIDO {c['proxima_revision']}")
                 else:
                     mon_parts.append(f"next: {c['proxima_revision']}")
+            if c.get("estado_caso"):
+                mon_parts.append(f"estado: {c['estado_caso']}")
+            if c.get("next_step"):
+                mon_parts.append(f"step: {c['next_step']}")
             lines.append(f"│  Monitoring: {', '.join(mon_parts) if mon_parts else 'ninguno'}")
+            if c.get("monitor_input"):
+                text = c["monitor_input"] if len(c["monitor_input"]) <= 100 else c["monitor_input"][:97] + "..."
+                lines.append(f"│  Monitor hint: {text}")
+
+            # Meta-review info
+            mr = c.get("meta_review")
+            if isinstance(mr, dict) and mr.get("estado") == "DONE":
+                mr_tag = _format_mr_tag(mr)
+                mr_decision = mr.get("meta_decision", "—")
+                mr_ts = (mr.get("timestamp") or "")[:10]
+                modelo = "gpt-5.2-pro"
+                lines.append(f"│  Meta-Review: {mr.get('veredicto', '?')} ({modelo}, {mr_ts})")
+                lines.append(f"│  Meta-decisión: {mr_decision}")
+            elif isinstance(mr, dict) and mr.get("estado") == "PROMPT_GENERADO":
+                lines.append(f"│  Meta-Review: prompt generado, pendiente de respuesta")
 
             # Agent confidences from DecisionPacket
             dp = _load_decision_packet(c.get("case_dir"))

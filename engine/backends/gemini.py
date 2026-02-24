@@ -29,8 +29,10 @@ class GeminiBackend(LLMBackend):
         output_schema: Path | None = None,
         cwd: Path | None = None,
         timeout: int = 600,
+        step_name: str | None = None,
     ) -> DispatchResult:
         """Dispatch to exactly one model. No fallback to different models."""
+        _ = step_name
         return self._dispatch_single_model(
             model_name=self.model,
             prompt=prompt,
@@ -69,11 +71,15 @@ class GeminiBackend(LLMBackend):
             )
             duration = time.time() - start
             raw = proc.stdout or ""
-            stderr_text = (proc.stderr or "")[:500]
+            stderr_full = proc.stderr or ""
+            stderr_text = stderr_full[:2000]
 
             if proc.returncode != 0 and not raw.strip():
+                # Pass full stderr as raw_output so _is_retryable_dispatch_error
+                # can detect quota/rate-limit patterns (e.g. TerminalQuotaError)
+                # even when they appear late in the stderr stream.
                 return DispatchResult(
-                    False, None, raw, model_name, "gemini", duration,
+                    False, None, stderr_full, model_name, "gemini", duration,
                     f"Non-zero exit code: {proc.returncode}. stderr: {stderr_text}",
                     exit_code=proc.returncode,
                 )

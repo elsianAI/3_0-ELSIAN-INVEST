@@ -1,0 +1,681 @@
+{
+  "version_esquema": "DecisionPacket_v2",
+  "backward_compatible_with": "DecisionPacket_v1",
+  "caso_id": "CASE_20260221_ACVA",
+  "fecha_corte": "2026-02-21",
+  "empresa": {
+    "ticker": "ACVA",
+    "nombre": "ACV Auctions Inc.",
+    "bolsa": "NASDAQ",
+    "pais": "US",
+    "sector": "Consumer Cyclical",
+    "industria": "Auto & Truck Dealerships"
+  },
+  "input_refs": {
+    "sources_pack_caso_id": "CASE_20260221_ACVA",
+    "truth_pack_caso_id": "CASE_20260221_ACVA",
+    "implied_expectations_caso_id": "CASE_20260221_ACVA",
+    "agent_reports": [
+      {
+        "agent_role": "BULL",
+        "agent_nombre": "BULL_v1_FUSION",
+        "report_ref": "AgentReport_v1_BULL",
+        "confianza_0_1": 0.55
+      },
+      {
+        "agent_role": "RED_TEAM",
+        "agent_nombre": "RED_TEAM_v1",
+        "report_ref": "AgentReport_v1_REDTEAM",
+        "confianza_0_1": 0.78
+      },
+      {
+        "agent_role": "CATALYST",
+        "agent_nombre": "CATALYST_SCORING_v1_FUSION",
+        "report_ref": "AgentReport_v1_CATALYST",
+        "confianza_0_1": 0.58
+      },
+      {
+        "agent_role": "FORENSIC",
+        "agent_nombre": "FORENSIC_SCORING_v1",
+        "report_ref": "AgentReport_v1_FORENSIC",
+        "confianza_0_1": 0.72
+      }
+    ]
+  },
+  "charter": {
+    "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+    "horizonte_meses": {
+      "min": 6,
+      "max": 30
+    },
+    "restricciones_no_especulativo": [
+      "Evitar tesis binaria",
+      "Evitar dependencia de financiacion salvadora",
+      "Exigir supervivencia 12-24 meses razonable",
+      "Exigir catalizador no binario y medible"
+    ]
+  },
+  "resumen_ejecutivo": {
+    "decision": "WATCHLIST",
+    "tamaño_recomendado_pct_cartera": 0,
+    "confianza_global_0_1": 0.65,
+    "racional_5_lineas": [
+      "Inflexión de CFO confirmada ($65M FY24, $91M 9M25) valida el modelo asset-light, pero la calidad del flujo es baja debido a la dependencia crítica de SBC estimada (~$113M) y float de capital de trabajo negativo (-$177M).",
+      "La valoración EV/FCF ~15x es atractiva solo si el FCF es real; el análisis forense sugiere que el FCF post-SBC es negativo (~-$43M), implicando dilución estructural del ~10% anual que destruye el retorno para el accionista.",
+      "Caja neta positiva ($101M) y ausencia de deuda inmediata otorgan margen de supervivencia (>24 meses), eliminando riesgo existencial a corto plazo, pero no corrigen la falta de rentabilidad operativa (EBIT negativo 6 años).",
+      "La tesis Bull de apalancamiento operativo en SG&A es plausible (58%->34%) pero volátil (reversión en Q3-25); se requiere confirmación de convergencia a EBIT breakeven para validar el re-rating.",
+      "Decisión WATCHLIST: La asimetría es favorable por precio y caja, pero la opacidad de datos (SBC, COGS) impide confirmar que el valor no es una trampa de dilución. Entrada condicionada a FCF ex-SBC positivo."
+    ],
+    "lo_mas_importante_ahora": [
+      "Confirmar dato real de SBC en 10-K FY2024: si es <$70M, la tesis pasa a APTO; si es >$100M, se confirma Value Trap.",
+      "Verificar sostenibilidad de CFO ex-float en próximos 2 trimestres.",
+      "Monitorizar reversión de SG&A: debe volver a <34% para validar apalancamiento.",
+      "Vigilar desaceleración de ingresos: si cae de 15%, el float se contrae."
+    ],
+    "principales_riesgos": [
+      "Value Trap por dilución: SBC > FCF real.",
+      "Reversión de Float: Normalización de AP consume la caja acumulada.",
+      "Goodwill Impairment: $523M en adquisiciones sin retorno visible.",
+      "Opacidad: Falta de desglose de COGS y SBC impide auditoría completa."
+    ]
+  },
+  "decision_probabilistica": {
+    "probabilidad_exito_0_1": 0.6,
+    "retorno_esperado_ponderado_pct": 4.0,
+    "escenarios_ponderados": {
+      "base": {
+        "probabilidad_0_1": 0.4,
+        "retorno_estimado_pct": 10
+      },
+      "bull": {
+        "probabilidad_0_1": 0.2,
+        "retorno_estimado_pct": 60
+      },
+      "bear": {
+        "probabilidad_0_1": 0.4,
+        "retorno_estimado_pct": -30
+      }
+    },
+    "sizing_kelly": {
+      "kelly_crudo_pct": 0,
+      "factor_ajuste_confianza": 0.65,
+      "kelly_ajustado_pct": 0,
+      "tope_maximo_pct": 10,
+      "sizing_preliminar_pct": 0,
+      "sizing_final_pct": 0,
+      "nota": "Kelly negativo o cero debido a retorno esperado bajo ajustado por riesgo de dilución y probabilidad de Bear case (40%). Decisión WATCHLIST fuerza sizing a 0."
+    },
+    "intervalo_confianza_90_pct": {
+      "percentil_5": -40,
+      "percentil_50": 4.0,
+      "percentil_95": 55
+    },
+    "conviccion_0_1": 0.65,
+    "ratio_asimetria": 0.33,
+    "_comment_ratio_asimetria": "Upside Base (10%) / Abs(Downside Bear) (30%) = 0.33. Desfavorable en escenario central.",
+    "expected_value_anualizado_pct": 2.7,
+    "decision_categorica": "WATCHLIST"
+  },
+  "analisis_sensibilidad": [
+    {
+      "assumption_id": "A-007",
+      "variable": "sbc_anual_real_usd",
+      "valor_base": 113000000,
+      "rango_test": {
+        "min": 60000000,
+        "max": 130000000,
+        "paso": 10000000
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": 35,
+        "si_max": -15
+      },
+      "impacto_en_decision": "Si SBC < $70M, decisión pasa a INVERTIR (FCF real positivo). Si > $110M, se mantiene WATCHLIST/DESCARTAR.",
+      "nota": "Variable crítica desconocida. Determina si hay creación o destrucción de valor."
+    },
+    {
+      "assumption_id": "A-002",
+      "variable": "float_ap_ar_ratio",
+      "valor_base": 2.05,
+      "rango_test": {
+        "min": 1.4,
+        "max": 2.2,
+        "paso": 0.1
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": -45,
+        "si_max": 5
+      },
+      "impacto_en_decision": "Si ratio cae < 1.5x, CFO se vuelve negativo y decisión pasa a SALIR.",
+      "nota": "El float financia la operación. Su reversión drena la caja."
+    }
+  ],
+  "gates": {
+    "data_quality_gate": {
+      "status": "PASS",
+      "por_que": [
+        "TruthPack pasó validaciones técnicas (balance identity, cashflow bridge).",
+        "Opacidad en desglose (SBC, COGS) es un riesgo de análisis, no un fallo de integridad de datos crudos."
+      ],
+      "faltantes_criticos": [
+        {
+          "item": "sbc_breakdown",
+          "como_resolver": "Buscar nota de compensación en 10-K FY2024."
+        },
+        {
+          "item": "ap_breakdown",
+          "como_resolver": "Detalle de 'Funds payable to customers' vs 'Trade payables'."
+        }
+      ]
+    },
+    "survivability_gate": {
+      "status": "CONDITIONAL",
+      "por_que": [
+        "Caja neta positiva ($101M) y CFO reportado positivo ($65M) eliminan riesgo inminente.",
+        "Condicional a que el float (AP) no se revierta abruptamente."
+      ],
+      "condiciones_si_conditional": [
+        "Ratio AP/AR debe mantenerse > 1.5x",
+        "CFO reportado debe seguir positivo"
+      ]
+    },
+    "mispricing_gate": {
+      "status": "PASS",
+      "por_que": [
+        "EV/FCF ~15x vs crecimiento ingresos >15%. Gap de expectativas existe.",
+        "Mercado descuenta Value Trap (EBIT negativo); si FCF es real, hay re-rating."
+      ]
+    },
+    "catalyst_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Consolidación de FCF recurrente (Prob 0.70).",
+        "Apalancamiento operativo SG&A (Prob 0.55)."
+      ]
+    },
+    "non_speculative_gate": {
+      "status": "PASS",
+      "banderas": {
+        "tesis_binaria_detectada": false,
+        "dependencia_financiacion_salvadora": false,
+        "opacidad_inaceptable": true
+      },
+      "por_que": [
+        "Pasa técnicamente por caja neta, pero la opacidad de SBC bordea lo inaceptable.",
+        "Se permite el paso a WATCHLIST para verificar datos."
+      ]
+    }
+  },
+  "scoring_preliminar": {
+    "metodo": "Score_0_100",
+    "componentes": {
+      "S_supervivencia_0_25": 15,
+      "M_mispricing_0_25": 15,
+      "C_catalizador_0_20": 12,
+      "Q_calidad_0_15": 5,
+      "R_downside_0_15": 12,
+      "V_penalizacion_0_a_menos15": -5
+    },
+    "total_0_100": 54,
+    "nota": "Score medio. Penalizado por calidad de resultados (EBIT negativo, SBC alta) y opacidad. Sostenido por caja neta y crecimiento."
+  },
+  "assumption_ledger": {
+    "reglas": {
+      "id_prefix": "A-",
+      "max_supuestos": 40,
+      "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+    },
+    "supuestos": [
+      {
+        "assumption_id": "A-001",
+        "enunciado": "La inflexión de CFO ($65M FY24) es estructural y no solo artefacto de float/SBC.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.45,
+        "confianza_0_1": 0.5,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "FCF",
+          "VALORACION"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_001",
+            "ubicacion": "Cash Flow FY2024",
+            "cita_corta": "CFO $65.4M positivo tras años negativos.",
+            "interpretacion": "El dato es positivo, pero el bridge EBIT-CFO sugiere baja calidad."
+          }
+        ],
+        "falsacion": {
+          "test": "CFO ex-float (ajustado por cambios en AP/AR) negativo en 2 trimestres.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [
+          "A-002",
+          "A-007"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_F01"
+          }
+        ],
+        "notas_arbitro": "Punto central de desacuerdo Bull vs RedTeam."
+      },
+      {
+        "assumption_id": "A-002",
+        "enunciado": "El float de capital de trabajo (AP > AR) es estructural al modelo de subastas.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.55,
+        "confianza_0_1": 0.4,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "CFO",
+          "LIQUIDEZ"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_001",
+            "ubicacion": "Balance Sheet",
+            "cita_corta": "AP $345M vs AR $169M.",
+            "interpretacion": "Ratio 2x sugiere float estructural, pero falta desglose."
+          }
+        ],
+        "falsacion": {
+          "test": "Ratio AP/AR cae < 1.5x.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_F02"
+          }
+        ],
+        "notas_arbitro": "Vital para la supervivencia."
+      },
+      {
+        "assumption_id": "A-007",
+        "enunciado": "SBC real es menor a $100M y no causa dilución >8% anual.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.4,
+        "confianza_0_1": 0.3,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "EPS",
+          "VALOR_ACCIONARIAL"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_001",
+            "ubicacion": "Bridge EBIT-CFO",
+            "cita_corta": "Residual bridge ~$113M.",
+            "interpretacion": "Probablemente SBC es alto (~$113M), violando este supuesto."
+          }
+        ],
+        "falsacion": {
+          "test": "SBC reportada > $90M en 10-K.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "10-K",
+          "accion_si_falla": "REDUCIR_50"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "RT_CLM_01"
+          }
+        ],
+        "notas_arbitro": "Red Team tiene evidencia inferencial fuerte contra este supuesto."
+      }
+    ]
+  },
+  "evidence_graph": {
+    "version": "EvidenceGraph_v1",
+    "nodos": [
+      {
+        "node_id": "E-001",
+        "tipo": "EVIDENCIA",
+        "label": "CFO FY24 $65M",
+        "ref": {
+          "source_id": "SRC_001"
+        }
+      },
+      {
+        "node_id": "E-002",
+        "tipo": "EVIDENCIA",
+        "label": "Bridge EBIT-CFO $149M",
+        "ref": {
+          "source_id": "SRC_001"
+        }
+      },
+      {
+        "node_id": "A-001",
+        "tipo": "SUPUESTO",
+        "label": "CFO es estructural",
+        "ref": {
+          "assumption_id": "A-001"
+        }
+      },
+      {
+        "node_id": "A-007",
+        "tipo": "SUPUESTO",
+        "label": "SBC controlada",
+        "ref": {
+          "assumption_id": "A-007"
+        }
+      },
+      {
+        "node_id": "D-001",
+        "tipo": "DECISION",
+        "label": "WATCHLIST",
+        "ref": {
+          "decision": "WATCHLIST"
+        }
+      }
+    ],
+    "aristas": [
+      {
+        "from": "E-001",
+        "to": "A-001",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.6,
+        "nota": "Dato positivo"
+      },
+      {
+        "from": "E-002",
+        "to": "A-001",
+        "relacion": "DEBILITA",
+        "peso_0_1": 0.9,
+        "nota": "Calidad baja del CFO"
+      },
+      {
+        "from": "E-002",
+        "to": "A-007",
+        "relacion": "DEBILITA",
+        "peso_0_1": 0.8,
+        "nota": "Sugiere SBC alto"
+      },
+      {
+        "from": "A-007",
+        "to": "D-001",
+        "relacion": "INFORMA",
+        "peso_0_1": 1.0,
+        "nota": "Dilución bloquea inversión"
+      }
+    ],
+    "validacion_grafo": {
+      "ids_unicos": true,
+      "aristas_referencian_nodos_existentes": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "detalle": "Grafo coherente con decisión de esperar datos."
+    }
+  },
+  "catalizadores_consolidados": [
+    {
+      "catalyst_id": "C-003",
+      "nombre": "Consolidación de FCF recurrente",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 3,
+        "probable": 12,
+        "max": 20
+      },
+      "probabilidad_0_1": 0.7,
+      "mecanismo_cierre_gap": "Valida que el CFO no es transitorio y reduce prima de riesgo.",
+      "supuestos_afectados": [
+        "A-001"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "CFO anualizado > $100M",
+          "fuente_prevista": "10-Q",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          }
+        }
+      ]
+    }
+  ],
+  "escenarios": [
+    {
+      "scenario_id": "BASE",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 12,
+        "probable": 18,
+        "max": 24
+      },
+      "descripcion": "CFO se mantiene positivo pero SBC alto diluye retorno. Empresa sobrevive pero acción lateral.",
+      "drivers_clave": [
+        "A-001",
+        "A-007"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 0,
+        "base": 10,
+        "max": 20
+      },
+      "nota_valoracion": "Dilución absorbe creación de valor."
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.2,
+      "ventana_meses": {
+        "min": 12,
+        "probable": 24,
+        "max": 30
+      },
+      "descripcion": "SBC se controla, Ingresos >20%, Apalancamiento operativo real. Re-rating a 20x FCF.",
+      "drivers_clave": [
+        "A-001",
+        "A-002",
+        "A-007"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 30,
+        "base": 60,
+        "max": 100
+      },
+      "nota_valoracion": "Escenario optimista de Bull."
+    },
+    {
+      "scenario_id": "BEAR",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 18
+      },
+      "descripcion": "Value Trap confirmada. Dilución 10% anual, EBIT negativo persistente. Múltiplo se comprime.",
+      "drivers_clave": [
+        "A-007",
+        "A-002"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": -50,
+        "base": -30,
+        "max": -15
+      },
+      "nota_valoracion": "Destrucción de valor por dilución."
+    }
+  ],
+  "kill_criteria_final": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con_assumption_id": "A-001",
+      "definicion": "CFO ex-float negativo en 2 trimestres consecutivos.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "fuente_prevista": "10-Q",
+      "accion": "REDUCIR_50",
+      "severidad": "ALTA",
+      "por_que": "Invalida la tesis de generación de caja."
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con_assumption_id": "A-007",
+      "definicion": "SBC confirmada > $100M en 10-K.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "fuente_prevista": "10-K",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Confirma Value Trap y dilución excesiva."
+    }
+  ],
+  "plan_monitorizacion": {
+    "frecuencias": {
+      "pulso_diario": {
+        "activo": false,
+        "que_mirar": []
+      },
+      "revision_semanal": {
+        "activo": false,
+        "que_mirar": []
+      },
+      "modo_evento": {
+        "activo": true,
+        "que_mirar": [
+          "Earnings Q4",
+          "10-K filing release"
+        ]
+      }
+    },
+    "lista_de_checks_por_supuesto": [
+      {
+        "assumption_id": "A-007",
+        "indicadores": [
+          "SBC line item"
+        ],
+        "fuente": "10-K",
+        "frecuencia": "ANUAL"
+      }
+    ],
+    "umbrales_alerta": []
+  },
+  "predicciones_para_calibracion_consolidadas": [
+    {
+      "pred_id": "CP-001",
+      "descripcion": "SBC reportada en 10-K FY2024 > $80M.",
+      "probabilidad_0_1": 0.82,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Dato en 10-K.",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "RED_TEAM",
+          "pred_id": "PRED_RT_01"
+        }
+      ]
+    }
+  ],
+  "arbitraje": {
+    "notas_arbitro": [
+      "Decision WATCHLIST obligatoria por falta de datos críticos (SBC, AP breakdown).",
+      "Sizing preliminar 0% por perfil de riesgo asimétrico negativo en escenario base.",
+      "Discrepancia Bull vs RedTeam resuelta a favor de cautela (RedTeam) dada la evidencia de pérdidas crónicas."
+    ],
+    "desacuerdos_detectados": [
+      {
+        "tema": "Calidad del FCF",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Inflexión real, float estructural",
+            "confianza_0_1": 0.55
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "Ilusorio por SBC y float reversible",
+            "confianza_0_1": 0.78
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "RESUELTO",
+          "decision": "descartar",
+          "por_que": "La evidencia forense del bridge EBIT-CFO apoya la tesis de baja calidad hasta que se demuestre lo contrario con datos.",
+          "accion": "Mantener en watchlist hasta tener desglose de SBC."
+        }
+      }
+    ],
+    "puntos_abiertos": [
+      "Desglose exacto de SBC anual.",
+      "Naturaleza detallada del AP ($345M)."
+    ]
+  },
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "SBC Breakdown FY2024",
+      "por_que_importa": "Determina si la empresa crea o destruye valor para el accionista.",
+      "como_obtenerlo": "10-K Note on Stock Based Compensation"
+    }
+  ],
+  "salida_para_siguiente_agente": {
+    "monitor_input_recomendado": "Vigilar release de 10-K FY2024 para obtener dato SBC.",
+    "estado_caso": "EN_ESPERA",
+    "proxima_revision_sugerida": "2026-03-15"
+  },
+  "log": {
+    "autochequeos": {
+      "decision_respeta_gates": true,
+      "supuestos_criticos_tienen_evidencia": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "kill_criteria_mapeados_a_supuestos": true,
+      "salida_solo_json": true,
+      "probabilidades_escenarios_suman_1": true,
+      "kelly_sizing_dentro_de_tope": true,
+      "intervalo_confianza_coherente_con_escenarios": true,
+      "decision_categorica_coherente_con_probabilistica": true,
+      "sizing_final_igual_preliminar_si_invertir": true,
+      "sensibilidad_cubre_supuestos_criticos": true
+    },
+    "limitaciones": [
+      "Falta de datos SBC impide valoración final precisa."
+    ],
+    "revision": {
+      "es_revision": false,
+      "revision_num": 1,
+      "decision_packet_anterior_caso_id": null,
+      "monitoring_updates_usados": [],
+      "resumen_cambios": []
+    }
+  },
+  "control": {
+    "estado_flujo": "ARBITRATE",
+    "next_step": "MONITOR",
+    "next_agent_role": "MONITOR",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 2,
+    "issues": [],
+    "work_orders": [],
+    "dispatch_queue": []
+  }
+}

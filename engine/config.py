@@ -273,6 +273,20 @@ class EngineConfig:
         return self.raw.get("execution", {})
 
     @property
+    def failure_diagnostics(self) -> dict:
+        cfg = self.raw.get("failure_diagnostics", {})
+        if not isinstance(cfg, dict):
+            cfg = {}
+        max_files = cfg.get("max_artifacts_per_case", 30)
+        try:
+            max_files_int = int(max_files)
+        except (TypeError, ValueError):
+            max_files_int = 30
+        if max_files_int <= 0:
+            max_files_int = 30
+        return {"max_artifacts_per_case": max_files_int}
+
+    @property
     def naming(self) -> dict:
         return self.raw.get("naming", {})
 

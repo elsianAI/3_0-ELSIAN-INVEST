@@ -34,6 +34,14 @@ from .changelog import append_entry
 from .dashboard import generate_dashboard
 from .quality_voting import maybe_vote_step
 
+# Steps that need project-wide filesystem access (tools-enabled agentic mode).
+# For these steps, dispatch cwd is set to workspace root instead of case_dir
+# so the LLM can read candidatos/, casos/, _docs/, etc.
+_PROJECT_SCOPED_STEPS = {
+    "SCANNER", "SCOUT_PREFILTRO", "SCOUT_Q", "SCOUT_E",
+    "MONITOR", "OUTCOME",
+}
+
 # DAG de dependencias entre steps principales
 PIPELINE_DAG = {
     "SOURCES":    {"depends_on": [],                           "parallel_with": []},
@@ -599,11 +607,30 @@ def _execute_single_step(
     # Inter-step validation (solo para steps con checks configurados)
     input_artifacts = _resolve_input_artifacts(case_dir, step_name)
     loaded_artifacts = {}
+    load_failures = []
     for art_name, art_path in input_artifacts.items():
         try:
             loaded_artifacts[art_name] = json.loads(art_path.read_text())
-        except (json.JSONDecodeError, OSError):
-            pass
+        except (json.JSONDecodeError, OSError) as exc:
+            load_failures.append(f"{art_name}: {exc}")
+            print(
+                f"[router] ⚠ failed to load input artifact {art_name} for {step_name}: {exc}",
+                file=sys.stderr,
+            )
+    if load_failures and not loaded_artifacts:
+        # All input artifacts failed to load — block execution
+        failure_ctx = {
+            "step_context": {"step": step_name, "mode": "inter_step_validation"},
+            "last_error": f"All input artifacts failed to load: {'; '.join(load_failures)}",
+            "attempts": [],
+        }
+        return {
+            "success": False,
+            "error": failure_ctx["last_error"],
+            "model": "validation",
+            "backend": "python",
+            "failure_ctx": failure_ctx,
+        }
     if loaded_artifacts:
         passed, errors, warnings = validate_inter_step(step_name, loaded_artifacts)
         for w in warnings:
@@ -647,22 +674,26 @@ def _execute_single_step(
         input_artifacts=input_artifacts,
     )
 
+    # For project-scoped steps (SCANNER, SCOUT, etc.) the LLM needs access
+    # to the full workspace tree, not just the output directory.
+    dispatch_cwd = config.workspace if step_name in _PROJECT_SCOPED_STEPS else case_dir
+
     # Multi-model dispatch + fusion
     vote_group_id: str | None = None
     if is_multi:
         vote_group_id = str(uuid4())
         result = dispatch_multi_and_fuse(
             config, step_name, prompt, instrucciones_dir,
-            cwd=case_dir,
+            cwd=dispatch_cwd,
         )
         # Per-model quality voting: vote each backend's individual output
         # This enables comparing per-model quality vs fusion quality.
         _vote_per_model(config, case_dir, step_name, vote_group_id=vote_group_id)
     elif config.get_escalation_config(step_name):
         # Use escalation-aware dispatch
-        result = dispatch_with_escalation(config, step_name, prompt, cwd=case_dir)
+        result = dispatch_with_escalation(config, step_name, prompt, cwd=dispatch_cwd)
     else:
-        result = dispatch_step(config, step_name, prompt, cwd=case_dir)
+        result = dispatch_step(config, step_name, prompt, cwd=dispatch_cwd)
         if isinstance(result, dict):
             result = list(result.values())[0]
 
@@ -750,17 +781,84 @@ def _run_python_step(
 
     runner_path = runner_map.get(step_name)
     if not runner_path:
-        return {"success": False, "error": f"No runner mapped for {step_name}"}
+        return {
+            "success": False,
+            "error": f"No runner mapped for {step_name}",
+            "model": "python",
+            "failure_ctx": {
+                "step_context": {
+                    "step": step_name,
+                    "mode": "python",
+                },
+                "backend": "python",
+                "transport": "python",
+                "model_profile": "python",
+                "last_error": f"No runner mapped for {step_name}",
+            },
+            "attempts": [{"attempt": 1, "phase": "python_runner", "error": f"No runner mapped for {step_name}"}],
+        }
 
     full_runner_path = config.workspace / runner_path
     if not full_runner_path.exists():
-        return {"success": False, "error": f"Runner not found: {full_runner_path}"}
+        return {
+            "success": False,
+            "error": f"Runner not found: {full_runner_path}",
+            "model": "python",
+            "failure_ctx": {
+                "step_context": {
+                    "step": step_name,
+                    "mode": "python",
+                },
+                "backend": "python",
+                "transport": "python",
+                "model_profile": "python",
+                "last_error": f"Runner not found: {full_runner_path}",
+            },
+            "attempts": [{"attempt": 1, "phase": "python_runner", "error": f"Runner not found: {full_runner_path}"}],
+        }
 
     # Build args based on step
     args = _build_runner_args(step_name, case_dir, ticker, config, hints=hints)
 
     cmd = [sys.executable, str(full_runner_path)] + args
     timeout_s = _resolve_python_step_timeout(config, step_name)
+
+    def _snip(text: str | None, limit: int = 1200) -> str:
+        if not text:
+            return ""
+        if len(text) <= limit:
+            return text
+        return f"{text[:limit]}..."
+
+    def _failure_ctx(base_error: str, exit_code: int | None = None, stderr: str | None = None, stdout: str | None = None) -> dict[str, object]:
+        return {
+            "step_context": {
+                "step": step_name,
+                "mode": "python",
+                "timeout_s": timeout_s,
+            },
+            "model_profile": "python",
+            "backend": "python",
+            "transport": "python",
+            "last_error": base_error,
+            "exit_code": exit_code,
+            "stderr": stderr or "",
+            "stdout_snippet": _snip(stdout),
+            "attempts": [
+                {
+                    "attempt": 1,
+                    "phase": "python_runner",
+                    "model_profile": "python",
+                    "model_id": "python",
+                    "transport": "python",
+                    "timeout": timeout_s,
+                    "duration_s": None,
+                    "exit_code": exit_code,
+                    "error": base_error,
+                    "recovered": False,
+                }
+            ],
+        }
 
     try:
         proc = subprocess.run(
@@ -772,26 +870,59 @@ def _run_python_step(
         )
 
         if proc.returncode == 0:
+            stderr_hints = ""
+            if proc.stderr and proc.stderr.strip():
+                stderr_hints = _snip(proc.stderr.strip(), limit=500)
+                print(
+                    f"[router] WARNING: python runner {step_name} emitted stderr: {stderr_hints}",
+                    file=sys.stderr,
+                )
             return {
                 "success": True,
                 "model": "python",
                 "output": proc.stdout[:1000],
+                "stderr_hints": stderr_hints,
                 "artifact": _infer_python_step_artifact(case_dir, step_name, ticker),
             }
-        else:
-            return {
-                "success": False,
-                "error": f"Runner exit code {proc.returncode}: {proc.stderr[:500]}",
-                "model": "python",
-            }
-    except subprocess.TimeoutExpired:
+        error_message = f"Runner exit code {proc.returncode}: {proc.stderr[:500]}"
         return {
             "success": False,
-            "error": f"Runner timeout ({step_name}, {timeout_s}s)",
+            "error": error_message,
             "model": "python",
+            "failure_ctx": _failure_ctx(
+                error_message,
+                exit_code=proc.returncode,
+                stderr=proc.stderr,
+                stdout=proc.stdout,
+            ),
+            "attempts": [{"attempt": 1, "phase": "python_runner", "exit_code": proc.returncode}],
+        }
+    except subprocess.TimeoutExpired:
+        error_message = f"Runner timeout ({step_name}, {timeout_s}s)"
+        return {
+            "success": False,
+            "error": error_message,
+            "model": "python",
+            "failure_ctx": _failure_ctx(
+                error_message,
+                exit_code=124,
+                stderr="Process timed out",
+            ),
+            "attempts": [{"attempt": 1, "phase": "python_runner", "exit_code": 124}],
         }
     except Exception as e:
-        return {"success": False, "error": str(e), "model": "python"}
+        error_message = str(e)
+        return {
+            "success": False,
+            "error": error_message,
+            "model": "python",
+            "failure_ctx": _failure_ctx(
+                error_message,
+                exit_code=None,
+                stderr="",
+            ),
+            "attempts": [{"attempt": 1, "phase": "python_runner", "exit_code": None, "error": error_message}],
+        }
 
 
 def _infer_python_step_artifact(case_dir: Path, step_name: str, ticker: str) -> str | None:
@@ -809,12 +940,119 @@ def _infer_python_step_artifact(case_dir: Path, step_name: str, ticker: str) -> 
     return found.name if found else None
 
 
+def _resolve_source_local_path(local_path: str, case_dir: Path, workspace: Path) -> Path | None:
+    lp = Path(local_path)
+    candidates: list[Path] = []
+    if lp.is_absolute():
+        candidates.append(lp)
+    else:
+        candidates.append(case_dir / local_path)
+        candidates.append(workspace / local_path)
+        candidates.append(Path(local_path))
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def _source_has_legacy_pdf_placeholder(source: dict, case_dir: Path, workspace: Path) -> bool:
+    local_path = source.get("local_path")
+    if not isinstance(local_path, str) or not local_path.strip():
+        return False
+    resolved = _resolve_source_local_path(local_path, case_dir, workspace)
+    if not resolved or resolved.suffix.lower() != ".txt":
+        return False
+    try:
+        head = resolved.read_text(encoding="utf-8", errors="replace")[:300].strip().lower()
+    except Exception:
+        return False
+    return (
+        head.startswith("[pdf original descargado")
+        or "extracción de texto no disponible en este runner" in head
+        or "extraccion de texto no disponible en este runner" in head
+    )
+
+
+def _parse_filing_date(value: object) -> datetime | None:
+    if not isinstance(value, str):
+        return None
+    raw = value.strip()
+    if len(raw) >= 10:
+        raw = raw[:10]
+    try:
+        return datetime.strptime(raw, "%Y-%m-%d")
+    except ValueError:
+        return None
+
+
+def _filing_sort_key(item: dict) -> tuple[int, int, float, str]:
+    parsed = _parse_filing_date(item.get("fecha_publicacion"))
+    estimated_raw = item.get("fecha_publicacion_estimated")
+    if estimated_raw is None:
+        estimated = parsed is None
+    else:
+        estimated = bool(estimated_raw)
+
+    try:
+        selection_score = float(item.get("selection_score") or 0.0)
+    except Exception:
+        selection_score = 0.0
+
+    source_id = str(item.get("source_id") or "")
+    date_ord = parsed.toordinal() if parsed else 0
+    # Sort ascending by key:
+    # 1) non-estimated first, 2) newer dates first, 3) higher score first, 4) stable source_id
+    return (1 if estimated else 0, -date_ord, -selection_score, source_id)
+
+
 def _select_filings(filings: list[dict], config: EngineConfig) -> list[dict]:
     """Filter and prioritize filings to reduce unnecessary LLM calls.
 
     Uses tp_extractor_max_per_type from config to cap filings per type.
     Within each type, keeps the most recent by fecha_publicacion.
     """
+    filtered_by_extraction = 0
+    filtered: list[dict] = []
+    for filing in filings:
+        extraction_status = filing.get("extraction_status")
+        if extraction_status is not None and str(extraction_status).upper() != "OK":
+            filtered_by_extraction += 1
+            continue
+        filtered.append(filing)
+
+    if filtered_by_extraction:
+        print(
+            f"[router] Filing selection: skipped {filtered_by_extraction} filings "
+            "with extraction_status != OK"
+        )
+
+    filings = filtered
+    dedup_hash_skipped = 0
+    hash_kept: dict[str, dict] = {}
+    no_hash: list[dict] = []
+    for filing in filings:
+        content_hash = filing.get("content_hash")
+        ch = str(content_hash).strip().lower() if isinstance(content_hash, str) else ""
+        if not ch:
+            no_hash.append(filing)
+            continue
+        prev = hash_kept.get(ch)
+        if prev is None:
+            hash_kept[ch] = filing
+            continue
+        dedup_hash_skipped += 1
+        if _filing_sort_key(filing) < _filing_sort_key(prev):
+            hash_kept[ch] = filing
+
+    if dedup_hash_skipped:
+        print(
+            f"[router] Filing selection: skipped {dedup_hash_skipped} duplicate filings by content_hash"
+        )
+    filings = no_hash + list(hash_kept.values())
+
+    if not filings:
+        return []
+
     max_per_type = config.raw.get("tp_extractor_max_per_type", {})
     if not max_per_type:
         return filings  # no limits configured — pass all through
@@ -833,8 +1071,7 @@ def _select_filings(filings: list[dict], config: EngineConfig) -> list[dict]:
     for ftype, group in by_type.items():
         limit = max_per_type.get(ftype, default_max)
 
-        # Sort by fecha_publicacion descending (most recent first)
-        group.sort(key=lambda x: x.get("fecha_publicacion", "0000-00-00"), reverse=True)
+        group.sort(key=_filing_sort_key)
 
         selected.extend(group[:limit])
         skipped_count += max(0, len(group) - limit)
@@ -886,8 +1123,119 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
                      "For US companies, verify ticker exists in SEC EDGAR.",
         }
 
+    annual_types = {"10-K", "20-F", "40-F", "ANNUAL_REPORT"}
+    annual_total_detected = 0
+    annual_extractable = 0
+    filtered_non_extractable = 0
+    filtered_legacy_placeholder = 0
+    filtered_transcript_issuer_mismatch = 0
+    eligible_filings: list[dict] = []
+
+    for source in all_filings:
+        ftype = str(source.get("tipo", source.get("type", ""))).upper()
+        is_annual = ftype in annual_types
+        if is_annual:
+            annual_total_detected += 1
+
+        extraction_status = source.get("extraction_status")
+        if extraction_status is not None:
+            if str(extraction_status).upper() != "OK":
+                filtered_non_extractable += 1
+                continue
+        else:
+            if _source_has_legacy_pdf_placeholder(source, case_dir, config.workspace):
+                filtered_legacy_placeholder += 1
+                continue
+
+        if ftype == "EARNINGS_TRANSCRIPT":
+            issuer_match = source.get("issuer_match")
+            if issuer_match is not None and str(issuer_match).upper() != "MATCH":
+                filtered_transcript_issuer_mismatch += 1
+                continue
+
+        eligible_filings.append(source)
+        if is_annual:
+            annual_extractable += 1
+
+    if filtered_non_extractable or filtered_legacy_placeholder or filtered_transcript_issuer_mismatch:
+        print(
+            "[router] Filing pre-filter (extractable only): "
+            f"kept={len(eligible_filings)}/{len(all_filings)}, "
+            f"filtered_non_extractable={filtered_non_extractable}, "
+            f"filtered_legacy_placeholder={filtered_legacy_placeholder}, "
+            f"filtered_transcript_issuer_mismatch={filtered_transcript_issuer_mismatch}"
+        )
+
+    empresa = sp.get("empresa", {}) if isinstance(sp, dict) else {}
+    bolsa = str(empresa.get("bolsa") or "").upper()
+    pais = str(empresa.get("pais") or "").upper()
+    is_non_us = (
+        (pais not in {"", "US", "USA", "UNITED STATES", "UNITED STATES OF AMERICA"})
+        or bolsa in {"SEHK", "HKEX", "ASX", "LSE", "AIM", "EPA", "TSX", "OTRA"}
+    )
+    if is_non_us and annual_total_detected == 0:
+        print(
+            "[router] Coverage warning (pre-TP): non-US issuer with 0 annual filings detected. "
+            "TruthPack quality may degrade due to insufficient annual coverage.",
+            file=sys.stderr,
+        )
+
+    if annual_total_detected > 0 and annual_extractable == 0:
+        error = (
+            "Coverage gate (pre-TP): Annual reports detected but none have extractable text. "
+            "Pipeline aborted to avoid contaminated/null TruthPack."
+        )
+        failure_ctx = {
+            "step_context": {"step": step_name, "mode": "annual_extractable_gate"},
+            "annual_total_detected": annual_total_detected,
+            "annual_extractable": annual_extractable,
+            "filings_total": len(all_filings),
+            "filings_eligible": len(eligible_filings),
+            "filtered_non_extractable": filtered_non_extractable,
+            "filtered_legacy_placeholder": filtered_legacy_placeholder,
+            "filtered_transcript_issuer_mismatch": filtered_transcript_issuer_mismatch,
+            "last_error": error,
+        }
+        return {
+            "success": False,
+            "error": error,
+            "failure_ctx": failure_ctx,
+        }
+
+    if not eligible_filings:
+        error = (
+            "Coverage gate (pre-TP): 0 extractable filings after filtering. "
+            "Review source extraction quality and issuer matching."
+        )
+        failure_ctx = {
+            "step_context": {"step": step_name, "mode": "extractable_filings_gate"},
+            "filings_total": len(all_filings),
+            "filings_eligible": 0,
+            "filtered_non_extractable": filtered_non_extractable,
+            "filtered_legacy_placeholder": filtered_legacy_placeholder,
+            "filtered_transcript_issuer_mismatch": filtered_transcript_issuer_mismatch,
+            "last_error": error,
+        }
+        return {
+            "success": False,
+            "error": error,
+            "failure_ctx": failure_ctx,
+        }
+
     # Apply filing selection filter
-    filings = _select_filings(all_filings, config)
+    filings = _select_filings(eligible_filings, config)
+    if not filings:
+        return {
+            "success": False,
+            "error": "Filing selection produced 0 entries after extraction-status filtering.",
+            "failure_ctx": {
+                "step_context": {"step": step_name, "mode": "filing_selection"},
+                "filings_total": len(all_filings),
+                "filings_eligible": len(eligible_filings),
+                "filtered_transcript_issuer_mismatch": filtered_transcript_issuer_mismatch,
+                "last_error": "No filings selected after extraction-status filtering.",
+            },
+        }
 
     # Clean stale partials from previous runs to avoid merger contamination
     for old_partial in case_dir.glob("_tmp_tp_filing_*.json"):
@@ -1279,6 +1627,10 @@ def _get_artifact_filename(step_name: str, ticker: str, case_dir: Path) -> str:
         "ARBITRO": f"DecisionPacket_v2_{ticker}_{date_str}_{model_str}.json",
         "MONITOR": f"MonitoringUpdate_v1_{ticker}_{date_str}_{model_str}.json",
         "SCANNER": f"ScannerReport_v1_{date_str}.json",
+        "SCOUT_PREFILTRO": f"ScoutPrefiltro_v1_{date_str}.json",
+        "SCOUT_Q": f"ScoutQ_v1_{date_str}.json",
+        "SCOUT_E": f"ScoutE_v1_{date_str}.json",
+        "SCOUT_SELECTOR": f"ScoutSelector_v1_{date_str}.json",
     }
 
     return artifact_map.get(step_name, f"_{step_name.lower()}_output.json")
@@ -1485,6 +1837,38 @@ def _extract_decision_fields(case_dir: Path, step_result: dict) -> None:
             if joined:
                 modelo_principal = joined
 
+        # ── Monitor fields from salida_para_siguiente_agente + control ──
+        salida = _get("salida_para_siguiente_agente") or {}
+        if not isinstance(salida, dict):
+            salida = {}
+        control = _get("control") or {}
+        if not isinstance(control, dict):
+            control = {}
+
+        # next_step: prefer control.next_step, fallback to salida
+        raw_next_step = control.get("next_step") or salida.get("next_step")
+        next_step = str(raw_next_step).strip() if raw_next_step else None
+
+        # proxima_revision_sugerida → proxima_revision (validate YYYY-MM-DD & future)
+        raw_fecha = salida.get("proxima_revision_sugerida")
+        proxima_revision = None
+        if isinstance(raw_fecha, str) and raw_fecha.strip():
+            try:
+                parsed = datetime.strptime(raw_fecha.strip(), "%Y-%m-%d").date()
+                # Sanity: must be in the future (or at least today)
+                if parsed >= datetime.now(timezone.utc).date():
+                    proxima_revision = parsed.isoformat()
+            except ValueError:
+                pass
+
+        # estado_caso: ACTIVO | EN_ESPERA | CERRADO
+        raw_estado_caso = salida.get("estado_caso")
+        estado_caso = str(raw_estado_caso).strip() if raw_estado_caso else None
+
+        # monitor_input_recomendado
+        raw_monitor_input = salida.get("monitor_input_recomendado")
+        monitor_input = str(raw_monitor_input).strip() if raw_monitor_input else None
+
         norm_score = _to_float(score)
         norm_score = int(round(_clamp(norm_score, 0.0, 100.0))) if norm_score is not None else 0
         norm_confianza = _to_float(confianza)
@@ -1503,6 +1887,10 @@ def _extract_decision_fields(case_dir: Path, step_result: dict) -> None:
                 probabilistica=probabilistica,
                 sizing=norm_sizing,
                 modelo_principal=modelo_principal,
+                next_step=next_step,
+                proxima_revision=proxima_revision,
+                estado_caso=estado_caso,
+                monitor_input=monitor_input,
             )
     except (json.JSONDecodeError, OSError, ValueError):
         pass
