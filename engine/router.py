@@ -114,6 +114,23 @@ def _normalize_country_code(value: object) -> str:
     return raw
 
 
+def _annual_non_extractable_bucket(source: dict) -> str:
+    status = str(source.get("extraction_status") or "").upper()
+    reason = str(source.get("extraction_reason") or "").upper()
+    merged = f"{status} {reason}"
+    if "LOW_TEXT_ANNUAL" in merged:
+        return "LOW_TEXT_ANNUAL"
+    if "LOW_SIGNAL_ANNUAL" in merged:
+        return "LOW_SIGNAL_ANNUAL"
+    if "LEGACY_PDF_PLACEHOLDER" in merged:
+        return "LEGACY_PLACEHOLDER"
+    if "NON_EXTRACTABLE" in merged:
+        return "NON_EXTRACTABLE_OTHER"
+    if "FETCH_ERROR" in merged:
+        return "FETCH_ERROR"
+    return "OTHER"
+
+
 def _infer_exchange_from_text(value: object) -> str:
     text = str(value or "").strip().upper()
     if not text:
@@ -1129,6 +1146,8 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
     filtered_non_extractable = 0
     filtered_legacy_placeholder = 0
     filtered_transcript_issuer_mismatch = 0
+    annual_non_extractable_counts: dict[str, int] = {}
+    annual_non_extractable_samples: list[dict[str, str]] = []
     eligible_filings: list[dict] = []
 
     for source in all_filings:
@@ -1141,10 +1160,35 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
         if extraction_status is not None:
             if str(extraction_status).upper() != "OK":
                 filtered_non_extractable += 1
+                if is_annual:
+                    bucket = _annual_non_extractable_bucket(source)
+                    annual_non_extractable_counts[bucket] = annual_non_extractable_counts.get(bucket, 0) + 1
+                    if len(annual_non_extractable_samples) < 6:
+                        annual_non_extractable_samples.append(
+                            {
+                                "source_id": str(source.get("source_id") or ""),
+                                "tipo": ftype,
+                                "status": str(source.get("extraction_status") or ""),
+                                "reason": str(source.get("extraction_reason") or "")[:220],
+                            }
+                        )
                 continue
         else:
             if _source_has_legacy_pdf_placeholder(source, case_dir, config.workspace):
                 filtered_legacy_placeholder += 1
+                if is_annual:
+                    annual_non_extractable_counts["LEGACY_PLACEHOLDER"] = (
+                        annual_non_extractable_counts.get("LEGACY_PLACEHOLDER", 0) + 1
+                    )
+                    if len(annual_non_extractable_samples) < 6:
+                        annual_non_extractable_samples.append(
+                            {
+                                "source_id": str(source.get("source_id") or ""),
+                                "tipo": ftype,
+                                "status": "LEGACY_PDF_PLACEHOLDER",
+                                "reason": "Legacy placeholder without extractable text.",
+                            }
+                        )
                 continue
 
         if ftype == "EARNINGS_TRANSCRIPT":
@@ -1181,14 +1225,23 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
         )
 
     if annual_total_detected > 0 and annual_extractable == 0:
+        if annual_non_extractable_counts:
+            print(
+                "[router] Annual extractability gate details: "
+                f"{annual_non_extractable_counts}",
+                file=sys.stderr,
+            )
         error = (
-            "Coverage gate (pre-TP): Annual reports detected but none have extractable text. "
-            "Pipeline aborted to avoid contaminated/null TruthPack."
+            "Coverage gate (pre-TP): Annual reports detected but none are extractable after quality "
+            "filters. Review annual-report URL/source quality (local regulator or direct annual report "
+            "document) before retrying TRUTH_PACK."
         )
         failure_ctx = {
             "step_context": {"step": step_name, "mode": "annual_extractable_gate"},
             "annual_total_detected": annual_total_detected,
             "annual_extractable": annual_extractable,
+            "annual_non_extractable_counts": annual_non_extractable_counts,
+            "annual_non_extractable_samples": annual_non_extractable_samples,
             "filings_total": len(all_filings),
             "filings_eligible": len(eligible_filings),
             "filtered_non_extractable": filtered_non_extractable,

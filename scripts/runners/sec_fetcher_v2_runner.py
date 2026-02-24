@@ -152,6 +152,17 @@ _FIN_HINTS = (
     "cny",
     "%",
 )
+TEXT_SAMPLE_MAX_CHARS = 12_000
+LOCAL_ANNUAL_MIN_TEXT_CHARS = 1_500
+LOCAL_ANNUAL_MIN_SIGNAL_HITS = 2
+LOCAL_ANNUAL_LONG_SAMPLE_CHARS = 8_000
+LOCAL_EVENT_REGISTRATION_HINTS_STRONG = (
+    "engagestream",
+    "register",
+    "registration",
+    "signup",
+    "webcast",
+)
 
 
 def now_utc_iso() -> str:
@@ -667,6 +678,84 @@ def _extract_date_from_html_document(html: str, doc_url: str) -> Tuple[Optional[
     return None, "unknown"
 
 
+def _local_event_registration_penalty(context_norm: str, full_url: str) -> float:
+    """Soft-penalize event/registration links so annual reports rank higher."""
+    ctx = f"{context_norm} {full_url.lower()}"
+    penalty = 0.0
+    if any(hint in ctx for hint in LOCAL_EVENT_REGISTRATION_HINTS_STRONG):
+        penalty -= 3.0
+    if re.search(r"\bevents?\b", ctx):
+        penalty -= 1.0
+    return penalty
+
+
+def _financial_signal_hits(text: str) -> Tuple[int, List[str]]:
+    if not text:
+        return 0, []
+    normalized = re.sub(r"\s+", " ", text.lower())
+    hits = sorted({hint for hint in _FIN_HINTS if hint in normalized})
+    return len(hits), hits
+
+
+def _classify_local_annual_extractability(
+    *,
+    tipo: str,
+    extraction_status: str,
+    extraction_reason: str,
+    text_chars: int,
+    text_sample: str,
+) -> Tuple[str, str, Dict[str, Any]]:
+    """Downgrade low-quality local annual fallback sources to non-extractable."""
+    tipo_up = str(tipo or "").upper().replace(" ", "")
+    is_local_annual = tipo_up in {"ANNUAL_REPORT", "10-K", "10K", "20-F", "20F", "40-F", "40F"}
+    if not is_local_annual or extraction_status != "OK":
+        return extraction_status, extraction_reason, {}
+
+    signal_hits_count, signal_hits = _financial_signal_hits(text_sample)
+    sample_len = len(text_sample or "")
+    sample_long_enough = sample_len >= LOCAL_ANNUAL_LONG_SAMPLE_CHARS
+
+    if text_chars < LOCAL_ANNUAL_MIN_TEXT_CHARS:
+        reason = (
+            "Local annual fallback downgraded: extracted text too short "
+            f"({text_chars} < {LOCAL_ANNUAL_MIN_TEXT_CHARS})."
+        )
+        merged_reason = f"{extraction_reason} {reason}".strip()
+        return "NON_EXTRACTABLE_LOW_TEXT_ANNUAL", merged_reason, {
+            "rejected_low_quality": True,
+            "reject_reason": "LOW_TEXT_ANNUAL",
+            "signal_hits": signal_hits,
+            "signal_hits_count": signal_hits_count,
+            "sample_len": sample_len,
+            "sample_long_enough": sample_long_enough,
+        }
+
+    if signal_hits_count < LOCAL_ANNUAL_MIN_SIGNAL_HITS and not sample_long_enough:
+        reason = (
+            "Local annual fallback downgraded: insufficient financial signal "
+            f"(hits={signal_hits_count} < {LOCAL_ANNUAL_MIN_SIGNAL_HITS}; sample_len={sample_len})."
+        )
+        if signal_hits:
+            reason = f"{reason} matched={','.join(signal_hits[:8])}."
+        merged_reason = f"{extraction_reason} {reason}".strip()
+        return "NON_EXTRACTABLE_LOW_SIGNAL_ANNUAL", merged_reason, {
+            "rejected_low_quality": True,
+            "reject_reason": "LOW_SIGNAL_ANNUAL",
+            "signal_hits": signal_hits,
+            "signal_hits_count": signal_hits_count,
+            "sample_len": sample_len,
+            "sample_long_enough": sample_long_enough,
+        }
+
+    return extraction_status, extraction_reason, {
+        "rejected_low_quality": False,
+        "signal_hits": signal_hits,
+        "signal_hits_count": signal_hits_count,
+        "sample_len": sample_len,
+        "sample_long_enough": sample_long_enough,
+    }
+
+
 def _select_local_fallback_candidates(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     ordered = sorted(
         candidates,
@@ -751,6 +840,7 @@ def extract_local_filing_candidates(
             selection_score += 1.0
         if date_guess:
             selection_score += 0.5
+        selection_score += _local_event_registration_penalty(context_norm, full_url)
 
         candidate = {
             "url": full_url,
@@ -944,7 +1034,7 @@ def get_doc_text(client: SecClient, url: str) -> Tuple[bytes, str, Dict[str, Any
         text_chars = len(text)
         alpha_ratio = _alpha_ratio(text)
         content_hash = _content_hash(text)
-        text_sample = text[:4000]
+        text_sample = text[:TEXT_SAMPLE_MAX_CHARS]
         if text_chars >= 500 and alpha_ratio >= 0.30:
             reason = ""
             if text_chars < 10000:
@@ -989,7 +1079,7 @@ def get_doc_text(client: SecClient, url: str) -> Tuple[bytes, str, Dict[str, Any
             text = fallback_block
     text_chars = len(text)
     content_hash = _content_hash(text)
-    text_sample = text[:4000]
+    text_sample = text[:TEXT_SAMPLE_MAX_CHARS]
     return content, text, {
         "extraction_status": "OK" if text_chars > 0 else "FETCH_ERROR",
         "extraction_reason": "" if text_chars > 0 else "Documento sin texto extraible tras limpieza HTML.",
@@ -1504,6 +1594,9 @@ def main() -> int:
     # when SEC is non-applicable or clearly insufficient for non-US coverage.
     local_fallback_attempted = False
     local_fallback_added = 0
+    local_fallback_extractable_added = 0
+    local_fallback_rejected_low_quality = 0
+    local_fallback_annual_non_extractable = 0
     local_fallback_errors: List[str] = []
 
     sec_forms_present = {
@@ -1645,6 +1738,20 @@ def main() -> int:
                     text_chars = int(extraction_meta.get("text_chars") or 0)
                 except Exception:
                     text_chars = 0
+                extraction_status, extraction_reason, annual_quality_eval = _classify_local_annual_extractability(
+                    tipo=_tipo,
+                    extraction_status=extraction_status,
+                    extraction_reason=extraction_reason,
+                    text_chars=text_chars,
+                    text_sample=text_sample,
+                )
+                low_quality_rejected = bool(annual_quality_eval.get("rejected_low_quality"))
+                if low_quality_rejected:
+                    local_fallback_rejected_low_quality += 1
+                    local_fallback_annual_non_extractable += 1
+                    local_fallback_errors.append(
+                        f"{source_id} downgraded to {extraction_status}: {annual_quality_eval.get('reject_reason')}"
+                    )
                 inferred_date = extraction_meta.get("inferred_date")
                 if not fecha_pub and inferred_date:
                     fecha_pub = str(inferred_date)
@@ -1686,6 +1793,8 @@ def main() -> int:
                     source["local_path"] = local_path_val
                 out["fuentes"].append(source)
                 local_fallback_added += 1
+                if extraction_status == "OK":
+                    local_fallback_extractable_added += 1
 
                 if _tipo in {"ANNUAL_REPORT", "10-K", "20-F", "40-F"} and extraction_status == "OK" and text_chars < 10000:
                     low_text_note = (
@@ -1693,7 +1802,7 @@ def main() -> int:
                     )
                     source["extraction_reason"] = f"{source.get('extraction_reason', '')} {low_text_note}".strip()
                     local_fallback_errors.append(f"{source_id} warning: {low_text_note}")
-                elif extraction_status != "OK":
+                elif extraction_status != "OK" and not low_quality_rejected:
                     local_fallback_errors.append(
                         f"{source_id} extraction_status={extraction_status}: {extraction_reason or 'sin detalle'}"
                     )
@@ -1759,10 +1868,22 @@ def main() -> int:
         "enabled": enable_local_fallback,
         "attempted": local_fallback_attempted,
         "sources_added": local_fallback_added,
+        "sources_added_total": local_fallback_added,
+        "sources_extractable_added": local_fallback_extractable_added,
+        "sources_rejected_low_quality": local_fallback_rejected_low_quality,
+        "annual_non_extractable_count": local_fallback_annual_non_extractable,
         "exchange": exchange,
         "country": country,
         "web_ir": web_ir,
     }
+    if local_fallback_attempted:
+        out.setdefault("log", {}).setdefault("limitaciones", []).append(
+            "Local fallback summary: "
+            f"added_total={local_fallback_added}, "
+            f"extractable_added={local_fallback_extractable_added}, "
+            f"rejected_low_quality={local_fallback_rejected_low_quality}, "
+            f"annual_non_extractable={local_fallback_annual_non_extractable}."
+        )
     if local_fallback_errors:
         out.setdefault("log", {}).setdefault("limitaciones", []).extend(local_fallback_errors)
 
