@@ -1,0 +1,414 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_SONO",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "gemini-2.0-flash-thinking",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_SONO",
+    "implied_expectations_caso_id": "CASE_20260224_SONO",
+    "sources_pack_caso_id": "CASE_YYYYMMDD_TICKER"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Deterioro estructural severo con ingresos cayendo (-18% en 3 años) y EBIT negativo persistente (-$50M FY2025).",
+      "Calidad de ganancias crítica: CFO positivo ($137M) sostenido artificialmente por liquidación de inventario y recortes de Capex insostenibles.",
+      "Bandera roja en Capital Allocation: Recompras consumieron 99% del FCF pese a pérdidas netas, debilitando el balance.",
+      "Pico de cuentas por cobrar (+48% vs ventas -5%) sugiere agresividad comercial o riesgo de cobro para maquillar ingresos.",
+      "Liquidez actual robusta ($312M en Q1-26) evita riesgo inminente, pero la viabilidad a largo plazo está comprometida sin giro operativo."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_FOR_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El CFO positivo es ilusorio y depende de la reducción de capital de trabajo y subinversión en Capex.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Cash Flow Statement FY2025",
+          "cita_corta": "Inventarios -$60.5M, Capex -48% YoY",
+          "interpretacion": "La generación de caja no proviene del negocio core sino de desinversión."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO ex-WC (Funds from Operations) > Capex de mantenimiento",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_FOR_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La subida agresiva de cuentas por cobrar (+48%) anticipa problemas de reconocimiento de ingresos o demanda futura débil.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "ubicacion": "Balance Sheet FY2025",
+          "cita_corta": "AR $44.5M a $65.8M con ventas cayendo",
+          "interpretacion": "Desacople clásico de fin de ciclo o channel stuffing."
+        }
+      ],
+      "falsacion": {
+        "test": "Normalización de DSO o write-off de bad debt",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q/10-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_FOR_001",
+      "descripcion": "Margen bruto cae por debajo del 43% en próximos 2 trimestres por presión promocional.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Gross Margin reportado en 10-Q < 43.0%",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FOR_002",
+      "descripcion": "Ingresos LTM continúan contrayéndose por debajo de $1.4B.",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Revenue TTM < $1,400M",
+      "fuente_prevista": "10-Q/10-K"
+    },
+    {
+      "pred_id": "PRED_FOR_003",
+      "descripcion": "Inventarios dejan de aportar flujo de caja positivo (cambio en inventarios <= $0).",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Change in inventories en Cash Flow Statement negativo (uso de caja) o neutro.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de covenants bancarios",
+      "por_que_importa": "Riesgo de acceso a línea de crédito si EBIT sigue negativo.",
+      "como_obtenerlo": "Credit Agreement (Exhibit 10.x en 10-K/Q)"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Aging de Cuentas por Cobrar",
+      "por_que_importa": "Validar calidad del aumento en AR.",
+      "como_obtenerlo": "Notas a los estados financieros (raramente público en detalle, buscar comentarios en earnings call)"
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.85,
+        "razon_principal": "Liquidez inmediata suficiente ($312M) evita quiebra inminente, pero 6 banderas rojas de severidad ALTA indican modelo de negocio roto y calidad de ganancias artificial."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "CONDITIONAL",
+          "score_0_5": 2,
+          "por_que": [
+            "Liquidez actual cubre vencimientos a 12m (Score > 1).",
+            "6 Banderas Rojas de Severidad ALTA detectadas (Score <= 2).",
+            "EBIT negativo estructural 3 años consecutivos.",
+            "Generación de FCF dependiente de factores no recurrentes (liquidación inventario, capex starvation).",
+            "Ingresos en declive secular (-18% desde FY22)."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 312504000,
+          "linea_credito_disponible_usd": 77600000,
+          "otras_fuentes_liquidez": [
+            "Valores negociables: $50,987,000"
+          ],
+          "runway_meses_estimado": 20,
+          "metodo_estimacion": "Escenario de estrés asumiendo FCF negativo de -$65M/trimestre (proxy Q2-FY25) sin ajustes de WC.",
+          "notas": "La posición de caja mejoró en Q1-26 por estacionalidad, pero la quema se reanudará en Q2-Q3."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 0,
+          "deuda_neta_usd": -363491000,
+          "coste_deuda_aprox_pct": 0,
+          "coverage_intereses": null,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 60,
+            "comentario": "Sin deuda financiera material. Obligaciones principales son operativas (leases, proveedores)."
+          },
+          "vencimientos": [],
+          "covenants": {
+            "disponible": true,
+            "tipos_detectados": [
+              "consolidated_leverage_ratio"
+            ],
+            "riesgo_breach": "BAJO",
+            "comentario": "Sin deuda dispuesta, riesgo de breach es técnico pero bajo impacto inmediato."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "MEDIO",
+          "motores": [
+            "SBC alto ($81M/año)",
+            "Posible equity raise si liquidez cae <$150M"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "Recompras agresivas han compensado dilución por SBC, pero a costa de liquidez."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Calidad muy baja. Resultados operativos reales (EBIT) negativos maquillados en flujo de caja por gestión agresiva de capital de trabajo y subinversión.",
+        "red_flags": [
+          {
+            "flag_id": "RF-01",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Cuentas por cobrar +48% vs Ingresos -5%. Divergencia crítica.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.9,
+            "por_que_importa": "Indica ingresos de baja calidad o 'channel stuffing' para cumplir objetivos.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Balance Sheet FY2025",
+                "cita_corta": "AR $44.5M -> $65.8M",
+                "interpretacion": "Extensión agresiva de crédito o ventas forzadas a cierre de año."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "DSO vuelve a media histórica (~10 días)",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-02",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "Capex Starvation: Inversión 48% menor al año anterior y 50% bajo depreciación.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.95,
+            "por_que_importa": "Infla FCF a corto plazo pero canibaliza el futuro en empresa tecnológica.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Cash Flow Statement",
+                "cita_corta": "Capex $28.7M vs Depr $62.3M",
+                "interpretacion": "Liquidación encubierta de base de activos."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Capex aumenta a niveles de depreciación ($60M+)",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-04",
+            "categoria": "OTHER",
+            "descripcion": "Divergencia extrema CFO vs EBIT ($187M gap).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.95,
+            "por_que_importa": "Ganancias reportadas no respaldan la generación de caja, sostenibilidad dudosa.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "CFS vs IS FY2025",
+                "cita_corta": "CFO $137M vs EBIT -$50M",
+                "interpretacion": "Caja generada por WC y SBC, no por negocio."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Convergencia de EBIT y CFO",
+              "ventana_meses": {
+                "min": 12,
+                "max": 18
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebit_a_cfo": {
+            "lectura": "Distorsión masiva. CFO depende 100% de SBC, Depreciación y liquidación de inventario.",
+            "posibles_distorsiones": [
+              "Liquidación de inventario (+$60M impact)",
+              "SBC elevado (+$81M)",
+              "Cuentas por cobrar (uso de caja, negativo)"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "FCF positivo artificialmente sostenido por recorte de Capex.",
+            "capex_riesgo": "ALTO",
+            "notas": "Capex < 50% de D&A es insostenible en tech hardware."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": true,
+          "sostenible_por_fcf": "NO",
+          "comentario": "Recompras consumieron 99% del FCF en FY25 pese a pérdidas netas. Destrucción de valor potencial."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "SI",
+          "comentario": "SBC representa >100% del FCF ajustado real (ex-WC)."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "Historial limitado reciente, riesgo bajo por falta de capacidad financiera agresiva."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Prioridad de recompras sobre salud balance sugiere enfoque cortoplacista."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Reversión de ciclo de inventarios + caída de ventas continua",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "CFO se torna negativo al tener que reponer inventario",
+              "Caja cae rápidamente",
+              "Efecto tijera en márgenes"
+            ],
+            "indicadores_tempranos": [
+              "Aumento de días de inventario",
+              "CFO trimestral negativo fuera de Q1"
+            ]
+          }
+        ],
+        "conclusion_downside": "Riesgo asimétrico negativo. Si el CFO se normaliza (sin beneficio de inventario), la empresa quema caja estructuralmente."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-01",
+          "relacionado_con": "margen",
+          "definicion": "Margen Bruto (GAAP) < 40.0% en cualquier trimestre",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Pérdida definitiva de pricing power y modelo premium."
+        },
+        {
+          "kc_id": "KC-02",
+          "relacionado_con": "fcf",
+          "definicion": "CFO TTM < $0",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirmaría que la generación de caja era puramente transitoria."
+        },
+        {
+          "kc_id": "KC-03",
+          "relacionado_con": "supervivencia",
+          "definicion": "Ingresos TTM < $1,300M",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Pérdida de escala operativa crítica para cubrir costes fijos."
+        },
+        {
+          "kc_id": "KC-04",
+          "relacionado_con": "liquidez",
+          "definicion": "Posición de Liquidez Total (Caja + Valores) < $150M",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "8-K/10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Entrada en zona de estrés financiero agudo."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 2.0,
+        "condiciones_para_aumentar_tamaño": [
+          "Estabilización de ingresos (YoY flat o positivo)",
+          "EBIT TTM positivo ex-Q1 holiday",
+          "Normalización de Capex manteniendo FCF positivo"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Activación de cualquier Kill Criteria",
+          "Anuncio de deuda convertible o equity raise dilutivo",
+          "Cuentas por cobrar subiendo otro trimestre > ventas"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "detalle_covenants",
+          "por_que_importa": "Entender margen de maniobra real con bancos.",
+          "como_obtenerlo": "Credit Agreement completo en Exhibits SEC."
+        },
+        {
+          "item": "aging_receivables",
+          "por_que_importa": "Descartar riesgo de impago masivo en AR inflado.",
+          "como_obtenerlo": "Notas o preguntas a IR."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "No se auditó inventario físico",
+      "Datos de competidores no cruzados",
+      "Confianza en datos reportados SEC"
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}
