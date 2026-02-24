@@ -1,0 +1,400 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_ACLS",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "Gemini_CLI_Forensic",
+    "modelo": "gemini-2.0-flash",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_ACLS",
+    "implied_expectations_caso_id": "CASE_20260224_ACLS",
+    "sources_pack_caso_id": "SourcesPack_v1_ACLS_2026-02-24"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Liquidez sólida con caja neta positiva ($105M) y ausencia de deuda financiera tradicional mitigan riesgos de supervivencia a corto plazo.",
+      "Deterioro cíclico severo en fundamentales: caída de ingresos (-26% desde pico) y compresión de márgenes (23.5% a 14.2%).",
+      "Alerta roja estructural en gestión de inventarios (223 días run-rate) y capital de trabajo, con CFO negativo en Q4-2025.",
+      "Análisis standalone oscurecido por fusión pendiente con Veeco; costos de transacción inflan G&A (+18%).",
+      "Perfil de riesgo asimétrico: supervivencia asegurada (Score 4), pero riesgo de valoración alto si falla la fusión."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.9
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_F_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La empresa mantiene una posición de caja neta positiva sin deuda bancaria, eliminando el riesgo inminente de solvencia.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "Financial Tables",
+          "cita_corta": "Cash $148.5M est vs Finance Leases $43.7M",
+          "interpretacion": "Colchón de liquidez suficiente para >24 meses de burn actual."
+        }
+      ],
+      "falsacion": {
+        "test": "Aparición de deuda bancaria o revolver draw en próximos filings",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_F_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La acumulación de inventarios (223 días sobre COGS run-rate) representa un riesgo latente de write-downs si la demanda no repunta.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024",
+          "ubicacion": "Balance Sheet",
+          "cita_corta": "Inventarios $282M vs COGS FY25 $462M",
+          "interpretacion": "Rotación extremadamente lenta para equipamiento tecnológico."
+        }
+      ],
+      "falsacion": {
+        "test": "Reducción de inventarios en $30M+ o repunte de ingresos >$250M/trimestre",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_F_001",
+      "descripcion": "CFO trimestral vuelve a positivo en Q1-2026 tras el negativo de Q4-2025",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 1,
+        "max": 4
+      },
+      "criterio_validacion": "Reporte de Cash Flow Operativo > 0 en 10-Q Q1-2026",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_F_002",
+      "descripcion": "Inventarios se mantienen por encima de $270M en Q1-2026",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 1,
+        "max": 4
+      },
+      "criterio_validacion": "Línea de inventarios en Balance Sheet > 270,000,000 USD",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_F_003",
+      "descripcion": "Gastos G&A disminuyen secuencialmente vs Q4-2025 si no hay hitos de fusión inmediatos",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 1,
+        "max": 4
+      },
+      "criterio_validacion": "G&A Q1-2026 < $26.2M",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Balance Sheet completo FY2025 (10-K pendiente)",
+      "por_que_importa": "Verificar niveles exactos de inventario y cuentas por cobrar al cierre de año, actualmente estimados.",
+      "como_obtenerlo": "Monitorizar SEC EDGAR para liberación del 10-K anual."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de Operating Lease Liabilities",
+      "por_que_importa": "Confirmar obligaciones fuera de balance no visibles en formato actual.",
+      "como_obtenerlo": "Nota de Leases en próximo 10-K."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.9,
+        "razon_principal": "Liquidez segura (Net Cash), pero deterioro operativo severo (Inventarios/Márgenes) y distorsión por fusión."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 4,
+          "por_que": [
+            "Caja neta positiva (~$105M) y ausencia de deuda financiera exigible.",
+            "FCF anual positivo ($107M FY2025) a pesar del ciclo bajista.",
+            "Base de capital sólida ($1.0B Equity) sin necesidad inmediata de dilución.",
+            "Riesgo principal es valoración y eficiencia, no solvencia."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 148526000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [],
+          "runway_meses_estimado": 50,
+          "metodo_estimacion": "Basado en escenario de estrés Q4 run-rate burn ($2.9M/mes sin recompras).",
+          "notas": "Caja estimada sumando Delta Cash FY2025 a saldo FY2024."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 43674000,
+          "deuda_neta_usd": -104852000,
+          "coste_deuda_aprox_pct": null,
+          "coverage_intereses": 22.1,
+          "net_debt_ebitda": -0.77,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "Solo obligaciones de arrendamiento financiero (leasing). Sin vencimientos de deuda corporativa (bonos/préstamos)."
+          },
+          "vencimientos": [
+            {
+              "anio": 2026,
+              "importe_usd": 1345000,
+              "tipo": "leasing",
+              "riesgo": "BAJO",
+              "fuente_ref": {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Lease Liabilities Current"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "BAJO",
+            "comentario": "Sin deuda bancaria reportada, riesgo de covenants mínimo."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "BAJO",
+          "motores": [
+            "SBC"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "Sin necesidad de levantar capital por estrés. Dilución limitada a compensación en acciones."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Contabilidad generalmente limpia pero degradada por ciclo negativo. Preocupación en gestión de capital de trabajo (Inventarios/Receivables) y brecha puntual CFO-EBIT en Q4.",
+        "red_flags": [
+          {
+            "flag_id": "RF-005",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Inventarios de $282M representan ~223 días de COGS run-rate. Riesgo alto de obsolescencia.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.7,
+            "por_que_importa": "Indica sobreproducción o caída de demanda no ajustada; posible impacto futuro en márgenes por write-downs.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2024",
+                "ubicacion": "Balance Sheet",
+                "cita_corta": "Inventarios $282M vs Ventas decrecientes",
+                "interpretacion": "Acumulación en contracción."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Reducción de días de inventario < 180",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-001",
+            "categoria": "REVENUE_RECOGNITION",
+            "descripcion": "CFO negativo (-$6.6M) en Q4-2025 vs Net Income positivo (+$34.3M). Brecha severa (-118%).",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.5,
+            "por_que_importa": "Beneficio contable no respaldado por caja en el trimestre más reciente; baja calidad de earnings puntual.",
+            "evidencias": [
+              {
+                "source_id": "SRC_019_8-K_2026-02-17",
+                "ubicacion": "Cash Flow Statement Q4",
+                "cita_corta": "CFO -$6.6M vs NI $34.3M",
+                "interpretacion": "Absorción agresiva de WC al cierre de año."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Reversión a CFO positivo alineado con NI en Q1-2026",
+              "ventana_meses": {
+                "min": 3,
+                "max": 3
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-007",
+            "categoria": "ONE_OFFS",
+            "descripcion": "Distorsión por fusión Veeco: G&A inflado (+18% YoY) y métricas standalone oscurecidas.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Dificulta valorar la rentabilidad subyacente del negocio base.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_007_10-Q_Q3-2025",
+                "ubicacion": "Income Statement",
+                "cita_corta": "G&A Q4 $26.2M vs $17.5M LY",
+                "interpretacion": "Costos de transacción explícitos/implícitos."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Normalización de G&A si la fusión se cancela o completa",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebit_a_cfo": {
+            "lectura": "Conversión FY2025 anual sana (99%), pero Q4 desastroso (-18%). Históricamente pobre en FY23/24.",
+            "posibles_distorsiones": [
+              "capital circulante",
+              "inventarios"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Alta conversión (~90%) debido a Capex extremadamente bajo ($11M, ~1.3% ventas).",
+            "capex_riesgo": "MEDIO",
+            "notas": "Posible subinversión (underinvestment) para maquillar FCF ante caída de ingresos."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": true,
+          "sostenible_por_fcf": "SI",
+          "comentario": "CFF FY2025 de -$124M sugiere recompras agresivas (~$50-70M est.) superiores al FCF generado en H2."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "Dato exacto no disponible en inputs actuales."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "ALTO",
+          "comentario": "Riesgo binario concentrado en la fusión con Veeco."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Falta dato de ownership directiva."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Fallo de fusión + Ciclo Semis prolongado",
+            "impacto_en_supervivencia": "BAJO",
+            "mecanismo_de_dolor": [
+              "caída de precio acción (multiple compression)",
+              "write-down inventarios",
+              "flujo de caja negativo sostenido"
+            ],
+            "indicadores_tempranos": [
+              "rechazo SAMR China",
+              "cancelación pedidos backlog"
+            ]
+          }
+        ],
+        "conclusion_downside": "El riesgo no es quiebra (caja protege), sino destrucción de valor para el accionista si la tesis de fusión falla y el negocio base sigue deteriorándose con inventario obsoleto."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "otro",
+          "definicion": "Ruptura oficial del Merger Agreement con Veeco",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "8-K",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Cambia tesis de inversión a standalone en ciclo bajo."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "fcf",
+          "definicion": "CFO negativo acumulado en periodo de 6 meses (2 trimestres)",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Confirmaría problemas estructurales de monetización más allá del Q4-2025."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "margen",
+          "definicion": "Margen EBIT trimestral < 10%",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Pérdida crítica de apalancamiento operativo."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 4.0,
+        "condiciones_para_aumentar_tamaño": [
+          "Aprobación regulatoria final de fusión Veeco",
+          "Retorno a crecimiento de ingresos trimestral YoY",
+          "Normalización de días de inventario < 180"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Bloqueo regulatorio de fusión",
+          "CFO negativo recurrente",
+          "Caída de caja neta por debajo de $50M"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "Balance Sheet FY2025 Definitivo",
+          "por_que_importa": "Confirmar composición de inventarios y pasivos.",
+          "como_obtenerlo": "10-K FY2025 (próximo)"
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Análisis basado en 8-K preliminar para FY2025, faltan notas detalladas.",
+      "Métricas de balance FY2025 estimadas por ausencia de reporte completo."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

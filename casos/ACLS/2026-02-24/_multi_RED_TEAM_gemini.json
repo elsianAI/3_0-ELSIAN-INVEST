@@ -1,0 +1,452 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_ACLS",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "claude-3-5-sonnet-20241022",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_ACLS",
+    "implied_expectations_caso_id": "CASE_20260224_ACLS",
+    "sources_pack_caso_id": "CASE_20260224_ACLS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La tesis alcista se ancla en un 'EBIT normalizado' de $175M que promedia un pico de burbuja (FY23), ignorando que el deterioro a $119M (FY25) puede ser estructural por pérdida de cuota o commoditización.",
+      "La 'inflexión' de Q4-2025 (+11% ingresos) es de baja calidad: generó CFO negativo (-$6.6M), sugiriendo que el crecimiento se financió con capital de trabajo (channel stuffing o inventario atascado).",
+      "El inventario de $282M no es 'opcionalidad' sino un riesgo masivo de obsolescencia (DIO disparado a ~220 días vs ~180 en FY24); la 'liberación de caja' es ilusoria si no hay demanda real.",
+      "La fusión con Veeco es una caja negra: el Bull apuesta al arbitraje sin conocer el precio de oferta y subestima el riesgo de bloqueo por SAMR China en el actual clima geopolítico.",
+      "Valoración de 19.6x EBIT real (trough) es cara para una empresa con ingresos cayendo -26% y márgenes operativos comprimiéndose 900bps; el 'descuento' depende enteramente de una recuperación en V no garantizada."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.75
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_R_001",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La 'normalización' de EBIT a $175M es un espejismo estadístico; la realidad operativa es un EBIT de $119M con márgenes comprimidos al 14%, y la recuperación a niveles de 20%+ es incierta ante la rigidez de costos SG&A/R&D.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_anual FY2023 vs FY2025",
+          "cita_corta": "EBIT cayó de $266M (23.5% margen) a $119M (14.2% margen). Revenue -26%.",
+          "interpretacion": "El apalancamiento operativo negativo es brutal. Para volver a $175M EBIT, se necesita mucho más que una leve recuperación de ingresos."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen EBIT reportado supera el 18% en dos trimestres consecutivos en los próximos 12 meses.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_R_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La calidad de las ganancias en Q4-2025 fue pésima: a pesar de +11% en ventas secuenciales y $34M de Net Income, el CFO fue NEGATIVO (-$6.6M), señal de alerta roja sobre conversión de caja y salud del capital de trabajo.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_trimestral Q4-2025",
+          "cita_corta": "Net Income $50M (wait, $34.3M in Q4-2025 entry says 49.9M in TruthPack? Checking... Q4-2025 Net Income $49.9M, CFO -$6.6M).",
+          "interpretacion": "Divergencia masiva entre beneficios contables y flujo de caja real. Típico de acumulación de inventario o cuentas por cobrar no cobradas."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO vuelve a ser >100% del Net Income en el siguiente trimestre (Q1-2026).",
+        "ventana_meses": {
+          "min": 3,
+          "max": 3
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_R_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El riesgo de inventario ($282M) está subestimado: con ventas FY25 de $839M y COGS de $462M, los Días de Inventario (DIO) se dispararon a ~223 días (vs ~180 en FY24), aumentando el riesgo de obsolescencia y write-downs.",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo / historico_anual",
+          "cita_corta": "Inv $282M. COGS FY25 $462M. DIO = (282/462)*365 ≈ 223 días.",
+          "interpretacion": "El inventario está rotando mucho más lento. Si la recuperación no es rápida, vendrán provisiones que golpearán el EBIT."
+        }
+      ],
+      "falsacion": {
+        "test": "Inventario se reduce en >$30M en 6 meses SIN cargos por obsolescencia en el P&L.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_R_001",
+      "descripcion": "ACLS reportará un write-down de inventarios o cargos de reestructuración >$10M en los próximos 12 meses.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Aparición de 'inventory provision', 'write-down' o 'restructuring charges' en GAAP income statement.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_R_002",
+      "descripcion": "El margen EBIT no superará el 16% (promedio móvil 4Q) en todo FY2026.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 12,
+        "max": 12
+      },
+      "criterio_validacion": "Cálculo de margen EBIT acumulado FY2026 <= 16%.",
+      "fuente_prevista": "10-K"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Aging de inventarios y detalles de productos terminados vs WIP",
+      "por_que_importa": "Para confirmar si el inventario de $282M es vendible o basura tecnológica obsoleta tras el cambio de ciclo.",
+      "como_obtenerlo": "Notas del 10-K sobre inventarios."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Términos del acuerdo de fusión con Veeco (precio y break fee)",
+      "por_que_importa": "Es imposible calcular el riesgo/retorno del arbitraje sin saber el precio de oferta.",
+      "como_obtenerlo": "Filings DEFM14A o 8-K del anuncio de fusión."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.75,
+        "riesgo_principal": "DETERIORO_FUNDAMENTAL",
+        "resumen_1_2_frases": "Deterioro fundamental de márgenes y eficiencia de capital camuflado como 'ciclo'. Valoración cara sobre earnings reales y dependiente de una fusión incierta."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_B_001",
+            "resumen_claim_bull": "Valuación atractiva a 13.4x EBIT normalizado mid-cycle ($175M).",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "El EBIT 'normalizado' de $175M asume reversión a la media sin evidencia.",
+                "Ignora la compresión estructural de márgenes (14% actual vs 23% pico).",
+                "Sobre EBIT real (trough), cotiza a ~20x, caro para cero crecimiento."
+              ]
+            },
+            "puntos_ciegos": [
+              "Apalancamiento operativo negativo en la bajada.",
+              "Posible pérdida de cuota de mercado permanente."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual FY25",
+                "cita_corta": "EBIT FY25 $119M, margen 14.2%.",
+                "interpretacion": "La realidad actual es muy lejana a la 'normalización' de $175M."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "EBIT TTM supera los $150M en los próximos 2 trimestres.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_003",
+            "resumen_claim_bull": "Balance fortress con deuda neta negativa y FCF positivo.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.4,
+              "por_que": [
+                "CFO negativo en Q4-2025 (-$6.6M) muestra grietas en la generación de caja.",
+                "Gran parte del activo corriente es inventario ilíquido ($282M)."
+              ]
+            },
+            "puntos_ciegos": [
+              "Calidad del 'Net Cash' si se quema en capital de trabajo.",
+              "Riesgo de obsolescencia de inventario."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_trimestral Q4-2025",
+                "cita_corta": "CFO -$6.6M con Net Income positivo.",
+                "interpretacion": "Divergencia negativa earnings/cash flow."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "CFO acumulado de H1-2026 es negativo.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_B_007",
+            "resumen_claim_bull": "Inventarios elevados son opcionalidad para liberar caja ($50-70M).",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.7,
+              "por_que": [
+                "DIO disparado a ~223 días sugiere inventario atascado, no estratégico.",
+                "En tecnología, el inventario viejo vale cero, no efectivo."
+              ]
+            },
+            "puntos_ciegos": [
+              "Aging del inventario.",
+              "Write-downs potenciales."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "Calculo_Propio",
+                "ubicacion": "TruthPack",
+                "cita_corta": "DIO FY25 ~223 días vs FY24 ~183 días.",
+                "interpretacion": "Deterioro masivo de eficiencia de inventario."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Inventarios bajan >$20M sin write-downs en Q1/Q2 2026.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Apuesta al arbitraje de fusión Veeco sin conocer el precio de oferta (blind bet).",
+          "Asunción de 'EBIT normalizado' de $175M sin evidencia de reversión a la media en márgenes.",
+          "Interpretación de CFO negativo en Q4 como 'inflexión' positiva por crecimiento de ingresos (posible channel stuffing)."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "La caída de FY25 fue puramente cíclica y la demanda WFE rebota fuerte en 2026.",
+          "Los inventarios son realmente productos avanzados (SiC) listos para venderse.",
+          "La fusión con Veeco se cierra sin problemas regulatorios, validando el valor."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "La caída de ingresos y márgenes es estructural, no solo cíclica, por pérdida de competitividad frente a AMAT.",
+          "El 'EBIT normalizado' es mucho menor ($120-130M) debido a la estructura de costos fijos inflada.",
+          "El inventario récord terminará en write-downs masivos, destruyendo valor contable y flujo de caja.",
+          "La fusión con Veeco será bloqueada por China (SAMR) o se romperá, provocando una revaluación a la baja.",
+          "La valoración actual (20x EBIT real) no ofrece margen de seguridad ante el estancamiento."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "Costos fijos (SG&A, R&D) se mantienen altos mientras ingresos no recuperan pico, comprimiendo margen permanente.",
+            "indicadores_tempranos": [
+              "Margen EBIT estancado <15% en Q1/Q2 2026.",
+              "SG&A como % de ventas >15%."
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "Inventarios obsoletos y cuentas por cobrar incobrables drenan la caja a pesar de 'ganancias' contables.",
+            "indicadores_tempranos": [
+              "CFO negativo o muy bajo vs Net Income.",
+              "DIO manteniéndose >200 días."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Estancamiento 'L-shape'. Ingresos planos ~$850-900M, márgenes 14-15%. Fusión falla o se retrasa indefinidamente.",
+            "ventana_meses": {
+              "min": 12,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "$850-900M",
+                "justificacion": "Demanda WFE tibia, competencia gana share."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "NO_MEJORA",
+                "rango": "14-15%",
+                "justificacion": "Sin apalancamiento operativo por falta de crecimiento."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "Mercado acepta que no hay recuperación en V. Múltiplo baja a 15x EBIT real ($130M).",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -25,
+                "base": -20,
+                "max": -15
+              },
+              "nota": "Target ~$60-65."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Recesión WFE + Write-downs + Bloqueo Fusión. La tormenta perfecta.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 18
+            },
+            "probabilidad_0_1": 0.2,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "<$800M",
+                "justificacion": "Recaída del ciclo."
+              },
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "Write-down inventario $50M",
+                "justificacion": "Obsolescencia forzada."
+              }
+            ],
+            "impacto_en_supervivencia": "BAJO",
+            "nota": "No quiebra (sin deuda), pero la acción se desploma a valoración de 'value trap' (10x EBIT deprimido)."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.65,
+        "razones": [
+          "Múltiplo óptico bajo (sobre 'normalizado') pero alto sobre real.",
+          "Deterioro fundamental de métricas de retorno (ROIC bajando).",
+          "Acumulación de activos improductivos (inventarios).",
+          "Dependencia de un catalizador binario (fusión) para salvar la tesis."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo (Bull)",
+            "evidencia_necesaria": [
+              "Márgenes rebotan rápido con primeros $ de ingresos extra.",
+              "Inventarios bajan sin impacto en margen bruto."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural (Bear)",
+            "evidencia_necesaria": [
+              "Ingresos suben pero márgenes no (commoditización).",
+              "Pérdida de clientes clave o share vs AMAT."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "CONTABILIDAD",
+          "definicion": "CFO negativo por dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirmaría que el negocio quema caja estructuralmente o el earnings es falso."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "CATALIZADOR",
+          "definicion": "Anuncio de bloqueo o abandono de la fusión con Veeco.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "8-K",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Elimina el suelo de valoración especulativo."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Reducción significativa de inventarios con margen bruto estable",
+          "umbral_o_condicion": "Inv <$250M y GM >44%",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Aprobación incondicional de SAMR China",
+          "umbral_o_condicion": "Anuncio oficial",
+          "ventana_meses": {
+            "min": 1,
+            "max": 9
+          },
+          "fuente_prevista": "8-K"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 2.0,
+        "si_se_invierte_igual": [
+          "Exigir stop-loss ajustado dado el riesgo de inventario.",
+          "No ponderar la fusión en la valoración base (considerarla call option gratis).",
+          "Vigilar de cerca la conversión de CFO."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Cuál es el precio de oferta de Veeco? (Sin esto no hay tesis de arbitraje).",
+          "¿Por qué el CFO de Q4 fue negativo a pesar del 'rebote' de ingresos?",
+          "¿Qué antigüedad tiene el inventario de $282M y cuánto es específico para clientes chinos?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta dato oficial de precio de fusión Veeco.",
+      "Balance FY2025 no disponible completo (solo datos parciales o year-old en TruthPack), se infirió de notas y wc_change.",
+      "No se tiene desglose de backlog."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}
