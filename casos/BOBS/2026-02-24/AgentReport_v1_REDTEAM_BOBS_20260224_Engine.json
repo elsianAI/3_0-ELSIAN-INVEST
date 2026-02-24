@@ -1,0 +1,1183 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_BOBS",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_fusion_v1",
+    "modelo": "fusion_claude_gemini_codex",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_BOBS",
+    "implied_expectations_caso_id": "CASE_20260224_BOBS",
+    "sources_pack_caso_id": "CASE_20260224_BOBS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La opacidad documental es crítica: no hay 10-K/10-Q en la base usada y CORE_FILING_COVERAGE está en warning; el análisis depende de 424B4.",
+      "La aceleración de ingresos (+20.3% 9M-2025) no prueba calidad estructural sin comps/cohortes, y el margen operativo sigue en zona ~6.5%.",
+      "Los arrendamientos (~USD 824.7M, ~USD 825M redondeado) son deuda económica relevante y cambian la lectura de apalancamiento/valoración.",
+      "Bain mantiene ~73% con 95,370,751 acciones remanentes reportadas, creando overhang técnico y riesgo de descuentos en secundarias.",
+      "El FCF TTM no está verificable en el TruthPack (cfo/capex/fcf = null) y hay riesgo de normalización adversa de capital de trabajo."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.75
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La calidad de evidencia financiera está limitada por ausencia de 10-K/10-Q; la base principal proviene de 424B4.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "data_quality.validaciones.CORE_FILING_COVERAGE",
+          "cita_corta": "Warning: No 10-K/20-F/ANNUAL_REPORT found in field provenance (found=['424B4']).",
+          "interpretacion": "La verificabilidad de FCF, calidad de earnings y políticas contables es incompleta."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "data_quality.DATA_COMPLETENESS",
+          "cita_corta": "Completitud global reportada: 53%.",
+          "interpretacion": "El riesgo de inferencias frágiles es material."
+        }
+      ],
+      "falsacion": {
+        "test": "Publicación de 2 10-Q consecutivos y 1 10-K con desglose completo de cash flow, leases y KPIs operativos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La narrativa de 'sin deuda' omite apalancamiento económico por arrendamientos (~USD 824.7M).",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "lease_data",
+          "cita_corta": "Operating lease liabilities: current 96M + noncurrent 671M; finance lease: 15M + 42M.",
+          "interpretacion": "Obligaciones fijas equivalentes a deuda económica."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "balance_sheet_ultimo y lease_data",
+          "cita_corta": "Caja 123.4M vs lease corriente ~111.2M.",
+          "interpretacion": "Colchón de liquidez de corto plazo estrecho si CFO se enfría."
+        }
+      ],
+      "falsacion": {
+        "test": "Lease liabilities bajan a <=700M y (caja + CFO TTM)/lease corriente >=2.0x.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El crecimiento de ingresos reciente no ha demostrado expansión robusta de margen operativo.",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "historico_trimestral.9M-2025 vs historico_anual",
+          "cita_corta": "EBIT margin: 9M-2025 6.46%; FY2024 5.81%; FY2023 5.87%.",
+          "interpretacion": "Mejora modesta, no evidencia de salto estructural."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen operativo TTM >7.5% por al menos 2 trimestres consecutivos post-IPO.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_004",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El overhang de Bain (~73%, 95,370,751 acciones remanentes) puede dominar la dinámica técnica del precio.",
+      "confianza_0_1": 0.92,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": "SEC Form 4",
+          "fecha": "2026-02-13",
+          "ubicacion": "tabla de transacciones",
+          "cita_corta": "Venta de 2,917,500 acciones; remanente 95,370,751.",
+          "interpretacion": "Bloque pendiente de monetización muy grande."
+        }
+      ],
+      "falsacion": {
+        "test": "Bain reduce participación por debajo de 50% sin secundarias con descuento >5%.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        },
+        "fuente_prevista": "otro"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_005",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El FCF TTM no está validado con la base disponible; aparece nulo en métricas clave.",
+      "confianza_0_1": 0.87,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "ttm y metricas_derivadas",
+          "cita_corta": "TTM: cfo_usd=null, capex_usd=null, fcf_usd=null.",
+          "interpretacion": "No hay auditabilidad suficiente de FCF estructural."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "data_quality.faltantes_criticos",
+          "cita_corta": "Cannot calculate FCF metrics. Need CFO and capex.",
+          "interpretacion": "Flag explícito de incompletitud crítica."
+        }
+      ],
+      "falsacion": {
+        "test": "10-Q/10-K post-IPO confirman FCF TTM >=120M con estabilidad trimestral razonable.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_006",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Sin KPIs de comp sales/cohortes, el crecimiento puede estar impulsado por expansión de footprint con retornos decrecientes.",
+      "confianza_0_1": 0.78,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "lease_data",
+          "cita_corta": "ROU assets: 490M (FY2023) -> 534M (FY2024) -> 630M (9M-2025).",
+          "interpretacion": "Compromisos de expansión crecientes sin evidencia pública de productividad por tienda."
+        }
+      ],
+      "falsacion": {
+        "test": "Comp sales >=3% en 3 de 4 trimestres y payback mediano de nuevas tiendas <36 meses.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_007",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Existe riesgo de que la caja operativa esté parcialmente sostenida por capital de trabajo volátil (proveedores/inventario).",
+      "confianza_0_1": 0.76,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "metricas_derivadas.wc_change",
+          "cita_corta": "Accounts Payable 271M vs Inventory 341M.",
+          "interpretacion": "Normalización de términos de pago puede comprimir CFO."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "historico_trimestral.9M-2025 vs FY2024",
+          "cita_corta": "CFO 9M-2025: 118.7M vs CFO FY2024: 161.2M.",
+          "interpretacion": "Conversión de caja no mejora al ritmo del crecimiento de ingresos."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO TTM >180M con estabilidad de capital de trabajo y sin caída abrupta de cuentas por pagar.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_008",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El leverage de SGA podría revertirse cuando se reflejen plenamente costos de empresa pública y SBC.",
+      "confianza_0_1": 0.74,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "historico_anual y historico_trimestral",
+          "cita_corta": "Margen operativo permanece en rango bajo pese a mejora parcial de ratios.",
+          "interpretacion": "La mejora observada aún no confirma estructura estable."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "historico_trimestral",
+          "cita_corta": "SGA trimestral individual incompleto/null en la base.",
+          "interpretacion": "Falta granularidad para confirmar tendencia estructural."
+        }
+      ],
+      "falsacion": {
+        "test": "SGA/Revenue <=39% y margen operativo >=7% sostenidos por 3 trimestres.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "El margen operativo TTM no superará 7.0% en los primeros 12 meses post-IPO.",
+      "probabilidad_0_1": 0.58,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT/Revenue TTM <=7.0% en el primer ciclo anual completo post-IPO.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "Bain ejecutará al menos una secundaria material con descuento >5% en los próximos 12 meses.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Oferta secundaria de accionista vendedor con descuento >5% vs cierre previo.",
+      "fuente_prevista": "otro"
+    },
+    {
+      "pred_id": "PRED_RT_003",
+      "descripcion": "El FCF TTM reportado en el primer 10-K completo será <=USD 120M.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "FCF TTM = CFO TTM - capex TTM <=120M.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_004",
+      "descripcion": "Las lease liabilities superarán USD 900M antes de ingresos TTM >USD 2,700M o crecerán más rápido que ingresos en FY2026.",
+      "probabilidad_0_1": 0.57,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Comparación de crecimiento YoY lease liabilities vs ingresos en 10-Q/10-K.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_005",
+      "descripcion": "Al menos uno de los próximos dos trimestres reportará crecimiento YoY de ingresos <8%.",
+      "probabilidad_0_1": 0.62,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Ingresos YoY trimestrales <8% en al menos un reporte oficial.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_006",
+      "descripcion": "Comp sales serán <=0% en al menos uno de los primeros dos reportes con disclosure comparable.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Comparable sales reportadas <=0% en al menos un trimestre.",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Primeros 10-Q y 10-K completos post-IPO con cash flow trimestral explícito",
+      "por_que_importa": "Sin esto no se valida FCF ni calidad de conversión de caja.",
+      "como_obtenerlo": "EDGAR SEC: estados financieros + MD&A."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose comp sales vs crecimiento por nuevas tiendas",
+      "por_que_importa": "Diferencia crecimiento orgánico de expansión inorgánica.",
+      "como_obtenerlo": "Earnings release, MD&A e investor presentation."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose capex mantenimiento vs capex expansión",
+      "por_que_importa": "Permite estimar FCF normalizado y retorno marginal real.",
+      "como_obtenerlo": "Notas PP&E, MD&A y Q&A de resultados."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla de vencimientos de arrendamientos no descontados por año",
+      "por_que_importa": "Necesaria para stress test de caja y fixed charges.",
+      "como_obtenerlo": "Nota ASC 842 en 10-Q/10-K."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Calendario lock-up y plan de monetización de Bain",
+      "por_que_importa": "Cuantifica riesgo técnico de sobreoferta y timing de presión vendedora.",
+      "como_obtenerlo": "424B4 (Shares Eligible for Future Sale), Form 4/13D y prospectos de secundarias."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Puente de acciones diluidas, SBC y efecto de S-8",
+      "por_que_importa": "Evita sobreestimar valor por acción y FCF por acción.",
+      "como_obtenerlo": "Notas de compensación en 10-Q/10-K y DEF 14A."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.75,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "La tesis alcista depende de extrapolar crecimiento y FCF con disclosure incompleto. Con leases altos, posible normalización adversa de caja y overhang del sponsor, el downside por compresión de múltiplo/flujo es material."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "Base financiera defensiva: deuda 0, caja neta y FCF positivo.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.58,
+              "por_que": [
+                "Deuda financiera 0 es compatible con lease leverage alto (~825M).",
+                "FCF TTM aparece null en TruthPack.",
+                "Cobertura de corto plazo (caja vs lease corriente) es ajustada."
+              ]
+            },
+            "puntos_ciegos": [
+              "No ajusta EV por leases.",
+              "Asume FCF estructural sin serie completa de filings.",
+              "No stress-testea fixed charges bajo desaceleración."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "lease_data, ttm, data_quality",
+                "cita_corta": "Lease liabilities ~824.7M; TTM cfo/capex/fcf null; CORE_FILING_COVERAGE warning.",
+                "interpretacion": "La fortaleza financiera está menos demostrada de lo que sugiere el bull."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "FCF TTM >=130M y cobertura (caja+CFO TTM)/lease corriente >=2.0x en reportes consecutivos.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_002",
+            "resumen_claim_bull": "Aceleración de ingresos valida ejecución de expansión.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.55,
+              "por_que": [
+                "No hay comp sales ni cohortes.",
+                "ROU assets y leases crecen rápido.",
+                "Sin payback por tienda no se prueba creación de valor."
+              ]
+            },
+            "puntos_ciegos": [
+              "Calidad del crecimiento (orgánico vs footprint).",
+              "Canibalización de tiendas.",
+              "Dependencia de promociones."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "lease_data",
+                "cita_corta": "ROU assets suben de 534M a 630M en 9M-2025.",
+                "interpretacion": "Expansión de base fija sin prueba pública de productividad equivalente."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Comps <=0% en 2 trimestres consecutivos o payback >36 meses.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_003",
+            "resumen_claim_bull": "El apalancamiento operativo en SGA es estructural.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "Margen operativo sigue en rango bajo.",
+                "Granularidad trimestral de SGA incompleta.",
+                "Costos post-IPO/SBC pueden revertir mejoras."
+              ]
+            },
+            "puntos_ciegos": [
+              "Separación entre efectos temporales y estructurales.",
+              "Costos de empresa pública no plenamente observados.",
+              "Sensibilidad de SGA a desaceleración."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual/historico_trimestral",
+                "cita_corta": "Margen operativo 5.8%-6.46% en periodos observados.",
+                "interpretacion": "No se confirma aún una nueva estructura de rentabilidad."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "SGA/Revenue >40.5% por 2 trimestres o margen operativo TTM <6.0%.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_004",
+            "resumen_claim_bull": "CAGR FCF 11-15% es alcanzable.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.67,
+              "por_que": [
+                "La base FCF está incompleta/null.",
+                "No hay split mantenimiento vs expansión de capex.",
+                "Sector cíclico de consumo discrecional."
+              ]
+            },
+            "puntos_ciegos": [
+              "Capex recurrente mínimo real.",
+              "Elasticidad de demanda/margen en desaceleración.",
+              "Dependencia de múltiplo para sostener upside."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "ttm, metricas_derivadas, faltantes_criticos",
+                "cita_corta": "fcf_usd null y flag de imposibilidad de cálculo.",
+                "interpretacion": "No hay base verificable para una trayectoria exigente de CAGR FCF."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "FCF TTM <120M al cierre FY2026.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 18
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_005",
+            "resumen_claim_bull": "Leases son manejables con liquidez y CFO.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "Leases crecen con rapidez.",
+                "Caja actual cubre poco más de 1x lease corriente.",
+                "Sin calendario completo de pagos no descontados no hay stress test sólido."
+              ]
+            },
+            "puntos_ciegos": [
+              "Escenario de caída de ventas con costos fijos.",
+              "Riesgo de productividad insuficiente en nuevas tiendas.",
+              "Sensibilidad a ciclo housing/tasas."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "lease_data.historico y balance_sheet_ultimo",
+                "cita_corta": "Leases 691.1M -> 824.7M; caja 123.4M.",
+                "interpretacion": "Rigidez financiera operativa creciente."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Lease liabilities >900M sin crecimiento proporcional de ingresos o cobertura <1.2x.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_006",
+            "resumen_claim_bull": "Habrá re-rating por normalización de disclosure.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.55,
+              "por_que": [
+                "Más disclosure puede revelar problemas, no solo reducir prima de opacidad.",
+                "El overhang de Bain puede sostener descuento.",
+                "No hay umbral explícito de mejora fundamental requerido."
+              ]
+            },
+            "puntos_ciegos": [
+              "Asume dirección positiva de nueva información.",
+              "Subestima impacto técnico de secundarias.",
+              "No cuantifica costo de oportunidad del waiting period."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "data_quality",
+                "cita_corta": "Completitud 53% + warning de filings núcleo.",
+                "interpretacion": "La sorpresa informacional puede ser negativa."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Tras dos 10-Q completos no hay mejora de guidance ni expansión de múltiplo.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "otro"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_007",
+            "resumen_claim_bull": "Overhang de Bain es manejable con salida ordenada.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.62,
+              "por_que": [
+                "Bloque remanente muy grande (95.37M).",
+                "Concentración ~73% mantiene presión potencial recurrente.",
+                "Una secundaria con descuento puede reanclar precio."
+              ]
+            },
+            "puntos_ciegos": [
+              "Cronograma real de monetización del sponsor.",
+              "Elasticidad de demanda de mercado para bloques grandes.",
+              "Impacto en gobernanza de minoritarios."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Form 4 2026-02-13",
+                "cita_corta": "Remanente 95,370,751 acciones.",
+                "interpretacion": "El riesgo técnico no es marginal."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Secundaria >10% del float con descuento >8%.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 18
+              },
+              "fuente_prevista": "filing"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Tratar FCF como robusto cuando aparece null en la base principal.",
+          "Suponer que crecimiento de ingresos equivale a productividad por tienda sin comps/cohortes.",
+          "Asumir que la opacidad se resolverá en re-rating positivo por defecto.",
+          "Usar deuda financiera cero como proxy de baja palanca ignorando leases.",
+          "Minimizar impacto del overhang de Bain como mero ruido técnico.",
+          "Presuponer que costos post-IPO y SBC no alterarán estructura de márgenes."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "BOBS sería un retailer cíclico en pico relativo de crecimiento con normalización posterior a un dígito bajo.",
+          "El mercado estaría descontando rigidez por leases y calidad de caja menos sólida.",
+          "El precio reflejaría prima negativa por opacidad y gobernanza/concentración accionarial.",
+          "La expansión reciente estaría más ligada a footprint que a mejora orgánica durable.",
+          "El upside quedaría limitado hasta que se validen FCF y unit economics con filings completos."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "BOBS combina crecimiento reciente con disclosure incompleto y riesgo de calidad de caja no verificada.",
+          "El lease leverage eleva rigidez operativa y sensibilidad a desaceleración de consumo.",
+          "Sin comps y payback por tienda, la expansión puede destruir valor marginal.",
+          "El overhang de Bain limita rerating y puede inducir descuentos técnicos recurrentes.",
+          "La valoración puede comprimirse si no se valida FCF normalizado en el primer ciclo completo de reportes."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "Márgenes operativos se estancan o retroceden por costos de empresa pública, SBC y menor leverage operativo.",
+            "indicadores_tempranos": [
+              "SGA/Revenue >40%",
+              "Margen operativo TTM <6%",
+              "Guidance de margen a la baja"
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "Inventario y normalización de proveedores reducen conversión de CFO.",
+            "indicadores_tempranos": [
+              "Inventario/Revenue TTM en alza",
+              "CFO/Net Income deteriorándose",
+              "Caída relevante de cuentas por pagar"
+            ]
+          },
+          {
+            "mecanismo": "CAPEX_MANTENIMIENTO_ALTO",
+            "descripcion": "Capex real de mantenimiento/expansión mantiene FCF por debajo de lo implícito en la tesis bull.",
+            "indicadores_tempranos": [
+              "Capex/Revenue sostenido elevado",
+              "CFO-capex TTM por debajo de expectativas",
+              "Sin disclosure de mantenimiento vs expansión"
+            ]
+          },
+          {
+            "mecanismo": "COMPETENCIA_PRECIOS",
+            "descripcion": "Mayor presión promocional erosiona margen bruto en un negocio con costos fijos altos.",
+            "indicadores_tempranos": [
+              "Margen bruto <44%",
+              "Comps débiles o negativas",
+              "Aumento de markdowns en MD&A"
+            ]
+          },
+          {
+            "mecanismo": "DILUCION_Y_OVERHANG",
+            "descripcion": "SBC/S-8 y secundarias del sponsor reducen valor por acción y sostienen presión técnica.",
+            "indicadores_tempranos": [
+              "Acciones diluidas creciendo >4%-5% YoY",
+              "Secundarias con descuento >5%",
+              "Nuevos registros de acciones"
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Desaceleración a crecimiento bajo, márgenes sin expansión significativa, FCF por debajo de lo exigido y ventas graduales del sponsor.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "+0% a +6% YoY",
+                "justificacion": "Normalización post-aceleración y ausencia de prueba de comps fuertes."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "5.5% a 6.5%",
+                "justificacion": "Presión de costos y menor leverage de SGA."
+              },
+              {
+                "variable": "FCF",
+                "direccion": "NO_MEJORA",
+                "rango": "USD 70M a USD 95M TTM",
+                "justificacion": "Conversión de caja y capex limitan FCF normalizado."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "Persisten descuento de calidad por opacidad, lease leverage y overhang del sponsor.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -38,
+                "base": -18,
+                "max": -5
+              },
+              "nota": "Rango fusionado usando escenarios de los tres modelos."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Debilidad macro de consumo + comps negativas + rigidez por leases + secundarias agresivas del sponsor.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.2,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "-5% a +3% YoY",
+                "justificacion": "Riesgo cíclico en bienes discrecionales de ticket alto."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "3.5% a 5.0%",
+                "justificacion": "Desapalancamiento operativo y presión promocional."
+              },
+              {
+                "variable": "OTRO",
+                "direccion": "EMPEORA",
+                "rango": "Secundarias de Bain con descuento 8%-15%",
+                "justificacion": "Necesidad de monetización en contexto adverso."
+              }
+            ],
+            "impacto_en_supervivencia": "MEDIO",
+            "nota": "Sin deuda financiera bancaria relevante, pero con rigidez alta por obligaciones fijas de leases."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.72,
+        "razones": [
+          "CORE_FILING_COVERAGE en warning y base dependiente de 424B4.",
+          "FCF TTM no verificable (null).",
+          "Lease liabilities ~824.7M frente a caja ~123.4M.",
+          "Falta de KPIs de productividad (comps, cohorte, payback).",
+          "Concentración accionarial del sponsor (~73%) con potencial sobreoferta.",
+          "Márgenes operativos en rango bajo para justificar múltiplo exigente.",
+          "Riesgo de normalización de capital de trabajo.",
+          "Capex/expansión sin desglose mantenimiento vs crecimiento.",
+          "Completitud de datos 53% limita robustez de conclusiones pro-crecimiento."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "Comp sales >2%-3% sostenidas por varios trimestres.",
+              "Margen operativo sostenido >7.0%-7.5%.",
+              "FCF TTM creciente con disclosure completo de CFO/capex.",
+              "Payback de nuevas tiendas competitivo y estable."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "Comp sales débiles/negativas recurrentes.",
+              "Leases creciendo por encima de ingresos.",
+              "SGA/Revenue >40% y margen operativo <6%.",
+              "Deterioro de caja con inventario alto y mayor presión promocional."
+            ]
+          }
+        ],
+        "prior_explicito": {
+          "baseline_0_1": 0.5,
+          "baseline_regla_aplicada": "Sin prefilter SCOUT demostrable, baseline 0.50.",
+          "factores_al_alza": [
+            {
+              "factor": "Opacidad de filings núcleo",
+              "direccion": "sube",
+              "delta_0_1": 0.1,
+              "anclaje_evidencia": "CORE_FILING_COVERAGE warning."
+            },
+            {
+              "factor": "Lease leverage elevado",
+              "direccion": "sube",
+              "delta_0_1": 0.08,
+              "anclaje_evidencia": "Leases ~824.7M vs caja ~123.4M."
+            },
+            {
+              "factor": "Falta de KPIs de productividad",
+              "direccion": "sube",
+              "delta_0_1": 0.07,
+              "anclaje_evidencia": "Ausencia de comps/cohortes/payback."
+            },
+            {
+              "factor": "Overhang y gobernanza sponsor",
+              "direccion": "sube",
+              "delta_0_1": 0.05,
+              "anclaje_evidencia": "Participación cercana a 73%."
+            }
+          ],
+          "factores_a_la_baja": [
+            {
+              "factor": "Deuda financiera cero y caja disponible",
+              "direccion": "baja",
+              "delta_0_1": -0.08,
+              "anclaje_evidencia": "Deuda financiera 0; caja 123.4M."
+            }
+          ],
+          "probabilidad_final_0_1": 0.72,
+          "puente_explicativo": "0.50 + 0.10 + 0.08 + 0.07 + 0.05 - 0.08 = 0.72"
+        }
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "Comp sales negativas en primer reporte comparable post-IPO.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma crecimiento de baja calidad."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "TESIS",
+          "definicion": "Margen operativo TTM <5.5% en cualquier 10-Q/10-K.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Invalida tesis de expansión de rentabilidad."
+        },
+        {
+          "kc_id": "KC-RT-003",
+          "tipo": "BALANCE",
+          "definicion": "Lease liabilities >USD 950M sin ingresos TTM >USD 2,800M.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Se confirma trampa de compromisos fijos."
+        },
+        {
+          "kc_id": "KC-RT-004",
+          "tipo": "TESIS",
+          "definicion": "FCF TTM del primer 10-K <USD 70M.",
+          "ventana_meses": {
+            "min": 9,
+            "max": 18
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "SALIR",
+          "por_que": "No se cumple generación mínima de caja para sostener tesis."
+        },
+        {
+          "kc_id": "KC-RT-005",
+          "tipo": "DILUCION",
+          "definicion": "Acciones diluidas crecen >5% YoY o SBC >3% de ingresos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Deteriora creación de valor por acción."
+        },
+        {
+          "kc_id": "KC-RT-006",
+          "tipo": "CATALIZADOR",
+          "definicion": "Secundaria de Bain >10% del float con descuento >8%.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 18
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Aumenta riesgo de espiral técnica bajista."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Comp sales sostenidas",
+          "umbral_o_condicion": "Comp sales >3% en al menos 3 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "FCF robusto y verificable",
+          "umbral_o_condicion": "FCF TTM >USD 130M con detalle trimestral de CFO/capex y conversión >1.0x vs NI.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-K"
+        },
+        {
+          "item": "Expansión real de margen",
+          "umbral_o_condicion": "Margen operativo >7.5% sostenido por 3 trimestres post-IPO.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 15
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Salida ordenada del sponsor",
+          "umbral_o_condicion": "Bain <50% sin descuentos >5% en secundarias.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "otro"
+        },
+        {
+          "item": "Unit economics de nuevas tiendas",
+          "umbral_o_condicion": "ROIC de nuevas tiendas >15% y payback <36 meses con disclosure verificable.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 1.0,
+        "si_se_invierte_igual": [
+          "Limitar posición inicial a <=1.0% hasta validar dos 10-Q completos.",
+          "No promediar a la baja sin comps y payback por cohorte.",
+          "Congelar incrementos si no hay split capex mantenimiento/expansión.",
+          "Monitorear mensualmente flujos y filings de Bain.",
+          "Aplicar kill criteria de forma automática, sin discrecionalidad ex post.",
+          "Reducir exposición si lease liabilities/ingresos diverge al alza.",
+          "Revisar impacto de SBC/S-8 sobre FCF por acción en cada trimestre."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Cuál es el FCF TTM real verificable (CFO - capex)?",
+          "¿Qué parte del crecimiento proviene de comp sales vs aperturas?",
+          "¿Cuál es el capex de mantenimiento mínimo anual?",
+          "¿Cuál es el payback/ROIC por cohorte de tiendas nuevas?",
+          "¿Cómo es la tabla anual de pagos de leases no descontados?",
+          "¿Cuál es el calendario exacto de monetización de Bain?",
+          "¿Cuál será la dilución neta por SBC y S-8 en 2026-2027?",
+          "¿El margen operativo ~6.5% es techo estructural o transitorio?"
+        ],
+        "trazabilidad_sizing": {
+          "rango_modelos_tamano_pct": {
+            "min": 0.0,
+            "max": 1.5
+          },
+          "valor_recomendado_pct": 1.0,
+          "justificacion": "Se adopta postura intermedia conservadora por combinación de opacidad crítica, lease leverage y overhang del sponsor."
+        }
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Análisis basado principalmente en 424B4; aún sin ciclo completo 10-Q/10-K en el set.",
+      "FCF TTM no calculable directamente desde TruthPack (campos null).",
+      "Sin KPIs críticos de comp sales, cohortes y productividad por tienda.",
+      "Sin desglose explícito de capex mantenimiento vs expansión.",
+      "Incertidumbre sobre covenants/condiciones detalladas de leases y timing exacto de monetización del sponsor.",
+      "Parte de hipótesis de calidad de caja (capital de trabajo) requiere confirmación en reportes trimestrales futuros."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "fusion": {
+      "step_name": "RED_TEAM",
+      "schema": "AgentReport_v1",
+      "modelos_usados": [
+        {
+          "id": "claude",
+          "modelo": "claude-sonnet-4-20250514"
+        },
+        {
+          "id": "gemini",
+          "modelo": "claude-3.5-sonnet"
+        },
+        {
+          "id": "codex",
+          "modelo": "gpt-5-codex"
+        }
+      ],
+      "criterios_resolucion": [
+        "Prioridad a datos cuantitativos con trazabilidad directa a TruthPack_v1/SRC_001.",
+        "En conflictos numéricos, se eligió el valor más evidenciado y consistente entre modelos (ej. leases ~824.7/~825).",
+        "En claims textuales, se combinaron aportes únicos y se eliminaron duplicados.",
+        "No se omitieron warnings/flags: CORE_FILING_COVERAGE warning, FCF null, completitud 53%.",
+        "Para probabilidades/scores se reportó rango [min, max] y valor recomendado."
+      ],
+      "rangos_probabilidades": [
+        {
+          "campo": "resumen_ejecutivo.confianza_0_1",
+          "rango_modelos": [
+            0.62,
+            0.79
+          ],
+          "valor_recomendado": 0.75
+        },
+        {
+          "campo": "payload.contenido.value_trap_checklist.probabilidad_value_trap_0_1",
+          "rango_modelos": [
+            0.42,
+            0.75
+          ],
+          "valor_recomendado": 0.72
+        },
+        {
+          "campo": "predicciones_calibracion.PRED_RT_002.probabilidad_0_1",
+          "rango_modelos": [
+            0.45,
+            0.85
+          ],
+          "valor_recomendado": 0.55
+        },
+        {
+          "campo": "predicciones_calibracion.PRED_RT_003.probabilidad_0_1",
+          "rango_modelos": [
+            0.52,
+            0.6
+          ],
+          "valor_recomendado": 0.6
+        }
+      ],
+      "conflictos": [
+        {
+          "campo": "resumen_ejecutivo.veredicto_role_local",
+          "valores_modelos": {
+            "claude": "WATCHLIST",
+            "gemini": "NO_APTO",
+            "codex": "NO_APTO"
+          },
+          "resolucion": "NO_APTO",
+          "justificacion": "Mayoría 2/3 y soporte en flags críticos de calidad de datos."
+        },
+        {
+          "campo": "resumen_ejecutivo.confianza_0_1",
+          "valores_modelos": {
+            "claude": 0.62,
+            "gemini": 0.75,
+            "codex": 0.79
+          },
+          "resolucion": 0.75,
+          "justificacion": "Valor intermedio-alto consistente con severidad de riesgos y manteniendo calibración conservadora."
+        },
+        {
+          "campo": "lease_liabilities_totales",
+          "valores_modelos": {
+            "claude": "~825M",
+            "gemini": "~825M",
+            "codex": "824.7M"
+          },
+          "resolucion": "USD 824.7M (~USD 825M)",
+          "justificacion": "Codex aporta mayor precisión numérica sin contradecir el resto."
+        },
+        {
+          "campo": "payload.contenido.value_trap_checklist.probabilidad_value_trap_0_1",
+          "valores_modelos": {
+            "claude": 0.42,
+            "gemini": 0.75,
+            "codex": 0.72
+          },
+          "resolucion": 0.72,
+          "justificacion": "Se prioriza estimación con trazabilidad explícita de prior y deltas, manteniendo rango reportado."
+        },
+        {
+          "campo": "recomendacion_para_arbitro.tamaño_maximo_sugerido_pct_cartera",
+          "valores_modelos": {
+            "claude": 1.5,
+            "gemini": 0.0,
+            "codex": 1.0
+          },
+          "resolucion": 1.0,
+          "justificacion": "Compromiso conservador: permite exposición mínima condicionada a hitos verificables."
+        },
+        {
+          "campo": "interpretacion_calidad_FCF",
+          "valores_modelos": {
+            "claude": "FCF no verificable (null)",
+            "gemini": "posible distorsión por capital de trabajo",
+            "codex": "FCF no consolidado + warning de filings"
+          },
+          "resolucion": "Se mantienen ambas capas: no verificable hoy y con riesgo adicional de normalización de WC.",
+          "justificacion": "No son excluyentes; se integran como riesgo compuesto."
+        },
+        {
+          "campo": "probabilidad_secundaria_Bain_descuento",
+          "valores_modelos": {
+            "claude": 0.45,
+            "gemini": 0.85,
+            "codex": 0.55
+          },
+          "resolucion": 0.55,
+          "justificacion": "Se adopta valor respaldado por evidencia de bloque remanente y se conserva amplio rango de incertidumbre en meta."
+        }
+      ]
+    }
+  }
+}

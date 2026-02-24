@@ -1,0 +1,930 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_BOBS",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "claude-sonnet-4-20250514",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_BOBS",
+    "implied_expectations_caso_id": "CASE_20260224_BOBS",
+    "sources_pack_caso_id": "CASE_20260224_BOBS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "BOBS es un IPO reciente con opacidad documental extrema: toda la base financiera depende de un solo prospecto 424B4, sin 10-K/10-Q disponibles.",
+      "El crecimiento acelerado de ingresos (+20.3% 9M-2025) enmascara un margen operativo plano (~6.5%) y un FCF no verificable con rigor.",
+      "Los arrendamientos operativos (~$825M) constituyen deuda encubierta que el mercado puede estar infravalorando; el EV ajustado por leases cambia radicalmente la imagen de valoración.",
+      "Bain Capital retiene ~73% de las acciones post-IPO, creando un overhang masivo con riesgo de presión vendedora prolongada.",
+      "La tesis bull depende de supuestos no verificables hoy (productividad de tiendas, capex mix, sostenibilidad de margen), convirtiendo la inversión en una apuesta a la fe más que a la evidencia."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.62
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La opacidad documental es estructural: no existe un solo 10-K o 10-Q público, y toda la base financiera del caso proviene de un prospecto 424B4.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "data_quality.validaciones.CORE_FILING_COVERAGE",
+          "cita_corta": "Warning: No 10-K/20-F/ANNUAL_REPORT found in field provenance (found=['424B4'])",
+          "interpretacion": "Imposible validar calidad de earnings, FCF real o políticas contables sin filings regulatorios estándar."
+        }
+      ],
+      "falsacion": {
+        "test": "BOBS publica su primer 10-Q con desglose completo de CFO, capex, segmentos y notas ASC 842 antes de junio 2026.",
+        "ventana_meses": {
+          "min": 2,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "Los arrendamientos operativos (~$825M) son funcionalmente deuda no reconocida en el EV simple; ajustando por leases, la valoración real es significativamente más cara.",
+      "confianza_0_1": 0.88,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "lease_data",
+          "cita_corta": "Operating lease liabilities: current $96M + noncurrent $671M; finance lease: $15M + $42M = total ~$825M.",
+          "interpretacion": "EV ajustado por leases sería ~$3,531M vs $2,707M reportado, un 30% más alto."
+        }
+      ],
+      "falsacion": {
+        "test": "EBITDAR/lease-adjusted debt ratio mejora a >2.5x en los primeros 10-Q/10-K, demostrando cobertura holgada.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El margen operativo está estancado en ~6.5% a pesar del crecimiento de ingresos del 20%, lo que sugiere que el apalancamiento operativo es más débil de lo que el bull asume.",
+      "confianza_0_1": 0.78,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "historico_trimestral.9M-2025 vs historico_anual",
+          "cita_corta": "EBIT 9M-2025 $111M sobre $1,719M ingresos = 6.46%; FY2024 EBIT $117.7M sobre $2,028M = 5.8%; FY2023 EBIT $117.8M sobre $2,008M = 5.87%.",
+          "interpretacion": "El margen operativo ha mejorado marginalmente pero sigue por debajo del 7% que el bull necesita como base."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen operativo TTM supera 7.5% durante dos trimestres consecutivos con desglose verificable en 10-Q.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_004",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Bain Capital retiene ~95.4M acciones (~73% del total), creando un overhang técnico masivo que puede presionar el precio durante 12-24 meses.",
+      "confianza_0_1": 0.92,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": "SEC Form 4",
+          "fecha": "2026-02-13",
+          "ubicacion": "tabla de transacciones",
+          "cita_corta": "Bain vendió 2,917,500 acciones en IPO; remanente 95,370,751 acciones.",
+          "interpretacion": "La venta inicial fue <3% del bloque total; quedan ~$2,070M al precio actual que Bain necesita monetizar."
+        }
+      ],
+      "falsacion": {
+        "test": "Bain reduce participación por debajo del 50% en 12 meses sin descuento superior al 5% en secundarias.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "otro"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_005",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El FCF TTM citado por el bull (~$112M) no es verificable con los datos disponibles; el TruthPack muestra FCF como null en TTM y métricas derivadas.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "ttm y metricas_derivadas",
+          "cita_corta": "TTM: cfo_usd=null, capex_usd=null, fcf_usd=null. metricas_derivadas: fcf_usd=null, margen_fcf_pct=null.",
+          "interpretacion": "El bull está inferiendo FCF a partir de datos parciales; sin CFO/capex trimestral la cifra no es auditable."
+        }
+      ],
+      "falsacion": {
+        "test": "Primer 10-Q revela CFO y capex trimestrales que confirman FCF TTM >$100M.",
+        "ventana_meses": {
+          "min": 2,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_006",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El crecimiento acelerado de ingresos podría reflejar apertura agresiva de tiendas con retornos decrecientes, no mejora orgánica genuina.",
+      "confianza_0_1": 0.7,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "lease_data",
+          "cita_corta": "ROU assets crecieron de $490M (FY2023) a $534M (FY2024) a $630M (9M-2025), +18% en 9 meses.",
+          "interpretacion": "El ritmo de firma de nuevos leases supera el crecimiento de ingresos, sugiriendo posible dilución de productividad por tienda."
+        }
+      ],
+      "falsacion": {
+        "test": "Comp sales positivas (>0%) reportadas en al menos 2 de los primeros 4 trimestres con reporting público.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_007",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El CFO 9M-2025 ($118.7M) cayó 26% vs 9M-2024 ($161.2M annualized pace), sugiriendo posible deterioro de conversión de caja a pesar del crecimiento de ingresos.",
+      "confianza_0_1": 0.72,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "historico_trimestral.9M-2025 vs FY2024",
+          "cita_corta": "CFO 9M-2025: $118.7M vs CFO FY2024: $161.2M. Capex 9M-2025: $58.0M vs FY2024: $78.2M.",
+          "interpretacion": "El ritmo de CFO 9M-2025 no está mejorando proporcionalmente al crecimiento de ingresos del 20%."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO TTM supera $180M con FCF TTM >$110M en los primeros 12 meses post-IPO.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "El margen operativo TTM no alcanzará 7.0% en los primeros 12 meses post-IPO.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT/Revenue TTM <7.0% en el primer 10-K anual completo.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "Bain ejecutará al menos una secundaria con descuento >5% sobre el precio de cierre previo en los próximos 12 meses.",
+      "probabilidad_0_1": 0.45,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Precio de colocación secundaria vs cierre anterior >5% de descuento.",
+      "fuente_prevista": "otro"
+    },
+    {
+      "pred_id": "PRED_RT_003",
+      "descripcion": "El FCF TTM real reportado en el primer 10-K será inferior a $120M.",
+      "probabilidad_0_1": 0.52,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "FCF (CFO menos capex) en trailing 4 trimestres reportados <$120M.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_004",
+      "descripcion": "Las lease liabilities totales superarán $900M antes de que los ingresos TTM superen $2,700M.",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Lease liabilities totales >$900M en cualquier 10-Q/10-K antes de ingresos TTM >$2,700M.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_005",
+      "descripcion": "El precio de la acción cotizará por debajo de $18 (>17% de caída) en al menos un día durante los próximos 12 meses.",
+      "probabilidad_0_1": 0.48,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Precio intraday ≤$18.00 registrado en datos de mercado.",
+      "fuente_prevista": "precio"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de comp sales vs nuevas tiendas en crecimiento de ingresos",
+      "por_que_importa": "Sin este dato es imposible distinguir crecimiento orgánico de inflación de footprint con retornos decrecientes.",
+      "como_obtenerlo": "Earnings release, investor presentation, MD&A en primer 10-Q."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla detallada de vencimientos de arrendamientos (undiscounted payments por año)",
+      "por_que_importa": "Permite evaluar el perfil real de obligaciones fijas y su impacto en FCF libre verdadero.",
+      "como_obtenerlo": "Nota ASC 842 en primer 10-K, sección de leases."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de capex mantenimiento vs capex expansión",
+      "por_que_importa": "Sin este puente, el FCF normalizado es inestimable y la tesis bull carece de ancla.",
+      "como_obtenerlo": "MD&A y notas de PP&E en 10-K/10-Q; Q&A en earnings call."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Términos de lock-up de Bain y ventanas de venta permitidas",
+      "por_que_importa": "Define el calendario de riesgo técnico de presión vendedora.",
+      "como_obtenerlo": "Prospecto 424B4 sección 'Shares Eligible for Future Sale'; underwriting agreement."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.62,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "BOBS presenta crecimiento de ingresos fuerte pero con margen operativo estancado, FCF no verificable, arrendamientos masivos como deuda encubierta, y un overhang del 73% del sponsor. La combinación de opacidad extrema y múltiplo exigente convierte esto en una potencial value trap disfrazada de historia de crecimiento."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "Base financiera defensiva: deuda $0, caja neta y FCF positivo.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.35,
+              "por_que": [
+                "La deuda financiera es $0 pero los lease liabilities suman ~$825M, funcionalmente equivalentes a deuda.",
+                "El FCF TTM citado ($112M) es null en el TruthPack; la cifra no es auditable con datos disponibles.",
+                "CFO 9M-2025 ($118.7M) implica un ritmo annualizado inferior a FY2024 ($161M) pese al crecimiento de ingresos del 20%.",
+                "La caja de $123M apenas cubre 1.1x los lease payments corrientes (~$111M), margen escaso."
+              ]
+            },
+            "puntos_ciegos": [
+              "El bull no ajusta EV por lease liabilities, subestimando el apalancamiento real.",
+              "No cuestiona por qué CFO 9M-2025 crece menos que ingresos.",
+              "La estructura post-Bain (IPO proceeds, costos de empresa pública) puede deteriorar la posición de caja neta.",
+              "No modela el impacto de la SBC registrada en el S-8 sobre el FCF por acción."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "lease_data",
+                "cita_corta": "Lease liabilities totales ~$825M vs caja $123M y patrimonio $548M.",
+                "interpretacion": "La empresa tiene más obligaciones fijas de leases que patrimonio neto."
+              },
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "metricas_derivadas",
+                "cita_corta": "fcf_usd: null, margen_fcf_pct: null, fcf_yield_pct: null.",
+                "interpretacion": "El TruthPack validado no puede confirmar FCF positivo."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Primer 10-K muestra CFO-capex TTM <$80M o lease liabilities superan $900M con caja <$100M.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_002",
+            "resumen_claim_bull": "Aceleración de ingresos: Q1 +14.8%, Q2 +20.1%, Q3 +25.8% YoY.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.45,
+              "por_que": [
+                "Sin desglose comp sales vs nuevas tiendas, es imposible saber si el crecimiento es orgánico o puro footprint.",
+                "Los ROU assets crecieron ~18% en 9 meses ($534M→$630M), sugiriendo que gran parte del crecimiento es apertura agresiva de tiendas con leases.",
+                "El crecimiento acelerado podría ser un artefacto del calendario fiscal 52/53 semanas.",
+                "No hay evidencia de pricing power ni de crecimiento de ticket medio.",
+                "El sector furniture retail es cíclico y sensible a tasas de interés/housing; el bull no modela riesgo macro."
+              ]
+            },
+            "puntos_ciegos": [
+              "Ausencia total de KPIs unitarios (tiendas, ventas por m², comp sales).",
+              "No modela el efecto de la base comparativa: FY2024 tuvo Q1 débil que infla la comparación YoY.",
+              "El crecimiento de leases puede estar adelantando ingresos futuros pero también comprometiendo flexibilidad.",
+              "No hay evidencia de que las tiendas nuevas alcancen productividad comparable a las existentes."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_trimestral",
+                "cita_corta": "Q1-2024 ingresos $464M fue el trimestre más débil del año, inflando la base de comparación YoY.",
+                "interpretacion": "Parte de la aceleración YoY es artefacto de una base comparativa baja."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Comp sales (cuando se reporten) son negativas en 2 de los primeros 4 trimestres, o ingresos YoY caen <8% por 2 trimestres seguidos.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_003",
+            "resumen_claim_bull": "Apalancamiento operativo estructural en SGA: SGA/Revenue bajó de 41.7% a 38.6% en 9M-2025.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.5,
+              "por_que": [
+                "A pesar de la mejora de ratio SGA, el margen operativo 9M-2025 (6.46%) apenas mejoró vs FY2023 (5.87%) y FY2024 (5.81%).",
+                "Los costos de empresa pública (auditoría, compliance, D&O, IR, SBC) aún no se reflejan plenamente en SGA.",
+                "Sin desglose de componentes de SGA, no se puede distinguir recortes sostenibles de timing o one-offs.",
+                "La mejora de SGA/Revenue podría revertir si el crecimiento de ingresos desacelera."
+              ]
+            },
+            "puntos_ciegos": [
+              "Los costos incrementales de ser empresa pública no están modelados.",
+              "No distingue SGA fija vs variable; si hay componente fijo alto, la desaceleración de ingresos revierte la mejora rápidamente.",
+              "No modela el impacto de la compensación basada en acciones (S-8 registrado) en SGA."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual",
+                "cita_corta": "Margen operativo FY2023: 5.87%, FY2024: 5.81%, 9M-2025: 6.46%.",
+                "interpretacion": "La mejora de margen operativo es modesta y no confirma apalancamiento operativo significativo."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "SGA/Revenue sube >40% en cualquier 10-Q o margen operativo cae <5.5% tras incluir costos de empresa pública.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_004",
+            "resumen_claim_bull": "El mercado exige CAGR FCF 11-15% a 5 años, y el ritmo operativo reciente sugiere que es alcanzable.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.5,
+              "por_que": [
+                "El FCF TTM es null en el TruthPack; no hay base verificable para afirmar que el ritmo es alcanzable.",
+                "El EBIT 9M-2025 ($111M) annualizado sería ~$148M, pero sin CFO/capex trimestral no se puede derivar FCF.",
+                "El capex está acelerando (FY2024 $78M vs FY2023 $30M); si se mantiene, el FCF podría comprimir aunque EBIT mejore.",
+                "El crecimiento de leases no aparece como capex pero es inversión real que no se refleja en FCF tradicional."
+              ]
+            },
+            "puntos_ciegos": [
+              "El bull no reconoce que el FCF base es inestimable con datos actuales.",
+              "No modela que el crecimiento de lease payments reduce el FCF económico real aunque no el contable.",
+              "No distingue entre FCF de mantenimiento y FCF después de inversión de crecimiento."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "ttm",
+                "cita_corta": "TTM: cfo_usd=null, capex_usd=null, fcf_usd=null.",
+                "interpretacion": "No hay datos para validar la afirmación de que el FCF CAGR requerido es alcanzable."
+              },
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "data_quality.faltantes_criticos",
+                "cita_corta": "free_cash_flow: 'Cannot calculate FCF metrics. Need CFO and capex.'",
+                "interpretacion": "El propio sistema de validación marca FCF como faltante crítico."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "FCF TTM en primer 10-K <$90M o conversión FCF/EBIT <50%.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 18
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_005",
+            "resumen_claim_bull": "Arrendamientos son manejables por liquidez y CFO.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.35,
+              "por_que": [
+                "La ratio caja/lease corriente es de 1.1x ($123M/$111M), margen muy estrecho.",
+                "Los lease liabilities crecen más rápido que los ingresos: +28% en ~12 meses ($596M→$825M excl. finance) vs ingresos +14% FY2024 vs TTM.",
+                "En un escenario de desaceleración de ingresos, las obligaciones fijas de leases comprimen FCF rápidamente.",
+                "No hay tabla de vencimientos no descontados para modelar el perfil de pagos futuros."
+              ]
+            },
+            "puntos_ciegos": [
+              "No modela escenario de estrés: qué pasa con la cobertura si ingresos caen 5-10%.",
+              "No compara la carga de leases con peers del sector para contextualizar si es normal o excesiva.",
+              "El crecimiento de ROU assets sugiere aceleración de compromisos sin evidencia de retorno proporcional."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "lease_data.historico",
+                "cita_corta": "Lease liabilities pasaron de $633M (FY2023) a $691M (FY2024) a $825M (9M-2025).",
+                "interpretacion": "Crecimiento del 30% en lease liabilities en ~21 meses, superando significativamente el crecimiento de ingresos."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Lease liabilities totales superan $900M sin que ingresos TTM excedan $2,700M o caja cae <$80M.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_006",
+            "resumen_claim_bull": "Re-rating potencial por cierre de prima de opacidad cuando se normalice el ciclo 10-Q/10-K.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.4,
+              "por_que": [
+                "El re-rating asume que la mayor disclosure será positiva; podría revelar problemas no visibles hoy.",
+                "Los primeros 10-Q/10-K podrían mostrar calidad de earnings inferior (SBC elevada, working capital adverso, capex mayor al esperado).",
+                "La cobertura de analistas en IPOs recientes suele iniciar con ratings optimistas de los bancos colocadores, creando espejismo de re-rating.",
+                "El timing del re-rating es indeterminado y el costo de oportunidad no está cuantificado."
+              ]
+            },
+            "puntos_ciegos": [
+              "El bull asume que más información = múltiplo más alto, pero podría ser lo contrario.",
+              "No modela que el primer ciclo de earnings post-IPO frecuentemente decepciona vs expectativas de prospecto.",
+              "No cuantifica cuánto del descuento es por opacidad vs por fundamentales genuinamente débiles."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "data_quality",
+                "cita_corta": "DATA_COMPLETENESS: 53% complete. historico_trimestral: 57% null.",
+                "interpretacion": "La magnitud de la opacidad es tal que el primer ciclo de disclosure puede traer sorpresas en ambas direcciones."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Los primeros 2 earnings post-IPO resultan en caída del precio >10% acumulada por decepción de calidad de datos.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "precio"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_007",
+            "resumen_claim_bull": "El overhang de Bain es riesgo técnico real; salida ordenada puede ampliar free float y reducir descuento.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.4,
+              "por_que": [
+                "Con 73% de las acciones, Bain necesitaría vender ~$1,400M+ solo para bajar al 20%, equivalente a 50% del market cap actual.",
+                "El bull califica el riesgo como 'técnico' pero un bloque de $2B+ buscando salida es un riesgo fundamental de oferta/demanda.",
+                "La primera venta fue en IPO a descuento (precio IPO $15.94 vs precio actual $21.70); las siguientes pueden requerir descuentos similares.",
+                "No hay visibilidad sobre el horizonte de inversión de Bain ni sus obligaciones con LPs."
+              ]
+            },
+            "puntos_ciegos": [
+              "No modela la mecánica de cómo ~$2B en acciones encuentran compradores sin comprimir el precio.",
+              "No considera que la presencia de un accionista mayoritario reduce la gobernanza independiente.",
+              "No evalúa conflictos de interés entre Bain y accionistas minoritarios post-IPO."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "tabla de transacciones",
+                "cita_corta": "Venta en IPO a $15.94/acción vs precio actual $21.70; remanente 95.4M acciones.",
+                "interpretacion": "La primera venta fue a descuento significativo vs precio actual; pattern puede repetirse."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Bain vende >15M acciones en una sola ventana de 3 meses con precio promedio <$19.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 18
+              },
+              "fuente_prevista": "otro"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "El FCF TTM de ~$112M citado por el bull es una cifra fantasma: el TruthPack lo marca como null y el propio sistema lo lista como 'faltante crítico'.",
+          "La tesis de 're-rating por disclosure' asume que más información será positiva, cuando el primer ciclo de reporting post-IPO frecuentemente decepciona.",
+          "El escenario BULL (retorno 35-60%) requiere EBIT de $210-230M, un salto del ~40-50% vs TTM, sin evidencia de que el margen operativo pueda expandirse significativamente desde el 6.5% actual.",
+          "La narrativa de 'apalancamiento operativo estructural' en SGA no se traduce en mejora material del margen operativo observado.",
+          "El bull trata los arrendamientos como 'riesgo manejable' pero $825M en lease liabilities es 1.5x el patrimonio neto y no aparece en el EV simple.",
+          "La convicción preliminar de 3.2/5 es alta para un caso donde el 53% de los datos son null y no existe un solo filing regulatorio estándar.",
+          "El bull asume implícitamente que la aceleración de ingresos es orgánica cuando los únicos datos disponibles (ROU assets) sugieren que es mayoritariamente por apertura de tiendas."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El mercado está valorando correctamente una empresa de muebles con márgenes operativos modestos (~6.5%), crecimiento impulsado por capex/leases con retornos inciertos, y un sponsor dominante que necesita monetizar.",
+          "El crecimiento de ingresos del 20% es transitorio y refleja un pico de aperturas; las tiendas nuevas madurarán a productividad inferior a las existentes y el crecimiento normalizará a mid-single digits.",
+          "El margen operativo está en su techo natural para un retailer de muebles discount; los costos de empresa pública y la SBC lo comprimirán hacia 5-5.5%.",
+          "Los lease liabilities crecientes representan una trampa: si el ciclo de housing se enfría, las tiendas nuevas underperforman pero las obligaciones de renta son fijas.",
+          "El múltiplo actual ya descuenta el escenario base del bull; no hay upside adicional sin superar la barra de crecimiento de FCF del 11-15% CAGR que el propio bull reconoce como exigente.",
+          "Bain vendió en el IPO a $15.94, muy por debajo del precio actual de $21.70, señalando que el precio de IPO era agresivo para el vendedor y el actual puede estar inflado por momentum post-IPO."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "BOBS es un retailer de muebles discount con márgenes operativos modestos (~6.5%) que el mercado ya está valorando a múltiplo completo (~16.6x EV/EBIT).",
+          "El crecimiento acelerado depende de apertura agresiva de tiendas financiadas con leases crecientes ($825M), sin evidencia de retornos adecuados por tienda nueva.",
+          "El FCF real es inverificable y el CFO 9M-2025 muestra deterioro de conversión relativo al crecimiento de ingresos.",
+          "Bain Capital necesita liquidar ~$2B en acciones, creando presión vendedora persistente sobre un free float limitado.",
+          "La opacidad extrema (sin 10-K/10-Q) impide evaluar calidad de earnings, working capital, SBC y capex real; comprar aquí es apostar a que lo desconocido será favorable."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "El margen operativo se estanca en 5.5-6.5% por costos de empresa pública, SBC creciente y falta de apalancamiento operativo real. El EBIT no crece proporcionalmente a los ingresos.",
+            "indicadores_tempranos": [
+              "SGA/Revenue sube >40% en cualquier trimestre post-IPO",
+              "Margen operativo TTM cae <6.0%",
+              "SBC trimestral >$5M o >2% de ingresos",
+              "Costos de D&O, auditoría y compliance superan $10M anuales"
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "El inventario ($341M, equivalente a ~16% de ingresos TTM) crece más rápido que las ventas, consumiendo caja y deteriorando CFO. El working capital neto de $89M ya es relevante.",
+            "indicadores_tempranos": [
+              "Inventarios/Revenue TTM supera 16%",
+              "Days inventory outstanding crece >10 días",
+              "CFO/Net Income <1.5x durante 2 trimestres",
+              "Cuentas por pagar/Inventarios cae <0.7x"
+            ]
+          },
+          {
+            "mecanismo": "CAPEX_MANTENIMIENTO_ALTO",
+            "descripcion": "El capex acelerado (FY2024: $78M vs FY2023: $30M) resulta ser mayoritariamente mantenimiento, no crecimiento, comprimiendo el FCF libre real a niveles insuficientes para justificar el múltiplo.",
+            "indicadores_tempranos": [
+              "Capex/Revenue >4.5% sin aumento proporcional de tiendas nuevas",
+              "CFO-Capex TTM <$80M",
+              "Depreciación crece >15% YoY sin growth correspondiente",
+              "Management no desglosa mantenimiento vs expansión en primeros 10-Q"
+            ]
+          },
+          {
+            "mecanismo": "COMPETENCIA_PRECIOS",
+            "descripcion": "Como retailer discount de muebles, BOBS compite en precio. Si competidores intensifican descuentos o el e-commerce de muebles gana share, el margen bruto se comprime.",
+            "indicadores_tempranos": [
+              "Margen bruto trimestral cae <43%",
+              "Comp sales negativas en 2+ trimestres",
+              "Ticket medio cae sin compensación de volumen",
+              "Descuentos promocionales aumentan en MD&A"
+            ]
+          },
+          {
+            "mecanismo": "DILUCION",
+            "descripcion": "La combinación de SBC (S-8 registrado, 2 planes de opciones) y potenciales secundarias del sponsor diluye el FCF por acción y el valor patrimonial por acción ($4.20 BV/share ya es bajo).",
+            "indicadores_tempranos": [
+              "Acciones diluidas crecen >3% YoY",
+              "SBC >3% de ingresos",
+              "BV por acción cae <$4.00",
+              "Nuevos registros de acciones bajo S-8"
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Crecimiento de ingresos desacelera a mid-single digits, margen operativo se estanca en 5.5-6.0% por costos de empresa pública, FCF decepciona expectativas y Bain ejecuta secundarias con descuento moderado. El múltiplo comprime de 16.6x a 14x EV/EBIT.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.3,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "+4% a +7% YoY (desaceleración material desde +20%)",
+                "justificacion": "Base comparativa alta de 2025 y maduración de tiendas nuevas reducen el ritmo orgánico."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "5.5% a 6.0%",
+                "justificacion": "Costos de empresa pública, SBC y pérdida parcial de leverage de SGA por desaceleración."
+              },
+              {
+                "variable": "FCF",
+                "direccion": "NO_MEJORA",
+                "rango": "$70M a $95M TTM",
+                "justificacion": "CFO no crece proporcionalmente a ingresos; capex se mantiene elevado por compromisos de expansión."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "Con EBIT estancado en ~$140M y múltiplo comprimido a 14x, el EV fair sería ~$1,960M. Restando lease-adjusted leverage y sumando caja, el equity value implicaría precio por acción inferior al actual.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -30,
+                "base": -18,
+                "max": -8
+              },
+              "nota": "Rango basado en compresión de múltiplo moderada y EBIT plano."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Ciclo de housing se enfría, comp sales negativas, tiendas nuevas underperforman con leases fijos. Bain fuerza secundarias agresivas creando espiral bajista. El margen operativo colapsa a <5% y el múltiplo comprime severamente.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 18,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.12,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "-2% a +3% YoY",
+                "justificacion": "Debilidad macro en housing/durables combinada con saturación de mercados existentes."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "3.5% a 5.0%",
+                "justificacion": "Desapalancamiento operativo severo con costos fijos de leases, SGA de empresa pública y presión competitiva."
+              },
+              {
+                "variable": "OTRO",
+                "direccion": "EMPEORA",
+                "rango": "Secundarias de Bain con descuento 10-15%",
+                "justificacion": "Necesidad de monetización del sponsor en un mercado adverso fuerza ventas a descuento."
+              }
+            ],
+            "impacto_en_supervivencia": "MEDIO",
+            "nota": "La empresa no tiene deuda financiera, por lo que la supervivencia no está en riesgo, pero el lease leverage crea rigidez: cerrar tiendas underperformantes implica costos de salida y las obligaciones persisten."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.42,
+        "razones": [
+          "Margen operativo estancado en ~6.5% pese a crecimiento de ingresos del 20%, sugiriendo techo estructural de rentabilidad.",
+          "FCF no verificable con datos disponibles; el TruthPack lo marca como null y faltante crítico.",
+          "Lease liabilities (~$825M) creciendo más rápido que ingresos representan capex encubierto no reflejado en métricas estándar.",
+          "Múltiplo EV/EBIT de ~16.6x es exigente para un retailer de muebles discount sin track record público.",
+          "Book value por acción de $4.20 vs precio de $21.70 implica 5.2x P/B; si el crecimiento decepciona, no hay piso patrimonial.",
+          "El 53% de los datos del TruthPack son null: la tesis se construye sobre arena informacional.",
+          "Sponsor con 73% de acciones cuyos intereses pueden divergir de accionistas minoritarios.",
+          "Sin comp sales, es imposible distinguir crecimiento orgánico de inflación de footprint con retornos decrecientes.",
+          "Sector de furniture retail es maduro, competitivo y sensible a ciclo de housing/tasas de interés."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "Comp sales positivas sostenidas (>2% durante 3+ trimestres) cuando se reporten.",
+              "Margen operativo mejora hacia 7.5%+ con los primeros 10-Q completos.",
+              "CFO/Net Income >1.5x de forma consistente, confirmando calidad de earnings.",
+              "Tiendas nuevas alcanzan productividad comparable a tiendas maduras en <24 meses."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "Comp sales negativas persistentes (2+ trimestres) indicando pérdida de share o saturación.",
+              "Margen operativo no supera 6.5% tras 4 trimestres de reporting público.",
+              "Lease liabilities crecen >15% sin mejora proporcional de EBIT/CFO.",
+              "Capex se mantiene >$75M/año sin evidencia de retorno (ROIC de tiendas nuevas)."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "Margen operativo TTM <5.5% reportado en cualquier 10-Q/10-K.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Margen <5.5% confirma que no hay apalancamiento operativo real y que la tesis de expansión de rentabilidad es falsa."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "BALANCE",
+          "definicion": "Lease liabilities totales superan $950M sin que ingresos TTM excedan $2,800M.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Crecimiento de lease liabilities desproporcionado al de ingresos confirma trampa de leases."
+        },
+        {
+          "kc_id": "KC-RT-003",
+          "tipo": "TESIS",
+          "definicion": "FCF TTM reportado en primer 10-K <$70M (CFO menos capex).",
+          "ventana_meses": {
+            "min": 9,
+            "max": 18
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "SALIR",
+          "por_que": "FCF <$70M invalida la tesis de que la empresa puede financiar crecimiento y generar retornos para accionistas."
+        },
+        {
+          "kc_id": "KC-RT-004",
+          "tipo": "DILUCION",
+          "definicion": "Acciones diluidas totales crecen >5% en los primeros 12 meses post-IPO.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Dilución acelerada destruye FCF por acción y señala que la SBC es material y no descontada."
+        },
+        {
+          "kc_id": "KC-RT-005",
+          "tipo": "CATALIZADOR",
+          "definicion": "Bain ejecuta venta de >20M acciones en un solo trimestre con descuento >8% sobre precio promedio del periodo.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 18
+          },
+          "fuente_prevista": "otro",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Venta masiva desordenada del sponsor señala urgencia de salida e introduce riesgo de espiral bajista."
+        },
+        {
+          "kc_id": "KC-RT-006",
+          "tipo": "CONTABILIDAD",
+          "definicion": "Primer 10-Q/10-K revela restatement, cambio de política contable material, o auditor flag/going concern.",
+          "ventana_meses": {
+            "min": 2,
+            "max": 9
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Señal directa de que la información del prospecto no era confiable."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Comp sales positivas sostenidas >3% durante 3+ trimestres consecutivos",
+          "umbral_o_condicion": "Comp sales >3% en reportes trimestrales oficiales",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "FCF TTM verificado >$130M con conversión FCF/Net Income >1.0x",
+          "umbral_o_condicion": "CFO-Capex >$130M y ratio >1.0x en 10-K auditado",
+          "ventana_meses": {
+            "min": 9,
+            "max": 18
+          },
+          "fuente_prevista": "10-K"
+        },
+        {
+          "item": "Margen operativo sostenido >7.5% durante 3 trimestres con costos de empresa pública ya absorbidos",
+          "umbral_o_condicion": "EBIT/Revenue >7.5% en 3 de 4 trimestres consecutivos post-IPO",
+          "ventana_meses": {
+            "min": 6,
+            "max": 15
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Bain reduce participación por debajo de 50% sin descuentos >5% en ninguna secundaria",
+          "umbral_o_condicion": "Participación <50% confirmada en filings con precios de colocación a ≤5% de descuento",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "otro"
+        },
+        {
+          "item": "ROIC explícito de tiendas nuevas >15% reportado por management con datos verificables",
+          "umbral_o_condicion": "Disclosure de ROIC/payback por vintage de tienda en earnings call o investor day",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 1.5,
+        "si_se_invierte_igual": [
+          "Limitar posición a <1.5% de cartera hasta que existan al menos 2 trimestres de 10-Q con desglose completo de CFO, capex y cash flow.",
+          "No promediar a la baja sin evidencia de comp sales y ROIC de tiendas nuevas.",
+          "Establecer stop-loss técnico en $16.50 (~24% por debajo) para limitar pérdida máxima.",
+          "Esperar a que Bain reduzca participación a <60% antes de considerar tamaño relevante.",
+          "Exigir al menos un trimestre con FCF reportado y verificable antes de añadir a la posición.",
+          "Monitorear estrictamente la ratio lease liabilities/ingresos: si diverge, reducir.",
+          "Considerar entrada escalonada: 0.5% inicial, incrementar solo con evidencia trimestral positiva.",
+          "Cubrir riesgo macro (housing/consumer discretionary) si la posición supera 1%."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Cuál es el FCF real (CFO menos capex) TTM? El TruthPack no puede calcularlo.",
+          "¿Qué porcentaje del crecimiento de ingresos es comp sales vs nuevas tiendas?",
+          "¿Cuál es el desglose capex mantenimiento vs capex expansión?",
+          "¿Cuál es el ROIC/payback por tienda nueva y su dispersión geográfica?",
+          "¿Cuáles son los términos exactos de lock-up de Bain y el calendario de ventanas de venta?",
+          "¿Cuánto SBC se registrará en los primeros 12 meses post-IPO y cuál es la dilución total esperada?",
+          "¿Cuál es la tabla de vencimientos no descontados de leases para los próximos 5 años?",
+          "¿El margen operativo del 6.5% es el techo natural del modelo de negocio o hay espacio de expansión demostrable?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Análisis basado exclusivamente en datos del prospecto 424B4; sin acceso a 10-K/10-Q estándar.",
+      "FCF TTM no calculable desde TruthPack; todas las referencias a FCF del bull son no auditables.",
+      "Sin KPIs operativos (comp sales, tiendas, ventas por tienda), el ataque al crecimiento depende de inferencias indirectas.",
+      "No hay acceso a transcripciones de earnings calls ni investor presentations para validar guidance de management.",
+      "El baseline de value trap de 0.50 se aplica por ausencia de datos de SCOUT/ranking previo."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

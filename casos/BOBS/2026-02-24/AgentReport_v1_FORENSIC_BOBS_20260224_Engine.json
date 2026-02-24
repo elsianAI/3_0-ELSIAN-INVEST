@@ -1,0 +1,1091 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_BOBS",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "fusion:gemini+claude+codex",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_BOBS",
+    "implied_expectations_caso_id": "CASE_20260224_BOBS",
+    "sources_pack_caso_id": "CASE_20260224_BOBS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Supervivencia financiera sólida a 12-24 meses: balance sin deuda financiera ($0), caja de $123M y CFO TTM de $188M cubren obligaciones corrientes con holgura.",
+      "Apalancamiento operativo oculto: pasivos por arrendamiento ($825M) superan en 150% al patrimonio ($548M), constituyendo la principal obligación económica fija y única bandera de severidad ALTA consensuada.",
+      "Calidad de CFO en deterioro: caída del 18% en FY2024 con ingresos planos; dependencia crítica del crédito comercial (AP/Inventario ~80%) y capex duplicado (x2.6) comprimiendo margen FCF al 4%.",
+      "Patrón de optimización pre-IPO: margen operativo 5.8%→7.0% por recorte de SGA mientras margen bruto cae 170bps; distribuciones masivas al sponsor PE ($294M en 3 años).",
+      "Opacidad significativa: datos exclusivamente de prospecto 424B4, completitud del dataset 53%, sin 10-K/10-Q; overhang de Bain Capital (~73%) incentiva presión vendedora.",
+      "Veredicto WATCHLIST: riesgo de supervivencia bajo pero incertidumbre elevada sobre sostenibilidad de márgenes, trayectoria de capex y comportamiento del sponsor post-lock-up."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.67
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "BOBS opera con $0 de deuda financiera y $123M de caja al 28-sep-2025, eliminando riesgo de refinanciación a 24 meses.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-05",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo",
+          "cita_corta": "Deuda total $0, caja $123.4M, patrimonio $547.8M",
+          "interpretacion": "Balance limpio post-paydown de First Lien Note pre-IPO. Sin muro de deuda financiera, la supervivencia depende de ejecución operativa y leases."
+        }
+      ],
+      "falsacion": {
+        "test": "Empresa toma deuda nueva >$150M o caja cae por debajo de $60M",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Pasivos totales por arrendamiento ($825M) superan el patrimonio ($548M) en 150%, constituyendo la principal obligación económica fija y actuando como deuda oculta masiva.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-05",
+          "ubicacion": "TruthPack_v1.lease_data",
+          "cita_corta": "Operating lease $767M + finance lease $57M = $825M total vs Patrimonio $548M",
+          "interpretacion": "Apalancamiento real muy superior al reportado por métricas tradicionales (Net Debt/EBITDA < 0). Carga creciente (+30% en 21 meses) y rigidez de costes fijos."
+        }
+      ],
+      "falsacion": {
+        "test": "Lease liabilities totales se reducen por debajo de $700M o ratio lease/CFO se mantiene <5x",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El capital de trabajo es frágil: la empresa financia ~80% de su inventario con proveedores (AP $272M vs Inventarios $341M), con riesgo alto si se endurecen términos de pago.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-05",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo",
+          "cita_corta": "Cuentas por pagar $271.6M vs Inventarios $341.3M; AP+leases corrientes $382.8M = 3.1x caja",
+          "interpretacion": "Dependencia crítica del crédito comercial; un shock de liquidez en proveedores afectaría operaciones. CFO cayó 18% en FY2024 con ventas planas, anticipando presión de capital de trabajo."
+        }
+      ],
+      "falsacion": {
+        "test": "Ratio AP/Inventario cae por debajo de 65% indicando estrés en pagos, o se estabiliza >80% confirmando sostenibilidad",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La mejora del margen operativo de 5.8% a 7.0% coincide con la ventana pre-IPO y se origina en recorte de SGA, no en mejora del margen bruto (que cayó de 47.3% a 45.6%), sugiriendo optimización cosmética pre-IPO.",
+      "confianza_0_1": 0.72,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-05",
+          "ubicacion": "TruthPack_v1.historico_anual y 9M comparado",
+          "cita_corta": "Margen bruto 9M cayó 170bps mientras margen operativo TTM subió 120bps; EBIT margin FY22 2.4%, FY23 5.9%, TTM 7.0%",
+          "interpretacion": "Patrón clásico de PE pre-IPO: recorte temporal de gastos para presentar márgenes atractivos a inversores. El margen bruto en descenso contradice eficiencia operativa genuina."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen operativo se mantiene >6.5% durante 4 trimestres consecutivos post-IPO con margen bruto estable o en mejora",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Bain Capital retiene ~73% de las acciones post-IPO y vendió en IPO a $15.94, un 36% por debajo del precio actual de $21.70, creando incentivo económico claro para ventas secundarias.",
+      "confianza_0_1": 0.95,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-13",
+          "ubicacion": "Form 4 / Form 3 data en TruthPack log",
+          "cita_corta": "95.4M acciones retenidas de ~130.4M diluidas; ventas IPO a $15.9375",
+          "interpretacion": "Incentivo económico claro para ventas secundarias post-lock-up; riesgo de overhang técnico. Un solo actor puede alterar materialmente el balance oferta-demanda del título."
+        }
+      ],
+      "falsacion": {
+        "test": "Bain Capital mantiene participación >65% sin ventas secundarias materiales por 12 meses o anuncia compromiso de retención",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La volatilidad extrema del FCF (de $0.6M a $167M en 3 años, factor 296x) con capex consumiendo 15-99% del CFO impide establecer un FCF normalizado fiable.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-05",
+          "ubicacion": "ForensicDetection puentes CFO→FCF / historico_anual",
+          "cita_corta": "FCF rango $0.6M-$167M (factor 296x); capex FY23 $30M → FY24 $78M; margen FCF 8.34% a 4.09%",
+          "interpretacion": "3 años de datos insuficientes para estabilizar FCF normalizado; reverse DCF depende de supuestos frágiles. Sin desglose mantenimiento vs crecimiento, el FCF estructural tiene incertidumbre material."
+        }
+      ],
+      "falsacion": {
+        "test": "FCF TTM se estabiliza dentro de ±20% del promedio 3 años durante 4 trimestres consecutivos y capex/CFO <35%",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_007",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Goodwill ($182M) e intangibles ($179M) representan $361M o 66% del patrimonio, originados en la adquisición por Bain Capital, sin pruebas de deterioro verificables.",
+      "confianza_0_1": 0.9,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-05",
+          "ubicacion": "TruthPack balance_sheet_ultimo / log limitaciones",
+          "cita_corta": "Goodwill $181.7M + intangibles $179.1M = $360.8M (19.5% activos, 65.86% patrimonio)",
+          "interpretacion": "Sin 10-K no se verifican pruebas de deterioro; impairment >$50M erosionaría significativamente el patrimonio (~9%)."
+        }
+      ],
+      "falsacion": {
+        "test": "Primer 10-K confirma prueba de deterioro pasada sin cargos o reporta impairment >$20M",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_008",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La cobertura documental es parcial (solo 424B4, completitud 53%) y limita severamente la robustez del diagnóstico forense.",
+      "confianza_0_1": 0.9,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "TruthPack_v1.data_quality.validaciones",
+          "cita_corta": "CORE_FILING_COVERAGE WARNING; solo 424B4 detectado; completitud global 53.44%",
+          "interpretacion": "Sin 10-K/10-Q no se pueden verificar políticas contables, SBC, controles internos ni series trimestrales granulares. Situación temporal que se resolverá con primeros filings regulatorios."
+        }
+      ],
+      "falsacion": {
+        "test": "Publicación de 10-Q/10-K con completitud >80% de métricas clave",
+        "ventana_meses": {
+          "min": 2,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_009",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "Las distribuciones al sponsor PE ($294M en CFF FY2022-FY2024) pueden haber limitado la reinversión en el negocio; ya cesaron pre-IPO pero el patrón merece monitoreo.",
+      "confianza_0_1": 0.55,
+      "impacto": "BAJO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-05",
+          "ubicacion": "TruthPack CFF FY2022-FY2024 vs 9M-2025",
+          "cita_corta": "CFF: -$90M, -$95M, -$105M (FY22-24) → -$8.6M (9M-2025); distribuciones consumieron 65% del CFO acumulado",
+          "interpretacion": "Distribuciones ya cesaron (9M-2025 CFF -$8.6M); riesgo residual solo si se reactivan post-IPO vía dividendos especiales."
+        }
+      ],
+      "falsacion": {
+        "test": "CFF post-IPO no incluye distribuciones especiales y se limita a dividendos regulares o recompras market-standard",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Margen operativo trimestral cae por debajo de 6.0% al menos una vez en los próximos 12 meses a medida que los recortes de SGA pre-IPO se revierten.",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT trimestral / ingresos trimestrales < 0.06 en 10-Q o 10-K.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Bain Capital ejecuta al menos una venta secundaria significativa (>5M acciones o >10% del total) dentro de 12 meses post-lock-up.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Filing Form 4 o S-3/prospectus suplementario registrando venta de >5M acciones por Bain Capital o entidades relacionadas.",
+      "fuente_prevista": "filing"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "FCF TTM se mantiene por encima de $80M durante los próximos 12 meses.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "CFO menos capex acumulados de 4 trimestres consecutivos > $80M según 10-Q/10-K.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "Capex anualizado se mantendrá por encima de $75M (run-rate actual) impulsado por expansión de tiendas.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Suma de Capex en Cash Flow Statement > $75M TTM en reportes trimestrales.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "Lease liabilities totales superan $900M al cierre de FY2025 por apertura de nuevas tiendas.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Suma de operating + finance lease liabilities (current + non-current) > $900M en 10-K FY2025.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "No se declarará dividendo en efectivo en los próximos 12 meses.",
+      "probabilidad_0_1": 0.9,
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "criterio_validacion": "Anuncios de IR / 10-K / earnings releases.",
+      "fuente_prevista": "PR"
+    },
+    {
+      "pred_id": "PRED_007",
+      "descripcion": "Empresa establece o divulga una línea de crédito revolving dentro de los próximos 12 meses.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Divulgación de revolving credit facility en 10-Q, 10-K o 8-K.",
+      "fuente_prevista": "filing"
+    },
+    {
+      "pred_id": "PRED_008",
+      "descripcion": "No se registra impairment de goodwill o intangibles >$20M en los próximos 24 meses.",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 6,
+        "max": 24
+      },
+      "criterio_validacion": "Ningún cargo por impairment de goodwill/intangibles >$20M reportado en 10-Q o 10-K.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_009",
+      "descripcion": "CFO trimestral mostrará volatilidad >30% interanual por efectos de capital de trabajo.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Comparación YoY de CFO en próximos reportes trimestrales.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_010",
+      "descripcion": "Deterioro de capital de trabajo: inventario/ingresos sube >17% y AP/inventario cae <70% simultáneamente.",
+      "probabilidad_0_1": 0.36,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Inventario/ingresos TTM >17% y AP/inventario <70% por dos trimestres consecutivos.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Primer 10-Q y/o 10-K como empresa pública con estado de flujos trimestral completo",
+      "por_que_importa": "Proporciona cash flow trimestral, desglose de SGA, políticas contables, SBC, covenants y controles internos que el 424B4 no incluye. Permite validar puentes EBIT-CFO-FCF y reducir error de derivaciones FY-9M.",
+      "como_obtenerlo": "SEC EDGAR / BOBS ticker / 10-Q Q4-2025 esperado en mar-abr 2026"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de capex: mantenimiento vs crecimiento (nuevas tiendas) por trimestre",
+      "por_que_importa": "Sin este desglose no se puede determinar FCF de mantenimiento ni evaluar si capex es discrecional. Clave para separar inversión recurrente de discrecional.",
+      "como_obtenerlo": "MD&A del primer 10-K/10-Q o guidance en earnings call / investor deck"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla contractual de vencimientos de leases y detalle de lease commitments (undiscounted future payments)",
+      "por_que_importa": "Con $825M en leases y crecimiento del 30%, conocer el perfil temporal de vencimientos es crítico para modelar carga de caja real y riesgo de supervivencia.",
+      "como_obtenerlo": "Nota de arrendamientos (ASC 842) en primer 10-K"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de revolver/líneas de crédito y covenants post-IPO",
+      "por_que_importa": "Determina colchón de liquidez adicional y riesgo de breach bajo escenario adverso. Sin línea confirmada, liquidez depende exclusivamente de caja y CFO.",
+      "como_obtenerlo": "Exhibits de crédito en 8-K/10-Q y notas de deuda"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de stock-based compensation (SBC) y planes de equity incentive",
+      "por_que_importa": "S-8 registrado para 2 planes; SBC puede diluir materialmente y distorsionar earnings GAAP vs Non-GAAP. Insider con opciones a $2.04 (>10x in-the-money).",
+      "como_obtenerlo": "Nota de SBC en 10-K/10-Q / DEF 14A proxy statement"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Lock-up agreements y calendarios de venta del sponsor",
+      "por_que_importa": "Define la ventana temporal exacta del riesgo de overhang de Bain Capital.",
+      "como_obtenerlo": "Prospecto 424B4 sección Underwriting / Lock-up o S-1 registration statement"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Series de same-store sales, aperturas y cierres por trimestre",
+      "por_que_importa": "Es la métrica clave para validar crecimiento implícito de FCF y detectar deterioro temprano de demanda.",
+      "como_obtenerlo": "Earnings releases, investor deck y call transcript"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de pruebas de deterioro de goodwill e intangibles y aging de inventarios",
+      "por_que_importa": "$361M en goodwill+intangibles sin verificación de impairment testing. Riesgo de obsolescencia en inventario de muebles.",
+      "como_obtenerlo": "Notas a los estados financieros en primer 10-K (impairment testing + inventory valuation allowance)"
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.67,
+        "razon_principal": "Balance sin deuda y CFO positivo garantizan supervivencia, pero la combinación de opacidad de datos (solo 424B4, 53% completitud), patrón de optimización de márgenes pre-IPO, concentración de ownership de PE (73%) con incentivos de exit, carga de leases creciente ($825M > patrimonio) y fragilidad de capital de trabajo justifican monitoreo activo antes de asignar APTO."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 3.5,
+          "por_que": [
+            "Deuda financiera $0 — sin riesgo de refinanciación ni breach de covenants bancarios.",
+            "Caja de $123M más CFO TTM de $188M proporcionan cobertura amplia de obligaciones corrientes.",
+            "FCF TTM positivo ($112M) a pesar de capex elevado de expansión.",
+            "Lease liabilities de $825M son la única carga significativa, pero cubierta por CFO (1.69x lease corriente).",
+            "Negativo: Deterioro calidad CFO (-18% YoY) y dependencia extrema de crédito comercial (AP ~80% inventario).",
+            "Negativo: 2-3 banderas ALTA activadas (leases, working capital) impiden calificación superior.",
+            "Negativo: Cobertura documental parcial (53%) reduce certeza del diagnóstico.",
+            "Riesgo principal no es supervivencia sino calidad de retornos para accionistas minoritarios."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 123379000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "CFO recurrente (~$160-190M anuales basado en FY2023-FY2024 y TTM)",
+            "Posible revolving credit facility no divulgada (probable post-IPO, no confirmada)"
+          ],
+          "runway_meses_estimado": 24,
+          "metodo_estimacion": "Con FCF TTM de $112M positivo y caja de $123M, la empresa autosostiene operaciones. Sin CFO, caja cubre leases corrientes ($111M) por ~13 meses. Con CFO basal reducido al 50%, runway supera 24 meses. Sin detalle contractual 13-24 meses de leases y sin revolver confirmado, el runway de estrés puede estar sobreestimado.",
+          "notas": "Sin líneas de crédito confirmadas; es altamente probable que se establezca un revolver post-IPO. La liquidez técnica existe pero operativamente está apalancada en proveedores."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 0,
+          "deuda_neta_usd": -123379000,
+          "coste_deuda_aprox_pct": 0,
+          "coverage_intereses": null,
+          "net_debt_ebitda": -0.64,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "Toda la deuda (First Lien Note ~$80M) fue pagada antes del IPO. No hay vencimientos de deuda pendientes. La pared económica relevante son los pagos mensuales de arrendamiento."
+          },
+          "vencimientos": [],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "UNKNOWN",
+            "comentario": "Sin deuda bancaria visible no existen covenants financieros activos. Si se establece un revolver post-IPO, se introducirán covenants que deberán monitorearse. Riesgo medio de incumplimiento de contratos de arrendamiento si ventas colapsan."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "MEDIO-ALTO",
+          "motores": [
+            "Bain Capital retiene 73% con incentivos de monetización post-lock-up (vendió IPO a $15.94, precio actual $21.70)",
+            "S-8 registrado para equity incentive plan (2014 Stock Option Plan + 2026 EIP)",
+            "Insider con opciones a $2.04/acción (>10x in-the-money)",
+            "Posibles secundarias del sponsor que amplían free float pero generan presión técnica"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "El riesgo de dilución no proviene de emisiones por necesidad de capital (balance sólido) sino de monetización del sponsor PE y compensación equity-based. Overhang de acciones es el riesgo principal para el precio de la acción a 12 meses."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Calidad de resultados DEBIL-INDETERMINADA. La conversión EBIT→CFO TTM es saludable (+15% sobre EBIT), pero la volatilidad histórica es preocupante (de -55% a +52% del EBIT). El puente CFO→FCF está dominado por capex extremadamente variable (15-99% del CFO). Sin acceso a 10-K/10-Q, no se pueden verificar políticas de reconocimiento de ingresos, capitalización de costos ni SBC. El principal foco no es fraude evidente sino riesgo de normalización adversa de FCF y de estructura de costos fijos por leases.",
+        "red_flags": [
+          {
+            "flag_id": "RF-01",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "Capex se multiplicó x2.6 vs FY2023 ($78M vs $30M) con ingresos planos (+1%), drenando FCF y comprimiendo margen FCF de 8.3% a 4.1%. Sin desglose mantenimiento vs crecimiento.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.75,
+            "por_que_importa": "Sin desglose, FCF de mantenimiento es inobservable; se puede sobrestimar capacidad generativa real. Indica posible ineficiencia de capital o costes ocultos de mantenimiento clasificados como expansión.",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "TruthPack historico_anual FY2023-FY2024",
+                "cita_corta": "Capex FY2023 $30M → FY2024 $78M; ingresos +1%",
+                "interpretacion": "Explosión de gasto de capital sin crecimiento proporcional de ingresos."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Primer 10-K proporciona desglose de capex y growth capex >60% del total, o capex regresa a niveles de ~4-5% de ventas generando crecimiento >10%",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-02",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "CFO cayó 18% YoY en FY2024 con ventas planas. Volatilidad extrema del bridge EBIT→CFO: de -$27M (FY2022) a +$61M (FY2023) a +$14M (FY2024). AP cubre 80% de inventarios, dependencia agresiva de proveedores.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.7,
+            "por_que_importa": "Estructura de capital de trabajo insostenible si hay contracción de crédito comercial. La volatilidad puede enmascarar deterioro secular o beneficios temporales no recurrentes (liberación masiva WC FY2023).",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "Balance Sheet y ForensicDetection puentes EBIT→CFO",
+                "cita_corta": "AP cubre 80% de Inventarios; AP+leases corrientes $382.8M = 3.1x caja; Delta WC: -$27M (FY22), +$61M (FY23), +$14M (FY24)",
+                "interpretacion": "Financiación agresiva con proveedores y calidad de conversión inestable."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Estabilización de CFO y ratio AP/Inv se mantiene >75%, con delta WC dentro de ±$20M del EBIT durante 4 trimestres",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-03",
+            "categoria": "LEASES",
+            "descripcion": "Pasivos por arrendamiento ($825M) superan patrimonio ($548M) en 150%, creciendo +30% en 21 meses. Lease corriente $111M representa 90% de la caja disponible.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.85,
+            "por_que_importa": "Apalancamiento operativo extremo; rigidez de costes fijos. Principal obligación fija; si CFO se deteriora, la carga de lease se vuelve amenaza de supervivencia #1.",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "TruthPack lease_data",
+                "cita_corta": "Total Lease Liabilities $825M; patrimonio $548M; crecimiento +30% en 21 meses",
+                "interpretacion": "Deuda oculta masiva. Crecimiento de leases supera crecimiento de ingresos."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Crecimiento de ventas > crecimiento de pasivos de lease y ratio lease/CFO se mantiene <5x",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-04",
+            "categoria": "ONE_OFFS",
+            "descripcion": "Margen operativo mejoró de 5.8% a 7.0% TTM coincidiendo con ventana pre-IPO, mientras margen bruto cayó 170bps. Mejora proviene de recorte de SGA, patrón clásico de PE.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.55,
+            "por_que_importa": "Si recortes de SGA son temporales (optimización pre-IPO), margen operativo podría revertir, invalidando la base del reverse DCF y expectativas implícitas del mercado.",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "TruthPack historico_anual y trimestral",
+                "cita_corta": "Margen operativo 5.8%→7.0%; margen bruto 47.3%→45.6%",
+                "interpretacion": "Patrón típico de PE pre-IPO: costos recortados para presentar márgenes atractivos."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Margen operativo se mantiene >6.5% durante FY2026 completo con SGA/revenue ratio estable y margen bruto sin deterioro adicional",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "RF-05",
+            "categoria": "GOODWILL_IMPAIRMENT",
+            "descripcion": "Goodwill $182M + intangibles $179M = $361M (66% del patrimonio, 19.5% activos). Originados en adquisición por Bain Capital sin pruebas de deterioro verificables.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.28,
+            "por_que_importa": "Impairment >$50M eliminaría ~9% del patrimonio y señalaría que precio de adquisición original fue excesivo. Riesgo latente pero sin trigger visible actualmente.",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "TruthPack balance_sheet_ultimo y log",
+                "cita_corta": "Goodwill $181.7M, intangibles $179.1M; sin 10-K para verificar impairment testing",
+                "interpretacion": "Balance contiene activos sensibles a supuestos de valor recuperable."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Primer 10-K revela impairment testing pasado sin cargos o reporta impairment >$20M",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-06",
+            "categoria": "RELATED_PARTIES",
+            "descripcion": "CFF fuertemente negativo ($294M acumulado FY2022-FY2024) con $0 deuda, indicando distribuciones masivas al sponsor PE que consumieron 65% del CFO acumulado. Ya cesaron pre-IPO.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.2,
+            "por_que_importa": "Distribuciones ya cesaron (9M-2025 CFF -$8.6M), pero si se reactivan vía dividendos especiales post-IPO, drenarían caja. Concentración de propiedad en Bain (73%) mantiene riesgo de eventos de salida.",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "TruthPack CFF FY2022-FY2024 vs 9M-2025",
+                "cita_corta": "CFF: -$90M, -$95M, -$105M (FY22-24) → -$8.6M (9M-2025); sponsor retiene 73%",
+                "interpretacion": "Patrón clásico de extracción PE pre-salida; ya cesó pero merece monitoreo."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "CFF post-IPO se limita a dividendos regulares sin distribuciones extraordinarias por 4 trimestres",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-07",
+            "categoria": "OTHER",
+            "descripcion": "Toda la información financiera proviene del 424B4; sin 10-K/10-Q para verificar políticas contables, SBC, controles internos ni series trimestrales granulares. Completitud 53%.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.9,
+            "por_que_importa": "Opacidad limita severamente la detección de anomalías y la capacidad de asignar confianza al análisis. Aumenta error de diagnóstico y exige mayor prima de seguridad en tamaño.",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "TruthPack data_quality CORE_FILING_COVERAGE",
+                "cita_corta": "WARNING: solo 424B4 encontrado; completitud global 53.44%",
+                "interpretacion": "Situación temporal que se resolverá con primeros filings regulatorios."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Primer 10-Q/10-K publicado con completitud >80% de métricas clave",
+              "ventana_meses": {
+                "min": 2,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "Conversión EBIT→CFO TTM es saludable (+$25M o +15% sobre EBIT, resultado de D&A > intereses+impuestos). Sin embargo, la volatilidad histórica es preocupante: FY2022 mostró -55% y FY2023 +52% del EBIT. Conversión ruidosa, afectada por swings masivos de capital de trabajo.",
+            "posibles_distorsiones": [
+              "Capital de trabajo (liberación masiva FY2023 no recurrente)",
+              "Intereses (reducción de $24M→$1M por paydown de deuda pre-IPO)",
+              "Posible SBC no declarada en datos disponibles",
+              "Ajustes no-cash y one-offs no desglosados en el prospecto"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Capex consume 40-49% del CFO en periodos recientes (FY2024, 9M-2025, TTM). Elevado para retail de muebles y refleja fase de expansión de tiendas. FY2023 fue atípico con capex de solo 15% del CFO. La normalización de FCF depende de disciplina de inversión.",
+            "capex_riesgo": "ALTO",
+            "notas": "Sin desglose maintenance vs growth capex. Si 50%+ del capex es de crecimiento, FCF de mantenimiento podría ser significativamente mayor (~$140-150M). Si es principalmente mantenimiento, la capacidad generativa sostenible se reduce. Duda material sobre cuánto es mantenimiento real vs crecimiento."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "UNKNOWN",
+          "comentario": "Sin datos de recompras. Como empresa recién cotizada no hay historial. FCF TTM de $112M podría soportar un programa modesto pero prioridad probable es reinversión en expansión y liquidez."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "S-8 registrado para 2014 Stock Option Plan y 2026 Equity Incentive Plan. Al menos un insider tiene opciones a $2.04 (>10x in-the-money). Magnitud del gasto SBC no cuantificable con datos disponibles; probable aumento post-IPO."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "BAJO",
+          "comentario": "No hay evidencia de actividad M&A reciente. Goodwill e intangibles existentes provienen de la adquisición original por Bain Capital. Foco orgánico aparente."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Bain Capital domina la estructura de ownership (73%). Alineación del management operativo desconocida sin DEF 14A o disclosure de compensación ejecutiva."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Margen operativo revierte a niveles pre-IPO (~5.5%) por normalización de SGA mientras margen bruto sigue comprimiéndose, reduciendo EBIT TTM a ~$120M.",
+            "impacto_en_supervivencia": "BAJO",
+            "mecanismo_de_dolor": [
+              "Caída de net income y presión sobre precio (EV/EBIT sube a ~22x)",
+              "Reducción marginal de CFO pero sin amenaza a liquidez"
+            ],
+            "indicadores_tempranos": [
+              "SGA/revenue ratio sube >33% en cualquier trimestre",
+              "Margen bruto trimestral <44%",
+              "Guidance implica inversión incremental en marketing/personal"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Capex de expansión escala a >$100M anuales sin crecimiento proporcional de ingresos (comp sales negativos + nuevas tiendas canibalizan existentes).",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "FCF comprimido a <$60M o negativo",
+              "Caja se erosiona sin línea de crédito confirmada",
+              "Lease liabilities siguen creciendo sin retorno proporcional"
+            ],
+            "indicadores_tempranos": [
+              "Capex >$25M trimestral con comp sales ≤0%",
+              "Lease liabilities crecen >$50M por trimestre",
+              "Revenue por tienda cae >5% YoY",
+              "Margen FCF <2%"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "Bain Capital ejecuta ventas secundarias agresivas post-lock-up (>20M acciones en 12 meses), creando presión técnica que empuja precio a <$15.",
+            "impacto_en_supervivencia": "BAJO",
+            "mecanismo_de_dolor": [
+              "Caída de precio erosiona confianza de mercado",
+              "Dificulta eventuales emisiones de equity si se necesitan",
+              "Señal negativa sobre visión del sponsor"
+            ],
+            "indicadores_tempranos": [
+              "S-3 shelf registration filed para venta de acciones del sponsor",
+              "Volumen anómalo de negociación en block trades",
+              "Reducción >10% de participación del sponsor en un solo trimestre"
+            ]
+          },
+          {
+            "escenario_id": "D-004",
+            "descripcion": "Desaceleración macro en housing/muebles comprime demanda + endurecimiento de términos de proveedores; shock de capital de trabajo consume caja rápidamente.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "Inventario/ingresos sube >17%",
+              "AP/inventario cae <70%, consumiendo caja",
+              "CFO se deteriora por build-up de WC",
+              "Posible necesidad de markdowns que comprimen margen bruto",
+              "Estrés de liquidez si coincide con capex elevado"
+            ],
+            "indicadores_tempranos": [
+              "Inventario trimestral >$400M",
+              "AP/inventario <75%",
+              "Datos macro de housing starts/existing home sales en declive sostenido",
+              "Competidores reportando comps negativos en muebles",
+              "Caída de comps sales + aumento de inventarios simultáneo"
+            ]
+          }
+        ],
+        "conclusion_downside": "El riesgo de supervivencia es bajo incluso en escenarios adversos individuales: $0 deuda y CFO recurrente de $160-190M proporcionan colchón amplio. Sin deuda financiera, el riesgo extremo es dilución masiva o reestructuración operativa, no quiebra inmediata. El riesgo real es de destrucción de valor para accionistas: precio sobrevalorado si márgenes revierten, capex no genera retorno, o sponsor ejecuta exit acelerado. En el peor escenario combinado (D-002 + D-004), FCF podría acercarse a cero con lease liabilities en $900M+, y la transición de PASS a CONDITIONAL puede ocurrir con rapidez por rigidez de costos fijos."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-01",
+          "relacionado_con": "margen",
+          "definicion": "EBIT/Revenue TTM cae por debajo del 5.0% en cualquier periodo reportado de 4 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Reversión de márgenes confirmaría que la mejora pre-IPO era temporal, invalidando las expectativas implícitas del mercado y la base del reverse DCF."
+        },
+        {
+          "kc_id": "KC-02",
+          "relacionado_con": "fcf",
+          "definicion": "FCF TTM (CFO - capex) inferior a $50M o FCF TTM negativo en 2 cierres trimestrales consecutivos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "FCF <$50M implica EV/FCF >50x, insostenible para retail de muebles sin ventaja tecnológica. Compresión severa de caja incompatible con valoración y resiliencia."
+        },
+        {
+          "kc_id": "KC-03",
+          "relacionado_con": "dilucion",
+          "definicion": "Bain Capital reduce participación por debajo del 50% vía ventas secundarias o vende >15% de su posición en una sola transacción o bloque en 12 meses post-IPO.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "Venta acelerada del sponsor señala baja convicción en el valor a largo plazo y genera presión técnica severa de oferta masiva."
+        },
+        {
+          "kc_id": "KC-04",
+          "relacionado_con": "otro",
+          "definicion": "Same-store sales (comp sales) negativos durante 2 trimestres consecutivos reportados.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "El precio implica CAGR de FCF del 11-15%; comps negativos sostenidos harían esto inalcanzable y rompen la hipótesis de crecimiento."
+        },
+        {
+          "kc_id": "KC-05",
+          "relacionado_con": "supervivencia",
+          "definicion": "Ratio (caja + líneas de crédito confirmadas) / (lease corriente 12M + deuda financiera 12M) cae por debajo de 1.0x en 2 cierres trimestrales consecutivos, o cobertura de liquidez (Caja / Pasivos Corrientes) < 0.25.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Cobertura de obligaciones fijas <1.0x indica riesgo de estrés de liquidez inminente para un negocio lease-heavy. Crisis de liquidez inminente."
+        },
+        {
+          "kc_id": "KC-06",
+          "relacionado_con": "fcf",
+          "definicion": "Capex anual supera $100M sin crecimiento de ingresos superior a 10%.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Destruye conversión de CFO a FCF sin retorno proporcional; quema de caja improductiva."
+        },
+        {
+          "kc_id": "KC-07",
+          "relacionado_con": "contabilidad",
+          "definicion": "Impairment de goodwill o intangibles superior a $50M en cualquier periodo.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Erosiona equity significativamente (~9% del patrimonio) y señala que precio de adquisición original fue excesivo."
+        },
+        {
+          "kc_id": "KC-08",
+          "relacionado_con": "supervivencia",
+          "definicion": "Inventario/ingresos TTM >17% y AP/inventario <70% simultáneamente por dos cierres trimestrales.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Anticipa consumo acelerado de caja por deterioro de capital de trabajo; estructura financiera insostenible."
+        },
+        {
+          "kc_id": "KC-09",
+          "relacionado_con": "contabilidad",
+          "definicion": "Restatement de estados financieros o divulgación de material weakness no remediada en >2 trimestres como empresa pública.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "Como empresa recién cotizada sin historial de controles internos públicos, un restatement destruiría la confianza de base."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 2.5,
+        "condiciones_para_aumentar_tamaño": [
+          "Primer 10-Q/10-K confirma margen operativo >6.5% con margen bruto estable o en mejora",
+          "FCF TTM se mantiene >$100M con capex de crecimiento desglosado explícitamente",
+          "Comp sales positivos en primeros 2 trimestres reportados como empresa pública",
+          "Bain Capital no ejecuta ventas secundarias significativas en primeros 6 meses post-lock-up",
+          "Se establece revolving credit facility que proporciona colchón de liquidez adicional",
+          "Capex/CFO <=35% con crecimiento de ingresos >=8%",
+          "Cobertura de obligaciones fijas >=1.3x sostenida"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Margen operativo TTM cae <5.0% (KC-01) — reducir 50%",
+          "FCF TTM <$50M o negativo consecutivo (KC-02) — salir",
+          "Bain Capital reduce participación <50% o venta masiva >15% (KC-03) — salir",
+          "Comp sales negativos 2 trimestres consecutivos (KC-04) — reducir 50%",
+          "Cobertura obligaciones fijas <1.0x consecutivo (KC-05) — salir",
+          "Capex >$100M sin crecimiento >10% (KC-06) — congelar compras",
+          "Deterioro simultáneo inventario/proveedores (KC-08) — reducir 50%",
+          "Restatement o material weakness (KC-09) — salir"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "detalle_capex",
+          "por_que_importa": "Sin desglose maintenance vs growth capex no se puede determinar FCF de mantenimiento ni evaluar si capex es discrecional.",
+          "como_obtenerlo": "MD&A del primer 10-K/10-Q, earnings call transcript o investor deck"
+        },
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "S-8 registrado para 2 planes de equity; SBC puede distorsionar materialmente earnings y diluir acciones. Impacto real en dilución y margen GAAP vs Non-GAAP.",
+          "como_obtenerlo": "Nota de SBC en primer 10-K/10-Q o DEF 14A"
+        },
+        {
+          "item": "tabla_vencimientos",
+          "por_que_importa": "Calendario de lease payments undiscounted necesario para modelar obligaciones futuras y carga de caja por periodos.",
+          "como_obtenerlo": "Nota de arrendamientos (ASC 842) en primer 10-K"
+        },
+        {
+          "item": "revolver_disponible",
+          "por_que_importa": "Sin línea de crédito confirmada, la liquidez depende exclusivamente de caja y CFO bajo escenarios de estrés.",
+          "como_obtenerlo": "10-Q o 8-K que divulgue credit facility agreement"
+        },
+        {
+          "item": "acciones_diluidas",
+          "por_que_importa": "Share count exacto necesario para evaluar dilución real de equity incentive plans y presión de overhang.",
+          "como_obtenerlo": "10-Q earnings per share footnote con fully diluted share count"
+        },
+        {
+          "item": "covenants",
+          "por_que_importa": "Si se establece revolving post-IPO, los covenants podrían restringir distribuciones o recompras y definir triggers de estrés.",
+          "como_obtenerlo": "Exhibit del credit agreement en 10-K o 8-K"
+        },
+        {
+          "item": "aging_inventarios",
+          "por_que_importa": "Riesgo de obsolescencia en muebles con $341M en inventario.",
+          "como_obtenerlo": "Notas 10-K (Inventory valuation allowance)"
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Confianza fusionada 0.67: rango original [0.62-0.75] entre modelos, refleja incertidumbre por opacidad de datos.",
+      "Datos basados exclusivamente en Prospecto IPO 424B4; sin 10-K/10-Q; completitud del dataset 53%.",
+      "FCF normalizado no determinable con fiabilidad: rango histórico de $0.6M a $167M en 3 años (factor 296x).",
+      "Sin desglose de SBC, cambios de WC por componente, capex maintenance/growth, ni políticas contables verificables.",
+      "Lease liabilities ($825M) no tienen calendario de madurez detallado.",
+      "Survival score fusionado 3.5/5: rango original [2.0-4.0]. Gemini más conservador (CONDITIONAL, score 2), Claude más constructivo (PASS, score 4), Codex intermedio (PASS, score 3). Fusión adoptó PASS con score 3.5 reconociendo balance entre fortaleza de caja/deuda cero y fragilidad de WC/leases.",
+      "CFO/capex trimestrales se derivan por diferencias FY-9M en parte del periodo, introduciendo posible error de estimación."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-24T12:30:00Z",
+    "inputs_hash": "fusion:gemini+claude+codex::CASE_20260224_BOBS_FORENSIC_SCORING",
+    "fusion": {
+      "modelos_fusionados": [
+        "gemini-2.0-flash-thinking-exp",
+        "claude-opus-4-6",
+        "codex"
+      ],
+      "step_fusionado": "FORENSIC_SCORING",
+      "criterios_de_resolucion": {
+        "veredicto": "Mayoría (2 de 3 WATCHLIST) con Codex como outlier APTO. Se adoptó WATCHLIST por principio de prudencia forense ante opacidad de datos.",
+        "confianza": "Media ponderada por evidencia: Gemini 0.75, Claude 0.62, Codex 0.64 → fusión 0.67. Claude y Codex más conservadores por reconocer explícitamente la limitación documental.",
+        "survival_score": "Rango [2.0-4.0]. Gemini asignó 2.0 (CONDITIONAL) priorizando fragilidad de WC; Claude asignó 4.0 (PASS fuerte) priorizando $0 deuda + CFO; Codex asignó 3.0 (PASS moderado). Fusión adoptó 3.5 reconociendo ambos extremos.",
+        "datos_cuantitativos": "Cifras idénticas entre modelos ($825M leases, $123M caja, $0 deuda, etc.) adoptadas directamente. Sin discrepancias numéricas materiales.",
+        "red_flags": "Unión de todas las banderas detectadas. Gemini y Codex elevaron capex y WC a ALTA; Claude mantuvo MEDIA. Fusión adoptó ALTA para ambas por acuerdo mayoritario y mayor fundamentación.",
+        "kill_criteria": "Combinación de los mejores KC de cada modelo, tomando umbrales del más conservador cuando difieren."
+      },
+      "conflictos_detectados": [
+        {
+          "conflicto_id": "CONF-01",
+          "campo": "veredicto_role_local",
+          "valores": {
+            "gemini": "WATCHLIST",
+            "claude": "WATCHLIST",
+            "codex": "APTO"
+          },
+          "resolucion": "WATCHLIST adoptado por mayoría (2/3) y principio de prudencia forense. Codex reconoce las mismas limitaciones pero interpreta el PASS de supervivencia como suficiente para APTO; fusión prioriza que opacidad documental (53%) impide asignar APTO con rigor.",
+          "justificacion": "Coherente con la propia narrativa de Codex que advierte 'la incertidumbre de medición exige límites de posición conservadores'."
+        },
+        {
+          "conflicto_id": "CONF-02",
+          "campo": "survival_score_0_5",
+          "valores": {
+            "gemini": 2.0,
+            "claude": 4.0,
+            "codex": 3.0
+          },
+          "resolucion": "Score fusionado 3.5. Gemini penaliza excesivamente por WC frágil (score 2 = CONDITIONAL) sin ponderar suficientemente $0 deuda; Claude es demasiado constructivo (score 4) minimizando la carga de leases. Codex ofrece balance razonable (3.0). Fusión adopta 3.5 reconociendo que la supervivencia es robusta pero con margen de seguridad limitado.",
+          "justificacion": "PASS es consenso, pero el grado varía. Score 3.5 refleja que supervivencia no está en duda inmediata pero vulnerabilidad operativa es real."
+        },
+        {
+          "conflicto_id": "CONF-03",
+          "campo": "severidad_capex_flag",
+          "valores": {
+            "gemini": "ALTA",
+            "claude": "MEDIA",
+            "codex": "MEDIA"
+          },
+          "resolucion": "Elevado a ALTA. Capex x2.6 con ventas planas (+1%) y margen FCF comprimido al 4% es material. Sin desglose maintenance vs growth, el riesgo de sobrestimar FCF es sustancial.",
+          "justificacion": "Gemini aporta mayor fundamentación cuantitativa; el incremento de 162% YoY es significativo para un negocio de retail."
+        },
+        {
+          "conflicto_id": "CONF-04",
+          "campo": "severidad_working_capital_flag",
+          "valores": {
+            "gemini": "ALTA",
+            "claude": "MEDIA",
+            "codex": "ALTA"
+          },
+          "resolucion": "ALTA adoptada por mayoría (2/3). La combinación de CFO -18%, AP/Inventario 80% y AP+leases corrientes = 3.1x caja justifica severidad elevada.",
+          "justificacion": "El dato de Codex (AP+leases corrientes $382.8M = 3.1x caja) refuerza la posición de Gemini."
+        },
+        {
+          "conflicto_id": "CONF-05",
+          "campo": "riesgo_dilucion_nivel",
+          "valores": {
+            "gemini": "ALTO",
+            "claude": "MEDIO",
+            "codex": "MEDIO"
+          },
+          "resolucion": "MEDIO-ALTO como compromiso. El overhang es real (73%, precio +36% vs IPO), pero el riesgo no es de dilución por necesidad de capital sino de presión técnica por monetización del sponsor.",
+          "justificacion": "Claude y Codex distinguen correctamente entre dilución fundamental y presión técnica; Gemini captura el riesgo de señal pero sobrepesa."
+        },
+        {
+          "conflicto_id": "CONF-06",
+          "campo": "KC-02_umbral_fcf",
+          "valores": {
+            "gemini": "$50M",
+            "claude": "$60M",
+            "codex": "$60M"
+          },
+          "resolucion": "Adoptado $50M (umbral más conservador de Gemini). Con FCF <$50M el EV/FCF supera 50x, nivel claramente insostenible.",
+          "justificacion": "Umbral más bajo es más prudente como kill criterion: evita triggers prematuros mientras protege contra escenarios verdaderamente críticos."
+        },
+        {
+          "conflicto_id": "CONF-07",
+          "campo": "KC-03_accion",
+          "valores": {
+            "gemini": "SALIR",
+            "claude": "CONGELAR_COMPRAS",
+            "codex": "REDUCIR_50"
+          },
+          "resolucion": "SALIR adoptado. Una venta >15% del sponsor en bloque o caída <50% es señal inequívoca de desalineación grave.",
+          "justificacion": "Gemini establece el criterio correcto: evento binario de confianza en el sponsor que merece acción decisiva."
+        },
+        {
+          "conflicto_id": "CONF-08",
+          "campo": "prediccion_margen_operativo",
+          "valores": {
+            "gemini": "0.65 para <6.5%",
+            "claude": "0.40 para <6.0%",
+            "codex": "0.42 para <5.0%"
+          },
+          "resolucion": "Fusión: 0.50 para <6.0%. Umbral de 6.0% es punto intermedio razonable. Probabilidad de 50% refleja genuina incertidumbre sobre sostenibilidad del margen.",
+          "justificacion": "Los tres modelos coinciden en que hay riesgo material de reversión, pero difieren en magnitud. El rango de probabilidades [0.40-0.65] refleja incertidumbre real."
+        }
+      ]
+    }
+  }
+}

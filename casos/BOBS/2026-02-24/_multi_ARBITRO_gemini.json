@@ -1,0 +1,839 @@
+{
+  "version_esquema": "DecisionPacket_v2",
+  "backward_compatible_with": "DecisionPacket_v1",
+  "caso_id": "CASE_20260224_BOBS",
+  "fecha_corte": "2026-02-24",
+  "empresa": {
+    "ticker": "BOBS",
+    "nombre": "Bob's Discount Furniture (BDF Holding Corp.)",
+    "bolsa": "NYSE",
+    "pais": "US",
+    "sector": "Consumer Discretionary",
+    "industria": "Home Furnishings Retail"
+  },
+  "input_refs": {
+    "sources_pack_caso_id": "CASE_20260224_BOBS",
+    "truth_pack_caso_id": "CASE_20260224_BOBS",
+    "implied_expectations_caso_id": "CASE_20260224_BOBS",
+    "agent_reports": [
+      {
+        "agent_role": "BULL",
+        "agent_nombre": "BULL_v1_FUSION",
+        "report_ref": "AgentReport_v1_BULL",
+        "confianza_0_1": 0.61
+      },
+      {
+        "agent_role": "RED_TEAM",
+        "agent_nombre": "RED_TEAM_fusion_v1",
+        "report_ref": "AgentReport_v1_REDTEAM",
+        "confianza_0_1": 0.75
+      },
+      {
+        "agent_role": "CATALYST",
+        "agent_nombre": "CATALYST_SCORING_v1_FUSION",
+        "report_ref": "AgentReport_v1_CATALYST",
+        "confianza_0_1": 0.62
+      },
+      {
+        "agent_role": "FORENSIC",
+        "agent_nombre": "FORENSIC_SCORING_v1",
+        "report_ref": "AgentReport_v1_FORENSIC",
+        "confianza_0_1": 0.67
+      }
+    ]
+  },
+  "charter": {
+    "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+    "horizonte_meses": {
+      "min": 6,
+      "max": 30
+    },
+    "restricciones_no_especulativo": [
+      "Evitar tesis binaria",
+      "Evitar dependencia de financiacion salvadora",
+      "Exigir supervivencia 12-24 meses razonable",
+      "Exigir catalizador no binario y medible"
+    ]
+  },
+  "resumen_ejecutivo": {
+    "decision": "WATCHLIST",
+    "tamaño_recomendado_pct_cartera": 0,
+    "confianza_global_0_1": 0.65,
+    "racional_5_lineas": [
+      "La empresa presenta fundamentos interesantes ($0 deuda financiera, crecimiento +20%) pero la opacidad documental es crítica (falta 10-K/10-Q, solo prospecto IPO).",
+      "Existe un apalancamiento operativo 'oculto' en arrendamientos ($825M vs $548M patrimonio) que exige validación de flujos de caja normalizados.",
+      "El margen operativo mejoró recientemente (5.8% a 7.0%), pero coincide con ventana pre-IPO y recortes de SGA, generando dudas sobre su sostenibilidad estructural.",
+      "El overhang de Bain Capital (73% propiedad) crea un techo técnico probable y riesgo de ventas secundarias.",
+      "La decisión prudente es esperar al primer ciclo de reportes trimestrales (10-Q) para validar FCF, unit economics y márgenes post-IPO."
+    ],
+    "lo_mas_importante_ahora": [
+      "Publicación del primer 10-Q post-IPO (validación de datos).",
+      "Confirmación de margen operativo >6.8% en entorno de empresa pública.",
+      "Desglose de capex mantenimiento vs. expansión para calcular FCF real.",
+      "Comportamiento de Bain Capital tras expiración de lock-up."
+    ],
+    "principales_riesgos": [
+      "Reversión de márgenes operativos a niveles históricos (~5.8%).",
+      "Trampa de valor por obligaciones de arrendamiento en escenario de baja de ventas.",
+      "Presión de venta técnica por salida del sponsor (overhang)."
+    ]
+  },
+  "_comment_v2_decision_probabilistica": "NUEVO EN V2: bloque probabilístico que complementa la decisión categórica",
+  "decision_probabilistica": {
+    "probabilidad_exito_0_1": 0.6,
+    "retorno_esperado_ponderado_pct": 11.2,
+    "escenarios_ponderados": {
+      "base": {
+        "probabilidad_0_1": 0.5,
+        "retorno_estimado_pct": 14
+      },
+      "bull": {
+        "probabilidad_0_1": 0.2,
+        "retorno_estimado_pct": 48
+      },
+      "bear": {
+        "probabilidad_0_1": 0.3,
+        "retorno_estimado_pct": -18
+      }
+    },
+    "sizing_kelly": {
+      "kelly_crudo_pct": 2.8,
+      "factor_ajuste_confianza": 0.45,
+      "kelly_ajustado_pct": 1.2,
+      "tope_maximo_pct": 10,
+      "sizing_preliminar_pct": 1.2,
+      "sizing_final_pct": 0,
+      "nota": "Kelly crudo bajo (2.8%) refleja asimetría moderada (upside base vs downside bear). Ajuste por opacidad documental reduce sizing a nivel de piloto. Final 0% por decisión WATCHLIST."
+    },
+    "intervalo_confianza_90_pct": {
+      "percentil_5": -22,
+      "percentil_50": 11.2,
+      "percentil_95": 45
+    },
+    "conviccion_0_1": 0.65,
+    "ratio_asimetria": 0.77,
+    "_comment_ratio_asimetria": "upside_base (14) / abs(downside_bear) (18). 0.77 es desfavorable en escenario base, depende del Bull case.",
+    "expected_value_anualizado_pct": 7.4,
+    "decision_categorica": "WATCHLIST",
+    "_comment_decision_categorica": "Retrocompatible: replica resumen_ejecutivo.decision para que downstream no se rompa."
+  },
+  "_comment_v2_sensibilidad": "NUEVO EN V2: análisis de sensibilidad sobre supuestos clave",
+  "analisis_sensibilidad": [
+    {
+      "assumption_id": "A-001",
+      "variable": "margen_operativo_sostenible_pct",
+      "valor_base": 7.0,
+      "rango_test": {
+        "min": 5.5,
+        "max": 8.0,
+        "paso": 0.5
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": -25,
+        "si_max": 35
+      },
+      "impacto_en_decision": "Si margen < 6.0%, decisión pasa a DESCARTAR por sobrevaloración.",
+      "nota": "Variable crítica. Reversión a 5.8% (histórico) implica EV/EBIT >22x."
+    },
+    {
+      "assumption_id": "A-004",
+      "variable": "crecimiento_ingresos_cagr_pct",
+      "valor_base": 10.0,
+      "rango_test": {
+        "min": 4.0,
+        "max": 15.0,
+        "paso": 2.0
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": -15,
+        "si_max": 40
+      },
+      "impacto_en_decision": "Si crecimiento < 6%, la tesis de expansión falla.",
+      "nota": "Valoración actual exige crecimiento >8%."
+    }
+  ],
+  "gates": {
+    "data_quality_gate": {
+      "status": "CONDITIONAL",
+      "por_que": [
+        "Falta de filings 10-K/10-Q (solo prospecto IPO disponible).",
+        "Completitud de datos ~53%.",
+        "Imposible verificar desglose de cash flow trimestral y covenants."
+      ],
+      "faltantes_criticos": [
+        {
+          "item": "10-Q trimestral",
+          "como_resolver": "Esperar publicación primer reporte post-IPO (Marzo/Abril 2026)."
+        }
+      ]
+    },
+    "survivability_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Deuda financiera $0.",
+        "Caja $123M cubre obligaciones corrientes inmediatas.",
+        "CFO TTM positivo ($188M)."
+      ],
+      "condiciones_si_conditional": []
+    },
+    "mispricing_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Reverse DCF implica crecimiento 11-15%, exigente pero alcanzable con tesis Bull.",
+        "Potencial re-rating si desaparece prima de opacidad."
+      ]
+    },
+    "catalyst_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Normalización de disclosure (CAT_07).",
+        "Expansión de tiendas (CAT_09).",
+        "Consolidación de márgenes (CAT_02)."
+      ]
+    },
+    "non_speculative_gate": {
+      "status": "PASS",
+      "banderas": {
+        "tesis_binaria_detectada": false,
+        "dependencia_financiacion_salvadora": false,
+        "opacidad_inaceptable": true
+      },
+      "por_que": [
+        "Negocio real con beneficios, no es 'pre-revenue'.",
+        "La opacidad es temporal (IPO reciente), no estructural."
+      ]
+    }
+  },
+  "scoring_preliminar": {
+    "metodo": "Score_0_100",
+    "componentes": {
+      "S_supervivencia_0_25": 22,
+      "M_mispricing_0_25": 12,
+      "C_catalizador_0_20": 15,
+      "Q_calidad_0_15": 8,
+      "R_downside_0_15": 8,
+      "V_penalizacion_0_a_menos15": -5
+    },
+    "total_0_100": 60,
+    "nota": "Score moderado. Fortaleza en supervivencia y catalizadores, penalizado por calidad de datos (opacidad) y valoración exigente."
+  },
+  "assumption_ledger": {
+    "reglas": {
+      "id_prefix": "A-",
+      "max_supuestos": 40,
+      "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+    },
+    "supuestos": [
+      {
+        "assumption_id": "A-001",
+        "enunciado": "El margen operativo TTM (7.0%) es sostenible y no fruto de ingeniería financiera pre-IPO.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.55,
+        "confianza_0_1": 0.5,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "EBIT",
+          "FCF",
+          "MULTIPLO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "metricas_derivadas",
+            "cita_corta": "Margen op 5.8% -> 7.0%; Margen bruto 47.3% -> 45.6%",
+            "interpretacion": "Mejora vía recorte SGA, riesgo de reversión."
+          }
+        ],
+        "falsacion": {
+          "test": "Margen operativo < 6.0% en próximos 2 trimestres.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "CATALYST",
+            "claim_id": "CLM_002"
+          },
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_004"
+          }
+        ],
+        "notas_arbitro": "Variable bisagra de la valoración."
+      },
+      {
+        "assumption_id": "A-002",
+        "enunciado": "La carga de arrendamientos ($825M) es manejable mientras el crecimiento de ventas supere al de pasivos.",
+        "tipo": "INFERENCIA",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.6,
+        "confianza_0_1": 0.7,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "FCF",
+          "SUPERVIVENCIA"
+        ],
+        "evidencias": [
+          {
+            "source_id": "TruthPack_v1",
+            "ubicacion": "lease_data",
+            "cita_corta": "Leases +30% en 21 meses vs Revenue +20% (9M)",
+            "interpretacion": "Apalancamiento operativo aumentando."
+          }
+        ],
+        "falsacion": {
+          "test": "Lease liabilities crecen > Ingresos durante FY2026.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-K",
+          "accion_si_falla": "REDUCIR_50"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_002"
+          }
+        ],
+        "notas_arbitro": "Deuda oculta clave."
+      },
+      {
+        "assumption_id": "A-003",
+        "enunciado": "La salida de Bain Capital será ordenada y no provocará colapso técnico del precio.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.5,
+        "confianza_0_1": 0.6,
+        "impacto": "MEDIO",
+        "drivers_afectados": [
+          "MULTIPLO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_001",
+            "ubicacion": "Form 4",
+            "cita_corta": "Venta IPO ~3% del total, retiene 73%.",
+            "interpretacion": "Salida gradual probable."
+          }
+        ],
+        "falsacion": {
+          "test": "Venta en bloque >10% con descuento >8%.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_si_falla": "CONGELAR_COMPRAS"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "CATALYST",
+            "claim_id": "CAT_08"
+          }
+        ],
+        "notas_arbitro": "Riesgo técnico puro."
+      },
+      {
+        "assumption_id": "A-004",
+        "enunciado": "La empresa puede mantener un CAGR de FCF del 11-15% a 5 años.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.45,
+        "confianza_0_1": 0.5,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "VALORACION"
+        ],
+        "evidencias": [
+          {
+            "source_id": "ImpliedExpectations_v1",
+            "ubicacion": "reverse_dcf",
+            "cita_corta": "Implied CAGR 11-15% para justificar precio.",
+            "interpretacion": "Exigencia alta de crecimiento."
+          }
+        ],
+        "falsacion": {
+          "test": "FCF TTM < $100M en cualquier cierre anual.",
+          "ventana_meses": {
+            "min": 9,
+            "max": 24
+          },
+          "fuente_prevista": "10-K",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [
+          "A-001"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_004"
+          }
+        ],
+        "notas_arbitro": "La tesis bull depende de esto."
+      }
+    ]
+  },
+  "evidence_graph": {
+    "version": "EvidenceGraph_v1",
+    "nodos": [
+      {
+        "node_id": "E-001",
+        "tipo": "EVIDENCIA",
+        "label": "Margen Op sube 5.8%->7.0%, Bruto baja",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-002",
+        "tipo": "EVIDENCIA",
+        "label": "Leases $825M vs Equity $548M",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-003",
+        "tipo": "EVIDENCIA",
+        "label": "Falta 10-K/10-Q",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "A-001",
+        "tipo": "SUPUESTO",
+        "label": "Margen Sostenible",
+        "ref": {
+          "assumption_id": "A-001"
+        }
+      },
+      {
+        "node_id": "A-002",
+        "tipo": "SUPUESTO",
+        "label": "Leases Manejables",
+        "ref": {
+          "assumption_id": "A-002"
+        }
+      },
+      {
+        "node_id": "D-001",
+        "tipo": "DECISION",
+        "label": "WATCHLIST",
+        "ref": {
+          "decision": "WATCHLIST"
+        }
+      }
+    ],
+    "aristas": [
+      {
+        "from": "E-001",
+        "to": "A-001",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.6,
+        "nota": "Mejora visible pero calidad dudosa"
+      },
+      {
+        "from": "E-002",
+        "to": "A-002",
+        "relacion": "ATAQUE",
+        "peso_0_1": 0.8,
+        "nota": "Nivel de deuda oculta alto"
+      },
+      {
+        "from": "E-003",
+        "to": "D-001",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.9,
+        "nota": "Opacidad bloquea inversión"
+      },
+      {
+        "from": "A-001",
+        "to": "D-001",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.7,
+        "nota": "Incertidumbre de margen requiere espera"
+      }
+    ],
+    "validacion_grafo": {
+      "ids_unicos": true,
+      "aristas_referencian_nodos_existentes": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "detalle": "Grafo validado."
+    }
+  },
+  "catalizadores_consolidados": [
+    {
+      "catalyst_id": "C-001",
+      "nombre": "Normalización Disclosure (10-Q)",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 2,
+        "probable": 3,
+        "max": 6
+      },
+      "probabilidad_0_1": 0.85,
+      "mecanismo_cierre_gap": "Reduce prima de opacidad, valida unit economics.",
+      "supuestos_afectados": [
+        "A-001",
+        "A-004"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Publicación 10-Q con desglose FCF",
+          "fuente_prevista": "filing",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          }
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-002",
+      "nombre": "Aceleración Expansión Tiendas",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 24
+      },
+      "probabilidad_0_1": 0.72,
+      "mecanismo_cierre_gap": "Crecimiento de ingresos justifica múltiplo.",
+      "supuestos_afectados": [
+        "A-004"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Aperturas netas >6 tiendas/año",
+          "fuente_prevista": "earnings",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          }
+        }
+      ]
+    }
+  ],
+  "escenarios": [
+    {
+      "scenario_id": "BASE",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 12,
+        "probable": 18,
+        "max": 24
+      },
+      "descripcion": "Crecimiento moderado (8-12%), margen operativo estable ~7%. Bain sale ordenadamente. Rentabilidad via earnings growth.",
+      "drivers_clave": [
+        "A-001",
+        "A-003"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 5,
+        "base": 14,
+        "max": 22
+      },
+      "nota_valoracion": "Valoración justa a 16x EBIT."
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.2,
+      "ventana_meses": {
+        "min": 12,
+        "probable": 24,
+        "max": 30
+      },
+      "descripcion": "Expansión exitosa (>12% growth), margen mejora >7.5% por apalancamiento real. Múltiplo expande a 18-19x.",
+      "drivers_clave": [
+        "A-001",
+        "A-004"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 35,
+        "base": 48,
+        "max": 60
+      },
+      "nota_valoracion": "Growth premium."
+    },
+    {
+      "scenario_id": "BEAR",
+      "probabilidad_0_1": 0.3,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 18
+      },
+      "descripcion": "Márgenes revierten a 5.5%, Bain vende agresivamente, leases ahogan cash flow. Múltiplo contrae a 10-12x.",
+      "drivers_clave": [
+        "A-001",
+        "A-002",
+        "A-003"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": -38,
+        "base": -18,
+        "max": -5
+      },
+      "nota_valoracion": "Multiple compression + earnings miss."
+    }
+  ],
+  "kill_criteria_final": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con_assumption_id": "A-001",
+      "definicion": "Margen operativo TTM < 5.0% en 4 trimestres consecutivos.",
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "fuente_prevista": "earnings",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Destruye tesis de eficiencia."
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con_assumption_id": "A-004",
+      "definicion": "FCF TTM < $50M.",
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "fuente_prevista": "10-Q",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Insostenible para valuation actual."
+    },
+    {
+      "kc_id": "KC-003",
+      "relacionado_con_assumption_id": "A-003",
+      "definicion": "Venta Bain >15% stake en bloque con descuento >8%.",
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "fuente_prevista": "filing",
+      "accion": "SALIR",
+      "severidad": "MEDIA",
+      "por_que": "Señal de falta de confianza interna."
+    }
+  ],
+  "plan_monitorizacion": {
+    "frecuencias": {
+      "pulso_diario": {
+        "activo": true,
+        "que_mirar": [
+          "SEC EDGAR filings (esperando 10-Q)",
+          "Form 4 (insider selling)",
+          "Precio vs $20"
+        ]
+      },
+      "revision_semanal": {
+        "activo": true,
+        "que_mirar": [
+          "Noticias sector retail home furnishings",
+          "Tasas de interés (impacto housing)"
+        ]
+      },
+      "modo_evento": {
+        "activo": true,
+        "que_mirar": [
+          "Earnings Q4-2025/Q1-2026",
+          "Analyst days",
+          "Conferencias retail"
+        ]
+      }
+    },
+    "lista_de_checks_por_supuesto": [
+      {
+        "assumption_id": "A-001",
+        "indicadores": [
+          "EBIT Margin",
+          "SGA % Revenue"
+        ],
+        "fuente": "earnings",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-002",
+        "indicadores": [
+          "Lease Liabilities Growth vs Revenue Growth"
+        ],
+        "fuente": "10-Q",
+        "frecuencia": "TRIMESTRAL"
+      }
+    ],
+    "umbrales_alerta": [
+      {
+        "tipo": "PRECIO",
+        "condicion": "Caída >15% sin noticias",
+        "accion": "REVISAR_COMITE",
+        "severidad": "MEDIA"
+      }
+    ]
+  },
+  "predicciones_para_calibracion_consolidadas": [
+    {
+      "pred_id": "CP-001",
+      "descripcion": "Primer 10-Q post-IPO publicado a tiempo.",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Filing en EDGAR.",
+      "fuente_prevista": "10-Q",
+      "origen": [
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_001"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-002",
+      "descripcion": "Margen operativo TTM se mantiene >= 6.8%.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Calculo sobre 10-Q.",
+      "fuente_prevista": "10-Q",
+      "origen": [
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_002"
+        },
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_002"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-003",
+      "descripcion": "Bain reduce participación por debajo del 65%.",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Form 4/13D.",
+      "fuente_prevista": "filing",
+      "origen": [
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_006"
+        }
+      ]
+    }
+  ],
+  "arbitraje": {
+    "notas_arbitro": [
+      "Decisión WATCHLIST forzada por Data Quality Gate (falta de 10-K/10-Q).",
+      "Kelly preliminar positivo (1.2%) reducido a 0% por prudencia ante opacidad.",
+      "Divergencia Bull (Apto) vs Resto (Watchlist/No Apto) resuelta a favor de la prudencia hasta tener datos auditados."
+    ],
+    "desacuerdos_detectados": [
+      {
+        "tema": "Sostenibilidad Margen Operativo",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Estructural (leverage SGA)",
+            "confianza_0_1": 0.65
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "Cosmético (dressing pre-IPO)",
+            "confianza_0_1": 0.74
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "NO_RESUELTO",
+          "decision": "convertir_en_escenario",
+          "por_que": "Imposible validar sin historial post-IPO. Se modela como riesgo en escenario Bear.",
+          "accion": "Monitorear próximos 2 trimestres."
+        }
+      }
+    ],
+    "puntos_abiertos": [
+      "Unit economics reales (payback tiendas nuevas).",
+      "Calendario exacto de vencimientos de leases.",
+      "Intención real de Bain sobre salida."
+    ]
+  },
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "10-Q Trimestral Q4-2025 / Q1-2026",
+      "por_que_importa": "Primer set de datos real y completo.",
+      "como_obtenerlo": "Esperar publicación EDGAR."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose Capex Maintenance vs Growth",
+      "por_que_importa": "Calculo de FCF real.",
+      "como_obtenerlo": "Earnings Call / IR Deck."
+    }
+  ],
+  "salida_para_siguiente_agente": {
+    "monitor_input_recomendado": "Vigilar fecha de earnings y filing de 10-Q.",
+    "estado_caso": "EN_ESPERA",
+    "proxima_revision_sugerida": "2026-05-01"
+  },
+  "log": {
+    "autochequeos": {
+      "decision_respeta_gates": true,
+      "supuestos_criticos_tienen_evidencia": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "kill_criteria_mapeados_a_supuestos": true,
+      "salida_solo_json": true,
+      "_comment_v2_checks": "NUEVO EN V2: checks probabilísticos",
+      "probabilidades_escenarios_suman_1": true,
+      "kelly_sizing_dentro_de_tope": true,
+      "intervalo_confianza_coherente_con_escenarios": true,
+      "decision_categorica_coherente_con_probabilistica": true,
+      "sizing_final_igual_preliminar_si_invertir": true,
+      "sensibilidad_cubre_supuestos_criticos": true
+    },
+    "limitaciones": [
+      "Falta de datos históricos profundos (solo 3 años en prospecto).",
+      "FCF derivado, no directo.",
+      "Dependencia de info de IPO."
+    ],
+    "revision": {
+      "es_revision": false,
+      "revision_num": 1,
+      "decision_packet_anterior_caso_id": null,
+      "monitoring_updates_usados": [],
+      "resumen_cambios": []
+    }
+  },
+  "control": {
+    "estado_flujo": "ARBITRATE",
+    "next_step": "MONITOR",
+    "next_agent_role": "MONITOR",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 2,
+    "issues": [],
+    "work_orders": [],
+    "dispatch_queue": []
+  }
+}

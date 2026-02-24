@@ -1,0 +1,417 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_BOBS",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "claude-3.5-sonnet",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_BOBS",
+    "implied_expectations_caso_id": "CASE_20260224_BOBS",
+    "sources_pack_caso_id": "CASE_20260224_BOBS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La tesis alcista ignora que el 'FCF positivo' actual está dopado por un ciclo de capital de trabajo insostenible y falta de distinción entre capex de mantenimiento y expansión.",
+      "El riesgo de 'Value Trap' es alto: Bain Capital retiene ~73% y la 'aceleración' reciente huele a window-dressing pre-IPO típico de retail.",
+      "Los arrendamientos ($825M) son deuda real oculta; ajustando el EV, BOBS no es barata y tiene un apalancamiento operativo brutal a la baja si el consumo se frena.",
+      "No hay evidencia de 'Comp Sales' positivas; el crecimiento puede ser puramente inorgánico (abrir tiendas para tapar debilidad en las existentes).",
+      "La opacidad no es un 'catalizador latente', es una bandera roja: la falta de desglose trimestral histórico sugiere que los números reales son volátiles."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.75
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La estructura de capital 'sin deuda' es un espejismo: los $825M en pasivos por arrendamiento actúan como deuda con covenants operativos rígidos.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "lease_data",
+          "cita_corta": "Operating lease liabilities totales ~USD 825M vs Deuda Financiera USD 0.",
+          "interpretacion": "El apalancamiento real es operativo, no financiero, lo que es igual de peligroso en una recesión de consumo."
+        }
+      ],
+      "falsacion": {
+        "test": "El ratio (Rent Expense + Interest) / EBITDAR cae por debajo de 1.5x en los próximos 12 meses.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La calidad del FCF reportado es sospechosa: la generación de caja depende excesivamente de partidas de circulante volátiles (Cuentas a Pagar).",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-28",
+          "ubicacion": "metricas_derivadas.wc_change",
+          "cita_corta": "Accounts Payable USD 271M vs Inventory USD 341M.",
+          "interpretacion": "Estirar a proveedores puede inflar el CFO temporalmente antes de la IPO."
+        }
+      ],
+      "falsacion": {
+        "test": "El ciclo de conversión de efectivo empeora >10 días o Cuentas por Pagar se reducen >15% en dos trimestres.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "El margen operativo caerá por debajo del 6% en el primer año completo post-IPO debido a costes de empresa pública y normalización.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Margen EBIT TTM < 6.0% en 10-K FY2026.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "Bain ejecutará una venta secundaria significativa (>5% del cap) antes de 12 meses, presionando el precio.",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Filing S-1/424 para oferta secundaria de accionistas vendedores.",
+      "fuente_prevista": "SEC Filings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose histórico de Same Store Sales (SSS) vs Crecimiento por Nuevas Tiendas",
+      "por_que_importa": "Diferenciar crecimiento orgánico real de expansión inorgánica cara.",
+      "como_obtenerlo": "Buscar 'Comparable Sales' o 'Comp Store Sales' en MD&A del próximo 10-Q."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.75,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "Retailer cíclico disfrazado de crecimiento, con dueños buscando salida (Bain 73%) y métricas dopadas pre-IPO. Estructura de costes rígida por leases en un entorno de consumo incierto."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "Base financiera defensiva sin deuda y con FCF positivo.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "Ignora $825M en pasivos por arrendamiento (Lease Liabilities) que son deuda contractual.",
+                "El FCF positivo puede ser efímero si se normaliza el capital de trabajo (stretch de proveedores).",
+                "Retailers con alto lease leverage quiebran rápido sin deuda bancaria si caen las ventas."
+              ]
+            },
+            "puntos_ciegos": [
+              "Sensibilidad del FCF a cambios en términos de pago a proveedores.",
+              "Naturaleza fija de los alquileres vs volatilidad de ventas."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "lease_data",
+                "cita_corta": "Operating lease liabilities noncurrent: USD 671M.",
+                "interpretacion": "Pasivo masivo fuera del balance financiero tradicional."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Flujo de Caja Operativo (CFO) cae >30% YoY sin caída proporcional de ventas (normalización WC).",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_002",
+            "resumen_claim_bull": "Aceleración de ingresos compatible con expansión (+20.3% YoY).",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.55,
+              "por_que": [
+                "Crecimiento puramente basado en nuevas aperturas suele ocultar debilidad en tiendas comparables (Comps).",
+                "No hay datos de 'Same Store Sales' para validar salud orgánica.",
+                "La expansión agresiva pre-IPO es un truco clásico para inflar crecimiento top-line."
+              ]
+            },
+            "puntos_ciegos": [
+              "Canibalización entre tiendas nuevas y existentes.",
+              "Rendimiento de cohortes nuevas vs antiguas (diminishing returns)."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "AgentReport_v1_BULL",
+                "ubicacion": "peticiones_de_fuentes",
+                "cita_corta": "Falta KPIs de expansión: número de tiendas, comp sales.",
+                "interpretacion": "El propio Bull admite que falta el dato crítico para validar la calidad del crecimiento."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Reporte de Comp Sales negativo o < 2% con crecimiento total de ingresos > 10%.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_004",
+            "resumen_claim_bull": "Umbral de crecimiento de FCF (11-15%) es alcanzable.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.7,
+              "por_que": [
+                "Requiere ejecución perfecta en un entorno macro incierto.",
+                "Asume que Capex de mantenimiento no subirá (las tiendas envejecen).",
+                "Sectores de consumo discrecional (muebles) son los primeros en sufrir recortes de gasto de hogares."
+              ]
+            },
+            "puntos_ciegos": [
+              "Ciclicidad del sector muebles (post-COVID hangover).",
+              "Inflación de costes de ocupación y laborales."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [],
+            "test_falsacion_para_el_bull": {
+              "test": "Margen FCF se contrae a pesar del crecimiento de ventas.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Asumir que la opacidad esconde valor y no problemas (Falacia de la Caja Negra).",
+          "Proyectar márgenes operativos estables o crecientes justo después de una IPO (históricamente, el momento de márgenes pico).",
+          "Dependencia crítica de que el mercado ignore el 'overhang' de Bain (73% ownership)."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El mercado está descontando correctamente que BOBS es un retailer cíclico en pico de ciclo.",
+          "El descuento por opacidad está justificado: los números reales (sin ajustes IPO) son peores.",
+          "La liquidez es una trampa: Bain necesita vender papel y el mercado lo sabe, poniendo un techo al precio."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "BOBS es una 'IPO trap' clásica: métricas embellecidas, dueño PE buscando salida masiva y ciclo de consumo girando a la baja.",
+          "La estructura de capital real (con leases) es rígida; una caída en ventas golpeará el FCF desproporcionadamente.",
+          "El crecimiento es de baja calidad (inorgánico) y enmascara deterioro en tiendas existentes.",
+          "La valoración actual no ofrece margen de seguridad real ajustada por pasivos de alquiler y riesgo de ejecución.",
+          "Bain usará cualquier subida para empapelar al mercado, limitando el upside estructural."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "Costes de empresa pública + inflación de rentas/salarios comprimen margen EBIT.",
+            "indicadores_tempranos": [
+              "SGA subiendo más rápido que ventas",
+              "Guidance de margen a la baja"
+            ]
+          },
+          {
+            "mecanismo": "DILUCION",
+            "descripcion": "Ventas secundarias de Bain y Stock Based Compensation (SBC) post-IPO.",
+            "indicadores_tempranos": [
+              "Registro de nuevos planes de acciones (S-8)",
+              "Anuncios de secondary offerings"
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Estancamiento: Crecimiento se desacelera a mid-single digits, márgenes se comprimen por costes. Bain vende goteando.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "+3% a +5%",
+                "justificacion": "Agotamiento de demanda post-COVID y saturación."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "4.5% - 5.5%",
+                "justificacion": "Pérdida de apalancamiento operativo."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "El mercado re-tasa a múltiplo de retailer maduro/problemático (8x-10x EV/EBIT).",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -30,
+                "base": -15,
+                "max": -5
+              },
+              "nota": "De-rating severo."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Recesión de Consumo + Trampa de Leases: Ventas caen, apalancamiento operativo tritura el EBIT. Caja quema rápido.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 18
+            },
+            "probabilidad_0_1": 0.25,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "-5% a 0%",
+                "justificacion": "Recesión macro impacta big-ticket items (muebles)."
+              }
+            ],
+            "impacto_en_supervivencia": "MEDIO",
+            "nota": "No quiebra inmediata, pero destrucción de valor masiva (>50%)."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.75,
+        "razones": [
+          "Propiedad concentrada en PE (Bain 73%) buscando salida.",
+          "Sector estructuralmente difícil (Retail muebles) con bajas barreras.",
+          "Métricas ópticas baratas (si ignoras leases) pero caras ajustadas por riesgo.",
+          "Crecimiento reciente sospechoso de ser 'pump' pre-IPO."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo (Bull)",
+            "evidencia_necesaria": [
+              "Comp sales acelerando junto con aperturas.",
+              "Márgenes estables."
+            ]
+          },
+          {
+            "hipotesis": "Es trampa (Red Team)",
+            "evidencia_necesaria": [
+              "Comp sales negativos.",
+              "Inventario creciendo más rápido que ventas.",
+              "Insider selling agresivo."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "Comp Sales negativos en primer reporte post-IPO.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma crecimiento de baja calidad."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "DILUCION",
+          "definicion": "Bain anuncia venta >10% de su stake con descuento >5%.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Exceso de oferta de papel limitará upside."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Reporte de Comp Sales > 5% sostenido.",
+          "umbral_o_condicion": "Sostenido 2 trimestres.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 9
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Desglose claro de Unit Economics de nuevas tiendas mostrando ROIC > 20%.",
+          "umbral_o_condicion": "Dato oficial en 10-K.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "filing"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": "0%",
+        "si_se_invierte_igual": [
+          "Esperar al primer 10-Q y 10-K para ver datos reales.",
+          "No entrar antes de que Bain aclare su calendario de salida.",
+          "Usar stops ajustados por volatilidad."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Cuál es el SSS (Same Store Sales) real de los últimos 4 trimestres?",
+          "¿Cuánto del 'FCF' es simplemente retrasar pagos a proveedores?",
+          "¿Cuál es el plan de salida de Bain y cuándo expira el lock-up?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta de datos históricos de Comp Sales impide validación definitiva.",
+      "Dependencia de filings IPO (424B4) que suelen estar 'maquillados'.",
+      "Incertidumbre sobre covenants de leases no públicos."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

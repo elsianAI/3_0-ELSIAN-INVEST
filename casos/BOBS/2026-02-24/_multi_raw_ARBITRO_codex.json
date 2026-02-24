@@ -1,0 +1,2225 @@
+{
+  "version_esquema": "ArbitroRemediateKickoff_v1",
+  "decision_packet": {
+    "version_esquema": "DecisionPacket_v2",
+    "backward_compatible_with": "DecisionPacket_v1",
+    "caso_id": "CASE_20260224_BOBS",
+    "fecha_corte": "2026-02-24",
+    "empresa": {
+      "ticker": "BOBS",
+      "nombre": "Bob's Discount Furniture (BDF Holding Corp.)",
+      "bolsa": "UNKNOWN",
+      "pais": "US",
+      "sector": "Consumer Discretionary",
+      "industria": "Home Furnishings Retail"
+    },
+    "input_refs": {
+      "sources_pack_caso_id": "CASE_20260224_BOBS",
+      "truth_pack_caso_id": "CASE_20260224_BOBS",
+      "implied_expectations_caso_id": "CASE_20260224_BOBS",
+      "agent_reports": [
+        {
+          "agent_role": "CATALYST",
+          "agent_nombre": "CATALYST_SCORING_v1_FUSION",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.62
+        },
+        {
+          "agent_role": "FORENSIC",
+          "agent_nombre": "FORENSIC_SCORING_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.67
+        },
+        {
+          "agent_role": "BULL",
+          "agent_nombre": "BULL_v1_FUSION",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.61
+        },
+        {
+          "agent_role": "RED_TEAM",
+          "agent_nombre": "RED_TEAM_fusion_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.75
+        }
+      ]
+    },
+    "charter": {
+      "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+      "horizonte_meses": {
+        "min": 6,
+        "max": 30
+      },
+      "restricciones_no_especulativo": [
+        "Evitar tesis binaria",
+        "Evitar dependencia de financiacion salvadora",
+        "Exigir supervivencia 12-24 meses razonable",
+        "Exigir catalizador no binario y medible"
+      ]
+    },
+    "resumen_ejecutivo": {
+      "decision": "BLOQUEADO",
+      "tamaño_recomendado_pct_cartera": 0,
+      "confianza_global_0_1": 0.49,
+      "racional_5_lineas": [
+        "El Data Quality Gate falla porque TruthPack llega como PARTIAL y no PASS, con cobertura solo 424B4 y sin 10-Q/10-K operativos completos.",
+        "La supervivencia a 12-24 meses es razonable por deuda financiera cero y caja neta, pero con condicion por pasivos de lease y fragilidad de capital de trabajo.",
+        "La asimetria probabilistica es desfavorable (ratio 0.56) y el Kelly da 0%, por lo que no hay sizing economico defendible.",
+        "Hay desacuerdo real entre BULL y RED/FORENSIC sobre sostenibilidad de margenes y calidad de FCF, no resoluble con evidencia actual.",
+        "Se activa REMEDIATE para completar datos criticos y re-arbitrar antes de cualquier asignacion de capital."
+      ],
+      "lo_mas_importante_ahora": [
+        "Obtener primeros 10-Q/10-K con CFO, capex y EBIT trimestral explicitos",
+        "Separar capex de mantenimiento vs expansion para validar FCF normalizado",
+        "Confirmar comp sales, aperturas/cierres y productividad por tienda",
+        "Extraer tabla contractual de pagos de leases no descontados",
+        "Monitorear lock-up y secundarias de Bain para riesgo tecnico de oferta"
+      ],
+      "principales_riesgos": [
+        "Opacidad de datos (solo 424B4, completitud 53.44%)",
+        "Pasivos de lease altos frente a equity y caja",
+        "Reversion del margen operativo post-IPO",
+        "Sobreoferta por desinversion del sponsor mayoritario",
+        "FCF estructural sobreestimado por falta de desglose de capex y capital de trabajo"
+      ]
+    },
+    "_comment_v2_decision_probabilistica": "NUEVO EN V2: bloque probabilistico que complementa la decision categorica",
+    "decision_probabilistica": {
+      "probabilidad_exito_0_1": 0.5,
+      "retorno_esperado_ponderado_pct": 1.25,
+      "escenarios_ponderados": {
+        "base": {
+          "probabilidad_0_1": 0.35,
+          "retorno_estimado_pct": 10
+        },
+        "bull": {
+          "probabilidad_0_1": 0.15,
+          "retorno_estimado_pct": 45
+        },
+        "bear": {
+          "probabilidad_0_1": 0.5,
+          "retorno_estimado_pct": -18
+        }
+      },
+      "sizing_kelly": {
+        "kelly_crudo_pct": 0,
+        "factor_ajuste_confianza": 0.34,
+        "kelly_ajustado_pct": 0,
+        "tope_maximo_pct": 10,
+        "sizing_preliminar_pct": 0,
+        "sizing_final_pct": 0,
+        "nota": "b=0.56 y p=0.50 producen Kelly negativo; se trunca a 0. Sin inversion mientras no pase data quality."
+      },
+      "intervalo_confianza_90_pct": {
+        "percentil_5": -21.6,
+        "percentil_50": 1.25,
+        "percentil_95": 36
+      },
+      "conviccion_0_1": 0.4,
+      "ratio_asimetria": 0.56,
+      "_comment_ratio_asimetria": "upside_base / abs(downside_bear). >2 = asimetria favorable. <1 = desfavorable.",
+      "expected_value_anualizado_pct": 1.25,
+      "decision_categorica": "BLOQUEADO",
+      "_comment_decision_categorica": "Retrocompatible: replica resumen_ejecutivo.decision para que downstream no se rompa."
+    },
+    "_comment_v2_sensibilidad": "NUEVO EN V2: analisis de sensibilidad sobre supuestos clave",
+    "analisis_sensibilidad": [
+      {
+        "assumption_id": "A-003",
+        "variable": "margen_operativo_ttm_pct",
+        "valor_base": 7.04,
+        "rango_test": {
+          "min": 5.5,
+          "max": 8,
+          "paso": 0.5
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": -22,
+          "si_max": 28
+        },
+        "impacto_en_decision": "Si margen <6.0% y sigue opacidad, pasa a DESCARTAR en re-arbitraje; si >7.5% con data PASS, habilita WATCHLIST.",
+        "nota": "Variable operativa mas sensible para EV/EBIT implicito."
+      },
+      {
+        "assumption_id": "A-004",
+        "variable": "cagr_fcf_5y_pct",
+        "valor_base": 13,
+        "rango_test": {
+          "min": 6,
+          "max": 18,
+          "paso": 2
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": -18,
+          "si_max": 24
+        },
+        "impacto_en_decision": "Si CAGR FCF verificable <10%, la tesis queda sin cierre de gap y pasa a DESCARTAR.",
+        "nota": "Deriva directo de ImpliedExpectations reverse DCF."
+      },
+      {
+        "assumption_id": "A-005",
+        "variable": "lease_liabilities_totales_usd",
+        "valor_base": 824690000,
+        "rango_test": {
+          "min": 760000000,
+          "max": 950000000,
+          "paso": 30000000
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": 6,
+          "si_max": -17
+        },
+        "impacto_en_decision": "Si leases >900M sin crecimiento proporcional de ingresos, mantener BLOQUEADO o mover a DESCARTAR.",
+        "nota": "Principal riesgo de rigidez de costos fijos."
+      },
+      {
+        "assumption_id": "A-006",
+        "variable": "venta_secundaria_bain_descuento_pct",
+        "valor_base": 5,
+        "rango_test": {
+          "min": 2,
+          "max": 12,
+          "paso": 2
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": 4,
+          "si_max": -15
+        },
+        "impacto_en_decision": "Descuento >8% en bloque grande activa congelar compras y sesga a DESCARTAR.",
+        "nota": "Riesgo tecnico de oferta no captura totalmente fundamentales."
+      },
+      {
+        "assumption_id": "A-010",
+        "variable": "completitud_datos_pct",
+        "valor_base": 53.44,
+        "rango_test": {
+          "min": 50,
+          "max": 85,
+          "paso": 5
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": -6,
+          "si_max": 10
+        },
+        "impacto_en_decision": "Si completitud no supera 75% tras 2 filings, BLOQUEADO persiste aun con mejora operativa.",
+        "nota": "Sensibilidad de gobernanza de decision, no solo de retorno."
+      }
+    ],
+    "gates": {
+      "data_quality_gate": {
+        "status": "FAIL",
+        "por_que": [
+          "TruthPack.data_quality.status llega como PARTIAL (no PASS).",
+          "CORE_FILING_COVERAGE en warning: no 10-K/10-Q, solo 424B4.",
+          "Faltan metricas directas de FCF/EBIT trimestral para validar calidad de caja."
+        ],
+        "faltantes_criticos": [
+          {
+            "item": "FCF",
+            "como_resolver": "Extraer CFO y capex trimestral desde primeros 10-Q/10-K post-IPO."
+          },
+          {
+            "item": "EBIT",
+            "como_resolver": "Obtener EBIT trimestral directo en filings regulares para evitar puentes FY-9M."
+          },
+          {
+            "item": "otro",
+            "como_resolver": "Completar comp sales, aperturas/cierres y capex mantenimiento vs expansion."
+          }
+        ]
+      },
+      "survivability_gate": {
+        "status": "CONDITIONAL",
+        "por_que": [
+          "Deuda financiera 0 y caja neta positiva sostienen supervivencia base.",
+          "Leases totales ~825M elevan rigidez de costos y riesgo operacional.",
+          "Capital de trabajo depende de credito comercial (AP/inventario elevado)."
+        ],
+        "condiciones_si_conditional": [
+          "Mantener cobertura de obligaciones fijas >=1.3x",
+          "Evitar FCF TTM <50M por dos trimestres",
+          "Controlar crecimiento de leases <= crecimiento de ingresos"
+        ]
+      },
+      "mispricing_gate": {
+        "status": "UNKNOWN",
+        "por_que": [
+          "Existe posible gap por prima de opacidad y overhang del sponsor.",
+          "Sin 10-Q/10-K completos no es verificable si el gap es real o justificado."
+        ]
+      },
+      "catalyst_gate": {
+        "status": "PASS",
+        "por_que": [
+          "Hay 3 catalizadores medibles y no binarios en ventana 6-30 meses.",
+          "Normalizacion de disclosure, sostenibilidad de margen y productividad de expansion son observables.",
+          "Todos tienen tests confirmatorios con fuentes previstas."
+        ]
+      },
+      "non_speculative_gate": {
+        "status": "PASS",
+        "banderas": {
+          "tesis_binaria_detectada": false,
+          "dependencia_financiacion_salvadora": false,
+          "opacidad_inaceptable": false
+        },
+        "por_que": [
+          "No depende de un evento binario unico para materializarse.",
+          "No requiere financiacion salvadora por balance sin deuda financiera.",
+          "La opacidad existe pero es resoluble por calendario regulatorio de filings."
+        ]
+      }
+    },
+    "scoring_preliminar": {
+      "metodo": "Score_0_100",
+      "componentes": {
+        "S_supervivencia_0_25": 17,
+        "M_mispricing_0_25": 11,
+        "C_catalizador_0_20": 13,
+        "Q_calidad_0_15": 3,
+        "R_downside_0_15": 6,
+        "V_penalizacion_0_a_menos15": -10
+      },
+      "total_0_100": 40,
+      "nota": "Supervivencia razonable pero baja calidad de datos y asimetria desfavorable impiden convertir tesis en inversion ejecutable."
+    },
+    "assumption_ledger": {
+      "reglas": {
+        "id_prefix": "A-",
+        "max_supuestos": 40,
+        "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+      },
+      "supuestos": [
+        {
+          "assumption_id": "A-001",
+          "enunciado": "La posicion de caja neta y deuda financiera cero se mantiene en 12 meses.",
+          "tipo": "HECHO",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.78,
+          "confianza_0_1": 0.9,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "COSTE_DEUDA",
+            "FCF"
+          ],
+          "evidencias": [
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "balance_sheet_ultimo",
+              "cita_corta": "Deuda total 0; caja 123.4M.",
+              "interpretacion": "Riesgo de refinanciacion bajo en el corto plazo."
+            }
+          ],
+          "falsacion": {
+            "test": "Deuda financiera >150M o caja <60M.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "10-Q",
+            "accion_si_falla": "REVISAR_COMITE"
+          },
+          "dependencias": [
+            "A-012"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_001"
+            },
+            {
+              "agent_role": "FORENSIC",
+              "claim_id": "CLM_001"
+            }
+          ],
+          "notas_arbitro": "Base de supervivencia, no de upside por si sola."
+        },
+        {
+          "assumption_id": "A-002",
+          "enunciado": "La carga de leases es manejable con CFO operativo recurrente.",
+          "tipo": "INFERENCIA",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.54,
+          "confianza_0_1": 0.72,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "FCF",
+            "MARGEN_OPERATIVO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "lease_data",
+              "cita_corta": "Lease liabilities totales ~824.7M.",
+              "interpretacion": "Es la principal deuda economica operativa."
+            }
+          ],
+          "falsacion": {
+            "test": "Ratio (caja+CFO TTM)/lease corriente <1.0x.",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            },
+            "fuente_prevista": "10-Q",
+            "accion_si_falla": "SALIR"
+          },
+          "dependencias": [
+            "A-001",
+            "A-012"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_005"
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_002"
+            }
+          ],
+          "notas_arbitro": "Supuesto de primer orden para no convertirse en value trap."
+        },
+        {
+          "assumption_id": "A-003",
+          "enunciado": "El margen operativo TTM >=6.8% es sostenible tras normalizacion post-IPO.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.52,
+          "confianza_0_1": 0.62,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "MARGEN_OPERATIVO",
+            "EBIT",
+            "MULTIPLO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "ImpliedExpectations_v1",
+              "ubicacion": "metricas_base",
+              "cita_corta": "Margen operativo TTM 7.04%.",
+              "interpretacion": "Nivel actual que el mercado parece extrapolar."
+            }
+          ],
+          "falsacion": {
+            "test": "Margen operativo <6.0% en dos trimestres consecutivos.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "10-Q",
+            "accion_si_falla": "REDUCIR_50"
+          },
+          "dependencias": [
+            "A-007",
+            "A-009"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_002"
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_003"
+            }
+          ],
+          "notas_arbitro": "Mayor desacuerdo entre agentes."
+        },
+        {
+          "assumption_id": "A-004",
+          "enunciado": "El negocio puede sostener CAGR de FCF de doble digito en 5 anos.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.45,
+          "confianza_0_1": 0.58,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "FCF",
+            "MULTIPLO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "ImpliedExpectations_v1",
+              "ubicacion": "reverse_dcf_fcf",
+              "cita_corta": "Mercado implica CAGR FCF 11%-15% central.",
+              "interpretacion": "Exigencia de valoracion material."
+            }
+          ],
+          "falsacion": {
+            "test": "FCF TTM <120M en primer 10-K completo.",
+            "ventana_meses": {
+              "min": 9,
+              "max": 18
+            },
+            "fuente_prevista": "10-K",
+            "accion_si_falla": "SALIR"
+          },
+          "dependencias": [
+            "A-005",
+            "A-008",
+            "A-009"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_004"
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_004"
+            }
+          ],
+          "notas_arbitro": "Sin validacion directa de FCF trimestral aun."
+        },
+        {
+          "assumption_id": "A-005",
+          "enunciado": "El capex de expansion genera productividad por tienda suficiente.",
+          "tipo": "INFERENCIA",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.5,
+          "confianza_0_1": 0.57,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "CAPEX",
+            "FCF",
+            "OTRO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_anual/lease_data",
+              "cita_corta": "Capex FY24 78.2M vs FY23 29.8M; ROU assets al alza.",
+              "interpretacion": "Expasion material de base fisica."
+            }
+          ],
+          "falsacion": {
+            "test": "Capex >100M sin crecimiento de ingresos >10%.",
+            "ventana_meses": {
+              "min": 6,
+              "max": 24
+            },
+            "fuente_prevista": "10-K",
+            "accion_si_falla": "CONGELAR_COMPRAS"
+          },
+          "dependencias": [
+            "A-008",
+            "A-012"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_003"
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_006"
+            }
+          ],
+          "notas_arbitro": "Falta KPI de payback por cohorte."
+        },
+        {
+          "assumption_id": "A-006",
+          "enunciado": "La salida de Bain sera gradual y sin descuentos disruptivos.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.43,
+          "confianza_0_1": 0.66,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "MULTIPLO",
+            "OTRO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "SRC_001",
+              "ubicacion": "Form 4 2026-02-13",
+              "cita_corta": "Venta 2,917,500 acciones; remanente 95,370,751.",
+              "interpretacion": "Overhang tecnico relevante durante 12-24 meses."
+            }
+          ],
+          "falsacion": {
+            "test": "Secundaria >10% del float con descuento >8%.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 18
+            },
+            "fuente_prevista": "filing",
+            "accion_si_falla": "CONGELAR_COMPRAS"
+          },
+          "dependencias": [
+            "A-010"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_004"
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_004"
+            }
+          ],
+          "notas_arbitro": "Riesgo tecnico clave para timing de entrada."
+        },
+        {
+          "assumption_id": "A-007",
+          "enunciado": "Los primeros 10-Q/10-K llegan a tiempo y con desglose util.",
+          "tipo": "HECHO",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.69,
+          "confianza_0_1": 0.8,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "OTRO",
+            "MULTIPLO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "AgentReport_v1_CATALYST",
+              "ubicacion": "PRED_001",
+              "cita_corta": "Primer 10-Q en plazo con guidance cuantitativo.",
+              "interpretacion": "Catalizador de transparencia mas cercano."
+            }
+          ],
+          "falsacion": {
+            "test": "Retraso >15 dias o disclosure incompleto en dos filings.",
+            "ventana_meses": {
+              "min": 2,
+              "max": 9
+            },
+            "fuente_prevista": "10-Q",
+            "accion_si_falla": "REVISAR_COMITE"
+          },
+          "dependencias": [],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_005"
+            },
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_006"
+            }
+          ],
+          "notas_arbitro": "Supuesto operativo para desbloquear data gate."
+        },
+        {
+          "assumption_id": "A-008",
+          "enunciado": "Comp sales se mantienen positivas en mayoria de trimestres.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "IMPORTANTE",
+          "probabilidad_0_1": 0.52,
+          "confianza_0_1": 0.5,
+          "impacto": "MEDIO",
+          "drivers_afectados": [
+            "INGRESOS",
+            "FCF",
+            "OTRO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "AgentReport_v1_CATALYST",
+              "ubicacion": "PRED_009",
+              "cita_corta": "Comp sales >2% en 3 de 4 trimestres.",
+              "interpretacion": "Clave para separar crecimiento organico de expansion."
+            }
+          ],
+          "falsacion": {
+            "test": "Comp sales <=0% en dos trimestres consecutivos.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "earnings",
+            "accion_si_falla": "REDUCIR_50"
+          },
+          "dependencias": [
+            "A-005"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_006"
+            },
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_003"
+            }
+          ],
+          "notas_arbitro": "Sin dato actual, solo hipotesis verificable."
+        },
+        {
+          "assumption_id": "A-009",
+          "enunciado": "El margen bruto se mantiene por encima de 44%.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "IMPORTANTE",
+          "probabilidad_0_1": 0.58,
+          "confianza_0_1": 0.56,
+          "impacto": "MEDIO",
+          "drivers_afectados": [
+            "MARGEN_OPERATIVO",
+            "EBIT"
+          ],
+          "evidencias": [
+            {
+              "source_id": "AgentReport_v1_BULL",
+              "ubicacion": "PRED_007",
+              "cita_corta": "Gross margin >44% en 3 de 4 trimestres.",
+              "interpretacion": "Soporte para evitar reversion fuerte de EBIT."
+            }
+          ],
+          "falsacion": {
+            "test": "Margen bruto <44% en dos trimestres consecutivos.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "10-Q",
+            "accion_si_falla": "REVISAR_COMITE"
+          },
+          "dependencias": [
+            "A-007"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_003"
+            }
+          ],
+          "notas_arbitro": "Driver secundario pero sensible."
+        },
+        {
+          "assumption_id": "A-010",
+          "enunciado": "La opacidad actual se reduce de forma material en dos filings.",
+          "tipo": "INFERENCIA",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.7,
+          "confianza_0_1": 0.74,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "OTRO",
+            "MULTIPLO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "data_quality",
+              "cita_corta": "CORE_FILING_COVERAGE warning; completitud 53.44%.",
+              "interpretacion": "Principal bloqueador actual de decision ejecutable."
+            }
+          ],
+          "falsacion": {
+            "test": "Completitud <75% y faltantes de FCF/EBIT tras dos reportes.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 9
+            },
+            "fuente_prevista": "10-Q",
+            "accion_si_falla": "CONGELAR_COMPRAS"
+          },
+          "dependencias": [
+            "A-007"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_001"
+            },
+            {
+              "agent_role": "FORENSIC",
+              "claim_id": "CLM_008"
+            }
+          ],
+          "notas_arbitro": "Supuesto de gobernanza para habilitar inversion."
+        },
+        {
+          "assumption_id": "A-011",
+          "enunciado": "No ocurre shock macro severo de demanda en muebles de descuento.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "CONTEXTUAL",
+          "probabilidad_0_1": 0.55,
+          "confianza_0_1": 0.45,
+          "impacto": "MEDIO",
+          "drivers_afectados": [
+            "INGRESOS",
+            "MARGEN_OPERATIVO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "AgentReport_v1_REDTEAM",
+              "ubicacion": "bear_case",
+              "cita_corta": "Riesgo ciclico en bienes discrecionales de ticket alto.",
+              "interpretacion": "Sensibilidad macro no despreciable."
+            }
+          ],
+          "falsacion": {
+            "test": "Ingresos YoY <0% por dos trimestres.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "earnings",
+            "accion_si_falla": "REVISAR_COMITE"
+          },
+          "dependencias": [],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_006"
+            }
+          ],
+          "notas_arbitro": "Riesgo exogeno fuera de control de management."
+        },
+        {
+          "assumption_id": "A-012",
+          "enunciado": "El capital de trabajo no consume caja de forma estructural.",
+          "tipo": "INFERENCIA",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.48,
+          "confianza_0_1": 0.68,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "WC",
+            "CFO",
+            "FCF"
+          ],
+          "evidencias": [
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "metricas_derivadas.wc_change",
+              "cita_corta": "AP 271.6M vs Inventarios 341.3M; CFO 9M desacelera.",
+              "interpretacion": "Potencial normalizacion adversa de caja."
+            }
+          ],
+          "falsacion": {
+            "test": "AP/Inventario <70% e inventario/ventas sube >17% por dos trimestres.",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            },
+            "fuente_prevista": "10-Q",
+            "accion_si_falla": "REDUCIR_50"
+          },
+          "dependencias": [
+            "A-007"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_007"
+            },
+            {
+              "agent_role": "FORENSIC",
+              "claim_id": "CLM_003"
+            }
+          ],
+          "notas_arbitro": "Uno de los principales drivers de downside operativo."
+        },
+        {
+          "assumption_id": "A-013",
+          "enunciado": "No hay impairment material en goodwill/intangibles en 24 meses.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "IMPORTANTE",
+          "probabilidad_0_1": 0.8,
+          "confianza_0_1": 0.64,
+          "impacto": "MEDIO",
+          "drivers_afectados": [
+            "OTRO",
+            "MULTIPLO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "log.limitaciones",
+              "cita_corta": "Goodwill 181.7M e intangibles 179.1M presentes.",
+              "interpretacion": "Base de activos intangibles significativa."
+            }
+          ],
+          "falsacion": {
+            "test": "Impairment >20M reportado en 10-Q/10-K.",
+            "ventana_meses": {
+              "min": 6,
+              "max": 24
+            },
+            "fuente_prevista": "10-K",
+            "accion_si_falla": "REDUCIR_50"
+          },
+          "dependencias": [
+            "A-007"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "FORENSIC",
+              "claim_id": "CLM_007"
+            }
+          ],
+          "notas_arbitro": "Riesgo de calidad contable a vigilar."
+        },
+        {
+          "assumption_id": "A-014",
+          "enunciado": "La dilucion por SBC y S-8 se mantiene bajo 5% anual de acciones.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "IMPORTANTE",
+          "probabilidad_0_1": 0.52,
+          "confianza_0_1": 0.5,
+          "impacto": "MEDIO",
+          "drivers_afectados": [
+            "OTRO",
+            "MULTIPLO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "AgentReport_v1_REDTEAM",
+              "ubicacion": "kill_criteria KC-RT-005",
+              "cita_corta": "Riesgo por SBC/S-8 y acciones diluidas >5% YoY.",
+              "interpretacion": "Riesgo de valor por accion, no de supervivencia."
+            }
+          ],
+          "falsacion": {
+            "test": "Acciones diluidas >5% YoY o SBC >3% de ingresos.",
+            "ventana_meses": {
+              "min": 6,
+              "max": 12
+            },
+            "fuente_prevista": "10-Q",
+            "accion_si_falla": "REVISAR_COMITE"
+          },
+          "dependencias": [
+            "A-007"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_008"
+            },
+            {
+              "agent_role": "FORENSIC",
+              "claim_id": "CLM_009"
+            }
+          ],
+          "notas_arbitro": "Falta disclosure completo post-IPO."
+        },
+        {
+          "assumption_id": "A-015",
+          "enunciado": "El crecimiento de leases no supera el crecimiento de ingresos en FY2026.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.48,
+          "confianza_0_1": 0.6,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "FCF",
+            "WC",
+            "MARGEN_OPERATIVO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "AgentReport_v1_CATALYST",
+              "ubicacion": "CLM_008",
+              "cita_corta": "Leases +18% vs revenue +14%.",
+              "interpretacion": "Se requiere convergencia para evitar rigidez creciente."
+            }
+          ],
+          "falsacion": {
+            "test": "Lease liabilities crecen mas rapido que ingresos en FY2026.",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            },
+            "fuente_prevista": "10-K",
+            "accion_si_falla": "REDUCIR_50"
+          },
+          "dependencias": [
+            "A-005",
+            "A-008"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_008"
+            },
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_005"
+            }
+          ],
+          "notas_arbitro": "Supuesto estructural de fixed-cost leverage."
+        }
+      ]
+    },
+    "evidence_graph": {
+      "version": "EvidenceGraph_v1",
+      "nodos": [
+        {
+          "node_id": "E-001",
+          "tipo": "EVIDENCIA",
+          "label": "TruthPack balance: deuda 0, caja 123M",
+          "ref": {
+            "source_id": "TruthPack_v1"
+          }
+        },
+        {
+          "node_id": "E-002",
+          "tipo": "EVIDENCIA",
+          "label": "Leases totales ~825M",
+          "ref": {
+            "source_id": "TruthPack_v1"
+          }
+        },
+        {
+          "node_id": "E-003",
+          "tipo": "EVIDENCIA",
+          "label": "CORE_FILING_COVERAGE warning",
+          "ref": {
+            "source_id": "TruthPack_v1"
+          }
+        },
+        {
+          "node_id": "E-004",
+          "tipo": "EVIDENCIA",
+          "label": "Reverse DCF exige CAGR FCF 11-15%",
+          "ref": {
+            "source_id": "ImpliedExpectations_v1"
+          }
+        },
+        {
+          "node_id": "E-005",
+          "tipo": "EVIDENCIA",
+          "label": "Bain mantiene 95.37M acciones",
+          "ref": {
+            "source_id": "SRC_001"
+          }
+        },
+        {
+          "node_id": "A-001",
+          "tipo": "SUPUESTO",
+          "label": "Liquidez neta sostenible",
+          "ref": {
+            "assumption_id": "A-001"
+          }
+        },
+        {
+          "node_id": "A-003",
+          "tipo": "SUPUESTO",
+          "label": "Margen >=6.8 sostenible",
+          "ref": {
+            "assumption_id": "A-003"
+          }
+        },
+        {
+          "node_id": "A-004",
+          "tipo": "SUPUESTO",
+          "label": "FCF crece a doble digito",
+          "ref": {
+            "assumption_id": "A-004"
+          }
+        },
+        {
+          "node_id": "A-010",
+          "tipo": "SUPUESTO",
+          "label": "Opacidad se reduce con filings",
+          "ref": {
+            "assumption_id": "A-010"
+          }
+        },
+        {
+          "node_id": "A-015",
+          "tipo": "SUPUESTO",
+          "label": "Leases crecen <= ingresos",
+          "ref": {
+            "assumption_id": "A-015"
+          }
+        },
+        {
+          "node_id": "C-001",
+          "tipo": "CATALIZADOR",
+          "label": "Normalizacion disclosure",
+          "ref": {
+            "catalyst_id": "C-001"
+          }
+        },
+        {
+          "node_id": "C-002",
+          "tipo": "CATALIZADOR",
+          "label": "Sostenibilidad margen",
+          "ref": {
+            "catalyst_id": "C-002"
+          }
+        },
+        {
+          "node_id": "C-003",
+          "tipo": "CATALIZADOR",
+          "label": "Productividad expansion",
+          "ref": {
+            "catalyst_id": "C-003"
+          }
+        },
+        {
+          "node_id": "SC-BASE",
+          "tipo": "ESCENARIO",
+          "label": "Escenario BASE",
+          "ref": {
+            "scenario_id": "BASE"
+          }
+        },
+        {
+          "node_id": "SC-BULL",
+          "tipo": "ESCENARIO",
+          "label": "Escenario BULL",
+          "ref": {
+            "scenario_id": "BULL"
+          }
+        },
+        {
+          "node_id": "SC-BEAR",
+          "tipo": "ESCENARIO",
+          "label": "Escenario BEAR",
+          "ref": {
+            "scenario_id": "BEAR"
+          }
+        },
+        {
+          "node_id": "D-001",
+          "tipo": "DECISION",
+          "label": "Decision final",
+          "ref": {
+            "decision": "BLOQUEADO"
+          }
+        }
+      ],
+      "aristas": [
+        {
+          "from": "E-001",
+          "to": "A-001",
+          "relacion": "SOPORTA",
+          "peso_0_1": 0.9,
+          "nota": "Balance limpio soporta supervivencia."
+        },
+        {
+          "from": "E-002",
+          "to": "A-015",
+          "relacion": "SOPORTA",
+          "peso_0_1": 0.8,
+          "nota": "Leases crecientes condicionan tesis."
+        },
+        {
+          "from": "E-003",
+          "to": "A-010",
+          "relacion": "SOPORTA",
+          "peso_0_1": 0.95,
+          "nota": "Data quality incompleta es evidencia directa."
+        },
+        {
+          "from": "E-004",
+          "to": "A-004",
+          "relacion": "SOPORTA",
+          "peso_0_1": 0.85,
+          "nota": "Expectativas implicitas elevadas."
+        },
+        {
+          "from": "E-005",
+          "to": "A-006",
+          "relacion": "SOPORTA",
+          "peso_0_1": 0.88,
+          "nota": "Overhang de sponsor."
+        },
+        {
+          "from": "C-001",
+          "to": "A-010",
+          "relacion": "DISPARA",
+          "peso_0_1": 0.9,
+          "nota": "Filings pueden reducir opacidad."
+        },
+        {
+          "from": "C-002",
+          "to": "A-003",
+          "relacion": "DISPARA",
+          "peso_0_1": 0.75,
+          "nota": "Catalizador de margen estructural."
+        },
+        {
+          "from": "C-003",
+          "to": "A-004",
+          "relacion": "DISPARA",
+          "peso_0_1": 0.72,
+          "nota": "Expansion bien ejecutada mejora FCF."
+        },
+        {
+          "from": "A-003",
+          "to": "SC-BASE",
+          "relacion": "DEPENDE_DE",
+          "peso_0_1": 0.7,
+          "nota": "Base requiere margen sostenido."
+        },
+        {
+          "from": "A-004",
+          "to": "SC-BULL",
+          "relacion": "DEPENDE_DE",
+          "peso_0_1": 0.8,
+          "nota": "Bull necesita crecimiento FCF superior."
+        },
+        {
+          "from": "A-015",
+          "to": "SC-BEAR",
+          "relacion": "DEPENDE_DE",
+          "peso_0_1": 0.78,
+          "nota": "Deterioro de leases agrava bear."
+        },
+        {
+          "from": "SC-BEAR",
+          "to": "D-001",
+          "relacion": "INFORMA",
+          "peso_0_1": 0.84,
+          "nota": "Probabilidad alta y downside domina asimetria."
+        }
+      ],
+      "validacion_grafo": {
+        "ids_unicos": true,
+        "aristas_referencian_nodos_existentes": true,
+        "supuestos_criticos_tienen_falsacion": true,
+        "detalle": "Sin inconsistencias de referencia detectadas."
+      }
+    },
+    "catalizadores_consolidados": [
+      {
+        "catalyst_id": "C-001",
+        "nombre": "Normalizacion de disclosure post-IPO",
+        "es_no_binario": true,
+        "ventana_meses": {
+          "min": 2,
+          "probable": 6,
+          "max": 12
+        },
+        "probabilidad_0_1": 0.85,
+        "mecanismo_cierre_gap": "Publicacion de 10-Q/10-K reduce prima de opacidad y habilita validacion de FCF/margen.",
+        "supuestos_afectados": [
+          "A-007",
+          "A-010",
+          "A-003"
+        ],
+        "tests_confirmatorios": [
+          {
+            "descripcion": "Dos 10-Q en plazo con cash flow trimestral completo",
+            "fuente_prevista": "10-Q",
+            "ventana_meses": {
+              "min": 2,
+              "max": 9
+            }
+          }
+        ]
+      },
+      {
+        "catalyst_id": "C-002",
+        "nombre": "Consolidacion de margen operativo",
+        "es_no_binario": true,
+        "ventana_meses": {
+          "min": 3,
+          "probable": 9,
+          "max": 18
+        },
+        "probabilidad_0_1": 0.58,
+        "mecanismo_cierre_gap": "Si EBIT/ventas se sostiene >=6.8%, valida la tesis de que EV/EBIT actual no esta sobreextendido.",
+        "supuestos_afectados": [
+          "A-003",
+          "A-009",
+          "A-004"
+        ],
+        "tests_confirmatorios": [
+          {
+            "descripcion": "Margen operativo trimestral >=6.8% en al menos 3 de 4 trimestres",
+            "fuente_prevista": "10-Q",
+            "ventana_meses": {
+              "min": 6,
+              "max": 12
+            }
+          }
+        ]
+      },
+      {
+        "catalyst_id": "C-003",
+        "nombre": "Productividad de expansion de tiendas",
+        "es_no_binario": true,
+        "ventana_meses": {
+          "min": 6,
+          "probable": 12,
+          "max": 24
+        },
+        "probabilidad_0_1": 0.72,
+        "mecanismo_cierre_gap": "Aperturas con comp sales positivas y capex disciplinado sostienen crecimiento de FCF requerido.",
+        "supuestos_afectados": [
+          "A-005",
+          "A-008",
+          "A-015"
+        ],
+        "tests_confirmatorios": [
+          {
+            "descripcion": "Ingresos YoY >=8% y comp sales >2% en mayoria de trimestres",
+            "fuente_prevista": "earnings",
+            "ventana_meses": {
+              "min": 6,
+              "max": 15
+            }
+          }
+        ]
+      }
+    ],
+    "escenarios": [
+      {
+        "scenario_id": "BASE",
+        "probabilidad_0_1": 0.35,
+        "ventana_meses": {
+          "min": 6,
+          "probable": 12,
+          "max": 24
+        },
+        "descripcion": "Disclosure mejora parcialmente. Margen se mantiene cerca de 6.8%-7.0%, crecimiento desacelera a high-single digit y FCF se sostiene sin expansion de multiple significativa.",
+        "drivers_clave": [
+          "A-003",
+          "A-007",
+          "A-012"
+        ],
+        "retorno_12_24m_pct_rango": {
+          "min": 0,
+          "base": 10,
+          "max": 18
+        },
+        "nota_valoracion": "Retorno via ejecucion operativa, no por rerating fuerte."
+      },
+      {
+        "scenario_id": "BULL",
+        "probabilidad_0_1": 0.15,
+        "ventana_meses": {
+          "min": 9,
+          "probable": 18,
+          "max": 30
+        },
+        "descripcion": "Filings confirman calidad de FCF, margen >7.3% y expansion con buenos retornos; sobrehang de Bain se maneja ordenadamente.",
+        "drivers_clave": [
+          "A-003",
+          "A-004",
+          "A-005",
+          "A-006"
+        ],
+        "retorno_12_24m_pct_rango": {
+          "min": 25,
+          "base": 45,
+          "max": 60
+        },
+        "nota_valoracion": "Requiere validacion simultanea de calidad de crecimiento y gobernanza de oferta."
+      },
+      {
+        "scenario_id": "BEAR",
+        "probabilidad_0_1": 0.5,
+        "ventana_meses": {
+          "min": 3,
+          "probable": 12,
+          "max": 24
+        },
+        "descripcion": "Persisten opacidad y dudas de calidad de caja; margen revierte, leases crecen por encima de ventas y hay presion tecnica por secundarias.",
+        "drivers_clave": [
+          "A-010",
+          "A-012",
+          "A-015",
+          "A-006"
+        ],
+        "retorno_12_24m_pct_rango": {
+          "min": -35,
+          "base": -18,
+          "max": -8
+        },
+        "nota_valoracion": "Compresion por menor confianza y menor calidad percibida de FCF."
+      }
+    ],
+    "kill_criteria_final": [
+      {
+        "kc_id": "KC-001",
+        "relacionado_con_assumption_id": "A-003",
+        "definicion": "Margen operativo TTM <5.5%.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 18
+        },
+        "fuente_prevista": "10-Q",
+        "accion": "REDUCIR_50",
+        "severidad": "ALTA",
+        "por_que": "Invalida sostenibilidad de mejora de rentabilidad."
+      },
+      {
+        "kc_id": "KC-002",
+        "relacionado_con_assumption_id": "A-004",
+        "definicion": "FCF TTM <50M o negativo en dos cierres consecutivos.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        },
+        "fuente_prevista": "10-Q",
+        "accion": "SALIR",
+        "severidad": "ALTA",
+        "por_que": "Rompe tesis de crecimiento de caja y multiplo soportable."
+      },
+      {
+        "kc_id": "KC-003",
+        "relacionado_con_assumption_id": "A-006",
+        "definicion": "Secundaria del sponsor >10% del float con descuento >8%.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 18
+        },
+        "fuente_prevista": "filing",
+        "accion": "CONGELAR_COMPRAS",
+        "severidad": "MEDIA",
+        "por_que": "Aumenta riesgo tecnico y senal negativa de sponsor."
+      },
+      {
+        "kc_id": "KC-004",
+        "relacionado_con_assumption_id": "A-012",
+        "definicion": "AP/Inventario <70% e inventario/ventas >17% por dos trimestres.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-Q",
+        "accion": "REDUCIR_50",
+        "severidad": "ALTA",
+        "por_que": "Indica deterioro de conversion de caja por capital de trabajo."
+      },
+      {
+        "kc_id": "KC-005",
+        "relacionado_con_assumption_id": "A-015",
+        "definicion": "Leases >950M sin ingresos TTM >2.8B.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-K",
+        "accion": "REDUCIR_50",
+        "severidad": "ALTA",
+        "por_que": "Riesgo de rigidez de costos fijos no compensado por escala."
+      },
+      {
+        "kc_id": "KC-006",
+        "relacionado_con_assumption_id": "A-010",
+        "definicion": "Tras dos filings, faltan aun CFO/capex trimestral o hay restatement material.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "filing",
+        "accion": "REVISAR_COMITE",
+        "severidad": "MEDIA",
+        "por_que": "Bloquea validacion de calidad de resultados."
+      }
+    ],
+    "plan_monitorizacion": {
+      "frecuencias": {
+        "pulso_diario": {
+          "activo": true,
+          "que_mirar": [
+            "precio vs umbral",
+            "noticias",
+            "filings"
+          ]
+        },
+        "revision_semanal": {
+          "activo": true,
+          "que_mirar": [
+            "estado supuestos criticos",
+            "riesgo de overhang Bain",
+            "estado de issues de remediation"
+          ]
+        },
+        "modo_evento": {
+          "activo": true,
+          "que_mirar": [
+            "earnings/transcript",
+            "10-Q/10-K",
+            "guidance",
+            "cash flow trimestral"
+          ]
+        }
+      },
+      "lista_de_checks_por_supuesto": [
+        {
+          "assumption_id": "A-003",
+          "indicadores": [
+            "margen operativo",
+            "SGA/ventas",
+            "gross margin"
+          ],
+          "fuente": "10-Q",
+          "frecuencia": "TRIMESTRAL"
+        },
+        {
+          "assumption_id": "A-004",
+          "indicadores": [
+            "CFO TTM",
+            "capex TTM",
+            "FCF TTM"
+          ],
+          "fuente": "10-K",
+          "frecuencia": "TRIMESTRAL"
+        },
+        {
+          "assumption_id": "A-006",
+          "indicadores": [
+            "participacion Bain",
+            "descuento de secundarias",
+            "float"
+          ],
+          "fuente": "filing",
+          "frecuencia": "QUINCENAL"
+        },
+        {
+          "assumption_id": "A-012",
+          "indicadores": [
+            "AP/Inventario",
+            "inventario/ventas",
+            "delta WC"
+          ],
+          "fuente": "10-Q",
+          "frecuencia": "TRIMESTRAL"
+        },
+        {
+          "assumption_id": "A-015",
+          "indicadores": [
+            "crecimiento leases",
+            "crecimiento ingresos",
+            "lease corriente"
+          ],
+          "fuente": "10-K",
+          "frecuencia": "TRIMESTRAL"
+        }
+      ],
+      "umbrales_alerta": [
+        {
+          "tipo": "PRECIO",
+          "condicion": "caida >15% en 10 dias con volumen >2x promedio",
+          "accion": "REVISAR_COMITE",
+          "severidad": "MEDIA"
+        },
+        {
+          "tipo": "FILING",
+          "condicion": "retraso de 10-Q >15 dias",
+          "accion": "REVISAR_COMITE",
+          "severidad": "ALTA"
+        }
+      ]
+    },
+    "predicciones_para_calibracion_consolidadas": [
+      {
+        "pred_id": "CP-001",
+        "descripcion": "Primer 10-Q se presenta en plazo con CFO y capex trimestral.",
+        "probabilidad_0_1": 0.69,
+        "ventana_meses": {
+          "min": 2,
+          "max": 6
+        },
+        "criterio_validacion": "10-Q en EDGAR a tiempo con estado de flujos trimestral completo.",
+        "fuente_prevista": "10-Q",
+        "origen": [
+          {
+            "agent_role": "CATALYST",
+            "pred_id": "PRED_001"
+          },
+          {
+            "agent_role": "BULL",
+            "pred_id": "PRED_004"
+          }
+        ]
+      },
+      {
+        "pred_id": "CP-002",
+        "descripcion": "Margen operativo TTM se mantiene >=6.8% en 12 meses.",
+        "probabilidad_0_1": 0.56,
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "criterio_validacion": "EBIT TTM / ingresos TTM >=0.068.",
+        "fuente_prevista": "10-Q",
+        "origen": [
+          {
+            "agent_role": "CATALYST",
+            "pred_id": "PRED_002"
+          },
+          {
+            "agent_role": "BULL",
+            "pred_id": "PRED_002"
+          }
+        ]
+      },
+      {
+        "pred_id": "CP-003",
+        "descripcion": "FCF TTM supera 120M en primer cierre anual completo post-IPO.",
+        "probabilidad_0_1": 0.54,
+        "ventana_meses": {
+          "min": 9,
+          "max": 18
+        },
+        "criterio_validacion": "FCF TTM = CFO TTM - capex TTM >=120M.",
+        "fuente_prevista": "10-K",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "pred_id": "PRED_003"
+          },
+          {
+            "agent_role": "CATALYST",
+            "pred_id": "PRED_005"
+          }
+        ]
+      },
+      {
+        "pred_id": "CP-004",
+        "descripcion": "Bain reduce participacion por debajo de 65% sin descuento >8%.",
+        "probabilidad_0_1": 0.5,
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        },
+        "criterio_validacion": "Form 4/13D muestran participacion <65% y terminos de colocacion ordenados.",
+        "fuente_prevista": "filing",
+        "origen": [
+          {
+            "agent_role": "CATALYST",
+            "pred_id": "PRED_006"
+          },
+          {
+            "agent_role": "BULL",
+            "pred_id": "PRED_005"
+          }
+        ]
+      },
+      {
+        "pred_id": "CP-005",
+        "descripcion": "Lease liabilities no crecen mas rapido que ingresos en FY2026.",
+        "probabilidad_0_1": 0.49,
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "criterio_validacion": "Crecimiento YoY leases <= crecimiento YoY ingresos.",
+        "fuente_prevista": "10-K",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "pred_id": "PRED_006"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "pred_id": "PRED_RT_004"
+          }
+        ]
+      },
+      {
+        "pred_id": "CP-006",
+        "descripcion": "Al menos uno de los proximos dos trimestres reporta ingresos YoY <8%.",
+        "probabilidad_0_1": 0.6,
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "criterio_validacion": "Ingresos YoY trimestrales <8% en al menos un reporte.",
+        "fuente_prevista": "earnings",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "pred_id": "PRED_RT_005"
+          },
+          {
+            "agent_role": "CATALYST",
+            "pred_id": "PRED_004"
+          }
+        ]
+      }
+    ],
+    "arbitraje": {
+      "notas_arbitro": [
+        "Se prioriza gate de calidad de datos: con status PARTIAL no procede decision de capital ejecutable.",
+        "El bloque probabilistico no sugiere INVERTIR: asimetria <1 y Kelly 0.",
+        "La decision categorica queda BLOQUEADO por gobernanza de evidencia; next_step REMEDIATE por resolubilidad alta en 1-2 ciclos de filing."
+      ],
+      "desacuerdos_detectados": [
+        {
+          "tema": "Sostenibilidad del margen operativo",
+          "agentes": [
+            {
+              "agent_role": "BULL",
+              "posicion": "Margen cercano a 7% es sostenible con apalancamiento SGA",
+              "confianza_0_1": 0.61
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "posicion": "Riesgo de reversion post-IPO; mejora puede ser transitoria",
+              "confianza_0_1": 0.75
+            }
+          ],
+          "resolucion_arbitro": {
+            "estado": "NO_RESUELTO",
+            "decision": "convertir_en_escenario",
+            "por_que": "No hay granularidad trimestral completa de SGA/EBIT para cerrar la controversia con evidencia dura.",
+            "accion": "Mantener como supuesto critico A-003 y exigir validacion en dos 10-Q."
+          }
+        },
+        {
+          "tema": "Existencia de mispricing explotable hoy",
+          "agentes": [
+            {
+              "agent_role": "BULL",
+              "posicion": "Hay descuento por opacidad y potencial rerating",
+              "confianza_0_1": 0.61
+            },
+            {
+              "agent_role": "FORENSIC",
+              "posicion": "Sin datos completos no puede probarse gap real",
+              "confianza_0_1": 0.67
+            }
+          ],
+          "resolucion_arbitro": {
+            "estado": "NO_RESUELTO",
+            "decision": "pedir_fuente",
+            "por_que": "El mispricing gate depende de datos no observables en el dataset actual.",
+            "accion": "Issue ISS-001 y ISS-002 en remediation."
+          }
+        },
+        {
+          "tema": "Tamaño inicial de posicion",
+          "agentes": [
+            {
+              "agent_role": "FORENSIC",
+              "posicion": "Hasta 2.5% max bajo condiciones",
+              "confianza_0_1": 0.67
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "posicion": "0-1% max o no invertir aun",
+              "confianza_0_1": 0.75
+            }
+          ],
+          "resolucion_arbitro": {
+            "estado": "RESUELTO",
+            "decision": "penalizar_tamaño",
+            "por_que": "Kelly da 0 por asimetria desfavorable y data gate fail.",
+            "accion": "sizing_final_pct = 0 hasta re-arbitraje."
+          }
+        }
+      ],
+      "puntos_abiertos": [
+        "FCF trimestral directo aun no observable sin puentes",
+        "Desglose capex mantenimiento vs crecimiento inexistente",
+        "No hay comp sales ni KPIs de cohorte de tiendas",
+        "Tabla completa de vencimientos de lease no descontados pendiente",
+        "Timing/forma de desinversion de Bain no determinado"
+      ]
+    },
+    "peticiones_de_fuentes": [
+      {
+        "prioridad": "ALTA",
+        "item": "Primeros 10-Q y 10-K completos post-IPO",
+        "por_que_importa": "Desbloquea Data Quality Gate y valida FCF/EBIT trimestral.",
+        "como_obtenerlo": "SEC EDGAR filings 10-Q/10-K de BOBS, estados financieros y MD&A."
+      },
+      {
+        "prioridad": "ALTA",
+        "item": "Desglose capex mantenimiento vs expansion",
+        "por_que_importa": "Sin este puente no hay FCF normalizado confiable.",
+        "como_obtenerlo": "MD&A y notas PP&E de 10-Q/10-K."
+      },
+      {
+        "prioridad": "ALTA",
+        "item": "Comp sales, numero de tiendas y aperturas/cierres",
+        "por_que_importa": "Separa crecimiento organico de crecimiento por huella fisica.",
+        "como_obtenerlo": "Earnings release, call transcript e investor materials."
+      },
+      {
+        "prioridad": "ALTA",
+        "item": "Tabla de pagos de leases no descontados por ano",
+        "por_que_importa": "Necesaria para stress test de liquidez y fixed charges.",
+        "como_obtenerlo": "Nota ASC 842 en 10-K/10-Q."
+      },
+      {
+        "prioridad": "MEDIA",
+        "item": "Calendario lock-up y terminos de secundarias de Bain",
+        "por_que_importa": "Cuantifica riesgo tecnico de sobreoferta.",
+        "como_obtenerlo": "424B4 seccion Shares Eligible for Future Sale y nuevos prospectos."
+      },
+      {
+        "prioridad": "MEDIA",
+        "item": "SBC trimestral y puente de acciones diluidas",
+        "por_que_importa": "Evita sobrestimar valor por accion.",
+        "como_obtenerlo": "Notas de compensacion en 10-Q/10-K y DEF 14A."
+      }
+    ],
+    "salida_para_siguiente_agente": {
+      "monitor_input_recomendado": "Usar este DecisionPacket_v2 como base para Monitor y ciclo de remediacion",
+      "estado_caso": "EN_ESPERA",
+      "proxima_revision_sugerida": "2026-04-15"
+    },
+    "log": {
+      "autochequeos": {
+        "decision_respeta_gates": true,
+        "supuestos_criticos_tienen_evidencia": true,
+        "supuestos_criticos_tienen_falsacion": true,
+        "kill_criteria_mapeados_a_supuestos": true,
+        "salida_solo_json": true,
+        "_comment_v2_checks": "NUEVO EN V2: checks probabilisticos",
+        "probabilidades_escenarios_suman_1": true,
+        "kelly_sizing_dentro_de_tope": true,
+        "intervalo_confianza_coherente_con_escenarios": true,
+        "decision_categorica_coherente_con_probabilistica": true,
+        "sizing_final_igual_preliminar_si_invertir": true,
+        "sensibilidad_cubre_supuestos_criticos": true
+      },
+      "limitaciones": [
+        "Dataset dependiente de 424B4 con cobertura documental parcial",
+        "Falta granularidad trimestral de cash flow y EBIT reportado",
+        "Sin KPI de tiendas/comps para validar productividad de expansion",
+        "Sin tabla completa de maturities de leases",
+        "Alta sensibilidad de conclusion a calidad de los proximos filings"
+      ],
+      "revision": {
+        "es_revision": false,
+        "revision_num": 1,
+        "decision_packet_anterior_caso_id": "N/A",
+        "monitoring_updates_usados": [],
+        "resumen_cambios": [
+          "Primera emision DecisionPacket_v2 con bloque probabilistico",
+          "Data quality gate marcado FAIL y activacion de REMEDIATE",
+          "Sizing fijado en 0 por Kelly y gobernanza de gates"
+        ]
+      }
+    },
+    "control": {
+      "estado_flujo": "ARBITRATE",
+      "next_step": "REMEDIATE",
+      "next_agent_role": "SOURCES",
+      "loop_budget_max": 2,
+      "loop_budget_restante": 2,
+      "issues": [
+        {
+          "issue_id": "ISS-001",
+          "issue_code": "CORE_FILINGS_MISSING",
+          "gate_afectado": "data_quality_gate",
+          "severidad": "ALTA",
+          "resoluble": true,
+          "owner_agent_role": "SOURCES",
+          "descripcion": "Faltan 10-Q/10-K completos para validar CFO, capex y EBIT trimestral.",
+          "criterio_aceptacion": {
+            "required_fields": [
+              "filing_10q_latest",
+              "filing_10k_or_annual_latest",
+              "cash_flow_trimestral_cfo",
+              "cash_flow_trimestral_capex",
+              "ebit_trimestral"
+            ],
+            "notes": "Cada campo debe incluir source_id + ubicacion + cita_corta."
+          }
+        },
+        {
+          "issue_id": "ISS-002",
+          "issue_code": "STORE_PRODUCTIVITY_KPI_MISSING",
+          "gate_afectado": "catalyst_gate",
+          "severidad": "MEDIA",
+          "resoluble": true,
+          "owner_agent_role": "TRUTH_PACK",
+          "descripcion": "No hay comp sales ni KPIs de expansion por tienda.",
+          "criterio_aceptacion": {
+            "required_fields": [
+              "same_store_sales_pct",
+              "store_count_total",
+              "openings_closures_trimestral",
+              "capex_maintenance_vs_growth"
+            ],
+            "notes": "Se acepta proxy defendible solo si no hay disclosure directo."
+          }
+        },
+        {
+          "issue_id": "ISS-003",
+          "issue_code": "LEASE_MATURITY_TABLE_MISSING",
+          "gate_afectado": "survivability_gate",
+          "severidad": "ALTA",
+          "resoluble": true,
+          "owner_agent_role": "TRUTH_PACK",
+          "descripcion": "Falta calendario de pagos de leases no descontados por ano.",
+          "criterio_aceptacion": {
+            "required_fields": [
+              "lease_payments_year_1",
+              "lease_payments_year_2_5",
+              "lease_payments_after_5y",
+              "lease_discount_rate",
+              "lease_remaining_term"
+            ],
+            "notes": "Debe venir desde nota ASC 842 de filing oficial."
+          }
+        }
+      ],
+      "work_orders": [
+        {
+          "wo_id": "WO-001",
+          "agent_role": "SOURCES",
+          "tipo": "EXTRACT_FIELDS",
+          "issue_refs": [
+            "ISS-001"
+          ],
+          "targets": {
+            "fields": [
+              "10-Q latest filing url/id",
+              "10-K latest filing url/id",
+              "cash flow trimestral line items",
+              "ebit trimestral line items"
+            ],
+            "notes": "Priorizar EDGAR oficial; capturar citas textuales cortas."
+          },
+          "acceptance": {
+            "required_fields": [
+              "filing_10q_latest",
+              "cash_flow_trimestral_cfo",
+              "cash_flow_trimestral_capex"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": []
+        },
+        {
+          "wo_id": "WO-002",
+          "agent_role": "TRUTH_PACK",
+          "tipo": "EXTRACT_FIELDS",
+          "issue_refs": [
+            "ISS-001",
+            "ISS-002",
+            "ISS-003"
+          ],
+          "targets": {
+            "fields": [
+              "ebit_trimestral",
+              "fcf_trimestral",
+              "same_store_sales_pct",
+              "store_count_total",
+              "openings_closures_trimestral",
+              "capex_maintenance_vs_growth",
+              "lease_payments_schedule"
+            ],
+            "notes": "Actualizar TruthPack_v1 con trazabilidad de fuente."
+          },
+          "acceptance": {
+            "required_fields": [
+              "ebit_trimestral",
+              "fcf_trimestral",
+              "lease_payments_schedule"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": [
+            "WO-001"
+          ]
+        },
+        {
+          "wo_id": "WO-003",
+          "agent_role": "IMPLIED",
+          "tipo": "RECOMPUTE_EXPECTATIONS",
+          "issue_refs": [
+            "ISS-001",
+            "ISS-002"
+          ],
+          "targets": {
+            "fields": [
+              "reverse_dcf_recomputed",
+              "metricas_base_actualizadas",
+              "sensibilidades_actualizadas"
+            ],
+            "notes": "Recalcular con FCF/EBIT directos trimestrales, no por puentes FY-9M."
+          },
+          "acceptance": {
+            "required_fields": [
+              "reverse_dcf_recomputed",
+              "metricas_base_actualizadas"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": [
+            "WO-002"
+          ]
+        },
+        {
+          "wo_id": "WO-004",
+          "agent_role": "ARBITRO",
+          "tipo": "REARBITRATE",
+          "issue_refs": [
+            "ISS-001",
+            "ISS-002",
+            "ISS-003"
+          ],
+          "targets": {
+            "fields": [
+              "DecisionPacket_v2_revisado"
+            ],
+            "notes": "Reevaluar gates, scoring, probabilidades y sizing al recibir PatchBundle_v3."
+          },
+          "acceptance": {
+            "required_fields": [
+              "DecisionPacket_v2_revisado"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": [
+            "WO-003"
+          ]
+        }
+      ],
+      "dispatch_queue": [
+        {
+          "step": 1,
+          "agent_role": "SOURCES",
+          "wo_ids": [
+            "WO-001"
+          ]
+        },
+        {
+          "step": 2,
+          "agent_role": "TRUTH_PACK",
+          "wo_ids": [
+            "WO-002"
+          ]
+        },
+        {
+          "step": 3,
+          "agent_role": "IMPLIED",
+          "wo_ids": [
+            "WO-003"
+          ]
+        },
+        {
+          "step": 4,
+          "agent_role": "ARBITRO",
+          "wo_ids": [
+            "WO-004"
+          ]
+        }
+      ]
+    }
+  },
+  "decision_packet_ref": {
+    "file_name": "DecisionPacket_CASE_20260224_BOBS_rev001.json"
+  },
+  "remediation_plan": {
+    "version_esquema": "RemediationPlan_v1",
+    "file_name": "RemediationPlan_CASE_20260224_BOBS.json",
+    "issues": [
+      {
+        "issue_id": "ISS-001",
+        "issue_code": "CORE_FILINGS_MISSING",
+        "gate_afectado": "data_quality_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "SOURCES",
+        "descripcion": "Faltan 10-Q/10-K completos para validar CFO, capex y EBIT trimestral.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "filing_10q_latest",
+            "filing_10k_or_annual_latest",
+            "cash_flow_trimestral_cfo",
+            "cash_flow_trimestral_capex",
+            "ebit_trimestral"
+          ],
+          "notes": "Cada campo debe incluir source_id + ubicacion + cita_corta."
+        }
+      },
+      {
+        "issue_id": "ISS-002",
+        "issue_code": "STORE_PRODUCTIVITY_KPI_MISSING",
+        "gate_afectado": "catalyst_gate",
+        "severidad": "MEDIA",
+        "resoluble": true,
+        "owner_agent_role": "TRUTH_PACK",
+        "descripcion": "No hay comp sales ni KPIs de expansion por tienda.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "same_store_sales_pct",
+            "store_count_total",
+            "openings_closures_trimestral",
+            "capex_maintenance_vs_growth"
+          ],
+          "notes": "Se acepta proxy defendible solo si no hay disclosure directo."
+        }
+      },
+      {
+        "issue_id": "ISS-003",
+        "issue_code": "LEASE_MATURITY_TABLE_MISSING",
+        "gate_afectado": "survivability_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "TRUTH_PACK",
+        "descripcion": "Falta calendario de pagos de leases no descontados por ano.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "lease_payments_year_1",
+            "lease_payments_year_2_5",
+            "lease_payments_after_5y",
+            "lease_discount_rate",
+            "lease_remaining_term"
+          ],
+          "notes": "Debe venir desde nota ASC 842 de filing oficial."
+        }
+      }
+    ],
+    "work_orders": [
+      {
+        "wo_id": "WO-001",
+        "agent_role": "SOURCES",
+        "tipo": "EXTRACT_FIELDS",
+        "issue_refs": [
+          "ISS-001"
+        ],
+        "targets": {
+          "fields": [
+            "10-Q latest filing url/id",
+            "10-K latest filing url/id",
+            "cash flow trimestral line items",
+            "ebit trimestral line items"
+          ],
+          "notes": "Priorizar EDGAR oficial; capturar citas textuales cortas."
+        },
+        "acceptance": {
+          "required_fields": [
+            "filing_10q_latest",
+            "cash_flow_trimestral_cfo",
+            "cash_flow_trimestral_capex"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": []
+      },
+      {
+        "wo_id": "WO-002",
+        "agent_role": "TRUTH_PACK",
+        "tipo": "EXTRACT_FIELDS",
+        "issue_refs": [
+          "ISS-001",
+          "ISS-002",
+          "ISS-003"
+        ],
+        "targets": {
+          "fields": [
+            "ebit_trimestral",
+            "fcf_trimestral",
+            "same_store_sales_pct",
+            "store_count_total",
+            "openings_closures_trimestral",
+            "capex_maintenance_vs_growth",
+            "lease_payments_schedule"
+          ],
+          "notes": "Actualizar TruthPack_v1 con trazabilidad de fuente."
+        },
+        "acceptance": {
+          "required_fields": [
+            "ebit_trimestral",
+            "fcf_trimestral",
+            "lease_payments_schedule"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": [
+          "WO-001"
+        ]
+      },
+      {
+        "wo_id": "WO-003",
+        "agent_role": "IMPLIED",
+        "tipo": "RECOMPUTE_EXPECTATIONS",
+        "issue_refs": [
+          "ISS-001",
+          "ISS-002"
+        ],
+        "targets": {
+          "fields": [
+            "reverse_dcf_recomputed",
+            "metricas_base_actualizadas",
+            "sensibilidades_actualizadas"
+          ],
+          "notes": "Recalcular con FCF/EBIT directos trimestrales, no por puentes FY-9M."
+        },
+        "acceptance": {
+          "required_fields": [
+            "reverse_dcf_recomputed",
+            "metricas_base_actualizadas"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": [
+          "WO-002"
+        ]
+      },
+      {
+        "wo_id": "WO-004",
+        "agent_role": "ARBITRO",
+        "tipo": "REARBITRATE",
+        "issue_refs": [
+          "ISS-001",
+          "ISS-002",
+          "ISS-003"
+        ],
+        "targets": {
+          "fields": [
+            "DecisionPacket_v2_revisado"
+          ],
+          "notes": "Reevaluar gates, scoring, probabilidades y sizing al recibir PatchBundle_v3."
+        },
+        "acceptance": {
+          "required_fields": [
+            "DecisionPacket_v2_revisado"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": [
+          "WO-003"
+        ]
+      }
+    ],
+    "dispatch_queue": [
+      {
+        "step": 1,
+        "agent_role": "SOURCES",
+        "wo_ids": [
+          "WO-001"
+        ]
+      },
+      {
+        "step": 2,
+        "agent_role": "TRUTH_PACK",
+        "wo_ids": [
+          "WO-002"
+        ]
+      },
+      {
+        "step": 3,
+        "agent_role": "IMPLIED",
+        "wo_ids": [
+          "WO-003"
+        ]
+      },
+      {
+        "step": 4,
+        "agent_role": "ARBITRO",
+        "wo_ids": [
+          "WO-004"
+        ]
+      }
+    ],
+    "loop_budget_restante": 2
+  }
+}

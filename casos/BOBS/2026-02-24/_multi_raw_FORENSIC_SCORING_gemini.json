@@ -1,0 +1,462 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260224_BOBS",
+  "fecha_corte": "2026-02-24",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260224_BOBS",
+    "implied_expectations_caso_id": "CASE_20260224_BOBS",
+    "sources_pack_caso_id": "CASE_20260224_BOBS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Estructura de capital atípica: Deuda financiera $0 pero pasivos por arrendamiento ($825M) superan en 1.5x al patrimonio.",
+      "Calidad de CFO en deterioro: Caída del 18% en FY2024 con ingresos planos, dependiente de financiación de proveedores (AP/Inv ~80%).",
+      "Riesgo de ejecución alto: Capex se duplicó (x2.6) comprimiendo margen FCF al 4%, sin crecimiento de ventas visible aún.",
+      "Overhang de acciones masivo: Bain Capital controla ~73% post-IPO, incentivando presión vendedora a valoraciones actuales.",
+      "Supervivencia asegurada a corto plazo por caja ($123M), pero fragilidad estructural ante shock de capital de trabajo."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.75
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_FOR_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La estructura de apalancamiento es operativa, no financiera: los arrendamientos ($825M) actúan como deuda oculta masiva.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "ubicacion": "TruthPack_v1.lease_data",
+          "cita_corta": "Lease liabilities total $824.6M vs Patrimonio $548M",
+          "interpretacion": "Apalancamiento real muy superior al reportado (Net Debt/EBITDA < 0)."
+        }
+      ],
+      "falsacion": {
+        "test": "Reducción significativa de pasivos por arrendamiento en próximos 2 trimestres",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_FOR_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El capital de trabajo es frágil: la empresa financia el 80% de su inventario con proveedores, riesgo alto si se endurecen términos.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo",
+          "cita_corta": "Cuentas por pagar $271.6M vs Inventarios $341.3M",
+          "interpretacion": "Dependencia crítica del crédito comercial; un shock de liquidez en proveedores afectaría operaciones."
+        }
+      ],
+      "falsacion": {
+        "test": "Ratio AP/Inventario cae por debajo de 65% indicando estrés en pagos o condiciones",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_FOR_003",
+      "tipo": "HIPOTESIS",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La mejora de margen operativo (5.8% a 7.0%) es cosmética pre-IPO y revertirá a la media histórica.",
+      "confianza_0_1": 0.7,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_018_424B4_2026-02-05",
+          "ubicacion": "TruthPack_v1.historico_anual",
+          "cita_corta": "EBIT margin FY22 2.4%, FY23 5.9%, TTM 7.0%",
+          "interpretacion": "Mejora coincide exactamente con ventana de salida a bolsa; margen bruto en descenso contradice eficiencia operativa."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen EBIT cae < 6% en primeros reportes post-IPO",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_FOR_001",
+      "descripcion": "Margen Operativo Q1-2026 reportado será inferior al 6.5%",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 1,
+        "max": 4
+      },
+      "criterio_validacion": "Dato EBIT margin en 10-Q",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FOR_002",
+      "descripcion": "Bain Capital registrará venta secundaria o distribución de acciones",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Filing Form 4 o S-1 adicional",
+      "fuente_prevista": "filing"
+    },
+    {
+      "pred_id": "PRED_FOR_003",
+      "descripcion": "Capex anualizado se mantendrá por encima de $75M (run-rate actual)",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Suma de Capex en Cash Flow Statement > $75M TTM",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FOR_004",
+      "descripcion": "CFO trimestral mostrará volatilidad >30% interanual por efectos de WC",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Comparación YoY de CFO en próximos reportes",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FOR_005",
+      "descripcion": "No se declarará dividendo en efectivo en los próximos 12 meses",
+      "probabilidad_0_1": 0.9,
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "criterio_validacion": "Anuncios de IR / 10-K",
+      "fuente_prevista": "PR"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "10-Q Trimestral completo (Income Statement, Balance Sheet, Cash Flow)",
+      "por_que_importa": "Necesario para verificar márgenes reales, estacionalidad de caja y covenant compliance real.",
+      "como_obtenerlo": "Esperar primer reporte post-IPO (aprox Mayo 2026)"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de Covenants de Arrendamiento",
+      "por_que_importa": "Riesgo técnico de default cruzado si métricas operativas caen.",
+      "como_obtenerlo": "Notas a los estados financieros en próximo 10-K"
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.75,
+        "razon_principal": "Fragilidad estructural por pasivos de arrendamiento masivos y dependencia de proveedores, pese a no tener deuda financiera."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "CONDITIONAL",
+          "score_0_5": 2,
+          "por_que": [
+            "Positivo: $0 Deuda financiera y Caja $123M.",
+            "Negativo: Pasivos lease ($825M) > Patrimonio ($548M).",
+            "Negativo: Deterioro calidad CFO y dependencia extrema de crédito comercial (80% inv).",
+            "Negativo: 4 Banderas Rojas de Severidad ALTA activadas."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 123379000,
+          "linea_credito_disponible_usd": 0,
+          "otras_fuentes_liquidez": [
+            "No documentadas en prospecto"
+          ],
+          "runway_meses_estimado": 24,
+          "metodo_estimacion": "Basado en cobertura de leases corrientes y capex mantenimiento con caja actual + CFO basal reducido al 50%.",
+          "notas": "La liquidez es técnica, pero operativa está muy apalancada en proveedores."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 0,
+          "deuda_neta_usd": -123379000,
+          "coste_deuda_aprox_pct": 0,
+          "coverage_intereses": 100,
+          "net_debt_ebitda": -0.75,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "Sin deuda financiera, no hay muro de vencimientos tradicional. La presión es el pago mensual de alquileres."
+          },
+          "vencimientos": [],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "BAJO",
+            "comentario": "Riesgo bajo de default financiero, riesgo medio de incumplimiento de contratos de arrendamiento si ventas colapsan."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "ALTO",
+          "motores": [
+            "Salida de Bain Capital (73% ownership)",
+            "Plan de incentivos post-IPO (SBC)"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "Overhang de acciones es el riesgo principal para el precio de la acción a 12 meses."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Calidad de resultados DEBIL. Conversión de caja volátil y métricas optimizadas para la salida a bolsa.",
+        "red_flags": [
+          {
+            "flag_id": "RF-01",
+            "categoria": "CAPEX_SPIKE",
+            "descripcion": "Capex duplicado (x2.6) sin crecimiento de ventas proporcional, drenando FCF.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Indica ineficiencia de capital o costes ocultos de mantenimiento clasificados como expansión.",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "Historico Anual",
+                "cita_corta": "Capex FY24 $78M vs FY23 $30M",
+                "interpretacion": "Explosión de gasto de capital."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Capex regresa a niveles de ~4-5% de ventas o genera crecimiento >10%",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "RF-02",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "CFO cayendo 18% con ventas planas; dependencia crítica de proveedores.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.9,
+            "por_que_importa": "Estructura de capital de trabajo insostenible si hay contracción de crédito comercial.",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "Balance Sheet",
+                "cita_corta": "AP cubre 80% de Inventarios",
+                "interpretacion": "Financiación agresiva con proveedores."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Estabilización de CFO y ratio AP/Inv",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-07",
+            "categoria": "LEASES",
+            "descripcion": "Pasivos por arrendamiento ($825M) superan Patrimonio ($548M).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 1.0,
+            "por_que_importa": "Apalancamiento operativo extremo; rigidez de costes fijos.",
+            "evidencias": [
+              {
+                "source_id": "SRC_018_424B4_2026-02-05",
+                "ubicacion": "Lease Data",
+                "cita_corta": "Total Lease Liabilities $825M",
+                "interpretacion": "Deuda oculta masiva."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Crecimiento de ventas > Crecimiento de pasivos de lease",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "Conversión ruidosa, afectada por swings masivos de capital de trabajo.",
+            "posibles_distorsiones": [
+              "capital circulante",
+              "one-offs"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Presión alta por Capex reciente (40-50% del CFO).",
+            "capex_riesgo": "ALTO",
+            "notas": "Duda sobre cuánto es mantenimiento real vs crecimiento."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "NO",
+          "comentario": "Prioridad debe ser liquidez y expansión, no retornos de capital."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "Datos no desglosados en prospecto, probable aumento post-IPO."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "BAJO",
+          "comentario": "Foco orgánico aparente."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Sponsor domina la tabla de cap (73%)."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Contracción de demanda de muebles + Endurecimiento de proveedores",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "caída de CFO",
+              "subida de working capital",
+              "estrés de liquidez"
+            ],
+            "indicadores_tempranos": [
+              "Caída de comps sales",
+              "Aumento de inventarios",
+              "Caída de cuentas por pagar"
+            ]
+          }
+        ],
+        "conclusion_downside": "La empresa es vulnerable a un ciclo negativo de capital de trabajo. Sin deuda financiera, el riesgo es dilución masiva o reestructuración operativa, no quiebra inmediata."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-01",
+          "relacionado_con": "margen",
+          "definicion": "Margen operativo (EBIT/Ingresos) < 5.0% en un trimestre reportado",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Confirmaría que la mejora de márgenes fue ingeniería pre-IPO."
+        },
+        {
+          "kc_id": "KC-02",
+          "relacionado_con": "fcf",
+          "definicion": "FCF TTM cae por debajo de $50M",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Valoración actual insostenible con FCF < $50M (EV/FCF > 50x)."
+        },
+        {
+          "kc_id": "KC-03",
+          "relacionado_con": "dilucion",
+          "definicion": "Bain Capital vende >15% de su posición en una sola transacción o bloque",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "Señal de salida del sponsor, presión de oferta masiva."
+        },
+        {
+          "kc_id": "KC-05",
+          "relacionado_con": "supervivencia",
+          "definicion": "Cobertura de liquidez (Caja / Pasivos Corrientes) < 0.25",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "balance_sheet",
+          "accion_recomendada": "SALIR",
+          "por_que": "Crisis de liquidez inminente."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 2.5,
+        "condiciones_para_aumentar_tamaño": [
+          "Confirmación de crecimiento de ventas >5% orgánico",
+          "Estabilización de FCF > $100M anualizado",
+          "Reducción ordenada de participación de Bain"
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Activación de cualquier Kill Criteria",
+          "Deterioro de condiciones de pago a proveedores"
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Impacto real en dilución y margen GAAP vs Non-GAAP",
+          "como_obtenerlo": "10-Q Cash Flow Statement y Notas"
+        },
+        {
+          "item": "aging_inventarios",
+          "por_que_importa": "Riesgo de obsolescencia en muebles",
+          "como_obtenerlo": "Notas 10-K (Inventory valuation allowance)"
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Datos basados únicamente en Prospecto IPO 424B4",
+      "Histórico limitado y posiblemente optimizado"
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-24T10:30:00Z",
+    "inputs_hash": "BOBS_20260224_FORENSIC_SCORING"
+  }
+}

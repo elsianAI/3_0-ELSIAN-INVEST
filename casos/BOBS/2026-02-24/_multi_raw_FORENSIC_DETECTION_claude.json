@@ -1,0 +1,311 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260224_BOBS",
+  "fecha_corte": "2026-02-24",
+  "ticker": "BOBS",
+  "red_flags": [
+    {
+      "id": "RF-01",
+      "categoria": "OPACIDAD_DATOS",
+      "titulo": "Datos financieros exclusivamente de prospecto 424B4 de IPO — sin 10-K/10-Q disponibles",
+      "descripcion": "Toda la información financiera proviene del prospecto 424B4 presentado para el IPO de febrero 2026. No existen reportes 10-K ni 10-Q públicos previos al ser una empresa recién cotizada. Los datos trimestrales de cash flow, COGS y SGA individuales no están disponibles, solo anuales y periodos de 9 meses. Esto limita severamente la capacidad de detectar anomalías intra-trimestrales y verificar la consistencia de los datos contra fuentes independientes.",
+      "source_id": "TruthPack_v1 / log.limitaciones",
+      "ubicacion": "data_quality.validaciones.CORE_FILING_COVERAGE (WARNING)"
+    },
+    {
+      "id": "RF-02",
+      "categoria": "LEASE_LIABILITIES_CRECIENTES",
+      "titulo": "Pasivos de arrendamiento operativo y financiero de $825M creciendo aceleradamente (+27% en 9 meses)",
+      "descripcion": "A sep-2025, los pasivos de arrendamiento operativo totalizan $767.5M (corriente $96M + no corriente $671.5M) y los financieros $57.2M (corriente $15.2M + no corriente $42.1M), para un total de $824.7M. Esto representa 63% del total de pasivos ($1,303M) y 150% del patrimonio ($548M). Desde dic-2024 ($691M total leases) han crecido un 19.4% en solo 9 meses, y desde dic-2023 ($633M) un 30.3% en 21 meses. El crecimiento de obligaciones de lease supera el crecimiento de ingresos (TTM +14% vs FY2024), sugiriendo expansión agresiva de footprint de tiendas pre-IPO.",
+      "source_id": "TruthPack_v1 / lease_data",
+      "ubicacion": "lease_data.fecha=2025-09-28 vs lease_data.historico"
+    },
+    {
+      "id": "RF-03",
+      "categoria": "GOODWILL_INTANGIBLES",
+      "titulo": "Goodwill $182M e intangibles $179M representan ~19.5% de activos totales sin información de impairment testing",
+      "descripcion": "El TruthPack documenta goodwill de $181,699K e intangible assets de $179,100K (total ~$361M, 19.5% de activos totales de $1,851M). Dado que la empresa fue adquirida por Bain Capital (sponsor PE), estos valores probablemente reflejan el purchase price allocation de la adquisición original. Sin acceso a 10-K, no se puede verificar si se han realizado pruebas de deterioro recientes ni cuáles son los supuestos de fair value. En un negocio de retail de muebles sin tecnología propietaria, el riesgo de impairment de intangibles es elevado si el crecimiento se desacelera.",
+      "source_id": "TruthPack_v1 / log.limitaciones",
+      "ubicacion": "Goodwill de $181,699k e intangible assets de $179,100k presentes en balance sheet"
+    },
+    {
+      "id": "RF-04",
+      "categoria": "CAPEX_SPIKE",
+      "titulo": "Capex FY2024 se multiplicó x2.6 vs FY2023 ($78M vs $30M) igualando al 100% del CFI",
+      "descripcion": "El capex saltó de $29.8M en FY2023 a $78.2M en FY2024, un incremento del 163%. Notablemente, el capex iguala exactamente al CFI en FY2024 ($78,224K), lo cual puede ser aritméticamente correcto (sin adquisiciones) pero impide distinguir entre capex de mantenimiento y capex de crecimiento. La misma situación se repite en 9M-2024 (capex = CFI = $60.1M) y 9M-2025 (capex = CFI = $58.0M). Sin desglose, no se puede evaluar cuánto del capex es recurrente-mantenimiento vs discrecional-expansión, lo cual es crítico para la sostenibilidad del FCF.",
+      "source_id": "TruthPack_v1 / historico_anual",
+      "ubicacion": "FY2024 capex_usd=-78,224,000 vs FY2023 capex_usd=-29,770,000; log nota sobre capex=CFI"
+    },
+    {
+      "id": "RF-05",
+      "categoria": "CFO_DECLIVE_CON_REVENUE_FLAT",
+      "titulo": "CFO cayó 18% en FY2024 ($161M vs $197M en FY2023) con ingresos estables",
+      "descripcion": "Los ingresos se mantuvieron prácticamente planos entre FY2023 ($2,008M) y FY2024 ($2,028M, +1%), pero el CFO disminuyó de $197M a $161M (-18.3%). El margen EBIT se mantuvo constante (~5.8-5.9%), por lo que la caída del CFO sugiere un deterioro del capital de trabajo o cambios en el timing de pagos/cobros. Sin datos trimestrales de cash flow, no se puede precisar qué componente de WC absorbió la caja. Este patrón es inconsistente con una empresa que mejora operacionalmente.",
+      "source_id": "TruthPack_v1 / historico_anual",
+      "ubicacion": "FY2023 cfo_usd=197,172,000 vs FY2024 cfo_usd=161,154,000"
+    },
+    {
+      "id": "RF-06",
+      "categoria": "PE_SPONSOR_CFF_DISTRIBUCIONES",
+      "titulo": "CFF de -$105M en FY2024 y -$95M en FY2023 con $0 de deuda — probables distribuciones al sponsor PE",
+      "descripcion": "La empresa reportó $0 de deuda a dic-2024 y dic-2025, habiendo pagado toda la deuda antes del IPO. Sin embargo, el CFF fue fuertemente negativo: -$89.7M (FY2022), -$94.5M (FY2023), -$105.5M (FY2024). Con deuda total de solo $80M en FY2023 y $0 desde FY2024, estos flujos de financiamiento negativos sugieren distribuciones sustanciales al sponsor PE (Bain Capital). En FY2024, los $105M de CFF negativo representan el 65% del CFO, lo cual significa que la mayoría del cash flow operativo se destinó a retribuciones al propietario, no a reinversión o acumulación de caja. Esto indica una política de extracción de efectivo pre-IPO típica de sponsors PE.",
+      "source_id": "TruthPack_v1 / historico_anual",
+      "ubicacion": "FY2024 cff_usd=-105,469,000; FY2023 cff_usd=-94,527,000; deuda_total_usd=0"
+    },
+    {
+      "id": "RF-07",
+      "categoria": "MARGEN_PRE_IPO_OPTIMIZATION",
+      "titulo": "Mejora del margen operativo de 5.8% a 7.0% coincide con ventana pre-IPO — posible window dressing",
+      "descripcion": "El margen operativo (EBIT/ingresos) se mantuvo en ~5.8% en FY2023 y FY2024, pero subió a 6.5% en 9M-2025 (EBIT $111M sobre ingresos $1,719M). Anualizado, el TTM derivado muestra 7.0%. Esta mejora de ~120bps coincide con la preparación del IPO (filing feb 2026) y el periodo 9M-2025 que sería el showcase financiero del prospecto. Es un patrón frecuente en IPOs respaldadas por PE: optimización temporal de gastos SGA para presentar márgenes atractivos a inversores públicos. Si la mejora es cosmética (recorte de gastos discrecionales, diferimiento de mantenimiento), el margen podría revertir post-IPO.",
+      "source_id": "TruthPack_v1 / historico_anual + ImpliedExpectations_v1",
+      "ubicacion": "FY2024 ebit/revenue=5.8%; 9M-2025 ebit/revenue=6.5%; ImpliedExpectations banderas.notas"
+    },
+    {
+      "id": "RF-08",
+      "categoria": "INVENTARIOS_ELEVADOS",
+      "titulo": "Inventarios de $341M representan 1.96x las cuentas por cobrar + caja combinadas — riesgo de obsolescencia",
+      "descripcion": "A sep-2025, inventarios = $341.3M vs AR = $19.1M y caja = $123.4M. El ratio inventarios/ingresos TTM es ~14.7%, y el inventario supera en $69.7M a las cuentas por pagar ($271.6M). Para un retailer de muebles, niveles altos de inventario son normales, pero sin datos históricos de inventario comparables (solo balance último disponible), no se puede evaluar si hay acumulación anómala. La industria de muebles tiene riesgo de obsolescencia por cambios de estilo y dificultad de liquidación rápida.",
+      "source_id": "TruthPack_v1 / balance_sheet_ultimo",
+      "ubicacion": "inventarios_usd=341,276,000; cuentas_por_pagar_usd=271,596,000"
+    },
+    {
+      "id": "RF-09",
+      "categoria": "CONCENTRACION_INSIDER_OWNERSHIP",
+      "titulo": "Bain Capital retiene ~73% de las acciones post-IPO — riesgo de overhang y desalineación de intereses",
+      "descripcion": "Según los Form 4 y Form 3 documentados, Bain Capital (vía BCPE BDF Investor, LP) retiene 95,370,751 acciones post-IPO de un total de ~130.4M acciones diluidas, equivalente a ~73%. Múltiples insiders vendieron 2,917,500 acciones cada uno en el IPO a $15.94/share. La concentración de ownership implica: (1) riesgo de ventas masivas post-lock-up que presionen el precio, (2) posible desalineación de incentivos entre sponsor PE (buscando exit) y accionistas minoritarios (buscando valor de largo plazo), (3) limitado free float que puede amplificar volatilidad.",
+      "source_id": "TruthPack_v1 / log.limitaciones (Form 4 / Form 3 data)",
+      "ubicacion": "Múltiples limitaciones referenciando ventas de acciones de Bain Capital en IPO"
+    },
+    {
+      "id": "RF-10",
+      "categoria": "CFF_ANOMALO_9M2025",
+      "titulo": "CFF 9M-2025 de solo -$8.6M vs -$102M en 9M-2024 — cambio radical sin explicación visible",
+      "descripcion": "El CFF pasó de -$102.2M en 9M-2024 a -$8.6M en 9M-2025, una reducción de 92%. Dado que la deuda ya era $0 en ambos periodos, este cambio refleja probablemente la cesación de distribuciones al sponsor PE en anticipación al IPO. En 9M-2024, las distribuciones al PE consumieron más que el 100% del FCF ($102M CFF vs $32M FCF = 9M CFO $92M - capex $60M). El cambio abrupto confirma que los flujos de financiamiento previos eran extracciones del sponsor, no servicio de deuda.",
+      "source_id": "TruthPack_v1 / historico_trimestral",
+      "ubicacion": "9M-2025 cff_usd=-8,570,000 vs 9M-2024 cff_usd=-102,161,000"
+    }
+  ],
+  "liquidez": {
+    "caja_disponible_usd": 123379000,
+    "deuda_total_usd": 0,
+    "deuda_neta_usd": -123379000,
+    "lineas_credito_disponibles": "No se dispone de información sobre líneas de crédito revolving en el prospecto 424B4. Es probable que la empresa haya establecido una facilidad de crédito post-IPO pero no está documentada en los datos disponibles.",
+    "runway_estimado_meses": "No aplicable — empresa genera caja positiva (CFO TTM ~$188M). La posición neta de caja de $123M más la generación operativa proporcionan amplio colchón. Sin deuda que venza.",
+    "vencimientos_deuda_12_24_meses": {
+      "total_usd": 0,
+      "detalle": "La empresa pagó toda su deuda (First Lien Note de ~$80M) antes del IPO. No hay vencimientos de deuda pendientes."
+    },
+    "obligaciones_lease_corrientes_usd": 111179000,
+    "obligaciones_lease_corrientes_detalle": "Operating lease corriente: $96,013K + Finance lease corriente: $15,166K = $111,179K. Esto equivale a ~59% del CFO de 9M-2025 anualizado, representando una carga fija significativa.",
+    "riesgo_covenants": "Sin deuda bancaria visible, no hay covenants financieros documentados. Sin embargo, si existe una facilidad revolving no divulgada, podrían existir covenants no visibles.",
+    "riesgo_dilucion": "ALTO — Bain Capital retiene ~73% y tiene incentivos para monetizar gradualmente. La empresa registró un equity incentive plan (S-8) que podría diluir adicionalmente. El precio del IPO fue $15.94 vs precio actual de $21.70, lo cual incentiva ventas secundarias.",
+    "evaluacion_supervivencia_12_24_meses": "BAJA probabilidad de estrés financiero. Balance sin deuda, caja de $123M, generación de CFO positiva y creciente. Los pasivos de lease son la principal obligación fija pero están cubiertos por el CFO actual. El riesgo no es de supervivencia sino de calidad de retornos para accionistas minoritarios."
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "periodos_analizados": [
+        "FY2022",
+        "FY2023",
+        "FY2024",
+        "9M-2025"
+      ],
+      "detalle": [
+        {
+          "periodo": "FY2022",
+          "ebit_usd": 49956000,
+          "menos_interes_usd": -24343000,
+          "menos_tax_usd": -7091000,
+          "mas_da_usd": 60707000,
+          "ebit_ajustado_pre_wc_usd": 79229000,
+          "cfo_usd": 51993000,
+          "delta_wc_y_otros_usd": -27236000,
+          "delta_como_pct_ebit": -54.5,
+          "nota": "CFO significativamente inferior al EBIT ajustado; la diferencia de -$27M (~55% del EBIT) indica consumo de WC o partidas no operativas. Año anómalo con margen operativo de solo 2.4%."
+        },
+        {
+          "periodo": "FY2023",
+          "ebit_usd": 117819000,
+          "menos_interes_usd": -19872000,
+          "menos_tax_usd": -24519000,
+          "mas_da_usd": 62876000,
+          "ebit_ajustado_pre_wc_usd": 136304000,
+          "cfo_usd": 197172000,
+          "delta_wc_y_otros_usd": 60868000,
+          "delta_como_pct_ebit": 51.7,
+          "nota": "CFO excede EBIT ajustado en $61M (+52% del EBIT). Esto sugiere liberación masiva de WC y/o partidas no-cash favorables (SBC, deferred revenue, etc.). Este exceso de conversión es inusual y podría reflejar timing favorable de pagos/cobros."
+        },
+        {
+          "periodo": "FY2024",
+          "ebit_usd": 117734000,
+          "menos_interes_usd": -10538000,
+          "menos_tax_usd": -25491000,
+          "mas_da_usd": 65194000,
+          "ebit_ajustado_pre_wc_usd": 146899000,
+          "cfo_usd": 161154000,
+          "delta_wc_y_otros_usd": 14255000,
+          "delta_como_pct_ebit": 12.1,
+          "nota": "Delta de +$14M (+12% del EBIT) es modesto y razonable. Conversión de EBIT a CFO más normalizada que FY2023. Interés reducido ($10.5M vs $19.9M) refleja paydown de deuda."
+        },
+        {
+          "periodo": "9M-2025",
+          "ebit_usd": 111025000,
+          "menos_interes_usd": -3201000,
+          "menos_tax_usd": -29282000,
+          "mas_da_usd": 52084000,
+          "ebit_ajustado_pre_wc_usd": 130626000,
+          "cfo_usd": 118748000,
+          "delta_wc_y_otros_usd": -11878000,
+          "delta_como_pct_ebit": -10.7,
+          "nota": "Delta de -$12M (-11% del EBIT) sugiere ligero consumo de WC, consistente con fase de expansión de tiendas (más inventario). Conversión razonable."
+        }
+      ],
+      "distorsiones_mayores_15pct": [
+        {
+          "periodo": "FY2022",
+          "delta_pct": -54.5,
+          "explicacion": "Año anómalo: WC consumption + bajo margen operativo generan una conversión EBIT→CFO muy pobre"
+        },
+        {
+          "periodo": "FY2023",
+          "delta_pct": 51.7,
+          "explicacion": "Liberación extraordinaria de WC; posible normalización post-disrupciones de cadena de suministro de FY2022. Beneficio no recurrente."
+        }
+      ]
+    },
+    "cfo_a_fcf": {
+      "periodos_analizados": [
+        "FY2022",
+        "FY2023",
+        "FY2024",
+        "9M-2025"
+      ],
+      "detalle": [
+        {
+          "periodo": "FY2022",
+          "cfo_usd": 51993000,
+          "capex_usd": -51427000,
+          "fcf_usd": 566000,
+          "capex_como_pct_cfo": 98.9,
+          "nota": "Capex consumió prácticamente el 100% del CFO. FCF casi cero. Toda la generación de caja se reinvirtió."
+        },
+        {
+          "periodo": "FY2023",
+          "cfo_usd": 197172000,
+          "capex_usd": -29770000,
+          "fcf_usd": 167402000,
+          "capex_como_pct_cfo": 15.1,
+          "nota": "Capex cayó 42% vs FY2022 mientras CFO se cuadruplicó, resultando en FCF excepcional de $167M. Año atípicamente favorable — posible diferimiento de inversiones."
+        },
+        {
+          "periodo": "FY2024",
+          "cfo_usd": 161154000,
+          "capex_usd": -78224000,
+          "fcf_usd": 82930000,
+          "capex_como_pct_cfo": 48.5,
+          "nota": "Capex se multiplicó x2.6 vs FY2023, reduciendo FCF a la mitad. El capex como % del CFO subió de 15% a 49%. Si este nivel de capex es el nuevo normal de expansión, la generación de FCF es significativamente menor que lo sugerido por FY2023."
+        },
+        {
+          "periodo": "9M-2025",
+          "cfo_usd": 118748000,
+          "capex_usd": -57989000,
+          "fcf_usd": 60759000,
+          "capex_como_pct_cfo": 48.8,
+          "nota": "Patrón consistente con FY2024: capex consume ~49% del CFO. FCF anualizado implícito ~$81M, por debajo de los $112M derivados en ImpliedExpectations (que usa Q4 fuerte estacionalmente)."
+        }
+      ],
+      "distorsiones_mayores_15pct": [
+        {
+          "periodo": "FY2023_vs_FY2024",
+          "tipo": "capex_swing",
+          "explicacion": "Capex pasó de 15% a 49% del CFO entre FY2023 y FY2024. Swing de 34pp en la ratio de reinversión. El FCF de FY2023 ($167M) es artificialmente inflado por capex anormalmente bajo y WC release, no representativo de generación sostenible."
+        }
+      ]
+    },
+    "nota_general": "La volatilidad del puente EBIT→CFO (de -55% a +52% del EBIT) y del puente CFO→FCF (capex 15-99% del CFO) es extrema para un negocio que debería ser relativamente estable. Esto dificulta determinar la capacidad de generación de FCF sostenible. El rango observable de FCF anual es de $0.6M a $167M, un factor de 296x entre extremos, lo cual indica que los datos históricos de 3 años son insuficientes para estabilizar estimaciones de FCF normalizado."
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC-01",
+      "criterio": "Margen operativo revierte por debajo del 5.0% en cualquiera de los próximos 4 trimestres reportados",
+      "razon": "La mejora de margen de 5.8% a 7.0% coincide con la ventana pre-IPO. Si revierte a <5%, indica que la optimización era temporal y el negocio no soporta los márgenes implícitos en el precio. FY2022 mostró que el margen puede caer hasta 2.4%.",
+      "ventana_temporal": "Próximos 12 meses (Q4-2025 a Q3-2026)",
+      "medible": true,
+      "probabilidad": "MEDIA"
+    },
+    {
+      "id": "KC-02",
+      "criterio": "FCF acumulado de los próximos 4 trimestres resulta inferior a $60M",
+      "razon": "El FCF TTM derivado de $112M se basa en un Q4 estacionalmente fuerte. Si el FCF real cae por debajo de $60M (similar al run-rate de 9M-2025 anualizado de ~$81M menos margen), el EV/FCF implícito superaría 45x, insostenible para un retailer de muebles. El FY2022 mostró que el FCF puede acercarse a cero.",
+      "ventana_temporal": "Próximos 12 meses",
+      "medible": true,
+      "probabilidad": "BAJA"
+    },
+    {
+      "id": "KC-03",
+      "criterio": "Bain Capital reduce su participación por debajo del 50% mediante ventas secundarias dentro de los 12 meses post-IPO",
+      "razon": "Una venta acelerada del sponsor señalaría desconfianza en la trayectoria de valor y crearía presión técnica sobre el precio. La participación actual (~73%) podría disminuir sustancialmente si se ejecutan secundarias agresivas post-lock-up. El precio del IPO fue $15.94 y el precio actual de $21.70 ofrece un +36% de ganancia, incentivando ventas.",
+      "ventana_temporal": "12 meses post-IPO (hasta feb 2027)",
+      "medible": true,
+      "probabilidad": "MEDIA"
+    },
+    {
+      "id": "KC-04",
+      "criterio": "Same-store sales (comp sales) negativos por 2 trimestres consecutivos",
+      "razon": "La justificación del precio actual depende de crecimiento de ingresos mid-teens (por expansión + comps positivos). Si los comps se vuelven negativos, el crecimiento se reduce a solo nuevas aperturas, haciendo inalcanzable el CAGR de FCF implícito de 11-15%. Nota: esta métrica se conocerá cuando BOBS reporte como empresa pública.",
+      "ventana_temporal": "Próximos 12-18 meses (primeros reportes trimestrales públicos)",
+      "medible": true,
+      "probabilidad": "MEDIA"
+    },
+    {
+      "id": "KC-05",
+      "criterio": "Impairment de goodwill o intangibles por valor superior a $50M",
+      "razon": "Con $361M en goodwill + intangibles (19.5% de activos, 66% del patrimonio), un impairment significativo señalaría que el valor pagado por Bain Capital en la adquisición original no se sostiene, cuestionando la premisa de crecimiento. El umbral de $50M representaría ~14% de estos activos y ~9% del patrimonio.",
+      "ventana_temporal": "Próximos 24 meses",
+      "medible": true,
+      "probabilidad": "BAJA"
+    },
+    {
+      "id": "KC-06",
+      "criterio": "Capex anual supera $100M sin incremento proporcional de ingresos (>10% crecimiento)",
+      "razon": "El capex ya escaló de $30M a $78M entre FY2023 y FY2024 sin crecimiento de ingresos proporcional (+1%). Si el capex sigue subiendo (la expansión de tiendas lo exige) sin que los ingresos acompañen, el FCF se comprimirá destructivamente. Con CFO en el rango de $160-190M, un capex >$100M reduciría el FCF a <$90M.",
+      "ventana_temporal": "FY2025 y FY2026",
+      "medible": true,
+      "probabilidad": "MEDIA"
+    }
+  ],
+  "report_type": "FORENSIC_DETECTION",
+  "input_refs": {
+    "truth_pack": "TruthPack_v1_partial / CASE_20260224_BOBS",
+    "implied_expectations": "ImpliedExpectations_v1 / CASE_20260224_BOBS",
+    "sources_pack": "No disponible"
+  },
+  "log": {
+    "limitaciones": [
+      "No se dispone de SourcesPack_v1 — análisis basado exclusivamente en TruthPack e ImpliedExpectations",
+      "Sin acceso a 10-K/10-Q, no se pueden verificar políticas contables de reconocimiento de ingresos, capitalización de costos, ni detalles de lease accounting",
+      "Sin datos de inventario histórico (solo balance último), no se puede calcular tendencia de inventory days ni detectar acumulación anómala",
+      "Sin desglose de capex (mantenimiento vs crecimiento), los puentes CFO→FCF no pueden distinguir inversión recurrente de discrecional",
+      "FY2022 usa fiscal year-end de Jan 1 2023, lo cual introduce inconsistencia en comparaciones interanuales",
+      "No se tienen datos de SBC (stock-based compensation), lo cual puede distorsionar el puente NI→CFO",
+      "Los datos trimestrales individuales no incluyen cash flow ni EBIT, limitando el análisis intra-anual"
+    ],
+    "areas_revisadas": [
+      "Liquidez y solvencia",
+      "Pasivos de arrendamiento",
+      "Goodwill e intangibles",
+      "Puentes EBIT→CFO→FCF",
+      "Tendencias de capex",
+      "Capital de trabajo (AR, inventarios, AP)",
+      "Estructura de ownership y riesgo de dilución",
+      "Flujos de financiamiento y distribuciones al sponsor",
+      "Patrones de margen pre-IPO",
+      "Reconocimiento de ingresos (no evaluable por falta de datos de políticas contables)"
+    ],
+    "nota_data_quality": "TruthPack con data_quality.overall_status=PARTIAL y confidence=95%. Análisis ejecutado bajo la matriz de decisión: TruthPack PARTIAL + SourcesPack NO disponible → ejecución con TruthPack solamente."
+  },
+  "_meta": {
+    "generado_por": "FORENSIC_DETECTION agent",
+    "timestamp": "2026-02-24T09:49:00Z",
+    "modelo": "claude-opus-4-6"
+  }
+}
