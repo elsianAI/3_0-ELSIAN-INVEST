@@ -1,0 +1,883 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260225_TEP",
+  "fecha_corte": "2026-02-25",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "claude-opus-4-6",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260225_TEP",
+    "implied_expectations_caso_id": "CASE_20260225_TEP",
+    "sources_pack_caso_id": "CASE_20260225_TEP"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "TEP genera CFO robusto (1,813M FY2024) y FCF positivo recurrente, sin estrés inmediato de liquidez operativa.",
+      "Margen EBIT en declive sostenido (15.5% FY2022 → 10.5% FY2024) requiere monitoreo activo.",
+      "Opacidad crítica en estructura de deuda: deuda total no reportada explícitamente, impidiendo evaluar apalancamiento real post-M&A FY2023.",
+      "Cuentas por cobrar elevadas (DSO ~78 días) y gasto por intereses creciente (+70% YoY) son señales de vigilancia.",
+      "Supervivencia operativa no está en riesgo a 12-24 meses dado CFO/FCF positivos, pero la falta de transparencia en deuda limita confianza."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.55
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La compañía genera CFO positivo recurrente: 1,375M (FY2023) y 1,813M (FY2024), con FCF estimado de 1,594M en FY2024.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_013",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Cash Flow Statement FY2024",
+          "cita_corta": "CFO=1,813M; capex=-219M; FCF=1,594M",
+          "interpretacion": "Generación de caja operativa sólida que cubre holgadamente capex de mantenimiento."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_003",
+          "url": null,
+          "titulo": null,
+          "fecha": "2023-12-31",
+          "ubicacion": "Cash Flow Statement FY2023",
+          "cita_corta": "CFO=1,375M; capex=-233M; FCF=1,142M",
+          "interpretacion": "FCF positivo también en FY2023 pese a M&A significativa."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO rolling 12M cae por debajo de 800M o FCF se vuelve negativo en dos trimestres consecutivos",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El margen EBIT ha caído de 15.5% (FY2022) a 10.5% (FY2024) pese a crecimiento de ingresos del 26%.",
+      "confianza_0_1": 0.88,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_003",
+          "url": null,
+          "titulo": null,
+          "fecha": "2023-12-31",
+          "ubicacion": "Income Statement histórico anual",
+          "cita_corta": "EBIT margin FY2022=15.5%, FY2023=12.0%",
+          "interpretacion": "Erosión de márgenes visible en dos años consecutivos."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_013",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Income Statement FY2024",
+          "cita_corta": "EBIT=1,082M / Ingresos=10,280M = 10.5%",
+          "interpretacion": "La tendencia decreciente continúa en FY2024."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen EBIT se recupera por encima del 12% en próximo reporte anual",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "No existe desglose explícito de deuda financiera total consolidada, impidiendo calcular apalancamiento neto y ratios de cobertura fiables.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_013",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Balance Sheet / Notas de deuda",
+          "cita_corta": "deuda_total_usd=null; pasivos totales imputados",
+          "interpretacion": "La opacidad en estructura de capital es un riesgo material para el análisis."
+        }
+      ],
+      "falsacion": {
+        "test": "Publicación de nota de deuda consolidada con vencimientos en próximo filing anual",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El salto de CFI en FY2023 (-2,587M vs capex -233M) indica una adquisición de ~2,350M financiada parcialmente con deuda (CFF +1,319M).",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_003",
+          "url": null,
+          "titulo": null,
+          "fecha": "2023-12-31",
+          "ubicacion": "Cash Flow Statement FY2023",
+          "cita_corta": "CFI=-2,587M; capex=-233M; CFF=+1,319M",
+          "interpretacion": "M&A de gran escala con financiación externa significativa."
+        }
+      ],
+      "falsacion": {
+        "test": "La compañía divulga detalle de la adquisición y estructura de financiación en reporte anual",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El gasto por intereses creció 70% YoY (126M→214M) incluyendo 61M de intereses por leases, presionando la cobertura de intereses a ~5.1x EBIT.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_013",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Income Statement FY2023-FY2024",
+          "cita_corta": "Intereses: 126M→214M; EBIT/interest=5.1x",
+          "interpretacion": "Cobertura aún aceptable pero deteriorándose rápidamente."
+        }
+      ],
+      "falsacion": {
+        "test": "Interest expense / EBIT supera 25% (cobertura < 4x) en próximos dos reportes",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "DSO de ~78 días con cuentas por cobrar de 2,200M sobre ingresos de 10,280M, sin benchmarking sectorial disponible.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_013",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Balance Sheet FY2024",
+          "cita_corta": "AR=2,200M; DSO~78 días",
+          "interpretacion": "Nivel elevado que requiere contexto sectorial para confirmar si es anómalo."
+        }
+      ],
+      "falsacion": {
+        "test": "DSO supera 100 días o AR crece >15% sin crecimiento proporcional de ingresos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_007",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Los pasivos por leases (795M) representan una carga fija significativa con pagos anuales de 311M, equivalentes al ~17% del CFO FY2024.",
+      "confianza_0_1": 0.88,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_013",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "Notas de arrendamientos FY2024",
+          "cita_corta": "Lease total=795M; pagos=311M/año; CFO=1,813M",
+          "interpretacion": "Carga fija material pero absorbible dado el nivel actual de CFO."
+        }
+      ],
+      "falsacion": {
+        "test": "Lease payments superan 25% del CFO anualizado",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_008",
+      "tipo": "HECHO",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "Las cifras están denominadas en EUR sin conversión FX a USD, lo que limita comparabilidad internacional directa.",
+      "confianza_0_1": 0.95,
+      "impacto": "BAJO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "log.limitaciones",
+          "cita_corta": "moneda origen EUR; no conversión EUR→USD",
+          "interpretacion": "Riesgo metodológico menor; no afecta análisis interno de tendencias."
+        }
+      ],
+      "falsacion": {
+        "test": "Se incorpora tipo de cambio EUR/USD para ajustar cifras",
+        "ventana_meses": {
+          "min": 1,
+          "max": 3
+        },
+        "fuente_prevista": "otro"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "El margen EBIT de TEP se mantiene por debajo del 12% en el próximo reporte anual (FY2025).",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Margen EBIT reportado en estado de resultados anual FY2025 < 12%.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "El gasto por intereses anual supera 200M EUR en FY2025.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Interest expense en income statement FY2025 > 200M.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "CFO anual FY2025 se mantiene por encima de 1,500M EUR.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "CFO reportado en cash flow statement FY2025 > 1,500M.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "DSO se mantiene en rango 70-90 días al cierre del próximo reporte semestral.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "AR / (ingresos semestrales anualizados) * 365 entre 70 y 90 días.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "La compañía no revela detalle completo de deuda financiera total en los próximos 12 meses.",
+      "probabilidad_0_1": 0.3,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Ausencia de línea 'total financial debt' explícita en próximo filing anual.",
+      "fuente_prevista": "filing"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "Ingresos anuales FY2025 superan 10,000M EUR, manteniendo trayectoria de crecimiento orgánico.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Revenue FY2025 reportado > 10,000M.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_007",
+      "descripcion": "Se observa nueva actividad de M&A con CFI semestral excediendo -500M en H1 o H2 2025.",
+      "probabilidad_0_1": 0.25,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "CFI en cualquier semestre 2025 < -500M con capex < -200M (diferencial indica M&A).",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Nota de deuda financiera consolidada con tabla de vencimientos",
+      "por_que_importa": "Sin deuda total no se puede medir apalancamiento, cobertura ni riesgo de refinanciación post-M&A.",
+      "como_obtenerlo": "Annual Report FY2024 completo / Nota de 'Financial liabilities' o 'Borrowings' en notas al balance consolidado."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Market cap y precio de acción actualizado con acciones diluidas",
+      "por_que_importa": "Necesario para calcular EV, múltiplos implícitos y desbloquear ImpliedExpectations.",
+      "como_obtenerlo": "Bloomberg/Reuters snapshot o filing con weighted-average diluted shares."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de covenants financieros vigentes",
+      "por_que_importa": "Evaluar riesgo de breach ante deterioro de márgenes y aumento de intereses.",
+      "como_obtenerlo": "Nota de 'Financial covenants' o 'Debt agreements' en Annual Report / Credit Facility Agreement."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose de COGS y gross profit",
+      "por_que_importa": "Permitiría diagnosticar si la erosión de margen es por mix de producto, costes directos o overhead.",
+      "como_obtenerlo": "Income Statement detallado en Annual Report / nota de 'Cost of sales'."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de la adquisición FY2023 y goodwill asociado",
+      "por_que_importa": "Evaluar riesgo de impairment y calidad del crecimiento inorgánico.",
+      "como_obtenerlo": "Nota de 'Business combinations' o 'Acquisitions' en Annual Report FY2023."
+    },
+    {
+      "prioridad": "BAJA",
+      "item": "Líneas de crédito disponibles (revolver/committed facilities)",
+      "por_que_importa": "Mejoraría estimación de liquidez real disponible más allá de caja.",
+      "como_obtenerlo": "Nota de 'Credit facilities' o MD&A sección de liquidez."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.55,
+        "razon_principal": "CFO/FCF positivos recurrentes alejan riesgo de liquidez inmediato, pero la opacidad en estructura de deuda post-M&A, el deterioro sostenido de márgenes EBIT y el crecimiento de intereses justifican vigilancia activa."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 3.5,
+          "por_que": [
+            "CFO FY2024 de 1,813M cubre holgadamente capex (219M), leases (311M) e intereses (214M).",
+            "FCF positivo en todos los periodos evaluados (FY2023, FY2024, H1-2024, H1-2025).",
+            "Caja de 1,058M proporciona colchón de 1.93x sobre obligaciones conocidas a 12 meses.",
+            "No hay evidencia de estrés de liquidez ni necesidad inmediata de refinanciación forzada.",
+            "Sin embargo, margen EBIT en declive sostenido (-500bps en 2 años) reduce margen de seguridad operativo.",
+            "Deuda total desconocida post-M&A FY2023 introduce incertidumbre material en evaluación de solvencia."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 1058000000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "CFO operativo recurrente (~1,500-1,800M anuales)",
+            "Potencial acceso a mercados de deuda (no confirmado)"
+          ],
+          "runway_meses_estimado": null,
+          "metodo_estimacion": "No se estima runway numérico dado que CFO es positivo y recurrente; la compañía autofinancia operaciones. El concepto de runway aplica a empresas con burn, no a este perfil.",
+          "notas": "La caja de 1,058M cubre ~1.93x las obligaciones corrientes conocidas (leases corrientes 216M + AP 333M). Sin deuda financiera total, no se puede calcular cobertura completa."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": null,
+          "deuda_neta_usd": null,
+          "coste_deuda_aprox_pct": null,
+          "coverage_intereses": 5.06,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "No evaluable: tabla de vencimientos no disponible. M&A FY2023 (~2,350M en CFI extra-capex) sugiere deuda significativa cuyo perfil de vencimiento es desconocido."
+          },
+          "vencimientos": [
+            {
+              "anio": 2025,
+              "importe_usd": 216000000,
+              "tipo": "leasing",
+              "riesgo": "BAJO",
+              "fuente_ref": {
+                "source_id": "SRC_013",
+                "ubicacion": "lease_data"
+              }
+            },
+            {
+              "anio": 2026,
+              "importe_usd": null,
+              "tipo": "unknown",
+              "riesgo": "UNKNOWN",
+              "fuente_ref": {
+                "source_id": "SRC_013",
+                "ubicacion": "nota deuda no disponible"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "UNKNOWN",
+            "comentario": "No se dispone de información sobre covenants financieros. Dado el apalancamiento implícito post-M&A y el deterioro de márgenes, evaluar covenants es crítico."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "UNKNOWN",
+          "motores": [
+            "Posible necesidad de capital si refinanciación de deuda M&A FY2023 no es viable a términos razonables"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "Sin datos de acciones diluidas ni historial de emisiones, no se puede evaluar dilución. El CFO positivo reduce probabilidad de emisión forzada, pero la opacidad en deuda deja abierta la posibilidad."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "La calidad de resultados es aceptable en lo observable: el puente EBIT+D&A→CFO en FY2024 muestra solo 2.6% de distorsión y la conversión CFO→FCF es del 88%. Sin embargo, FY2023 y H1-2024 presentan distorsiones >15% sin desglose de working capital disponible. La ausencia de COGS, gross profit y detalle de SGA limita diagnósticos de calidad de margen.",
+        "red_flags": [
+          {
+            "flag_id": "F-001",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "Depreciación FY2024 (779M) supera capex (219M) en 3.6x, sugiriendo base de activos inflada por adquisiciones previas con bajo capex de reposición.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.6,
+            "por_que_importa": "Puede indicar que el capex reportado subestima la inversión necesaria para mantener la base de activos, o que existe riesgo de impairment futuro.",
+            "evidencias": [
+              {
+                "source_id": "SRC_013",
+                "ubicacion": "Cash Flow Statement FY2024",
+                "cita_corta": "depreciacion=779M; capex=219M; ratio=3.6x",
+                "interpretacion": "Efecto de adquisiciones históricas con amortización de intangibles."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Capex aumenta a >400M o se reporta capex de mantenimiento vs crecimiento separadamente",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "flag_id": "F-002",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "DSO de ~78 días con AR/AP ratio de 6.6x inmoviliza 1,867M de capital de trabajo neto.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.5,
+            "por_que_importa": "Capital de trabajo elevado consume liquidez y puede enmascarar deterioro de cobranza si DSO sube.",
+            "evidencias": [
+              {
+                "source_id": "SRC_013",
+                "ubicacion": "Balance Sheet FY2024",
+                "cita_corta": "AR=2,200M; AP=333M; DSO~78 días",
+                "interpretacion": "Posición de WC desfavorable; requiere comparativa sectorial."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "DSO supera 100 días o AR crece >15% sin crecimiento proporcional de ingresos",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-003",
+            "categoria": "OTHER",
+            "descripcion": "Gasto por intereses creció 70% YoY (126M→214M), muy por encima del crecimiento de ingresos (23%), incluyendo 61M de intereses por leases.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.75,
+            "por_que_importa": "Señala apalancamiento creciente post-M&A que erosiona rentabilidad neta y comprime cobertura de intereses.",
+            "evidencias": [
+              {
+                "source_id": "SRC_013",
+                "ubicacion": "Income Statement FY2023-FY2024",
+                "cita_corta": "Interest: 126M→214M (+70%); lease interest=61M",
+                "interpretacion": "Carga financiera aumenta más rápido que el negocio operativo."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Interest expense se estabiliza o baja a <200M y cobertura EBIT/interest se mantiene >5x",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-004",
+            "categoria": "OTHER",
+            "descripcion": "Opacidad en estructura de capital: deuda total no reportada como línea explícita; pasivos totales imputados por identidad contable.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.8,
+            "por_que_importa": "Imposibilita medir apalancamiento real, ratios de cobertura y riesgo de refinanciación.",
+            "evidencias": [
+              {
+                "source_id": "SRC_013",
+                "ubicacion": "Balance Sheet",
+                "cita_corta": "deuda_total_usd=null; pasivos=7,518M imputados",
+                "interpretacion": "Limitación crítica para análisis forense de solvencia."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Se publica nota consolidada de deuda financiera con vencimientos en próximo Annual Report",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "flag_id": "F-005",
+            "categoria": "OTHER",
+            "descripcion": "Margen EBIT en declive sostenido: 15.5% (FY2022) → 12.0% (FY2023) → 10.5% (FY2024), pese a crecimiento de ingresos.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.65,
+            "por_que_importa": "Si continúa, reduce capacidad de servicio de deuda y generación de FCF, comprometiendo supervivencia a mediano plazo.",
+            "evidencias": [
+              {
+                "source_id": "SRC_003",
+                "ubicacion": "Income Statement histórico",
+                "cita_corta": "Margen EBIT: 15.5%→12.0%→10.5%",
+                "interpretacion": "Erosión consistente que puede reflejar dilución de márgenes por M&A o presión competitiva."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Margen EBIT se recupera por encima del 12% en FY2025",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-006",
+            "categoria": "OTHER",
+            "descripcion": "CFI FY2023 anómalamente negativo (-2,587M vs capex -233M), consistente con M&A de ~2,350M sin desglose público de valoración/goodwill.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.55,
+            "por_que_importa": "Riesgo de goodwill impairment y sobrepago si adquisición no genera sinergias esperadas.",
+            "evidencias": [
+              {
+                "source_id": "SRC_003",
+                "ubicacion": "Cash Flow Statement FY2023",
+                "cita_corta": "CFI=-2,587M; capex=-233M; M&A implícita~2,350M",
+                "interpretacion": "Adquisición material financiada con deuda (CFF +1,319M)."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Se publica test de impairment de goodwill mostrando headroom positivo",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "flag_id": "F-007",
+            "categoria": "LEASES",
+            "descripcion": "Pasivos por arrendamiento de 795M con pagos anuales de 311M representan carga fija significativa (~17% del CFO).",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.4,
+            "por_que_importa": "En escenario adverso de caída de CFO, la carga fija de leases amplifica el estrés financiero.",
+            "evidencias": [
+              {
+                "source_id": "SRC_013",
+                "ubicacion": "Notas de arrendamientos FY2024",
+                "cita_corta": "Lease liabilities=795M; pagos=311M/año",
+                "interpretacion": "Manejable al nivel actual de CFO pero añade rigidez a la estructura de costes."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Lease payments superan 25% del CFO en cualquier periodo reportado",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "FY2024 muestra conversión sólida (EBIT+D&A de 1,861M vs CFO de 1,813M, gap -2.6%). FY2023 mostró distorsión material del 16% (gap -262M), probablemente por consumo de WC o impuestos pagados. H1-2024 invirtió la distorsión (+18.4%), sugiriendo reversión temporal de WC. H1-2025 vuelve a normalidad (-11.4%).",
+            "posibles_distorsiones": [
+              "capital circulante (AR elevado)",
+              "impuestos pagados vs devengados",
+              "one-offs relacionados con M&A FY2023",
+              "intereses pagados vs devengados"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Conversión CFO→FCF consistentemente alta: 83-88% en FY2023/FY2024, bajando a 80% en H1-2025. La intensidad de capex es baja (capex/ingresos ~2.1% en FY2024), lo que sugiere modelo asset-light post-adquisición.",
+            "capex_riesgo": "MEDIO",
+            "notas": "La ratio depreciación/capex de 3.6x sugiere que el capex actual puede ser insuficiente para mantener la base de activos a largo plazo, especialmente intangibles adquiridos."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "UNKNOWN",
+          "comentario": "No hay datos sobre programa de recompras. CFF FY2024 fue -1,403M, compatible con repago de deuda de M&A más que con recompras."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "No se dispone de datos de SBC ni compensación variable del management. Solicitar en nota de gastos de personal."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "M&A FY2023 de ~2,350M es material (~28% de activos totales FY2024). Sin detalle de valoración, goodwill asignado ni sinergias realizadas, el riesgo de mala asignación es moderado."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Sin datos accesibles sobre participación insider o alineación de incentivos."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Margen EBIT cae por debajo del 8% combinado con incapacidad de refinanciar deuda de M&A a vencimiento.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "Caída de CFO por compresión de márgenes",
+              "Aumento de coste de refinanciación por deterioro de métricas crediticias",
+              "Potencial breach de covenants no visibles",
+              "Posible emisión dilutiva forzada"
+            ],
+            "indicadores_tempranos": [
+              "Margen EBIT < 9% en dos trimestres consecutivos",
+              "Downgrade por agencia de rating",
+              "CFF positivo recurrente indicando dependencia de financiación externa",
+              "Aumento de spread de CDS o bonos corporativos"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Deterioro de cuentas por cobrar con DSO >100 días y provisión de incobrables material.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "Consumo de WC que presiona CFO",
+              "Provisión de incobrables que erosiona net income",
+              "Pérdida de confianza del mercado si es concentración de clientes"
+            ],
+            "indicadores_tempranos": [
+              "DSO > 90 días",
+              "AR creciendo >20% sin crecimiento proporcional de ingresos",
+              "Mención de provisiones de incobrables en reportes",
+              "Cambio en política de revenue recognition"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "Goodwill impairment material por M&A FY2023 no generando sinergias esperadas.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "Write-down que erosiona patrimonio y empeora ratios de apalancamiento",
+              "Señal de destrucción de valor que presiona precio accionario",
+              "Posible trigger de covenants basados en net worth"
+            ],
+            "indicadores_tempranos": [
+              "Ingresos del segmento adquirido por debajo de plan",
+              "Márgenes del segmento adquirido inferiores al promedio grupal",
+              "Mención de test de impairment con headroom reducido en notas anuales"
+            ]
+          }
+        ],
+        "conclusion_downside": "El escenario de mayor riesgo combina compresión de márgenes con refinanciación forzada, dado que la deuda de M&A es significativa pero opaca. La probabilidad es baja-media gracias al CFO robusto, pero la falta de visibilidad en vencimientos y covenants impide cuantificar el colchón real. Un segundo vector de riesgo es el deterioro de WC vía AR, que aunque no amenaza supervivencia inmediata, podría amplificar estrés en escenario combinado."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "supervivencia",
+          "definicion": "CFO rolling 12M cae por debajo de 800M EUR en dos reportes consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Señalaría deterioro operativo severo que compromete servicio de deuda y cargas fijas."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "margen",
+          "definicion": "Margen EBIT anual cae por debajo del 8%.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Un margen <8% con la carga financiera actual comprimiría net income a niveles críticos."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "deuda",
+          "definicion": "Ratio interest expense / EBIT supera 30% (cobertura < 3.3x).",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Indicaría que el servicio de deuda consume porción insostenible de resultado operativo."
+        },
+        {
+          "kc_id": "KC-004",
+          "relacionado_con": "contabilidad",
+          "definicion": "DSO supera 100 días o AR crece >20% interanual sin crecimiento proporcional de ingresos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Deterioro de cobranza puede señalar problemas de calidad de ingresos o concentración de riesgo."
+        },
+        {
+          "kc_id": "KC-005",
+          "relacionado_con": "deuda",
+          "definicion": "Divulgación explícita de breach de covenant o reestructuración forzada de deuda.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "Breach de covenant confirmaría estrés financiero severo y cambio fundamental de tesis."
+        },
+        {
+          "kc_id": "KC-006",
+          "relacionado_con": "fcf",
+          "definicion": "FCF rolling 12M se vuelve negativo (CFO + capex < 0).",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "FCF negativo en empresa de este tamaño señalaría problema estructural, no temporal."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 3.0,
+        "condiciones_para_aumentar_tamaño": [
+          "Publicación de tabla de vencimientos de deuda mostrando perfil manejable sin refinanciación concentrada.",
+          "Margen EBIT se estabiliza o revierte tendencia por encima del 11% en H1-2025.",
+          "Disponibilidad de EV/market cap para validar valoración implícita razonable.",
+          "Confirmación de covenants con headroom >20% sobre niveles actuales.",
+          "Reducción de intereses o demostración de refinanciación a coste inferior."
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Margen EBIT cae por debajo del 8% en base anual.",
+          "Cobertura de intereses (EBIT/interest) cae por debajo de 3.5x.",
+          "Breach de covenant o anuncio de reestructuración de deuda.",
+          "CFO rolling 12M cae por debajo de 1,000M sin justificación temporal.",
+          "Goodwill impairment material (>500M) que erosione patrimonio."
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "tabla_vencimientos",
+          "por_que_importa": "Sin tabla de vencimientos no se puede evaluar maturity wall ni riesgo de refinanciación post-M&A.",
+          "como_obtenerlo": "Annual Report FY2024 completo, nota de 'Borrowings' / 'Financial liabilities by maturity'."
+        },
+        {
+          "item": "covenants",
+          "por_que_importa": "Ante deterioro de márgenes e intereses crecientes, conocer umbrales contractuales es crítico.",
+          "como_obtenerlo": "Nota de 'Financial covenants' o 'Loan agreements' en filing anual o credit facility documentation."
+        },
+        {
+          "item": "acciones_diluidas",
+          "por_que_importa": "Necesario para market cap, EV y evaluación de riesgo de dilución.",
+          "como_obtenerlo": "Nota de 'Earnings per share' con weighted-average diluted share count."
+        },
+        {
+          "item": "detalle_capex",
+          "por_que_importa": "Con ratio D&A/capex de 3.6x, distinguir mantenimiento vs crecimiento es esencial.",
+          "como_obtenerlo": "MD&A sección 'Capital expenditures' o nota de 'Property, plant and equipment'."
+        },
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Evaluar dilución potencial y alineación de management.",
+          "como_obtenerlo": "Nota de 'Share-based compensation' / 'Employee benefits'."
+        },
+        {
+          "item": "revolver_disponible",
+          "por_que_importa": "Colchón de liquidez adicional no evaluado.",
+          "como_obtenerlo": "Nota de 'Credit facilities' / 'Committed lines of credit' en filing anual."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Data completeness del TruthPack es 26%, limitando profundidad de análisis forense.",
+      "Deuda total no disponible: ratios de apalancamiento (net debt/EBITDA, debt/equity) no calculables.",
+      "Cifras en EUR etiquetadas como _usd sin conversión FX; todas las cifras son nominales en EUR.",
+      "ImpliedExpectations bloqueado por falta de EV; no se incorporó valoración implícita al scoring.",
+      "Sin benchmarking sectorial para contextualizar DSO, márgenes y capitalización."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-25T09:45:00Z",
+    "inputs_hash": "TP_CASE_20260225_TEP+FD_CASE_20260225_TEP+IE_CASE_20260225_TEP"
+  }
+}

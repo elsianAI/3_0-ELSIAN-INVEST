@@ -1,0 +1,250 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260225_TEP",
+  "fecha_corte": "2026-02-25",
+  "ticker": "TEP",
+  "report_type": "FORENSIC_DETECTION",
+  "red_flags": [
+    {
+      "id": "RF-001",
+      "categoria": "OPACIDAD_ESTRUCTURA_CAPITAL",
+      "descripcion": "No se reporta deuda_total_usd como línea explícita en los filings disponibles. Los pasivos totales (€7,518M) fueron imputados por identidad contable (activos - patrimonio). Sin desglose explícito de deuda financiera total, es imposible evaluar apalancamiento real.",
+      "evidencia": "balance_sheet_ultimo.deuda_total_usd = null; pasivos_totales_usd imputado via IMPUTED:balance_identity",
+      "source_id": "SRC_013",
+      "ubicacion": "Balance Sheet / Notas de deuda"
+    },
+    {
+      "id": "RF-002",
+      "categoria": "DIVERGENCIA_CFO_VS_EBIT",
+      "descripcion": "En FY2024, CFO (€1,813M) supera EBIT (€1,082M) por €731M (+67.6%). Aunque parte se explica por depreciación (€779M), la magnitud sugiere posibles ajustes de capital de trabajo favorables o diferencias significativas de impuestos pagados vs devengados que no se pueden verificar por falta de desglose.",
+      "evidencia": "FY2024: EBIT=1,082M, D&A=779M, EBIT+D&A=1,861M vs CFO=1,813M (diferencia=-48M razonable). Sin embargo FY2023: EBIT=998M, D&A=639M, EBIT+D&A=1,637M vs CFO=1,375M (diferencia=-262M, gap de 16% requiere explicación por cambios WC o impuestos pagados)",
+      "source_id": "SRC_003 / SRC_013",
+      "ubicacion": "Income Statement / Cash Flow Statement FY2023-FY2024"
+    },
+    {
+      "id": "RF-003",
+      "categoria": "CUENTAS_POR_COBRAR_ELEVADAS",
+      "descripcion": "Cuentas por cobrar de €2,200M representan ~21.4% de ingresos FY2024 (€10,280M), equivalente a ~78 días de ventas (DSO). Para una empresa con ingresos >€10B, un DSO de ~78 días puede ser normal en ciertos sectores (servicios, B2B), pero sin comparativa histórica ni sectorial, constituye un punto de vigilancia.",
+      "evidencia": "balance_sheet_ultimo.cuentas_por_cobrar_usd=2,200,000,000; ingresos FY2024=10,280,000,000; DSO estimado = (2200/10280)*365 ≈ 78 días",
+      "source_id": "SRC_013",
+      "ubicacion": "Balance Sheet FY2024"
+    },
+    {
+      "id": "RF-004",
+      "categoria": "CUENTAS_POR_PAGAR_BAJAS_VS_COBRAR",
+      "descripcion": "Ratio cuentas por pagar / cuentas por cobrar muy bajo: €333M / €2,200M = 15.1%. El capital de trabajo neto (receivables - payables) asciende a €1,867M, inmovilizando capital significativo. Puede indicar poder de negociación asimétrico desfavorable o concentración de clientes.",
+      "evidencia": "cuentas_por_cobrar=2,200M, cuentas_por_pagar=333M, WC neto=1,867M",
+      "source_id": "SRC_013",
+      "ubicacion": "Balance Sheet FY2024"
+    },
+    {
+      "id": "RF-005",
+      "categoria": "MARGEN_OPERATIVO_DECRECIENTE",
+      "descripcion": "El margen EBIT se ha deteriorado mientras los ingresos crecen fuertemente. FY2021: 15.1%, FY2022: 15.5%, FY2023: 12.0%, FY2024: 10.5%. Caída de 500bps en dos años pese a crecimiento de ingresos del 45% (FY2022→FY2024). Sugiere presión de costes, posible compra de crecimiento inorgánico con márgenes dilutivos, o cambio de mix de negocio.",
+      "evidencia": "FY2021: 1071/7115=15.1%; FY2022: 1262/8154=15.5%; FY2023: 998/8345=12.0%; FY2024: 1082/10280=10.5%",
+      "source_id": "SRC_003 / SRC_013",
+      "ubicacion": "Income Statement historico_anual"
+    },
+    {
+      "id": "RF-006",
+      "categoria": "FLUJO_INVERSION_ANOMALO_FY2023",
+      "descripcion": "En FY2023, CFI fue -€2,587M (negativo masivo), mientras capex fue solo -€233M. Implica €2,354M de inversión no-capex: probablemente adquisiciones de gran escala. Financiado con CFF=+€1,319M (deuda/equity), lo que indica apalancamiento significativo para M&A. En FY2024 CFI se normalizó a -€221M.",
+      "evidencia": "FY2023: CFI=-2,587M, capex=-233M, diferencia=2,354M posible M&A; CFF=+1,319M financiación neta",
+      "source_id": "SRC_003",
+      "ubicacion": "Cash Flow Statement FY2023"
+    },
+    {
+      "id": "RF-007",
+      "categoria": "MONEDA_NO_CONVERTIDA",
+      "descripcion": "Todas las cifras están denominadas en EUR pero etiquetadas con sufijo _usd sin conversión FX. Esto impide comparaciones reales con benchmarks en USD y puede distorsionar análisis cruzados.",
+      "evidencia": "log.limitaciones múltiples: 'Moneda de origen del filing: EUR; no se aplicó conversión EUR->USD'",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "log.limitaciones"
+    },
+    {
+      "id": "RF-008",
+      "categoria": "LEASE_LIABILITIES_SIGNIFICATIVAS",
+      "descripcion": "Pasivos por arrendamiento totales de €795.4M (corriente €216M + no corriente €580M), con pagos anuales de €311M e intereses de €61M. Representan ~17.5% del patrimonio (€4,556M). Activos ROU de €725.5M. Existe además compromisos off-balance de €10.7M y gastos excluidos de €25.1M.",
+      "evidencia": "lease_data FY2024: lease_liabilities_total=795.4M, lease_payments=-311M, interest_on_lease=61M, ROU=725.5M",
+      "source_id": "SRC_013",
+      "ubicacion": "Notas de arrendamientos FY2024"
+    },
+    {
+      "id": "RF-009",
+      "categoria": "COMPLETITUD_DATOS_BAJA",
+      "descripcion": "Data completeness de solo 26%. Historico anual 77% null, trimestral 73% null, métricas derivadas 86% null. La ausencia masiva de COGS, gross profit, SG&A, R&D impide evaluar la calidad del crecimiento y la estructura de costes.",
+      "evidencia": "data_quality.validaciones.DATA_COMPLETENESS: 'Overall: 26% complete'",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "data_quality"
+    },
+    {
+      "id": "RF-010",
+      "categoria": "INTERES_CRECIENTE",
+      "descripcion": "Gasto de intereses creció de €126M (FY2023) a €214M (FY2024), un aumento del 69.8%, significativamente superior al crecimiento de ingresos (23.2%). Incluye €61M de intereses por leases. Indica apalancamiento creciente post-adquisiciones FY2023.",
+      "evidencia": "FY2023: interest_expense=-126M; FY2024: interest_expense=-214M; lease interest FY2024=61M",
+      "source_id": "SRC_003 / SRC_013",
+      "ubicacion": "Income Statement FY2023-FY2024"
+    }
+  ],
+  "liquidez": {
+    "caja_disponible_usd": 1058000000,
+    "lineas_credito_disponibles_usd": null,
+    "comentario_lineas": "No se dispone de información sobre líneas de crédito no utilizadas en los filings disponibles.",
+    "runway_estimado_meses": "No calculable con precisión. Con CFO FY2024 de €1,813M y capex de €219M, FCF implícito ≈ €1,594M/año. Empresa genera caja positiva; no está en situación de burn. El riesgo es de servicio de deuda, no de supervivencia operativa.",
+    "vencimientos_deuda_12_24_meses": {
+      "detalle": "No disponible. deuda_total_usd = null en TruthPack. Lease liabilities corrientes de €216M vencen en 12 meses.",
+      "lease_corriente_usd": 216000000
+    },
+    "riesgo_covenants": "No evaluable. Sin visibilidad sobre estructura de deuda ni covenants específicos.",
+    "riesgo_dilucion": "No evaluable. Sin datos de acciones diluidas ni programas de emisión.",
+    "evaluacion_general": "La empresa genera CFO robusto (€1,813M FY2024) y FCF implícito positivo (~€1,594M). Caja de €1,058M cubre lease corriente (€216M) y capex (€219M) ampliamente. No hay señales inmediatas de estrés de liquidez, pero la opacidad sobre deuda total y vencimientos impide una evaluación completa del riesgo de refinanciamiento post-M&A FY2023."
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "FY2023": {
+        "ebit_usd": 998000000,
+        "depreciacion_usd": 639000000,
+        "ebit_mas_da": 1637000000,
+        "cfo_usd": 1375000000,
+        "diferencia_usd": -262000000,
+        "diferencia_pct": -16.0,
+        "comentario": "Gap de -16.0% entre EBIT+D&A y CFO. Supera umbral del 15%. Posibles causas: impuestos pagados (€228M devengados), cambios desfavorables de WC, o intereses pagados no separados en CFO. Sin desglose no se puede conciliar exactamente.",
+        "distorsion_mayor_15pct": true
+      },
+      "FY2024": {
+        "ebit_usd": 1082000000,
+        "depreciacion_usd": 779000000,
+        "ebit_mas_da": 1861000000,
+        "cfo_usd": 1813000000,
+        "diferencia_usd": -48000000,
+        "diferencia_pct": -2.6,
+        "comentario": "Gap de solo -2.6%. EBIT+D&A y CFO están bien alineados. La mejora respecto a FY2023 sugiere normalización del capital de trabajo o menores impuestos efectivos pagados.",
+        "distorsion_mayor_15pct": false
+      },
+      "H1_2024": {
+        "ebit_usd": 503000000,
+        "depreciacion_usd": 148000000,
+        "ebit_mas_da": 651000000,
+        "cfo_usd": 771000000,
+        "diferencia_usd": 120000000,
+        "diferencia_pct": 18.4,
+        "comentario": "CFO supera EBIT+D&A en 18.4%. Puede indicar liberación de WC en H1 o timing favorable de cobros/pagos. Supera umbral del 15%.",
+        "distorsion_mayor_15pct": true
+      },
+      "H1_2025": {
+        "ebit_usd": 530000000,
+        "depreciacion_usd": 134000000,
+        "ebit_mas_da": 664000000,
+        "cfo_usd": 588000000,
+        "diferencia_usd": -76000000,
+        "diferencia_pct": -11.4,
+        "comentario": "Gap de -11.4%. Dentro del umbral pero deterioro vs H1-2024. Posible acumulación de WC o mayores impuestos pagados en H1-2025.",
+        "distorsion_mayor_15pct": false
+      }
+    },
+    "cfo_a_fcf": {
+      "FY2023": {
+        "cfo_usd": 1375000000,
+        "capex_usd": -233000000,
+        "fcf_implicito_usd": 1142000000,
+        "conversion_cfo_a_fcf_pct": 83.1,
+        "comentario": "Buena conversión. Capex es solo 17% del CFO."
+      },
+      "FY2024": {
+        "cfo_usd": 1813000000,
+        "capex_usd": -219000000,
+        "fcf_implicito_usd": 1594000000,
+        "conversion_cfo_a_fcf_pct": 87.9,
+        "comentario": "Conversión excelente. Capex bajo relativo a CFO. Sin embargo, CFI total fue solo -€221M, prácticamente igual al capex, lo que sugiere ausencia de M&A en FY2024 (contraste con FY2023 donde CFI=-€2,587M)."
+      },
+      "H1_2024": {
+        "cfo_usd": 771000000,
+        "capex_usd": -88000000,
+        "fcf_implicito_usd": 683000000,
+        "conversion_cfo_a_fcf_pct": 88.6,
+        "comentario": "Alta conversión semestral."
+      },
+      "H1_2025": {
+        "cfo_usd": 588000000,
+        "capex_usd": -117000000,
+        "fcf_implicito_usd": 471000000,
+        "conversion_cfo_a_fcf_pct": 80.1,
+        "comentario": "Conversión aceptable pero CFO H1-2025 (€588M) es 23.7% inferior a H1-2024 (€771M), señal de deterioro de generación de caja operativa."
+      }
+    },
+    "nota_general": "Los puentes son razonablemente sólidos en FY2024 pero muestran distorsión en FY2023 (EBIT→CFO) y deterioro en H1-2025 vs H1-2024. La ausencia de desglose de cambios de WC, impuestos pagados y stock-based compensation impide reconciliación precisa."
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC-001",
+      "condicion": "CFO anualizado cae por debajo de €800M (menos de la mitad de FY2024) en dos trimestres consecutivos reportados",
+      "ventana_temporal": "12 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "razon": "H1-2025 CFO de €588M (anualizado ~€1,176M) aún cómodo. Solo un deterioro severo de WC o pérdida operativa llevaría a este nivel."
+    },
+    {
+      "id": "KC-002",
+      "condicion": "Margen EBIT cae por debajo del 8% en base anual (FY completo)",
+      "ventana_temporal": "12 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "razon": "Tendencia decreciente: 15.5% (FY2022) → 12.0% (FY2023) → 10.5% (FY2024). Si la presión de costes de integración post-M&A continúa, un margen sub-8% es plausible en 12-24 meses."
+    },
+    {
+      "id": "KC-003",
+      "condicion": "Incapacidad de refinanciar deuda de adquisición FY2023 a vencimiento, resultando en default o reestructuración forzada",
+      "ventana_temporal": "24 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "razon": "Sin visibilidad sobre vencimientos de deuda. El CFI de -€2,587M en FY2023 sugiere adquisición financiada significativamente. Si la deuda asociada vence en 2025-2026, el riesgo de refinanciamiento existe aunque la generación de caja es fuerte."
+    },
+    {
+      "id": "KC-004",
+      "condicion": "DSO (días de ventas en cuentas por cobrar) supera 100 días, indicando deterioro de cobranza o concentración de clientes morosos",
+      "ventana_temporal": "12 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "razon": "Actual ~78 días. Un salto a >100 días requeriría deterioro material de calidad de cartera. Sin embargo, sin serie histórica de DSO, no se puede evaluar tendencia."
+    },
+    {
+      "id": "KC-005",
+      "condicion": "Ratio interest expense / EBIT supera 30% (cobertura de intereses cae por debajo de 3.3x)",
+      "ventana_temporal": "12 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "razon": "FY2024: 214/1082 = 19.8% (cobertura 5.1x). FY2023: 126/998 = 12.6% (cobertura 7.9x). Deterioro rápido. Con margen EBIT cayendo e intereses subiendo, el umbral de 30% podría alcanzarse si EBIT cae a ~€710M con intereses estables."
+    },
+    {
+      "id": "KC-006",
+      "condicion": "Caja cae por debajo de €500M sin acceso demostrado a líneas de crédito no dispuestas",
+      "ventana_temporal": "12 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "razon": "Caja FY2024 de €1,058M con tendencia positiva (delta_cash +€189M en FY2024). Solo un evento extraordinario (M&A grande, pago de deuda concentrado) agotaría caja a <€500M."
+    }
+  ],
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1_partial",
+    "truth_pack_data_quality": "PARTIAL",
+    "implied_expectations_status": "BLOCKED",
+    "sources_pack_disponible": false
+  },
+  "log": {
+    "limitaciones": [
+      "TruthPack con data_quality PARTIAL (26% completeness). Análisis basado exclusivamente en campos disponibles.",
+      "No se revisaron filings directamente (SourcesPack no disponible).",
+      "Cifras denominadas en EUR pero etiquetadas _usd sin conversión FX.",
+      "Sin visibilidad sobre: COGS, gross profit, SG&A, R&D, goodwill, deuda total, vencimientos de deuda, covenants, acciones diluidas.",
+      "ImpliedExpectations BLOCKED: sin EV ni market cap para anclar valoración.",
+      "No se pudo evaluar reconocimiento de ingresos, capitalización de capex, goodwill ni RPTs por falta de datos granulares.",
+      "Depreciación H1-2024 (€148M) y H1-2025 (€134M) parecen bajas vs FY2024 (€779M); posible diferencia de alcance o temporalidad en reporte semestral."
+    ],
+    "areas_no_evaluables": [
+      "Reconocimiento agresivo de ingresos (sin detalle de políticas contables)",
+      "Capitalización excesiva de capex (sin desglose capex mantenimiento vs crecimiento)",
+      "Goodwill y deterioro (sin dato de goodwill en balance)",
+      "Transacciones con partes relacionadas (sin información)",
+      "Elementos fuera de balance más allá de leases (sin notas detalladas)"
+    ]
+  },
+  "_meta": {
+    "modelo": "ForensicDetection_v1",
+    "timestamp": "2026-02-25T09:37:00Z",
+    "notas": "Análisis ejecutado con TruthPack PARTIAL sin SourcesPack. Cobertura limitada pero suficiente para detección inicial de banderas rojas cuantitativas."
+  }
+}

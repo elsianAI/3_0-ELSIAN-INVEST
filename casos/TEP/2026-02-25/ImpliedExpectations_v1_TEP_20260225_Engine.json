@@ -1,0 +1,188 @@
+{
+  "version_esquema": "ImpliedExpectations_v1",
+  "caso_id": "CASE_20260225_TEP",
+  "fecha_corte": "2026-02-25",
+  "empresa": {
+    "ticker": "TEP",
+    "nombre": "UNKNOWN",
+    "bolsa": "UNKNOWN",
+    "pais": "UNKNOWN",
+    "sector": "UNKNOWN",
+    "industria": "UNKNOWN"
+  },
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1_partial",
+    "truth_pack_caso_id": "CASE_20260225_TEP"
+  },
+  "status": "BLOCKED",
+  "motivo_blocked": "Prerequisito incumplido: truth_pack.data_quality.status=PARTIAL (se requiere PASS). Adicionalmente falta enterprise_value_usd para traducir precio/EV en expectativas implícitas.",
+  "snapshot_mercado": {
+    "fecha": "2026-02-25",
+    "precio_usd": null,
+    "market_cap_usd": null,
+    "enterprise_value_usd": null,
+    "deuda_total_usd": null,
+    "caja_usd": 1058000000,
+    "deuda_neta_usd": null,
+    "acciones_diluidas": null
+  },
+  "metricas_base": {
+    "periodo_base": "FY",
+    "fecha_fin_periodo_base": "2024-12-31",
+    "ingresos_usd": 10280000000,
+    "ebit_usd": 1082000000,
+    "cfo_usd": 1813000000,
+    "capex_usd": -219000000,
+    "fcf_usd": null,
+    "margen_operativo_pct": null,
+    "margen_fcf_pct": null
+  },
+  "seleccion_metodo": {
+    "metodo_principal": "BLOCKED",
+    "razon": "No se puede ejecutar reverse valuation sin EV actual. Aunque existe EBIT positivo, falta la variable ancla de valoración (enterprise_value_usd).",
+    "metodos_secundarios": [
+      "MULTIPLOS_IMPLICITOS_SOLO"
+    ]
+  },
+  "multiples_implicitos": {
+    "disponible": false,
+    "ev_ebit": null,
+    "ev_fcf": null,
+    "p_fcf": null,
+    "fcf_yield_pct": null,
+    "comentario": "No calculable: faltan EV y market cap."
+  },
+  "parametros_modelo": {
+    "horizonte_anos": 5,
+    "tasa_descuento_grid": [
+      0.08,
+      0.1,
+      0.12
+    ],
+    "crecimiento_terminal_grid": [
+      0.02,
+      0.03
+    ],
+    "multiple_terminal_fcf_grid": [
+      10,
+      12,
+      15,
+      18
+    ],
+    "nota_parametros": "Se mantienen rangos estándar para sensibilidad de coste de capital y valor terminal. En ausencia de EV verificable, no se ejecuta inversión de valoración; los grids quedan definidos para recálculo cuando el TruthPack pase gates.",
+    "convenciones": {
+      "definicion_fcf": "FCF = CFO - CAPEX (usando capex como salida de caja)",
+      "ev_formula": "EV = market_cap + deuda_total - caja",
+      "si_fcf_negativo": "usar earnings power / EBIT y no reverse DCF de FCF"
+    }
+  },
+  "reverse_dcf_fcf": {
+    "aplicable": false,
+    "fcf0_usd": null,
+    "resultado_grid": [],
+    "sensibilidades": {
+      "ranking_drivers": [
+        {
+          "driver": "cagr_fcf_5y",
+          "importancia": "ALTA"
+        },
+        {
+          "driver": "multiple_terminal",
+          "importancia": "MEDIA"
+        },
+        {
+          "driver": "tasa_descuento",
+          "importancia": "MEDIA"
+        }
+      ],
+      "observacion": "No evaluable sin EV de referencia."
+    },
+    "validaciones_modelo": {
+      "ev_presente": false,
+      "fcf0_presente": false,
+      "resultados_sin_valores_absurdos": true,
+      "detalle": "Modelo no ejecutado por bloqueo de inputs."
+    }
+  },
+  "reverse_earnings_power": {
+    "aplicable": false,
+    "metrica_base": "EBIT",
+    "valor_base_usd": 1082000000,
+    "rango_normalizado_usd": {
+      "min": null,
+      "base": null,
+      "max": null
+    },
+    "implied_multiple_sobre_normalizado": {
+      "multiple_min": null,
+      "multiple_base": null,
+      "multiple_max": null
+    },
+    "lectura": "No se puede inferir múltiplo implícito sobre earnings power sin EV/market cap. Se conserva EBIT como métrica base para recálculo posterior.",
+    "supuestos": [
+      "Usar EBIT (no EBITA) como métrica operativa principal.",
+      "No imputar deuda total ni market cap ausentes."
+    ]
+  },
+  "resumen_expectativas_implicitas": {
+    "enunciados": [
+      "No es posible traducir el precio/EV actual en expectativas porque el EV no está disponible en el TruthPack validado."
+    ],
+    "variable_critica_principal": "RIESGO_CAPITAL",
+    "que_deberia_observarse_en_6_12_meses": [
+      "Disponibilidad de market_cap_usd y enterprise_value_usd consistentes con la fórmula EV.",
+      "Publicación de deuda_total_usd explícita para completar estructura de capital.",
+      "Actualización de FCF canónico (CFO y CAPEX con convención de signo consistente)."
+    ]
+  },
+  "banderas": {
+    "expectativas_extremas": false,
+    "posible_value_trap": false,
+    "posible_peak_earnings": false,
+    "alto_riesgo_balance": false,
+    "opacidad_alta": true,
+    "notas": [
+      "Evaluación de banderas de valoración no concluyente por falta de EV.",
+      "Data completeness reportada en 26%."
+    ]
+  },
+  "faltantes_criticos": [
+    {
+      "item": "enterprise_value_usd",
+      "por_que_importa": "Sin EV no existe ancla para inferir crecimiento/márgenes implícitos.",
+      "como_resolver": "Aportar market_cap_usd y deuda_total_usd para calcular EV = market_cap + deuda_total - caja."
+    },
+    {
+      "item": "market_cap_usd",
+      "por_que_importa": "Necesario para EV y múltiplos de equity (P/FCF).",
+      "como_resolver": "Incorporar snapshot de mercado con fecha y acciones diluidas."
+    },
+    {
+      "item": "deuda_total_usd",
+      "por_que_importa": "Sin deuda total no se puede construir EV ni riesgo financiero implícito.",
+      "como_resolver": "Extraer total debt explícito del filing o nota de deuda consolidada."
+    },
+    {
+      "item": "acciones_diluidas",
+      "por_que_importa": "Requerido para validar market cap y métricas por acción.",
+      "como_resolver": "Añadir weighted-average diluted shares del periodo base."
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "truth_pack.data_quality.status no cumple PASS (valor actual: PARTIAL).",
+      "Campos *_usd contienen nominal en EUR sin conversión FX explícita.",
+      "deuda_total_usd y enterprise_value_usd ausentes en snapshot de mercado.",
+      "Cobertura de datos reportada: 26%."
+    ],
+    "traza_calculo": [
+      "Modo detectado: NORMAL (no se recibió RemediationPlan + PatchBundle).",
+      "Gate N1 verificado: data_quality.status=PARTIAL -> bloqueo.",
+      "Gate N2 verificado: enterprise_value_usd ausente -> bloqueo confirmado.",
+      "Se tomó FY2024 como periodo base operativo para referencia de EBIT/CFO/CAPEX.",
+      "No se calcularon múltiplos implícitos por falta de EV/market cap.",
+      "No se ejecutó grid N6; por tanto no aplica validación de duplicados de 24 combinaciones.",
+      "Se aplicó convención de métrica operativa con EBIT (no EBITA) para evitar inconsistencia metodológica."
+    ]
+  }
+}

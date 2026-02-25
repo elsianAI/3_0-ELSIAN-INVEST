@@ -1,0 +1,465 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260225_TEP",
+  "fecha_corte": "2026-02-25",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "Gemini-CLI",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260225_TEP",
+    "implied_expectations_caso_id": "CASE_20260225_TEP",
+    "sources_pack_caso_id": "CASE_20260225_TEP"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La supuesta solidez de caja del BULL ignora el fuerte deterioro en H1-2025, donde el CFO cayó a €588M (vs €771M) y el Net Income a €249M (vs €291M).",
+      "La brecha masiva entre D&A (€779M) y Capex (€219M) en FY2024 no es una 'opcionalidad de caja', sino una señal de subinversión severa que infla artificialmente el FCF.",
+      "El incremento de las cuentas por cobrar (AR €2,200M, 21% de ventas) representa un riesgo de incobrabilidad masivo, no una 'opcionalidad de caja futura'.",
+      "La opacidad absoluta en la estructura de capital (Deuda Total oculta, Pasivos Totales no explicitados) impide descartar un balance sobreapalancado e insostenible.",
+      "La compresión de margen es persistente y las señales de H1-2025 son mixtas: el EBIT subió levemente, pero el beneficio neto y la caja colapsaron."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CRITICO",
+      "enunciado": "La compañía está subinvirtiendo sistemáticamente para inflar su flujo de caja a corto plazo, poniendo en riesgo la viabilidad a largo plazo.",
+      "confianza_0_1": 0.8,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_013",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "TruthPack historico_anual FY2024",
+          "cita_corta": "depreciation=-€779M; capex=-€219M.",
+          "interpretacion": "Capex es apenas el 28% de la depreciación, indicando consumo de activos."
+        }
+      ],
+      "falsacion": {
+        "test": "El capex en FY2025 y FY2026 sube por encima de €500M sostenidamente o la directiva explica detalladamente la naturaleza no monetaria del D&A sin impacto operativo.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El flujo de caja operativo ya está mostrando deterioro severo, contradiciendo la tesis de robustez.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "TruthPack historico_trimestral H1-2025",
+          "cita_corta": "CFO H1-2025 €588M vs CFO H1-2024 €771M.",
+          "interpretacion": "Caída del 23% en generación de caja operativa interanual en el primer semestre."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO H2-2025 se recupera fuertemente superando los €1,200M y cerrando el año plano o al alza.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "El CFO anual de FY2025 será inferior a los €1,813M reportados en FY2024.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "CFO FY2025 reportado < €1,813M.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "Se anunciará un incremento significativo del capex o un cargo por deterioro de activos (impairment) debido a la baja inversión previa.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 6,
+        "max": 24
+      },
+      "criterio_validacion": "Capex FY2025 o FY2026 > €400M o impairment > €200M reportado en P&L.",
+      "fuente_prevista": "10-K"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de la deuda total y pasivos totales",
+      "por_que_importa": "Es imposible descartar riesgo de quiebra o refinanciación sin saber cuánto deben.",
+      "como_obtenerlo": "Balance completo y notas de pasivos financieros."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Aging de cuentas por cobrar (Accounts Receivable)",
+      "por_que_importa": "€2,200M en AR es altísimo y podría esconder ventas no cobrables.",
+      "como_obtenerlo": "Nota de riesgo de crédito en el reporte anual."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.85,
+        "riesgo_principal": "OPACIDAD",
+        "resumen_1_2_frases": "La aparente solidez se basa en subinversión en capex (inflando FCF) y métricas opacas sin visibilidad de la deuda real. El deterioro en H1-2025 del CFO y Beneficio Neto confirma que los problemas son estructurales, no transitorios."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_FUS_001",
+            "resumen_claim_bull": "TEP opera con escala consolidada y crecimiento histórico material, lo que reduce riesgo de fragilidad estructural del negocio.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "Crecer en ingresos no garantiza viabilidad si los márgenes se hunden.",
+                "El crecimiento puede haber sido comprado caro (M&A) e integrado pobremente.",
+                "Escala no protege contra deuda oculta o insolvencia si el circulante se estanca."
+              ]
+            },
+            "puntos_ciegos": [
+              "Ignora que H1-2025 mostró estancamiento de ingresos (€5,116M vs €5,076M en H1-2024, crecimiento pírrico).",
+              "Asume que escala es equivalente a calidad operativa."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
+                "ubicacion": "TruthPack historico_trimestral H1-2025",
+                "cita_corta": "Net income H1-2025 €249M vs H1-2024 €291M.",
+                "interpretacion": "La escala no previno una caída del beneficio neto en H1-2025."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Los ingresos en FY2025 crecen menos de inflación o caen, demostrando pérdida de cuota de mercado.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_002",
+            "resumen_claim_bull": "La generación de caja libre FY2024 fue robusta y suficiente para autofinanciar operación y capex.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.8,
+              "por_que": [
+                "La generación de caja libre está artificialmente inflada por un capex de subsistencia (€219M frente a €779M de depreciación).",
+                "El H1-2025 muestra una caída drástica en CFO (-23%)."
+              ]
+            },
+            "puntos_ciegos": [
+              "El deterioro de la caja en los últimos 6 meses (H1-2025).",
+              "La no sostenibilidad de operar con capex tan por debajo de D&A en un negocio de escala."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
+                "ubicacion": "TruthPack historico_trimestral H1-2025",
+                "cita_corta": "CFO H1-2025 €588M vs €771M H1-2024.",
+                "interpretacion": "Fuerte deterioro reciente del flujo operativo que destruye la tesis de robustez."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "CFO de H2-2025 cae interanualmente, confirmando la tendencia estructural bajista.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_005",
+            "resumen_claim_bull": "El capital de trabajo ofrece opcionalidad de caja: AR elevado y DSO alto permiten liberar liquidez.",
+            "evaluacion_red_team": {
+              "estado": "FALSO",
+              "probabilidad_de_fallo_0_1": 0.9,
+              "por_que": [
+                "Un saldo de cuentas por cobrar alto no es una 'opción' de liquidez, es dinero atascado que probablemente no se cobre.",
+                "Con €2,200M en AR sobre ventas de €10B, el canal podría estar sobreabastecido."
+              ]
+            },
+            "puntos_ciegos": [
+              "Riesgo masivo de write-offs (castigos) en AR.",
+              "El deterioro de calidad de los clientes."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_013",
+                "ubicacion": "TruthPack balance_sheet_ultimo",
+                "cita_corta": "AR €2,200M.",
+                "interpretacion": "Volumen crítico inmovilizado en clientes."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "AR aumenta sobre ventas o se anuncia un cargo extraordinario por cuentas incobrables >€50M.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_006",
+            "resumen_claim_bull": "La brecha D&A vs capex sugiere que la rentabilidad de caja subyacente puede ser superior a la utilidad contable.",
+            "evaluacion_red_team": {
+              "estado": "FALSO",
+              "probabilidad_de_fallo_0_1": 0.85,
+              "por_que": [
+                "Es un argumento sumamente complaciente. Si deprecias €779M y gastas €219M, estás ordeñando los activos hasta secarlos.",
+                "A la larga, el gap se pagará con crecimiento negativo o un shock de capex."
+              ]
+            },
+            "puntos_ciegos": [
+              "Subinversión crónica.",
+              "Obsolescencia del inmovilizado y pérdida de competitividad."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_013",
+                "ubicacion": "TruthPack historico_anual FY2024",
+                "cita_corta": "depreciation=-€779M; capex=-€219M.",
+                "interpretacion": "La magnitud del gap indica un estado de ordeñe insostenible, no eficiencia."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Los ingresos orgánicos decaen y el capex debe incrementarse sustancialmente para frenar la sangría.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 24
+              },
+              "fuente_prevista": "filing"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "El BULL invierte a ciegas: acepta un caso 'WATCHLIST' pero habla de reratings y flujos sin tener idea de la deuda total ni el Enterprise Value.",
+          "Transformar fallos contables (D&A enorme vs Capex ínfimo) y mal manejo de liquidez (AR gigante) en 'opcionalidades positivas'.",
+          "Dependencia de que H1-2025 es una estabilización cuando Beneficio Neto y CFO cayeron interanualmente."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "La empresa realizó adquisiciones destructivas de valor que no generan caja real (el gap de D&A proviene de intangibles inútiles).",
+          "La opacidad de pasivos es deliberada para ocultar covenants al límite o deuda oculta.",
+          "Las cuentas por cobrar (€2,200M) son en gran parte incobrables y se aproxima un 'baño de sangre' contable (write-off).",
+          "El margen nunca volverá a niveles pasados porque la competencia ha destruido su pricing power."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "TEP es un negocio que parece generar caja solo porque está canibalizando su propia estructura (capex a niveles de inanición).",
+          "El deterioro operativo es obvio en H1-2025: la caja operativa colapsó un 23% y el beneficio neto sigue contrayéndose.",
+          "Mantiene €2,200M atascados en cuentas por cobrar, lo que augura un castigo contable inminente.",
+          "La absoluta falta de transparencia en la deuda total y pasivos impide cualquier cálculo de riesgo.",
+          "El mercado descuenta correctamente que es un negocio en deterioro estructural, sobreapalancado e inflado por M&A pasado."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "CAPEX_MANTENIMIENTO_ALTO",
+            "descripcion": "La subinversión actual (capex 28% de D&A) forzará un ciclo masivo de reposición de activos, devorando el supuesto Free Cash Flow.",
+            "indicadores_tempranos": [
+              "Incremento repentino del capex trimestral.",
+              "Caída abrupta del margen operativo por ineficiencias de activos viejos.",
+              "Pérdida de grandes contratos por falta de capacidad o calidad."
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "Las cuentas por cobrar se revelan incobrables, requiriendo inyecciones de deuda para financiar el circulante real.",
+            "indicadores_tempranos": [
+              "Incremento de provisiones para deudores dudosos.",
+              "AR crece a mayor ritmo que las ventas.",
+              "Aumento del DSO por encima de los 90 días."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "El deterioro del CFO de H1-2025 se confirma como tendencia estructural. La caja libre se normaliza a la baja mientras el capex se ve forzado a subir.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.45,
+            "drivers": [
+              {
+                "variable": "FCF",
+                "direccion": "EMPEORA",
+                "rango": "Cae por debajo de €1,000M anuales",
+                "justificacion": "Ajuste de capex al alza y continuidad del mal cobro en AR."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "NO_MEJORA",
+                "rango": "Se estanca < 10.5%",
+                "justificacion": "Incapacidad para trasladar costes a clientes."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "El mercado castiga las métricas al asumir calidad baja de ganancias y riesgo de deudores.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": null,
+                "base": null,
+                "max": null
+              },
+              "nota": "Retorno no estimable numéricamente sin EV, pero direccionalmente muy negativo."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "La opacidad de pasivos oculta una crisis de solvencia. Un write-off en AR destruye el equity y se rompen covenants.",
+            "ventana_meses": {
+              "min": 3,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.25,
+            "es_binario": true,
+            "drivers": [
+              {
+                "variable": "DEUDA",
+                "direccion": "EMPEORA",
+                "rango": "Apalancamiento real revelado en >4x EBITDA",
+                "justificacion": "Aparición de pasivos ocultos tras auditoría profunda o crisis de liquidez."
+              }
+            ],
+            "impacto_en_supervivencia": "ALTO",
+            "nota": "Este caso es binario: si la deuda no reportada es insostenible, el equity vale cero."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.85,
+        "razones": [
+          "Opacidad absoluta en deuda total y pasivos corrientes/no corrientes.",
+          "Márgenes en declive secular a pesar del gran aumento en escala de ingresos.",
+          "Señales claras de canibalización de activos (capex minúsculo vs D&A gigante).",
+          "Caída abrupta del flujo de caja operativo en el periodo más reciente (H1-2025).",
+          "Pila inmensa de cuentas por cobrar sin justificación operativa clara."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "Recuperación vigorosa de ingresos en H2-2025 (>10% YoY).",
+              "Cobro acelerado de AR reduciendo el DSO.",
+              "Mantenimiento de liderazgo tecnológico sin disparar el capex."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "Competencia roba cuota forzando descuentos (margen plano o en caída).",
+              "Dificultades continuas para convertir ventas en CFO.",
+              "Impulso súbito del capex para reparar años de abandono."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "BALANCE",
+          "definicion": "La deuda neta revelada excede 3x el CFO anualizado o no se publican pasivos completos en el próximo reporte anual.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "La opacidad contable combinada con sobreapalancamiento es el fin de la inversión."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "CONTABILIDAD",
+          "definicion": "Cargo por impairment o write-off en cuentas por cobrar > €100M.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirmaría que el balance y las ventas pasadas estaban inflados."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Aclaración exhaustiva de pasivos",
+          "umbral_o_condicion": "Publicación clara del Enterprise Value con deuda neta verificable y calendario de repagos amigable.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "filing"
+        },
+        {
+          "item": "Reversión del colapso de CFO",
+          "umbral_o_condicion": "CFO anual supera los €1,800M demostrando que H1-2025 fue una anomalía de circulante (timings).",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0.0,
+        "si_se_invierte_igual": [
+          "Limitar estrictamente a 1% o 2% máximo como 'apuesta de reestructuración'.",
+          "Uso de opciones u otras estructuras que limiten pérdida máxima al capital aportado por alto riesgo de quiebra oculta.",
+          "Esperar obligatoriamente al reporte del FY2025 para tener visibilidad de pasivos."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Por qué el balance último no detalla pasivos totales y deuda de manera explícita?",
+          "¿Qué porcentaje de la depreciación de €779M se debe a amortización de intangibles vs desgaste de activos fijos duros?",
+          "¿Por qué el CFO colapsó en H1-2025 si la directiva asegura que la empresa está en una fase de disciplina?",
+          "¿Qué antigüedad (aging) tienen los €2,200M en cuentas por cobrar?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "máx 5 bullets",
+      "Prior = 0.50 por carecer de prefight de alto ranking demostrable, ajustado a 0.85 por graves riesgos operativos y opacidad."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

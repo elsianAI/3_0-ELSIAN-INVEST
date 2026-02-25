@@ -1,0 +1,378 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260225_TEP",
+  "fecha_corte": "2026-02-25",
+  "red_flags": [
+    {
+      "categoria": "ANOMALIAS_CAPEX_DEPRECIACION",
+      "descripcion": "La depreciacion FY2024 (779M) supera ampliamente el capex FY2024 (219M), lo que sugiere alta amortizacion/intangibles o efecto de adquisiciones previas con bajo capex fisico.",
+      "evidencia": [
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "Cash Flow Statement FY2024",
+          "cita_corta": "depreciacion=779M; capex=219M"
+        }
+      ]
+    },
+    {
+      "categoria": "COMPLETITUD_DATOS_BAJA",
+      "descripcion": "La completitud del dataset es baja (26%) con alta nulidad en historico anual, trimestral y metricas derivadas, limitando pruebas forenses clave.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.validaciones.DATA_COMPLETENESS",
+          "cita_corta": "overall=26%; anual_null=77%; trimestral_null=73%; derivadas_null=86%"
+        },
+        {
+          "source_id": "TruthPack_v1_partial",
+          "ubicacion": "log.limitaciones",
+          "cita_corta": "faltan COGS, gross profit, SG&A, R&D y deuda total explicita"
+        }
+      ]
+    },
+    {
+      "categoria": "CUENTAS_POR_COBRAR_ELEVADAS",
+      "descripcion": "Cuentas por cobrar de 2,200M equivalen a ~21.4% de ingresos FY2024 y ~78 dias de ventas (DSO), punto de vigilancia sin comparativa historica/sectorial.",
+      "evidencia": [
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "Balance Sheet FY2024",
+          "cita_corta": "AR=2,200M; ingresos FY2024=10,280M; DSO~78 dias"
+        }
+      ]
+    },
+    {
+      "categoria": "CUENTAS_POR_PAGAR_BAJAS_VS_COBRAR",
+      "descripcion": "El ratio cuentas por pagar/cuentas por cobrar es bajo (333M/2,200M=15.1%), con capital de trabajo neto inmovilizado de 1,867M.",
+      "evidencia": [
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "Balance Sheet FY2024",
+          "cita_corta": "AP=333M; AR=2,200M; neto AR-AP=1,867M"
+        }
+      ]
+    },
+    {
+      "categoria": "DIVERGENCIA_CFO_VS_EBIT",
+      "descripcion": "La conversion resultado-caja muestra distorsiones relevantes en algunos periodos (FY2023 y H1-2024), con desglose incompleto de WC e impuestos pagados.",
+      "evidencia": [
+        {
+          "source_id": "SRC_003",
+          "ubicacion": "Income Statement / Cash Flow FY2023",
+          "cita_corta": "EBIT+D&A=1,637M vs CFO=1,375M; gap=-16.0%"
+        },
+        {
+          "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
+          "ubicacion": "H1-2024",
+          "cita_corta": "EBIT+D&A=651M vs CFO=771M; gap=+18.4%"
+        },
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "FY2024",
+          "cita_corta": "EBIT+D&A=1,861M vs CFO=1,813M; gap=-2.6%"
+        }
+      ]
+    },
+    {
+      "categoria": "FLUJO_INVERSION_ANOMALO_FY2023",
+      "descripcion": "En FY2023 hubo CFI muy negativo no explicado por capex (CFI -2,587M vs capex -233M), financiado con CFF positivo (+1,319M), consistente con M&A de gran escala.",
+      "evidencia": [
+        {
+          "source_id": "SRC_003",
+          "ubicacion": "Cash Flow Statement FY2023",
+          "cita_corta": "CFI=-2,587M; capex=-233M; CFF=+1,319M"
+        },
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "Cash Flow Statement FY2024",
+          "cita_corta": "CFI se normaliza a -221M"
+        },
+        {
+          "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
+          "ubicacion": "H1-2025",
+          "cita_corta": "CFI=-596M con CFF=+229M"
+        }
+      ]
+    },
+    {
+      "categoria": "INCONSISTENCIA_COMPARATIVO_BALANCE",
+      "descripcion": "Se reporta inconsistencia interna en fechas comparativas del balance, elevando riesgo de lectura erronea interanual.",
+      "evidencia": [
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "log.limitaciones",
+          "cita_corta": "inconsistencia en comparativo de balance 12/31/2023 vs 12/31/2024"
+        }
+      ]
+    },
+    {
+      "categoria": "INTERES_CRECIENTE",
+      "descripcion": "El gasto por intereses aumento 69.8% (126M a 214M), muy por encima del crecimiento de ingresos, incluyendo 61M de intereses por leases.",
+      "evidencia": [
+        {
+          "source_id": "SRC_003 / SRC_013",
+          "ubicacion": "Income Statement FY2023-FY2024",
+          "cita_corta": "intereses 126M->214M; lease interest FY2024=61M"
+        }
+      ]
+    },
+    {
+      "categoria": "LEASE_LIABILITIES_SIGNIFICATIVAS",
+      "descripcion": "Pasivos por arrendamiento relevantes (795.4M totales; 216M corrientes y 580M no corrientes) con carga fija de pagos de caja.",
+      "evidencia": [
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "Notas de arrendamientos FY2024",
+          "cita_corta": "lease total=795.4M; corriente=216M; no corriente=580M; pagos anuales=311M"
+        },
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "lease_data",
+          "cita_corta": "ROU=725.5M; off-balance commitments=10.7M"
+        }
+      ]
+    },
+    {
+      "categoria": "MARGEN_OPERATIVO_DECRECIENTE",
+      "descripcion": "El margen EBIT cae desde 15.5% (FY2022) a 10.5% (FY2024) pese a fuerte crecimiento de ingresos.",
+      "evidencia": [
+        {
+          "source_id": "SRC_003 / SRC_013",
+          "ubicacion": "Income Statement historico anual",
+          "cita_corta": "FY2022 15.5% -> FY2023 12.0% -> FY2024 10.5%"
+        }
+      ]
+    },
+    {
+      "categoria": "MONEDA_NO_CONVERTIDA",
+      "descripcion": "Las cifras estan en EUR pero etiquetadas como _usd sin conversion FX, afectando comparabilidad externa.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "log.limitaciones",
+          "cita_corta": "moneda origen EUR; no conversion EUR->USD"
+        }
+      ]
+    },
+    {
+      "categoria": "OPACIDAD_CLASIFICACION_CASHFLOW",
+      "descripcion": "La identidad de caja incluye efectos FX/reclasificaciones sin desglose suficiente de otros ajustes, dificultando validar calidad del CFO.",
+      "evidencia": [
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "data_quality.validaciones.CASHFLOW_IDENTITY",
+          "cita_corta": "diferencia puente vs delta caja FY2024=7M (3.7%); otros ajustes no desglosados"
+        }
+      ]
+    },
+    {
+      "categoria": "OPACIDAD_ESTRUCTURA_CAPITAL",
+      "descripcion": "No se reporta deuda financiera total como linea explicita; pasivos totales fueron imputados por identidad contable, impidiendo medir apalancamiento real con precision.",
+      "evidencia": [
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "Balance Sheet / Notas de deuda",
+          "cita_corta": "deuda_total_usd=null; pasivos_totales imputados por activos-patrimonio"
+        },
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "Balance Sheet",
+          "cita_corta": "faltan lineas canonicas explicitas de deuda total consolidada"
+        }
+      ]
+    },
+    {
+      "categoria": "OPACIDAD_INGRESOS_OPERATIVOS",
+      "descripcion": "No hay lineas explicitas de COGS y Gross Profit en el estado de resultados consolidado simplificado, limitando analisis de calidad de margen.",
+      "evidencia": [
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "Income Statement",
+          "cita_corta": "ausencia de COGS y gross profit"
+        }
+      ]
+    }
+  ],
+  "liquidez": {
+    "efectivo_disponible_usd": 1058000000,
+    "lineas_credito_disponibles_usd": null,
+    "runway_estimado_meses_base_operativo": "INF",
+    "runway_estimado_meses_escenario_lease": 40.82,
+    "vencimientos_deuda_12_24_meses": {
+      "deuda_financiera_total_reportada_usd": null,
+      "lease_liabilities_corriente_12m_usd": 216000000,
+      "lease_liabilities_no_corriente_12_24m_usd": 580000000,
+      "cuentas_por_pagar_usd": 333000000
+    },
+    "cobertura_caja_sobre_obligaciones_12m_conocidas_x": 1.93,
+    "riesgo_incumplimiento_covenants": "NO_EVALUABLE_POR_FALTA_DE_DEUDA_TOTAL_Y_UMBRAL_CONTRACTUAL",
+    "riesgo_dilucion_accionaria": "NO_EVALUABLE_POR_FALTA_DE_DESGLOSE_DE_FINANCIACION",
+    "evaluacion_general": "La compania muestra CFO/FCF positivos (FY2023, FY2024 y H1-2025) y sin estres inmediato de liquidez operativa; el principal riesgo es la opacidad de deuda/vencimientos de refinanciacion post-M&A."
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "metodologia": "Comparar CFO contra EBIT + depreciacion/amortizacion.",
+      "periodos": {
+        "FY2023": {
+          "ebit_usd": 998000000,
+          "depreciacion_usd": 639000000,
+          "ebit_mas_da_usd": 1637000000,
+          "cfo_usd": 1375000000,
+          "diferencia_usd": -262000000,
+          "distorsion_pct": 16.0,
+          "distorsion_mayor_15pct": true
+        },
+        "FY2024": {
+          "ebit_usd": 1082000000,
+          "depreciacion_usd": 779000000,
+          "ebit_mas_da_usd": 1861000000,
+          "cfo_usd": 1813000000,
+          "diferencia_usd": -48000000,
+          "distorsion_pct": 2.6,
+          "distorsion_mayor_15pct": false
+        },
+        "H1_2024": {
+          "ebit_usd": 503000000,
+          "depreciacion_usd": 148000000,
+          "ebit_mas_da_usd": 651000000,
+          "cfo_usd": 771000000,
+          "diferencia_usd": 120000000,
+          "distorsion_pct": 18.4,
+          "distorsion_mayor_15pct": true
+        },
+        "H1_2025": {
+          "ebit_usd": 530000000,
+          "depreciacion_usd": 134000000,
+          "ebit_mas_da_usd": 664000000,
+          "cfo_usd": 588000000,
+          "diferencia_usd": -76000000,
+          "distorsion_pct": 11.4,
+          "distorsion_mayor_15pct": false
+        }
+      }
+    },
+    "cfo_a_fcf": {
+      "metodologia": "FCF = CFO + CAPEX; distorsion_pct = abs(CAPEX)/abs(CFO)*100.",
+      "periodos": {
+        "FY2023": {
+          "cfo_usd": 1375000000,
+          "capex_usd": -233000000,
+          "fcf_usd": 1142000000,
+          "conversion_cfo_a_fcf_pct": 83.1,
+          "distorsion_pct": 16.95
+        },
+        "FY2024": {
+          "cfo_usd": 1813000000,
+          "capex_usd": -219000000,
+          "fcf_usd": 1594000000,
+          "conversion_cfo_a_fcf_pct": 87.9,
+          "distorsion_pct": 12.08
+        },
+        "H1_2024": {
+          "cfo_usd": 771000000,
+          "capex_usd": -88000000,
+          "fcf_usd": 683000000,
+          "conversion_cfo_a_fcf_pct": 88.6,
+          "distorsion_pct": 11.41
+        },
+        "H1_2025": {
+          "cfo_usd": 588000000,
+          "capex_usd": -117000000,
+          "fcf_usd": 471000000,
+          "conversion_cfo_a_fcf_pct": 80.1,
+          "distorsion_pct": 19.9
+        }
+      }
+    },
+    "nota_general": "Puentes consistentes en FY2024; distorsion material en FY2023 y H1-2024 en EBIT->CFO, y menor conversion CFO->FCF en H1-2025."
+  },
+  "kill_criteria_candidatos": [
+    {
+      "kc_id": "KC-001",
+      "definicion": "CFO anualizado cae por debajo de 800M en dos trimestres consecutivos reportados",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "BAJA"
+    },
+    {
+      "kc_id": "KC-002",
+      "definicion": "Margen EBIT cae por debajo del 8% en base anual",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "kc_id": "KC-003",
+      "definicion": "Incapacidad de refinanciar deuda de adquisicion FY2023 a vencimiento, resultando en default o reestructuracion forzada",
+      "ventana_temporal": "24 meses",
+      "probabilidad": "BAJA"
+    },
+    {
+      "kc_id": "KC-004",
+      "definicion": "DSO supera 100 dias, indicando deterioro de cobranza o concentracion de clientes morosos",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "BAJA"
+    },
+    {
+      "kc_id": "KC-005",
+      "definicion": "Ratio interest expense / EBIT supera 30% (cobertura de intereses por debajo de 3.3x)",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "kc_id": "KC-006",
+      "definicion": "Caja cae por debajo de 500M sin acceso demostrado a lineas de credito no dispuestas",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "BAJA"
+    },
+    {
+      "kc_id": "KC_01_CFO_12M_NEGATIVO",
+      "definicion": "CFO_rolling_12m <= 0",
+      "ventana_temporal": "Monitoreo trimestral hasta 2027-02-25",
+      "probabilidad": "BAJA"
+    },
+    {
+      "kc_id": "KC_02_FCF_12M_NO_POSITIVO",
+      "definicion": "FCF_rolling_12m <= 0 (FCF = CFO + CAPEX)",
+      "ventana_temporal": "Monitoreo trimestral hasta 2027-02-25",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "kc_id": "KC_03_DEPENDENCIA_FINANCIACION_EXTERNA_RECURRENTE",
+      "definicion": "(CFI_rolling_12m < -CFO_rolling_12m) AND (CFF_rolling_12m > 0) durante 2 semestres consecutivos",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "kc_id": "KC_04_COBERTURA_LIQUIDEZ_12M",
+      "definicion": "caja_usd / (lease_liabilities_current_usd + cuentas_por_pagar_usd) < 1.0",
+      "ventana_temporal": "Monitoreo trimestral en 12 meses",
+      "probabilidad": "BAJA"
+    },
+    {
+      "kc_id": "KC_05_STRESS_CUENTAS_POR_COBRAR",
+      "definicion": "(cuentas_por_cobrar / ingresos_anuales) > 25% o DSO > 90 dias",
+      "ventana_temporal": "Monitoreo semestral en 12-24 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "kc_id": "KC_06_LEVERAGE_O_COVENANT_TRIGGER",
+      "definicion": "deuda_total_usd / EBIT_12m > 4.0 o divulgacion explicita de breach de covenant",
+      "ventana_temporal": "Proximo reporte anual y siguientes 24 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "definicion": "Afloramiento explicito de deuda corporativa que ubique el apalancamiento neto consolidado sobre 3.0x EBITDA",
+      "ventana_temporal": "6-12 meses",
+      "probabilidad": "BAJA"
+    },
+    {
+      "definicion": "Caida sostenida del CFO anualizado por debajo de 1000M",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "definicion": "Deterioro del margen EBIT por debajo del umbral del 8%",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "MEDIA"
+    }
+  ]
+}
