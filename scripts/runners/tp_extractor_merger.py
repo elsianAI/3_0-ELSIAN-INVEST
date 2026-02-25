@@ -36,6 +36,9 @@ def _dedup(items: list) -> list:
     return seen
 
 
+# V6.2: Maximum periods per filing (enforced in merger, not just prompt)
+MAX_PERIODS_PER_FILING = 10
+
 FILING_PRIORITY = {
     "10-K": 1, "20-F": 1, "ANNUAL_REPORT": 1,
     "10-Q": 2, "6-K": 2, "INTERIM_REPORT": 2,
@@ -105,6 +108,17 @@ def merge(partial_extractions: list[dict]) -> dict:
     # non-standard keys and the merged result ends up with NULLs.
     normalized_extractions = [_apply_normalization(pe) for pe in partial_extractions]
     merger_warnings: list[str] = []
+
+    # V6.2: Enforce max_periods_per_filing on all partials before any merge
+    for ext in normalized_extractions:
+        for section_key in ("historico_anual", "historico_trimestral"):
+            entries = ext.get(section_key, [])
+            if len(entries) > MAX_PERIODS_PER_FILING:
+                ext[section_key] = sorted(
+                    entries,
+                    key=lambda e: _period_sort_key(e.get("periodo", ""), e),
+                    reverse=True,
+                )[:MAX_PERIODS_PER_FILING]
 
     if len(normalized_extractions) == 1:
         merged = dict(normalized_extractions[0])
@@ -177,10 +191,13 @@ def _apply_normalization(tp: dict) -> dict:
 
 
 def _merge_annual(extractions: list[dict]) -> list:
-    """Fusiona historico_anual por periodo."""
-    by_period = {}
+    """Fusiona historico_anual por periodo.
 
-    for ext in extractions:
+    V6.2: Uses normalized merge key. Tie-break by filing recency (index).
+    """
+    by_period: dict[str, dict] = {}
+
+    for ext_idx, ext in enumerate(extractions):
         filing_type = _resolve_filing_type(ext)
         priority = FILING_PRIORITY.get(filing_type, 99)
 
@@ -189,25 +206,41 @@ def _merge_annual(extractions: list[dict]) -> list:
             if not periodo:
                 continue
 
-            if periodo not in by_period:
-                seeded = _seed_field_sources(dict(entry), filing_type)
-                by_period[periodo] = {"data": seeded, "priority": priority, "source": filing_type}
-            else:
-                existing = by_period[periodo]
-                merged = _merge_period_entries(existing["data"], entry,
-                                              existing["priority"], priority, filing_type)
-                by_period[periodo]["data"] = merged
+            # V6.2: use normalized merge key for dedup
+            merge_key = _normalize_merge_key(entry)
 
-    # Sort by chronological key, not alphabetical period string
-    periods = sorted(by_period.keys(), key=lambda p: _period_sort_key(p, by_period[p]["data"]))
+            if merge_key not in by_period:
+                seeded = _seed_field_sources(dict(entry), filing_type)
+                by_period[merge_key] = {
+                    "data": seeded, "priority": priority,
+                    "source": filing_type, "recency": ext_idx,
+                }
+            else:
+                existing = by_period[merge_key]
+                merged = _merge_period_entries(
+                    existing["data"], entry,
+                    existing["priority"], priority, filing_type,
+                    new_recency=ext_idx,
+                    existing_recency=existing.get("recency", 0),
+                )
+                by_period[merge_key]["data"] = merged
+
+    # Sort by chronological key
+    periods = sorted(by_period.keys(),
+                     key=lambda p: _period_sort_key(
+                         by_period[p]["data"].get("periodo", p),
+                         by_period[p]["data"]))
     return [by_period[p]["data"] for p in periods]
 
 
 def _merge_quarterly(extractions: list[dict]) -> list:
-    """Fusiona historico_trimestral por periodo."""
-    by_period = {}
+    """Fusiona historico_trimestral por periodo.
 
-    for ext in extractions:
+    V6.2: Uses normalized merge key. Tie-break by filing recency (index).
+    """
+    by_period: dict[str, dict] = {}
+
+    for ext_idx, ext in enumerate(extractions):
         filing_type = _resolve_filing_type(ext)
         priority = FILING_PRIORITY.get(filing_type, 99)
 
@@ -216,16 +249,27 @@ def _merge_quarterly(extractions: list[dict]) -> list:
             if not periodo:
                 continue
 
-            if periodo not in by_period:
-                seeded = _seed_field_sources(dict(entry), filing_type)
-                by_period[periodo] = {"data": seeded, "priority": priority}
-            else:
-                existing = by_period[periodo]
-                merged = _merge_period_entries(existing["data"], entry,
-                                              existing["priority"], priority, filing_type)
-                by_period[periodo]["data"] = merged
+            merge_key = _normalize_merge_key(entry)
 
-    periods = sorted(by_period.keys(), key=lambda p: _period_sort_key(p, by_period[p]["data"]))
+            if merge_key not in by_period:
+                seeded = _seed_field_sources(dict(entry), filing_type)
+                by_period[merge_key] = {
+                    "data": seeded, "priority": priority, "recency": ext_idx,
+                }
+            else:
+                existing = by_period[merge_key]
+                merged = _merge_period_entries(
+                    existing["data"], entry,
+                    existing["priority"], priority, filing_type,
+                    new_recency=ext_idx,
+                    existing_recency=existing.get("recency", 0),
+                )
+                by_period[merge_key]["data"] = merged
+
+    periods = sorted(by_period.keys(),
+                     key=lambda p: _period_sort_key(
+                         by_period[p]["data"].get("periodo", p),
+                         by_period[p]["data"]))
     return [by_period[p]["data"] for p in periods]
 
 
@@ -638,23 +682,49 @@ def _warn_lease_only_debt_missing(tp_like: dict, warnings: list[str]) -> None:
         warnings.append(msg)
 
 
+def _normalize_merge_key(entry: dict) -> str:
+    """V6.2 1B.1: Normalized merge key for period deduplication.
+
+    Key = (periodo_norm, fecha_fin_norm, tipo_periodo_norm, moneda_original_norm)
+    Falls back to just periodo if new fields not present.
+    """
+    periodo = str(entry.get("periodo", "")).strip().upper()
+    fecha_fin = str(entry.get("fecha_fin", "")).strip()
+    tipo_periodo = str(entry.get("tipo_periodo", "")).strip().lower()
+    moneda = str(entry.get("moneda_original", "")).strip().upper()
+
+    # Normalize periodo: remove spaces, standardize FY/Q format
+    periodo = re.sub(r"\s+", "", periodo)
+
+    # For backward compat: if only periodo exists, use it alone
+    if not fecha_fin and not tipo_periodo:
+        return periodo
+
+    return f"{periodo}|{fecha_fin}|{tipo_periodo}|{moneda}"
+
+
 def _merge_period_entries(existing: dict, new_entry: dict,
                          existing_priority: int, new_priority: int,
-                         new_source: str = "UNKNOWN") -> dict:
+                         new_source: str = "UNKNOWN",
+                         new_recency: int = 0,
+                         existing_recency: int = 0) -> dict:
     """Merge two period entries, resolving conflicts by priority.
 
-    Rules:
+    Rules (V6.2):
+      - Tier superior gana siempre (lower priority number wins).
+      - En empate de tier: filing más reciente gana (lower index = more recent).
+      - All conflicts recorded in _merge_conflicts for reconciliation.
       - Null-fill is ONLY allowed when new source has equal or better
-        (lower) priority.  A TRANSCRIPT (4) cannot fill a null that
-        a 20-F (1) correctly left empty.
-      - Conflicts use higher priority (lower number wins).
+        (lower) priority.
       - Provenance tracked in _field_sources.
     """
     merged = dict(existing)
     provenance = dict(merged.get("_field_sources", {}))
+    conflicts: list[dict] = []
 
     for key, new_val in new_entry.items():
-        if key in ("periodo", "fecha_fin", "fuente_refs", "_field_sources"):
+        if key in ("periodo", "fecha_fin", "fuente_refs", "_field_sources",
+                    "_merge_conflicts", "tipo_periodo", "moneda_original"):
             continue
 
         existing_val = merged.get(key)
@@ -665,12 +735,40 @@ def _merge_period_entries(existing: dict, new_entry: dict,
                 merged[key] = new_val
                 provenance[key] = new_source
         elif existing_val is not None and new_val is not None and existing_val != new_val:
-            # Conflict — use higher priority (lower number)
+            # Capture the previous source BEFORE modifying provenance
+            prev_source = provenance.get(key, "UNKNOWN")
+
+            # Conflict — use higher priority (lower number wins)
             if new_priority < existing_priority:
                 merged[key] = new_val
                 provenance[key] = new_source
+                conflicts.append({
+                    "campo": key,
+                    "valor_kept": new_val, "valor_dropped": existing_val,
+                    "source_kept": new_source, "source_dropped": prev_source,
+                    "reason": "priority",
+                })
+            elif new_priority == existing_priority and new_recency < existing_recency:
+                # V6.2: Same tier tie-break by recency (lower index = more recent filing wins)
+                merged[key] = new_val
+                provenance[key] = f"{new_source}:recency"
+                conflicts.append({
+                    "campo": key,
+                    "valor_kept": new_val, "valor_dropped": existing_val,
+                    "source_kept": new_source, "source_dropped": prev_source,
+                    "reason": "recency",
+                })
+            else:
+                # Existing wins — new is dropped
+                conflicts.append({
+                    "campo": key,
+                    "valor_kept": existing_val, "valor_dropped": new_val,
+                    "source_kept": prev_source, "source_dropped": new_source,
+                    "reason": "priority" if new_priority > existing_priority else "recency",
+                })
 
     merged["_field_sources"] = provenance
+    merged["_merge_conflicts"] = existing.get("_merge_conflicts", []) + conflicts
     return merged
 
 

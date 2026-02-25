@@ -31,6 +31,53 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 
+# V6.2 1B.3: Expected fields by filing doc type for adjusted completeness
+EXPECTED_FIELDS_BY_DOC_TYPE = {
+    "10-K": {
+        "historico_anual": [
+            "ingresos_usd", "cogs_usd", "gross_profit_usd", "ebit_usd",
+            "net_income_usd", "cfo_usd", "cfi_usd", "cff_usd", "capex_usd",
+            "delta_cash_usd", "depreciation_usd", "income_tax_usd",
+        ],
+        "balance_sheet_ultimo": [
+            "activos_totales_usd", "pasivos_totales_usd", "patrimonio_usd",
+            "caja_usd", "deuda_total_usd",
+        ],
+    },
+    "20-F": {
+        "historico_anual": [
+            "ingresos_usd", "ebit_usd", "net_income_usd",
+            "cfo_usd", "cfi_usd", "cff_usd", "capex_usd",
+        ],
+        "balance_sheet_ultimo": [
+            "activos_totales_usd", "pasivos_totales_usd", "patrimonio_usd",
+            "caja_usd",
+        ],
+    },
+    "ANNUAL_REPORT": {
+        "historico_anual": [
+            "ingresos_usd", "ebit_usd", "net_income_usd",
+            "cfo_usd", "cfi_usd", "cff_usd",
+        ],
+        "balance_sheet_ultimo": [
+            "activos_totales_usd", "pasivos_totales_usd", "patrimonio_usd",
+            "caja_usd",
+        ],
+    },
+    "10-Q": {
+        "historico_trimestral": [
+            "ingresos_usd", "net_income_usd", "cfo_usd",
+        ],
+    },
+    "TRANSCRIPT": {
+        "historico_anual": ["ingresos_usd"],
+    },
+    "_default": {
+        "historico_anual": ["ingresos_usd", "net_income_usd"],
+    },
+}
+
+
 GATES = [
     {"name": "BALANCE_IDENTITY",   "tolerance": 0.02, "critical": True},
     {"name": "CASHFLOW_IDENTITY",  "tolerance": 0.05, "critical": True},
@@ -116,6 +163,12 @@ def validate(tp_with_metrics: dict) -> dict:
     overall = _overall_status(gates_results)
     confidence = _calc_confidence(gates_results)
 
+    # V6.2 1B.3: Compute adjusted completeness by doc type
+    completitud_ajustada = _compute_completitud_ajustada(result)
+
+    # V6.2 1B.4: Cross-filing reconciliation
+    reconciliation_log = _reconcile_cross_filing(result)
+
     # Build data_quality section
     result["data_quality"] = {
         "status": overall,
@@ -124,12 +177,15 @@ def validate(tp_with_metrics: dict) -> dict:
         "overall_status": overall,
         "warnings": warnings,
         "confidence_score": confidence,
+        "completitud_ajustada_por_tipo": completitud_ajustada,
+        "reconciliation_log": reconciliation_log,
         "faltantes_criticos": _find_critical_missing(result),
         "limitaciones": _find_limitations(result),
         "nota": (
             f"Validation by tp_validator.py. "
             f"Overall: {overall}. Confidence: {confidence}%. "
             f"{len(warnings)} warnings."
+            f" Adjusted completeness: {completitud_ajustada.get('pct', 0):.0f}%."
         ),
     }
 
@@ -532,6 +588,135 @@ def _gate_data_completeness(tp: dict) -> dict:
         "note": f"Overall: {completeness_pct:.0f}% complete. {details}",
         "completeness_pct": completeness_pct,
     }
+
+
+def _compute_completitud_ajustada(tp: dict) -> dict:
+    """V6.2 1B.3: Compute completeness adjusted by document type.
+
+    Instead of counting ALL fields globally, only count fields that are
+    expected for the primary filing type.  This gives TEP (20-F) a
+    realistic score instead of penalizing for missing 10-K-specific fields.
+    """
+    # Determine primary doc type from field provenance
+    source_types: dict[str, int] = {}
+    for entry in tp.get("historico_anual", []):
+        for val in entry.get("_field_sources", {}).values():
+            if val:
+                ft = str(val).split(":")[0].upper()
+                source_types[ft] = source_types.get(ft, 0) + 1
+    for val in tp.get("balance_sheet_ultimo", {}).get("_field_sources", {}).values():
+        if val:
+            ft = str(val).split(":")[0].upper()
+            source_types[ft] = source_types.get(ft, 0) + 1
+
+    primary_type = max(source_types, key=source_types.get) if source_types else "_default"  # type: ignore
+    expected = EXPECTED_FIELDS_BY_DOC_TYPE.get(
+        primary_type,
+        EXPECTED_FIELDS_BY_DOC_TYPE.get("_default", {}),
+    )
+
+    total_expected = 0
+    total_present = 0
+    details: dict[str, str] = {}
+
+    # Check annual fields
+    annual_fields = expected.get("historico_anual", [])
+    if annual_fields and tp.get("historico_anual"):
+        latest = tp["historico_anual"][-1] if tp["historico_anual"] else {}
+        present = sum(1 for f in annual_fields if latest.get(f) is not None)
+        total_expected += len(annual_fields)
+        total_present += present
+        details["historico_anual"] = f"{present}/{len(annual_fields)}"
+
+    # Check quarterly fields
+    quarterly_fields = expected.get("historico_trimestral", [])
+    if quarterly_fields and tp.get("historico_trimestral"):
+        latest_q = tp["historico_trimestral"][-1] if tp["historico_trimestral"] else {}
+        present_q = sum(1 for f in quarterly_fields if latest_q.get(f) is not None)
+        total_expected += len(quarterly_fields)
+        total_present += present_q
+        details["historico_trimestral"] = f"{present_q}/{len(quarterly_fields)}"
+
+    # Check balance sheet fields
+    bs_fields = expected.get("balance_sheet_ultimo", [])
+    if bs_fields:
+        bs = tp.get("balance_sheet_ultimo", {})
+        present_bs = sum(1 for f in bs_fields if bs.get(f) is not None)
+        total_expected += len(bs_fields)
+        total_present += present_bs
+        details["balance_sheet_ultimo"] = f"{present_bs}/{len(bs_fields)}"
+
+    pct = (total_present / total_expected * 100) if total_expected > 0 else 0
+
+    return {
+        "primary_doc_type": primary_type,
+        "pct": round(pct, 1),
+        "present": total_present,
+        "expected": total_expected,
+        "details": details,
+    }
+
+
+def _reconcile_cross_filing(tp: dict) -> list[dict]:
+    """V6.2 1B.4: Cross-filing reconciliation.
+
+    Uses _merge_conflicts stored by the merger to detect material discrepancies.
+    Classification (V6.1 rule):
+      - concordancia: diff_pct < 1%
+      - potential_restatement: diff_pct > 5% AND diff_abs > threshold
+      - extraction_discrepancy: everything else (one condition but not both)
+    """
+    reconciliation_log: list[dict] = []
+
+    # Materiality threshold based on total_assets (V6.1 rule)
+    # Fallback: assume conservative proxy of 1B when total_assets unavailable
+    _FALLBACK_TOTAL_ASSETS = 1_000_000_000
+    bs = tp.get("balance_sheet_ultimo", {})
+    total_assets = _num(bs.get("activos_totales_usd"))
+    base_assets = total_assets if (total_assets is not None and total_assets > 0) else _FALLBACK_TOTAL_ASSETS
+    threshold_abs = max(5_000_000, 0.005 * base_assets)
+
+    # Collect conflicts from all period entries
+    for section_key in ("historico_anual", "historico_trimestral"):
+        for entry in tp.get(section_key, []):
+            periodo = entry.get("periodo", "?")
+            conflicts = entry.get("_merge_conflicts", [])
+            for conflict in conflicts:
+                campo = conflict.get("campo", "?")
+                kept = _num(conflict.get("valor_kept"))
+                dropped = _num(conflict.get("valor_dropped"))
+
+                if kept is None or dropped is None:
+                    # Non-numeric conflict (string fields etc.) — skip
+                    continue
+
+                # Compute discrepancy metrics
+                avg = (abs(kept) + abs(dropped)) / 2
+                diff_abs = abs(kept - dropped)
+                diff_pct = (diff_abs / avg * 100) if avg > 0 else 0.0
+
+                # Classify (V6.1 rule: both conditions required for restatement)
+                if diff_pct < 1.0:
+                    clasificacion = "concordancia"
+                elif diff_pct > 5.0 and diff_abs > threshold_abs:
+                    clasificacion = "potential_restatement"
+                else:
+                    clasificacion = "extraction_discrepancy"
+
+                reconciliation_log.append({
+                    "periodo": periodo,
+                    "campo": campo,
+                    "valor_kept": kept,
+                    "valor_dropped": dropped,
+                    "source_kept": conflict.get("source_kept"),
+                    "source_dropped": conflict.get("source_dropped"),
+                    "reason": conflict.get("reason"),
+                    "diff_abs": round(diff_abs, 2),
+                    "diff_pct": round(diff_pct, 2),
+                    "clasificacion": clasificacion,
+                })
+
+    return reconciliation_log
 
 
 def _calc_confidence(gates: list[dict]) -> float:
