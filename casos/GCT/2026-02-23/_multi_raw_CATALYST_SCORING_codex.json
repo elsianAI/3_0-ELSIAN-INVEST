@@ -1,7 +1,7 @@
 {
   "version_esquema": "AgentReport_v1",
   "caso_id": "CASE_20260223_GCT",
-  "fecha_corte": "2026-02-23",
+  "fecha_corte": "2026-02-24",
   "agente": {
     "agent_role": "CATALYST",
     "agent_nombre": "CATALYST_v1",
@@ -15,219 +15,274 @@
   },
   "resumen_ejecutivo": {
     "bullets": [
-      "Tres catalizadores con probabilidad alta y seis en zona media/baja.",
-      "Recompras, FCF y normalizacion de G&A son los motores con mayor conviccion.",
-      "Gobernanza/disclosure, leasing e integracion M&A mantienen incertidumbre.",
-      "La calidad agregada es MEDIA por faltantes de deuda_total y EV.",
-      "Veredicto agregado: WATCHLIST."
+      "EV sigue no calculable por deuda_total_usd y enterprise_value_usd en null; CAT_GCT_01 mantiene probabilidad media (0.52).",
+      "FCF TTM de 201297000 y P/FCF 6.2097 sostienen CAT_GCT_02, pero la conversion de caja fue volatil entre trimestres.",
+      "Ingresos 2025 crecieron YoY en Q1, Q2 y Q3; CAT_GCT_03 mantiene probabilidad media-alta (0.58).",
+      "La mejora de eficiencia de gasto apoya CAT_GCT_04, con necesidad de confirmacion en multiples reportes.",
+      "Lease liabilities de 484278000 y visibilidad parcial de integracion limitan rerating inmediato; veredicto local WATCHLIST."
     ],
     "veredicto_role_local": "WATCHLIST",
-    "confianza_0_1": 0.63,
-    "justificacion_1_2_parrafos": "La evidencia favorece catalizadores financieros de corto plazo, pero el rerating estructural depende de variables aun no cerradas. La calibracion presenta dispersion: conviccion alta en recompras, G&A y sostenibilidad de FCF, y baja en margen bruto y monetizacion de leases.\n\nEl caso permanece en WATCHLIST hasta confirmar FCF >=130M, disclosure consistente de deuda/EV y continuidad operativa sin eventos de control interno."
+    "veredicto": "WATCHLIST",
+    "confianza_0_1": 0.61,
+    "justificacion": "La media de probabilidad de catalizadores es 0.52 y la media de confianza de timing es 0.52, con calidad heterogenea. Los catalizadores de caja y crecimiento tienen evidencia reciente y medible, pero el bloqueo por EV/deuda total y el riesgo de leases reducen la velocidad esperada de cierre del gap. Se requiere confirmacion multitrimestral para pasar a APTO."
   },
   "claims": [
     {
-      "claim_id": "CLM_001",
+      "claim_id": "CLM_GCT_01",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El marco de expectativas implicitas esta bloqueado porque deuda_total_usd y enterprise_value_usd siguen en null.",
+      "confianza_0_1": 0.96,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "motivo_blocked",
+          "cita_corta": "Falta enterprise_value_usd (EV); sin EV no se puede ejecutar valoracion inversa.",
+          "interpretacion": "Sin EV no hay anclaje para expectativa implicita."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "mercado.enterprise_value_usd",
+          "cita_corta": "enterprise_value_usd: null.",
+          "interpretacion": "El EV no esta disponible."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "mercado.deuda_total_usd",
+          "cita_corta": "deuda_total_usd: null.",
+          "interpretacion": "No se puede cerrar EV con formula estandar."
+        }
+      ],
+      "falsacion": {
+        "test": "deuda_total_usd y enterprise_value_usd no nulos en 2 reportes consecutivos",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_GCT_02",
       "tipo": "INFERENCIA",
       "criticidad": "CRITICO",
-      "enunciado": "La valoracion implica contraccion de FCF a 5 anos.",
-      "confianza_0_1": 0.74,
+      "enunciado": "El multiple P/FCF bajo frente a FCF TTM alto indica duda del mercado sobre la sostenibilidad de caja.",
+      "confianza_0_1": 0.72,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "ImpliedExpectations_v1",
+          "source_id": "TruthPack_v1",
           "url": null,
           "titulo": null,
-          "fecha": "2026-02-23",
-          "ubicacion": "reverse_dcf_fcf",
-          "cita_corta": "CAGR implicito de FCF entre -1% y -13%.",
-          "interpretacion": "El precio incorpora deterioro o prima de riesgo alta."
-        }
-      ],
-      "falsacion": {
-        "test": "FCF >=130M por 2 ejercicios sin rerating",
-        "ventana_meses": {
-          "min": 6,
-          "max": 24
+          "fecha": "2026-02-24",
+          "ubicacion": "ttm.fcf_usd",
+          "cita_corta": "fcf_usd: 201297000.",
+          "interpretacion": "El nivel absoluto de caja libre es elevado."
         },
-        "fuente_prevista": "earnings"
-      }
-    },
-    {
-      "claim_id": "CLM_002",
-      "tipo": "INFERENCIA",
-      "criticidad": "IMPORTANTE",
-      "enunciado": "El descuento de multiple puede cerrarse si baja la prima de riesgo.",
-      "confianza_0_1": 0.62,
-      "impacto": "ALTO",
-      "evidencias": [
         {
           "tipo": "SOURCEPACK",
           "source_id": "ImpliedExpectations_v1",
           "url": null,
           "titulo": null,
-          "fecha": "2026-02-23",
+          "fecha": "2026-02-24",
           "ubicacion": "multiples_implicitos",
-          "cita_corta": "P/FCF 8.77x y FCF yield 11.4%.",
-          "interpretacion": "Multiplo deprimido frente a peers."
-        }
-      ],
-      "falsacion": {
-        "test": "P/FCF <9x con FCF estable por 12 meses",
-        "ventana_meses": {
-          "min": 6,
-          "max": 18
+          "cita_corta": "p_fcf: 6.2097; fcf_yield_pct: 16.1038.",
+          "interpretacion": "La valoracion sobre market cap es exigente a la baja."
         },
-        "fuente_prevista": "precio"
-      }
-    },
-    {
-      "claim_id": "CLM_003",
-      "tipo": "HECHO",
-      "criticidad": "IMPORTANTE",
-      "enunciado": "El crecimiento se desacelera pero sigue positivo en 2025.",
-      "confianza_0_1": 0.79,
-      "impacto": "MEDIO",
-      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_006_10-Q_Q1-2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "historico_trimestral[Q1-2025].cfo_usd",
+          "cita_corta": "cfo_usd: 9433000.",
+          "interpretacion": "Hubo trimestre de conversion de caja debil."
+        },
         {
           "tipo": "SOURCEPACK",
           "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
           "url": null,
           "titulo": null,
-          "fecha": "2025-11-06",
-          "ubicacion": "revenue",
-          "cita_corta": "Q3-2025 332.6M vs Q3-2024 303.3M.",
-          "interpretacion": "No hay contraccion YoY."
+          "fecha": null,
+          "ubicacion": "historico_trimestral[Q3-2025].cfo_usd",
+          "cita_corta": "cfo_usd: 126292000.",
+          "interpretacion": "La caja es fuerte pero volatil entre trimestres."
         }
       ],
       "falsacion": {
-        "test": "Dos trimestres YoY negativos",
+        "test": "FCF TTM >= 180000000 y CFO/Net Income >= 1.0x en 3 de 4 trimestres",
         "ventana_meses": {
-          "min": 3,
-          "max": 12
-        },
-        "fuente_prevista": "kpi_operativo"
-      }
-    },
-    {
-      "claim_id": "CLM_004",
-      "tipo": "HECHO",
-      "criticidad": "CRITICO",
-      "enunciado": "G&A de 2024 muestra normalizacion parcial en 2025.",
-      "confianza_0_1": 0.77,
-      "impacto": "ALTO",
-      "evidencias": [
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "TruthPack_v1",
-          "url": null,
-          "titulo": null,
-          "fecha": "2026-02-23",
-          "ubicacion": "historico_trimestral",
-          "cita_corta": "G&A Q3-2025 8.5M vs Q3-2024 15.3M.",
-          "interpretacion": "La tendencia de gasto mejora."
-        }
-      ],
-      "falsacion": {
-        "test": "G&A/ingresos >6% en 2 trimestres",
-        "ventana_meses": {
-          "min": 3,
-          "max": 12
+          "min": 6,
+          "max": 18
         },
         "fuente_prevista": "earnings"
       }
     },
     {
-      "claim_id": "CLM_005",
-      "tipo": "HECHO",
-      "criticidad": "CRITICO",
-      "enunciado": "Lease liabilities superan patrimonio y sostienen riesgo de balance.",
-      "confianza_0_1": 0.84,
-      "impacto": "ALTO",
+      "claim_id": "CLM_GCT_03",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El crecimiento YoY en 2025 reduce riesgo de peak earnings, pero aun necesita continuidad.",
+      "confianza_0_1": 0.7,
+      "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "TruthPack_v1",
+          "source_id": "SRC_SEC_006_10-Q_Q1-2025.htm",
           "url": null,
           "titulo": null,
-          "fecha": "2026-02-23",
-          "ubicacion": "lease_data",
-          "cita_corta": "Lease liabilities 484.3M vs patrimonio 405.2M.",
-          "interpretacion": "Compromiso fijo elevado."
+          "fecha": null,
+          "ubicacion": "historico_trimestral[Q1-2025].ingresos_usd",
+          "cita_corta": "271906000 vs 251077000 en Q1-2024.",
+          "interpretacion": "Crecimiento YoY positivo en Q1."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_005_10-Q_Q2-2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "historico_trimestral[Q2-2025].ingresos_usd",
+          "cita_corta": "322606000 vs 310867000 en Q2-2024.",
+          "interpretacion": "Crecimiento YoY positivo en Q2."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "historico_trimestral[Q3-2025].ingresos_usd",
+          "cita_corta": "332638000 vs 303316000 en Q3-2024.",
+          "interpretacion": "Crecimiento YoY positivo en Q3."
         }
       ],
       "falsacion": {
-        "test": "Lease liabilities/ingresos <=35% sostenido",
+        "test": "dos trimestres consecutivos con ingresos YoY negativos",
         "ventana_meses": {
-          "min": 12,
-          "max": 30
+          "min": 6,
+          "max": 24
         },
-        "fuente_prevista": "filing"
+        "fuente_prevista": "10-Q"
       }
     },
     {
-      "claim_id": "CLM_006",
+      "claim_id": "CLM_GCT_04",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La caida de G&A en Q3-2025 frente a Q3-2024 coincide con mejora de eficiencia operativa.",
+      "confianza_0_1": 0.67,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_007_10-Q_Q3-2024.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "historico_trimestral[Q3-2024].ga_usd",
+          "cita_corta": "ga_usd: 15296000.",
+          "interpretacion": "Base de gasto previa mas alta."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "historico_trimestral[Q3-2025].ga_usd",
+          "cita_corta": "ga_usd: 8511000.",
+          "interpretacion": "Gasto G&A bajo en el trimestre mas reciente."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "historico_trimestral[Q3-2025].ebit_usd",
+          "cita_corta": "ebit_usd: 40520000 sobre ingresos 332638000.",
+          "interpretacion": "El margen EBIT trimestral supera 12%."
+        }
+      ],
+      "falsacion": {
+        "test": "G&A/ingresos > 5% en 2 trimestres consecutivos o margen EBIT < 10%",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_GCT_05",
       "tipo": "HECHO",
       "criticidad": "IMPORTANTE",
-      "enunciado": "Caja elevada y bajo gasto financiero aportan flexibilidad.",
+      "enunciado": "El volumen de lease liabilities mantiene un factor de riesgo financiero material en la tesis.",
       "confianza_0_1": 0.82,
       "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "TruthPack_v1",
+          "source_id": "SRC_SEC_001_10-K_FY2024.htm",
           "url": null,
           "titulo": null,
-          "fecha": "2026-02-23",
-          "ubicacion": "mercado/balance",
-          "cita_corta": "Caja 259.8M e interes FY2024 256K.",
-          "interpretacion": "Riesgo financiero acotado."
-        }
-      ],
-      "falsacion": {
-        "test": "Caja <150M y FCF <100M",
-        "ventana_meses": {
-          "min": 6,
-          "max": 18
+          "fecha": null,
+          "ubicacion": "lease_data.total_lease_liabilities_usd",
+          "cita_corta": "total_lease_liabilities_usd: 484278000.",
+          "interpretacion": "El pasivo por arrendamientos es elevado en terminos absolutos."
         },
-        "fuente_prevista": "filing"
-      }
-    },
-    {
-      "claim_id": "CLM_007",
-      "tipo": "HIPOTESIS",
-      "criticidad": "CRITICO",
-      "enunciado": "La prima de riesgo explicaria parte dominante del descuento.",
-      "confianza_0_1": 0.56,
-      "impacto": "ALTO",
-      "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "ImpliedExpectations_v1",
+          "source_id": "SRC_SEC_001_10-K_FY2024.htm",
           "url": null,
           "titulo": null,
-          "fecha": "2026-02-23",
-          "ubicacion": "sensibilidades",
-          "cita_corta": "La tasa de descuento es driver de alta sensibilidad.",
-          "interpretacion": "No todo el descuento proviene de deterioro operativo."
+          "fecha": null,
+          "ubicacion": "lease_data.operating_lease_liabilities_non_current_usd",
+          "cita_corta": "operating_lease_liabilities_non_current_usd: 395235000.",
+          "interpretacion": "El componente de largo plazo concentra el riesgo."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2024.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": null,
+          "ubicacion": "balance_sheet_ultimo.caja_usd",
+          "cita_corta": "caja_usd: 259759000.",
+          "interpretacion": "La caja no cubre totalmente el pasivo por leases."
         }
       ],
       "falsacion": {
-        "test": "Sin rerating pese a mejoras de disclosure y FCF",
+        "test": "total_lease_liabilities_usd cae >= 8% YoY sin caida de ingresos YoY",
         "ventana_meses": {
-          "min": 9,
+          "min": 12,
           "max": 24
         },
-        "fuente_prevista": "precio"
+        "fuente_prevista": "10-K"
       }
     },
     {
-      "claim_id": "CLM_008",
+      "claim_id": "CLM_GCT_06",
       "tipo": "HIPOTESIS",
       "criticidad": "CONTEXTUAL",
-      "enunciado": "La adquisicion de New Classic puede sumar crecimiento neto.",
-      "confianza_0_1": 0.49,
+      "enunciado": "La adquisicion solo cerrara brecha si se observa contribucion recurrente y rentable en reportes financieros.",
+      "confianza_0_1": 0.62,
       "impacto": "MEDIO",
       "evidencias": [
         {
@@ -236,1046 +291,620 @@
           "url": null,
           "titulo": null,
           "fecha": "2025-11-06",
-          "ubicacion": "M&A",
-          "cita_corta": "Consideracion 18M e ingresos target 70M.",
-          "interpretacion": "Potencial aun no confirmado."
+          "ubicacion": "TruthPack_v1.log.conversiones_aplicadas",
+          "cita_corta": "$70 million in annual revenues -> 70000000 USD.",
+          "interpretacion": "Existe base cuantitativa de potencial comercial del activo adquirido."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_017_8-K_2025-11-06.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-11-06",
+          "ubicacion": "TruthPack_v1.log.conversiones_aplicadas",
+          "cita_corta": "$18 million total consideration -> 18000000 USD.",
+          "interpretacion": "El desembolso fue acotado frente al tamano potencial declarado."
         }
       ],
       "falsacion": {
-        "test": "Contribucion <50M o dilucion >100 bps",
+        "test": "no hay disclosure cuantitativo de contribucion en 12 meses o surge impairment material",
         "ventana_meses": {
           "min": 6,
-          "max": 18
+          "max": 24
         },
-        "fuente_prevista": "earnings"
+        "fuente_prevista": "filing"
       }
     }
   ],
   "predicciones_calibracion": [
     {
       "pred_id": "PRED_001",
-      "descripcion": "Ingresos >330M en 2 de 3 trimestres",
-      "probabilidad_0_1": 0.58,
+      "descripcion": "deuda_total_usd pasa de null a valor reportado en dos reportes consecutivos.",
+      "probabilidad_0_1": 0.55,
       "ventana_meses": {
         "min": 3,
         "max": 12
       },
-      "criterio_validacion": "Ingresos trimestrales en 10-Q",
+      "criterio_validacion": "Ambos reportes incluyen deuda total agregada (corto + largo plazo) sin notas ambiguas.",
       "fuente_prevista": "10-Q"
     },
     {
       "pred_id": "PRED_002",
-      "descripcion": "G&A/ingresos <=4.5% promedio 3 trimestres",
-      "probabilidad_0_1": 0.68,
+      "descripcion": "enterprise_value_usd pasa a calculable de forma recurrente.",
+      "probabilidad_0_1": 0.54,
       "ventana_meses": {
         "min": 3,
         "max": 12
       },
-      "criterio_validacion": "Ratio trimestral promedio",
+      "criterio_validacion": "EV no nulo en dos cortes consecutivos con formula EV = market_cap + deuda_total - caja.",
       "fuente_prevista": "10-Q"
     },
     {
       "pred_id": "PRED_003",
-      "descripcion": "FCF FY2026 >=130M",
-      "probabilidad_0_1": 0.62,
+      "descripcion": "FCF TTM se mantiene en o por encima de 180000000 en al menos tres de cuatro actualizaciones.",
+      "probabilidad_0_1": 0.64,
       "ventana_meses": {
-        "min": 9,
+        "min": 6,
         "max": 18
       },
-      "criterio_validacion": "FCF anual en 10-K FY2026",
-      "fuente_prevista": "10-K"
+      "criterio_validacion": "Serie TTM trimestral cumple umbral >= 180000000 en 3/4 observaciones consecutivas.",
+      "fuente_prevista": "earnings"
     },
     {
       "pred_id": "PRED_004",
-      "descripcion": "Recompras >5% market cap en 12m",
-      "probabilidad_0_1": 0.73,
+      "descripcion": "La conversion de utilidades a caja (CFO/Net Income) supera 1.0x en al menos tres de cuatro trimestres.",
+      "probabilidad_0_1": 0.6,
       "ventana_meses": {
-        "min": 3,
-        "max": 12
+        "min": 6,
+        "max": 18
       },
-      "criterio_validacion": "Monto acumulado >62.5M",
+      "criterio_validacion": "CFO/Net Income >= 1.0x en 3 de 4 trimestres reportados.",
       "fuente_prevista": "10-Q"
     },
     {
       "pred_id": "PRED_005",
-      "descripcion": "Acciones diluidas -3% YoY",
-      "probabilidad_0_1": 0.69,
+      "descripcion": "Ingresos trimestrales crecen YoY >= 5% en al menos tres de cuatro trimestres.",
+      "probabilidad_0_1": 0.58,
       "ventana_meses": {
         "min": 6,
-        "max": 15
+        "max": 18
       },
-      "criterio_validacion": "Comparacion anual de acciones",
-      "fuente_prevista": "10-K"
+      "criterio_validacion": "Tasa YoY trimestral >= 5% en 3/4 trimestres consecutivos.",
+      "fuente_prevista": "10-Q"
     },
     {
       "pred_id": "PRED_006",
-      "descripcion": "Sin retrasos de filing ni restatements por 4 trimestres",
-      "probabilidad_0_1": 0.66,
+      "descripcion": "Margen bruto se mantiene en o por encima de 23% en al menos tres de cuatro trimestres.",
+      "probabilidad_0_1": 0.57,
       "ventana_meses": {
-        "min": 3,
-        "max": 15
+        "min": 6,
+        "max": 18
       },
-      "criterio_validacion": "No NT 10-Q/10-K ni enmiendas materiales",
-      "fuente_prevista": "otro"
+      "criterio_validacion": "gross_profit_usd/ingresos_usd >= 0.23 en 3/4 trimestres.",
+      "fuente_prevista": "earnings"
     },
     {
       "pred_id": "PRED_007",
-      "descripcion": "Lease liabilities/ingresos <=40% FY2026",
-      "probabilidad_0_1": 0.45,
+      "descripcion": "G&A/ingresos se mantiene en o por debajo de 4.0% en al menos tres de cuatro trimestres.",
+      "probabilidad_0_1": 0.56,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "ga_usd/ingresos_usd <= 0.04 en 3/4 trimestres consecutivos.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_008",
+      "descripcion": "Lease liabilities totales caen al menos 8% YoY sin deterioro de ingresos YoY.",
+      "probabilidad_0_1": 0.35,
       "ventana_meses": {
         "min": 12,
         "max": 24
       },
-      "criterio_validacion": "Ratio anual calculado",
+      "criterio_validacion": "total_lease_liabilities_usd disminuye >= 8% YoY y los ingresos anuales no caen YoY.",
       "fuente_prevista": "10-K"
     },
     {
-      "pred_id": "PRED_008",
-      "descripcion": "Contribucion New Classic >=55M",
-      "probabilidad_0_1": 0.47,
-      "ventana_meses": {
-        "min": 6,
-        "max": 18
-      },
-      "criterio_validacion": "Disclosure explicito",
-      "fuente_prevista": "earnings"
-    },
-    {
       "pred_id": "PRED_009",
-      "descripcion": "Margen bruto >=25% en 2 trimestres consecutivos",
-      "probabilidad_0_1": 0.34,
-      "ventana_meses": {
-        "min": 3,
-        "max": 12
-      },
-      "criterio_validacion": "Dos 10-Q consecutivos",
-      "fuente_prevista": "10-Q"
-    },
-    {
-      "pred_id": "PRED_010",
-      "descripcion": "P/FCF >=10.5x con FCF>=120M",
-      "probabilidad_0_1": 0.5,
+      "descripcion": "La adquisicion reporta contribucion anualizada >= 50000000 con ausencia de impairment material.",
+      "probabilidad_0_1": 0.49,
       "ventana_meses": {
         "min": 6,
-        "max": 18
+        "max": 24
       },
-      "criterio_validacion": "Multiplo y FCF cumplen",
-      "fuente_prevista": "otro"
+      "criterio_validacion": "10-Q/10-K o PR incluyen contribucion cuantificada >= 50000000 y sin cargo de deterioro material asociado.",
+      "fuente_prevista": "PR"
     }
   ],
   "peticiones_de_fuentes": [
     {
       "prioridad": "ALTA",
-      "item": "deuda_total_usd y deuda_neta_usd",
-      "por_que_importa": "Sin deuda no hay EV robusto.",
-      "como_obtenerlo": "10-Q/10-K notas de deuda financiera"
+      "item": "Reconciliacion de deuda total financiera y politica explicita de tratamiento de leases.",
+      "por_que_importa": "Desbloquea EV y elimina la principal limitacion metodologica.",
+      "como_obtenerlo": "10-Q/10-K, notas de deuda y arrendamientos, tabla short-term + long-term debt.",
+      "tipo_fuente": "FILING_PRIMARIO",
+      "utilidad_esperada": "Alta: habilita valoracion inversa y multiples EV/*.",
+      "costo_adquisicion": "BAJO"
     },
     {
       "prioridad": "ALTA",
-      "item": "enterprise_value_usd",
-      "por_que_importa": "Permite multiples EV-based consistentes.",
-      "como_obtenerlo": "EV = market cap + deuda total - caja"
-    },
-    {
-      "prioridad": "ALTA",
-      "item": "Q4-2024 trimestral",
-      "por_que_importa": "Permite TTM consecutivo sin FY0 fallback.",
-      "como_obtenerlo": "Derivar desde FY2024 y Q1-Q3 2024 o filing faltante"
-    },
-    {
-      "prioridad": "ALTA",
-      "item": "Detalle neto recompras vs SBC",
-      "por_que_importa": "Impacto real por accion.",
-      "como_obtenerlo": "roll-forward de acciones y treasury stock"
+      "item": "Desglose trimestral de cuentas por cobrar, inventarios y cuentas por pagar.",
+      "por_que_importa": "Permite separar FCF recurrente de efectos transitorios de capital de trabajo.",
+      "como_obtenerlo": "10-Q seccion balance y notas de working capital; extraer serie de 8 trimestres.",
+      "tipo_fuente": "FILING_PRIMARIO",
+      "utilidad_esperada": "Alta: mejora calibracion de CAT_GCT_02 y CAT_GCT_03.",
+      "costo_adquisicion": "MEDIO"
     },
     {
       "prioridad": "MEDIA",
-      "item": "Split ingresos producto/servicios",
-      "por_que_importa": "Validar tesis de expansion de margen bruto.",
-      "como_obtenerlo": "Notas de ingresos y MD&A"
+      "item": "Bridge trimestral CFO a FCF recurrente con ajustes no recurrentes.",
+      "por_que_importa": "Refuerza la calidad de caja y reduce error de interpretacion de picos trimestrales.",
+      "como_obtenerlo": "Earnings call/PR y reconciliaciones financieras en anexos de resultados.",
+      "tipo_fuente": "EARNINGS_SUPPLEMENT",
+      "utilidad_esperada": "Media-alta: aumenta conviccion de sostenibilidad de caja.",
+      "costo_adquisicion": "MEDIO"
     },
     {
       "prioridad": "MEDIA",
-      "item": "KPI de utilizacion de almacenes",
-      "por_que_importa": "Medir retorno economico de leases.",
-      "como_obtenerlo": "KPIs operativos en earnings y filings"
+      "item": "Disclosure de contribucion de New Classic (ingresos, margen, sinergias, capital de trabajo).",
+      "por_que_importa": "Permite validar si el catalizador de M&A aporta cierre real de brecha.",
+      "como_obtenerlo": "10-Q/10-K y PR de integracion con KPIs cuantitativos.",
+      "tipo_fuente": "FILING_PRIMARIO",
+      "utilidad_esperada": "Media: mejora calibracion de CAT_GCT_06.",
+      "costo_adquisicion": "MEDIO"
+    },
+    {
+      "prioridad": "BAJA",
+      "item": "Calendario de vencimientos y terminos de renegociacion de leases por tramo.",
+      "por_que_importa": "Aumenta precision de timing para el catalizador de reduccion de pasivos por arrendamiento.",
+      "como_obtenerlo": "Nota de arrendamientos en 10-K y actualizaciones en 10-Q.",
+      "tipo_fuente": "FILING_PRIMARIO",
+      "utilidad_esperada": "Media: afina probabilidad y ventana de CAT_GCT_05.",
+      "costo_adquisicion": "BAJO"
+    }
+  ],
+  "peticiones_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Reconciliacion de deuda total financiera y politica explicita de tratamiento de leases.",
+      "por_que_importa": "Desbloquea EV y elimina la principal limitacion metodologica.",
+      "como_obtenerlo": "10-Q/10-K, notas de deuda y arrendamientos, tabla short-term + long-term debt.",
+      "tipo_fuente": "FILING_PRIMARIO",
+      "utilidad_esperada": "Alta: habilita valoracion inversa y multiples EV/*.",
+      "costo_adquisicion": "BAJO"
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose trimestral de cuentas por cobrar, inventarios y cuentas por pagar.",
+      "por_que_importa": "Permite separar FCF recurrente de efectos transitorios de capital de trabajo.",
+      "como_obtenerlo": "10-Q seccion balance y notas de working capital; extraer serie de 8 trimestres.",
+      "tipo_fuente": "FILING_PRIMARIO",
+      "utilidad_esperada": "Alta: mejora calibracion de CAT_GCT_02 y CAT_GCT_03.",
+      "costo_adquisicion": "MEDIO"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Bridge trimestral CFO a FCF recurrente con ajustes no recurrentes.",
+      "por_que_importa": "Refuerza la calidad de caja y reduce error de interpretacion de picos trimestrales.",
+      "como_obtenerlo": "Earnings call/PR y reconciliaciones financieras en anexos de resultados.",
+      "tipo_fuente": "EARNINGS_SUPPLEMENT",
+      "utilidad_esperada": "Media-alta: aumenta conviccion de sostenibilidad de caja.",
+      "costo_adquisicion": "MEDIO"
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Disclosure de contribucion de New Classic (ingresos, margen, sinergias, capital de trabajo).",
+      "por_que_importa": "Permite validar si el catalizador de M&A aporta cierre real de brecha.",
+      "como_obtenerlo": "10-Q/10-K y PR de integracion con KPIs cuantitativos.",
+      "tipo_fuente": "FILING_PRIMARIO",
+      "utilidad_esperada": "Media: mejora calibracion de CAT_GCT_06.",
+      "costo_adquisicion": "MEDIO"
+    },
+    {
+      "prioridad": "BAJA",
+      "item": "Calendario de vencimientos y terminos de renegociacion de leases por tramo.",
+      "por_que_importa": "Aumenta precision de timing para el catalizador de reduccion de pasivos por arrendamiento.",
+      "como_obtenerlo": "Nota de arrendamientos en 10-K y actualizaciones en 10-Q.",
+      "tipo_fuente": "FILING_PRIMARIO",
+      "utilidad_esperada": "Media: afina probabilidad y ventana de CAT_GCT_05.",
+      "costo_adquisicion": "BAJO"
     }
   ],
   "payload": {
     "payload_version": "CatalystPayload_v1",
     "contenido": {
       "mapeo_con_expectativas_implicitas": {
-        "variable_critica_principal": "CRECIMIENTO_FCF",
-        "lectura_en_1_2_frases": "El mercado descuenta caida del FCF y/o prima de riesgo alta. Los catalizadores utiles son los que sostienen FCF, margen operativo y transparencia."
+        "variable_critica_principal": "OTRO",
+        "lectura_en_1_2_frases": "El mercado no puede traducir precio a expectativas implicitas robustas por falta de EV/deuda total. Los catalizadores mas relevantes son los que restauran trazabilidad de capital y validan persistencia de FCF."
       },
+      "scoring_catalizadores": [
+        {
+          "catalyst_id": "CAT_GCT_01",
+          "probabilidad_0_1": 0.52,
+          "confianza_timing": 0.45,
+          "calidad": "CALIDAD_MEDIA"
+        },
+        {
+          "catalyst_id": "CAT_GCT_02",
+          "probabilidad_0_1": 0.64,
+          "confianza_timing": 0.6,
+          "calidad": "CALIDAD_ALTA"
+        },
+        {
+          "catalyst_id": "CAT_GCT_03",
+          "probabilidad_0_1": 0.58,
+          "confianza_timing": 0.62,
+          "calidad": "CALIDAD_ALTA"
+        },
+        {
+          "catalyst_id": "CAT_GCT_04",
+          "probabilidad_0_1": 0.56,
+          "confianza_timing": 0.57,
+          "calidad": "CALIDAD_MEDIA"
+        },
+        {
+          "catalyst_id": "CAT_GCT_05",
+          "probabilidad_0_1": 0.33,
+          "confianza_timing": 0.4,
+          "calidad": "CALIDAD_BAJA"
+        },
+        {
+          "catalyst_id": "CAT_GCT_06",
+          "probabilidad_0_1": 0.49,
+          "confianza_timing": 0.46,
+          "calidad": "CALIDAD_MEDIA"
+        }
+      ],
       "catalizadores": [
         {
-          "catalyst_id": "CAT_001",
-          "nombre": "Mejora de gobernanza y disclosure",
+          "catalyst_id": "CAT_GCT_01",
+          "nombre": "Transparencia de deuda total y EV recurrente",
           "categoria": "CORPORATIVO",
-          "es_no_binario": true,
-          "ventana_meses": {
-            "min": 6,
-            "probable": 18,
-            "max": 24
-          },
-          "probabilidad_0_1": 0.41,
-          "confianza_timing": 0.38,
-          "calidad": "CALIDAD_MEDIA",
-          "mecanismo_cierre_gap": "Reducir el gap entre expectativas de contraccion y fundamentales observados.",
-          "impacto_esperado": {
-            "tipo": "CUALITATIVO",
-            "drivers_afectados": [
-              {
-                "driver": "MULTIPLO",
-                "direccion": "MEJORA",
-                "magnitud_rango": null,
-                "nota": "Impacto dominante via prima de riesgo."
-              }
-            ],
-            "justificacion": "La sensibilidad principal del caso es el descuento aplicado al FCF."
-          },
-          "evidencia_actual": [
-            {
-              "tipo": "SOURCEPACK",
-              "source_id": "CatalystDetection_v1",
-              "url": null,
-              "titulo": null,
-              "fecha": "2026-02-23",
-              "ubicacion": "CAT_001",
-              "cita_corta": "Catalizador detectado en el paquete base.",
-              "interpretacion": "Base objetiva para scoring."
-            }
-          ],
-          "evidencia_confirmatoria_futura": [
-            {
-              "descripcion": "Confirmacion de hito principal",
-              "fuente_prevista": "filing",
-              "umbral_o_condicion": "Cumplimiento de eventos de calibracion",
-              "ventana_meses": {
-                "min": 3,
-                "max": 18
-              }
-            }
-          ],
-          "leading_indicators": [
-            "Cumplimiento trimestral de hitos",
-            "FCF estable",
-            "Sin deterioro de margen"
-          ],
-          "riesgos_de_ejecucion": [
-            "Riesgo macro",
-            "Riesgo de ejecucion"
-          ],
-          "contra_catalizadores": [
-            "Desviacion negativa de FCF",
-            "Compresion de margen"
-          ],
-          "plan_monitorizacion": {
-            "frecuencia": "TRIMESTRAL",
-            "que_mirar": [
-              "10-Q/10-K",
-              "CFO y FCF",
-              "Margenes"
-            ]
-          },
-          "predicciones_calibracion": [
-            {
-              "descripcion": "Deuda total explicitada en dos filings",
-              "probabilidad_0_1": 0.45,
-              "ventana_temporal": {
-                "inicio": "2026-05-01",
-                "fin": "2026-11-30"
-              },
-              "criterio_validacion": "2 reportes seguidos incluyen deuda total"
-            },
-            {
-              "descripcion": "Sin NT 10-Q/10-K por 4 trimestres",
-              "probabilidad_0_1": 0.66,
-              "ventana_temporal": {
-                "inicio": "2026-03-01",
-                "fin": "2027-03-31"
-              },
-              "criterio_validacion": "No hay retrasos formales"
-            }
-          ],
-          "peticiones_fuentes": [
-            {
-              "tipo_fuente": "10-Q/10-K deuda financiera",
-              "utilidad_esperada": "Eliminar incertidumbre EV",
-              "costo_adquisicion": "BAJO"
-            }
-          ],
-          "resumen_ejecutivo": {
-            "veredicto": "WATCHLIST",
-            "confianza_0_1": 0.44
-          },
-          "_meta": {
-            "agente": "CATALYST_v1",
-            "version": "1.0.0",
-            "timestamp": "2026-02-23T22:40:00Z",
-            "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
-          }
-        },
-        {
-          "catalyst_id": "CAT_002",
-          "nombre": "Sinergias de New Classic",
-          "categoria": "CORPORATIVO",
-          "es_no_binario": true,
-          "ventana_meses": {
-            "min": 12,
-            "probable": 18,
-            "max": 24
-          },
-          "probabilidad_0_1": 0.47,
-          "confianza_timing": 0.46,
-          "calidad": "CALIDAD_MEDIA",
-          "mecanismo_cierre_gap": "Reducir el gap entre expectativas de contraccion y fundamentales observados.",
-          "impacto_esperado": {
-            "tipo": "CUALITATIVO",
-            "drivers_afectados": [
-              {
-                "driver": "MULTIPLO",
-                "direccion": "MEJORA",
-                "magnitud_rango": null,
-                "nota": "Impacto dominante via prima de riesgo."
-              }
-            ],
-            "justificacion": "La sensibilidad principal del caso es el descuento aplicado al FCF."
-          },
-          "evidencia_actual": [
-            {
-              "tipo": "SOURCEPACK",
-              "source_id": "CatalystDetection_v1",
-              "url": null,
-              "titulo": null,
-              "fecha": "2026-02-23",
-              "ubicacion": "CAT_002",
-              "cita_corta": "Catalizador detectado en el paquete base.",
-              "interpretacion": "Base objetiva para scoring."
-            }
-          ],
-          "evidencia_confirmatoria_futura": [
-            {
-              "descripcion": "Confirmacion de hito principal",
-              "fuente_prevista": "filing",
-              "umbral_o_condicion": "Cumplimiento de eventos de calibracion",
-              "ventana_meses": {
-                "min": 3,
-                "max": 18
-              }
-            }
-          ],
-          "leading_indicators": [
-            "Cumplimiento trimestral de hitos",
-            "FCF estable",
-            "Sin deterioro de margen"
-          ],
-          "riesgos_de_ejecucion": [
-            "Riesgo macro",
-            "Riesgo de ejecucion"
-          ],
-          "contra_catalizadores": [
-            "Desviacion negativa de FCF",
-            "Compresion de margen"
-          ],
-          "plan_monitorizacion": {
-            "frecuencia": "TRIMESTRAL",
-            "que_mirar": [
-              "10-Q/10-K",
-              "CFO y FCF",
-              "Margenes"
-            ]
-          },
-          "predicciones_calibracion": [
-            {
-              "descripcion": "Disclosure de ingresos New Classic",
-              "probabilidad_0_1": 0.52,
-              "ventana_temporal": {
-                "inicio": "2026-05-01",
-                "fin": "2027-02-28"
-              },
-              "criterio_validacion": "Existe desglose explicito"
-            },
-            {
-              "descripcion": "Contribucion anualizada >=55M",
-              "probabilidad_0_1": 0.47,
-              "ventana_temporal": {
-                "inicio": "2026-08-01",
-                "fin": "2027-08-31"
-              },
-              "criterio_validacion": "Ingresos anualizados reportados"
-            }
-          ],
-          "peticiones_fuentes": [
-            {
-              "tipo_fuente": "PPA y pro forma de adquisicion",
-              "utilidad_esperada": "Separar efecto contable vs operativo",
-              "costo_adquisicion": "MEDIO"
-            }
-          ],
-          "resumen_ejecutivo": {
-            "veredicto": "WATCHLIST",
-            "confianza_0_1": 0.48
-          },
-          "_meta": {
-            "agente": "CATALYST_v1",
-            "version": "1.0.0",
-            "timestamp": "2026-02-23T22:40:00Z",
-            "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
-          }
-        },
-        {
-          "catalyst_id": "CAT_003",
-          "nombre": "Retorno de capital por recompras",
-          "categoria": "FINANCIERO",
-          "es_no_binario": true,
-          "ventana_meses": {
-            "min": 6,
-            "probable": 9,
-            "max": 12
-          },
-          "probabilidad_0_1": 0.76,
-          "confianza_timing": 0.71,
-          "calidad": "CALIDAD_ALTA",
-          "mecanismo_cierre_gap": "Reducir el gap entre expectativas de contraccion y fundamentales observados.",
-          "impacto_esperado": {
-            "tipo": "CUALITATIVO",
-            "drivers_afectados": [
-              {
-                "driver": "MULTIPLO",
-                "direccion": "MEJORA",
-                "magnitud_rango": null,
-                "nota": "Impacto dominante via prima de riesgo."
-              }
-            ],
-            "justificacion": "La sensibilidad principal del caso es el descuento aplicado al FCF."
-          },
-          "evidencia_actual": [
-            {
-              "tipo": "SOURCEPACK",
-              "source_id": "CatalystDetection_v1",
-              "url": null,
-              "titulo": null,
-              "fecha": "2026-02-23",
-              "ubicacion": "CAT_003",
-              "cita_corta": "Catalizador detectado en el paquete base.",
-              "interpretacion": "Base objetiva para scoring."
-            }
-          ],
-          "evidencia_confirmatoria_futura": [
-            {
-              "descripcion": "Confirmacion de hito principal",
-              "fuente_prevista": "filing",
-              "umbral_o_condicion": "Cumplimiento de eventos de calibracion",
-              "ventana_meses": {
-                "min": 3,
-                "max": 18
-              }
-            }
-          ],
-          "leading_indicators": [
-            "Cumplimiento trimestral de hitos",
-            "FCF estable",
-            "Sin deterioro de margen"
-          ],
-          "riesgos_de_ejecucion": [
-            "Riesgo macro",
-            "Riesgo de ejecucion"
-          ],
-          "contra_catalizadores": [
-            "Desviacion negativa de FCF",
-            "Compresion de margen"
-          ],
-          "plan_monitorizacion": {
-            "frecuencia": "TRIMESTRAL",
-            "que_mirar": [
-              "10-Q/10-K",
-              "CFO y FCF",
-              "Margenes"
-            ]
-          },
-          "predicciones_calibracion": [
-            {
-              "descripcion": "Recompras >=62.5M en 12m",
-              "probabilidad_0_1": 0.73,
-              "ventana_temporal": {
-                "inicio": "2026-03-01",
-                "fin": "2027-02-28"
-              },
-              "criterio_validacion": "Monto acumulado supera 62.5M"
-            },
-            {
-              "descripcion": "Acciones diluidas -3% YoY",
-              "probabilidad_0_1": 0.69,
-              "ventana_temporal": {
-                "inicio": "2026-08-01",
-                "fin": "2027-03-31"
-              },
-              "criterio_validacion": "Comparacion YoY de acciones"
-            }
-          ],
-          "peticiones_fuentes": [
-            {
-              "tipo_fuente": "Roll-forward de recompras",
-              "utilidad_esperada": "Cuantificar retorno real",
-              "costo_adquisicion": "BAJO"
-            }
-          ],
-          "resumen_ejecutivo": {
-            "veredicto": "APTO",
-            "confianza_0_1": 0.74
-          },
-          "_meta": {
-            "agente": "CATALYST_v1",
-            "version": "1.0.0",
-            "timestamp": "2026-02-23T22:40:00Z",
-            "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
-          }
-        },
-        {
-          "catalyst_id": "CAT_004",
-          "nombre": "FCF robusto sostenido",
-          "categoria": "FINANCIERO",
-          "es_no_binario": true,
-          "ventana_meses": {
-            "min": 12,
-            "probable": 18,
-            "max": 24
-          },
-          "probabilidad_0_1": 0.68,
-          "confianza_timing": 0.62,
-          "calidad": "CALIDAD_ALTA",
-          "mecanismo_cierre_gap": "Reducir el gap entre expectativas de contraccion y fundamentales observados.",
-          "impacto_esperado": {
-            "tipo": "CUALITATIVO",
-            "drivers_afectados": [
-              {
-                "driver": "MULTIPLO",
-                "direccion": "MEJORA",
-                "magnitud_rango": null,
-                "nota": "Impacto dominante via prima de riesgo."
-              }
-            ],
-            "justificacion": "La sensibilidad principal del caso es el descuento aplicado al FCF."
-          },
-          "evidencia_actual": [
-            {
-              "tipo": "SOURCEPACK",
-              "source_id": "CatalystDetection_v1",
-              "url": null,
-              "titulo": null,
-              "fecha": "2026-02-23",
-              "ubicacion": "CAT_004",
-              "cita_corta": "Catalizador detectado en el paquete base.",
-              "interpretacion": "Base objetiva para scoring."
-            }
-          ],
-          "evidencia_confirmatoria_futura": [
-            {
-              "descripcion": "Confirmacion de hito principal",
-              "fuente_prevista": "filing",
-              "umbral_o_condicion": "Cumplimiento de eventos de calibracion",
-              "ventana_meses": {
-                "min": 3,
-                "max": 18
-              }
-            }
-          ],
-          "leading_indicators": [
-            "Cumplimiento trimestral de hitos",
-            "FCF estable",
-            "Sin deterioro de margen"
-          ],
-          "riesgos_de_ejecucion": [
-            "Riesgo macro",
-            "Riesgo de ejecucion"
-          ],
-          "contra_catalizadores": [
-            "Desviacion negativa de FCF",
-            "Compresion de margen"
-          ],
-          "plan_monitorizacion": {
-            "frecuencia": "TRIMESTRAL",
-            "que_mirar": [
-              "10-Q/10-K",
-              "CFO y FCF",
-              "Margenes"
-            ]
-          },
-          "predicciones_calibracion": [
-            {
-              "descripcion": "FCF FY2026 >=130M",
-              "probabilidad_0_1": 0.62,
-              "ventana_temporal": {
-                "inicio": "2027-02-01",
-                "fin": "2027-04-30"
-              },
-              "criterio_validacion": "FCF anual en 10-K FY2026"
-            },
-            {
-              "descripcion": "CFO/Net income >=1.0",
-              "probabilidad_0_1": 0.6,
-              "ventana_temporal": {
-                "inicio": "2027-02-01",
-                "fin": "2027-04-30"
-              },
-              "criterio_validacion": "Ratio anual >=1"
-            }
-          ],
-          "peticiones_fuentes": [
-            {
-              "tipo_fuente": "Bridge de working capital",
-              "utilidad_esperada": "Normalizar FCF recurrente",
-              "costo_adquisicion": "BAJO"
-            }
-          ],
-          "resumen_ejecutivo": {
-            "veredicto": "APTO",
-            "confianza_0_1": 0.66
-          },
-          "_meta": {
-            "agente": "CATALYST_v1",
-            "version": "1.0.0",
-            "timestamp": "2026-02-23T22:40:00Z",
-            "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
-          }
-        },
-        {
-          "catalyst_id": "CAT_005",
-          "nombre": "Liquidez alta y deuda baja",
-          "categoria": "FINANCIERO",
-          "es_no_binario": true,
-          "ventana_meses": {
-            "min": 6,
-            "probable": 18,
-            "max": 30
-          },
-          "probabilidad_0_1": 0.61,
-          "confianza_timing": 0.67,
-          "calidad": "CALIDAD_MEDIA",
-          "mecanismo_cierre_gap": "Reducir el gap entre expectativas de contraccion y fundamentales observados.",
-          "impacto_esperado": {
-            "tipo": "CUALITATIVO",
-            "drivers_afectados": [
-              {
-                "driver": "MULTIPLO",
-                "direccion": "MEJORA",
-                "magnitud_rango": null,
-                "nota": "Impacto dominante via prima de riesgo."
-              }
-            ],
-            "justificacion": "La sensibilidad principal del caso es el descuento aplicado al FCF."
-          },
-          "evidencia_actual": [
-            {
-              "tipo": "SOURCEPACK",
-              "source_id": "CatalystDetection_v1",
-              "url": null,
-              "titulo": null,
-              "fecha": "2026-02-23",
-              "ubicacion": "CAT_005",
-              "cita_corta": "Catalizador detectado en el paquete base.",
-              "interpretacion": "Base objetiva para scoring."
-            }
-          ],
-          "evidencia_confirmatoria_futura": [
-            {
-              "descripcion": "Confirmacion de hito principal",
-              "fuente_prevista": "filing",
-              "umbral_o_condicion": "Cumplimiento de eventos de calibracion",
-              "ventana_meses": {
-                "min": 3,
-                "max": 18
-              }
-            }
-          ],
-          "leading_indicators": [
-            "Cumplimiento trimestral de hitos",
-            "FCF estable",
-            "Sin deterioro de margen"
-          ],
-          "riesgos_de_ejecucion": [
-            "Riesgo macro",
-            "Riesgo de ejecucion"
-          ],
-          "contra_catalizadores": [
-            "Desviacion negativa de FCF",
-            "Compresion de margen"
-          ],
-          "plan_monitorizacion": {
-            "frecuencia": "TRIMESTRAL",
-            "que_mirar": [
-              "10-Q/10-K",
-              "CFO y FCF",
-              "Margenes"
-            ]
-          },
-          "predicciones_calibracion": [
-            {
-              "descripcion": "Caja >=220M en 4 cierres",
-              "probabilidad_0_1": 0.63,
-              "ventana_temporal": {
-                "inicio": "2026-03-01",
-                "fin": "2027-03-31"
-              },
-              "criterio_validacion": "Saldo trimestral >=220M"
-            },
-            {
-              "descripcion": "Sin deuda nueva >50M",
-              "probabilidad_0_1": 0.72,
-              "ventana_temporal": {
-                "inicio": "2026-03-01",
-                "fin": "2027-03-31"
-              },
-              "criterio_validacion": "Notas de deuda sin incremento material"
-            }
-          ],
-          "peticiones_fuentes": [
-            {
-              "tipo_fuente": "Vencimientos de deuda",
-              "utilidad_esperada": "Medir riesgo de refinanciacion",
-              "costo_adquisicion": "BAJO"
-            }
-          ],
-          "resumen_ejecutivo": {
-            "veredicto": "WATCHLIST",
-            "confianza_0_1": 0.6
-          },
-          "_meta": {
-            "agente": "CATALYST_v1",
-            "version": "1.0.0",
-            "timestamp": "2026-02-23T22:40:00Z",
-            "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
-          }
-        },
-        {
-          "catalyst_id": "CAT_006",
-          "nombre": "Normalizacion de G&A",
-          "categoria": "OPERATIVO",
           "es_no_binario": true,
           "ventana_meses": {
             "min": 6,
             "probable": 12,
             "max": 18
           },
-          "probabilidad_0_1": 0.72,
-          "confianza_timing": 0.69,
-          "calidad": "CALIDAD_ALTA",
-          "mecanismo_cierre_gap": "Reducir el gap entre expectativas de contraccion y fundamentales observados.",
-          "impacto_esperado": {
-            "tipo": "CUALITATIVO",
-            "drivers_afectados": [
-              {
-                "driver": "MULTIPLO",
-                "direccion": "MEJORA",
-                "magnitud_rango": null,
-                "nota": "Impacto dominante via prima de riesgo."
-              }
-            ],
-            "justificacion": "La sensibilidad principal del caso es el descuento aplicado al FCF."
-          },
-          "evidencia_actual": [
-            {
-              "tipo": "SOURCEPACK",
-              "source_id": "CatalystDetection_v1",
-              "url": null,
-              "titulo": null,
-              "fecha": "2026-02-23",
-              "ubicacion": "CAT_006",
-              "cita_corta": "Catalizador detectado en el paquete base.",
-              "interpretacion": "Base objetiva para scoring."
-            }
-          ],
-          "evidencia_confirmatoria_futura": [
-            {
-              "descripcion": "Confirmacion de hito principal",
-              "fuente_prevista": "filing",
-              "umbral_o_condicion": "Cumplimiento de eventos de calibracion",
-              "ventana_meses": {
-                "min": 3,
-                "max": 18
-              }
-            }
-          ],
-          "leading_indicators": [
-            "Cumplimiento trimestral de hitos",
-            "FCF estable",
-            "Sin deterioro de margen"
-          ],
-          "riesgos_de_ejecucion": [
-            "Riesgo macro",
-            "Riesgo de ejecucion"
-          ],
-          "contra_catalizadores": [
-            "Desviacion negativa de FCF",
-            "Compresion de margen"
-          ],
-          "plan_monitorizacion": {
-            "frecuencia": "TRIMESTRAL",
-            "que_mirar": [
-              "10-Q/10-K",
-              "CFO y FCF",
-              "Margenes"
-            ]
-          },
-          "predicciones_calibracion": [
-            {
-              "descripcion": "G&A/ingresos <=4.5% promedio 3 trimestres",
-              "probabilidad_0_1": 0.68,
-              "ventana_temporal": {
-                "inicio": "2026-03-01",
-                "fin": "2026-12-31"
-              },
-              "criterio_validacion": "Promedio simple en 10-Q"
-            },
-            {
-              "descripcion": "Margen operativo >=12% en 2/3",
-              "probabilidad_0_1": 0.64,
-              "ventana_temporal": {
-                "inicio": "2026-03-01",
-                "fin": "2026-12-31"
-              },
-              "criterio_validacion": "EBIT/ingresos trimestral"
-            }
-          ],
-          "peticiones_fuentes": [
-            {
-              "tipo_fuente": "Desglose G&A recurrente/one-off",
-              "utilidad_esperada": "Estimar margen sostenible",
-              "costo_adquisicion": "BAJO"
-            }
-          ],
-          "resumen_ejecutivo": {
-            "veredicto": "APTO",
-            "confianza_0_1": 0.7
-          },
-          "_meta": {
-            "agente": "CATALYST_v1",
-            "version": "1.0.0",
-            "timestamp": "2026-02-23T22:40:00Z",
-            "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
-          }
-        },
-        {
-          "catalyst_id": "CAT_007",
-          "nombre": "Monetizacion de activos de lease",
-          "categoria": "OPERATIVO",
-          "es_no_binario": true,
-          "ventana_meses": {
-            "min": 12,
-            "probable": 18,
-            "max": 30
-          },
-          "probabilidad_0_1": 0.43,
-          "confianza_timing": 0.44,
+          "probabilidad_0_1": 0.52,
+          "confianza_timing": 0.45,
           "calidad": "CALIDAD_MEDIA",
-          "mecanismo_cierre_gap": "Reducir el gap entre expectativas de contraccion y fundamentales observados.",
+          "mecanismo_cierre_gap": "Publicar deuda total y puente EV de forma recurrente elimina bloqueo metodologico y reduce prima de opacidad sobre el multiple.",
           "impacto_esperado": {
             "tipo": "CUALITATIVO",
             "drivers_afectados": [
               {
-                "driver": "MULTIPLO",
-                "direccion": "MEJORA",
+                "driver": "COSTE_DEUDA",
+                "direccion": "BAJA",
                 "magnitud_rango": null,
-                "nota": "Impacto dominante via prima de riesgo."
+                "nota": "Mejor trazabilidad reduce prima de riesgo por opacidad."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Mayor comparabilidad habilita rerating relativo."
               }
             ],
-            "justificacion": "La sensibilidad principal del caso es el descuento aplicado al FCF."
+            "justificacion": "El catalizador actua sobre la calidad de informacion, no sobre caja directa."
           },
           "evidencia_actual": [
             {
               "tipo": "SOURCEPACK",
-              "source_id": "CatalystDetection_v1",
+              "source_id": "ImpliedExpectations_v1",
               "url": null,
               "titulo": null,
-              "fecha": "2026-02-23",
-              "ubicacion": "CAT_007",
-              "cita_corta": "Catalizador detectado en el paquete base.",
-              "interpretacion": "Base objetiva para scoring."
+              "fecha": "2026-02-24",
+              "ubicacion": "motivo_blocked",
+              "cita_corta": "Falta enterprise_value_usd (EV); sin EV no se puede ejecutar valoracion inversa.",
+              "interpretacion": "El metodo principal sigue bloqueado."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "url": null,
+              "titulo": null,
+              "fecha": "2026-02-24",
+              "ubicacion": "mercado.enterprise_value_usd",
+              "cita_corta": "enterprise_value_usd: null.",
+              "interpretacion": "No hay EV utilizable."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "url": null,
+              "titulo": null,
+              "fecha": "2026-02-24",
+              "ubicacion": "mercado.deuda_total_usd",
+              "cita_corta": "deuda_total_usd: null.",
+              "interpretacion": "No hay insumo completo para EV."
             }
           ],
           "evidencia_confirmatoria_futura": [
             {
-              "descripcion": "Confirmacion de hito principal",
+              "descripcion": "deuda_total_usd y enterprise_value_usd reportados sin null en 2 periodos consecutivos",
               "fuente_prevista": "filing",
-              "umbral_o_condicion": "Cumplimiento de eventos de calibracion",
+              "umbral_o_condicion": "Campos no nulos y reconciliables con formula EV estandar",
               "ventana_meses": {
                 "min": 3,
+                "max": 12
+              }
+            },
+            {
+              "descripcion": "Publicacion recurrente de puente EV",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "Formula EV explicitada y estable en definicion de deuda/leases",
+              "ventana_meses": {
+                "min": 6,
                 "max": 18
               }
             }
           ],
           "leading_indicators": [
-            "Cumplimiento trimestral de hitos",
-            "FCF estable",
-            "Sin deterioro de margen"
+            "deuda_total_usd deja de ser null",
+            "enterprise_value_usd pasa a ser calculable en dos cortes seguidos",
+            "opacidad_alta cambia de true a false en evaluacion interna"
           ],
           "riesgos_de_ejecucion": [
-            "Riesgo macro",
-            "Riesgo de ejecucion"
+            "Persistencia de disclosure sin deuda total agregada.",
+            "Cambios de definicion entre deuda financiera y leases.",
+            "Comunicacion parcial que impida reconstruir EV comparable."
           ],
           "contra_catalizadores": [
-            "Desviacion negativa de FCF",
-            "Compresion de margen"
+            "deuda_total_usd permanece null mas de 12 meses.",
+            "Aumenta complejidad de pasivos sin desglose estandarizado."
           ],
           "plan_monitorizacion": {
             "frecuencia": "TRIMESTRAL",
             "que_mirar": [
-              "10-Q/10-K",
-              "CFO y FCF",
-              "Margenes"
+              "Campos deuda_total_usd y enterprise_value_usd en TruthPack",
+              "Notas de deuda y arrendamientos en 10-Q/10-K",
+              "Consistencia de formula EV con market_cap, deuda y caja"
             ]
-          },
-          "predicciones_calibracion": [
-            {
-              "descripcion": "Revenue/ROU assets >2.8x",
-              "probabilidad_0_1": 0.47,
-              "ventana_temporal": {
-                "inicio": "2026-10-01",
-                "fin": "2027-06-30"
-              },
-              "criterio_validacion": "Ratio anual calculado"
-            },
-            {
-              "descripcion": "Lease liabilities/ingresos <=40%",
-              "probabilidad_0_1": 0.45,
-              "ventana_temporal": {
-                "inicio": "2027-02-01",
-                "fin": "2027-04-30"
-              },
-              "criterio_validacion": "Ratio anual en 10-K"
-            }
-          ],
-          "peticiones_fuentes": [
-            {
-              "tipo_fuente": "KPI de ocupacion de almacenes",
-              "utilidad_esperada": "Conectar leases con ingresos",
-              "costo_adquisicion": "MEDIO"
-            }
-          ],
-          "resumen_ejecutivo": {
-            "veredicto": "NO_APTO",
-            "confianza_0_1": 0.57
-          },
-          "_meta": {
-            "agente": "CATALYST_v1",
-            "version": "1.0.0",
-            "timestamp": "2026-02-23T22:40:00Z",
-            "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
           }
         },
         {
-          "catalyst_id": "CAT_008",
-          "nombre": "Estabilidad de ingresos trimestrales",
-          "categoria": "OPERATIVO",
+          "catalyst_id": "CAT_GCT_02",
+          "nombre": "Sostenibilidad del FCF con conversion de caja estable",
+          "categoria": "FINANCIERO",
           "es_no_binario": true,
           "ventana_meses": {
             "min": 6,
             "probable": 12,
             "max": 18
+          },
+          "probabilidad_0_1": 0.64,
+          "confianza_timing": 0.6,
+          "calidad": "CALIDAD_ALTA",
+          "mecanismo_cierre_gap": "Si el FCF elevado se repite sin dependencia de shocks de working capital, disminuye la duda de sostenibilidad y mejora la lectura del multiple.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Persistencia de caja libre en ventana multitrimestral."
+              },
+              {
+                "driver": "WORKING_CAPITAL",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Menor volatilidad de cobros/pagos."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Aumento de confianza en calidad de beneficios."
+              }
+            ],
+            "justificacion": "Hay evidencia fuerte en TTM y un test objetivo de continuidad."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "url": null,
+              "titulo": null,
+              "fecha": "2026-02-24",
+              "ubicacion": "ttm.fcf_usd",
+              "cita_corta": "fcf_usd: 201297000.",
+              "interpretacion": "FCF absoluto alto."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "ImpliedExpectations_v1",
+              "url": null,
+              "titulo": null,
+              "fecha": "2026-02-24",
+              "ubicacion": "multiples_implicitos",
+              "cita_corta": "p_fcf: 6.2097; fcf_yield_pct: 16.1038.",
+              "interpretacion": "Valoracion baja sobre FCF observado."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_006_10-Q_Q1-2025.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": null,
+              "ubicacion": "historico_trimestral[Q1-2025].cfo_usd",
+              "cita_corta": "cfo_usd: 9433000.",
+              "interpretacion": "Existe variabilidad trimestral."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": null,
+              "ubicacion": "historico_trimestral[Q3-2025].cfo_usd",
+              "cita_corta": "cfo_usd: 126292000.",
+              "interpretacion": "Capacidad de generar caja alta en trimestres fuertes."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Persistencia de FCF TTM",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "FCF TTM >= 180000000 en al menos 3 de 4 observaciones",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              }
+            },
+            {
+              "descripcion": "Calidad de conversion de utilidades",
+              "fuente_prevista": "10-Q",
+              "umbral_o_condicion": "CFO/Net Income >= 1.0x en 3 de 4 trimestres",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              }
+            }
+          ],
+          "leading_indicators": [
+            "CFO trimestral >= 30000000 en 3 de 4 trimestres",
+            "CFO/Net Income >= 1.0x sostenido",
+            "Delta de caja LTM positivo"
+          ],
+          "riesgos_de_ejecucion": [
+            "Reversion de capital de trabajo.",
+            "Subida de capex por expansion.",
+            "Compresion de margen bruto por costos logisticos."
+          ],
+          "contra_catalizadores": [
+            "FCF TTM cae por debajo de 140000000.",
+            "CFO por debajo de net_income en 2 trimestres seguidos.",
+            "Delta de caja LTM persistentemente negativo."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "CFO, capex y FCF TTM",
+              "Ratio CFO/Net Income",
+              "Componentes de working capital en 10-Q"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_GCT_03",
+          "nombre": "Crecimiento organico post-escalado con margen bruto estable",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 15,
+            "max": 24
           },
           "probabilidad_0_1": 0.58,
-          "confianza_timing": 0.57,
-          "calidad": "CALIDAD_MEDIA",
-          "mecanismo_cierre_gap": "Reducir el gap entre expectativas de contraccion y fundamentales observados.",
+          "confianza_timing": 0.62,
+          "calidad": "CALIDAD_ALTA",
+          "mecanismo_cierre_gap": "Sostener crecimiento YoY tras FY2024 reduce riesgo de peak earnings y soporta multiples menos descontados.",
           "impacto_esperado": {
             "tipo": "CUALITATIVO",
             "drivers_afectados": [
               {
-                "driver": "MULTIPLO",
+                "driver": "EBIT",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Escala operativa sobre base de ingresos mayor."
+              },
+              {
+                "driver": "MARGEN_OPERATIVO",
                 "direccion": "MEJORA",
                 "magnitud_rango": null,
-                "nota": "Impacto dominante via prima de riesgo."
+                "nota": "Estabilidad de margen bruto protege conversion operativa."
+              },
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Mayor base de beneficios sostiene caja libre."
               }
             ],
-            "justificacion": "La sensibilidad principal del caso es el descuento aplicado al FCF."
+            "justificacion": "Los tres ultimos trimestres muestran crecimiento YoY positivo."
           },
           "evidencia_actual": [
             {
               "tipo": "SOURCEPACK",
-              "source_id": "CatalystDetection_v1",
+              "source_id": "SRC_SEC_006_10-Q_Q1-2025.htm",
               "url": null,
               "titulo": null,
-              "fecha": "2026-02-23",
-              "ubicacion": "CAT_008",
-              "cita_corta": "Catalizador detectado en el paquete base.",
-              "interpretacion": "Base objetiva para scoring."
+              "fecha": null,
+              "ubicacion": "historico_trimestral[Q1-2025].ingresos_usd",
+              "cita_corta": "271906000 vs 251077000 en Q1-2024.",
+              "interpretacion": "YoY positivo en Q1."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_005_10-Q_Q2-2025.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": null,
+              "ubicacion": "historico_trimestral[Q2-2025].ingresos_usd",
+              "cita_corta": "322606000 vs 310867000 en Q2-2024.",
+              "interpretacion": "YoY positivo en Q2."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": null,
+              "ubicacion": "historico_trimestral[Q3-2025].ingresos_usd",
+              "cita_corta": "332638000 vs 303316000 en Q3-2024.",
+              "interpretacion": "YoY positivo en Q3."
             }
           ],
           "evidencia_confirmatoria_futura": [
             {
-              "descripcion": "Confirmacion de hito principal",
-              "fuente_prevista": "filing",
-              "umbral_o_condicion": "Cumplimiento de eventos de calibracion",
+              "descripcion": "Crecimiento interanual sostenido",
+              "fuente_prevista": "10-Q",
+              "umbral_o_condicion": "Ingresos YoY >= 5% en 3 de 4 trimestres",
               "ventana_meses": {
-                "min": 3,
+                "min": 6,
+                "max": 18
+              }
+            },
+            {
+              "descripcion": "Estabilidad de margen bruto",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "margen_bruto_pct >= 23% en 3 de 4 trimestres",
+              "ventana_meses": {
+                "min": 6,
                 "max": 18
               }
             }
           ],
           "leading_indicators": [
-            "Cumplimiento trimestral de hitos",
-            "FCF estable",
-            "Sin deterioro de margen"
+            "Ingresos YoY trimestrales >= 5%",
+            "Gross profit YoY positivo en 3 de 4 trimestres",
+            "Net income YoY positivo en 3 de 4 trimestres"
           ],
           "riesgos_de_ejecucion": [
-            "Riesgo macro",
-            "Riesgo de ejecucion"
+            "Desaceleracion de demanda en categorias de gran volumen.",
+            "Presion competitiva en precios.",
+            "Base comparativa exigente despues de FY2024."
           ],
           "contra_catalizadores": [
-            "Desviacion negativa de FCF",
-            "Compresion de margen"
+            "Dos trimestres consecutivos con ingresos YoY negativos.",
+            "Margen bruto por debajo de 22% sostenido.",
+            "Caida YoY de net_income superior a 10%."
           ],
           "plan_monitorizacion": {
             "frecuencia": "TRIMESTRAL",
             "que_mirar": [
-              "10-Q/10-K",
-              "CFO y FCF",
-              "Margenes"
+              "Ingresos YoY trimestrales",
+              "Margen bruto trimestral",
+              "Relacion gross profit y net income YoY"
             ]
-          },
-          "predicciones_calibracion": [
-            {
-              "descripcion": "Ingresos >330M en 2/3 trimestres",
-              "probabilidad_0_1": 0.58,
-              "ventana_temporal": {
-                "inicio": "2026-03-01",
-                "fin": "2026-12-31"
-              },
-              "criterio_validacion": "Ingresos trimestrales reportados"
-            },
-            {
-              "descripcion": "YoY ingresos >=5% en 3/4",
-              "probabilidad_0_1": 0.62,
-              "ventana_temporal": {
-                "inicio": "2026-03-01",
-                "fin": "2027-03-31"
-              },
-              "criterio_validacion": "Calculo YoY"
-            }
-          ],
-          "peticiones_fuentes": [
-            {
-              "tipo_fuente": "KPIs GMV y cohortes",
-              "utilidad_esperada": "Validar calidad del crecimiento",
-              "costo_adquisicion": "MEDIO"
-            }
-          ],
-          "resumen_ejecutivo": {
-            "veredicto": "WATCHLIST",
-            "confianza_0_1": 0.59
-          },
-          "_meta": {
-            "agente": "CATALYST_v1",
-            "version": "1.0.0",
-            "timestamp": "2026-02-23T22:40:00Z",
-            "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
           }
         },
         {
-          "catalyst_id": "CAT_009",
-          "nombre": "Expansion de margen bruto",
+          "catalyst_id": "CAT_GCT_04",
+          "nombre": "Disciplina de G&A con expansion de margen EBIT",
           "categoria": "OPERATIVO",
           "es_no_binario": true,
           "ventana_meses": {
@@ -1283,121 +912,342 @@
             "probable": 12,
             "max": 18
           },
-          "probabilidad_0_1": 0.36,
-          "confianza_timing": 0.48,
-          "calidad": "CALIDAD_BAJA",
-          "mecanismo_cierre_gap": "Reducir el gap entre expectativas de contraccion y fundamentales observados.",
+          "probabilidad_0_1": 0.56,
+          "confianza_timing": 0.57,
+          "calidad": "CALIDAD_MEDIA",
+          "mecanismo_cierre_gap": "Mantener menor intensidad de G&A sobre ventas preserva margen EBIT y refuerza calidad de beneficios.",
           "impacto_esperado": {
             "tipo": "CUALITATIVO",
             "drivers_afectados": [
               {
-                "driver": "MULTIPLO",
+                "driver": "MARGEN_OPERATIVO",
                 "direccion": "MEJORA",
                 "magnitud_rango": null,
-                "nota": "Impacto dominante via prima de riesgo."
+                "nota": "G&A controlado sostiene margen."
+              },
+              {
+                "driver": "EBIT",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Mayor eficiencia operativa."
+              },
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Mas EBIT retenido en caja."
               }
             ],
-            "justificacion": "La sensibilidad principal del caso es el descuento aplicado al FCF."
+            "justificacion": "El ultimo trimestre muestra mejora marcada, pero requiere continuidad para mayor conviccion."
           },
           "evidencia_actual": [
             {
               "tipo": "SOURCEPACK",
-              "source_id": "CatalystDetection_v1",
+              "source_id": "SRC_SEC_007_10-Q_Q3-2024.htm",
               "url": null,
               "titulo": null,
-              "fecha": "2026-02-23",
-              "ubicacion": "CAT_009",
-              "cita_corta": "Catalizador detectado en el paquete base.",
-              "interpretacion": "Base objetiva para scoring."
+              "fecha": null,
+              "ubicacion": "historico_trimestral[Q3-2024].ga_usd",
+              "cita_corta": "ga_usd: 15296000.",
+              "interpretacion": "Punto de comparacion de gasto alto."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": null,
+              "ubicacion": "historico_trimestral[Q3-2025].ga_usd",
+              "cita_corta": "ga_usd: 8511000.",
+              "interpretacion": "Intensidad de G&A menor."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": null,
+              "ubicacion": "historico_trimestral[Q3-2025].ebit_usd",
+              "cita_corta": "ebit_usd: 40520000; ingresos_usd: 332638000.",
+              "interpretacion": "Margen EBIT trimestral superior a 11.5%."
             }
           ],
           "evidencia_confirmatoria_futura": [
             {
-              "descripcion": "Confirmacion de hito principal",
-              "fuente_prevista": "filing",
-              "umbral_o_condicion": "Cumplimiento de eventos de calibracion",
+              "descripcion": "Relacion G&A/ingresos controlada",
+              "fuente_prevista": "10-Q",
+              "umbral_o_condicion": "ga_usd/ingresos_usd <= 4.0% en 3 de 4 trimestres",
               "ventana_meses": {
-                "min": 3,
+                "min": 6,
+                "max": 18
+              }
+            },
+            {
+              "descripcion": "Margen EBIT sostenido",
+              "fuente_prevista": "10-Q",
+              "umbral_o_condicion": "ebit_usd/ingresos_usd >= 11.5% en 3 de 4 trimestres",
+              "ventana_meses": {
+                "min": 6,
                 "max": 18
               }
             }
           ],
           "leading_indicators": [
-            "Cumplimiento trimestral de hitos",
-            "FCF estable",
-            "Sin deterioro de margen"
+            "G&A/ingresos <= 4.0%",
+            "Margen EBIT trimestral >= 11.5%",
+            "Crecimiento de G&A <= crecimiento de ingresos"
           ],
           "riesgos_de_ejecucion": [
-            "Riesgo macro",
-            "Riesgo de ejecucion"
+            "Reaceleracion de gasto comercial.",
+            "Inflacion de costos de personal y tecnologia.",
+            "Gastos no recurrentes de compliance."
           ],
           "contra_catalizadores": [
-            "Desviacion negativa de FCF",
-            "Compresion de margen"
+            "G&A/ingresos > 5% por 2 trimestres.",
+            "Margen EBIT < 10%.",
+            "G&A creciendo mas de 5 pp por encima de ingresos."
           ],
           "plan_monitorizacion": {
             "frecuencia": "TRIMESTRAL",
             "que_mirar": [
-              "10-Q/10-K",
-              "CFO y FCF",
-              "Margenes"
+              "ga_usd y ratio ga_usd/ingresos_usd",
+              "margen EBIT trimestral",
+              "Ritmo YoY de gastos operativos vs ingresos"
             ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_GCT_05",
+          "nombre": "Reduccion progresiva de lease liabilities",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 12,
+            "probable": 18,
+            "max": 24
           },
-          "predicciones_calibracion": [
-            {
-              "descripcion": "Margen bruto >=25% en 2 trimestres seguidos",
-              "probabilidad_0_1": 0.34,
-              "ventana_temporal": {
-                "inicio": "2026-03-01",
-                "fin": "2026-12-31"
+          "probabilidad_0_1": 0.33,
+          "confianza_timing": 0.4,
+          "calidad": "CALIDAD_BAJA",
+          "mecanismo_cierre_gap": "Reducir pasivos por arrendamiento mejora perfil de riesgo financiero y puede reducir descuento aplicado al equity.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "COSTE_DEUDA",
+                "direccion": "BAJA",
+                "magnitud_rango": null,
+                "nota": "Menor carga contractual mejora percepcion de riesgo."
               },
-              "criterio_validacion": "Dos 10-Q consecutivos"
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Menor presion de pagos de arrendamiento en tiempo."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Riesgo financiero menor soporta rerating parcial."
+              }
+            ],
+            "justificacion": "El punto de partida de pasivos lease es alto y la ventana de ejecucion es larga."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_001_10-K_FY2024.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": null,
+              "ubicacion": "lease_data.total_lease_liabilities_usd",
+              "cita_corta": "total_lease_liabilities_usd: 484278000.",
+              "interpretacion": "Pasivo lease material."
             },
             {
-              "descripcion": "Mix de servicios sube YoY por 3 trimestres",
-              "probabilidad_0_1": 0.39,
-              "ventana_temporal": {
-                "inicio": "2026-05-01",
-                "fin": "2027-03-31"
-              },
-              "criterio_validacion": "Participacion de servicios"
-            }
-          ],
-          "peticiones_fuentes": [
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_001_10-K_FY2024.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": null,
+              "ubicacion": "lease_data.total_right_of_use_assets_usd",
+              "cita_corta": "total_right_of_use_assets_usd: 452476000.",
+              "interpretacion": "Uso intensivo de activos arrendados."
+            },
             {
-              "tipo_fuente": "Split producto vs servicios",
-              "utilidad_esperada": "Testear hipotesis de mix",
-              "costo_adquisicion": "MEDIO"
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_SEC_001_10-K_FY2024.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": null,
+              "ubicacion": "balance_sheet_ultimo.caja_usd",
+              "cita_corta": "caja_usd: 259759000.",
+              "interpretacion": "La caja es menor que el pasivo lease total."
             }
           ],
-          "resumen_ejecutivo": {
-            "veredicto": "NO_APTO",
-            "confianza_0_1": 0.64
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Reduccion de pasivos por lease",
+              "fuente_prevista": "10-K",
+              "umbral_o_condicion": "total_lease_liabilities_usd cae >= 8% YoY sin caida de ingresos YoY",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              }
+            },
+            {
+              "descripcion": "Menor presion de lease corriente",
+              "fuente_prevista": "10-K",
+              "umbral_o_condicion": "operating_lease_liabilities_current_usd/ingresos_ttm <= 6.5%",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Crecimiento YoY de lease liabilities <= 0%",
+            "Lease corriente sobre ingresos en tendencia descendente",
+            "ROU assets sobre ingresos descendiendo"
+          ],
+          "riesgos_de_ejecucion": [
+            "Rigidez de contratos de largo plazo.",
+            "Costos iniciales de renegociacion.",
+            "Riesgo operativo al reducir huella logistica."
+          ],
+          "contra_catalizadores": [
+            "Lease liabilities suben > 10% YoY.",
+            "Lease corriente/ingresos supera 8% sostenido.",
+            "ROU assets suben sin mejora proporcional de ingresos."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Evolucion de lease liabilities corrientes y no corrientes",
+              "ROU assets y ratio sobre ingresos TTM",
+              "Notas de contratos y vencimientos en 10-K/10-Q"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_GCT_06",
+          "nombre": "Monetizacion visible de integracion New Classic",
+          "categoria": "CORPORATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 15,
+            "max": 24
           },
-          "_meta": {
-            "agente": "CATALYST_v1",
-            "version": "1.0.0",
-            "timestamp": "2026-02-23T22:40:00Z",
-            "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
+          "probabilidad_0_1": 0.49,
+          "confianza_timing": 0.46,
+          "calidad": "CALIDAD_MEDIA",
+          "mecanismo_cierre_gap": "La integracion solo cierra brecha si se traduce en ingresos recurrentes y margen consolidado sin deterioro contable material.",
+          "impacto_esperado": {
+            "tipo": "CUALITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "EBIT",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Sinergias operativas potenciales de la adquisicion."
+              },
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Aporte de caja si la integracion es eficiente."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Mayor visibilidad de crecimiento inorganico rentable."
+              }
+            ],
+            "justificacion": "Hay tamano de referencia de ingresos y precio pagado, pero falta trazabilidad post-cierre."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_017_8-K_2025-11-06.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": "2025-11-06",
+              "ubicacion": "TruthPack_v1.log.conversiones_aplicadas",
+              "cita_corta": "$70 million in annual revenues -> 70000000 USD.",
+              "interpretacion": "Se declaro run-rate anual de ingresos del activo."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_017_8-K_2025-11-06.htm",
+              "url": null,
+              "titulo": null,
+              "fecha": "2025-11-06",
+              "ubicacion": "TruthPack_v1.log.conversiones_aplicadas",
+              "cita_corta": "$18 million total consideration -> 18000000 USD.",
+              "interpretacion": "El costo de adquisicion fue definido publicamente."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Aporte de ingresos del negocio adquirido en disclosure formal",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "Contribucion anualizada >= 50000000 en 10-Q/10-K o PR",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              }
+            },
+            {
+              "descripcion": "Calidad economica de integracion",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "Sin impairment material ligado a adquisicion y sin dilucion material de margen bruto",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Menciones cuantitativas de contribucion en reportes consecutivos",
+            "Run-rate anualizado del activo >= 50000000",
+            "Ausencia de cargos de deterioro relevantes"
+          ],
+          "riesgos_de_ejecucion": [
+            "Retrasos de integracion operativa y sistemas.",
+            "Retencion insuficiente de clientes del activo adquirido.",
+            "Dilucion de margen por mix."
+          ],
+          "contra_catalizadores": [
+            "Sin disclosure cuantitativo de contribucion en 12 meses.",
+            "Impairment o cargos de integracion materialmente altos.",
+            "Run-rate por debajo de 50000000 a 24 meses."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Notas de M&A en 10-Q/10-K",
+              "PR y suplementos de resultados con KPIs de integracion",
+              "Evolucion de margen bruto y EBIT post-adquisicion"
+            ]
           }
         }
       ],
       "conclusion_catalizadores": {
         "calidad_catalizador": "MEDIA",
-        "por_que": "Existe evidencia favorable en recompras, FCF y G&A, pero persiste incertidumbre material en deuda/EV, leases e integracion M&A.",
-        "si_no_hay_catalizador_apto": false,
-        "veredicto": "WATCHLIST",
-        "confianza_0_1": 0.63
+        "por_que": "Dos catalizadores tienen señal de ejecucion reciente y criterios de validacion objetivos (caja y crecimiento). Dos catalizadores adicionales son plausibles pero exigen continuidad de varios trimestres. Los catalizadores de leases e integracion presentan mayor incertidumbre y menor visibilidad temporal. La combinacion resultante soporta WATCHLIST con monitorizacion activa.",
+        "si_no_hay_catalizador_apto": true
       }
     }
   },
   "log": {
     "limitaciones": [
-      "deuda_total_usd y EV incompletos",
-      "TTM en FY0 fallback",
-      "KPIs de mix y utilizacion no estandarizados",
-      "Contribucion de New Classic no totalmente trazable",
-      "Rerating depende de prima de riesgo no observable"
+      "EV no calculable por deuda_total_usd en null.",
+      "No hay serie completa de AR e inventarios para descomponer working capital.",
+      "Contribucion post-adquisicion no esta cuantificada en reportes recurrentes.",
+      "Catalizador de leases depende de vencimientos contractuales de mayor horizonte."
     ],
     "autochequeos": {
       "sin_metricas_inventadas": true,
@@ -1408,7 +1258,7 @@
   "_meta": {
     "agente": "CATALYST_v1",
     "version": "1.0.0",
-    "timestamp": "2026-02-23T22:40:00Z",
-    "inputs_hash": "sha256:a04cf2d30d904be1bd7aa6d3c2c9103762fbcb113d1ede721a86b40852f7ff08"
+    "timestamp": "2026-02-24T16:05:00Z",
+    "inputs_hash": "sha256:4ecf71501575b62f06d9a446eec9bc400525db7a636de5f171ca202b9b7876df"
   }
 }

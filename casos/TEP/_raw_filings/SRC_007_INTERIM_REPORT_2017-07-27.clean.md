@@ -1,0 +1,4840 @@
+# FINANCIAL STATEMENTS — SRC_SEC_007_INTERIM_REPORT_2017-07-27
+
+_Extracted from: SRC_SEC_007_INTERIM_REPORT_2017-07-27.pdf_
+
+_Extractor mode: pdf_text_
+
+_Total chars: 198,764_
+
+
+
+## INCOME STATEMENT
+
+4. STATUTORY AUDITOR’S REVIEW REPORT ON 2017 HALF YEARLY FINANCIAL 
+INFORMATION .............................................................................................................................................. 31
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+2 
+ 
+1. Condensed consolidated interim financial 
+statements 
+ 
+ 
+ 
+1.1 CONDENSED CONSOLIDATED STATEMENT OF FINANCIAL POSITION (in millions of euros) .............. 3 
+1.2 CONDENSED CONSOLIDATED STATEMENT OF INCOME (in millions of euros) .................................. 4 
+1.3 CONDENSED CONSOLIDATED STATEMENT OF COMPREHENSIVE INCOME (in millions of euros) ..... 4 
+1.4 CONDENSED CONSOLIDATED STATEMENT OF CASH FLOWS (in millions of euros) ........................... 5 
+1.5 CONDENSED CONSOLIDATED STATEMENT OF CHANGES IN EQUITY (in millions of euros) .............. 6 
+1.6 NOTES TO THE CONDENSED CONSOLIDATED FINANCIAL STATEMENTS (in millions of euros) ......... 7
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+3 
+ 
+1.1 Condensed consolidated statement of financial position (in 
+millions of euros) 
+ASSETS Notes 06.30.2017 12.31.2016
+Non-current assets
+Goodwill D 1,816 1,936
+Other intangible assets 1,036 1,172
+Property, plant and equipment 436 476
+Financial assets 54 55
+Deferred tax assets 42 30
+Total non-current assets 3,384 3,669
+Current assets
+Current income tax receivable 59 46
+Accounts receivable - Trade C.1 797 871
+Other current assets C.1 115 100
+Other financial assets 29 24
+Cash and cash equivalents H.4 308 282
+Total current assets 1,308 1,323
+Total assets 4,692 4,992
+EQUITY AND LIABILITIES Notes 06.30.2017 12.31.2016
+Equity
+Share capital F.1 144 144
+Share premium 575 575
+Translation reserve -47 100
+Other reserves 1,144 1,092
+Equity attributable to owners of the company 1,816 1,911
+Non-controlling interests 11 10
+Total shareholder's equity 1,827 1,921
+Non-current liabilities
+Provisions I.1 14 13
+Financial liabilities G.2 1,537 1,688
+Deferred tax liabilities 398 444
+Total non-current liabilities 1,949 2,145
+Current liabilities
+Provisions I.1 33 36
+Current income tax 72 61
+Accounts payable - Trade C.3 127 126
+Other current liabilities C.3 412 442
+Other financial liabilities G.2 272 261
+Total current liabilities 916 926
+Total equity and liabilities 4,692 4,992
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+4 
+ 
+1.2 Condensed consolidated statement of income (in millions of euros) 
+Notes 1st ½ yr 
+2017
+1st ½ yr 
+2016
+Revenues C.4 2,081 1,689
+Other revenues C.4 4 2
+Personnel -1,377 -1,151
+External expenses -369 -309
+Taxes other than income taxes -12 -9
+Depreciation and amortization -83 -72
+Amortization of intang. assets acquired as part of a business combination -45 -11
+Share-based payments C.2 -8 -8
+Operating profit 191 131
+Income from cash and cash equivalents 0 1
+Interest on financial liabilities -32 -12
+Net financing costs G.1 -32 -11
+Other financial income (expenses), net G.1 7 1
+Financial result -25 -10
+Profit before taxes 166 121
+Income tax E -49 -34
+Net profit 117 87
+Net profit - Group share 116 86
+Net profit (loss) attributable to non-controlling interests 1 1
+Basic earnings per share (in €) F.3 2.01 1.51
+Diluted earnings per share (in €) F.3 1.98 1.48
+ 
+ 
+ 
+1.3 Condensed consolidated statement of comprehensive income 
+(in millions of euros) 
+1st ½ yr 
+2017
+1st ½ yr 
+2016
+Net profit 117 87
+May not be reclassified to profit or loss in a subsequent period
+May be reclassified to profit or loss in a subsequent period
+Net gain on foreign exchange hedges (before tax) 6 5
+Income tax net losses on foreign exchange hedges -2 -2
+Translation differences -147 -37
+Other recognized income and expenses, net -143 -34
+Total comprehensive income (loss) -26 53
+Group share -27 52
+Attributable to non-controllling interests 1 1
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+5 
+ 
+1.4 Condensed consolidated statement of cash flows (in millions of 
+euros) 
+Cash flows from operating activities Notes 1st ½ yr 2017 1st ½ yr 2016
+Net profit - Group share 116 86
+Net profit attributable to non-controlling interests 1 1
+Income tax expense 49 34
+Interest expense on financial liabilities 29 8
+(Income) expenses, net, without effect on cash H.1 137 90
+Income tax paid -81 -43
+Internally generated funds from operations 251 176
+Change in working capital H.2 22 20
+Net cash from operating activities 273 196
+Cash flows from investing activities
+Acquisition of intangible assets and property, plant and equipment -68 -76
+Loans made -1
+1
+Repayment of loans 1
+Net cash flow from investing activities -68 -75
+Cash flows from financing activities
+Acquisition/disposal of treasury shares -1 -17
+Change in ownership interest in controlled entities G.2 -39 -33
+Dividends paid to parent company shareholders -68
+Financial interests paid/received -27 -8
+Increase in financial liabilities 1,106 537
+Repayment of financial liabilities -1,282 -526
+Net cash flow from financing activities -243 -115
+Change in cash and cash equivalents -38 6
+Effect of exchange rates on cash held 59 -10
+Net cash at January 1 H.4 279 254
+Net cash at June 30 H.4 300 250
+Proceeds from disposals of intangible assets and property, plant and equipment
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+6 
+ 
+1.5 Condensed consolidated statement of changes in equity (in 
+millions of euros) 
+Total
+Share capital
+Share premium
+Translation reserve
+Retained earnings
+Impact of financial 
+hedging instruments
+Equity - Group share
+Non-controlling 
+interests
+At December 31, 2015 143 575 69 978 -7 1,758 7 1,765
+Trans lation differences from foreign 
+operations -37 -37 -37
+Net profit 86 86 1 87
+Net gain on cas h flow hedges (after tax) 3 3 3
+Total recognized income and expenses 0 0 -37 86 3 52 1 53
+Operations on non-controlling interes ts -13 -13 -13
+Fair value of incentive plan s hare awards 8 8 8
+Treas ury s hares -18 -18 -18
+Dividends (€1.20 per s hare) -68 -68 -68
+At June 30, 2016 143 575 32 973 -4 1,719 8 1,727
+At December 31, 2016 (restated)* 144 575 100 1,099 -7 1,911 10 1,921
+Trans lation differences from foreign 
+operations -147 -147 -147
+Net profit 116 116 1 117
+Net gain on cas h flow hedges (after tax) 4 4 4
+Total recognized income and expenses 0 0 -147 116 4 -27 1 -26
+Operations on non-controlling interes ts 1 1 1
+Fair value of incentive plan s hare awards 7 7 7
+Treas ury s hares -1 -1 -1
+Dividends (€1.30 per s hare) -75 -75 -75
+At June 30, 2017 144 575 -47 1,147 -3 1,816 11 1,827
+* s ee note B
+Group share
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+7 
+ 
+1.6 Notes to the condensed consolidated financial statements (in 
+millions of euros) 
+ 
+A. Accounting policies and methods ............................................................................................................... 8 
+A.1 Reporting entity .............................................................................................................................. 8 
+A.2 Basis of preparation ........................................................................................................................ 8 
+A.3 Estimates ......................................................................................................................................... 8 
+ 
+B. Consolidation scope ..................................................................................................................................... 9 
+ 
+C. Operational activity ................................................................................................................................... 10 
+C.1 Accounts receivable – Trade and Other current assets ................................................................ 10 
+C.2 Share-based payments .................................................................................................................. 11 
+C.3 Accounts payable – Trade and Other current liabilities ................................................................ 12 
+C.4 Revenues and other operating revenues ...................................................................................... 12 
+C.5 Segment reporting ......................................................................................................................... 13 
+ 
+D. Goodwill ..................................................................................................................................................... 14 
+ 
+E. Income tax.................................................................................................................................................. 14 
+ 
+F. Equity and earning per share .................................................................................................................... 14 
+F.1 Share capital and dividends ........................................................................................................... 14 
+F.2 Treasury shares .............................................................................................................................. 14 
+F.3 Earnings per share ......................................................................................................................... 14 
+ 
+G. Financial assets and financial liabilities .................................................................................................... 15 
+G.1 Financial result .............................................................................................................................. 15 
+G.2 Financial liabilities ......................................................................................................................... 16 
+G.3 Foreign exchange hedging operations .......................................................................................... 16 
+G.4 Carrying amount and fair value of financial assets and financial liabilities by accounting category
+ ............................................................................................................................................................. 18 
+G.5 Foreign currencies ......................................................................................................................... 20 
+ 
+H. Cash flows .................................................................................................................................................. 20 
+H.1 (Income) expenses, net, without effect on cash ........................................................................... 20 
+H.2 Change in working capital ............................................................................................................. 20 
+H.3 Reconciliation of the change in net debt with cash flows ............................................................ 21 
+H.4 Analysis of net cash presented in the condensed consolidated statement of cash flows ........... 21 
+ 
+I. Provisions, litigation, commitments and other contractual obligations ................................................. 22 
+I.1 Change in provisions ....................................................................................................................... 22 
+I.2 Warranties and other contractual obligations ............................................................................... 22 
+ 
+J. Related parties ........................................................................................................................................... 22 
+ 
+K. Events after the reporting date ................................................................................................................. 22
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+8 
+ 
+Highlights of the first half of 2017 
+The group has made a bond issue in the amount of €600 
+million, redeemable in 2024, with a nominal interest rate 
+of 1.50%, in order to complete the refinancing of its 
+acquisition of LanguageLine Solutions LLC. 
+ 
+A. Accounting policies and 
+methods 
+A.1 Reporting entity 
+ 
+Teleperformance (“the company”) is a company 
+domiciled in France. 
+The condensed consolidated interim financial 
+statements of the company as at and for the six months 
+ended June 30, 2017 include the company and its 
+subsidiaries (together referred to as “the group”). 
+The consolidated financial statements of the group for 
+the year ended December 31, 2016 are available upon 
+request from the company’s registered office at 21/25 
+rue Balzac, 75008 Paris, or from its website 
+(www.teleperformance.com). 
+All financial information presented in euro has been 
+rounded to the nearest million unless otherwise 
+specified.. 
+A.2 Basis of preparation 
+These condensed consolidated interim financial 
+statements as at and for the six months ended June 30, 
+2017 have been prepared in accordance with IAS 34 
+“Interim Financial Reporting” and are presented in 
+accordance with revised and amended IAS 1. They do not 
+include all the information required for full annual 
+financial statements and should be read in conjunction 
+with the consolidated financial statements of the group 
+as at and for the y ear ended December 31, 2016 which 
+are included in the 2016 reference document D.17-0122 
+that was filed with the AMF (the French Stock Exchange 
+regulator) on March 2, 2017. 
+The accounting policies have been applied consistently to 
+all periods presented in t hese condensed consolidated 
+interim financial statements. 
+These condensed consolidated interim financial 
+statements were approved by the Board of Directors on 
+July 27, 2017. 
+The following standards, amendments and 
+interpretations: 
+- Amendments to IAS 12, on the recognition of 
+deferred tax assets for unrealized losses; 
+- Amendments to IAS 7 on the statement of cash flows 
+came into force in 2017 but did not have a significant 
+impact on the group’s financial statements. 
+The group has elected not to early apply the following 
+new standards: 
+- IFRS 15 on revenues; 
+- IFRS 9 on financial instruments; 
+These standards will come into effect from January 1, 
+2018. 
+The group does not expect a significant impact on its 
+financial statements from the adoption of IFRS 15. The 
+group uses foreign exchange hedging instruments on a 
+regular basis and the adoption of IFRS 9 should result in 
+a reduction of the volatility it experiences in the results 
+of these operations. 
+The assessment of the impact of the new standard IFRS 
+16 on leases, which comes into effect on January 1, 2019, 
+is still in progress. 
+The accounting policies applied by the group in these 
+condensed consolidated interim financial statements are 
+the same as those applied by the group in its 
+consolidated financial statements as at and for the year 
+ended December 31, 2016, with the exception of the new 
+standards, amendments and interpretations set out 
+above, and are in accordance with IFRSs as issued by the 
+IASB and adopted by the European Union. 
+A.3 Estimates 
+The preparation of financial statements in conformity 
+with IFRS requires making estimates and assumptions 
+which affect the reported amounts in the financial 
+statements, especially with respect to the following 
+items: 
+- the depreciation and amortization rates, 
+- the calculation of losses on doubtful receivables, 
+- impairment of intangible assets and goodwill, 
+- the measurement of provisions and retirement 
+benefits, 
+- the measurement of share-based payment expense, 
+- provisions for contingencies and expenses, 
+- the measurement of intangible assets acquired as 
+part of a business combination, 
+- deferred taxation. 
+ 
+The estimates are based on information available at the 
+time of preparation of the financial statements, and may 
+be revised, in a future period, if circumstances change, or 
+if new information is available. Actual results may differ 
+from these estimates.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+9 
+ 
+ 
+B. Consolidation scope 
+The group made no acquisition or disposal during the first half of. 
+During the first half of 2017, the group restated its measurement of the fair values of the identifiable assets and liabilities 
+acquired of LanguageLine Solutions LLC. The principal impact concerns the US income tax rate which has been revised. 
+The following schedule sets out the revised fair values of the identifiable assets and liabilities as of the date of 
+acquisition: 
+ 
+In millions of US$
+Fair values at 
+09/19/2016
+Non-current assets
+Intangible assets 983
+Property, plant and equipment 9
+Other non-current assets 4
+Total non-current assets 996
+Current assets
+Current tax assets 4
+Accounts receivable - Trade 77
+Other current assets 6
+Cash and cash equivalents 10
+Total current assets 97
+TOTAL ASSETS 1,093
+Non-current liabilities
+Provisions 1
+Deferred tax liabilities 377
+Total non-current liabilities 378
+Current liabilities
+Provisions 3
+Accounts payable - Trade 8
+Other current liabilities 20
+Total current liabilities 31
+TOTAL LIABILITIES 409
+Net assets, acquired 100% 684
+Acquisition price 1,538
+Goodwill 854
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+10 
+ 
+Following changes emerge on certain items of the condensed consolidated statement of financial position as of 
+December 31, 2016: 
+Non-current assets
+Goodwill 1,952 -16 1,936
+Intangible assets 1,175 -3 1,172
+Property, plant and equipment 476 476
+Financial assets 55 55
+Deferred tax assets 30 30
+Total non-current assets 3,688 -19 3,669
+Non-current liabilities
+Provisions 13 13
+Financial liabilities 1,688 1,688
+Deferred tax liabilities 464 -20 444
+Total non-current liabilities 2,165 -20 2,145
+Current provisions 34 2 36
+Total equity 1,922 -1 1,921
+After restatementsConsolidated statement of financial 
+position, December 31, 2016 (extract) As published Restatements
+ 
+ 
+C. Operational activity 
+ 
+C.1 Accounts receivable – Trade and Other current assets 
+Gross Write- Net Net
+ downs
+Accounts receivable - Trade 804 -7 797 871
+Other receivables 23 -9 14 12
+Taxation recoverable 41 41 37
+Advances and receivables on non-current assets 6 6 8
+Prepaid expenses 54 54 43
+Total 928 -16 912 971
+06/30/2017 12/31/2016
+ 
+ 
+Factoring arrangements : 
+The group and a number of its subsidiaries use factoring arrangements which comply with criteria for derecognition. 
+The outstanding amounts totaled €51.4 million and €50.5 million at June 30, 2017 and December 31, 2016, respectively. 
+Under the agreement, the Group retains the credit control and receipt functions in respect of the sold receivables on 
+behalf of the factor.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+11 
+ 
+C.2 Share-based payments 
+ 
+2016 incentive share award plans 
+ 
+The Board of Directors’ meetings of April 28 and November 2, 2016 approved free awards in a total amount of 1,065,808 
+incentive plan shares to group personnel, including company officers, under the authorization given at the Shareholders’ 
+General Meeting of April 28, 2016, which included a maximum limit of 2.5% of the share capit al of the company at the 
+grant date. The board meeting on April 28, 2016 also approved the setting-up of a long-term incentive plan for company 
+officers, with the free award of 350,000 shares. The two plans have identical conditions for vesting. 
+ 
+The features of these plans are as follows: 
+04/28/16 plan 11/02/16 plan
+Date of board meeting allocating the awards 04/28/2016 11/02/2016
+Vesting period 04/28/2016 to 
+04/28/2019
+11/02/2016 to 
+11/02/2019
+Grant date 04/28/2016 11/02/2016
+Number of share awards* 1,264,300 151,508
+Number of canceled shares -59,700 -13,264
+Number of outstanding share awards at June 30, 2017 1,204,600 138,244
+Fair value of each share award at the grant date (taking into account the market 
+condition) €48.51 €72.40
+Fair value of each share award at the grant date (without taking into account the 
+market condition) €75.20 €88.80
+* including for company officers 350,000 0
+ 
+Vesting of the free share awards is conditional on the beneficiaries remaining with the group until at least the end of 
+the vesting period and on meeting certain performance conditions relating to the financial years between 2016 and 
+2018. 
+As of June 30, 2017, it is considered probable that it will be necessary to meet the market condition in order to obtain 
+the highest number of shares and the amount of expense recognized in respect of the plans is therefore based on fair 
+values of €48.51 and €72.40 per share, which results in related expense of €8.4 million in the first half of 2017 .
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+12 
+ 
+C.3 Accounts payable – Trade and Other current liabilities 
+06/30/2017 12/31/2016
+Accounts payable - Trade 127 126
+Other payables 144 158
+Taxes payable 58 56
+Accruals 180 160
+Other operating liabilities 30 68
+Total 539 568
+ 
+Other operating liabilities at June 30, 2017 include an amount of €9.8 million (December 31, 2016: €23.9 million) in 
+respect of the negative fair value of derivative financial instruments used for currency hedging. 
+C.4 Revenues and other operating revenues 
+ 
+Revenues 
+ 
+Group revenues in the first half of 2017 amounted to €2,081 million, which represents an increase (on the basis of 
+published figures) of 23.2% over the same period in 2016. 
+At constant currency rates and consolidation scope, the increase is 9.9%. 
+ 
+Other operating revenues 
+Other operating revenues mainly comprise government grants. 
+In the first half of 2017, grant income amounted to €4.3 million, compared with €2.2 million in the same period of 2016. 
+It includes French competitiveness and employment tax credits for € 1.4 million in 2017, compared with €1.3 million in 
+the same period of 2016.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+13 
+ 
+C.5 Segment reporting 
+Segment information is reported in the schedules set out below. 
+Inter-segment operations are not significant and are not identified separately. 
+With effect from January 1, 2017, group activity as followed by the chief executive officer is split into the following two 
+segments: 
+ The « Core Services » segment which includes customer care, technical support and new customer acquisitions 
+and is divided into three principal management regions : 
+ 
+- English-speaking & APAC, which covers the activities in the following countries: Canada, USA, United 
+Kingdom, South Africa, China, Indonesia, India, Philippines, Singapore, Jamaica, Guyana, Australia and 
+Malaysia; 
+- Ibero-LATAM, which covers the activities in the following countries: Argentina, Brazil, Chile, Colombia, 
+Costa Rica, Dominican Republic, El Salvador, Mexico, Spain an d Portugal; 
+- Continental Europe & MEA, which covers the activities in the countries of the EMEA region with the 
+exception of the United Kingdom, Spain and Portugal. 
+ 
+ The « Specialized Services » segment which includes the interpreting services of LanguageLi ne Solutions, the 
+visa application management services for government departments offered by TLScontact, GN Research’s 
+analytics solutions and the accounts receivable credit management services of AllianceOne Receivables 
+Management (ARM) in North America. 
+As a result of this new operational organization, the 2016 comparable amounts have been restated accordingly: 
+Six months ended June 30, 2017 SPECIALIZED 
+SERVICES TOTAL
+English-
+speaking & 
+APAC
+Ibero-
+LATAM
+Continental 
+Europe
+& MEA
+Holdings
+Revenue 812 534 406 329 2,081
+Operating profit 51 53 11 12 64 191
+Capital expenditure 25 20 14 9 68
+Intangible assets and 
+Property, plant and 
+equipment (carrying amounts)
+1,069 294 270 2 1,653 3,288
+Depreciation and 
+amortization of non-current 
+assets
+48 24 13 43 128
+Six months ended June 30, 2017 
+(proforma)
+SPECIALIZED 
+SERVICES TOTAL
+English-
+speaking & 
+APAC
+Ibero-
+LATAM
+Continental 
+Europe
+& MEA
+Holdings
+Revenue 784 400 392 113 1,689
+Operating profit 52 41 6 9 23 131
+Capital expenditure 35 23 12 6 76
+Intangible assets and 
+Property, plant and 
+equipment (carrying amounts)
+1,130 293 264 4 92 1,783
+Depreciation and 
+amortization of non-current 
+assets
+45 19 13 6 83
+CORE SERVICES
+CORE SERVICES
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+14 
+ 
+D. Goodwill 
+There were no changes to the composition of CGUs or 
+groups of CGUs in the first half of 2017. 
+The group has reviewed its CGUs and groups of CGUs to 
+determine whether there is any indication of 
+impairment. 
+These reviews did not result in any subsequent 
+requirement to perform impairment tests, and no 
+impairment losses were therefore recognized in the first 
+half of 2017. 
+E. Income tax 
+Income tax expense in an interim period is measured 
+using management’s best estimate of the expected full -
+year rate. 
+The income tax expense in the first half of 2017 
+amounted to €49.0 million compared with €33.9 million 
+in the first half of 2016. This increase is principally due to 
+the contribution of LanguageLine Solutions LLC which 
+was acquired in the second half of 2016. 
+ 
+F. Equity and earning per share 
+F.1 Share capital and dividends 
+The share capital at June 30, 2017 amounted to 
+€144,450,000 represented by 57,780,000 shares with a 
+nominal value of €2.50 each, fully paid up. 
+ 
+The company made a dividend distribution of €75.1 
+million during July 2017. 
+ 
+F.2 Treasury shares 
+ 
+At June 30, 2017, the group held 20,500 treasury shares, 
+acquired under its liquidity contract, in a carrying amount 
+of €2.3 million which has been deducted from equity. 
+ 
+ 
+F.3 Earnings per share 
+Basic and diluted earnings per share are calculated as follows: 
+1st ½ yr 2017 1st ½ yr 2016
+Net profit - Group share 116 86
+Weighted-average number of shares used to calculate basic earnings per share 57,769,706 56,918,628
+Dilutive effect of incentive share awards 935,172 933,421
+Weighted-average number of shares used to calculate diluted earnings per share 58,704,878 57,852,049
+Basic earnings per share (in €) 2.01 1.51
+Diluted earnings per share (in €) 1.98 1.48
+ 
+ 
+Weighted-average number of shares used to calculate basic earnings per share: 
+ 
+1st ½ yr 2017 1st ½ yr 2016
+Number of ordinary shares in issue at January 1 57,780,000 57,201,690
+Treasury shares -10,294 -283,062
+Total 57,769,706 56,918,628
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+15 
+ 
+G. Financial assets and financial liabilities 
+G.1 Financial result 
+1st ½ yr 2017 1st ½ yr 2016
+Income from cash and cash equivalents 0 1
+Other interest expense, net -25 -9
+Bank commissions -7 -3
+Gross financing costs -32 -12
+Net financing costs -32 -11
+Foreign exchange gains 18 17
+Foreign exchange losses -11 -15
+Other financial expense 0 -1
+Other financial income (expenses), net 7 1
+Financial result -25 -10
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+16 
+ 
+G.2 Financial liabilities 
+ 
+Net financial indebtedness: Schedule of debt maturities: 
+ 
+06/30/2017 Current Non-current 12/31/2016 Current Non-current 
+Loans from financial 
+institutions 613 175 438 1,344 201 1,143
+USPP loans 504 504 544 544
+Bonds 600 600
+Bond issuance 
+expense/premiums & 
+discounts
+-10 -4 -6 -7 -7
+Loan hedging instruments 12 12 17 17
+Bank overdrafts and advances 8 8 3 3
+Dividends payable 75 75 0
+Due to minority shareholders 0 39 39
+Other financial liabilities 7 6 1 9 8 1
+Total financial liabilities 1,809 272 1,537 1,949 261 1,688
+Marketable securities 43 43 7 7
+Cash and bank 265 265 275 275
+Total cash and cash 
+equivalents 308 308 282 282
+Net debt 1,501 -36 1,537 1,667 -21 1,688
+ 
+The group made a bond issue in the amount of €600 
+million, redeemable in 2024, with a nominal interest rate 
+of 1.50%, in order to complete the refinancing of its 
+acquisition of LanguageLine Solutio ns LLC. The proceeds 
+were used to reimburse the bridging loan of €668 million 
+which had been obtained originally for a duration of 24 
+months. 
+The group also made a payment of €38.5 million during 
+the first half of 2017 relating to the balance of deferred 
+consideration due on the acquisition of minority 
+interests. 
+ 
+Covenants 
+Our principal financial liabilities are subject to financial 
+covenants which were all respected as of June 30, 2017. 
+ 
+G.3 Foreign exchange hedging operations 
+Revenues and operating expenses of group subsidiaries 
+may be denominated in a currency other than the 
+functional currency of each country concerned. To cover 
+these exchange risks, hedge contracts are entered into 
+between the following principal currencies: 
+- the US dollar and the Mexican peso ; 
+- the US dollar and the Colombian peso ; 
+- the Philippine peso and the US dollar ; 
+- the Colombian peso, the Turkish pound, the Tunisian 
+dinar and the Euro. 
+The policy of the group is cover its highly probable 
+forecast commercial transactions denominated in 
+foreign currency, usually up to 12 months ahead. The 
+group uses forward exchange contracts and plain vanilla 
+foreign exchange options. 
+In addition, hedging arrangements are in place to cover 
+the risk of changes in exchange rates amongst the various 
+currencies managed in the cash pool (particularly the US$ 
+and the Mexican peso) and the euro, and on certain loans 
+between Teleperformance SE and its subsidiaries.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+17 
+ 
+The principal outstanding derivative financial instruments at the reporting date are as follows : 
+Derivative financial instruments at June 30, 2017 
+(in thousands)
+Notional 
+amount in 
+currency
+Notional 
+amount in € at 
+06/30/2017
+Fair value in € 
+at 
+06/30/2017
+In equity In 2017 
+profit or loss
+Hedge of forecast transactions
+USD/MXN - 2017 57 50 3 1 2
+MXN/USD - 2017 485 24 1 0 1
+USD/PHP - 2017 10,895 189 -5 -3 -2
+COP/EUR - 2017 23 23 -1 -2 1
+COP/USD - 2017 56 53 0 -1 1
+USD/INR - 2017 29 25 1 0 1
+EUR/TND - 2017 44 16 -1 -1 1
+Cross Currency Interest Swap EUR/USD 85 74 -11 0 -11
+USD interest caps 400 351 -1 0 -1
+Interest rate swap fixed/variable 200 200 0 0 0
+€ interest cap 120 120 0 0 0
+Hedge of intra-group loans 
+in USD 192 169 3 0 3
+in PHP 4,293 75 -3 0 -3
+Cash pooling hedges
+in GBP 10 11 0 0 0
+in MXN 1,150 56 1 0 1
+in USD 20 18 0 0 0
+Derivative financial instruments at December 31, 
+2016 (in thousands)
+Notional 
+amount in 
+currency
+Notional 
+amount in € at 
+12/31/2016
+Fair value in € 
+at 
+12/31/2016
+In equity In 2016 
+profit or loss
+Hedge of forecast transactions
+USD/MXN - 2017 10 9 -1 -1
+USD/MXN - 2017 45 43 -2 -2 0
+MXN/USD - 2016 197 9 -1 -1
+MXN/USD - 2017 846 39 -3 -3 0
+USD/PHP - 2016 2,395 46 0 0 0
+USD/PHP - 2017 11,005 211 -8 -6 -2
+COP/EUR - 2017 28 28 0 0 0
+COP/USD - 2017 50 47 0 0 0
+USD/INR - 2017 25 24 0 0 0
+EUR/TND - 2017 52 21 0 0 0
+Cross Currency Interest Swap EUR/USD 85 81 -17 -17
+USD interest caps 400 380 0 0
+Hedge of intra-group loans 
+in GBP 6 7 1 1
+in USD 140 133 -7 -7
+in PHP 4,486 86 1 1
+Cash pooling hedges
+in MXN 1,570 72 -1 -1
+in USD 45 43 0 0
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+18 
+ 
+At June 30, 2017, the net negative fair value of derivative financial instruments amounted to -€14.0 million (December 
+31, 2016: negative fair value of -€37.7 million) of which €8.3 million is presented in Other financial assets, €9.8 million 
+in Other current liabilities and €12.5 million in Other financial liabilities. 
+Counterparty credit risk (Credit value adjustment – CVA) and own credit risk (Debt value adjustment – DVA) are taken 
+account of in the fair values of hedging instruments, but the amounts a re not significant. 
+ 
+G.4 Carrying amount and fair value of financial assets and financial liabilities by accounting 
+category 
+The following schedules show the carrying amounts of financial assets and financial liabilities by accounting category as 
+well as their fair values by level of hierarchy : 
+06/30/2017
+Financial 
+instrument
+s at fair 
+value 
+through 
+profit or 
+loss
+Derivative 
+financial 
+instruments
+Loans and 
+receivable
+s
+Financial 
+liabilities 
+at 
+amortized 
+cost
+Total Lev 1 Lev 2 Lev 3 Total
+Financial instruments: Assets
+I - Financial assets at fair value 43 8 0 0 51 43 8 0 51
+Exchange rate hedging instruments 8 8 8 8
+Marketable securities 43 43 43 43
+II - Financial assets at amortized cost 0 0 1,252 0 1,252 265 987 0 1,252
+Loans 11 11 11 11
+Guarantee deposits 54 54 54 54
+Net asset warranty 10 10 10 10
+Accounts receivable - Trade 797 797 797 797
+Other assets 115 115 115 115
+Cash and bank 265 265 265 265
+Financial instruments: Liabilities
+I - Financial liabilities at fair value 0 22 0 0 22 0 22 0 22
+Cross Currency Interest Swap/Interest 
+caps on loan 12 12 12 12
+Exchange rate hedging instruments 10 10 10 10
+II - Financial liabilities at amortized cost 0 0 8 2,328 2,336 8 2,328 0 2,336
+Loans from financial institutions, USPP 
+and Bonds 1,707 1,707 1,707 1,707
+Finance lease liabilities 2 2 2 2
+Other borrowings and financial 
+liabilities 80 80 80 80
+Bank overdrafts and advances 8 8 8 8
+Accounts payable - Trade 127 127 127 127
+Other liabilities 412 412 412 412
+Fair valueAccounting category
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+19 
+ 
+12/31/2016
+Financial 
+instrument
+s at fair 
+value 
+through 
+profit or 
+loss
+Derivative 
+financial 
+instruments
+Loans and 
+receivable
+s
+Financial 
+liabilities 
+at 
+amortized 
+cost
+Total Lev 1 Lev 2 Lev 3 Total
+Financial instruments: Assets
+I - Financial assets at fair value 7 3 0 0 10 7 3 0 10
+Exchange rate hedging instruments 3 3 3 3
+Marketable securities 7 7 7 7
+II - Financial assets at amortized cost 0 0 1,322 0 1,322 275 1,047 0 1,322
+Loans 12 12 12 12
+Guarantee deposits 53 53 53 53
+Net asset warranty 11 11 11 11
+Accounts receivable - Trade 871 871 871 871
+Other assets 100 100 100 100
+Cash and bank 275 275 275 275
+Financial instruments: Liabilities
+I - Financial liabilities at fair value 0 41 0 0 41 0 41 0 41
+Cross Currency Interest Swap on loan 17 17 17 17
+Exchange rate hedging instruments 24 24 24 24
+II - Financial liabilities at amortized cost 0 0 3 2,458 2,461 3 2,458 0 2,461
+Loans from financial institutions and the 
+USPP 1,881 1,881 1,881 1,881
+Finance lease liabilities 2 2 2 2
+Other borrowings and financial 
+liabilities 7 7 7 7
+Bank overdrafts and advances 3 3 3 3
+Accounts payable - Trade 126 126 126 126
+Other liabilities 442 442 442 442
+Fair valueAccounting category
+ 
+No assets or liabilities measured at fair value have been transferred between different levels of the fair value hierarchy.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+20 
+ 
+G.5 Foreign currencies 
+ 
+Average rate Closing rate Average rate Closing rate
+Principal currencies Country 1st half year 
+2017 06/30/2017 1st half year 
+2016 12/31/2016
+Europe
+£ sterling United Kingdom 0.86 0.88 0.78 0.86
+Americas and Asia
+Brazilian real Brazil 3.44 3.76 4.14 3.43
+Colombian peso Colombia 3,161.00 3,474.00 3,484.00 3,159.00
+US dollar USA 1.08 1.14 1.12 1.05
+Mexican peso Mexico 21.03 20.58 20.17 21.77
+Philippine peso Philippines 54.05 57.58 52.32 52.27
+ 
+ 
+H. Cash flows 
+ 
+H.1 (Income) expenses, net, without effect on cash 
+1st half 1st half
+year 2017 year 2016
+Depreciation, amortization and impairment losses on non-current assets 128 83
+Change in provisions 0 1
+Unrealized gains and losses on financial instruments 2 -2
+Share-based payments 7 8
+Total 137 90
+ 
+ 
+H.2 Change in working capital 
+1st half 1st half
+year 2017 year 2016
+Accounts receivable - Trade 25 10
+Accounts payable - Trade -11 14
+Other 8 -4
+Total 22 20
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+21 
+ 
+H.3 Reconciliation of the change in net debt with cash flows 
+ 
+ 
+ 
+ 
+ 
+H.4 Analysis of net cash presented in the condensed consolidated statement of cash flows 
+06/30/2017 12/31/2016
+Bank overdrafts and advances -8 -3
+Marketable securities 43 7
+Cash and bank 265 275
+Net cash 300 279
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+22 
+ 
+I. Provisions, litigation, commitments and other contractual obligations 
+ 
+I.1 Change in provisions 
+12/31/2016 Increases Translation Other 06/30/2017
+Utilized Not utilized differences
+Non-current
+Provisions for retirement benefits 12 1 13
+Provisions for risks 1 1
+Total 13 1 0 0 0 0 14
+Current
+Provisions for risks 34 2 -2 -1 -2 31
+Provisions for other expenses 2 2
+Total 36 2 -2 -1 -2 0 33
+TOTAL 49 3 -2 -1 -2 0 47
+Releases
+ 
+ 
+Provisions for risks at June 30, 2017, include a contingent 
+liability of €10.8 million (US$12.4 million), in respect of 
+risks identified during the Aegis USA Inc. acquisition 
+process in 2014, including tax risks of €10.3 million. An 
+equivalent asset of €10 .3 million has been recognized, as 
+these risks are covered by a contractual warranty. 
+Other provisions for risks at June 30, 2017 include other 
+risks in a total amount of €20.1 million, of which €8.2 
+million relates to personnel -related risks, principally 
+concerning lawsuits with former employees, particularly in 
+Argentina and France. 
+As legal proceedings are ongoing for most of these 
+disputes, their settlement date is uncertain. 
+ 
+ 
+I.2 Warranties and other contractual 
+obligations 
+ 
+The group has neither given nor received any significant 
+new warranties during the first half of 2017. 
+ 
+J. Related parties 
+The group has no knowledge of any significant transactions 
+with related parties during the first half of 2017. 
+ 
+K. Events after the reporting date 
+None
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+23 
+ 
+2. 2017 half year management report 
+ 
+2.1 Group revenue in the first half year 2017 
+A. Business activity over the last half year 
+ 
+Consolidated revenue amounted to €2,081 million in the first half of 2017, representing a year -on-year increase of 
++ 9.9% on a like -for-like basis. Revenue growth was + 23.2% as reported, essentially due to the €204 million 
+contribution from the co nsolidation of LanguageLine Solutions as from September 19, 2016. Reported revenue was 
+also lifted by the €20 million positive currency effect, stemming mainly from the increase in the Brazilian real, 
+Colombian peso and US dollar against the euro. 
+ 
+The table below shows the change in revenues generated by activity: 
+ 
+based on reported constant exchange rate 
+&
+figures scope of consolidation
+CORE SERVICES 1,752 1,576 11.2% 9.8%
+English-speaking market & 
+Asia-Pacific 812 784 3.7% 3.7%
+Ibero-LATAM 534 400 33.5% 25.1%
+Continental Europe & MEA 406 392 3.4% 5.2%
+SPECIALIZED SERVICES 329 113 191.4% 11.4%
+Total 2,081 1,689 23.2% 9.9%
+(€ millions) 1st half year 
+2017
+1st half year 
+2016
+variation
+ 
+ 
+ Core services 
+Core Services revenue amounted to €1,752 million in the first half of 2017, a gain of + 11.2% as reported and of + 9.8% 
+like-for-like. The currency effect was positive for the period, primarily reflecting the increase in the US dollar, Brazilian 
+real and Colombian peso against the euro. 
+- English-speaking market & Asia-Pacific 
+First-half revenue for the region climbed + 3.7% on both a like-for-like and reported basis compared to the same period 
+in 2016. The positive impacts of a stronger US dollar were largely offset by the negative impacts of sterling's weakness 
+against the euro. 
+Teleperformance continued to diversify its client portfolio in the region over the first half of the year. The fastest 
+growing client segments in the United States were e -distribution and e -transport services, along with healthcare. 
+Consumer goods and consumer electronics also contributed to regional revenue growth. In this way, over the period,
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+24 
+ 
+the Group continued to reduce its dependence on pay -TV and other telecommunications segments, which accounted 
+for less than 30% of the regional revenue stream in 2016. 
+Given the phase-out of unprofitable contracts in the United Kingdom, which primarily impacted revenue growth in the 
+English-speaking market & Asia -Pacific region in late 2016, business in the United Kingdom was still down in the first 
+half. 
+In Asia -Pacific, business continued to benefit from the significant investments made in the region since 2016 and 
+remained upbeat, particularly in India, with North American and regional mul tinationals in a wide range of buoyant 
+client industries, such as consumer electronics and e-tailing. The positive impacts of this good momentum were offset 
+in the first half by a slowdown in offshore operations serving the North American market in the Phi lippines, to the 
+benefits of Mexico (Ibero -LATAM region), which is currently enjoying a more favorable currency and geopolitical 
+environment. 
+- Ibero-LATAM 
+Business in the Ibero -LATAM region saw exceptionally strong growth in first -half 2017, with year -on-year gains of 
++ 25.1% like-for-like and of + 33.5% as reported, lifting revenue to €534 million for the period. Exchange rates had a 
+positive impact on revenue, mainly reflecting gains in the Brazilian real and Colombian peso against the euro. 
+The Group continued to leverage the same growth drivers in the second quarter as in the beginning of the year, 
+reflecting the significant investments made during 2016 and successful diversification in a number of different sectors. 
+Operations in Portugal, Colombia and Brazil along with offshore activities in the region, including in Mexico, delivered 
+the highest levels of growth. Offshore activities have become particularly attractive as local currencies have weakened. 
+Operations in Brazil remain upbeat despite the persistently uncertain economic and political environment, thanks to 
+recent new contract wins with large US companies in various sectors, and particularly the new econo my. 
+Business in Portugal once again contributed to regional growth, still powered by the success of the Lisbon -based 
+multilingual platforms with large international accounts. E -retailing and e -services were among the fastest growing 
+customer segments. 
+- Continental Europe & MEA 
+In the Continental Europe & MEA region, first-half 2017 revenue rose by + 5.2% like-for-like and by + 3.4% as reported, 
+ending the period at €406 million. The negative currency effects stemmed mainly from the fall in the Egyptian pou nd 
+against the euro. 
+The healthy momentum seen in the three months to March 31, 2017 continued into the second quarter, which posted 
+like-for-like growth of + 4.9%. The Group's growth drivers remained unchanged. Teleperformance continued to enjoy 
+brisk sales momentum, particularly with global clients, in Eastern Europe (Russia, Poland, Czech Republic and Romania) 
+and in most Mediterranean countries: in Greece where, as in Lisbon, the Group is benefiting from the success of its 
+multilingual platforms; in Egypt, especially in the Internet and consumer electronics segment; in Albania, which serves 
+the Italian market; and in Turkey. 
+In Northern Europe, the Group's operations in Scandinavia returned to firm growth in good profitability conditions, 
+whereas the market environment in France, the Netherlands and Germany remained subdued . 
+The fastest growing markets in the region are consumer electronics, financial services, travel agencies and consumer 
+goods. E-services accounted for a good number of the recently awarded contracts.
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+25 
+ 
+ Specialized services 
+Revenue from Specialized Services rose sharply to €329 million in the first half of 2017 from €113 million one year 
+earlier, due to the consolidation of LanguageLine Solutions as from September 19, 2016. On a like -for-like basis, 
+revenue was up + 11.4% for the period. 
+Growth in Specialized Services was primarily attributable to the fast-paced expansion at TLScontact, led by an increase 
+in visa applications and by brisk sales of add-on services. 
+LanguageLine Solutions reported satisfactory pro forma revenue growth in the first half, in line with Group 
+expectations. Given the date on which LanguageLine Solutions was acquired, like -for-like growth for the Group in the 
+first half of 2017 excludes growth reported by LanguageLine Solutions. 
+The LanguageLine Solutions and TLScontact businesses account for more than 80% of annual pro forma Specialized 
+Services revenue. 
+ 
+B. First half 2017 result 
+EBITA before non -recurring items came to €245 million for the first half, up + 62.6% from €150 million in the first -half 
+2016. EBITA margin before non-recurring items widened further to 11.8% from 8.9% in the six months to June 30, 2016. 
+ 
+(€ millions) 1st Half year 
+2017
+1st Half year 
+2016
+Operating profit 191 131
+Share-based payments 9 8
+Acquisition of intang. Assets acquired as part of business 
+combination 45 11
+EBITA before non-recurring items 245 150
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+26 
+ 
+EBITA before non-recurring items by activity – excluding holding companies 
+(€ millions) 1st half year 2017 1st half year 2016
+English-speaking market & Asia-Pacific 60 60
+% or revenue 7.4% 7.7%
+Ibero-LATAM 55 43
+% of revenue 10.3% 10.7%
+Continentale Europe & MEA 11 6
+% revenue 2.7% 1.6%
+Specialized activities 98 24
+% or revenue 29.7% 21.0%
+Total - including holding companies 245 150
+% of revenue 11.8% 8.9%
+ 
+ 
+- English-speaking market & Asia-Pacific 
+The English-speaking market and Asia -Pacific region achieved EBITA before non -recurring items of €60 million in the 
+first half of 2017, on a par with the prior -year period. EBITA margin before non -recurring items came to 7.4% versus 
+7.7% in first-half 2016. This primarily reflects: 
+ 
+o An unfavorable geographic mix effect on margins owing to significant growth in domes tic business in the 
+United States, whereas offshore operations slowed in the Philippines in favor of offshore activities in Mexico 
+(Ibero-LATAM region), which has become particularly attractive thanks to local currency trends and a more 
+secure geopolitical environment ; 
+o Significant investments made in the region over the past few half-year periods and the resulting gradual ramp-
+up of facilities opened in Australia, China and, more recently, Malaysia. 
+ 
+- Ibero-LATAM 
+EBITA before non-recurring items in the Ibero-LATAM region amounted to €55 million in the first half of 2017, compared 
+to €43 million in the same period in 2016. 
+EBITA margin before non -recurring items remained high, representing 10.3% versus 10.7% in the first half of 2016. 
+Growth in operations in Portugal and Colombia was particularly robust and profitable over the period. 
+The region benefited once again from currency fluctuations that continue to favor offshore business in Mexico serving 
+the US market, but to a lesser extent than in first-half 2016. 
+ 
+- Continental Europe & MEA 
+In the Continental Europe & MEA region, Teleperformance remained on the steady upward trend in profitability that 
+began in 2012. EBITA before non-recurring items for the region came to €11 million, giving a margin of 2.7% versus 1.6% 
+in the prior-year period. Positive factors contributing to this growth included:
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+27 
+ 
+o Vibrant business growth with global clients and satisfactory cost discipline in a number of countries in 
+Southern and Eastern Europe, such as Greece with its highly efficient multilingual solutions, and Russia; 
+o Ongoing improvement in profitability in certain countries, such as the Nordics, and to a lesser extent Italy with 
+the development of its offshore solutions in Albania 
+ 
+ Specialized services 
+In Specialized Services, EBITA before non-recurring items amounted to €98 million in the first half of 2017, compared 
+to €24 million in first -half 2016. EBITA margin before non -recurring items stood at 29.7% versus 21.0% in the prior -
+year period. 
+These figures primarily reflect the consolidation of LanguageLine Solutions as from September 19, 2016. The US 
+company contributed €41 million to consolidated EBITA before non-recurring items in full-year 2016, for a margin of 
+36.3%. 
+ 
+ 
+Consolidated operating profit (EBIT) amounted to €191 million, up + 45.8% from €131 million in first-half 2016. 
+First-half 2017 EBIT reflects the amortization of intangible assets in an amount of €45 million, up sharply on the prior-
+year period following the acquisition of LanguageLine Solutions, and an €8 million accounting expense on 
+performance share plans. 
+The financial result represented a net expense of €25 million versus €10 million in first -half 2016, reflecting the cost 
+of debt incurred in connection with the LanguageLine Solutions acquisi tion. 
+Income tax expense amounted to €49 million. The Group's average tax rate was 29.5% compared to 28.0% in first -
+half 2016, owing to the increasing contribution of the Group's North American operations to its results.
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+28 
+ 
+2.2 Cash flow and capital structure 
+A. Consolidated financial structure as of June 30, 2017 
+ 
+Long-term capital 
+(€ millions) 06/30/2017 12/31/2016
+Shareholders' equity 1,827 1,921 
+Non-current financial liabilities 1,537 1,688 
+Total non-current capital 3,364 3,609 
+ 
+Short-term capital 
+(€ millions) 06/30/2017 12/31/2016
+Current financial liabilities 272 261 
+Cash and cash equivalent 308 282 
+Cash, net of current liabilities 36 21 
+ 
+B. Cash flow 
+ 
+Source and amount of cash flows 
+(€ millions) 06/30/2017 06/30/2016
+Internally generated funds from operations before changes in 
+working capital requirements 251 176
+Changes in working capital requirements 22 20
+Cash flow from operating activitites 273 196
+Investment and capital expenditure -68 -75
+Repayment of loans 0 0
+Cash flow from investing activities -68 -75
+Proceeds from share capital increases/Treasury shares -1 -17
+Change in ownership interest in controlled activities -39 -33
+Dividends paid 0 -68
+Net change in financial liabilities -176 11
+Interest paid on financial liabilities -27 -8
+Cash flow from financing activities -243 -115
+Change in cash and cash equivalent -38 6
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+29 
+ 
+Cash flow after tax and interest paid rose to €224 million from €168 million in first-half 2016. Change in consolidated 
+working capital requirement was an inflow of €22 million, on a par with the prior -year period. This good performance 
+reflects, in particular, the success of the policy deployed to improve the group’s liquidity. 
+Net capital expenditure amounted to €68 million, or 3.3% of revenue, versus €75 million and 4.4% in first-half 2016. The 
+group continued to create or expand contact centers to support clients in all markets, while maintaining discipline in 
+the choice of capital expenditure. 
+In all, net free cash flow increased sharply, to €178 million from €113 million in the prior -year period. 
+Minority interests’ transactions, which totaled €40 million in the first half, mainly included TLScontact final earn -out. 
+After considering a dividend of €75 million paid in early July, net debt stood at €1,501 million at June 30, 2017. The 
+group’s financial structure therefore remains very solid with equity of €1,827 million at end June. 
+ 
+2.3 Related parties 
+ 
+The group has no knowledge of any significant transactions with related parties during the first half of 2017. 
+ 
+2.4 Event after the reporting date 
+ 
+None. 
+ 
+2.5 Trend and prospects 
+A. Risks and uncertainties 
+ 
+The group is exposed to the risks which were described in the Reference document for the year ended December 31, 
+2016; which was subject to visa by the AMF. 
+The group’s management team has not anticipated any significant changes in such risks and uncertainties or new risk and 
+uncertainty elements for the second half of 2017. 
+ 
+B. 2017 Outlook 
+ 
+In light of the encouraging first-half year results, Teleperformance confirms and refines its full year guidance, targeting: 
+- Like-for-like revenue growth of at least + 7% ; 
+- An EBITA margin before non-recurring items above 13 %. 
+In addition, Teleperformance expects to maintain a high level of net free cash flow in 2017.
+
+2017 Half-year financial report 
+3. Attestation of the person responsible for the condensed consolidated interim financial statements and management report 
+ 
+30 
+ 
+3. Attestation of the person responsible for the condensed 
+consolidated interim financial statements and 
+management report 
+ 
+« I hereby declare that, to the best of my knowledge, the condensed consolidated financial statements for the first half 
+of 2017 have been prepared in accordance with applicable accounting principles and give a true and fair view of the 
+assets and liabilities, financial situation and results of the Group. I further declare that the half year Management Report 
+gives a true and fair view of the material events occurring during the first six months of the financial year and of their 
+impact on the half year financial statements, of the principal related party transactions, and of the principal risks and 
+uncertainties for the remaining six months of 2017 ». 
+ 
+ 
+Paris, July 27, 2017 
+ 
+Paulo César Salles Vasques 
+Chief Executive Officer
+
+2017 Half-year financial report 
+4. Statutory auditors’ review report on 2017 Half-yearly Financial Information 
+31 
+ 
+4. Statutory auditors’ review report on 2017 Half-yearly 
+Financial information 
+ 
+This is a free translation into English of the statutory 
+auditors’ review report on the half -yearly financial 
+information issued in French and is provided solely for 
+the convenience of English speaking users. This report 
+includes information relating to the specific verification 
+of information given in the Group’s interim management 
+report. This report should be read in conjunction with, 
+and construed in accordance with, French law and 
+professional standards applicable in France. 
+ 
+For the six-month period ended June 30, 2017 
+ 
+To the Shareholders, 
+In compliance with the assignment entrusted to us by 
+your shareholders meeting and in accordance with the 
+requirements of article L. 451 -1-2 III of the French 
+Monetary and Financial Code ("Code monétaire et 
+financier"), we hereby report to you on: 
+- the review of the accompanying condensed half -
+yearly consolidated financial statements of 
+Teleperformance SE, for the period from January 
+1st, 2017 to June 30, 2017 ; 
+- the verification of the informa tion presented in the 
+interim management report. 
+These condensed half -yearly consolidated financial 
+statements are the responsibility of the Board of 
+Directors. Our role is to express a conclusion on these 
+financial statements based on our review. 
+I - Conclusion on the financial statements 
+We conducted our review in accordance with 
+professional standards applicable in France. A review of 
+interim financial information consists of making 
+inquiries, primarily of persons responsible for financial 
+and a ccounting matters, and applying analytical and 
+other review procedures. A review is substantially less 
+in scope than an audit conducted in accordance with 
+professional standards applicable in France and 
+consequently does not enable us to obtain assurance 
+that we would become aware of all significant matters 
+that might be identified in an audit. Accordingly, we do 
+not express an audit opinion. 
+Based on our review, nothing has come to our atte
+
+
+## BALANCE SHEET
+
+EMENT REPORT ....................................................................... 30 
+4. STATUTORY AUDITOR’S REVIEW REPORT ON 2017 HALF YEARLY FINANCIAL 
+INFORMATION .............................................................................................................................................. 31
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+2 
+ 
+1. Condensed consolidated interim financial 
+statements 
+ 
+ 
+ 
+1.1 CONDENSED CONSOLIDATED STATEMENT OF FINANCIAL POSITION (in millions of euros) .............. 3 
+1.2 CONDENSED CONSOLIDATED STATEMENT OF INCOME (in millions of euros) .................................. 4 
+1.3 CONDENSED CONSOLIDATED STATEMENT OF COMPREHENSIVE INCOME (in millions of euros) ..... 4 
+1.4 CONDENSED CONSOLIDATED STATEMENT OF CASH FLOWS (in millions of euros) ........................... 5 
+1.5 CONDENSED CONSOLIDATED STATEMENT OF CHANGES IN EQUITY (in millions of euros) .............. 6 
+1.6 NOTES TO THE CONDENSED CONSOLIDATED FINANCIAL STATEMENTS (in millions of euros) ......... 7
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+3 
+ 
+1.1 Condensed consolidated statement of financial position (in 
+millions of euros) 
+ASSETS Notes 06.30.2017 12.31.2016
+Non-current assets
+Goodwill D 1,816 1,936
+Other intangible assets 1,036 1,172
+Property, plant and equipment 436 476
+Financial assets 54 55
+Deferred tax assets 42 30
+Total non-current assets 3,384 3,669
+Current assets
+Current income tax receivable 59 46
+Accounts receivable - Trade C.1 797 871
+Other current assets C.1 115 100
+Other financial assets 29 24
+Cash and cash equivalents H.4 308 282
+Total current assets 1,308 1,323
+Total assets 4,692 4,992
+EQUITY AND LIABILITIES Notes 06.30.2017 12.31.2016
+Equity
+Share capital F.1 144 144
+Share premium 575 575
+Translation reserve -47 100
+Other reserves 1,144 1,092
+Equity attributable to owners of the company 1,816 1,911
+Non-controlling interests 11 10
+Total shareholder's equity 1,827 1,921
+Non-current liabilities
+Provisions I.1 14 13
+Financial liabilities G.2 1,537 1,688
+Deferred tax liabilities 398 444
+Total non-current liabilities 1,949 2,145
+Current liabilities
+Provisions I.1 33 36
+Current income tax 72 61
+Accounts payable - Trade C.3 127 126
+Other current liabilities C.3 412 442
+Other financial liabilities G.2 272 261
+Total current liabilities 916 926
+Total equity and liabilities 4,692 4,992
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+4 
+ 
+1.2 Condensed consolidated statement of income (in millions of euros) 
+Notes 1st ½ yr 
+2017
+1st ½ yr 
+2016
+Revenues C.4 2,081 1,689
+Other revenues C.4 4 2
+Personnel -1,377 -1,151
+External expenses -369 -309
+Taxes other than income taxes -12 -9
+Depreciation and amortization -83 -72
+Amortization of intang. assets acquired as part of a business combination -45 -11
+Share-based payments C.2 -8 -8
+Operating profit 191 131
+Income from cash and cash equivalents 0 1
+Interest on financial liabilities -32 -12
+Net financing costs G.1 -32 -11
+Other financial income (expenses), net G.1 7 1
+Financial result -25 -10
+Profit before taxes 166 121
+Income tax E -49 -34
+Net profit 117 87
+Net profit - Group share 116 86
+Net profit (loss) attributable to non-controlling interests 1 1
+Basic earnings per share (in €) F.3 2.01 1.51
+Diluted earnings per share (in €) F.3 1.98 1.48
+ 
+ 
+ 
+1.3 Condensed consolidated statement of comprehensive income 
+(in millions of euros) 
+1st ½ yr 
+2017
+1st ½ yr 
+2016
+Net profit 117 87
+May not be reclassified to profit or loss in a subsequent period
+May be reclassified to profit or loss in a subsequent period
+Net gain on foreign exchange hedges (before tax) 6 5
+Income tax net losses on foreign exchange hedges -2 -2
+Translation differences -147 -37
+Other recognized income and expenses, net -143 -34
+Total comprehensive income (loss) -26 53
+Group share -27 52
+Attributable to non-controllling interests 1 1
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+5 
+ 
+1.4 Condensed consolidated statement of cash flows (in millions of 
+euros) 
+Cash flows from operating activities Notes 1st ½ yr 2017 1st ½ yr 2016
+Net profit - Group share 116 86
+Net profit attributable to non-controlling interests 1 1
+Income tax expense 49 34
+Interest expense on financial liabilities 29 8
+(Income) expenses, net, without effect on cash H.1 137 90
+Income tax paid -81 -43
+Internally generated funds from operations 251 176
+Change in working capital H.2 22 20
+Net cash from operating activities 273 196
+Cash flows from investing activities
+Acquisition of intangible assets and property, plant and equipment -68 -76
+Loans made -1
+1
+Repayment of loans 1
+Net cash flow from investing activities -68 -75
+Cash flows from financing activities
+Acquisition/disposal of treasury shares -1 -17
+Change in ownership interest in controlled entities G.2 -39 -33
+Dividends paid to parent company shareholders -68
+Financial interests paid/received -27 -8
+Increase in financial liabilities 1,106 537
+Repayment of financial liabilities -1,282 -526
+Net cash flow from financing activities -243 -115
+Change in cash and cash equivalents -38 6
+Effect of exchange rates on cash held 59 -10
+Net cash at January 1 H.4 279 254
+Net cash at June 30 H.4 300 250
+Proceeds from disposals of intangible assets and property, plant and equipment
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+6 
+ 
+1.5 Condensed consolidated statement of changes in equity (in 
+millions of euros) 
+Total
+Share capital
+Share premium
+Translation reserve
+Retained earnings
+Impact of financial 
+hedging instruments
+Equity - Group share
+Non-controlling 
+interests
+At December 31, 2015 143 575 69 978 -7 1,758 7 1,765
+Trans lation differences from foreign 
+operations -37 -37 -37
+Net profit 86 86 1 87
+Net gain on cas h flow hedges (after tax) 3 3 3
+Total recognized income and expenses 0 0 -37 86 3 52 1 53
+Operations on non-controlling interes ts -13 -13 -13
+Fair value of incentive plan s hare awards 8 8 8
+Treas ury s hares -18 -18 -18
+Dividends (€1.20 per s hare) -68 -68 -68
+At June 30, 2016 143 575 32 973 -4 1,719 8 1,727
+At December 31, 2016 (restated)* 144 575 100 1,099 -7 1,911 10 1,921
+Trans lation differences from foreign 
+operations -147 -147 -147
+Net profit 116 116 1 117
+Net gain on cas h flow hedges (after tax) 4 4 4
+Total recognized income and expenses 0 0 -147 116 4 -27 1 -26
+Operations on non-controlling interes ts 1 1 1
+Fair value of incentive plan s hare awards 7 7 7
+Treas ury s hares -1 -1 -1
+Dividends (€1.30 per s hare) -75 -75 -75
+At June 30, 2017 144 575 -47 1,147 -3 1,816 11 1,827
+* s ee note B
+Group share
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+7 
+ 
+1.6 Notes to the condensed consolidated financial statements (in 
+millions of euros) 
+ 
+A. Accounting policies and methods ............................................................................................................... 8 
+A.1 Reporting entity .............................................................................................................................. 8 
+A.2 Basis of preparation ........................................................................................................................ 8 
+A.3 Estimates ......................................................................................................................................... 8 
+ 
+B. Consolidation scope ..................................................................................................................................... 9 
+ 
+C. Operational activity ................................................................................................................................... 10 
+C.1 Accounts receivable – Trade and Other current assets ................................................................ 10 
+C.2 Share-based payments .................................................................................................................. 11 
+C.3 Accounts payable – Trade and Other current liabilities ................................................................ 12 
+C.4 Revenues and other operating revenues ...................................................................................... 12 
+C.5 Segment reporting ......................................................................................................................... 13 
+ 
+D. Goodwill ..................................................................................................................................................... 14 
+ 
+E. Income tax.................................................................................................................................................. 14 
+ 
+F. Equity and earning per share .................................................................................................................... 14 
+F.1 Share capital and dividends ........................................................................................................... 14 
+F.2 Treasury shares .............................................................................................................................. 14 
+F.3 Earnings per share ......................................................................................................................... 14 
+ 
+G. Financial assets and financial liabilities .................................................................................................... 15 
+G.1 Financial result .............................................................................................................................. 15 
+G.2 Financial liabilities ......................................................................................................................... 16 
+G.3 Foreign exchange hedging operations .......................................................................................... 16 
+G.4 Carrying amount and fair value of financial assets and financial liabilities by accounting category
+ ............................................................................................................................................................. 18 
+G.5 Foreign currencies ......................................................................................................................... 20 
+ 
+H. Cash flows .................................................................................................................................................. 20 
+H.1 (Income) expenses, net, without effect on cash ........................................................................... 20 
+H.2 Change in working capital ............................................................................................................. 20 
+H.3 Reconciliation of the change in net debt with cash flows ............................................................ 21 
+H.4 Analysis of net cash presented in the condensed consolidated statement of cash flows ........... 21 
+ 
+I. Provisions, litigation, commitments and other contractual obligations ................................................. 22 
+I.1 Change in provisions ....................................................................................................................... 22 
+I.2 Warranties and other contractual obligations ............................................................................... 22 
+ 
+J. Related parties ........................................................................................................................................... 22 
+ 
+K. Events after the reporting date ................................................................................................................. 22
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+8 
+ 
+Highlights of the first half of 2017 
+The group has made a bond issue in the amount of €600 
+million, redeemable in 2024, with a nominal interest rate 
+of 1.50%, in order to complete the refinancing of its 
+acquisition of LanguageLine Solutions LLC. 
+ 
+A. Accounting policies and 
+methods 
+A.1 Reporting entity 
+ 
+Teleperformance (“the company”) is a company 
+domiciled in France. 
+The condensed consolidated interim financial 
+statements of the company as at and for the six months 
+ended June 30, 2017 include the company and its 
+subsidiaries (together referred to as “the group”). 
+The consolidated financial statements of the group for 
+the year ended December 31, 2016 are available upon 
+request from the company’s registered office at 21/25 
+rue Balzac, 75008 Paris, or from its website 
+(www.teleperformance.com). 
+All financial information presented in euro has been 
+rounded to the nearest million unless otherwise 
+specified.. 
+A.2 Basis of preparation 
+These condensed consolidated interim financial 
+statements as at and for the six months ended June 30, 
+2017 have been prepared in accordance with IAS 34 
+“Interim Financial Reporting” and are presented in 
+accordance with revised and amended IAS 1. They do not 
+include all the information required for full annual 
+financial statements and should be read in conjunction 
+with the consolidated financial statements of the group 
+as at and for the y ear ended December 31, 2016 which 
+are included in the 2016 reference document D.17-0122 
+that was filed with the AMF (the French Stock Exchange 
+regulator) on March 2, 2017. 
+The accounting policies have been applied consistently to 
+all periods presented in t hese condensed consolidated 
+interim financial statements. 
+These condensed consolidated interim financial 
+statements were approved by the Board of Directors on 
+July 27, 2017. 
+The following standards, amendments and 
+interpretations: 
+- Amendments to IAS 12, on the recognition of 
+deferred tax assets for unrealized losses; 
+- Amendments to IAS 7 on the statement of cash flows 
+came into force in 2017 but did not have a significant 
+impact on the group’s financial statements. 
+The group has elected not to early apply the following 
+new standards: 
+- IFRS 15 on revenues; 
+- IFRS 9 on financial instruments; 
+These standards will come into effect from January 1, 
+2018. 
+The group does not expect a significant impact on its 
+financial statements from the adoption of IFRS 15. The 
+group uses foreign exchange hedging instruments on a 
+regular basis and the adoption of IFRS 9 should result in 
+a reduction of the volatility it experiences in the results 
+of these operations. 
+The assessment of the impact of the new standard IFRS 
+16 on leases, which comes into effect on January 1, 2019, 
+is still in progress. 
+The accounting policies applied by the group in these 
+condensed consolidated interim financial statements are 
+the same as those applied by the group in its 
+consolidated financial statements as at and for the year 
+ended December 31, 2016, with the exception of the new 
+standards, amendments and interpretations set out 
+above, and are in accordance with IFRSs as issued by the 
+IASB and adopted by the European Union. 
+A.3 Estimates 
+The preparation of financial statements in conformity 
+with IFRS requires making estimates and assumptions 
+which affect the reported amounts in the financial 
+statements, especially with respect to the following 
+items: 
+- the depreciation and amortization rates, 
+- the calculation of losses on doubtful receivables, 
+- impairment of intangible assets and goodwill, 
+- the measurement of provisions and retirement 
+benefits, 
+- the measurement of share-based payment expense, 
+- provisions for contingencies and expenses, 
+- the measurement of intangible assets acquired as 
+part of a business combination, 
+- deferred taxation. 
+ 
+The estimates are based on information available at the 
+time of preparation of the financial statements, and may 
+be revised, in a future period, if circumstances change, or 
+if new information is available. Actual results may differ 
+from these estimates.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+9 
+ 
+ 
+B. Consolidation scope 
+The group made no acquisition or disposal during the first half of. 
+During the first half of 2017, the group restated its measurement of the fair values of the identifiable assets and liabilities 
+acquired of LanguageLine Solutions LLC. The principal impact concerns the US income tax rate which has been revised. 
+The following schedule sets out the revised fair values of the identifiable assets and liabilities as of the date of 
+acquisition: 
+ 
+In millions of US$
+Fair values at 
+09/19/2016
+Non-current assets
+Intangible assets 983
+Property, plant and equipment 9
+Other non-current assets 4
+Total non-current assets 996
+Current assets
+Current tax assets 4
+Accounts receivable - Trade 77
+Other current assets 6
+Cash and cash equivalents 10
+Total current assets 97
+TOTAL ASSETS 1,093
+Non-current liabilities
+Provisions 1
+Deferred tax liabilities 377
+Total non-current liabilities 378
+Current liabilities
+Provisions 3
+Accounts payable - Trade 8
+Other current liabilities 20
+Total current liabilities 31
+TOTAL LIABILITIES 409
+Net assets, acquired 100% 684
+Acquisition price 1,538
+Goodwill 854
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+10 
+ 
+Following changes emerge on certain items of the condensed consolidated statement of financial position as of 
+December 31, 2016: 
+Non-current assets
+Goodwill 1,952 -16 1,936
+Intangible assets 1,175 -3 1,172
+Property, plant and equipment 476 476
+Financial assets 55 55
+Deferred tax assets 30 30
+Total non-current assets 3,688 -19 3,669
+Non-current liabilities
+Provisions 13 13
+Financial liabilities 1,688 1,688
+Deferred tax liabilities 464 -20 444
+Total non-current liabilities 2,165 -20 2,145
+Current provisions 34 2 36
+Total equity 1,922 -1 1,921
+After restatementsConsolidated statement of financial 
+position, December 31, 2016 (extract) As published Restatements
+ 
+ 
+C. Operational activity 
+ 
+C.1 Accounts receivable – Trade and Other current assets 
+Gross Write- Net Net
+ downs
+Accounts receivable - Trade 804 -7 797 871
+Other receivables 23 -9 14 12
+Taxation recoverable 41 41 37
+Advances and receivables on non-current assets 6 6 8
+Prepaid expenses 54 54 43
+Total 928 -16 912 971
+06/30/2017 12/31/2016
+ 
+ 
+Factoring arrangements : 
+The group and a number of its subsidiaries use factoring arrangements which comply with criteria for derecognition. 
+The outstanding amounts totaled €51.4 million and €50.5 million at June 30, 2017 and December 31, 2016, respectively. 
+Under the agreement, the Group retains the credit control and receipt functions in respect of the sold receivables on 
+behalf of the factor.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+11 
+ 
+C.2 Share-based payments 
+ 
+2016 incentive share award plans 
+ 
+The Board of Directors’ meetings of April 28 and November 2, 2016 approved free awards in a total amount of 1,065,808 
+incentive plan shares to group personnel, including company officers, under the authorization given at the Shareholders’ 
+General Meeting of April 28, 2016, which included a maximum limit of 2.5% of the share capit al of the company at the 
+grant date. The board meeting on April 28, 2016 also approved the setting-up of a long-term incentive plan for company 
+officers, with the free award of 350,000 shares. The two plans have identical conditions for vesting. 
+ 
+The features of these plans are as follows: 
+04/28/16 plan 11/02/16 plan
+Date of board meeting allocating the awards 04/28/2016 11/02/2016
+Vesting period 04/28/2016 to 
+04/28/2019
+11/02/2016 to 
+11/02/2019
+Grant date 04/28/2016 11/02/2016
+Number of share awards* 1,264,300 151,508
+Number of canceled shares -59,700 -13,264
+Number of outstanding share awards at June 30, 2017 1,204,600 138,244
+Fair value of each share award at the grant date (taking into account the market 
+condition) €48.51 €72.40
+Fair value of each share award at the grant date (without taking into account the 
+market condition) €75.20 €88.80
+* including for company officers 350,000 0
+ 
+Vesting of the free share awards is conditional on the beneficiaries remaining with the group until at least the end of 
+the vesting period and on meeting certain performance conditions relating to the financial years between 2016 and 
+2018. 
+As of June 30, 2017, it is considered probable that it will be necessary to meet the market condition in order to obtain 
+the highest number of shares and the amount of expense recognized in respect of the plans is therefore based on fair 
+values of €48.51 and €72.40 per share, which results in related expense of €8.4 million in the first half of 2017 .
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+12 
+ 
+C.3 Accounts payable – Trade and Other current liabilities 
+06/30/2017 12/31/2016
+Accounts payable - Trade 127 126
+Other payables 144 158
+Taxes payable 58 56
+Accruals 180 160
+Other operating liabilities 30 68
+Total 539 568
+ 
+Other operating liabilities at June 30, 2017 include an amount of €9.8 million (December 31, 2016: €23.9 million) in 
+respect of the negative fair value of derivative financial instruments used for currency hedging. 
+C.4 Revenues and other operating revenues 
+ 
+Revenues 
+ 
+Group revenues in the first half of 2017 amounted to €2,081 million, which represents an increase (on the basis of 
+published figures) of 23.2% over the same period in 2016. 
+At constant currency rates and consolidation scope, the increase is 9.9%. 
+ 
+Other operating revenues 
+Other operating revenues mainly comprise government grants. 
+In the first half of 2017, grant income amounted to €4.3 million, compared with €2.2 million in the same period of 2016. 
+It includes French competitiveness and employment tax credits for € 1.4 million in 2017, compared with €1.3 million in 
+the same period of 2016.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+13 
+ 
+C.5 Segment reporting 
+Segment information is reported in the schedules set out below. 
+Inter-segment operations are not significant and are not identified separately. 
+With effect from January 1, 2017, group activity as followed by the chief executive officer is split into the following two 
+segments: 
+ The « Core Services » segment which includes customer care, technical support and new customer acquisitions 
+and is divided into three principal management regions : 
+ 
+- English-speaking & APAC, which covers the activities in the following countries: Canada, USA, United 
+Kingdom, South Africa, China, Indonesia, India, Philippines, Singapore, Jamaica, Guyana, Australia and 
+Malaysia; 
+- Ibero-LATAM, which covers the activities in the following countries: Argentina, Brazil, Chile, Colombia, 
+Costa Rica, Dominican Republic, El Salvador, Mexico, Spain an d Portugal; 
+- Continental Europe & MEA, which covers the activities in the countries of the EMEA region with the 
+exception of the United Kingdom, Spain and Portugal. 
+ 
+ The « Specialized Services » segment which includes the interpreting services of LanguageLi ne Solutions, the 
+visa application management services for government departments offered by TLScontact, GN Research’s 
+analytics solutions and the accounts receivable credit management services of AllianceOne Receivables 
+Management (ARM) in North America. 
+As a result of this new operational organization, the 2016 comparable amounts have been restated accordingly: 
+Six months ended June 30, 2017 SPECIALIZED 
+SERVICES TOTAL
+English-
+speaking & 
+APAC
+Ibero-
+LATAM
+Continental 
+Europe
+& MEA
+Holdings
+Revenue 812 534 406 329 2,081
+Operating profit 51 53 11 12 64 191
+Capital expenditure 25 20 14 9 68
+Intangible assets and 
+Property, plant and 
+equipment (carrying amounts)
+1,069 294 270 2 1,653 3,288
+Depreciation and 
+amortization of non-current 
+assets
+48 24 13 43 128
+Six months ended June 30, 2017 
+(proforma)
+SPECIALIZED 
+SERVICES TOTAL
+English-
+speaking & 
+APAC
+Ibero-
+LATAM
+Continental 
+Europe
+& MEA
+Holdings
+Revenue 784 400 392 113 1,689
+Operating profit 52 41 6 9 23 131
+Capital expenditure 35 23 12 6 76
+Intangible assets and 
+Property, plant and 
+equipment (carrying amounts)
+1,130 293 264 4 92 1,783
+Depreciation and 
+amortization of non-current 
+assets
+45 19 13 6 83
+CORE SERVICES
+CORE SERVICES
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+14 
+ 
+D. Goodwill 
+There were no changes to the composition of CGUs or 
+groups of CGUs in the first half of 2017. 
+The group has reviewed its CGUs and groups of CGUs to 
+determine whether there is any indication of 
+impairment. 
+These reviews did not result in any subsequent 
+requirement to perform impairment tests, and no 
+impairment losses were therefore recognized in the first 
+half of 2017. 
+E. Income tax 
+Income tax expense in an interim period is measured 
+using management’s best estimate of the expected full -
+year rate. 
+The income tax expense in the first half of 2017 
+amounted to €49.0 million compared with €33.9 million 
+in the first half of 2016. This increase is principally due to 
+the contribution of LanguageLine Solutions LLC which 
+was acquired in the second half of 2016. 
+ 
+F. Equity and earning per share 
+F.1 Share capital and dividends 
+The share capital at June 30, 2017 amounted to 
+€144,450,000 represented by 57,780,000 shares with a 
+nominal value of €2.50 each, fully paid up. 
+ 
+The company made a dividend distribution of €75.1 
+million during July 2017. 
+ 
+F.2 Treasury shares 
+ 
+At June 30, 2017, the group held 20,500 treasury shares, 
+acquired under its liquidity contract, in a carrying amount 
+of €2.3 million which has been deducted from equity. 
+ 
+ 
+F.3 Earnings per share 
+Basic and diluted earnings per share are calculated as follows: 
+1st ½ yr 2017 1st ½ yr 2016
+Net profit - Group share 116 86
+Weighted-average number of shares used to calculate basic earnings per share 57,769,706 56,918,628
+Dilutive effect of incentive share awards 935,172 933,421
+Weighted-average number of shares used to calculate diluted earnings per share 58,704,878 57,852,049
+Basic earnings per share (in €) 2.01 1.51
+Diluted earnings per share (in €) 1.98 1.48
+ 
+ 
+Weighted-average number of shares used to calculate basic earnings per share: 
+ 
+1st ½ yr 2017 1st ½ yr 2016
+Number of ordinary shares in issue at January 1 57,780,000 57,201,690
+Treasury shares -10,294 -283,062
+Total 57,769,706 56,918,628
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+15 
+ 
+G. Financial assets and financial liabilities 
+G.1 Financial result 
+1st ½ yr 2017 1st ½ yr 2016
+Income from cash and cash equivalents 0 1
+Other interest expense, net -25 -9
+Bank commissions -7 -3
+Gross financing costs -32 -12
+Net financing costs -32 -11
+Foreign exchange gains 18 17
+Foreign exchange losses -11 -15
+Other financial expense 0 -1
+Other financial income (expenses), net 7 1
+Financial result -25 -10
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+16 
+ 
+G.2 Financial liabilities 
+ 
+Net financial indebtedness: Schedule of debt maturities: 
+ 
+06/30/2017 Current Non-current 12/31/2016 Current Non-current 
+Loans from financial 
+institutions 613 175 438 1,344 201 1,143
+USPP loans 504 504 544 544
+Bonds 600 600
+Bond issuance 
+expense/premiums & 
+discounts
+-10 -4 -6 -7 -7
+Loan hedging instruments 12 12 17 17
+Bank overdrafts and advances 8 8 3 3
+Dividends payable 75 75 0
+Due to minority shareholders 0 39 39
+Other financial liabilities 7 6 1 9 8 1
+Total financial liabilities 1,809 272 1,537 1,949 261 1,688
+Marketable securities 43 43 7 7
+Cash and bank 265 265 275 275
+Total cash and cash 
+equivalents 308 308 282 282
+Net debt 1,501 -36 1,537 1,667 -21 1,688
+ 
+The group made a bond issue in the amount of €600 
+million, redeemable in 2024, with a nominal interest rate 
+of 1.50%, in order to complete the refinancing of its 
+acquisition of LanguageLine Solutio ns LLC. The proceeds 
+were used to reimburse the bridging loan of €668 million 
+which had been obtained originally for a duration of 24 
+months. 
+The group also made a payment of €38.5 million during 
+the first half of 2017 relating to the balance of deferred 
+consideration due on the acquisition of minority 
+interests. 
+ 
+Covenants 
+Our principal financial liabilities are subject to financial 
+covenants which were all respected as of June 30, 2017. 
+ 
+G.3 Foreign exchange hedging operations 
+Revenues and operating expenses of group subsidiaries 
+may be denominated in a currency other than the 
+functional currency of each country concerned. To cover 
+these exchange risks, hedge contracts are entered into 
+between the following principal currencies: 
+- the US dollar and the Mexican peso ; 
+- the US dollar and the Colombian peso ; 
+- the Philippine peso and the US dollar ; 
+- the Colombian peso, the Turkish pound, the Tunisian 
+dinar and the Euro. 
+The policy of the group is cover its highly probable 
+forecast commercial transactions denominated in 
+foreign currency, usually up to 12 months ahead. The 
+group uses forward exchange contracts and plain vanilla 
+foreign exchange options. 
+In addition, hedging arrangements are in place to cover 
+the risk of changes in exchange rates amongst the various 
+currencies managed in the cash pool (particularly the US$ 
+and the Mexican peso) and the euro, and on certain loans 
+between Teleperformance SE and its subsidiaries.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+17 
+ 
+The principal outstanding derivative financial instruments at the reporting date are as follows : 
+Derivative financial instruments at June 30, 2017 
+(in thousands)
+Notional 
+amount in 
+currency
+Notional 
+amount in € at 
+06/30/2017
+Fair value in € 
+at 
+06/30/2017
+In equity In 2017 
+profit or loss
+Hedge of forecast transactions
+USD/MXN - 2017 57 50 3 1 2
+MXN/USD - 2017 485 24 1 0 1
+USD/PHP - 2017 10,895 189 -5 -3 -2
+COP/EUR - 2017 23 23 -1 -2 1
+COP/USD - 2017 56 53 0 -1 1
+USD/INR - 2017 29 25 1 0 1
+EUR/TND - 2017 44 16 -1 -1 1
+Cross Currency Interest Swap EUR/USD 85 74 -11 0 -11
+USD interest caps 400 351 -1 0 -1
+Interest rate swap fixed/variable 200 200 0 0 0
+€ interest cap 120 120 0 0 0
+Hedge of intra-group loans 
+in USD 192 169 3 0 3
+in PHP 4,293 75 -3 0 -3
+Cash pooling hedges
+in GBP 10 11 0 0 0
+in MXN 1,150 56 1 0 1
+in USD 20 18 0 0 0
+Derivative financial instruments at December 31, 
+2016 (in thousands)
+Notional 
+amount in 
+currency
+Notional 
+amount in € at 
+12/31/2016
+Fair value in € 
+at 
+12/31/2016
+In equity In 2016 
+profit or loss
+Hedge of forecast transactions
+USD/MXN - 2017 10 9 -1 -1
+USD/MXN - 2017 45 43 -2 -2 0
+MXN/USD - 2016 197 9 -1 -1
+MXN/USD - 2017 846 39 -3 -3 0
+USD/PHP - 2016 2,395 46 0 0 0
+USD/PHP - 2017 11,005 211 -8 -6 -2
+COP/EUR - 2017 28 28 0 0 0
+COP/USD - 2017 50 47 0 0 0
+USD/INR - 2017 25 24 0 0 0
+EUR/TND - 2017 52 21 0 0 0
+Cross Currency Interest Swap EUR/USD 85 81 -17 -17
+USD interest caps 400 380 0 0
+Hedge of intra-group loans 
+in GBP 6 7 1 1
+in USD 140 133 -7 -7
+in PHP 4,486 86 1 1
+Cash pooling hedges
+in MXN 1,570 72 -1 -1
+in USD 45 43 0 0
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+18 
+ 
+At June 30, 2017, the net negative fair value of derivative financial instruments amounted to -€14.0 million (December 
+31, 2016: negative fair value of -€37.7 million) of which €8.3 million is presented in Other financial assets, €9.8 million 
+in Other current liabilities and €12.5 million in Other financial liabilities. 
+Counterparty credit risk (Credit value adjustment – CVA) and own credit risk (Debt value adjustment – DVA) are taken 
+account of in the fair values of hedging instruments, but the amounts a re not significant. 
+ 
+G.4 Carrying amount and fair value of financial assets and financial liabilities by accounting 
+category 
+The following schedules show the carrying amounts of financial assets and financial liabilities by accounting category as 
+well as their fair values by level of hierarchy : 
+06/30/2017
+Financial 
+instrument
+s at fair 
+value 
+through 
+profit or 
+loss
+Derivative 
+financial 
+instruments
+Loans and 
+receivable
+s
+Financial 
+liabilities 
+at 
+amortized 
+cost
+Total Lev 1 Lev 2 Lev 3 Total
+Financial instruments: Assets
+I - Financial assets at fair value 43 8 0 0 51 43 8 0 51
+Exchange rate hedging instruments 8 8 8 8
+Marketable securities 43 43 43 43
+II - Financial assets at amortized cost 0 0 1,252 0 1,252 265 987 0 1,252
+Loans 11 11 11 11
+Guarantee deposits 54 54 54 54
+Net asset warranty 10 10 10 10
+Accounts receivable - Trade 797 797 797 797
+Other assets 115 115 115 115
+Cash and bank 265 265 265 265
+Financial instruments: Liabilities
+I - Financial liabilities at fair value 0 22 0 0 22 0 22 0 22
+Cross Currency Interest Swap/Interest 
+caps on loan 12 12 12 12
+Exchange rate hedging instruments 10 10 10 10
+II - Financial liabilities at amortized cost 0 0 8 2,328 2,336 8 2,328 0 2,336
+Loans from financial institutions, USPP 
+and Bonds 1,707 1,707 1,707 1,707
+Finance lease liabilities 2 2 2 2
+Other borrowings and financial 
+liabilities 80 80 80 80
+Bank overdrafts and advances 8 8 8 8
+Accounts payable - Trade 127 127 127 127
+Other liabilities 412 412 412 412
+Fair valueAccounting category
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+19 
+ 
+12/31/2016
+Financial 
+instrument
+s at fair 
+value 
+through 
+profit or 
+loss
+Derivative 
+financial 
+instruments
+Loans and 
+receivable
+s
+Financial 
+liabilities 
+at 
+amortized 
+cost
+Total Lev 1 Lev 2 Lev 3 Total
+Financial instruments: Assets
+I - Financial assets at fair value 7 3 0 0 10 7 3 0 10
+Exchange rate hedging instruments 3 3 3 3
+Marketable securities 7 7 7 7
+II - Financial assets at amortized cost 0 0 1,322 0 1,322 275 1,047 0 1,322
+Loans 12 12 12 12
+Guarantee deposits 53 53 53 53
+Net asset warranty 11 11 11 11
+Accounts receivable - Trade 871 871 871 871
+Other assets 100 100 100 100
+Cash and bank 275 275 275 275
+Financial instruments: Liabilities
+I - Financial liabilities at fair value 0 41 0 0 41 0 41 0 41
+Cross Currency Interest Swap on loan 17 17 17 17
+Exchange rate hedging instruments 24 24 24 24
+II - Financial liabilities at amortized cost 0 0 3 2,458 2,461 3 2,458 0 2,461
+Loans from financial institutions and the 
+USPP 1,881 1,881 1,881 1,881
+Finance lease liabilities 2 2 2 2
+Other borrowings and financial 
+liabilities 7 7 7 7
+Bank overdrafts and advances 3 3 3 3
+Accounts payable - Trade 126 126 126 126
+Other liabilities 442 442 442 442
+Fair valueAccounting category
+ 
+No assets or liabilities measured at fair value have been transferred between different levels of the fair value hierarchy.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+20 
+ 
+G.5 Foreign currencies 
+ 
+Average rate Closing rate Average rate Closing rate
+Principal currencies Country 1st half year 
+2017 06/30/2017 1st half year 
+2016 12/31/2016
+Europe
+£ sterling United Kingdom 0.86 0.88 0.78 0.86
+Americas and Asia
+Brazilian real Brazil 3.44 3.76 4.14 3.43
+Colombian peso Colombia 3,161.00 3,474.00 3,484.00 3,159.00
+US dollar USA 1.08 1.14 1.12 1.05
+Mexican peso Mexico 21.03 20.58 20.17 21.77
+Philippine peso Philippines 54.05 57.58 52.32 52.27
+ 
+ 
+H. Cash flows 
+ 
+H.1 (Income) expenses, net, without effect on cash 
+1st half 1st half
+year 2017 year 2016
+Depreciation, amortization and impairment losses on non-current assets 128 83
+Change in provisions 0 1
+Unrealized gains and losses on financial instruments 2 -2
+Share-based payments 7 8
+Total 137 90
+ 
+ 
+H.2 Change in working capital 
+1st half 1st half
+year 2017 year 2016
+Accounts receivable - Trade 25 10
+Accounts payable - Trade -11 14
+Other 8 -4
+Total 22 20
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+21 
+ 
+H.3 Reconciliation of the change in net debt with cash flows 
+ 
+ 
+ 
+ 
+ 
+H.4 Analysis of net cash presented in the condensed consolidated statement of cash flows 
+06/30/2017 12/31/2016
+Bank overdrafts and advances -8 -3
+Marketable securities 43 7
+Cash and bank 265 275
+Net cash 300 279
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+22 
+ 
+I. Provisions, litigation, commitments and other contractual obligations 
+ 
+I.1 Change in provisions 
+12/31/2016 Increases Translation Other 06/30/2017
+Utilized Not utilized differences
+Non-current
+Provisions for retirement benefits 12 1 13
+Provisions for risks 1 1
+Total 13 1 0 0 0 0 14
+Current
+Provisions for risks 34 2 -2 -1 -2 31
+Provisions for other expenses 2 2
+Total 36 2 -2 -1 -2 0 33
+TOTAL 49 3 -2 -1 -2 0 47
+Releases
+ 
+ 
+Provisions for risks at June 30, 2017, include a contingent 
+liability of €10.8 million (US$12.4 million), in respect of 
+risks identified during the Aegis USA Inc. acquisition 
+process in 2014, including tax risks of €10.3 million. An 
+equivalent asset of €10 .3 million has been recognized, as 
+these risks are covered by a contractual warranty. 
+Other provisions for risks at June 30, 2017 include other 
+risks in a total amount of €20.1 million, of which €8.2 
+million relates to personnel -related risks, principally 
+concerning lawsuits with former employees, particularly in 
+Argentina and France. 
+As legal proceedings are ongoing for most of these 
+disputes, their settlement date is uncertain. 
+ 
+ 
+I.2 Warranties and other contractual 
+obligations 
+ 
+The group has neither given nor received any significant 
+new warranties during the first half of 2017. 
+ 
+J. Related parties 
+The group has no knowledge of any significant transactions 
+with related parties during the first half of 2017. 
+ 
+K. Events after the reporting date 
+None
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+23 
+ 
+2. 2017 half year management report 
+ 
+2.1 Group revenue in the first half year 2017 
+A. Business activity over the last half year 
+ 
+Consolidated revenue amounted to €2,081 million in the first half of 2017, representing a year -on-year increase of 
++ 9.9% on a like -for-like basis. Revenue growth was + 23.2% as reported, essentially due to the €204 million 
+contribution from the co nsolidation of LanguageLine Solutions as from September 19, 2016. Reported revenue was 
+also lifted by the €20 million positive currency effect, stemming mainly from the increase in the Brazilian real, 
+Colombian peso and US dollar against the euro. 
+ 
+The table below shows the change in revenues generated by activity: 
+ 
+based on reported constant exchange rate 
+&
+figures scope of consolidation
+CORE SERVICES 1,752 1,576 11.2% 9.8%
+English-speaking market & 
+Asia-Pacific 812 784 3.7% 3.7%
+Ibero-LATAM 534 400 33.5% 25.1%
+Continental Europe & MEA 406 392 3.4% 5.2%
+SPECIALIZED SERVICES 329 113 191.4% 11.4%
+Total 2,081 1,689 23.2% 9.9%
+(€ millions) 1st half year 
+2017
+1st half year 
+2016
+variation
+ 
+ 
+ Core services 
+Core Services revenue amounted to €1,752 million in the first half of 2017, a gain of + 11.2% as reported and of + 9.8% 
+like-for-like. The currency effect was positive for the period, primarily reflecting the increase in the US dollar, Brazilian 
+real and Colombian peso against the euro. 
+- English-speaking market & Asia-Pacific 
+First-half revenue for the region climbed + 3.7% on both a like-for-like and reported basis compared to the same period 
+in 2016. The positive impacts of a stronger US dollar were largely offset by the negative impacts of sterling's weakness 
+against the euro. 
+Teleperformance continued to diversify its client portfolio in the region over the first half of the year. The fastest 
+growing client segments in the United States were e -distribution and e -transport services, along with healthcare. 
+Consumer goods and consumer electronics also contributed to regional revenue growth. In this way, over the period,
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+24 
+ 
+the Group continued to reduce its dependence on pay -TV and other telecommunications segments, which accounted 
+for less than 30% of the regional revenue stream in 2016. 
+Given the phase-out of unprofitable contracts in the United Kingdom, which primarily impacted revenue growth in the 
+English-speaking market & Asia -Pacific region in late 2016, business in the United Kingdom was still down in the first 
+half. 
+In Asia -Pacific, business continued to benefit from the significant investments made in the region since 2016 and 
+remained upbeat, particularly in India, with North American and regional mul tinationals in a wide range of buoyant 
+client industries, such as consumer electronics and e-tailing. The positive impacts of this good momentum were offset 
+in the first half by a slowdown in offshore operations serving the North American market in the Phi lippines, to the 
+benefits of Mexico (Ibero -LATAM region), which is currently enjoying a more favorable currency and geopolitical 
+environment. 
+- Ibero-LATAM 
+Business in the Ibero -LATAM region saw exceptionally strong growth in first -half 2017, with year -on-year gains of 
++ 25.1% like-for-like and of + 33.5% as reported, lifting revenue to €534 million for the period. Exchange rates had a 
+positive impact on revenue, mainly reflecting gains in the Brazilian real and Colombian peso against the euro. 
+The Group continued to leverage the same growth drivers in the second quarter as in the beginning of the year, 
+reflecting the significant investments made during 2016 and successful diversification in a number of different sectors. 
+Operations in Portugal, Colombia and Brazil along with offshore activities in the region, including in Mexico, delivered 
+the highest levels of growth. Offshore activities have become particularly attractive as local currencies have weakened. 
+Operations in Brazil remain upbeat despite the persistently uncertain economic and political environment, thanks to 
+recent new contract wins with large US companies in various sectors, and particularly the new econo my. 
+Business in Portugal once again contributed to regional growth, still powered by the success of the Lisbon -based 
+multilingual platforms with large international accounts. E -retailing and e -services were among the fastest growing 
+customer segments. 
+- Continental Europe & MEA 
+In the Continental Europe & MEA region, first-half 2017 revenue rose by + 5.2% like-for-like and by + 3.4% as reported, 
+ending the period at €406 million. The negative currency effects stemmed mainly from the fall in the Egyptian pou nd 
+against the euro. 
+The healthy momentum seen in the three months to March 31, 2017 continued into the second quarter, which posted 
+like-for-like growth of + 4.9%. The Group's growth drivers remained unchanged. Teleperformance continued to enjoy 
+brisk sales momentum, particularly with global clients, in Eastern Europe (Russia, Poland, Czech Republic and Romania) 
+and in most Mediterranean countries: in Greece where, as in Lisbon, the Group is benefiting from the success of its 
+multilingual platforms; in Egypt, especially in the Internet and consumer electronics segment; in Albania, which serves 
+the Italian market; and in Turkey. 
+In Northern Europe, the Group's operations in Scandinavia returned to firm growth in good profitability conditions, 
+whereas the market environment in France, the Netherlands and Germany remained subdued . 
+The fastest growing markets in the region are consumer electronics, financial services, travel agencies and consumer 
+goods. E-services accounted for a good number of the recently awarded contracts.
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+25 
+ 
+ Specialized services 
+Revenue from Specialized Services rose sharply to €329 million in the first half of 2017 from €113 million one year 
+earlier, due to the consolidation of LanguageLine Solutions as from September 19, 2016. On a like -for-like basis, 
+revenue was up + 11.4% for the period. 
+Growth in Specialized Services was primarily attributable to the fast-paced expansion at TLScontact, led by an increase 
+in visa applications and by brisk sales of add-on services. 
+LanguageLine Solutions reported satisfactory pro forma revenue growth in the first half, in line with Group 
+expectations. Given the date on which LanguageLine Solutions was acquired, like -for-like growth for the Group in the 
+first half of 2017 excludes growth reported by LanguageLine Solutions. 
+The LanguageLine Solutions and TLScontact businesses account for more than 80% of annual pro forma Specialized 
+Services revenue. 
+ 
+B. First half 2017 result 
+EBITA before non -recurring items came to €245 million for the first half, up + 62.6% from €150 million in the first -half 
+2016. EBITA margin before non-recurring items widened further to 11.8% from 8.9% in the six months to June 30, 2016. 
+ 
+(€ millions) 1st Half year 
+2017
+1st Half year 
+2016
+Operating profit 191 131
+Share-based payments 9 8
+Acquisition of intang. Assets acquired as part of business 
+combination 45 11
+EBITA before non-recurring items 245 150
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+26 
+ 
+EBITA before non-recurring items by activity – excluding holding companies 
+(€ millions) 1st half year 2017 1st half year 2016
+English-speaking market & Asia-Pacific 60 60
+% or revenue 7.4% 7.7%
+Ibero-LATAM 55 43
+% of revenue 10.3% 10.7%
+Continentale Europe & MEA 11 6
+% revenue 2.7% 1.6%
+Specialized activities 98 24
+% or revenue 29.7% 21.0%
+Total - including holding companies 245 150
+% of revenue 11.8% 8.9%
+ 
+ 
+- English-speaking market & Asia-Pacific 
+The English-speaking market and Asia -Pacific region achieved EBITA before non -recurring items of €60 million in the 
+first half of 2017, on a par with the prior -year period. EBITA margin before non -recurring items came to 7.4% versus 
+7.7% in first-half 2016. This primarily reflects: 
+ 
+o An unfavorable geographic mix effect on margins owing to significant growth in domes tic business in the 
+United States, whereas offshore operations slowed in the Philippines in favor of offshore activities in Mexico 
+(Ibero-LATAM region), which has become particularly attractive thanks to local currency trends and a more 
+secure geopolitical environment ; 
+o Significant investments made in the region over the past few half-year periods and the resulting gradual ramp-
+up of facilities opened in Australia, China and, more recently, Malaysia. 
+ 
+- Ibero-LATAM 
+EBITA before non-recurring items in the Ibero-LATAM region amounted to €55 million in the first half of 2017, compared 
+to €43 million in the same period in 2016. 
+EBITA margin before non -recurring items remained high, representing 10.3% versus 10.7% in the first half of 2016. 
+Growth in operations in Portugal and Colombia was particularly robust and profitable over the period. 
+The region benefited once again from currency fluctuations that continue to favor offshore business in Mexico serving 
+the US market, but to a lesser extent than in first-half 2016. 
+ 
+- Continental Europe & MEA 
+In the Continental Europe & MEA region, Teleperformance remained on the steady upward trend in profitability that 
+began in 2012. EBITA before non-recurring items for the region came to €11 million, giving a margin of 2.7% versus 1.6% 
+in the prior-year period. Positive factors contributing to this growth included:
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+27 
+ 
+o Vibrant business growth with global clients and satisfactory cost discipline in a number of countries in 
+Southern and Eastern Europe, such as Greece with its highly efficient multilingual solutions, and Russia; 
+o Ongoing improvement in profitability in certain countries, such as the Nordics, and to a lesser extent Italy with 
+the development of its offshore solutions in Albania 
+ 
+ Specialized services 
+In Specialized Services, EBITA before non-recurring items amounted to €98 million in the first half of 2017, compared 
+to €24 million in first -half 2016. EBITA margin before non -recurring items stood at 29.7% versus 21.0% in the prior -
+year period. 
+These figures primarily reflect the consolidation of LanguageLine Solutions as from September 19, 2016. The US 
+company contributed €41 million to consolidated EBITA before non-recurring items in full-year 2016, for a margin of 
+36.3%. 
+ 
+ 
+Consolidated operating profit (EBIT) amounted to €191 million, up + 45.8% from €131 million in first-half 2016. 
+First-half 2017 EBIT reflects the amortization of intangible assets in an amount of €45 million, up sharply on the prior-
+year period following the acquisition of LanguageLine Solutions, and an €8 million accounting expense on 
+performance share plans. 
+The financial result represented a net expense of €25 million versus €10 million in first -half 2016, reflecting the cost 
+of debt incurred in connection with the LanguageLine Solutions acquisi tion. 
+Income tax expense amounted to €49 million. The Group's average tax rate was 29.5% compared to 28.0% in first -
+half 2016, owing to the increasing contribution of the Group's North American operations to its results.
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+28 
+ 
+2.2 Cash flow and capital structure 
+A. Consolidated financial structure as of June 30, 2017 
+ 
+Long-term capital 
+(€ millions) 06/30/2017 12/31/2016
+Shareholders' equity 1,827 1,921 
+Non-current financial liabilities 1,537 1,688 
+Total non-current capital 3,364 3,609 
+ 
+Short-term capital 
+(€ millions) 06/30/2017 12/31/2016
+Current financial liabilities 272 261 
+Cash and cash equivalent 308 282 
+Cash, net of current liabilities 36 21 
+ 
+B. Cash flow 
+ 
+Source and amount of cash flows 
+(€ millions) 06/30/2017 06/30/2016
+Internally generated funds from operations before changes in 
+working capital requirements 251 176
+Changes in working capital requirements 22 20
+Cash flow from operating activitites 273 196
+Investment and capital expenditure -68 -75
+Repayment of loans 0 0
+Cash flow from investing activities -68 -75
+Proceeds from share capital increases/Treasury shares -1 -17
+Change in ownership interest in controlled activities -39 -33
+Dividends paid 0 -68
+Net change in financial liabilities -176 11
+Interest paid on financial liabilities -27 -8
+Cash flow from financing activities -243 -115
+Change in cash and cash equivalent -38 6
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+29 
+ 
+Cash flow after tax and interest paid rose to €224 million from €168 million in first-half 2016. Change in consolidated 
+working capital requirement was an inflow of €22 million, on a par with the prior -year period. This good performance 
+reflects, in particular, the success of the policy deployed to improve the group’s liquidity. 
+Net capital expenditure amounted to €68 million, or 3.3% of revenue, versus €75 million and 4.4% in first-half 2016. The 
+group continued to create or expand contact centers to support clients in all markets, while maintaining discipline in 
+the choice of capital expenditure. 
+In all, net free cash flow increased sharply, to €178 million from €113 million in the prior -year period. 
+Minority interests’ transactions, which totaled €40 million in the first half, mainly included TLScontact final earn -out. 
+After considering a dividend of €75 million paid in early July, net debt stood at €1,501 million at June 30, 2017. The 
+group’s financial structure therefore remains very solid with equity of €1,827 million at end June. 
+ 
+2.3 Related parties 
+ 
+The group has no knowledge of any significant transactions with related parties during the first half of 2017. 
+ 
+2.4 Event after the reporting date 
+ 
+None. 
+ 
+2.5 Trend and prospects 
+A. Risks and uncertainties 
+ 
+The group is exposed to the risks which were described in the Reference document for the year ended December 31, 
+2016; which was subject to visa by the AMF. 
+The group’s management team has not anticipated any significant changes in such risks and uncertainties or new risk and 
+uncertainty elements for the second half of 2017. 
+ 
+B. 2017 Outlook 
+ 
+In light of the encouraging first-half year results, Teleperformance confirms and refines its full year guidance, targeting: 
+- Like-for-like revenue growth of at least + 7% ; 
+- An EBITA margin before non-recurring items above 13 %. 
+In addition, Teleperformance expects to maintain a high level of net free cash flow in 2017.
+
+2017 Half-year financial report 
+3. Attestation of the person responsible for the condensed consolidated interim financial statements and management report 
+ 
+30 
+ 
+3. Attestation of the person responsible for the condensed 
+consolidated interim financial statements and 
+management report 
+ 
+« I hereby declare that, to the best of my knowledge, the condensed consolidated financial statements for the first half 
+of 2017 have been prepared in accordance with applicable accounting principles and give a true and fair view of the 
+assets and liabilities, financial situation and results of the Group. I further declare that the half year Management Report 
+gives a true and fair view of the material events occurring during the first six months of the financial year and of their 
+impact on the half year financial statements, of the principal related party transactions, and of the principal risks and 
+uncertainties for the remaining six months of 2017 ». 
+ 
+ 
+Paris, July 27, 2017 
+ 
+Paulo César Salles Vasques 
+Chief Executive Officer
+
+2017 Half-year financial report 
+4. Statutory auditors’ review report on 2017 Half-yearly Financial Information 
+31 
+ 
+4. Statutory auditors’ review report on 2017 Half-yearly 
+Financial information 
+ 
+This is a free translation into English of the statutory 
+auditors’ review report on the half -yearly financial 
+information issued in French and is provided solely for 
+the convenience of English speaking users. This report 
+includes information relating to the specific verification 
+of information given in the Group’s interim management 
+report. This report should be read in conjunction with, 
+and construed in accordance with, French law and 
+professional standards applicable in France. 
+ 
+For the six-month period ended June 30, 2017 
+ 
+To the Shareholders, 
+In compliance with the assignment entrusted to us by 
+your shareholders meeting and in accordance with the 
+requirements of article L. 451 -1-2 III of the French 
+Monetary and Financial Code ("Code monétaire et 
+financier"), we hereby report to you on: 
+- the review of the accompanying condensed half -
+yearly consolidated financial statements of 
+Teleperformance SE, for the period from January 
+1st, 2017 to June 30, 2017 ; 
+- the verification of the informa tion presented in the 
+interim management report. 
+These condensed half -yearly consolidated financial 
+statements are the responsibility of the Board of 
+Directors. Our role is to express a conclusion on these 
+financial statements based on our review. 
+I - Conclusion on the financial statements 
+We conducted our review in accordance with 
+professional standards applicable in France. A review of 
+interim financial information consists of making 
+inquiries, primarily of persons responsible for financial 
+and a ccounting matters, and applying analytical and 
+other review procedures. A review is substantially less 
+in scope than an audit conducted in accordance with 
+professional standards applicable in France and 
+consequently does not enable us to obtain assurance 
+that we would become aware of all significant matters 
+that might be identified in an audit. Accordingly, we do 
+not express an audit opinion. 
+Based on our review, nothing has come to our attention 
+that causes us to believe that the accompanying 
+condensed ha lf-yearly consolidated financial 
+statements are not prepared, in all material respects, in 
+accordance with IAS 34 - standard of the IFRSs as 
+adopted by the European Union applicable to interim 
+financial information. 
+ 
+II – Specific verification 
+We have also verified the information presented in the 
+half-yearly management report on the condensed half-
+yearly consolidated financial statements subject to our
+
+
+## CASH FLOW
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+2 
+ 
+1. Condensed consolidated interim financial 
+statements 
+ 
+ 
+ 
+1.1 CONDENSED CONSOLIDATED STATEMENT OF FINANCIAL POSITION (in millions of euros) .............. 3 
+1.2 CONDENSED CONSOLIDATED STATEMENT OF INCOME (in millions of euros) .................................. 4 
+1.3 CONDENSED CONSOLIDATED STATEMENT OF COMPREHENSIVE INCOME (in millions of euros) ..... 4 
+1.4 CONDENSED CONSOLIDATED STATEMENT OF CASH FLOWS (in millions of euros) ........................... 5 
+1.5 CONDENSED CONSOLIDATED STATEMENT OF CHANGES IN EQUITY (in millions of euros) .............. 6 
+1.6 NOTES TO THE CONDENSED CONSOLIDATED FINANCIAL STATEMENTS (in millions of euros) ......... 7
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+3 
+ 
+1.1 Condensed consolidated statement of financial position (in 
+millions of euros) 
+ASSETS Notes 06.30.2017 12.31.2016
+Non-current assets
+Goodwill D 1,816 1,936
+Other intangible assets 1,036 1,172
+Property, plant and equipment 436 476
+Financial assets 54 55
+Deferred tax assets 42 30
+Total non-current assets 3,384 3,669
+Current assets
+Current income tax receivable 59 46
+Accounts receivable - Trade C.1 797 871
+Other current assets C.1 115 100
+Other financial assets 29 24
+Cash and cash equivalents H.4 308 282
+Total current assets 1,308 1,323
+Total assets 4,692 4,992
+EQUITY AND LIABILITIES Notes 06.30.2017 12.31.2016
+Equity
+Share capital F.1 144 144
+Share premium 575 575
+Translation reserve -47 100
+Other reserves 1,144 1,092
+Equity attributable to owners of the company 1,816 1,911
+Non-controlling interests 11 10
+Total shareholder's equity 1,827 1,921
+Non-current liabilities
+Provisions I.1 14 13
+Financial liabilities G.2 1,537 1,688
+Deferred tax liabilities 398 444
+Total non-current liabilities 1,949 2,145
+Current liabilities
+Provisions I.1 33 36
+Current income tax 72 61
+Accounts payable - Trade C.3 127 126
+Other current liabilities C.3 412 442
+Other financial liabilities G.2 272 261
+Total current liabilities 916 926
+Total equity and liabilities 4,692 4,992
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+4 
+ 
+1.2 Condensed consolidated statement of income (in millions of euros) 
+Notes 1st ½ yr 
+2017
+1st ½ yr 
+2016
+Revenues C.4 2,081 1,689
+Other revenues C.4 4 2
+Personnel -1,377 -1,151
+External expenses -369 -309
+Taxes other than income taxes -12 -9
+Depreciation and amortization -83 -72
+Amortization of intang. assets acquired as part of a business combination -45 -11
+Share-based payments C.2 -8 -8
+Operating profit 191 131
+Income from cash and cash equivalents 0 1
+Interest on financial liabilities -32 -12
+Net financing costs G.1 -32 -11
+Other financial income (expenses), net G.1 7 1
+Financial result -25 -10
+Profit before taxes 166 121
+Income tax E -49 -34
+Net profit 117 87
+Net profit - Group share 116 86
+Net profit (loss) attributable to non-controlling interests 1 1
+Basic earnings per share (in €) F.3 2.01 1.51
+Diluted earnings per share (in €) F.3 1.98 1.48
+ 
+ 
+ 
+1.3 Condensed consolidated statement of comprehensive income 
+(in millions of euros) 
+1st ½ yr 
+2017
+1st ½ yr 
+2016
+Net profit 117 87
+May not be reclassified to profit or loss in a subsequent period
+May be reclassified to profit or loss in a subsequent period
+Net gain on foreign exchange hedges (before tax) 6 5
+Income tax net losses on foreign exchange hedges -2 -2
+Translation differences -147 -37
+Other recognized income and expenses, net -143 -34
+Total comprehensive income (loss) -26 53
+Group share -27 52
+Attributable to non-controllling interests 1 1
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+5 
+ 
+1.4 Condensed consolidated statement of cash flows (in millions of 
+euros) 
+Cash flows from operating activities Notes 1st ½ yr 2017 1st ½ yr 2016
+Net profit - Group share 116 86
+Net profit attributable to non-controlling interests 1 1
+Income tax expense 49 34
+Interest expense on financial liabilities 29 8
+(Income) expenses, net, without effect on cash H.1 137 90
+Income tax paid -81 -43
+Internally generated funds from operations 251 176
+Change in working capital H.2 22 20
+Net cash from operating activities 273 196
+Cash flows from investing activities
+Acquisition of intangible assets and property, plant and equipment -68 -76
+Loans made -1
+1
+Repayment of loans 1
+Net cash flow from investing activities -68 -75
+Cash flows from financing activities
+Acquisition/disposal of treasury shares -1 -17
+Change in ownership interest in controlled entities G.2 -39 -33
+Dividends paid to parent company shareholders -68
+Financial interests paid/received -27 -8
+Increase in financial liabilities 1,106 537
+Repayment of financial liabilities -1,282 -526
+Net cash flow from financing activities -243 -115
+Change in cash and cash equivalents -38 6
+Effect of exchange rates on cash held 59 -10
+Net cash at January 1 H.4 279 254
+Net cash at June 30 H.4 300 250
+Proceeds from disposals of intangible assets and property, plant and equipment
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+6 
+ 
+1.5 Condensed consolidated statement of changes in equity (in 
+millions of euros) 
+Total
+Share capital
+Share premium
+Translation reserve
+Retained earnings
+Impact of financial 
+hedging instruments
+Equity - Group share
+Non-controlling 
+interests
+At December 31, 2015 143 575 69 978 -7 1,758 7 1,765
+Trans lation differences from foreign 
+operations -37 -37 -37
+Net profit 86 86 1 87
+Net gain on cas h flow hedges (after tax) 3 3 3
+Total recognized income and expenses 0 0 -37 86 3 52 1 53
+Operations on non-controlling interes ts -13 -13 -13
+Fair value of incentive plan s hare awards 8 8 8
+Treas ury s hares -18 -18 -18
+Dividends (€1.20 per s hare) -68 -68 -68
+At June 30, 2016 143 575 32 973 -4 1,719 8 1,727
+At December 31, 2016 (restated)* 144 575 100 1,099 -7 1,911 10 1,921
+Trans lation differences from foreign 
+operations -147 -147 -147
+Net profit 116 116 1 117
+Net gain on cas h flow hedges (after tax) 4 4 4
+Total recognized income and expenses 0 0 -147 116 4 -27 1 -26
+Operations on non-controlling interes ts 1 1 1
+Fair value of incentive plan s hare awards 7 7 7
+Treas ury s hares -1 -1 -1
+Dividends (€1.30 per s hare) -75 -75 -75
+At June 30, 2017 144 575 -47 1,147 -3 1,816 11 1,827
+* s ee note B
+Group share
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+7 
+ 
+1.6 Notes to the condensed consolidated financial statements (in 
+millions of euros) 
+ 
+A. Accounting policies and methods ............................................................................................................... 8 
+A.1 Reporting entity .............................................................................................................................. 8 
+A.2 Basis of preparation ........................................................................................................................ 8 
+A.3 Estimates ......................................................................................................................................... 8 
+ 
+B. Consolidation scope ..................................................................................................................................... 9 
+ 
+C. Operational activity ................................................................................................................................... 10 
+C.1 Accounts receivable – Trade and Other current assets ................................................................ 10 
+C.2 Share-based payments .................................................................................................................. 11 
+C.3 Accounts payable – Trade and Other current liabilities ................................................................ 12 
+C.4 Revenues and other operating revenues ...................................................................................... 12 
+C.5 Segment reporting ......................................................................................................................... 13 
+ 
+D. Goodwill ..................................................................................................................................................... 14 
+ 
+E. Income tax.................................................................................................................................................. 14 
+ 
+F. Equity and earning per share .................................................................................................................... 14 
+F.1 Share capital and dividends ........................................................................................................... 14 
+F.2 Treasury shares .............................................................................................................................. 14 
+F.3 Earnings per share ......................................................................................................................... 14 
+ 
+G. Financial assets and financial liabilities .................................................................................................... 15 
+G.1 Financial result .............................................................................................................................. 15 
+G.2 Financial liabilities ......................................................................................................................... 16 
+G.3 Foreign exchange hedging operations .......................................................................................... 16 
+G.4 Carrying amount and fair value of financial assets and financial liabilities by accounting category
+ ............................................................................................................................................................. 18 
+G.5 Foreign currencies ......................................................................................................................... 20 
+ 
+H. Cash flows .................................................................................................................................................. 20 
+H.1 (Income) expenses, net, without effect on cash ........................................................................... 20 
+H.2 Change in working capital ............................................................................................................. 20 
+H.3 Reconciliation of the change in net debt with cash flows ............................................................ 21 
+H.4 Analysis of net cash presented in the condensed consolidated statement of cash flows ........... 21 
+ 
+I. Provisions, litigation, commitments and other contractual obligations ................................................. 22 
+I.1 Change in provisions ....................................................................................................................... 22 
+I.2 Warranties and other contractual obligations ............................................................................... 22 
+ 
+J. Related parties ........................................................................................................................................... 22 
+ 
+K. Events after the reporting date ................................................................................................................. 22
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+8 
+ 
+Highlights of the first half of 2017 
+The group has made a bond issue in the amount of €600 
+million, redeemable in 2024, with a nominal interest rate 
+of 1.50%, in order to complete the refinancing of its 
+acquisition of LanguageLine Solutions LLC. 
+ 
+A. Accounting policies and 
+methods 
+A.1 Reporting entity 
+ 
+Teleperformance (“the company”) is a company 
+domiciled in France. 
+The condensed consolidated interim financial 
+statements of the company as at and for the six months 
+ended June 30, 2017 include the company and its 
+subsidiaries (together referred to as “the group”). 
+The consolidated financial statements of the group for 
+the year ended December 31, 2016 are available upon 
+request from the company’s registered office at 21/25 
+rue Balzac, 75008 Paris, or from its website 
+(www.teleperformance.com). 
+All financial information presented in euro has been 
+rounded to the nearest million unless otherwise 
+specified.. 
+A.2 Basis of preparation 
+These condensed consolidated interim financial 
+statements as at and for the six months ended June 30, 
+2017 have been prepared in accordance with IAS 34 
+“Interim Financial Reporting” and are presented in 
+accordance with revised and amended IAS 1. They do not 
+include all the information required for full annual 
+financial statements and should be read in conjunction 
+with the consolidated financial statements of the group 
+as at and for the y ear ended December 31, 2016 which 
+are included in the 2016 reference document D.17-0122 
+that was filed with the AMF (the French Stock Exchange 
+regulator) on March 2, 2017. 
+The accounting policies have been applied consistently to 
+all periods presented in t hese condensed consolidated 
+interim financial statements. 
+These condensed consolidated interim financial 
+statements were approved by the Board of Directors on 
+July 27, 2017. 
+The following standards, amendments and 
+interpretations: 
+- Amendments to IAS 12, on the recognition of 
+deferred tax assets for unrealized losses; 
+- Amendments to IAS 7 on the statement of cash flows 
+came into force in 2017 but did not have a significant 
+impact on the group’s financial statements. 
+The group has elected not to early apply the following 
+new standards: 
+- IFRS 15 on revenues; 
+- IFRS 9 on financial instruments; 
+These standards will come into effect from January 1, 
+2018. 
+The group does not expect a significant impact on its 
+financial statements from the adoption of IFRS 15. The 
+group uses foreign exchange hedging instruments on a 
+regular basis and the adoption of IFRS 9 should result in 
+a reduction of the volatility it experiences in the results 
+of these operations. 
+The assessment of the impact of the new standard IFRS 
+16 on leases, which comes into effect on January 1, 2019, 
+is still in progress. 
+The accounting policies applied by the group in these 
+condensed consolidated interim financial statements are 
+the same as those applied by the group in its 
+consolidated financial statements as at and for the year 
+ended December 31, 2016, with the exception of the new 
+standards, amendments and interpretations set out 
+above, and are in accordance with IFRSs as issued by the 
+IASB and adopted by the European Union. 
+A.3 Estimates 
+The preparation of financial statements in conformity 
+with IFRS requires making estimates and assumptions 
+which affect the reported amounts in the financial 
+statements, especially with respect to the following 
+items: 
+- the depreciation and amortization rates, 
+- the calculation of losses on doubtful receivables, 
+- impairment of intangible assets and goodwill, 
+- the measurement of provisions and retirement 
+benefits, 
+- the measurement of share-based payment expense, 
+- provisions for contingencies and expenses, 
+- the measurement of intangible assets acquired as 
+part of a business combination, 
+- deferred taxation. 
+ 
+The estimates are based on information available at the 
+time of preparation of the financial statements, and may 
+be revised, in a future period, if circumstances change, or 
+if new information is available. Actual results may differ 
+from these estimates.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+9 
+ 
+ 
+B. Consolidation scope 
+The group made no acquisition or disposal during the first half of. 
+During the first half of 2017, the group restated its measurement of the fair values of the identifiable assets and liabilities 
+acquired of LanguageLine Solutions LLC. The principal impact concerns the US income tax rate which has been revised. 
+The following schedule sets out the revised fair values of the identifiable assets and liabilities as of the date of 
+acquisition: 
+ 
+In millions of US$
+Fair values at 
+09/19/2016
+Non-current assets
+Intangible assets 983
+Property, plant and equipment 9
+Other non-current assets 4
+Total non-current assets 996
+Current assets
+Current tax assets 4
+Accounts receivable - Trade 77
+Other current assets 6
+Cash and cash equivalents 10
+Total current assets 97
+TOTAL ASSETS 1,093
+Non-current liabilities
+Provisions 1
+Deferred tax liabilities 377
+Total non-current liabilities 378
+Current liabilities
+Provisions 3
+Accounts payable - Trade 8
+Other current liabilities 20
+Total current liabilities 31
+TOTAL LIABILITIES 409
+Net assets, acquired 100% 684
+Acquisition price 1,538
+Goodwill 854
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+10 
+ 
+Following changes emerge on certain items of the condensed consolidated statement of financial position as of 
+December 31, 2016: 
+Non-current assets
+Goodwill 1,952 -16 1,936
+Intangible assets 1,175 -3 1,172
+Property, plant and equipment 476 476
+Financial assets 55 55
+Deferred tax assets 30 30
+Total non-current assets 3,688 -19 3,669
+Non-current liabilities
+Provisions 13 13
+Financial liabilities 1,688 1,688
+Deferred tax liabilities 464 -20 444
+Total non-current liabilities 2,165 -20 2,145
+Current provisions 34 2 36
+Total equity 1,922 -1 1,921
+After restatementsConsolidated statement of financial 
+position, December 31, 2016 (extract) As published Restatements
+ 
+ 
+C. Operational activity 
+ 
+C.1 Accounts receivable – Trade and Other current assets 
+Gross Write- Net Net
+ downs
+Accounts receivable - Trade 804 -7 797 871
+Other receivables 23 -9 14 12
+Taxation recoverable 41 41 37
+Advances and receivables on non-current assets 6 6 8
+Prepaid expenses 54 54 43
+Total 928 -16 912 971
+06/30/2017 12/31/2016
+ 
+ 
+Factoring arrangements : 
+The group and a number of its subsidiaries use factoring arrangements which comply with criteria for derecognition. 
+The outstanding amounts totaled €51.4 million and €50.5 million at June 30, 2017 and December 31, 2016, respectively. 
+Under the agreement, the Group retains the credit control and receipt functions in respect of the sold receivables on 
+behalf of the factor.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+11 
+ 
+C.2 Share-based payments 
+ 
+2016 incentive share award plans 
+ 
+The Board of Directors’ meetings of April 28 and November 2, 2016 approved free awards in a total amount of 1,065,808 
+incentive plan shares to group personnel, including company officers, under the authorization given at the Shareholders’ 
+General Meeting of April 28, 2016, which included a maximum limit of 2.5% of the share capit al of the company at the 
+grant date. The board meeting on April 28, 2016 also approved the setting-up of a long-term incentive plan for company 
+officers, with the free award of 350,000 shares. The two plans have identical conditions for vesting. 
+ 
+The features of these plans are as follows: 
+04/28/16 plan 11/02/16 plan
+Date of board meeting allocating the awards 04/28/2016 11/02/2016
+Vesting period 04/28/2016 to 
+04/28/2019
+11/02/2016 to 
+11/02/2019
+Grant date 04/28/2016 11/02/2016
+Number of share awards* 1,264,300 151,508
+Number of canceled shares -59,700 -13,264
+Number of outstanding share awards at June 30, 2017 1,204,600 138,244
+Fair value of each share award at the grant date (taking into account the market 
+condition) €48.51 €72.40
+Fair value of each share award at the grant date (without taking into account the 
+market condition) €75.20 €88.80
+* including for company officers 350,000 0
+ 
+Vesting of the free share awards is conditional on the beneficiaries remaining with the group until at least the end of 
+the vesting period and on meeting certain performance conditions relating to the financial years between 2016 and 
+2018. 
+As of June 30, 2017, it is considered probable that it will be necessary to meet the market condition in order to obtain 
+the highest number of shares and the amount of expense recognized in respect of the plans is therefore based on fair 
+values of €48.51 and €72.40 per share, which results in related expense of €8.4 million in the first half of 2017 .
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+12 
+ 
+C.3 Accounts payable – Trade and Other current liabilities 
+06/30/2017 12/31/2016
+Accounts payable - Trade 127 126
+Other payables 144 158
+Taxes payable 58 56
+Accruals 180 160
+Other operating liabilities 30 68
+Total 539 568
+ 
+Other operating liabilities at June 30, 2017 include an amount of €9.8 million (December 31, 2016: €23.9 million) in 
+respect of the negative fair value of derivative financial instruments used for currency hedging. 
+C.4 Revenues and other operating revenues 
+ 
+Revenues 
+ 
+Group revenues in the first half of 2017 amounted to €2,081 million, which represents an increase (on the basis of 
+published figures) of 23.2% over the same period in 2016. 
+At constant currency rates and consolidation scope, the increase is 9.9%. 
+ 
+Other operating revenues 
+Other operating revenues mainly comprise government grants. 
+In the first half of 2017, grant income amounted to €4.3 million, compared with €2.2 million in the same period of 2016. 
+It includes French competitiveness and employment tax credits for € 1.4 million in 2017, compared with €1.3 million in 
+the same period of 2016.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+13 
+ 
+C.5 Segment reporting 
+Segment information is reported in the schedules set out below. 
+Inter-segment operations are not significant and are not identified separately. 
+With effect from January 1, 2017, group activity as followed by the chief executive officer is split into the following two 
+segments: 
+ The « Core Services » segment which includes customer care, technical support and new customer acquisitions 
+and is divided into three principal management regions : 
+ 
+- English-speaking & APAC, which covers the activities in the following countries: Canada, USA, United 
+Kingdom, South Africa, China, Indonesia, India, Philippines, Singapore, Jamaica, Guyana, Australia and 
+Malaysia; 
+- Ibero-LATAM, which covers the activities in the following countries: Argentina, Brazil, Chile, Colombia, 
+Costa Rica, Dominican Republic, El Salvador, Mexico, Spain an d Portugal; 
+- Continental Europe & MEA, which covers the activities in the countries of the EMEA region with the 
+exception of the United Kingdom, Spain and Portugal. 
+ 
+ The « Specialized Services » segment which includes the interpreting services of LanguageLi ne Solutions, the 
+visa application management services for government departments offered by TLScontact, GN Research’s 
+analytics solutions and the accounts receivable credit management services of AllianceOne Receivables 
+Management (ARM) in North America. 
+As a result of this new operational organization, the 2016 comparable amounts have been restated accordingly: 
+Six months ended June 30, 2017 SPECIALIZED 
+SERVICES TOTAL
+English-
+speaking & 
+APAC
+Ibero-
+LATAM
+Continental 
+Europe
+& MEA
+Holdings
+Revenue 812 534 406 329 2,081
+Operating profit 51 53 11 12 64 191
+Capital expenditure 25 20 14 9 68
+Intangible assets and 
+Property, plant and 
+equipment (carrying amounts)
+1,069 294 270 2 1,653 3,288
+Depreciation and 
+amortization of non-current 
+assets
+48 24 13 43 128
+Six months ended June 30, 2017 
+(proforma)
+SPECIALIZED 
+SERVICES TOTAL
+English-
+speaking & 
+APAC
+Ibero-
+LATAM
+Continental 
+Europe
+& MEA
+Holdings
+Revenue 784 400 392 113 1,689
+Operating profit 52 41 6 9 23 131
+Capital expenditure 35 23 12 6 76
+Intangible assets and 
+Property, plant and 
+equipment (carrying amounts)
+1,130 293 264 4 92 1,783
+Depreciation and 
+amortization of non-current 
+assets
+45 19 13 6 83
+CORE SERVICES
+CORE SERVICES
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+14 
+ 
+D. Goodwill 
+There were no changes to the composition of CGUs or 
+groups of CGUs in the first half of 2017. 
+The group has reviewed its CGUs and groups of CGUs to 
+determine whether there is any indication of 
+impairment. 
+These reviews did not result in any subsequent 
+requirement to perform impairment tests, and no 
+impairment losses were therefore recognized in the first 
+half of 2017. 
+E. Income tax 
+Income tax expense in an interim period is measured 
+using management’s best estimate of the expected full -
+year rate. 
+The income tax expense in the first half of 2017 
+amounted to €49.0 million compared with €33.9 million 
+in the first half of 2016. This increase is principally due to 
+the contribution of LanguageLine Solutions LLC which 
+was acquired in the second half of 2016. 
+ 
+F. Equity and earning per share 
+F.1 Share capital and dividends 
+The share capital at June 30, 2017 amounted to 
+€144,450,000 represented by 57,780,000 shares with a 
+nominal value of €2.50 each, fully paid up. 
+ 
+The company made a dividend distribution of €75.1 
+million during July 2017. 
+ 
+F.2 Treasury shares 
+ 
+At June 30, 2017, the group held 20,500 treasury shares, 
+acquired under its liquidity contract, in a carrying amount 
+of €2.3 million which has been deducted from equity. 
+ 
+ 
+F.3 Earnings per share 
+Basic and diluted earnings per share are calculated as follows: 
+1st ½ yr 2017 1st ½ yr 2016
+Net profit - Group share 116 86
+Weighted-average number of shares used to calculate basic earnings per share 57,769,706 56,918,628
+Dilutive effect of incentive share awards 935,172 933,421
+Weighted-average number of shares used to calculate diluted earnings per share 58,704,878 57,852,049
+Basic earnings per share (in €) 2.01 1.51
+Diluted earnings per share (in €) 1.98 1.48
+ 
+ 
+Weighted-average number of shares used to calculate basic earnings per share: 
+ 
+1st ½ yr 2017 1st ½ yr 2016
+Number of ordinary shares in issue at January 1 57,780,000 57,201,690
+Treasury shares -10,294 -283,062
+Total 57,769,706 56,918,628
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+15 
+ 
+G. Financial assets and financial liabilities 
+G.1 Financial result 
+1st ½ yr 2017 1st ½ yr 2016
+Income from cash and cash equivalents 0 1
+Other interest expense, net -25 -9
+Bank commissions -7 -3
+Gross financing costs -32 -12
+Net financing costs -32 -11
+Foreign exchange gains 18 17
+Foreign exchange losses -11 -15
+Other financial expense 0 -1
+Other financial income (expenses), net 7 1
+Financial result -25 -10
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+16 
+ 
+G.2 Financial liabilities 
+ 
+Net financial indebtedness: Schedule of debt maturities: 
+ 
+06/30/2017 Current Non-current 12/31/2016 Current Non-current 
+Loans from financial 
+institutions 613 175 438 1,344 201 1,143
+USPP loans 504 504 544 544
+Bonds 600 600
+Bond issuance 
+expense/premiums & 
+discounts
+-10 -4 -6 -7 -7
+Loan hedging instruments 12 12 17 17
+Bank overdrafts and advances 8 8 3 3
+Dividends payable 75 75 0
+Due to minority shareholders 0 39 39
+Other financial liabilities 7 6 1 9 8 1
+Total financial liabilities 1,809 272 1,537 1,949 261 1,688
+Marketable securities 43 43 7 7
+Cash and bank 265 265 275 275
+Total cash and cash 
+equivalents 308 308 282 282
+Net debt 1,501 -36 1,537 1,667 -21 1,688
+ 
+The group made a bond issue in the amount of €600 
+million, redeemable in 2024, with a nominal interest rate 
+of 1.50%, in order to complete the refinancing of its 
+acquisition of LanguageLine Solutio ns LLC. The proceeds 
+were used to reimburse the bridging loan of €668 million 
+which had been obtained originally for a duration of 24 
+months. 
+The group also made a payment of €38.5 million during 
+the first half of 2017 relating to the balance of deferred 
+consideration due on the acquisition of minority 
+interests. 
+ 
+Covenants 
+Our principal financial liabilities are subject to financial 
+covenants which were all respected as of June 30, 2017. 
+ 
+G.3 Foreign exchange hedging operations 
+Revenues and operating expenses of group subsidiaries 
+may be denominated in a currency other than the 
+functional currency of each country concerned. To cover 
+these exchange risks, hedge contracts are entered into 
+between the following principal currencies: 
+- the US dollar and the Mexican peso ; 
+- the US dollar and the Colombian peso ; 
+- the Philippine peso and the US dollar ; 
+- the Colombian peso, the Turkish pound, the Tunisian 
+dinar and the Euro. 
+The policy of the group is cover its highly probable 
+forecast commercial transactions denominated in 
+foreign currency, usually up to 12 months ahead. The 
+group uses forward exchange contracts and plain vanilla 
+foreign exchange options. 
+In addition, hedging arrangements are in place to cover 
+the risk of changes in exchange rates amongst the various 
+currencies managed in the cash pool (particularly the US$ 
+and the Mexican peso) and the euro, and on certain loans 
+between Teleperformance SE and its subsidiaries.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+17 
+ 
+The principal outstanding derivative financial instruments at the reporting date are as follows : 
+Derivative financial instruments at June 30, 2017 
+(in thousands)
+Notional 
+amount in 
+currency
+Notional 
+amount in € at 
+06/30/2017
+Fair value in € 
+at 
+06/30/2017
+In equity In 2017 
+profit or loss
+Hedge of forecast transactions
+USD/MXN - 2017 57 50 3 1 2
+MXN/USD - 2017 485 24 1 0 1
+USD/PHP - 2017 10,895 189 -5 -3 -2
+COP/EUR - 2017 23 23 -1 -2 1
+COP/USD - 2017 56 53 0 -1 1
+USD/INR - 2017 29 25 1 0 1
+EUR/TND - 2017 44 16 -1 -1 1
+Cross Currency Interest Swap EUR/USD 85 74 -11 0 -11
+USD interest caps 400 351 -1 0 -1
+Interest rate swap fixed/variable 200 200 0 0 0
+€ interest cap 120 120 0 0 0
+Hedge of intra-group loans 
+in USD 192 169 3 0 3
+in PHP 4,293 75 -3 0 -3
+Cash pooling hedges
+in GBP 10 11 0 0 0
+in MXN 1,150 56 1 0 1
+in USD 20 18 0 0 0
+Derivative financial instruments at December 31, 
+2016 (in thousands)
+Notional 
+amount in 
+currency
+Notional 
+amount in € at 
+12/31/2016
+Fair value in € 
+at 
+12/31/2016
+In equity In 2016 
+profit or loss
+Hedge of forecast transactions
+USD/MXN - 2017 10 9 -1 -1
+USD/MXN - 2017 45 43 -2 -2 0
+MXN/USD - 2016 197 9 -1 -1
+MXN/USD - 2017 846 39 -3 -3 0
+USD/PHP - 2016 2,395 46 0 0 0
+USD/PHP - 2017 11,005 211 -8 -6 -2
+COP/EUR - 2017 28 28 0 0 0
+COP/USD - 2017 50 47 0 0 0
+USD/INR - 2017 25 24 0 0 0
+EUR/TND - 2017 52 21 0 0 0
+Cross Currency Interest Swap EUR/USD 85 81 -17 -17
+USD interest caps 400 380 0 0
+Hedge of intra-group loans 
+in GBP 6 7 1 1
+in USD 140 133 -7 -7
+in PHP 4,486 86 1 1
+Cash pooling hedges
+in MXN 1,570 72 -1 -1
+in USD 45 43 0 0
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+18 
+ 
+At June 30, 2017, the net negative fair value of derivative financial instruments amounted to -€14.0 million (December 
+31, 2016: negative fair value of -€37.7 million) of which €8.3 million is presented in Other financial assets, €9.8 million 
+in Other current liabilities and €12.5 million in Other financial liabilities. 
+Counterparty credit risk (Credit value adjustment – CVA) and own credit risk (Debt value adjustment – DVA) are taken 
+account of in the fair values of hedging instruments, but the amounts a re not significant. 
+ 
+G.4 Carrying amount and fair value of financial assets and financial liabilities by accounting 
+category 
+The following schedules show the carrying amounts of financial assets and financial liabilities by accounting category as 
+well as their fair values by level of hierarchy : 
+06/30/2017
+Financial 
+instrument
+s at fair 
+value 
+through 
+profit or 
+loss
+Derivative 
+financial 
+instruments
+Loans and 
+receivable
+s
+Financial 
+liabilities 
+at 
+amortized 
+cost
+Total Lev 1 Lev 2 Lev 3 Total
+Financial instruments: Assets
+I - Financial assets at fair value 43 8 0 0 51 43 8 0 51
+Exchange rate hedging instruments 8 8 8 8
+Marketable securities 43 43 43 43
+II - Financial assets at amortized cost 0 0 1,252 0 1,252 265 987 0 1,252
+Loans 11 11 11 11
+Guarantee deposits 54 54 54 54
+Net asset warranty 10 10 10 10
+Accounts receivable - Trade 797 797 797 797
+Other assets 115 115 115 115
+Cash and bank 265 265 265 265
+Financial instruments: Liabilities
+I - Financial liabilities at fair value 0 22 0 0 22 0 22 0 22
+Cross Currency Interest Swap/Interest 
+caps on loan 12 12 12 12
+Exchange rate hedging instruments 10 10 10 10
+II - Financial liabilities at amortized cost 0 0 8 2,328 2,336 8 2,328 0 2,336
+Loans from financial institutions, USPP 
+and Bonds 1,707 1,707 1,707 1,707
+Finance lease liabilities 2 2 2 2
+Other borrowings and financial 
+liabilities 80 80 80 80
+Bank overdrafts and advances 8 8 8 8
+Accounts payable - Trade 127 127 127 127
+Other liabilities 412 412 412 412
+Fair valueAccounting category
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+19 
+ 
+12/31/2016
+Financial 
+instrument
+s at fair 
+value 
+through 
+profit or 
+loss
+Derivative 
+financial 
+instruments
+Loans and 
+receivable
+s
+Financial 
+liabilities 
+at 
+amortized 
+cost
+Total Lev 1 Lev 2 Lev 3 Total
+Financial instruments: Assets
+I - Financial assets at fair value 7 3 0 0 10 7 3 0 10
+Exchange rate hedging instruments 3 3 3 3
+Marketable securities 7 7 7 7
+II - Financial assets at amortized cost 0 0 1,322 0 1,322 275 1,047 0 1,322
+Loans 12 12 12 12
+Guarantee deposits 53 53 53 53
+Net asset warranty 11 11 11 11
+Accounts receivable - Trade 871 871 871 871
+Other assets 100 100 100 100
+Cash and bank 275 275 275 275
+Financial instruments: Liabilities
+I - Financial liabilities at fair value 0 41 0 0 41 0 41 0 41
+Cross Currency Interest Swap on loan 17 17 17 17
+Exchange rate hedging instruments 24 24 24 24
+II - Financial liabilities at amortized cost 0 0 3 2,458 2,461 3 2,458 0 2,461
+Loans from financial institutions and the 
+USPP 1,881 1,881 1,881 1,881
+Finance lease liabilities 2 2 2 2
+Other borrowings and financial 
+liabilities 7 7 7 7
+Bank overdrafts and advances 3 3 3 3
+Accounts payable - Trade 126 126 126 126
+Other liabilities 442 442 442 442
+Fair valueAccounting category
+ 
+No assets or liabilities measured at fair value have been transferred between different levels of the fair value hierarchy.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+20 
+ 
+G.5 Foreign currencies 
+ 
+Average rate Closing rate Average rate Closing rate
+Principal currencies Country 1st half year 
+2017 06/30/2017 1st half year 
+2016 12/31/2016
+Europe
+£ sterling United Kingdom 0.86 0.88 0.78 0.86
+Americas and Asia
+Brazilian real Brazil 3.44 3.76 4.14 3.43
+Colombian peso Colombia 3,161.00 3,474.00 3,484.00 3,159.00
+US dollar USA 1.08 1.14 1.12 1.05
+Mexican peso Mexico 21.03 20.58 20.17 21.77
+Philippine peso Philippines 54.05 57.58 52.32 52.27
+ 
+ 
+H. Cash flows 
+ 
+H.1 (Income) expenses, net, without effect on cash 
+1st half 1st half
+year 2017 year 2016
+Depreciation, amortization and impairment losses on non-current assets 128 83
+Change in provisions 0 1
+Unrealized gains and losses on financial instruments 2 -2
+Share-based payments 7 8
+Total 137 90
+ 
+ 
+H.2 Change in working capital 
+1st half 1st half
+year 2017 year 2016
+Accounts receivable - Trade 25 10
+Accounts payable - Trade -11 14
+Other 8 -4
+Total 22 20
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+21 
+ 
+H.3 Reconciliation of the change in net debt with cash flows 
+ 
+ 
+ 
+ 
+ 
+H.4 Analysis of net cash presented in the condensed consolidated statement of cash flows 
+06/30/2017 12/31/2016
+Bank overdrafts and advances -8 -3
+Marketable securities 43 7
+Cash and bank 265 275
+Net cash 300 279
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+22 
+ 
+I. Provisions, litigation, commitments and other contractual obligations 
+ 
+I.1 Change in provisions 
+12/31/2016 Increases Translation Other 06/30/2017
+Utilized Not utilized differences
+Non-current
+Provisions for retirement benefits 12 1 13
+Provisions for risks 1 1
+Total 13 1 0 0 0 0 14
+Current
+Provisions for risks 34 2 -2 -1 -2 31
+Provisions for other expenses 2 2
+Total 36 2 -2 -1 -2 0 33
+TOTAL 49 3 -2 -1 -2 0 47
+Releases
+ 
+ 
+Provisions for risks at June 30, 2017, include a contingent 
+liability of €10.8 million (US$12.4 million), in respect of 
+risks identified during the Aegis USA Inc. acquisition 
+process in 2014, including tax risks of €10.3 million. An 
+equivalent asset of €10 .3 million has been recognized, as 
+these risks are covered by a contractual warranty. 
+Other provisions for risks at June 30, 2017 include other 
+risks in a total amount of €20.1 million, of which €8.2 
+million relates to personnel -related risks, principally 
+concerning lawsuits with former employees, particularly in 
+Argentina and France. 
+As legal proceedings are ongoing for most of these 
+disputes, their settlement date is uncertain. 
+ 
+ 
+I.2 Warranties and other contractual 
+obligations 
+ 
+The group has neither given nor received any significant 
+new warranties during the first half of 2017. 
+ 
+J. Related parties 
+The group has no knowledge of any significant transactions 
+with related parties during the first half of 2017. 
+ 
+K. Events after the reporting date 
+None
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+23 
+ 
+2. 2017 half year management report 
+ 
+2.1 Group revenue in the first half year 2017 
+A. Business activity over the last half year 
+ 
+Consolidated revenue amounted to €2,081 million in the first half of 2017, representing a year -on-year increase of 
++ 9.9% on a like -for-like basis. Revenue growth was + 23.2% as reported, essentially due to the €204 million 
+contribution from the co nsolidation of LanguageLine Solutions as from September 19, 2016. Reported revenue was 
+also lifted by the €20 million positive currency effect, stemming mainly from the increase in the Brazilian real, 
+Colombian peso and US dollar against the euro. 
+ 
+The table below shows the change in revenues generated by activity: 
+ 
+based on reported constant exchange rate 
+&
+figures scope of consolidation
+CORE SERVICES 1,752 1,576 11.2% 9.8%
+English-speaking market & 
+Asia-Pacific 812 784 3.7% 3.7%
+Ibero-LATAM 534 400 33.5% 25.1%
+Continental Europe & MEA 406 392 3.4% 5.2%
+SPECIALIZED SERVICES 329 113 191.4% 11.4%
+Total 2,081 1,689 23.2% 9.9%
+(€ millions) 1st half year 
+2017
+1st half year 
+2016
+variation
+ 
+ 
+ Core services 
+Core Services revenue amounted to €1,752 million in the first half of 2017, a gain of + 11.2% as reported and of + 9.8% 
+like-for-like. The currency effect was positive for the period, primarily reflecting the increase in the US dollar, Brazilian 
+real and Colombian peso against the euro. 
+- English-speaking market & Asia-Pacific 
+First-half revenue for the region climbed + 3.7% on both a like-for-like and reported basis compared to the same period 
+in 2016. The positive impacts of a stronger US dollar were largely offset by the negative impacts of sterling's weakness 
+against the euro. 
+Teleperformance continued to diversify its client portfolio in the region over the first half of the year. The fastest 
+growing client segments in the United States were e -distribution and e -transport services, along with healthcare. 
+Consumer goods and consumer electronics also contributed to regional revenue growth. In this way, over the period,
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+24 
+ 
+the Group continued to reduce its dependence on pay -TV and other telecommunications segments, which accounted 
+for less than 30% of the regional revenue stream in 2016. 
+Given the phase-out of unprofitable contracts in the United Kingdom, which primarily impacted revenue growth in the 
+English-speaking market & Asia -Pacific region in late 2016, business in the United Kingdom was still down in the first 
+half. 
+In Asia -Pacific, business continued to benefit from the significant investments made in the region since 2016 and 
+remained upbeat, particularly in India, with North American and regional mul tinationals in a wide range of buoyant 
+client industries, such as consumer electronics and e-tailing. The positive impacts of this good momentum were offset 
+in the first half by a slowdown in offshore operations serving the North American market in the Phi lippines, to the 
+benefits of Mexico (Ibero -LATAM region), which is currently enjoying a more favorable currency and geopolitical 
+environment. 
+- Ibero-LATAM 
+Business in the Ibero -LATAM region saw exceptionally strong growth in first -half 2017, with year -on-year gains of 
++ 25.1% like-for-like and of + 33.5% as reported, lifting revenue to €534 million for the period. Exchange rates had a 
+positive impact on revenue, mainly reflecting gains in the Brazilian real and Colombian peso against the euro. 
+The Group continued to leverage the same growth drivers in the second quarter as in the beginning of the year, 
+reflecting the significant investments made during 2016 and successful diversification in a number of different sectors. 
+Operations in Portugal, Colombia and Brazil along with offshore activities in the region, including in Mexico, delivered 
+the highest levels of growth. Offshore activities have become particularly attractive as local currencies have weakened. 
+Operations in Brazil remain upbeat despite the persistently uncertain economic and political environment, thanks to 
+recent new contract wins with large US companies in various sectors, and particularly the new econo my. 
+Business in Portugal once again contributed to regional growth, still powered by the success of the Lisbon -based 
+multilingual platforms with large international accounts. E -retailing and e -services were among the fastest growing 
+customer segments. 
+- Continental Europe & MEA 
+In the Continental Europe & MEA region, first-half 2017 revenue rose by + 5.2% like-for-like and by + 3.4% as reported, 
+ending the period at €406 million. The negative currency effects stemmed mainly from the fall in the Egyptian pou nd 
+against the euro. 
+The healthy momentum seen in the three months to March 31, 2017 continued into the second quarter, which posted 
+like-for-like growth of + 4.9%. The Group's growth drivers remained unchanged. Teleperformance continued to enjoy 
+brisk sales momentum, particularly with global clients, in Eastern Europe (Russia, Poland, Czech Republic and Romania) 
+and in most Mediterranean countries: in Greece where, as in Lisbon, the Group is benefiting from the success of its 
+multilingual platforms; in Egypt, especially in the Internet and consumer electronics segment; in Albania, which serves 
+the Italian market; and in Turkey. 
+In Northern Europe, the Group's operations in Scandinavia returned to firm growth in good profitability conditions, 
+whereas the market environment in France, the Netherlands and Germany remained subdued . 
+The fastest growing markets in the region are consumer electronics, financial services, travel agencies and consumer 
+goods. E-services accounted for a good number of the recently awarded contracts.
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+25 
+ 
+ Specialized services 
+Revenue from Specialized Services rose sharply to €329 million in the first half of 2017 from €113 million one year 
+earlier, due to the consolidation of LanguageLine Solutions as from September 19, 2016. On a like -for-like basis, 
+revenue was up + 11.4% for the period. 
+Growth in Specialized Services was primarily attributable to the fast-paced expansion at TLScontact, led by an increase 
+in visa applications and by brisk sales of add-on services. 
+LanguageLine Solutions reported satisfactory pro forma revenue growth in the first half, in line with Group 
+expectations. Given the date on which LanguageLine Solutions was acquired, like -for-like growth for the Group in the 
+first half of 2017 excludes growth reported by LanguageLine Solutions. 
+The LanguageLine Solutions and TLScontact businesses account for more than 80% of annual pro forma Specialized 
+Services revenue. 
+ 
+B. First half 2017 result 
+EBITA before non -recurring items came to €245 million for the first half, up + 62.6% from €150 million in the first -half 
+2016. EBITA margin before non-recurring items widened further to 11.8% from 8.9% in the six months to June 30, 2016. 
+ 
+(€ millions) 1st Half year 
+2017
+1st Half year 
+2016
+Operating profit 191 131
+Share-based payments 9 8
+Acquisition of intang. Assets acquired as part of business 
+combination 45 11
+EBITA before non-recurring items 245 150
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+26 
+ 
+EBITA before non-recurring items by activity – excluding holding companies 
+(€ millions) 1st half year 2017 1st half year 2016
+English-speaking market & Asia-Pacific 60 60
+% or revenue 7.4% 7.7%
+Ibero-LATAM 55 43
+% of revenue 10.3% 10.7%
+Continentale Europe & MEA 11 6
+% revenue 2.7% 1.6%
+Specialized activities 98 24
+% or revenue 29.7% 21.0%
+Total - including holding companies 245 150
+% of revenue 11.8% 8.9%
+ 
+ 
+- English-speaking market & Asia-Pacific 
+The English-speaking market and Asia -Pacific region achieved EBITA before non -recurring items of €60 million in the 
+first half of 2017, on a par with the prior -year period. EBITA margin before non -recurring items came to 7.4% versus 
+7.7% in first-half 2016. This primarily reflects: 
+ 
+o An unfavorable geographic mix effect on margins owing to significant growth in domes tic business in the 
+United States, whereas offshore operations slowed in the Philippines in favor of offshore activities in Mexico 
+(Ibero-LATAM region), which has become particularly attractive thanks to local currency trends and a more 
+secure geopolitical environment ; 
+o Significant investments made in the region over the past few half-year periods and the resulting gradual ramp-
+up of facilities opened in Australia, China and, more recently, Malaysia. 
+ 
+- Ibero-LATAM 
+EBITA before non-recurring items in the Ibero-LATAM region amounted to €55 million in the first half of 2017, compared 
+to €43 million in the same period in 2016. 
+EBITA margin before non -recurring items remained high, representing 10.3% versus 10.7% in the first half of 2016. 
+Growth in operations in Portugal and Colombia was particularly robust and profitable over the period. 
+The region benefited once again from currency fluctuations that continue to favor offshore business in Mexico serving 
+the US market, but to a lesser extent than in first-half 2016. 
+ 
+- Continental Europe & MEA 
+In the Continental Europe & MEA region, Teleperformance remained on the steady upward trend in profitability that 
+began in 2012. EBITA before non-recurring items for the region came to €11 million, giving a margin of 2.7% versus 1.6% 
+in the prior-year period. Positive factors contributing to this growth included:
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+27 
+ 
+o Vibrant business growth with global clients and satisfactory cost discipline in a number of countries in 
+Southern and Eastern Europe, such as Greece with its highly efficient multilingual solutions, and Russia; 
+o Ongoing improvement in profitability in certain countries, such as the Nordics, and to a lesser extent Italy with 
+the development of its offshore solutions in Albania 
+ 
+ Specialized services 
+In Specialized Services, EBITA before non-recurring items amounted to €98 million in the first half of 2017, compared 
+to €24 million in first -half 2016. EBITA margin before non -recurring items stood at 29.7% versus 21.0% in the prior -
+year period. 
+These figures primarily reflect the consolidation of LanguageLine Solutions as from September 19, 2016. The US 
+company contributed €41 million to consolidated EBITA before non-recurring items in full-year 2016, for a margin of 
+36.3%. 
+ 
+ 
+Consolidated operating profit (EBIT) amounted to €191 million, up + 45.8% from €131 million in first-half 2016. 
+First-half 2017 EBIT reflects the amortization of intangible assets in an amount of €45 million, up sharply on the prior-
+year period following the acquisition of LanguageLine Solutions, and an €8 million accounting expense on 
+performance share plans. 
+The financial result represented a net expense of €25 million versus €10 million in first -half 2016, reflecting the cost 
+of debt incurred in connection with the LanguageLine Solutions acquisi tion. 
+Income tax expense amounted to €49 million. The Group's average tax rate was 29.5% compared to 28.0% in first -
+half 2016, owing to the increasing contribution of the Group's North American operations to its results.
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+28 
+ 
+2.2 Cash flow and capital structure 
+A. Consolidated financial structure as of June 30, 2017 
+ 
+Long-term capital 
+(€ millions) 06/30/2017 12/31/2016
+Shareholders' equity 1,827 1,921 
+Non-current financial liabilities 1,537 1,688 
+Total non-current capital 3,364 3,609 
+ 
+Short-term capital 
+(€ millions) 06/30/2017 12/31/2016
+Current financial liabilities 272 261 
+Cash and cash equivalent 308 282 
+Cash, net of current liabilities 36 21 
+ 
+B. Cash flow 
+ 
+Source and amount of cash flows 
+(€ millions) 06/30/2017 06/30/2016
+Internally generated funds from operations before changes in 
+working capital requirements 251 176
+Changes in working capital requirements 22 20
+Cash flow from operating activitites 273 196
+Investment and capital expenditure -68 -75
+Repayment of loans 0 0
+Cash flow from investing activities -68 -75
+Proceeds from share capital increases/Treasury shares -1 -17
+Change in ownership interest in controlled activities -39 -33
+Dividends paid 0 -68
+Net change in financial liabilities -176 11
+Interest paid on financial liabilities -27 -8
+Cash flow from financing activities -243 -115
+Change in cash and cash equivalent -38 6
+
+2017 Half-year financial report 
+2. 2017 half-year management report 
+29 
+ 
+Cash flow after tax and interest paid rose to €224 million from €168 million in first-half 2016. Change in consolidated 
+working capital requirement was an inflow of €22 million, on a par with the prior -year period. This good performance 
+reflects, in particular, the success of the policy deployed to improve the group’s liquidity. 
+Net capital expenditure amounted to €68 million, or 3.3% of revenue, versus €75 million and 4.4% in first-half 2016. The 
+group continued to create or expand contact centers to support clients in all markets, while maintaining discipline in 
+the choice of capital expenditure. 
+In all, net free cash flow increased sharply, to €178 million from €113 million in the prior -year period. 
+Minority interests’ transactions, which totaled €40 million in the first half, mainly included TLScontact final earn -out. 
+After considering a dividend of €75 million paid in early July, net debt stood at €1,501 million at June 30, 2017. The 
+group’s financial structure therefore remains very solid with equity of €1,827 million at end June. 
+ 
+2.3 Related parties 
+ 
+The group has no knowledge of any significant transactions with related parties during the first half of 2017. 
+ 
+2.4 Event after the reporting date 
+ 
+None. 
+ 
+2.5 Trend and prospects 
+A. Risks and uncertainties 
+ 
+The group is exposed to the risks which were described in the Reference document for the year ended December 31, 
+2016; which was subject to visa by the AMF. 
+The group’s management team has not anticipated any significant changes in such risks and uncertainties or new risk and 
+uncertainty elements for the second half of 2017. 
+ 
+B. 2017 Outlook 
+ 
+In light of the encouraging first-half year results, Teleperformance confirms and refines its full year guidance, targeting: 
+- Like-for-like revenue growth of at least + 7% ; 
+- An EBITA margin before non-recurring items above 13 %. 
+In addition, Teleperformance expects to maintain a high level of net free cash flow in 2017.
+
+2017 Half-year financial report 
+3. Attestation of the person responsible for the condensed consolidated interim financial statements and management report 
+ 
+30 
+ 
+3. Attestation of the person responsible for the condensed 
+consolidated interim financial statements and 
+management report 
+ 
+« I hereby declare that, to the best of my knowledge, the condensed consolidated financial statements for the first half 
+of 2017 have been prepared in accordance with applicable accounting principles and give a true and fair view of the 
+assets and liabilities, financial situation and results of the Group. I further declare that the half year Management Report 
+gives a true and fair view of the material events occurring during the first six months of the financial year and of their 
+impact on the half year financial statements, of the principal related party transactions, and of the principal risks and 
+uncertainties for the remaining six months of 2017 ». 
+ 
+ 
+Paris, July 27, 2017 
+ 
+Paulo César Salles Vasques 
+Chief Executive Officer
+
+2017 Half-year financial report 
+4. Statutory auditors’ review report on 2017 Half-yearly Financial Information 
+31 
+ 
+4. Statutory auditors’ review report on 2017 Half-yearly 
+Financial information 
+ 
+This is a free translation into English of the statutory 
+auditors’ review report on the half -yearly financial 
+information issued in French and is provided solely for 
+the convenience of English speaking users. This report 
+includes information relating to the specific verification 
+of information given in the Group’s interim management 
+report. This report should be read in conjunction with, 
+and construed in accordance with, French law and 
+professional standards applicable in France. 
+ 
+For the six-month period ended June 30, 2017 
+ 
+To the Shareholders, 
+In compliance with the assignment entrusted to us by 
+your shareholders meeting and in accordance with the 
+requirements of article L. 451 -1-2 III of the French 
+Monetary and Financial Code ("Code monétaire et 
+financier"), we hereby report to you on: 
+- the review of the accompanying condensed half -
+yearly consolidated financial statements of 
+Teleperformance SE, for the period from January 
+1st, 2017 to June 30, 2017 ; 
+- the verification of the informa tion presented in the 
+interim management report. 
+These condensed half -yearly consolidated financial 
+statements are the responsibility of the Board of 
+Directors. Our role is to express a conclusion on these 
+financial statements based on our review. 
+I - Conclusion on the financial statements 
+We conducted our review in accordance with 
+professional standards applicable in France. A review of 
+interim financial information consists of making 
+inquiries, primarily of persons responsible for financial 
+and a ccounting matters, and applying analytical and 
+other review procedures. A review is substantially less 
+in scope than an audit conducted in accordance with 
+professional standards applicable in France and 
+consequently does not enable us to obtain assurance 
+that we would become aware of all significant matters 
+that might be identified in an audit. Accordingly, we do 
+not express an audit opinion. 
+Based on our review, nothing has come to our attention 
+that causes us to believe that the accompanying 
+condensed ha lf-yearly consolidated financial 
+statements are not prepared, in all material respects, in 
+accordance with IAS 34 - standard of the IFRSs as 
+adopted by the European Union applicable to interim 
+financial information. 
+ 
+II – Specific verification 
+We have also verified the information presented in the 
+half-yearly management report on the condensed half-
+yearly consolidated financial statements subject to our 
+review. We have no matters to report as to its fair 
+presentation and consistency with the condensed half -
+yearly consolidated financial statements. 
+ 
+ 
+ 
+Paris La Défense Neuilly sur seine 
+July 27, 2017 July 27, 2017 
+ 
+KPMG Audit IS Deloitte & Associés 
+Jacques Pierre Philippe Battisti 
+Partner Partner
+
+2017 Half-year financial report 
+4. Statutory auditors’ review report on 2017 Half-yearly Financial Information 
+32 
+ 
+ 
+ 
+KPMG Audit IS Deloitte & Associés 
+Éric Junières Philippe Battisti 
+Associé Associé
+ 
+ 
+ 
+ 
+ 
+ /teleperformanceglobal 
+ @teleperformance 
+ 
+Follow us : 
+ /teleperformance 
+ blog.teleperformance.com 
+ /company/teleperformance 
+Teleperformance SE 
+European company 
+With a share capital of €144 450 000 
+RCS number 301 292 702 
+21/25 rue Balzac – 75008 Paris – France 
+Tél : +33 1 59 83 59 00 
+ /teleperformanceglobal 
+ @teleperformance
+
+
+## EQUITY
+
+1. Condensed consolidated interim financial 
+statements 
+ 
+ 
+ 
+1.1 CONDENSED CONSOLIDATED STATEMENT OF FINANCIAL POSITION (in millions of euros) .............. 3 
+1.2 CONDENSED CONSOLIDATED STATEMENT OF INCOME (in millions of euros) .................................. 4 
+1.3 CONDENSED CONSOLIDATED STATEMENT OF COMPREHENSIVE INCOME (in millions of euros) ..... 4 
+1.4 CONDENSED CONSOLIDATED STATEMENT OF CASH FLOWS (in millions of euros) ........................... 5 
+1.5 CONDENSED CONSOLIDATED STATEMENT OF CHANGES IN EQUITY (in millions of euros) .............. 6 
+1.6 NOTES TO THE CONDENSED CONSOLIDATED FINANCIAL STATEMENTS (in millions of euros) ......... 7
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+3 
+ 
+1.1 Condensed consolidated statement of financial position (in 
+millions of euros) 
+ASSETS Notes 06.30.2017 12.31.2016
+Non-current assets
+Goodwill D 1,816 1,936
+Other intangible assets 1,036 1,172
+Property, plant and equipment 436 476
+Financial assets 54 55
+Deferred tax assets 42 30
+Total non-current assets 3,384 3,669
+Current assets
+Current income tax receivable 59 46
+Accounts receivable - Trade C.1 797 871
+Other current assets C.1 115 100
+Other financial assets 29 24
+Cash and cash equivalents H.4 308 282
+Total current assets 1,308 1,323
+Total assets 4,692 4,992
+EQUITY AND LIABILITIES Notes 06.30.2017 12.31.2016
+Equity
+Share capital F.1 144 144
+Share premium 575 575
+Translation reserve -47 100
+Other reserves 1,144 1,092
+Equity attributable to owners of the company 1,816 1,911
+Non-controlling interests 11 10
+Total shareholder's equity 1,827 1,921
+Non-current liabilities
+Provisions I.1 14 13
+Financial liabilities G.2 1,537 1,688
+Deferred tax liabilities 398 444
+Total non-current liabilities 1,949 2,145
+Current liabilities
+Provisions I.1 33 36
+Current income tax 72 61
+Accounts payable - Trade C.3 127 126
+Other current liabilities C.3 412 442
+Other financial liabilities G.2 272 261
+Total current liabilities 916 926
+Total equity and liabilities 4,692 4,992
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+4 
+ 
+1.2 Condensed consolidated statement of income (in millions of euros) 
+Notes 1st ½ yr 
+2017
+1st ½ yr 
+2016
+Revenues C.4 2,081 1,689
+Other revenues C.4 4 2
+Personnel -1,377 -1,151
+External expenses -369 -309
+Taxes other than income taxes -12 -9
+Depreciation and amortization -83 -72
+Amortization of intang. assets acquired as part of a business combination -45 -11
+Share-based payments C.2 -8 -8
+Operating profit 191 131
+Income from cash and cash equivalents 0 1
+Interest on financial liabilities -32 -12
+Net financing costs G.1 -32 -11
+Other financial income (expenses), net G.1 7 1
+Financial result -25 -10
+Profit before taxes 166 121
+Income tax E -49 -34
+Net profit 117 87
+Net profit - Group share 116 86
+Net profit (loss) attributable to non-controlling interests 1 1
+Basic earnings per share (in €) F.3 2.01 1.51
+Diluted earnings per share (in €) F.3 1.98 1.48
+ 
+ 
+ 
+1.3 Condensed consolidated statement of comprehensive income 
+(in millions of euros) 
+1st ½ yr 
+2017
+1st ½ yr 
+2016
+Net profit 117 87
+May not be reclassified to profit or loss in a subsequent period
+May be reclassified to profit or loss in a subsequent period
+Net gain on foreign exchange hedges (before tax) 6 5
+Income tax net losses on foreign exchange hedges -2 -2
+Translation differences -147 -37
+Other recognized income and expenses, net -143 -34
+Total comprehensive income (loss) -26 53
+Group share -27 52
+Attributable to non-controllling interests 1 1
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+5 
+ 
+1.4 Condensed consolidated statement of cash flows (in millions of 
+euros) 
+Cash flows from operating activities Notes 1st ½ yr 2017 1st ½ yr 2016
+Net profit - Group share 116 86
+Net profit attributable to non-controlling interests 1 1
+Income tax expense 49 34
+Interest expense on financial liabilities 29 8
+(Income) expenses, net, without effect on cash H.1 137 90
+Income tax paid -81 -43
+Internally generated funds from operations 251 176
+Change in working capital H.2 22 20
+Net cash from operating activities 273 196
+Cash flows from investing activities
+Acquisition of intangible assets and property, plant and equipment -68 -76
+Loans made -1
+1
+Repayment of loans 1
+Net cash flow from investing activities -68 -75
+Cash flows from financing activities
+Acquisition/disposal of treasury shares -1 -17
+Change in ownership interest in controlled entities G.2 -39 -33
+Dividends paid to parent company shareholders -68
+Financial interests paid/received -27 -8
+Increase in financial liabilities 1,106 537
+Repayment of financial liabilities -1,282 -526
+Net cash flow from financing activities -243 -115
+Change in cash and cash equivalents -38 6
+Effect of exchange rates on cash held 59 -10
+Net cash at January 1 H.4 279 254
+Net cash at June 30 H.4 300 250
+Proceeds from disposals of intangible assets and property, plant and equipment
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+6 
+ 
+1.5 Condensed consolidated statement of changes in equity (in 
+millions of euros) 
+Total
+Share capital
+Share premium
+Translation reserve
+Retained earnings
+Impact of financial 
+hedging instruments
+Equity - Group share
+Non-controlling 
+interests
+At December 31, 2015 143 575 69 978 -7 1,758 7 1,765
+Trans lation differences from foreign 
+operations -37 -37 -37
+Net profit 86 86 1 87
+Net gain on cas h flow hedges (after tax) 3 3 3
+Total recognized income and expenses 0 0 -37 86 3 52 1 53
+Operations on non-controlling interes ts -13 -13 -13
+Fair value of incentive plan s hare awards 8 8 8
+Treas ury s hares -18 -18 -18
+Dividends (€1.20 per s hare) -68 -68 -68
+At June 30, 2016 143 575 32 973 -4 1,719 8 1,727
+At December 31, 2016 (restated)* 144 575 100 1,099 -7 1,911 10 1,921
+Trans lation differences from foreign 
+operations -147 -147 -147
+Net profit 116 116 1 117
+Net gain on cas h flow hedges (after tax) 4 4 4
+Total recognized income and expenses 0 0 -147 116 4 -27 1 -26
+Operations on non-controlling interes ts 1 1 1
+Fair value of incentive plan s hare awards 7 7 7
+Treas ury s hares -1 -1 -1
+Dividends (€1.30 per s hare) -75 -75 -75
+At June 30, 2017 144 575 -47 1,147 -3 1,816 11 1,827
+* s ee note B
+Group share
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+7 
+ 
+1.6 Notes to the condensed consolidated financial statements (in 
+millions of euros) 
+ 
+A. Accounting policies and methods ............................................................................................................... 8 
+A.1 Reporting entity .............................................................................................................................. 8 
+A.2 Basis of preparation ........................................................................................................................ 8 
+A.3 Estimates ......................................................................................................................................... 8 
+ 
+B. Consolidation scope ..................................................................................................................................... 9 
+ 
+C. Operational activity ................................................................................................................................... 10 
+C.1 Accounts receivable – Trade and Other current assets ................................................................ 10 
+C.2 Share-based payments .................................................................................................................. 11 
+C.3 Accounts payable – Trade and Other current liabilities ................................................................ 12 
+C.4 Revenues and other operating revenues ...................................................................................... 12 
+C.5 Segment reporting ......................................................................................................................... 13 
+ 
+D. Goodwill ..................................................................................................................................................... 14 
+ 
+E. Income tax.................................................................................................................................................. 14 
+ 
+F. Equity and earning per share .................................................................................................................... 14 
+F.1 Share capital and dividends ........................................................................................................... 14 
+F.2 Treasury shares .............................................................................................................................. 14 
+F.3 Earnings per share ......................................................................................................................... 14 
+ 
+G. Financial assets and financial liabilities .................................................................................................... 15 
+G.1 Financial result .............................................................................................................................. 15 
+G.2 Financial liabilities ......................................................................................................................... 16 
+G.3 Foreign exchange hedging operations .......................................................................................... 16 
+G.4 Carrying amount and fair value of financial assets and financial liabilities by accounting category
+ ............................................................................................................................................................. 18 
+G.5 Foreign currencies ......................................................................................................................... 20 
+ 
+H. Cash flows .................................................................................................................................................. 20 
+H.1 (Income) expenses, net, without effect on cash ........................................................................... 20 
+H.2 Change in working capital ............................................................................................................. 20 
+H.3 Reconciliation of the change in net debt with cash flows ............................................................ 21 
+H.4 Analysis of net cash presented in the condensed consolidated statement of cash flows ........... 21 
+ 
+I. Provisions, litigation, commitments and other contractual obligations ................................................. 22 
+I.1 Change in provisions ....................................................................................................................... 22 
+I.2 Warranties and other contractual obligations ............................................................................... 22 
+ 
+J. Related parties ........................................................................................................................................... 22 
+ 
+K. Events after the reporting date ................................................................................................................. 22
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+8 
+ 
+Highlights of the first half of 2017 
+The group has made a bond issue in the amount of €600 
+million, redeemable in 2024, with a nominal interest rate 
+of 1.50%, in order to complete the refinancing of its 
+acquisition of LanguageLine Solutions LLC. 
+ 
+A. Accounting policies and 
+methods 
+A.1 Reporting entity 
+ 
+Teleperformance (“the company”) is a company 
+domiciled in France. 
+The condensed consolidated interim financial 
+statements of the company as at and for the six months 
+ended June 30, 2017 include the company and its 
+subsidiaries (together referred to as “the group”). 
+The consolidated financial statements of the group for 
+the year ended December 31, 2016 are available upon 
+request from the company’s registered office at 21/25 
+rue Balzac, 75008 Paris, or from its website 
+(www.teleperformance.com). 
+All financial information presented in euro has been 
+rounded to the nearest million unless otherwise 
+specified.. 
+A.2 Basis of preparation 
+These condensed consolidated interim financial 
+statements as at and for the six months ended June 30, 
+2017 have been prepared in accordance with IAS 34 
+“Interim Financial Reporting” and are presented in 
+accordance with revised and amended IAS 1. They do not 
+include all the information required for full annual 
+financial statements and should be read in conjunction 
+with the consolidated financial statements of the group 
+as at and for the y ear ended December 31, 2016 which 
+are included in the 2016 reference document D.17-0122 
+that was filed with the AMF (the French Stock Exchange 
+regulator) on March 2, 2017. 
+The accounting policies have been applied consistently to 
+all periods presented in t hese condensed consolidated 
+interim financial statements. 
+These condensed consolidated interim financial 
+statements were approved by the Board of Directors on 
+July 27, 2017. 
+The following standards, amendments and 
+interpretations: 
+- Amendments to IAS 12, on the recognition of 
+deferred tax assets for unrealized losses; 
+- Amendments to IAS 7 on the statement of cash flows 
+came into force in 2017 but did not have a significant 
+impact on the group’s financial statements. 
+The group has elected not to early apply the following 
+new standards: 
+- IFRS 15 on revenues; 
+- IFRS 9 on financial instruments; 
+These standards will come into effect from January 1, 
+2018. 
+The group does not expect a significant impact on its 
+financial statements from the adoption of IFRS 15. The 
+group uses foreign exchange hedging instruments on a 
+regular basis and the adoption of IFRS 9 should result in 
+a reduction of the volatility it experiences in the results 
+of these operations. 
+The assessment of the impact of the new standard IFRS 
+16 on leases, which comes into effect on January 1, 2019, 
+is still in progress. 
+The accounting policies applied by the group in these 
+condensed consolidated interim financial statements are 
+the same as those applied by the group in its 
+consolidated financial statements as at and for the year 
+ended December 31, 2016, with the exception of the new 
+standards, amendments and interpretations set out 
+above, and are in accordance with IFRSs as issued by the 
+IASB and adopted by the European Union. 
+A.3 Estimates 
+The preparation of financial statements in conformity 
+with IFRS requires making estimates and assumptions 
+which affect the reported amounts in the financial 
+statements, especially with respect to the following 
+items: 
+- the depreciation and amortization rates, 
+- the calculation of losses on doubtful receivables, 
+- impairment of intangible assets and goodwill, 
+- the measurement of provisions and retirement 
+benefits, 
+- the measurement of share-based payment expense, 
+- provisions for contingencies and expenses, 
+- the measurement of intangible assets acquired as 
+part of a business combination, 
+- deferred taxation. 
+ 
+The estimates are based on information available at the 
+time of preparation of the financial statements, and may 
+be revised, in a future period, if circumstances change, or 
+if new information is available. Actual results may differ 
+from these estimates.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+9 
+ 
+ 
+B. Consolidation scope 
+The group made no acquisition or disposal during the first half of. 
+During the first half of 2017, the group restated its measurement of the fair values of the identifiable assets and liabilities 
+acquired of LanguageLine Solutions LLC. The principal impact concerns the US income tax rate which has been revised. 
+The following schedule sets out the revised fair values of the identifiable assets and liabilities as of the date of 
+acquisition: 
+ 
+In millions of US$
+Fair values at 
+09/19/2016
+Non-current assets
+Intangible assets 983
+Property, plant and equipment 9
+Other non-current assets 4
+Total non-current assets 996
+Current assets
+Current tax assets 4
+Accounts receivable - Trade 77
+Other current assets 6
+Cash and cash equivalents 10
+Total current assets 97
+TOTAL ASSETS 1,093
+Non-current liabilities
+Provisions 1
+Deferred tax liabilities 377
+Total non-current liabilities 378
+Current liabilities
+Provisions 3
+Accounts payable - Trade 8
+Other current liabilities 20
+Total current liabilities 31
+TOTAL LIABILITIES 409
+Net assets, acquired 100% 684
+Acquisition price 1,538
+Goodwill 854
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+10 
+ 
+Following changes emerge on certain items of the condensed consolidated statement of financial position as of 
+December 31, 2016: 
+Non-current assets
+Goodwill 1,952 -16 1,936
+Intangible assets 1,175 -3 1,172
+Property, plant and equipment 476 476
+Financial assets 55 55
+Deferred tax assets 30 30
+Total non-current assets 3,688 -19 3,669
+Non-current liabilities
+Provisions 13 13
+Financial liabilities 1,688 1,688
+Deferred tax liabilities 464 -20 444
+Total non-current liabilities 2,165 -20 2,145
+Current provisions 34 2 36
+Total equity 1,922 -1 1,921
+After restatementsConsolidated statement of financial 
+position, December 31, 2016 (extract) As published Restatements
+ 
+ 
+C. Operational activity 
+ 
+C.1 Accounts receivable – Trade and Other current assets 
+Gross Write- Net Net
+ downs
+Accounts receivable - Trade 804 -7 797 871
+Other receivables 23 -9 14 12
+Taxation recoverable 41 41 37
+Advances and receivables on non-current assets 6 6 8
+Prepaid expenses 54 54 43
+Total 928 -16 912 971
+06/30/2017 12/31/2016
+ 
+ 
+Factoring arrangements : 
+The group and a number of its subsidiaries use factoring arrangements which comply with criteria for derecognition. 
+The outstanding amounts totaled €51.4 million and €50.5 million at June 30, 2017 and December 31, 2016, respectively. 
+Under the agreement, the Group retains the credit control and receipt functions in respect of the sold receivables on 
+behalf of the factor.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+11 
+ 
+C.2 Share-based payments 
+ 
+2016 incentive share award plans 
+ 
+The Board of Directors’ meetings of April 28 and November 2, 2016 approved free awards in a total amount of 1,065,808 
+incentive plan shares to group personnel, including company officers, under the authorization given at the Shareholders’ 
+General Meeting of April 28, 2016, which included a maximum limit of 2.5% of the share capit al of the company at the 
+grant date. The board meeting on April 28, 2016 also approved the setting-up of a long-term incentive plan for company 
+officers, with the free award of 350,000 shares. The two plans have identical conditions for vesting. 
+ 
+The features of these plans are as follows: 
+04/28/16 plan 11/02/16 plan
+Date of board meeting allocating the awards 04/28/2016 11/02/2016
+Vesting period 04/28/2016 to 
+04/28/2019
+11/02/2016 to 
+11/02/2019
+Grant date 04/28/2016 11/02/2016
+Number of share awards* 1,264,300 151,508
+Number of canceled shares -59,700 -13,264
+Number of outstanding share awards at June 30, 2017 1,204,600 138,244
+Fair value of each share award at the grant date (taking into account the market 
+condition) €48.51 €72.40
+Fair value of each share award at the grant date (without taking into account the 
+market condition) €75.20 €88.80
+* including for company officers 350,000 0
+ 
+Vesting of the free share awards is conditional on the beneficiaries remaining with the group until at least the end of 
+the vesting period and on meeting certain performance conditions relating to the financial years between 2016 and 
+2018. 
+As of June 30, 2017, it is considered probable that it will be necessary to meet the market condition in order to obtain 
+the highest number of shares and the amount of expense recognized in respect of the plans is therefore based on fair 
+values of €48.51 and €72.40 per share, which results in related expense of €8.4 million in the first half of 2017 .
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+12 
+ 
+C.3 Accounts payable – Trade and Other current liabilities 
+06/30/2017 12/31/2016
+Accounts payable - Trade 127 126
+Other payables 144 158
+Taxes payable 58 56
+Accruals 180 160
+Other operating liabilities 30 68
+Total 539 568
+ 
+Other operating liabilities at June 30, 2017 include an amount of €9.8 million (December 31, 2016: €23.9 million) in 
+respect of the negative fair value of derivative financial instruments used for currency hedging. 
+C.4 Revenues and other operating revenues 
+ 
+Revenues 
+ 
+Group revenues in the first half of 2017 amounted to €2,081 million, which represents an increase (on the basis of 
+published figures) of 23.2% over the same period in 2016. 
+At constant currency rates and consolidation scope, the increase is 9.9%. 
+ 
+Other operating revenues 
+Other operating revenues mainly comprise government grants. 
+In the first half of 2017, grant income amounted to €4.3 million, compared with €2.2 million in the same period of 2016. 
+It includes French competitiveness and employment tax credits for € 1.4 million in 2017, compared with €1.3 million in 
+the same period of 2016.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+13 
+ 
+C.5 Segment reporting 
+Segment information is reported in the schedules set out below. 
+Inter-segment operations are not significant and are not identified separately. 
+With effect from January 1, 2017, group activity as followed by the chief executive officer is split into the following two 
+segments: 
+ The « Core Services » segment which includes customer care, technical support and new customer acquisitions 
+and is divided into three principal management regions : 
+ 
+- English-speaking & APAC, which covers the activities in the following countries: Canada, USA, United 
+Kingdom, South Africa, China, Indonesia, India, Philippines, Singapore, Jamaica, Guyana, Australia and 
+Malaysia; 
+- Ibero-LATAM, which covers the activities in the following countries: Argentina, Brazil, Chile, Colombia, 
+Costa Rica, Dominican Republic, El Salvador, Mexico, Spain an d Portugal; 
+- Continental Europe & MEA, which covers the activities in the countries of the EMEA region with the 
+exception of the United Kingdom, Spain and Portugal. 
+ 
+ The « Specialized Services » segment which includes the interpreting services of LanguageLi ne Solutions, the 
+visa application management services for government departments offered by TLScontact, GN Research’s 
+analytics solutions and the accounts receivable credit management services of AllianceOne Receivables 
+Management (ARM) in North America. 
+As a result of this new operational organization, the 2016 comparable amounts have been restated accordingly: 
+Six months ended June 30, 2017 SPECIALIZED 
+SERVICES TOTAL
+English-
+speaking & 
+APAC
+Ibero-
+LATAM
+Continental 
+Europe
+& MEA
+Holdings
+Revenue 812 534 406 329 2,081
+Operating profit 51 53 11 12 64 191
+Capital expenditure 25 20 14 9 68
+Intangible assets and 
+Property, plant and 
+equipment (carrying amounts)
+1,069 294 270 2 1,653 3,288
+Depreciation and 
+amortization of non-current 
+assets
+48 24 13 43 128
+Six months ended June 30, 2017 
+(proforma)
+SPECIALIZED 
+SERVICES TOTAL
+English-
+speaking & 
+APAC
+Ibero-
+LATAM
+Continental 
+Europe
+& MEA
+Holdings
+Revenue 784 400 392 113 1,689
+Operating profit 52 41 6 9 23 131
+Capital expenditure 35 23 12 6 76
+Intangible assets and 
+Property, plant and 
+equipment (carrying amounts)
+1,130 293 264 4 92 1,783
+Depreciation and 
+amortization of non-current 
+assets
+45 19 13 6 83
+CORE SERVICES
+CORE SERVICES
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+14 
+ 
+D. Goodwill 
+There were no changes to the composition of CGUs or 
+groups of CGUs in the first half of 2017. 
+The group has reviewed its CGUs and groups of CGUs to 
+determine whether there is any indication of 
+impairment. 
+These reviews did not result in any subsequent 
+requirement to perform impairment tests, and no 
+impairment losses were therefore recognized in the first 
+half of 2017. 
+E. Income tax 
+Income tax expense in an interim period is measured 
+using management’s best estimate of the expected full -
+year rate. 
+The income tax expense in the first half of 2017 
+amounted to €49.0 million compared with €33.9 million 
+in the first half of 2016. This increase is principally due to 
+the contribution of LanguageLine Solutions LLC which 
+was acquired in the second half of 2016. 
+ 
+F. Equity and earning per share 
+F.1 Share capital and dividends 
+The share capital at June 30, 2017 amounted to 
+€144,450,000 represented by 57,780,000 shares with a 
+nominal value of €2.50 each, fully paid up. 
+ 
+The company made a dividend distribution of €75.1 
+million during July 2017. 
+ 
+F.2 Treasury shares 
+ 
+At June 30, 2017, the group held 20,500 treasury shares, 
+acquired under its liquidity contract, in a carrying amount 
+of €2.3 million which has been deducted from equity. 
+ 
+ 
+F.3 Earnings per share 
+Basic and diluted earnings per share are calculated as follows: 
+1st ½ yr 2017 1st ½ yr 2016
+Net profit - Group share 116 86
+Weighted-average number of shares used to calculate basic earnings per share 57,769,706 56,918,628
+Dilutive effect of incentive share awards 935,172 933,421
+Weighted-average number of shares used to calculate diluted earnings per share 58,704,878 57,852,049
+Basic earnings per share (in €) 2.01 1.51
+Diluted earnings per share (in €) 1.98 1.48
+ 
+ 
+Weighted-average number of shares used to calculate basic earnings per share: 
+ 
+1st ½ yr 2017 1st ½ yr 2016
+Number of ordinary shares in issue at January 1 57,780,000 57,201,690
+Treasury shares -10,294 -283,062
+Total 57,769,706 56,918,628
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+15 
+ 
+G. Financial assets and financial liabilities 
+G.1 Financial result 
+1st ½ yr 2017 1st ½ yr 2016
+Income from cash and cash equivalents 0 1
+Other interest expense, net -25 -9
+Bank commissions -7 -3
+Gross financing costs -32 -12
+Net financing costs -32 -11
+Foreign exchange gains 18 17
+Foreign exchange losses -11 -15
+Other financial expense 0 -1
+Other financial income (expenses), net 7 1
+Financial result -25 -10
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+16 
+ 
+G.2 Financial liabilities 
+ 
+Net financial indebtedness: Schedule of debt maturities: 
+ 
+06/30/2017 Current Non-current 12/31/2016 Current Non-current 
+Loans from financial 
+institutions 613 175 438 1,344 201 1,143
+USPP loans 504 504 544 544
+Bonds 600 600
+Bond issuance 
+expense/premiums & 
+discounts
+-10 -4 -6 -7 -7
+Loan hedging instruments 12 12 17 17
+Bank overdrafts and advances 8 8 3 3
+Dividends payable 75 75 0
+Due to minority shareholders 0 39 39
+Other financial liabilities 7 6 1 9 8 1
+Total financial liabilities 1,809 272 1,537 1,949 261 1,688
+Marketable securities 43 43 7 7
+Cash and bank 265 265 275 275
+Total cash and cash 
+equivalents 308 308 282 282
+Net debt 1,501 -36 1,537 1,667 -21 1,688
+ 
+The group made a bond issue in the amount of €600 
+million, redeemable in 2024, with a nominal interest rate 
+of 1.50%, in order to complete the refinancing of its 
+acquisition of LanguageLine Solutio ns LLC. The proceeds 
+were used to reimburse the bridging loan of €668 million 
+which had been obtained originally for a duration of 24 
+months. 
+The group also made a payment of €38.5 million during 
+the first half of 2017 relating to the balance of deferred 
+consideration due on the acquisition of minority 
+interests. 
+ 
+Covenants 
+Our principal financial liabilities are subject to financial 
+covenants which were all respected as of June 30, 2017. 
+ 
+G.3 Foreign exchange hedging operations 
+Revenues and operating expenses of group subsidiaries 
+may be denominated in a currency other than the 
+functional currency of each country concerned. To cover 
+these exchange risks, hedge contracts are entered into 
+between the following principal currencies: 
+- the US dollar and the Mexican peso ; 
+- the US dollar and the Colombian peso ; 
+- the Philippine peso and the US dollar ; 
+- the Colombian peso, the Turkish pound, the Tunisian 
+dinar and the Euro. 
+The policy of the group is cover its highly probable 
+forecast commercial transactions denominated in 
+foreign currency, usually up to 12 months ahead. The 
+group uses forward exchange contracts and plain vanilla 
+foreign exchange options. 
+In addition, hedging arrangements are in place to cover 
+the risk of changes in exchange rates amongst the various 
+currencies managed in the cash pool (particularly the US$ 
+and the Mexican peso) and the euro, and on certain loans 
+between Teleperformance SE and its subsidiaries.
+
+2017 Half-year financial report 
+1. Condensed consolidated interim financial statements 
+17 
+ 
+The principal outstanding derivative financial instruments at the reporting date are as follows : 
+Derivative financial instruments at June 30, 2017 
+(in thousands)
+Notional 
+amount in 
+currency
+Notional 
+amount in € at 
+06/30/2017
+Fair value in € 
+at 
+06/30/2017
+In equity In 2017 
+profit or loss
+Hedge of forecast transactions
+USD/MXN - 2017 57 50 3 1 2
+MXN/USD - 2017 485 24 1 0 1
+USD/PHP - 2017 10,895 189 -5 -3 -2
+COP/EUR - 2017 23 23 -1 -2 1
+COP/USD - 2017 56 53 0 -1 1
+USD/INR - 2017 29 25 1 0 1
+EUR/TND - 2017 44 16 -1 -1 1
+Cross Currency Interest Swap EUR/USD 85 74 -11 0 -11
+USD interest caps 400 351 -1 0 -1
+Interest rate swap fixed/variable 200 200 0 0 0
+€ interest cap 120 120 0 0 0
+Hedge of intra-group loans 
+in USD 192 169 3 0 3
+in PHP 4
+
+... [SECTION TRUNCATED at budget limit]

@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import concurrent.futures
 import contextlib
+import datetime as dt
 import json
 import io
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -58,6 +60,23 @@ _RELAXED_DETECTION_SHAPES: dict[str, dict[str, type]] = {
 }
 
 _TRUNCATION_CONTINUATION_STEPS = {"ARBITRO"}
+_PROMPT_EXCERPT_LOCK = threading.Lock()
+
+
+def _append_prompt_excerpt_meta(case_dir: Path, payload: dict) -> None:
+    try:
+        diag_dir = case_dir / "_diagnostics" / "prompt_excerpt"
+        diag_dir.mkdir(parents=True, exist_ok=True)
+        target = diag_dir / "TP_EXTRACTOR_FILING_excerpt_meta.jsonl"
+        line = json.dumps(payload, ensure_ascii=False)
+        with _PROMPT_EXCERPT_LOCK:
+            with target.open("a", encoding="utf-8") as handle:
+                handle.write(line + "\n")
+    except Exception as exc:
+        print(
+            f"[dispatch] WARNING: could not persist prompt excerpt metadata: {exc}",
+            file=sys.stderr,
+        )
 
 
 # ── Validation helpers (shared v1/v2) ────────────────────────
@@ -449,6 +468,27 @@ def _is_quality_only_error(error: str | None) -> bool:
 # ── v2: Core dispatch with retry + transport fallback ─────────
 
 
+def _transport_satisfies_step(
+    transport: "ModelTransport",
+    step_requirements: set[str],
+) -> bool:
+    """Check if a transport's capabilities satisfy the step's requirements.
+
+    Returns True when:
+    - The step has no declared requirements (backward compat)
+    - The transport's capabilities are a superset of the step's requirements
+    Returns False when the transport lacks a required capability.
+    """
+    if not step_requirements:
+        return True  # No requirements → anything goes
+    caps = set(transport.capabilities)
+    # "text_only" explicitly means no tools/web_access
+    if "text_only" in caps:
+        # text_only transport can only satisfy steps with no requirements
+        return False
+    return step_requirements.issubset(caps)
+
+
 def _dispatch_model_with_retry(
     config: EngineConfig,
     model_profile: str,
@@ -708,77 +748,137 @@ def _dispatch_model_with_retry(
         )
     )
 
+    # Mark this transport as unavailable so subsequent dispatch calls
+    # (e.g., fusion) can skip it immediately instead of waiting for the
+    # full timeout cycle again.
+    if last_is_transport_error:
+        config.mark_backend_unavailable(primary.transport_name)
+        decision_log.append(f"transport_marked_unavailable:{primary.transport_name}")
+
     copilot_fallback_skipped = False
+    # Automatic capability-aware gate: block copilot fallback when the step
+    # requires capabilities that copilot cannot satisfy (e.g., tools, web_access).
+    step_reqs = config.get_step_requirements(step_name) if step_name else set()
     if skip_copilot_fallback and config.copilot_transport_fallback and last_is_transport_error:
         decision_log.append("copilot_fallback:skipped_by_caller")
         copilot_fallback_skipped = True
-    elif (not skip_copilot_fallback) and config.copilot_transport_fallback and last_is_transport_error:
+    elif config.copilot_transport_fallback and last_is_transport_error and not skip_copilot_fallback:
         copilot = spec.copilot_transport
         if copilot and copilot.transport_name != primary.transport_name:
-            copilot_backend = _instantiate_transport(copilot, config.raw)
-            if copilot_backend and copilot_backend.check_available():
-                print(
-                    f"[dispatch] Transport fallback: {model_profile} "
-                    f"{primary.transport_name} → copilot (model_id={copilot.model_id})",
-                )
+            # Check capabilities BEFORE attempting copilot dispatch
+            if not _transport_satisfies_step(copilot, step_reqs):
                 decision_log.append(
-                    f"copilot_fallback:primary={primary.transport_name}_to={copilot.transport_name}"
+                    f"copilot_fallback:blocked_by_capabilities"
+                    f"(requires={sorted(step_reqs)},caps={copilot.capabilities})"
                 )
-                # Fix-E / Fix-I: Respect caller timeout. Default to primary
-                # transport timeout only when caller has not provided one.
-                effective_timeout = timeout if timeout is not None else primary.timeout_seconds
-                copilot_result = copilot_backend.dispatch(
-                    prompt, output_schema, cwd, effective_timeout, step_name=step_name
+                copilot_fallback_skipped = True
+                print(
+                    f"[dispatch] Copilot fallback BLOCKED for {model_profile}/{step_name}: "
+                    f"step requires {sorted(step_reqs)}, copilot only has {copilot.capabilities}",
+                    file=sys.stderr,
                 )
-                # Preserve logical backend identity (short name)
-                copilot_result.backend = primary.transport_name
-                copilot_result.model_profile = model_profile
-                copilot_result.transport = "copilot"
-                copilot_result.routed_via = "copilot"
-                copilot_result.fallback_reason = "transport_fallback"
-                copilot_result.attempt = len(attempts) + 1
-                _record_attempt("copilot_fallback", copilot_result.attempt, copilot_result, effective_timeout)
-
-                if copilot_result.success:
+            else:
+                copilot_backend = _instantiate_transport(copilot, config.raw)
+                if copilot_backend and copilot_backend.check_available():
                     print(
-                        f"[dispatch]   ✓ {model_profile} rescued via copilot "
-                        f"({copilot_result.model}, {copilot_result.duration_s:.1f}s)",
+                        f"[dispatch] Transport fallback: {model_profile} "
+                        f"{primary.transport_name} → copilot (model_id={copilot.model_id})",
                     )
-                    copilot_result.attempts = attempts
-                    return copilot_result
+                    decision_log.append(
+                        f"copilot_fallback:primary={primary.transport_name}_to={copilot.transport_name}"
+                    )
+                    # Fix-E / Fix-I: Respect caller timeout. Default to primary
+                    # transport timeout only when caller has not provided one.
+                    effective_timeout = timeout if timeout is not None else primary.timeout_seconds
+                    copilot_result = copilot_backend.dispatch(
+                        prompt, output_schema, cwd, effective_timeout, step_name=step_name
+                    )
+                    # Preserve logical backend identity (short name)
+                    copilot_result.backend = primary.transport_name
+                    copilot_result.model_profile = model_profile
+                    copilot_result.transport = "copilot"
+                    copilot_result.routed_via = "copilot"
+                    copilot_result.fallback_reason = "transport_fallback"
+                    copilot_result.attempt = len(attempts) + 1
+                    _record_attempt("copilot_fallback", copilot_result.attempt, copilot_result, effective_timeout)
 
-                # JSON recovery on copilot result
-                if copilot_result.raw_output:
-                    recovered, recovery_method = _try_recover_json_ex(
-                        copilot_result.raw_output, copilot_result.error
-                    )
-                    if recovered is not None:
-                        if _looks_like_transport_envelope(recovered):
-                            # Try to unwrap artifact from inside the envelope
-                            unwrapped, unwrap_method = _unwrap_transport_envelope(recovered)
-                            if unwrapped is not None and _is_viable_recovered_artifact(unwrapped):
+                    if copilot_result.success:
+                        print(
+                            f"[dispatch]   ✓ {model_profile} rescued via copilot "
+                            f"({copilot_result.model}, {copilot_result.duration_s:.1f}s)",
+                        )
+                        copilot_result.attempts = attempts
+                        return copilot_result
+
+                    # JSON recovery on copilot result
+                    if copilot_result.raw_output:
+                        recovered, recovery_method = _try_recover_json_ex(
+                            copilot_result.raw_output, copilot_result.error
+                        )
+                        if recovered is not None:
+                            if _looks_like_transport_envelope(recovered):
+                                # Try to unwrap artifact from inside the envelope
+                                unwrapped, unwrap_method = _unwrap_transport_envelope(recovered)
+                                if unwrapped is not None and _is_viable_recovered_artifact(unwrapped):
+                                    print(
+                                        f"[dispatch] Artifact unwrapped from transport envelope for "
+                                        f"{model_profile} via copilot (method={unwrap_method})",
+                                        file=sys.stderr,
+                                    )
+                                    copilot_result.success = True
+                                    copilot_result.output = unwrapped
+                                    if attempts:
+                                        attempts[-1]["recovered"] = unwrap_method
+                                    copilot_result.attempts = attempts
+                                    return copilot_result
+                                method = recovery_method or "unknown_recovery"
+                                copilot_result.success = False
+                                copilot_result.output = None
+                                copilot_result.error = (
+                                    f"Recovered output is transport envelope (method={method}); "
+                                    "not a valid artifact payload"
+                                )
+                                if attempts:
+                                    attempts[-1]["recovered"] = method
+                                    if method == "truncation_repair":
+                                        attempts[-1]["truncation_repaired"] = True
+                                        copilot_result.failure_ctx = {
+                                            **(copilot_result.failure_ctx or {}),
+                                            "truncation_repaired": True,
+                                            "recovery_method": method,
+                                            "model_profile": model_profile,
+                                            "backend": primary.transport_name,
+                                            "transport": "copilot",
+                                            "attempts": attempts,
+                                            "decision_log": decision_log,
+                                            "last_error": copilot_result.error,
+                                        }
+                                last_result = copilot_result
+                            elif not _is_viable_recovered_artifact(recovered):
+                                method = recovery_method or "unknown_recovery"
                                 print(
-                                    f"[dispatch] Artifact unwrapped from transport envelope for "
-                                    f"{model_profile} via copilot (method={unwrap_method})",
+                                    f"[dispatch] Recovered fragment rejected for {model_profile} via copilot "
+                                    f"(method={method}, keys={len(recovered)}): "
+                                    f"no version_esquema, likely sub-object",
+                                    file=sys.stderr,
+                                )
+                                if attempts:
+                                    attempts[-1]["recovered"] = f"{method}_rejected_fragment"
+                                last_result = copilot_result
+                            else:
+                                method = recovery_method or "unknown_recovery"
+                                print(
+                                    f"[dispatch] JSON recovered for {model_profile} via copilot "
+                                    f"(method={method})",
                                     file=sys.stderr,
                                 )
                                 copilot_result.success = True
-                                copilot_result.output = unwrapped
+                                copilot_result.output = recovered
                                 if attempts:
-                                    attempts[-1]["recovered"] = unwrap_method
-                                copilot_result.attempts = attempts
-                                return copilot_result
-                            method = recovery_method or "unknown_recovery"
-                            copilot_result.success = False
-                            copilot_result.output = None
-                            copilot_result.error = (
-                                f"Recovered output is transport envelope (method={method}); "
-                                "not a valid artifact payload"
-                            )
-                            if attempts:
-                                attempts[-1]["recovered"] = method
+                                    attempts[-1]["recovered"] = method
+                                    if method == "truncation_repair":
+                                        attempts[-1]["truncation_repaired"] = True
                                 if method == "truncation_repair":
-                                    attempts[-1]["truncation_repaired"] = True
                                     copilot_result.failure_ctx = {
                                         **(copilot_result.failure_ctx or {}),
                                         "truncation_repaired": True,
@@ -790,56 +890,19 @@ def _dispatch_model_with_retry(
                                         "decision_log": decision_log,
                                         "last_error": copilot_result.error,
                                     }
-                            last_result = copilot_result
-                        elif not _is_viable_recovered_artifact(recovered):
-                            method = recovery_method or "unknown_recovery"
-                            print(
-                                f"[dispatch] Recovered fragment rejected for {model_profile} via copilot "
-                                f"(method={method}, keys={len(recovered)}): "
-                                f"no version_esquema, likely sub-object",
-                                file=sys.stderr,
-                            )
-                            if attempts:
-                                attempts[-1]["recovered"] = f"{method}_rejected_fragment"
-                            last_result = copilot_result
-                        else:
-                            method = recovery_method or "unknown_recovery"
-                            print(
-                                f"[dispatch] JSON recovered for {model_profile} via copilot "
-                                f"(method={method})",
-                                file=sys.stderr,
-                            )
-                            copilot_result.success = True
-                            copilot_result.output = recovered
-                            if attempts:
-                                attempts[-1]["recovered"] = method
-                                if method == "truncation_repair":
-                                    attempts[-1]["truncation_repaired"] = True
-                            if method == "truncation_repair":
-                                copilot_result.failure_ctx = {
-                                    **(copilot_result.failure_ctx or {}),
-                                    "truncation_repaired": True,
-                                    "recovery_method": method,
-                                    "model_profile": model_profile,
-                                    "backend": primary.transport_name,
-                                    "transport": "copilot",
-                                    "attempts": attempts,
-                                    "decision_log": decision_log,
-                                    "last_error": copilot_result.error,
-                                }
-                            copilot_result.attempts = attempts
-                            return copilot_result
+                                copilot_result.attempts = attempts
+                                return copilot_result
 
-                print(
-                    f"[dispatch]   ✗ {model_profile} via copilot also failed: "
-                    f"{(copilot_result.error or 'unknown')[:100]}",
-                    file=sys.stderr,
-                )
-                decision_log.append("copilot_fallback:failed")
-                last_result = copilot_result
+                    print(
+                        f"[dispatch]   ✗ {model_profile} via copilot also failed: "
+                        f"{(copilot_result.error or 'unknown')[:100]}",
+                        file=sys.stderr,
+                    )
+                    decision_log.append("copilot_fallback:failed")
+                    last_result = copilot_result
 
-            else:
-                decision_log.append("copilot_fallback:unavailable")
+                else:
+                    decision_log.append("copilot_fallback:unavailable")
 
     if last_result is None:
         return DispatchResult(
@@ -1231,6 +1294,27 @@ def dispatch_multi_and_fuse(
                     f"{result.error}",
                     file=sys.stderr,
                 )
+                # Save a failure trace so that diagnostic info is always available
+                # (previously, failed dispatches left no trace file at all).
+                if cwd:
+                    fail_trace_path = cwd / f"_multi_{step_name}_{backend_name}_FAIL.json"
+                    fail_trace = {
+                        "model_profile": model_profile,
+                        "backend": backend_name,
+                        "step": step_name,
+                        "success": False,
+                        "error": result.error,
+                        "exit_code": result.exit_code,
+                        "duration_s": result.duration_s,
+                        "transport": result.transport,
+                        "routed_via": result.routed_via,
+                        "failure_ctx": result.failure_ctx,
+                    }
+                    try:
+                        fail_trace_path.write_text(json.dumps(fail_trace, indent=2, ensure_ascii=False, default=str))
+                        print(f"[dispatcher] Saved failure trace: {fail_trace_path.name}")
+                    except OSError:
+                        pass
 
     if not successful_candidates:
         failed_details = []
@@ -1346,7 +1430,70 @@ def dispatch_multi_and_fuse(
         if cap_val and cap_val > 0:
             fusion_timeout = min(fusion_timeout, cap_val)
 
-    fusion_attempt_results: list[tuple[str, DispatchResult]] = []
+    # Step 4b: State shared across both v2 cascade and v1 single-shot paths.
+    fusion_attempts_summary: list[dict] = []
+    last_fusion_error: str | None = None
+    had_invalid_fusion_payload = False
+    last_fusion_result: DispatchResult | None = None
+
+    def _evaluate_fusion_result(
+        fmodel: str, fresult: DispatchResult
+    ) -> DispatchResult | None:
+        """Validate a fusion result and return it if valid, else None.
+
+        Side-effects: updates fusion_attempts_summary, last_fusion_error,
+        had_invalid_fusion_payload, last_fusion_result (via nonlocal).
+        Returns the result if valid so the caller can do ``return``, else None.
+        """
+        nonlocal last_fusion_error, had_invalid_fusion_payload, last_fusion_result
+        last_fusion_result = fresult
+        fresult.backends_used = used
+
+        attempt_item: dict[str, object] = {
+            "model_profile": fmodel,
+            "success": bool(fresult.success),
+            "transport": fresult.transport,
+            "routed_via": fresult.routed_via,
+            "duration_s": fresult.duration_s,
+            "error": fresult.error,
+        }
+
+        if fresult.success:
+            fused_output = fresult.output if isinstance(fresult.output, dict) else None
+            normalized_fused_output = _normalize_backend_output(fused_output) if fused_output else None
+            is_valid_fused, fused_reason = _validate_multi_candidate(
+                config, step_name, normalized_fused_output
+            )
+            if is_valid_fused:
+                if fused_output is not None and normalized_fused_output is not None:
+                    fresult.output = normalized_fused_output
+                fusion_attempts_summary.append(attempt_item)
+                base_ctx = fresult.failure_ctx if isinstance(fresult.failure_ctx, dict) else {}
+                fresult.failure_ctx = {
+                    **base_ctx,
+                    "step_context": {
+                        "step": step_name,
+                        "mode": "multi_fusion",
+                    },
+                    "fusion_attempts": fusion_attempts_summary,
+                }
+                return fresult
+
+            had_invalid_fusion_payload = True
+            invalid_reason = fused_reason or "fusion_output_invalid"
+            attempt_item["validation_error"] = invalid_reason
+            last_fusion_error = f"Fusion output invalid via {fmodel}: {invalid_reason}"
+            print(
+                f"[dispatch] WARNING: Fusion output for {step_name} invalid via {fmodel} "
+                f"({invalid_reason}). Trying next fusion candidate.",
+                file=sys.stderr,
+            )
+        else:
+            last_fusion_error = fresult.error or f"Fusion dispatch failed via {fmodel}"
+
+        fusion_attempts_summary.append(attempt_item)
+        return None
+
     if config.is_v2:
         fusion_models: list[str] = []
         primary_fusion = config.get_fusion_model_for_step(step_name)
@@ -1355,6 +1502,35 @@ def dispatch_multi_and_fuse(
                 fusion_models.append(candidate)
 
         for idx, fusion_model in enumerate(fusion_models, start=1):
+            # Early-skip: if this model's transport was marked unavailable during
+            # the multi-model phase (e.g., Claude auth failed), skip it immediately
+            # instead of waiting for the full timeout cycle.
+            transport_name = config.resolve_transport_name(fusion_model)
+            if config.preflight_done() and not config.is_backend_available(transport_name):
+                print(
+                    f"[dispatch] Skipping fusion via {fusion_model}: "
+                    f"transport {transport_name} marked unavailable",
+                    file=sys.stderr,
+                )
+                skipped = DispatchResult(
+                    False, None, "", fusion_model, transport_name, 0.0,
+                    f"Transport {transport_name} unavailable (skipped)",
+                    model_profile=fusion_model,
+                    transport=transport_name,
+                )
+                last_fusion_result = skipped
+                last_fusion_error = skipped.error or f"Fusion dispatch failed via {fusion_model}"
+                fusion_attempts_summary.append({
+                    "model_profile": fusion_model,
+                    "success": False,
+                    "transport": transport_name,
+                    "routed_via": None,
+                    "duration_s": 0.0,
+                    "error": skipped.error,
+                })
+                continue
+
+            is_last = (idx == len(fusion_models))
             print(
                 f"[dispatch] Fusion for {step_name} attempt {idx}/{len(fusion_models)} → {fusion_model}",
                 file=sys.stderr,
@@ -1363,67 +1539,22 @@ def dispatch_multi_and_fuse(
                 config, fusion_model, fusion_prompt, output_schema, cwd,
                 fusion_timeout,
                 step_name=step_name,
-                skip_copilot_fallback=True,
+                # Allow copilot fallback only on the last fusion attempt as a
+                # final rescue path (copilot backend now has prompt wrapping for
+                # structured JSON output).
+                skip_copilot_fallback=not is_last,
             )
-            fusion_attempt_results.append((fusion_model, fusion_result))
+            # Validate immediately — return on first valid result (true cascade).
+            valid = _evaluate_fusion_result(fusion_model, fusion_result)
+            if valid is not None:
+                return valid
     else:
         fusion_result = dispatch_step(config, "FUSION", fusion_prompt, output_schema, cwd)
         if isinstance(fusion_result, dict):
             fusion_result = list(fusion_result.values())[0]
-        fusion_attempt_results.append(("FUSION", fusion_result))
-
-    fusion_attempts_summary: list[dict] = []
-    last_fusion_error: str | None = None
-    had_invalid_fusion_payload = False
-    last_fusion_result: DispatchResult | None = None
-
-    for fusion_model, fusion_result in fusion_attempt_results:
-        last_fusion_result = fusion_result
-        fusion_result.backends_used = used
-
-        attempt_item: dict[str, object] = {
-            "model_profile": fusion_model,
-            "success": bool(fusion_result.success),
-            "transport": fusion_result.transport,
-            "routed_via": fusion_result.routed_via,
-            "duration_s": fusion_result.duration_s,
-            "error": fusion_result.error,
-        }
-
-        if fusion_result.success:
-            fused_output = fusion_result.output if isinstance(fusion_result.output, dict) else None
-            normalized_fused_output = _normalize_backend_output(fused_output) if fused_output else None
-            is_valid_fused, fused_reason = _validate_multi_candidate(
-                config, step_name, normalized_fused_output
-            )
-            if is_valid_fused:
-                if fused_output is not None and normalized_fused_output is not None:
-                    fusion_result.output = normalized_fused_output
-                fusion_attempts_summary.append(attempt_item)
-                base_ctx = fusion_result.failure_ctx if isinstance(fusion_result.failure_ctx, dict) else {}
-                fusion_result.failure_ctx = {
-                    **base_ctx,
-                    "step_context": {
-                        "step": step_name,
-                        "mode": "multi_fusion",
-                    },
-                    "fusion_attempts": fusion_attempts_summary,
-                }
-                return fusion_result
-
-            had_invalid_fusion_payload = True
-            invalid_reason = fused_reason or "fusion_output_invalid"
-            attempt_item["validation_error"] = invalid_reason
-            last_fusion_error = f"Fusion output invalid via {fusion_model}: {invalid_reason}"
-            print(
-                f"[dispatch] WARNING: Fusion output for {step_name} invalid via {fusion_model} "
-                f"({invalid_reason}). Trying next fusion candidate.",
-                file=sys.stderr,
-            )
-        else:
-            last_fusion_error = fusion_result.error or f"Fusion dispatch failed via {fusion_model}"
-
-        fusion_attempts_summary.append(attempt_item)
+        valid = _evaluate_fusion_result("FUSION", fusion_result)
+        if valid is not None:
+            return valid
 
     # Fallback: fusion failed but we have valid per-model candidates.
     fallback_candidate = _pick_fallback_candidate()
@@ -1576,11 +1707,23 @@ def dispatch_parallel_filings(
         local_path = filing_entry.get("local_path")
         filing_path = (case_dir.parent.parent.parent / local_path) if local_path else Path("/dev/null")
 
-        prompt = build_filing_prompt(
+        prompt, excerpt_meta = build_filing_prompt(
             filing_path=filing_path,
             source_entry=filing_entry,
             ticker=filing_entry.get("ticker", "UNKNOWN"),
             instrucciones_dir=instrucciones_dir,
+        )
+        _append_prompt_excerpt_meta(
+            case_dir,
+            {
+                "ts_utc": dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z"),
+                "step": "TP_EXTRACTOR_FILING",
+                "source_id": filing_entry.get("source_id"),
+                "ticker": filing_entry.get("ticker"),
+                "filing_type": filing_entry.get("tipo", filing_entry.get("form_type")),
+                "local_path": local_path,
+                "excerpt_meta": excerpt_meta,
+            },
         )
 
         if config.is_v2:

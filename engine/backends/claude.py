@@ -16,6 +16,15 @@ _AUTH_CACHE: dict[tuple[str, str], tuple[float, bool, str | None]] = {}
 _AUTH_CACHE_TTL_OK = 600    # 10 min for successes
 _AUTH_CACHE_TTL_FAIL = 60   # 60s for failures
 
+# Patterns in error/stderr that indicate auth or permission failure.
+# When detected after a dispatch, the auth cache is invalidated so that
+# subsequent steps don't waste their full timeout on a stale "OK" entry.
+_AUTH_FAILURE_PATTERNS = (
+    "unauthorized", "not logged in", "authentication", "forbidden",
+    "401", "403", "invalid api key", "invalid token", "expired",
+    "not authenticated", "permission denied",
+)
+
 _TOOLS_ENABLED_STEPS = {
     "MONITOR",
     "SCANNER",
@@ -24,6 +33,25 @@ _TOOLS_ENABLED_STEPS = {
     "SCOUT_E",
     "OUTCOME",
 }
+
+
+def _step_requires_tools(step_key: str, config: dict) -> bool:
+    """Check if a step requires tools based on pipeline_dag config.
+
+    Falls back to the hardcoded _TOOLS_ENABLED_STEPS set for backward
+    compatibility when the config doesn't declare 'requires'.
+    """
+    dag = config.get("pipeline_dag", {})
+    for dag_steps in dag.values():
+        for entry in dag_steps:
+            if entry.get("step") == step_key:
+                reqs = entry.get("requires", [])
+                if reqs:
+                    return "tools" in reqs
+                # No 'requires' declared → fall back to hardcoded set
+                return step_key in _TOOLS_ENABLED_STEPS
+    # Step not found in any DAG → fall back to hardcoded set
+    return step_key in _TOOLS_ENABLED_STEPS
 
 
 def _extract_truncation_meta(envelope: dict) -> dict:
@@ -66,6 +94,18 @@ class ClaudeBackend(LLMBackend):
     def name(self) -> str:
         return "claude"
 
+    def _invalidate_auth_cache_if_auth_error(self, *texts: str) -> None:
+        """Invalidate auth cache if any text contains auth failure patterns."""
+        combined = " ".join(texts).lower()
+        if any(p in combined for p in _AUTH_FAILURE_PATTERNS):
+            cache_key = (self.binary_path, self.model)
+            _AUTH_CACHE.pop(cache_key, None)
+            print(
+                f"[claude] Auth cache invalidated for {self.model} "
+                f"(auth failure detected in dispatch error)",
+                file=sys.stderr,
+            )
+
     def dispatch(
         self,
         prompt: str,
@@ -95,7 +135,7 @@ class ClaudeBackend(LLMBackend):
     ) -> DispatchResult:
         """Ejecuta claude -p en modo no-interactivo para un modelo concreto."""
         step_key = (step_name or "").strip().upper()
-        tools_enabled = step_key in _TOOLS_ENABLED_STEPS
+        tools_enabled = _step_requires_tools(step_key, self.config)
 
         cmd = [
             self.binary_path, "-p", prompt,
@@ -127,9 +167,18 @@ class ClaudeBackend(LLMBackend):
             if proc.returncode != 0 and not raw.strip():
                 # Pass full stderr as raw_output so _is_retryable_dispatch_error
                 # can detect quota/rate-limit/network patterns.
+                error_msg = f"Non-zero exit code: {proc.returncode}. stderr: {stderr_full[:2000]}"
+                print(
+                    f"[claude] dispatch FAILED: exit={proc.returncode} "
+                    f"stderr={stderr_full[:500]}",
+                    file=sys.stderr,
+                )
+                # Invalidate auth cache if the error looks like an auth/permission issue
+                # so subsequent steps don't waste their full timeout on stale cached "OK".
+                self._invalidate_auth_cache_if_auth_error(error_msg, stderr_full)
                 return DispatchResult(
                     False, None, stderr_full, model_name, "claude", duration,
-                    f"Non-zero exit code: {proc.returncode}. stderr: {stderr_full[:2000]}",
+                    error_msg,
                     exit_code=proc.returncode,
                 )
 
@@ -142,9 +191,11 @@ class ClaudeBackend(LLMBackend):
                     error_msg = envelope.get("result", "Unknown Claude CLI error")
                     if isinstance(error_msg, dict):
                         error_msg = json.dumps(error_msg)[:500]
+                    cli_error = f"Claude CLI error: {str(error_msg)[:500]}"
+                    self._invalidate_auth_cache_if_auth_error(cli_error)
                     return DispatchResult(
                         False, None, raw, model_name, "claude", duration,
-                        f"Claude CLI error: {str(error_msg)[:500]}",
+                        cli_error,
                         exit_code=proc.returncode,
                         failure_ctx={
                             **trunc_meta,

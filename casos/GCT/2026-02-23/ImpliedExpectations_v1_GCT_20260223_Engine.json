@@ -1,14 +1,14 @@
 {
   "version_esquema": "ImpliedExpectations_v1",
   "caso_id": "CASE_20260223_GCT",
-  "fecha_corte": "2026-02-23",
+  "fecha_corte": "2026-02-24",
   "empresa": {
     "ticker": "GCT",
-    "nombre": "GigaCloud Technology Inc",
-    "bolsa": "NASDAQ",
-    "pais": "US",
-    "sector": "Technology",
-    "industria": "Internet Services & Infrastructure"
+    "nombre": "UNKNOWN",
+    "bolsa": "UNKNOWN",
+    "pais": "UNKNOWN",
+    "sector": "UNKNOWN",
+    "industria": "UNKNOWN"
   },
   "input_refs": {
     "truth_pack_version": "TruthPack_v1",
@@ -17,41 +17,41 @@
   "status": "OK",
   "motivo_blocked": null,
   "snapshot_mercado": {
-    "fecha": "2026-02-23",
+    "fecha": "2026-02-24",
     "precio_usd": 33.82,
-    "market_cap_usd": 1250000000,
-    "enterprise_value_usd": null,
-    "deuda_total_usd": null,
-    "caja_usd": 259759000,
-    "deuda_neta_usd": null,
-    "acciones_diluidas": 29160000
+    "market_cap_usd": 1250000000.0,
+    "enterprise_value_usd": 990241000.0,
+    "deuda_total_usd": 0.0,
+    "caja_usd": 259759000.0,
+    "deuda_neta_usd": -259759000.0,
+    "acciones_diluidas": null
   },
   "metricas_base": {
-    "periodo_base": "FY0_fallback",
-    "fecha_fin_periodo_base": "2024-12-31",
-    "ingresos_usd": 1161042000,
-    "ebit_usd": 130622000,
-    "cfo_usd": 158078000,
-    "capex_usd": -15536000,
-    "fcf_usd": 142542000,
-    "margen_operativo_pct": 11.25,
-    "margen_fcf_pct": 12.28
+    "periodo_base": "TTM",
+    "fecha_fin_periodo_base": "2025-09-30",
+    "ingresos_usd": 1222932000.0,
+    "ebit_usd": 132320000.0,
+    "cfo_usd": 202459000.0,
+    "capex_usd": 1162000.0,
+    "fcf_usd": 201297000.0,
+    "margen_operativo_pct": 10.82,
+    "margen_fcf_pct": 16.46
   },
   "seleccion_metodo": {
     "metodo_principal": "REVERSE_DCF_FCF",
-    "razon": "FCF FY2024 es positivo y robusto (142.5M USD, margen FCF 12.3%). Se aplica reverse DCF a nivel equity (market_cap como target) dado que EV no es calculable por ausencia de deuda_total_usd en el TruthPack. El enfoque es válido porque FCF ya es post-intereses y la deuda financiera parece mínima (interest expense de solo 256K en FY2024).",
+    "razon": "El FCF base es positivo y material (TTM), por lo que se puede resolver directamente el crecimiento implicito que justifica el EV actual. EBIT tambien es positivo, pero como metodo secundario de contraste.",
     "metodos_secundarios": [
-      "REVERSE_EARNINGS_POWER",
-      "MULTIPLOS_IMPLICITOS_SOLO"
+      "MULTIPLOS_IMPLICITOS_SOLO",
+      "REVERSE_EARNINGS_POWER"
     ]
   },
   "multiples_implicitos": {
     "disponible": true,
-    "ev_ebit": null,
-    "ev_fcf": null,
-    "p_fcf": 8.77,
-    "fcf_yield_pct": 11.4,
-    "comentario": "P/FCF de 8.8x y FCF yield de 11.4% son niveles típicamente asociados a escepticismo significativo del mercado: o bien se descuenta caída de FCF, o se aplica una prima de riesgo elevada por factores cualitativos (gobernanza, opacidad, concentración geográfica)."
+    "ev_ebit": 7.4837,
+    "ev_fcf": 4.9193,
+    "p_fcf": 6.2097,
+    "fcf_yield_pct": 16.1038,
+    "comentario": "Los multiplos son bajos para un FCF actual alto, lo que sugiere que el mercado descuenta una caida relevante del FCF y/o menor sostenibilidad del nivel actual."
   },
   "parametros_modelo": {
     "horizonte_anos": 5,
@@ -70,208 +70,208 @@
       15,
       18
     ],
-    "nota_parametros": "Rango de descuento 8-12% refleja desde coste de capital base de growth tech (8%) hasta prima ajustada por riesgo-país y gobernanza de micro-cap con domicilio offshore (12%). Múltiplos terminales 10-18x cubren desde valoración distressed/cíclica hasta plataforma estabilizada. El modelo usa market_cap como target (no EV) dado que deuda_total_usd no está disponible; la deuda financiera parece negligible (interest expense ~$256K FY2024) aunque los lease liabilities son sustanciales ($484M).",
+    "nota_parametros": "El rango de tasa de descuento cubre escenarios de riesgo de capital de moderado a exigente. El crecimiento terminal (2%-3%) representa crecimiento real bajo de largo plazo con inflacion. Los multiplos terminales (10x-18x FCF) cubren desde compresion hasta salida mas benevolente, para medir sensibilidad sin fijar un unico punto.",
     "convenciones": {
       "definicion_fcf": "FCF = CFO - CAPEX (usando capex como salida de caja)",
-      "ev_formula": "EV = market_cap + deuda_total - caja (NO calculable; se usa market_cap como proxy equity-level)",
+      "ev_formula": "EV = market_cap + deuda_total - caja",
       "si_fcf_negativo": "usar earnings power / EBIT y no reverse DCF de FCF"
     }
   },
   "reverse_dcf_fcf": {
     "aplicable": true,
-    "fcf0_usd": 142542000,
+    "fcf0_usd": 201297000.0,
     "resultado_grid": [
       {
         "tasa_descuento": 0.08,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 10,
-        "cagr_fcf_5y_implicito": -0.049,
-        "fcf_year5_implicito_usd": 110700000,
-        "nota": "FCF debería caer ~5% anual hasta 111M; implica que el mercado espera contracción moderada sostenida del flujo de caja."
+        "cagr_fcf_5y_implicito": -0.1805,
+        "fcf_year5_implicito_usd": 74380756.97,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.08,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 12,
-        "cagr_fcf_5y_implicito": -0.073,
-        "fcf_year5_implicito_usd": 97300000,
-        "nota": "FCF caería a 97M, una reducción de ~32% acumulada; el mercado exige una valoración terminal baja para compensar riesgo."
+        "cagr_fcf_5y_implicito": -0.2013,
+        "fcf_year5_implicito_usd": 65435213.33,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.08,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 15,
-        "cagr_fcf_5y_implicito": -0.106,
-        "fcf_year5_implicito_usd": 81400000,
-        "nota": "Implica que el FCF se reduciría casi a la mitad en 5 años; escenario de deterioro significativo del negocio."
+        "cagr_fcf_5y_implicito": -0.227,
+        "fcf_year5_implicito_usd": 55563042.6,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.08,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 18,
-        "cagr_fcf_5y_implicito": -0.132,
-        "fcf_year5_implicito_usd": 69400000,
-        "nota": "FCF caería a 69M (~-51% acumulado); escenario cercano a colapso del modelo de negocio."
+        "cagr_fcf_5y_implicito": -0.2481,
+        "fcf_year5_implicito_usd": 48370174.22,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.08,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 10,
-        "cagr_fcf_5y_implicito": -0.049,
-        "fcf_year5_implicito_usd": 110700000,
-        "nota": "Mismo cálculo que con g_terminal=2%; el múltiplo terminal de 10x con g=3% sería inconsistente (implica tasa de capitalización del 7%)."
+        "cagr_fcf_5y_implicito": -0.1816,
+        "fcf_year5_implicito_usd": 73882269.06,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.08,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 12,
-        "cagr_fcf_5y_implicito": -0.073,
-        "fcf_year5_implicito_usd": 97300000,
-        "nota": "Con g_terminal=3%, un múltiplo de 12x sería coherente con una tasa de capitalización implícita del 11.3%."
+        "cagr_fcf_5y_implicito": -0.2024,
+        "fcf_year5_implicito_usd": 64978753.18,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.08,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 15,
-        "cagr_fcf_5y_implicito": -0.106,
-        "fcf_year5_implicito_usd": 81400000,
-        "nota": "FCF descendería a 81M; el múltiplo terminal alto combinado con g=3% exige mayor caída inicial para cuadrar el precio."
+        "cagr_fcf_5y_implicito": -0.2281,
+        "fcf_year5_implicito_usd": 55158435.26,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.08,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 18,
-        "cagr_fcf_5y_implicito": -0.132,
-        "fcf_year5_implicito_usd": 69400000,
-        "nota": "Escenario extremo: el mercado necesitaría asumir destrucción masiva de FCF incluso con valoración terminal generosa."
+        "cagr_fcf_5y_implicito": -0.2493,
+        "fcf_year5_implicito_usd": 48006972.8,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.1,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 10,
-        "cagr_fcf_5y_implicito": -0.031,
-        "fcf_year5_implicito_usd": 121900000,
-        "nota": "Escenario más benigno: FCF solo necesita caer ~3% anual, coherente con normalización post-boom."
+        "cagr_fcf_5y_implicito": -0.1654,
+        "fcf_year5_implicito_usd": 81527709.71,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.1,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 12,
-        "cagr_fcf_5y_implicito": -0.056,
-        "fcf_year5_implicito_usd": 106800000,
-        "nota": "FCF a 107M; implica una contracción gradual pero sostenida de márgenes o ingresos."
+        "cagr_fcf_5y_implicito": -0.1865,
+        "fcf_year5_implicito_usd": 71722624.16,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.1,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 15,
-        "cagr_fcf_5y_implicito": -0.09,
-        "fcf_year5_implicito_usd": 88900000,
-        "nota": "El mercado estaría asumiendo que GCT pierde ~38% de su FCF actual en 5 años."
+        "cagr_fcf_5y_implicito": -0.2127,
+        "fcf_year5_implicito_usd": 60901875.59,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.1,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 18,
-        "cagr_fcf_5y_implicito": -0.116,
-        "fcf_year5_implicito_usd": 76400000,
-        "nota": "Caída severa del FCF a 76M; escenario de erosión competitiva o regulatoria significativa."
+        "cagr_fcf_5y_implicito": -0.2342,
+        "fcf_year5_implicito_usd": 53017872.94,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.1,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 10,
-        "cagr_fcf_5y_implicito": -0.031,
-        "fcf_year5_implicito_usd": 121900000,
-        "nota": "Con r=10% y M=10x, la exigencia de caída es mínima; si GCT mantiene FCF estable, el precio actual infravalora."
+        "cagr_fcf_5y_implicito": -0.1665,
+        "fcf_year5_implicito_usd": 80981324.07,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.1,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 12,
-        "cagr_fcf_5y_implicito": -0.056,
-        "fcf_year5_implicito_usd": 106800000,
-        "nota": "Contracción moderada del FCF; coherente con pérdida parcial de ventaja competitiva."
+        "cagr_fcf_5y_implicito": -0.1876,
+        "fcf_year5_implicito_usd": 71222304.56,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.1,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 15,
-        "cagr_fcf_5y_implicito": -0.09,
-        "fcf_year5_implicito_usd": 88900000,
-        "nota": "Escenario central-pesimista: el mercado asume deterioro sustancial pero no terminal del negocio."
+        "cagr_fcf_5y_implicito": -0.2138,
+        "fcf_year5_implicito_usd": 60458391.14,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.1,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 18,
-        "cagr_fcf_5y_implicito": -0.116,
-        "fcf_year5_implicito_usd": 76400000,
-        "nota": "FCF casi reducido a la mitad; requiere escenario de disrupción severa del marketplace B2B."
+        "cagr_fcf_5y_implicito": -0.2354,
+        "fcf_year5_implicito_usd": 52619772.93,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.12,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 10,
-        "cagr_fcf_5y_implicito": -0.013,
-        "fcf_year5_implicito_usd": 133400000,
-        "nota": "Con descuento alto (12%), el FCF apenas necesita bajar ~1% anual; el precio refleja principalmente prima de riesgo, no caída de fundamentales."
+        "cagr_fcf_5y_implicito": -0.1502,
+        "fcf_year5_implicito_usd": 89213777.72,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.12,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 12,
-        "cagr_fcf_5y_implicito": -0.039,
-        "fcf_year5_implicito_usd": 116700000,
-        "nota": "Caída modesta del FCF a 117M; la mayor parte del descuento viene de la prima de riesgo."
+        "cagr_fcf_5y_implicito": -0.1717,
+        "fcf_year5_implicito_usd": 78484312.53,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.12,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 15,
-        "cagr_fcf_5y_implicito": -0.073,
-        "fcf_year5_implicito_usd": 97300000,
-        "nota": "FCF a 97M; equilibrio entre prima de riesgo elevada y expectativa de contracción operativa."
+        "cagr_fcf_5y_implicito": -0.1984,
+        "fcf_year5_implicito_usd": 66643432.16,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.12,
         "crecimiento_terminal": 0.02,
         "multiple_terminal_fcf": 18,
-        "cagr_fcf_5y_implicito": -0.1,
-        "fcf_year5_implicito_usd": 84100000,
-        "nota": "Escenario que combina máxima prima de riesgo con valoración terminal generosa; exige caída de 10% anual."
+        "cagr_fcf_5y_implicito": -0.2203,
+        "fcf_year5_implicito_usd": 58016160.99,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.12,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 10,
-        "cagr_fcf_5y_implicito": -0.013,
-        "fcf_year5_implicito_usd": 133400000,
-        "nota": "Prácticamente FCF plano; si el descuento del 12% es correcto, el mercado no espera deterioro operativo significativo."
+        "cagr_fcf_5y_implicito": -0.1513,
+        "fcf_year5_implicito_usd": 88615881.28,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.12,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 12,
-        "cagr_fcf_5y_implicito": -0.039,
-        "fcf_year5_implicito_usd": 116700000,
-        "nota": "Contracción leve; el grueso de la valoración deprimida se explica por prima de riesgo, no por expectativas de negocio."
+        "cagr_fcf_5y_implicito": -0.1729,
+        "fcf_year5_implicito_usd": 77936825.04,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.12,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 15,
-        "cagr_fcf_5y_implicito": -0.073,
-        "fcf_year5_implicito_usd": 97300000,
-        "nota": "Caída acumulada de ~32%; múltiplo terminal de 15x con g=3% implica capitalización del 9.7%, coherente con r=12%."
+        "cagr_fcf_5y_implicito": -0.1995,
+        "fcf_year5_implicito_usd": 66158137.98,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       },
       {
         "tasa_descuento": 0.12,
         "crecimiento_terminal": 0.03,
         "multiple_terminal_fcf": 18,
-        "cagr_fcf_5y_implicito": -0.1,
-        "fcf_year5_implicito_usd": 84100000,
-        "nota": "Escenario más extremo del grid: aun con descuento alto y múltiplo generoso, se requiere caída del 10% anual en FCF."
+        "cagr_fcf_5y_implicito": -0.2214,
+        "fcf_year5_implicito_usd": 57580529.89,
+        "nota": "Implica contraccion anual compuesta del FCF para que el EV actual cierre con estos supuestos de descuento y salida."
       }
     ],
     "sensibilidades": {
@@ -281,109 +281,94 @@
           "importancia": "ALTA"
         },
         {
-          "driver": "tasa_descuento",
-          "importancia": "ALTA"
+          "driver": "multiple_terminal",
+          "importancia": "MEDIA"
         },
         {
-          "driver": "multiple_terminal",
+          "driver": "tasa_descuento",
           "importancia": "MEDIA"
         }
       ],
-      "observacion": "La tasa de descuento es inusualmente influyente en este caso: al pasar de 8% a 12%, el CAGR implícito pasa de -5%/-13% a -1%/-10%. Esto indica que gran parte del descuento del mercado puede atribuirse a prima de riesgo (gobernanza, opacidad) más que a expectativas de deterioro operativo. El múltiplo terminal tiene impacto moderado pero consistente."
+      "observacion": "Con EV/FCF actual bajo, la variable que mas ajusta el cierre del modelo es el crecimiento/contraccion del FCF en el periodo explicito; multiple y tasa desplazan la exigencia pero no cambian el signo de la expectativa."
     },
     "validaciones_modelo": {
-      "ev_presente": false,
+      "ev_presente": true,
       "fcf0_presente": true,
       "resultados_sin_valores_absurdos": true,
-      "detalle": "Todos los CAGR implícitos caen en rango -1% a -13%, lo cual es plausible para un mercado escéptico sobre la sostenibilidad del crecimiento reciente. Se usó market_cap en lugar de EV como target, lo que subestima ligeramente la exigencia (EV > market_cap si deuda neta > 0, pero dada la caja de 260M y deuda financiera aparentemente mínima, EV podría ser inferior a market_cap)."
+      "detalle": "Las 24 combinaciones son unicas y arrojan FCF year5 positivo (USD 48.0M-89.2M) con CAGR implicito entre -24.9% y -15.0%."
     }
   },
   "reverse_earnings_power": {
-    "aplicable": true,
+    "aplicable": false,
     "metrica_base": "EBIT",
-    "valor_base_usd": 130622000,
+    "valor_base_usd": 132320000.0,
     "rango_normalizado_usd": {
-      "min": 92000000,
-      "base": 120000000,
-      "max": 131000000
+      "min": null,
+      "base": null,
+      "max": null
     },
     "implied_multiple_sobre_normalizado": {
-      "multiple_min": 9.5,
-      "multiple_base": 10.4,
-      "multiple_max": 13.6
+      "multiple_min": null,
+      "multiple_base": null,
+      "multiple_max": null
     },
-    "lectura": "El mercado valora GCT a 9.5-13.6x EBIT normalizado (usando market_cap como proxy dado que EV no es calculable). Estos múltiplos están en la zona baja para una empresa tecnológica de alto crecimiento, sugiriendo que el mercado aplica un descuento significativo por riesgo percibido (estructura corporativa, concentración en mercado chino/asiático, historial corto como empresa pública). Si se normalizara a niveles de peers de plataformas B2B (15-20x EBIT), habría un gap de valoración sustancial.",
+    "lectura": "No se usa como metodo principal porque hay FCF positivo suficiente para reverse DCF; se mantiene como contraste secundario.",
     "supuestos": [
-      "Rango min (92M): promedio EBIT FY2022-FY2024, asumiendo que FY2022 fue un año débil representativo del suelo operativo",
-      "Rango base (120M): promedio FY2023-FY2024, excluyendo años pre-scale",
-      "Rango max (131M): EBIT FY2024 como potencial pico si el crecimiento actual es insostenible",
-      "Se usa market_cap (1,250M) en lugar de EV por ausencia de deuda_total_usd"
+      "EBIT TTM se toma como referencia de rentabilidad operativa actual."
     ]
   },
   "resumen_expectativas_implicitas": {
     "enunciados": [
-      "Para justificar el market cap actual de $1,250M, el mercado parece asumir que el FCF de GCT DECRECERÁ entre un 1% y un 13% anual durante los próximos 5 años, dependiendo de la prima de riesgo aplicada (8-12%) y el múltiplo terminal asumido (10-18x).",
-      "En el escenario central (r=10%, M=12-15x), el CAGR implícito del FCF es de -6% a -9%, lo que significaría que el FCF caería de $143M actuales a $89-107M en 5 años.",
-      "Si la valoración deprimida se explica principalmente por prima de riesgo (r=12%) y no por deterioro operativo, bastaría con que el FCF se mantuviera aproximadamente estable para que el precio actual estuviera justificado.",
-      "El P/FCF de 8.8x y FCF yield de 11.4% posicionan a GCT en territorio de deep value o de trampa de valor, dependiendo de si el escepticismo del mercado sobre la sostenibilidad del modelo de negocio es correcto."
+      "Para justificar el EV actual bajo el grid definido, el mercado parece asumir una contraccion del FCF de aproximadamente 15%-25% anual compuesto durante 5 anos.",
+      "Ese rango lleva el FCF del ano 5 a ~USD 48M-89M (desde ~USD 201M TTM), incluso permitiendo crecimiento terminal de 2%-3%.",
+      "Con multiplos terminales mas altos (15x-18x), la contraccion implicita requerida sigue siendo severa (~20%-25% CAGR), por lo que la expectativa dominante es deterioro del flujo, no solo compresion de salida."
     ],
-    "variable_critica_principal": "RIESGO_CAPITAL",
+    "variable_critica_principal": "CRECIMIENTO_FCF",
     "que_deberia_observarse_en_6_12_meses": [
-      "Evolución de ingresos trimestrales: si mantienen la trayectoria de $270-330M/trimestre o comienzan a contraerse (valida/refuta expectativa de caída).",
-      "Margen operativo trimestral: verificar si el 11.25% de FY2024 se sostiene o comprime, dado el salto de G&A de $30M (FY2023) a $74M (FY2024).",
-      "Generación de FCF vs CFO: el CFO de $158M se benefició de cambios en working capital; observar si el FCF normalizado se mantiene por encima de $120M.",
-      "Resolución de preocupaciones de gobernanza: auditor, calidad de disclosures, progreso en cumplimiento SEC, posibles acciones regulatorias.",
-      "Evolución de lease liabilities ($484M): determinar si la expansión agresiva de almacenes genera retorno suficiente o se convierte en lastre financiero."
+      "FCF TTM y FCF trimestral mostrando trayectoria interanual de caida consistente con una senda de contraccion de doble digito.",
+      "Margen operativo y margen FCF con compresion sostenida vs base TTM (10.82% y 16.46%).",
+      "Conversion de caja (CFO/EBIT) debilitandose y mayor consumo de capital de trabajo en terminos recurrentes.",
+      "Persistencia del descuento en EV/FCF y EV/EBIT sin rerating, senal de que el mercado mantiene expectativa de menor earning power."
     ]
   },
   "banderas": {
-    "expectativas_extremas": false,
+    "expectativas_extremas": true,
     "posible_value_trap": true,
     "posible_peak_earnings": true,
-    "alto_riesgo_balance": true,
-    "opacidad_alta": true,
+    "alto_riesgo_balance": false,
+    "opacidad_alta": false,
     "notas": [
-      "posible_value_trap: P/FCF de 8.8x en empresa de hipercrecimiento reciente (ingresos 4x en 4 años) sugiere que el mercado descuenta riesgos severos no visibles en los estados financieros; la baratura aparente puede no materializarse.",
-      "posible_peak_earnings: FY2024 marcó récords históricos tras crecimiento explosivo; los trimestres recientes (Q1-Q3 2025) muestran EBIT trimestral de 28-41M vs Q1-Q3 2024 de 28-41M, sugiriendo meseta más que continuación del crecimiento.",
-      "alto_riesgo_balance + opacidad_alta: Lease liabilities de $484M superan el patrimonio ($405M); deuda_total_usd no reportada explícitamente; estructura corporativa offshore con transición de 20-F a 10-K; G&A se duplicó de $30M a $74M en un año sin explicación clara."
+      "El grid implica contraccion anual del FCF en todos los escenarios (sin casos de crecimiento).",
+      "Multiples bajos pueden reflejar deterioro esperado mas que infravaloracion mecanica.",
+      "La posicion neta de caja reduce tension financiera, aunque existen pasivos de leasing relevantes fuera de deuda financiera tradicional."
     ]
   },
   "faltantes_criticos": [
     {
-      "item": "deuda_total_usd",
-      "por_que_importa": "Sin deuda total no se puede calcular EV ni deuda neta; todos los múltiplos EV-based quedan nulos, reduciendo la robustez del análisis.",
-      "como_resolver": "Extraer short-term debt + long-term debt + current portion of long-term debt del balance del 10-K FY2024; distinguir deuda financiera de lease liabilities."
-    },
-    {
-      "item": "enterprise_value_usd",
-      "por_que_importa": "EV es el ancla principal de valoración; su ausencia obliga a usar market_cap como proxy, lo cual es menos preciso especialmente con $260M en caja.",
-      "como_resolver": "Depende de resolver deuda_total_usd primero; luego aplicar EV = market_cap + deuda_total - caja."
-    },
-    {
-      "item": "Q4-2024_trimestral",
-      "por_que_importa": "Sin Q4-2024, el TTM cayó a FY0_fallback; un TTM real (Q1-2025 a Q4-2024 o más reciente) daría una imagen más actualizada del run-rate.",
-      "como_resolver": "Derivar Q4-2024 restando Q1+Q2+Q3-2024 del FY2024 anual, o localizar el 10-Q/8-K correspondiente."
+      "item": "acciones_diluidas",
+      "por_que_importa": "Permite reconciliar de forma robusta market cap, metricas por accion y dilution en el tiempo.",
+      "como_resolver": "Incluir acciones diluidas TTM/FY desde 10-K/10-Q y su fecha de referencia en el TruthPack."
     }
   ],
   "log": {
     "limitaciones": [
-      "EV no calculable: se usó market_cap ($1,250M) como proxy equity-level para el reverse DCF; si la deuda neta es negativa (probable dada caja de $260M y deuda financiera aparentemente mínima), el EV real sería inferior a market_cap y las expectativas implícitas serían aún menos exigentes.",
-      "TTM basado en FY0_fallback (FY2024) por trimestres no consecutivos; los datos trimestrales disponibles de 2025 (Q1-Q3) no se incorporan al período base, lo que puede subestimar o sobreestimar el run-rate actual.",
-      "Lease liabilities ($484M) no se incluyeron en la deuda para el cálculo; si se trataran como deuda-equivalente, el EV sería significativamente mayor y las expectativas de crecimiento implícitas serían más exigentes.",
-      "Share count discrepancia: EPS implica ~29.2M acciones diluidas, pero market_cap/precio implica ~37.0M; se usó market_cap tal como reportado.",
-      "Crecimiento reciente (revenue CAGR FY2020-FY2024: ~43%) es extraordinario y dificulta la normalización; el modelo no incorpora escenarios de re-aceleración."
+      "El capex TTM aparece con convencion de signo no uniforme en fuentes historicas; se uso el FCF ya calculado por TruthPack.",
+      "No hay acciones diluidas explicitas en el snapshot de mercado para reconciliar metricas per-share.",
+      "El EV reportado excluye explicitamente pasivos por leasing al seguir la formula canonica del TruthPack.",
+      "El FCF puede tener volatilidad por capital de trabajo, afectando la lectura estructural del run-rate.",
+      "Los campos descriptivos de empresa (bolsa/pais/sector) no vienen poblados en el TruthPack entregado."
     ],
     "traza_calculo": [
-      "FCF0 = CFO (158,078,000) - |CAPEX| (15,536,000) = 142,542,000 USD (de metricas_derivadas del TruthPack).",
-      "Target para reverse DCF = market_cap = 1,250,000,000 USD (EV no disponible).",
-      "Ratio objetivo: Target/FCF0 = 1,250,000,000 / 142,542,000 = 8.77x (= P/FCF).",
-      "Para cada combinación (r, M): se resolvió a*(1-a^5)/(1-a) + M*a^5 = 8.77, donde a = (1+g)/(1+r).",
-      "CAGR implícito g = a*(1+r) - 1; FCF_year5 = FCF0 * (1+g)^5.",
-      "Ejemplo central (r=10%, M=15): a ≈ 0.827, g = 0.827*1.10 - 1 = -9.0%, FCF5 = 142.5M * 0.624 = 88.9M.",
-      "Earnings power: EBIT normalizado min=92M (avg FY2022-24), base=120M (avg FY2023-24), max=131M (FY2024).",
-      "Múltiplo implícito sobre EBIT normalizado: market_cap / EBIT_norm = 1,250M / {92M, 120M, 131M} = {13.6x, 10.4x, 9.5x}.",
-      "Acciones diluidas estimadas: net_income (125,808,000) / EPS (4.3144) = 29,160,000.",
-      "Verificación grid: 3 tasas × 2 g_terminal × 4 múltiplos = 24 combinaciones únicas por parámetros (tasa_descuento, crecimiento_terminal, multiple_terminal)."
+      "Gate N1 validado: data_quality.status = PASS.",
+      "Gate N2 validado: EV, FCF y EBIT presentes.",
+      "Snapshot de mercado tomado desde truth_pack.mercado (precio, market cap, EV, deuda, caja).",
+      "Metricas base tomadas de ttm (fecha_fin 2025-09-30).",
+      "Multiples implicitos recalculados: EV/EBIT, EV/FCF, P/FCF y FCF yield.",
+      "Metodo principal seleccionado: REVERSE_DCF_FCF (FCF0 > 0).",
+      "Se resolvio CAGR FCF implicito por biseccion para cada combinacion del grid (3x2x4 = 24).",
+      "Se aplico TV por multiplo de salida sobre FCF year5 ajustado por crecimiento terminal.",
+      "Check de bug conocido: 24 combinaciones unicas sin duplicados en (tasa_descuento, crecimiento_terminal, multiple_terminal_fcf).",
+      "Check de bug conocido: uso de EBIT (no EBITA) en metricas y contraste operativo."
     ]
   }
 }

@@ -58,6 +58,12 @@ YAHOO_SUFFIX: Dict[str, str] = {
 }
 
 US_EXCHANGES = {"NYSE", "NASDAQ", "AMEX", "US", ""}
+EURONEXT_SUFFIX_BY_COUNTRY: Dict[str, str] = {
+    "FR": ".PA",
+    "NL": ".AS",
+    "BE": ".BR",
+    "PT": ".LS",
+}
 
 
 def _get_with_retry(url: str) -> requests.Response:
@@ -173,18 +179,19 @@ def fetch_stooq_ohlcv(ticker: str, exchange: str = "US") -> List[Dict[str, str]]
     return [r for r in rows if r.get("Date") and r.get("Close")]
 
 
-def fetch_yahoo_snapshot(ticker: str, exchange: str) -> Dict[str, Any]:
+def fetch_yahoo_snapshot(ticker: str, exchange: str, symbol_override: str | None = None) -> Dict[str, Any]:
     """Fetch basic quote data from Yahoo Finance (non-US fallback)."""
     suffix = YAHOO_SUFFIX.get(exchange.upper(), "")
-    sym = f"{ticker}{suffix}"
+    sym = symbol_override or f"{ticker}{suffix}"
     chart_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote_plus(sym)}?range=5d&interval=1d"
     try:
         resp = _get_with_retry(chart_url)
         data = resp.json()
         result = data.get("chart", {}).get("result", [])
         if not result:
-            return {"url": f"https://finance.yahoo.com/quote/{quote_plus(sym)}", "company_name": ticker,
-                    "sector": None, "industry": None, "country": None, "exchange": exchange, "snapshot": {}}
+            return {"url": f"https://finance.yahoo.com/quote/{quote_plus(sym)}", "symbol": sym,
+                    "company_name": ticker, "sector": None, "industry": None, "country": None,
+                    "exchange": exchange, "snapshot": {}, "instrument_type": None}
         meta = result[0].get("meta", {})
         price = meta.get("regularMarketPrice")
         prev = meta.get("previousClose") or meta.get("chartPreviousClose")
@@ -199,6 +206,7 @@ def fetch_yahoo_snapshot(ticker: str, exchange: str) -> Dict[str, Any]:
         currency = meta.get("currency", "USD")
         return {
             "url": f"https://finance.yahoo.com/quote/{quote_plus(sym)}",
+            "symbol": sym,
             "company_name": meta.get("shortName") or meta.get("longName") or ticker,
             "sector": None,
             "industry": None,
@@ -206,10 +214,12 @@ def fetch_yahoo_snapshot(ticker: str, exchange: str) -> Dict[str, Any]:
             "exchange": meta.get("exchangeName") or exchange,
             "snapshot": snap,
             "currency": currency,
+            "instrument_type": meta.get("instrumentType"),
         }
     except Exception:
-        return {"url": f"https://finance.yahoo.com/quote/{quote_plus(sym)}", "company_name": ticker,
-                "sector": None, "industry": None, "country": None, "exchange": exchange, "snapshot": {}}
+        return {"url": f"https://finance.yahoo.com/quote/{quote_plus(sym)}", "symbol": sym,
+                "company_name": ticker, "sector": None, "industry": None, "country": None,
+                "exchange": exchange, "snapshot": {}, "instrument_type": None}
 
 
 def _get_yahoo_crumb_session() -> Tuple[Optional[str], requests.Session]:
@@ -237,7 +247,7 @@ def _get_yahoo_crumb_session() -> Tuple[Optional[str], requests.Session]:
     return None, session
 
 
-def _fetch_yahoo_summary(ticker: str, exchange: str) -> Dict[str, Any]:
+def _fetch_yahoo_summary(ticker: str, exchange: str, symbol_override: str | None = None) -> Dict[str, Any]:
     """Fetch market cap, shares, sector/industry from Yahoo Finance quoteSummary.
 
     The /v8/finance/chart endpoint only returns price/volume.  This endpoint
@@ -247,7 +257,7 @@ def _fetch_yahoo_summary(ticker: str, exchange: str) -> Dict[str, Any]:
     Requires crumb authentication (cookie + crumb token).
     """
     suffix = YAHOO_SUFFIX.get(exchange.upper(), "")
-    sym = f"{ticker}{suffix}"
+    sym = symbol_override or f"{ticker}{suffix}"
 
     crumb, session = _get_yahoo_crumb_session()
     if not crumb:
@@ -296,6 +306,108 @@ def _fetch_yahoo_summary(ticker: str, exchange: str) -> Dict[str, Any]:
         return {}
 
 
+def _infer_euronext_suffix_candidates(country: str, web_ir: str) -> List[str]:
+    c = (country or "").upper()
+    if c in EURONEXT_SUFFIX_BY_COUNTRY:
+        preferred = EURONEXT_SUFFIX_BY_COUNTRY[c]
+        others = [s for cc, s in EURONEXT_SUFFIX_BY_COUNTRY.items() if cc != c]
+        return [preferred] + others
+    low = (web_ir or "").lower()
+    for cc, suffix in (("fr", ".PA"), ("nl", ".AS"), ("be", ".BR"), ("pt", ".LS")):
+        if f"/{cc}/" in low or f"-{cc}." in low:
+            others = [s for k, s in EURONEXT_SUFFIX_BY_COUNTRY.items() if s != suffix]
+            return [suffix] + others
+    return [".PA", ".AS", ".BR", ".LS"]
+
+
+def _build_yahoo_symbol_candidates(
+    ticker: str,
+    exchange: str,
+    country: str = "",
+    web_ir: str = "",
+) -> List[str]:
+    candidates: List[str] = []
+    ex = (exchange or "").upper()
+    if ex == "EURONEXT":
+        for suffix in _infer_euronext_suffix_candidates(country, web_ir):
+            candidates.append(f"{ticker}{suffix}")
+    else:
+        suffix = YAHOO_SUFFIX.get(ex, "")
+        if suffix:
+            candidates.append(f"{ticker}{suffix}")
+    candidates.append(ticker)
+
+    out: List[str] = []
+    seen: set[str] = set()
+    for sym in candidates:
+        if sym and sym not in seen:
+            out.append(sym)
+            seen.add(sym)
+    return out
+
+
+def _select_yahoo_symbol_context(
+    ticker: str,
+    exchange: str,
+    country: str = "",
+    web_ir: str = "",
+) -> tuple[Dict[str, Any], Dict[str, Any]]:
+    """Resolve best Yahoo symbol for non-US equities with deterministic candidates."""
+    candidates = _build_yahoo_symbol_candidates(ticker, exchange, country=country, web_ir=web_ir)
+    tried: List[dict] = []
+    fallback_ctx: Dict[str, Any] | None = None
+
+    for sym in candidates:
+        ctx = fetch_yahoo_snapshot(ticker, exchange, symbol_override=sym)
+        inst = str(ctx.get("instrument_type") or "").upper()
+        has_snapshot = bool(ctx.get("snapshot"))
+        has_price = bool((ctx.get("snapshot") or {}).get("Price"))
+        tried.append(
+            {
+                "symbol": sym,
+                "instrument_type": inst or "UNKNOWN",
+                "has_snapshot": has_snapshot,
+                "has_price": has_price,
+            }
+        )
+
+        if inst != "EQUITY":
+            continue
+        if has_price:
+            return ctx, {
+                "symbol_candidates_tried": tried,
+                "selected_symbol": sym,
+                "selection_reason": "equity_with_price",
+            }
+        if fallback_ctx is None:
+            fallback_ctx = ctx
+
+    if fallback_ctx is not None:
+        return fallback_ctx, {
+            "symbol_candidates_tried": tried,
+            "selected_symbol": fallback_ctx.get("symbol"),
+            "selection_reason": "equity_without_price",
+        }
+
+    # No valid equity candidate: keep hints and avoid contaminating identity.
+    return {
+        "url": "",
+        "symbol": None,
+        "company_name": ticker,
+        "sector": None,
+        "industry": None,
+        "country": country or None,
+        "exchange": exchange or "UNKNOWN",
+        "snapshot": {},
+        "currency": "USD",
+        "instrument_type": None,
+    }, {
+        "symbol_candidates_tried": tried,
+        "selected_symbol": None,
+        "selection_reason": "no_equity_candidate",
+    }
+
+
 def rolling_avg_volume(rows: List[Dict[str, str]], n: int) -> Optional[float]:
     if not rows:
         return None
@@ -331,10 +443,14 @@ def main() -> int:
     parser.add_argument("--ticker", required=True, help="Ticker, e.g., BBW or 0327")
     parser.add_argument("--case-dir", required=True, help="Case directory, e.g., casos/BBW/2026-02-13")
     parser.add_argument("--exchange", default="", help="Exchange code (NYSE, NASDAQ, SEHK, LSE, …). Empty = auto-detect/US.")
+    parser.add_argument("--country", default="", help="Country hint, e.g., US, FR, NL")
+    parser.add_argument("--web-ir", default="", help="Investor relations URL hint")
     args = parser.parse_args()
 
     ticker = args.ticker.upper().strip()
     exchange_arg = args.exchange.upper().strip()
+    country_arg = args.country.upper().strip()
+    web_ir_arg = args.web_ir.strip()
     case_dir = Path(args.case_dir).resolve()
     case_dir.mkdir(parents=True, exist_ok=True)
 
@@ -359,13 +475,29 @@ def main() -> int:
             })
         currency = "USD"
         publicador = "Finviz + Stooq"
+        symbol_trace = {
+            "symbol_candidates_tried": [],
+            "selected_symbol": ticker,
+            "selection_reason": "finviz_us",
+        }
     else:
-        ctx = fetch_yahoo_snapshot(ticker, exchange_arg)
+        ctx, symbol_trace = _select_yahoo_symbol_context(
+            ticker,
+            exchange_arg,
+            country=country_arg,
+            web_ir=web_ir_arg,
+        )
         currency = ctx.get("currency", "USD")
         publicador = "Yahoo Finance + Stooq"
 
         # Enrich with quoteSummary for market_cap, shares, sector/industry
-        summary = _fetch_yahoo_summary(ticker, exchange_arg)
+        summary = {}
+        if ctx.get("symbol"):
+            summary = _fetch_yahoo_summary(
+                ticker,
+                exchange_arg,
+                symbol_override=str(ctx.get("symbol")),
+            )
         snap = ctx.get("snapshot", {})
         if summary.get("market_cap") and "Market Cap" not in snap:
             snap["Market Cap"] = str(summary["market_cap"])
@@ -378,6 +510,12 @@ def main() -> int:
         if summary.get("country") and ctx.get("country") is None:
             ctx["country"] = summary["country"]
         ctx["snapshot"] = snap
+
+        # If no valid equity candidate was found, keep identity from hints.
+        if symbol_trace.get("selection_reason") == "no_equity_candidate":
+            ctx["company_name"] = ticker
+            ctx["exchange"] = exchange_arg or "UNKNOWN"
+            ctx["country"] = country_arg or "UNKNOWN"
 
         # Handle GBp (pence sterling) → GBP conversion for LSE stocks
         if currency == "GBp":
@@ -460,7 +598,7 @@ def main() -> int:
     div_yield = to_float(snapshot.get("Dividend %"))
 
     exchange_out = ctx.get("exchange") or exchange_arg or "UNKNOWN"
-    country = ctx.get("country") or "UNKNOWN"
+    country = ctx.get("country") or country_arg or "UNKNOWN"
     sector = ctx.get("sector") or "UNKNOWN"
     industry = ctx.get("industry") or "UNKNOWN"
 
@@ -528,6 +666,14 @@ def main() -> int:
         "faltantes": faltantes,
         "sub_agent": "MARKET_DATA",
         "timestamp": now_iso,
+        "log": {
+            "limitaciones": [],
+            "observaciones": [
+                f"symbol_resolution={symbol_trace.get('selection_reason')}",
+                f"selected_symbol={symbol_trace.get('selected_symbol')}",
+            ],
+            "symbol_candidates_tried": symbol_trace.get("symbol_candidates_tried", []),
+        },
     }
 
     out_path = case_dir / "_market_data_output.json"

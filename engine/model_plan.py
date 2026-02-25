@@ -21,22 +21,25 @@ class StepPlanEntry:
     is_multi: bool
     fusion_model: str | None
     min_backends: int | None
+    requires: list[str] | None = None
 
 
 def build_step_plan(
     config: "EngineConfig",
     step_names: list[str] | None = None,
+    operation: str = "PIPELINE",
 ) -> list[StepPlanEntry]:
     """Build the execution plan for a pipeline segment.
 
     If step_names is provided, it is interpreted as a list of pipeline_key values.
+    ``operation`` selects which DAG section to read (PIPELINE, SCANNER, etc.).
     """
     allowed_keys = None
     if step_names is not None:
         allowed_keys = set(step_names)
 
     plan: list[StepPlanEntry] = []
-    for step_def in config.get_dag("PIPELINE"):
+    for step_def in config.get_dag(operation):
         step_name = step_def.get("step")
         if not isinstance(step_name, str):
             continue
@@ -59,6 +62,7 @@ def build_step_plan(
                     is_multi=False,
                     fusion_model=None,
                     min_backends=None,
+                    requires=step_def.get("requires"),
                 )
             )
             continue
@@ -78,6 +82,7 @@ def build_step_plan(
                 is_multi=is_multi,
                 fusion_model=fusion_model,
                 min_backends=min_backends,
+                requires=step_def.get("requires"),
             )
         )
 
@@ -185,9 +190,18 @@ def render_plan_table(
     width: int = 120,
 ) -> str:
     """Render a compact ASCII table showing plans and availability."""
-    headers = ["Step", "Tipo", "Modelos", "Transports", "Fusión", "Estado", "Notas"]
-    rows: list[tuple[str, str, str, str, str, str, str]] = []
+    headers = ["Step", "Tipo", "Modelos", "Transports", "Req", "Fusión", "Estado", "Notas"]
+    rows: list[tuple[str, str, str, str, str, str, str, str]] = []
     for idx, entry in enumerate(plan, start=1):
+        # --- capability requirement indicators ---
+        req_icons: list[str] = []
+        if entry.requires:
+            if "tools" in entry.requires:
+                req_icons.append("🔧")
+            if "web_access" in entry.requires:
+                req_icons.append("🌐")
+        req_text = " ".join(req_icons) if req_icons else "—"
+
         if entry.step_type == "python":
             models_text = "—"
             transports_text = "—"
@@ -198,6 +212,7 @@ def render_plan_table(
                 "python",
                 models_text,
                 transports_text,
+                req_text,
                 "—",
                 status_text,
                 notes,
@@ -244,6 +259,7 @@ def render_plan_table(
             f"{entry.step_type} ({'multi' if entry.is_multi else 'single'})",
             ", ".join(entry.models) if entry.models else "—",
             "/".join(entry.transports) if entry.transports else "—",
+            req_text,
             fusion_model,
             status_text,
             notes,

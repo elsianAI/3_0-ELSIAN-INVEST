@@ -1,11 +1,11 @@
 {
   "version_esquema": "AgentReport_v1",
   "caso_id": "CASE_20260223_GCT",
-  "fecha_corte": "2026-02-23",
+  "fecha_corte": "2026-02-24",
   "agente": {
     "agent_role": "FORENSIC",
     "agent_nombre": "FORENSIC_SCORING_v1",
-    "modelo": "gpt-5-codex",
+    "modelo": "GPT-5-Codex",
     "idioma": "es"
   },
   "input_refs": {
@@ -15,68 +15,68 @@
   },
   "resumen_ejecutivo": {
     "bullets": [
-      "Supervivencia 12-24 meses clasifica PASS con score 3.0 por caja de 259.8M y CFO FY2024 de 158.1M.",
-      "Tres banderas ALTO concentran el riesgo: distorsión EBIT→CFO, rigidez por leasing y salto de G&A.",
-      "Los lease liabilities de 484.3M superan patrimonio y limitan flexibilidad operativa en desaceleración.",
-      "La calidad de beneficios depende de capital de trabajo, con volatilidad extrema trimestral en CFO/EBIT.",
-      "Tamaño máximo sugerido: 2.5% de cartera hasta cerrar faltantes críticos de deuda, capital de trabajo y dilución."
+      "Liquidez actual sólida: caja 259.8M y FCF TTM 201.3M cubren 2.93x los leases corrientes.",
+      "Riesgo principal: opacidad de deuda financiera y covenants, con EV bloqueado por deuda_total_usd nula.",
+      "El balance está fuertemente cargado a leasing: 484.3M, equivalente a 72.7% de pasivos.",
+      "La calidad de conversión EBIT a CFO es positiva pero volátil, con señales de distorsión por capital de trabajo.",
+      "Supervivencia 12-24 meses evaluada en PASS con score 3/5 y tamaño máximo de posición acotado."
     ],
     "veredicto_role_local": "APTO",
-    "confianza_0_1": 0.66
+    "confianza_0_1": 0.67
   },
   "claims": [
     {
       "claim_id": "CLM_001",
       "tipo": "HECHO",
       "criticidad": "CRITICO",
-      "enunciado": "GCT mantiene capacidad de supervivencia operativa en 12-24 meses con caja alta y CFO positivo.",
-      "confianza_0_1": 0.76,
+      "enunciado": "La compañía mantiene capacidad de supervivencia a 12-24 meses por liquidez y generación de caja operativa positivas.",
+      "confianza_0_1": 0.77,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_SEC_001_10-K_FY2024.htm",
+          "source_id": "ForensicDetection_v1.liquidez",
           "url": null,
           "titulo": null,
-          "fecha": "2024-12-31",
-          "ubicacion": "Balance Sheet / Cash Flow Statement",
-          "cita_corta": "Caja 259.8M y CFO FY2024 158.1M.",
-          "interpretacion": "La empresa no depende de financiación externa inmediata para operar."
+          "fecha": "2026-02-24",
+          "ubicacion": "liquidez.caja_disponible_usd; liquidez.fcf_ttm_usd",
+          "cita_corta": "Caja 259.8M, FCF TTM 201.3M y cobertura 2.93x sobre lease corriente.",
+          "interpretacion": "No hay señal de estrés de caja inmediato."
         }
       ],
       "falsacion": {
-        "test": "CFO TTM cae por debajo de 80M o caja trimestral cae bajo 100M.",
+        "test": "Caja <100M o CFO TTM <100M",
         "ventana_meses": {
           "min": 3,
           "max": 12
         },
-        "fuente_prevista": "10-Q"
+        "fuente_prevista": "filing"
       }
     },
     {
       "claim_id": "CLM_002",
       "tipo": "HECHO",
       "criticidad": "CRITICO",
-      "enunciado": "El principal riesgo de supervivencia proviene de obligaciones de leasing y no de deuda financiera explícita.",
-      "confianza_0_1": 0.79,
+      "enunciado": "La opacidad de deuda financiera impide medir apalancamiento real y riesgo de refinanciación con precisión.",
+      "confianza_0_1": 0.69,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_SEC_001_10-K_FY2024.htm",
+          "source_id": "TruthPack_v1.balance_sheet_ultimo",
           "url": null,
           "titulo": null,
-          "fecha": "2024-12-31",
-          "ubicacion": "Lease Data",
-          "cita_corta": "Lease liabilities totales 484.3M; corrientes 88.7M.",
-          "interpretacion": "Existe alta rigidez de pagos fijos anuales frente a caja disponible."
+          "fecha": "2026-02-24",
+          "ubicacion": "balance_sheet_ultimo.deuda_total_usd; mercado.enterprise_value_usd",
+          "cita_corta": "deuda_total_usd y enterprise_value_usd en null.",
+          "interpretacion": "No puede calcularse deuda neta ni EV/EBIT."
         }
       ],
       "falsacion": {
-        "test": "Lease liabilities bajan debajo de 350M y pagos corrientes/caja caen por debajo de 20%.",
+        "test": "Publicación de deuda total, vencimientos y covenants detallados",
         "ventana_meses": {
-          "min": 6,
-          "max": 18
+          "min": 1,
+          "max": 12
         },
         "fuente_prevista": "10-K"
       }
@@ -85,51 +85,79 @@
       "claim_id": "CLM_003",
       "tipo": "INFERENCIA",
       "criticidad": "IMPORTANTE",
-      "enunciado": "La calidad de beneficios es inestable porque el puente EBIT→CFO muestra oscilaciones extremas ligadas a capital de trabajo.",
-      "confianza_0_1": 0.71,
+      "enunciado": "La conversión EBIT->CFO es favorable en nivel, pero inestable históricamente y sensible a capital de trabajo.",
+      "confianza_0_1": 0.66,
       "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "ForensicDetection_v1.puentes.ebit_a_cfo",
+          "source_id": "ForensicDetection_v1.puentes",
           "url": null,
           "titulo": null,
-          "fecha": "2026-02-23",
-          "ubicacion": "Serie histórica anual y trimestral",
-          "cita_corta": "Distorsión anual entre -78.3% y +41.8%; Q3-2025 ratio CFO/EBIT 3.12x.",
-          "interpretacion": "La caja operativa puede variar con fuerza aunque EBIT permanezca estable."
+          "fecha": "2026-02-24",
+          "ubicacion": "puentes.ebit_a_cfo.serie_fy2020_fy2024",
+          "cita_corta": "CFO/EBIT: 0.75, 0.22, 1.42, 1.21, 1.21; TTM 1.53.",
+          "interpretacion": "La dispersión histórica exige seguimiento de calidad de caja."
         }
       ],
       "falsacion": {
-        "test": "CFO/EBIT se estabiliza entre 0.8x y 1.2x durante cuatro trimestres consecutivos.",
+        "test": "CFO/EBIT entre 0.9 y 1.2 durante cuatro trimestres con desglose de capital de trabajo",
         "ventana_meses": {
           "min": 6,
-          "max": 12
+          "max": 18
         },
         "fuente_prevista": "earnings"
       }
     },
     {
       "claim_id": "CLM_004",
-      "tipo": "INFERENCIA",
-      "criticidad": "CRITICO",
-      "enunciado": "La combinación de margen bruto en compresión y G&A en expansión puede erosionar FCF estructuralmente.",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La estructura del pasivo está concentrada en arrendamientos y reduce flexibilidad financiera ante un shock operativo.",
       "confianza_0_1": 0.74,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_SEC_001_10-K_FY2024.htm",
+          "source_id": "TruthPack_v1.lease_data",
           "url": null,
           "titulo": null,
-          "fecha": "2024-12-31",
-          "ubicacion": "Income Statement FY2023-FY2024",
-          "cita_corta": "Margen bruto 26.8%→24.6%; G&A 30.0M→73.9M.",
-          "interpretacion": "El apalancamiento operativo está empeorando pese al crecimiento de ingresos."
+          "fecha": "2026-02-24",
+          "ubicacion": "lease_data.total_lease_liabilities_usd",
+          "cita_corta": "Lease liabilities 484.3M, 72.7% de pasivos y 119.4% del patrimonio.",
+          "interpretacion": "Compromisos fijos altos elevan fragilidad ante caída de márgenes."
         }
       ],
       "falsacion": {
-        "test": "Margen bruto vuelve por encima de 25% y G&A/ingresos baja por debajo de 6% sostenidamente.",
+        "test": "Lease liabilities/patrimonio <100% y lease corriente cubierto >3x por CFO TTM",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La compresión de margen bruto y el aumento de G&A elevan el riesgo de deterioro de rentabilidad operativa.",
+      "confianza_0_1": 0.64,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ForensicDetection_v1.red_flags",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-24",
+          "ubicacion": "MARGEN_BRUTO_COMPRESION; EXPANSION_GA_ACELERADA",
+          "cita_corta": "Margen bruto TTM 23.1%; G&A FY2024 +146% vs ingresos +65%.",
+          "interpretacion": "Hay presión de estructura de costes."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen bruto TTM >24.5% y G&A/ingresos <=5.5% por dos trimestres",
         "ventana_meses": {
           "min": 3,
           "max": 12
@@ -141,387 +169,454 @@
   "predicciones_calibracion": [
     {
       "pred_id": "PRED_001",
-      "descripcion": "El margen bruto trimestral será inferior a 23% en al menos 2 de los próximos 4 trimestres.",
-      "probabilidad_0_1": 0.46,
+      "descripcion": "El margen bruto TTM cae por debajo de 22% en al menos un reporte dentro de 12 meses.",
+      "probabilidad_0_1": 0.55,
       "ventana_meses": {
         "min": 3,
         "max": 12
       },
-      "criterio_validacion": "Se valida si gross_profit_usd/ingresos_usd < 0.23 en dos 10-Q dentro de 12 meses.",
+      "criterio_validacion": "gross_profit_ttm / revenue_ttm < 0.22 en 10-Q/10-K.",
       "fuente_prevista": "10-Q"
     },
     {
       "pred_id": "PRED_002",
-      "descripcion": "El margen EBIT caerá por debajo de 10% en al menos 2 de los próximos 4 trimestres.",
-      "probabilidad_0_1": 0.38,
-      "ventana_meses": {
-        "min": 3,
-        "max": 12
-      },
-      "criterio_validacion": "Se valida si ebit_usd/ingresos_usd < 0.10 en dos trimestres reportados.",
-      "fuente_prevista": "earnings"
-    },
-    {
-      "pred_id": "PRED_003",
-      "descripcion": "G&A/ingresos alcanzará o superará 7.5% en al menos 2 trimestres durante los próximos 12 meses.",
+      "descripcion": "El CFO TTM se reduce por debajo de 170M antes de 12 meses.",
       "probabilidad_0_1": 0.42,
       "ventana_meses": {
         "min": 3,
         "max": 12
       },
-      "criterio_validacion": "Se valida si ga_usd/ingresos_usd >= 0.075 en dos trimestres.",
+      "criterio_validacion": "Suma de CFO últimos 4 trimestres < 170000000.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Se registra al menos un trimestre con salida por CFF superior a 50M.",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "criterio_validacion": "CFF trimestral < -50000000.",
       "fuente_prevista": "10-Q"
     },
     {
       "pred_id": "PRED_004",
-      "descripcion": "El CFO TTM caerá por debajo de 120M antes del cierre de FY2026.",
-      "probabilidad_0_1": 0.41,
+      "descripcion": "Se revela deuda financiera previamente no detallada superior a 150M.",
+      "probabilidad_0_1": 0.36,
       "ventana_meses": {
-        "min": 6,
-        "max": 18
+        "min": 1,
+        "max": 12
       },
-      "criterio_validacion": "Se valida con suma de CFO de cuatro trimestres consecutivos < 120000000.",
+      "criterio_validacion": "deuda_total_usd reportada > 150000000 en filing anual o trimestral.",
       "fuente_prevista": "10-K"
     },
     {
       "pred_id": "PRED_005",
-      "descripcion": "La caja cerrará por debajo de 200M en algún trimestre de los próximos 18 meses.",
-      "probabilidad_0_1": 0.29,
-      "ventana_meses": {
-        "min": 6,
-        "max": 18
-      },
-      "criterio_validacion": "Se valida si caja_usd reportada en balance trimestral < 200000000.",
-      "fuente_prevista": "10-Q"
-    },
-    {
-      "pred_id": "PRED_006",
-      "descripcion": "Las acciones diluidas aumentarán más de 8% interanual en el próximo reporte anual.",
+      "descripcion": "El ratio lease liabilities/patrimonio supera 130% en el próximo anual.",
       "probabilidad_0_1": 0.33,
       "ventana_meses": {
         "min": 6,
         "max": 18
       },
-      "criterio_validacion": "Se valida comparando diluted shares FY2026 vs FY2025.",
+      "criterio_validacion": "total_lease_liabilities_usd / patrimonio_usd > 1.30.",
       "fuente_prevista": "10-K"
     },
     {
-      "pred_id": "PRED_007",
-      "descripcion": "Las salidas de financiación acumuladas superarán 90M en dos trimestres consecutivos.",
-      "probabilidad_0_1": 0.37,
+      "pred_id": "PRED_006",
+      "descripcion": "El crecimiento de ingresos YoY cae por debajo de 10% en al menos un trimestre.",
+      "probabilidad_0_1": 0.58,
       "ventana_meses": {
         "min": 3,
         "max": 12
       },
-      "criterio_validacion": "Se valida si la suma de CFF de dos trimestres consecutivos es menor a -90000000.",
-      "fuente_prevista": "10-Q"
+      "criterio_validacion": "((ingresos_t - ingresos_t-4) / ingresos_t-4) < 0.10.",
+      "fuente_prevista": "earnings"
     }
   ],
   "peticiones_de_fuentes": [
     {
       "prioridad": "ALTA",
-      "item": "Tabla de deuda financiera total y vencimientos 2026-2028 (Tipo: filing SEC)",
-      "por_que_importa": "Permite medir riesgo de refinanciación real y completar EV/deuda neta.",
-      "como_obtenerlo": "10-K FY2024/FY2025, nota de deuda y contractual obligations; costo/disponibilidad: bajo, público."
+      "item": "Deuda financiera total, vencimientos 12/24 meses y estructura de tasas.",
+      "tipo_fuente": "filing",
+      "por_que_importa": "Permite cuantificar riesgo de refinanciación, deuda neta y EV.",
+      "como_obtenerlo": "10-K/10-Q, nota de deuda y anexos de crédito; disponibilidad alta, costo bajo.",
+      "costo_disponibilidad": "BAJO/ALTA"
     },
     {
       "prioridad": "ALTA",
-      "item": "Saldos y roll-forward trimestral de cuentas por cobrar e inventarios (Tipo: filing SEC)",
-      "por_que_importa": "Reduce incertidumbre de calidad de ingresos, DSO/DIO y sostenibilidad de CFO.",
-      "como_obtenerlo": "10-Q MD&A + notas de balance; costo/disponibilidad: bajo, público."
+      "item": "Detalle de covenants y headroom (leverage, cobertura, liquidez mínima).",
+      "tipo_fuente": "filing + contrato",
+      "por_que_importa": "Reduce incertidumbre sobre triggers de default técnico.",
+      "como_obtenerlo": "10-K notas de deuda y exhibits de facility agreements; disponibilidad media, costo medio.",
+      "costo_disponibilidad": "MEDIO/MEDIA"
     },
     {
       "prioridad": "ALTA",
-      "item": "Reconciliación de acciones básicas vs diluidas y detalle de convertibles/warrants (Tipo: filing + proxy)",
-      "por_que_importa": "Aclara la discrepancia accionaria de 26.7% y el riesgo de dilución.",
-      "como_obtenerlo": "10-K nota EPS, DEF14A y 8-K de equity issuances; costo/disponibilidad: bajo, público."
+      "item": "Saldos y aging de cuentas por cobrar e inventarios.",
+      "tipo_fuente": "filing",
+      "por_que_importa": "Permite validar calidad de ingresos y puente EBIT-CFO vía DSO/DIO.",
+      "como_obtenerlo": "10-K/10-Q notas de working capital y MD&A; disponibilidad alta, costo bajo.",
+      "costo_disponibilidad": "BAJO/ALTA"
     },
     {
       "prioridad": "MEDIA",
-      "item": "Desglose de CFI entre adquisiciones, earn-outs y otras inversiones (Tipo: filing SEC)",
-      "por_que_importa": "Permite distinguir FCF operativo de consumo de caja inorgánico.",
-      "como_obtenerlo": "10-K/10-Q nota de adquisiciones y estado de flujos detallado; costo/disponibilidad: medio, público."
+      "item": "Disponibilidad real de revolver/ABL y borrowing base.",
+      "tipo_fuente": "filing + IR",
+      "por_que_importa": "Ajusta evaluación de liquidez en stress y tamaño de posición.",
+      "como_obtenerlo": "10-K liquidity section y consulta IR; disponibilidad media, costo medio.",
+      "costo_disponibilidad": "MEDIO/MEDIA"
     },
     {
       "prioridad": "MEDIA",
-      "item": "Detalle de SBC y compensación variable no cash (Tipo: filing SEC)",
-      "por_que_importa": "Mejora el puente EBIT→CFO y la medición de rentabilidad por acción.",
-      "como_obtenerlo": "10-K notas de stock compensation y proxy compensation tables; costo/disponibilidad: bajo, público."
-    },
-    {
-      "prioridad": "MEDIA",
-      "item": "Cronograma anual de pagos mínimos de arrendamiento por año (Tipo: filing SEC)",
-      "por_que_importa": "Refina estrés de liquidez y riesgo de rigidez financiera en 12-24 meses.",
-      "como_obtenerlo": "10-K nota de leases con maturity table; costo/disponibilidad: bajo, público."
+      "item": "Acciones diluidas, SBC y reconciliación de cambios de capital.",
+      "tipo_fuente": "filing proxy/10-K",
+      "por_que_importa": "Permite calibrar riesgo de dilución y sostenibilidad de retorno al accionista.",
+      "como_obtenerlo": "DEF14A y 10-K notas de equity compensation; disponibilidad alta, costo bajo.",
+      "costo_disponibilidad": "BAJO/ALTA"
     }
   ],
   "payload": {
     "payload_version": "ForensicPayload_v1",
     "contenido": {
       "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "APTO",
+        "confianza_0_1": 0.67,
+        "razon_principal": "Liquidez y FCF actuales sostienen la supervivencia, pero la opacidad de deuda y la carga de leasing exigen límites estrictos de posición y monitoreo trimestral."
+      },
       "forensic_scoring": {
-        "red_flags_scoring": [
+        "red_flags": [
           {
             "red_flag_id": "RF-001",
+            "categoria": "AUSENCIA_RECEIVABLES_INVENTORY",
+            "descripcion": "No aparecen cuentas por cobrar ni inventarios en el balance disponible, lo que impide validar DSO/DIO y la calidad del crecimiento de ingresos.",
             "severidad": "MEDIO",
-            "base_cuantificable": "Diferencia accionaria de 7.8M acciones, equivalente a 26.7%."
+            "base_impacto_cuantificable": "AR e inventarios en null mientras ingresos FY2024 crecieron 64.96%; no se puede auditar ciclo de caja."
           },
           {
             "red_flag_id": "RF-002",
-            "severidad": "ALTO",
-            "base_cuantificable": "Distorsión EBIT→CFO anual de -78.3% a +41.8%; Q3-2025 CFO/EBIT de 3.12x."
+            "categoria": "CAPEX_ANOMALIA",
+            "descripcion": "El capex luce inusualmente bajo para la escala del negocio (FY2024 ~1.3% de ventas) y el TTM muestra distorsión por Q4 sintético.",
+            "severidad": "MEDIO",
+            "base_impacto_cuantificable": "FY2024 capex 15.5M sobre ventas 1,161.0M (1.34%); TTM capex +1.2M inconsistente con FY auditado."
           },
           {
             "red_flag_id": "RF-003",
+            "categoria": "CFF_VOLATILIDAD_SIGNIFICATIVA",
+            "descripcion": "Los flujos de financiación presentan oscilaciones relevantes, incluyendo salida acumulada de -126.6M en 9M-2025.",
             "severidad": "MEDIO",
-            "base_cuantificable": "AR, inventarios y deuda total en null con ingresos FY2024 de 1.161B."
+            "base_impacto_cuantificable": "CFF pasó de +31.9M (FY2022) a -25.0M (FY2024) y -126.6M (9M-2025)."
           },
           {
             "red_flag_id": "RF-004",
+            "categoria": "CFI_VOLATILIDAD_ANOMALA",
+            "descripcion": "Los flujos de inversión muestran alta volatilidad y componentes no-capex materiales que dificultan estimar FCF sostenible.",
             "severidad": "MEDIO",
-            "base_cuantificable": "Gap CFI-capex de 86.2M en FY2023 y 39.9M en FY2024."
+            "base_impacto_cuantificable": "FY2023 CFI -90.5M frente a capex -4.4M; diferencia no-capex relevante."
           },
           {
             "red_flag_id": "RF-005",
-            "severidad": "ALTO",
-            "base_cuantificable": "Lease liabilities 484.3M, equivalentes a 119.5% del patrimonio."
+            "categoria": "COMPARABILIDAD_FLUJOS_TRIMESTRALES_YTD",
+            "descripcion": "La serie trimestral de cash flow incluye cortes YTD de 9 meses en Q3, reduciendo comparabilidad QoQ y pudiendo inflar conversiones intraanuales.",
+            "severidad": "BAJO",
+            "base_impacto_cuantificable": "Q3-2024 y Q3-2025 de cash flow son acumulados 9M, no trimestrales aislados."
           },
           {
             "red_flag_id": "RF-006",
+            "categoria": "EXPANSION_GA_ACELERADA",
+            "descripcion": "G&A creció 146% en FY2024 (vs. ingresos +65%), elevando el ratio G&A/ingresos de 4.3% a 6.4%.",
             "severidad": "MEDIO",
-            "base_cuantificable": "CFF acumulado de -103.9M en Q2-Q3 2025."
+            "base_impacto_cuantificable": "G&A subió de 30.0M a 73.9M; ratio +2.1pp."
           },
           {
             "red_flag_id": "RF-007",
+            "categoria": "LEASE_DOMINANCIA_BALANCE",
+            "descripcion": "La estructura del balance está dominada por compromisos de arrendamiento, con peso elevado sobre pasivos y patrimonio.",
             "severidad": "ALTO",
-            "base_cuantificable": "G&A creció 146.4% YoY frente a ingresos +65.0%."
+            "base_impacto_cuantificable": "Lease liabilities 484.3M = 72.7% de pasivos y 119.4% de patrimonio; compromiso fijo elevado."
           },
           {
             "red_flag_id": "RF-008",
+            "categoria": "MARGEN_BRUTO_COMPRESION",
+            "descripcion": "El margen bruto muestra compresión en tendencia (27.3% FY2020 a 24.6% FY2024; TTM 23.1%) pese al fuerte crecimiento de ingresos.",
             "severidad": "MEDIO",
-            "base_cuantificable": "Transición 20-F→10-K con deuda financiera no explicitada y alta opacidad estructural."
+            "base_impacto_cuantificable": "Compresión de 4.2pp desde FY2020 y 1.5pp desde FY2024 a TTM."
           },
           {
             "red_flag_id": "RF-009",
-            "severidad": "MEDIO",
-            "base_cuantificable": "Compresión de margen bruto de 220 bps en FY2024."
+            "categoria": "MARKET_DISCONNECT",
+            "descripcion": "Desconexión marcada entre crecimiento y valoración: ingresos FY2024 +65% con valoración aproximada de ~6x P/FCF.",
+            "severidad": "BAJO",
+            "base_impacto_cuantificable": "P/FCF 6.21 y FCF yield 16.10% señalan posible prima de riesgo elevada."
           },
           {
             "red_flag_id": "RF-010",
+            "categoria": "OPACIDAD_DEUDA",
+            "descripcion": "La deuda financiera total no está explícitamente desglosada, impidiendo evaluar con precisión apalancamiento, refinanciación y covenants.",
+            "severidad": "ALTO",
+            "base_impacto_cuantificable": "deuda_total_usd y enterprise_value_usd son null; no se puede calcular net debt/EBITDA ni EV/*."
+          },
+          {
+            "red_flag_id": "RF-011",
+            "categoria": "PUENTE_EBIT_CFO_DISTORSION",
+            "descripcion": "La conversión EBIT->CFO exhibe distorsiones materiales y volatilidad histórica, sugiriendo dependencia de ajustes no desglosados de capital de trabajo.",
             "severidad": "MEDIO",
-            "base_cuantificable": "Compresión de margen EBIT de 15.6% a 11.2%."
+            "base_impacto_cuantificable": "CFO/EBIT osciló entre 0.22 y 1.42; TTM 1.53, fuera de rango estable."
+          },
+          {
+            "red_flag_id": "RF-012",
+            "categoria": "RD_DESDE_CERO_ESCALADA",
+            "descripcion": "R&D pasó de 0 (FY2020-2021) a 9.8M (FY2024) sin explicación explícita del cambio de política contable o de clasificación.",
+            "severidad": "BAJO",
+            "base_impacto_cuantificable": "R&D aumentó 9.8M en cuatro años sin puente explícito de clasificación."
+          },
+          {
+            "red_flag_id": "RF-013",
+            "categoria": "TRANSICION_FILING_20F_A_10K",
+            "descripcion": "La transición de 20-F a 10-K complica la comparabilidad histórica y puede introducir cambios de marco contable/reporting.",
+            "severidad": "BAJO",
+            "base_impacto_cuantificable": "FY2020 reportado en 20-F y FY2021+ en 10-K; riesgo metodológico de comparabilidad."
           }
         ],
         "kill_criteria_formalizados": [
           {
-            "kc_id": "KC-001",
-            "descripcion": "Margen bruto trimestral por debajo de 20% durante dos trimestres consecutivos.",
-            "probabilidad_0_1": 0.3,
-            "ventana_temporal": {
-              "inicio": "2026-03-31",
-              "fin_esperado": "2027-03-31"
-            },
-            "criterio_chequeo": "gross_profit_usd/ingresos_usd < 0.20 en dos 10-Q consecutivos.",
-            "accion_si_activado": "REDUCIR_50"
-          },
-          {
-            "kc_id": "KC-002",
-            "descripcion": "Margen EBIT trimestral por debajo de 8% durante dos trimestres consecutivos.",
-            "probabilidad_0_1": 0.29,
-            "ventana_temporal": {
-              "inicio": "2026-03-31",
-              "fin_esperado": "2027-03-31"
-            },
-            "criterio_chequeo": "ebit_usd/ingresos_usd < 0.08 en dos trimestres seguidos.",
-            "accion_si_activado": "REDUCIR_50"
-          },
-          {
-            "kc_id": "KC-003",
-            "descripcion": "CFO TTM menor a 80M o CFO negativo por dos trimestres consecutivos.",
-            "probabilidad_0_1": 0.22,
-            "ventana_temporal": {
-              "inicio": "2026-06-30",
-              "fin_esperado": "2027-09-30"
-            },
-            "criterio_chequeo": "Suma CFO cuatro trimestres < 80000000 o dos CFO trimestrales negativos consecutivos.",
-            "accion_si_activado": "SALIR"
-          },
-          {
-            "kc_id": "KC-004",
-            "descripcion": "Caja por debajo de 100M sin línea de crédito comprometida superior a 50M.",
-            "probabilidad_0_1": 0.18,
-            "ventana_temporal": {
-              "inicio": "2026-06-30",
-              "fin_esperado": "2028-02-23"
-            },
-            "criterio_chequeo": "caja_usd < 100000000 y líneas disponibles documentadas < 50000000.",
-            "accion_si_activado": "SALIR"
-          },
-          {
-            "kc_id": "KC-005",
-            "descripcion": "Dilución mayor a 15% anual o mayor a 10% con CFO TTM no positivo.",
-            "probabilidad_0_1": 0.27,
-            "ventana_temporal": {
-              "inicio": "2026-03-31",
-              "fin_esperado": "2027-12-31"
-            },
-            "criterio_chequeo": "Acciones diluidas YoY > 15%, o > 10% con CFO TTM <= 0.",
-            "accion_si_activado": "SALIR"
-          },
-          {
-            "kc_id": "KC-006",
-            "descripcion": "Opinión de going concern, covenant breach o notice of default en filings oficiales.",
-            "probabilidad_0_1": 0.08,
-            "ventana_temporal": {
-              "inicio": "2026-03-01",
-              "fin_esperado": "2028-02-23"
-            },
-            "criterio_chequeo": "Mención explícita de going concern, default o covenant breach en 10-Q, 10-K o 8-K.",
-            "accion_si_activado": "SALIR"
-          },
-          {
-            "kc_id": "KC-007",
-            "descripcion": "FCF TTM inferior a arrendamientos corrientes y caída de caja interanual mayor a 30%.",
-            "probabilidad_0_1": 0.24,
-            "ventana_temporal": {
-              "inicio": "2026-06-30",
-              "fin_esperado": "2028-02-23"
-            },
-            "criterio_chequeo": "FCF_TTM < 88661000 y variación caja YoY <= -30%.",
-            "accion_si_activado": "SALIR"
-          },
-          {
-            "kc_id": "KC-008",
-            "descripcion": "Divergencia EBIT→CFO negativa de -15% o peor por dos cierres consecutivos.",
-            "probabilidad_0_1": 0.26,
-            "ventana_temporal": {
-              "inicio": "2026-06-30",
-              "fin_esperado": "2027-12-31"
-            },
-            "criterio_chequeo": "(CFO_TTM-EBIT_TTM)/abs(EBIT_TTM) <= -0.15 en dos reportes consecutivos.",
-            "accion_si_activado": "REVISAR_COMITE"
-          },
-          {
-            "kc_id": "KC-009",
-            "descripcion": "G&A supera 8% de ingresos durante dos trimestres consecutivos sin guía correctiva.",
+            "kc_id": "KC-F001",
+            "origen_kc_id": "KC-001",
+            "descripcion": "Margen bruto TTM <20% en dos reportes consecutivos.",
             "probabilidad_0_1": 0.34,
             "ventana_temporal": {
-              "inicio": "2026-03-31",
-              "fin_esperado": "2027-03-31"
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
             },
-            "criterio_chequeo": "ga_usd/ingresos_usd >= 0.08 en dos 10-Q consecutivos.",
-            "accion_si_activado": "CONGELAR_COMPRAS"
+            "criterio_chequeo": "10-Q/10-K: gross_profit_ttm/revenue_ttm < 0.20 en dos publicaciones seguidas.",
+            "accion_si_activado": "REDUCIR_50 y congelar compras; salida total si coincide con CFO TTM <100M."
           },
           {
-            "kc_id": "KC-010",
-            "descripcion": "Ingresos trimestrales por debajo de 200M durante dos trimestres consecutivos.",
+            "kc_id": "KC-F002",
+            "origen_kc_id": "KC-002",
+            "descripcion": "CFO acumulado 4 trimestres <100M.",
+            "probabilidad_0_1": 0.22,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
+            },
+            "criterio_chequeo": "Suma de CFO últimos cuatro trimestres < 100000000.",
+            "accion_si_activado": "SALIR."
+          },
+          {
+            "kc_id": "KC-F003",
+            "origen_kc_id": "KC-003",
+            "descripcion": "Se revela deuda financiera >150M y deuda neta/EBITDA >3.0x.",
+            "probabilidad_0_1": 0.27,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2028-02-24"
+            },
+            "criterio_chequeo": "10-K/10-Q: deuda_total_usd >150M y net_debt_ebitda >3.0.",
+            "accion_si_activado": "REVISAR_COMITE inmediato y REDUCIR_50."
+          },
+          {
+            "kc_id": "KC-F004",
+            "origen_kc_id": "KC-004",
+            "descripcion": "Ingresos trimestrales YoY <-15% por dos trimestres consecutivos.",
+            "probabilidad_0_1": 0.18,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2028-02-24"
+            },
+            "criterio_chequeo": "((Revenue_t - Revenue_t-4)/Revenue_t-4) < -0.15 durante dos trimestres seguidos.",
+            "accion_si_activado": "REDUCIR_50; SALIR si se combina con caída de CFO TTM <100M."
+          },
+          {
+            "kc_id": "KC-F005",
+            "origen_kc_id": "KC-005",
+            "descripcion": "Lease liabilities/patrimonio >150%.",
+            "probabilidad_0_1": 0.31,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
+            },
+            "criterio_chequeo": "total_lease_liabilities_usd / patrimonio_usd > 1.50.",
+            "accion_si_activado": "CONGELAR_COMPRAS y REVISAR_COMITE."
+          },
+          {
+            "kc_id": "KC-F006",
+            "origen_kc_id": "KC-006",
+            "descripcion": "Caja disponible <100M sin líneas de crédito confirmadas.",
+            "probabilidad_0_1": 0.14,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
+            },
+            "criterio_chequeo": "caja_usd <100000000 y linea_credito_disponible_usd = null o 0.",
+            "accion_si_activado": "SALIR."
+          },
+          {
+            "kc_id": "KC-F007",
+            "origen_kc_id": "KC_01",
+            "descripcion": "CFO_TTM / lease_operating_current <1.0.",
+            "probabilidad_0_1": 0.26,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
+            },
+            "criterio_chequeo": "cfo_ttm_usd / operating_lease_liabilities_current_usd < 1.0.",
+            "accion_si_activado": "REDUCIR_50."
+          },
+          {
+            "kc_id": "KC-F008",
+            "origen_kc_id": "KC_02",
+            "descripcion": "Caja < lease liabilities corrientes.",
+            "probabilidad_0_1": 0.12,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2028-02-24"
+            },
+            "criterio_chequeo": "caja_usd < operating_lease_liabilities_current_usd + finance_lease_liabilities_current_usd.",
+            "accion_si_activado": "SALIR."
+          },
+          {
+            "kc_id": "KC-F009",
+            "origen_kc_id": "KC_03",
+            "descripcion": "CFO/EBIT <0.70 en dos reportes consecutivos.",
+            "probabilidad_0_1": 0.29,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2028-02-24"
+            },
+            "criterio_chequeo": "ratio cfo_usd/ebit_usd <0.70 durante dos publicaciones seguidas.",
+            "accion_si_activado": "REDUCIR_50 y activar revisión forense ampliada."
+          },
+          {
+            "kc_id": "KC-F010",
+            "origen_kc_id": "KC_04",
+            "descripcion": "FCF acumulado 12 meses negativo.",
             "probabilidad_0_1": 0.15,
             "ventana_temporal": {
-              "inicio": "2026-03-31",
-              "fin_esperado": "2027-09-30"
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
             },
-            "criterio_chequeo": "ingresos_usd < 200000000 en dos trimestres seguidos.",
-            "accion_si_activado": "REVISAR_COMITE"
+            "criterio_chequeo": "FCF TTM < 0 usando FCF=CFO-CAPEX.",
+            "accion_si_activado": "SALIR."
+          },
+          {
+            "kc_id": "KC-F011",
+            "origen_kc_id": "KC_05",
+            "descripcion": "Deuda reportada > caja y vencimientos financieros 12m >25% de caja.",
+            "probabilidad_0_1": 0.24,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2028-02-24"
+            },
+            "criterio_chequeo": "deuda_total_usd > caja_usd y deuda_financiera_12m_usd > 0.25*caja_usd.",
+            "accion_si_activado": "REVISAR_COMITE y REDUCIR_50."
+          },
+          {
+            "kc_id": "KC-F012",
+            "origen_kc_id": "AUTO_NULL_01",
+            "descripcion": "CFO < Net Income por dos trimestres consecutivos.",
+            "probabilidad_0_1": 0.33,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2026-08-24"
+            },
+            "criterio_chequeo": "cfo_usd < net_income_usd en dos trimestres seguidos.",
+            "accion_si_activado": "CONGELAR_COMPRAS y reevaluar tesis de caja."
+          },
+          {
+            "kc_id": "KC-F013",
+            "origen_kc_id": "AUTO_NULL_02",
+            "descripcion": "Interest Income / Cash Balance anualizado <2.0%.",
+            "probabilidad_0_1": 0.21,
+            "ventana_temporal": {
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
+            },
+            "criterio_chequeo": "(interest_income_annualized / avg_cash_balance) < 0.02.",
+            "accion_si_activado": "REVISAR_COMITE por posible sobrestimación de liquidez efectiva."
           }
         ],
         "supervivencia_resultado": "PASS",
-        "survival_score_0_5": 3.0,
+        "survival_score_0_5": 3,
         "max_position_size": {
           "tipo": "pct_cartera",
-          "valor": 2.5,
-          "justificacion": "Score 3.0 y tres riesgos ALTO justifican exposición limitada. Se requiere confirmación de deuda real, dilución y estabilidad operativa antes de ampliar."
+          "valor_pct": 3.0,
+          "justificacion": "Score 3/5 con confianza 0.67 y dos banderas ALTO (leasing/opacidad deuda) exige límite prudente. Tamaño máximo de 3% mantiene opcionalidad y controla riesgo de sorpresa de balance."
         },
         "predicciones_calibracion": [
           {
-            "pred_id": "PRED_001",
-            "descripcion": "Margen bruto inferior a 23% en al menos 2 de próximos 4 trimestres.",
-            "probabilidad_0_1": 0.46,
+            "pred_id": "CAL-001",
+            "descripcion": "Margen bruto TTM <22% en al menos un reporte.",
+            "probabilidad_0_1": 0.55,
             "ventana_temporal": {
-              "inicio": "2026-03-31",
-              "fin_esperado": "2027-03-31"
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
             },
-            "criterio_validacion": "Dos trimestres con gross_profit_usd/ingresos_usd < 0.23."
+            "criterio_validacion": "gross_profit_ttm / revenue_ttm < 0.22."
           },
           {
-            "pred_id": "PRED_002",
-            "descripcion": "Margen EBIT inferior a 10% en al menos 2 de próximos 4 trimestres.",
-            "probabilidad_0_1": 0.38,
-            "ventana_temporal": {
-              "inicio": "2026-03-31",
-              "fin_esperado": "2027-03-31"
-            },
-            "criterio_validacion": "Dos trimestres con ebit_usd/ingresos_usd < 0.10."
-          },
-          {
-            "pred_id": "PRED_003",
-            "descripcion": "G&A/ingresos igual o mayor a 7.5% en dos trimestres dentro de 12 meses.",
+            "pred_id": "CAL-002",
+            "descripcion": "CFO TTM <170M.",
             "probabilidad_0_1": 0.42,
             "ventana_temporal": {
-              "inicio": "2026-03-31",
-              "fin_esperado": "2027-03-31"
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
             },
-            "criterio_validacion": "ga_usd/ingresos_usd >= 0.075 en dos reportes trimestrales."
+            "criterio_validacion": "Suma de CFO últimos 4 trimestres <170000000."
           },
           {
-            "pred_id": "PRED_004",
-            "descripcion": "CFO TTM menor a 120M antes de cierre FY2026.",
-            "probabilidad_0_1": 0.41,
+            "pred_id": "CAL-003",
+            "descripcion": "CFF trimestral < -50M en al menos un trimestre.",
+            "probabilidad_0_1": 0.5,
             "ventana_temporal": {
-              "inicio": "2026-06-30",
-              "fin_esperado": "2027-09-30"
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
             },
-            "criterio_validacion": "Suma de CFO de cuatro trimestres consecutivos < 120000000."
+            "criterio_validacion": "CFF trimestral menor a -50000000."
           },
           {
-            "pred_id": "PRED_005",
-            "descripcion": "Caja por debajo de 200M en algún trimestre dentro de 18 meses.",
-            "probabilidad_0_1": 0.29,
+            "pred_id": "CAL-004",
+            "descripcion": "Se publica deuda financiera >150M no previamente transparente.",
+            "probabilidad_0_1": 0.36,
             "ventana_temporal": {
-              "inicio": "2026-06-30",
+              "inicio": "2026-02-24",
               "fin_esperado": "2027-12-31"
             },
-            "criterio_validacion": "caja_usd reportada trimestralmente < 200000000."
+            "criterio_validacion": "deuda_total_usd reportada >150000000."
           },
           {
-            "pred_id": "PRED_006",
-            "descripcion": "Acciones diluidas aumentan más de 8% interanual en próximo anual.",
+            "pred_id": "CAL-005",
+            "descripcion": "Lease liabilities/patrimonio >130%.",
             "probabilidad_0_1": 0.33,
             "ventana_temporal": {
-              "inicio": "2026-12-31",
-              "fin_esperado": "2028-02-23"
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-12-31"
             },
-            "criterio_validacion": "diluted shares FY2026/FY2025 - 1 > 0.08."
+            "criterio_validacion": "total_lease_liabilities_usd / patrimonio_usd >1.30."
           },
           {
-            "pred_id": "PRED_007",
-            "descripcion": "CFF acumulado en dos trimestres consecutivos menor a -90M.",
-            "probabilidad_0_1": 0.37,
+            "pred_id": "CAL-006",
+            "descripcion": "Crecimiento de ingresos YoY <10% en al menos un trimestre.",
+            "probabilidad_0_1": 0.58,
             "ventana_temporal": {
-              "inicio": "2026-03-31",
-              "fin_esperado": "2027-03-31"
+              "inicio": "2026-02-24",
+              "fin_esperado": "2027-02-24"
             },
-            "criterio_validacion": "Suma de CFF dos trimestres consecutivos < -90000000."
+            "criterio_validacion": "Revenue growth YoY trimestral <10%."
           }
         ],
         "resumen_ejecutivo": {
           "veredicto": "APTO",
-          "confianza_0_1": 0.66,
-          "justificacion_parrafos": [
-            "GCT conserva capacidad de supervivencia a 12-24 meses por caja de 259.8M y flujo operativo positivo. La probabilidad de liquidación inmediata es baja bajo condiciones actuales.",
-            "El riesgo principal es de deterioro gradual: rigidez por leases, deterioro de márgenes y calidad de caja volátil por capital de trabajo. La posición debe mantenerse acotada y condicionada a hitos de validación trimestral sobre márgenes, CFO y dilución."
-          ]
+          "confianza_0_1": 0.67
         },
+        "resumen_ejecutivo_detallado": "Pese a múltiples banderas forenses, GCT mantiene caja de 259.8M y FCF TTM de 201.3M, con cobertura de 2.93x sobre leasing corriente. Esto reduce el riesgo de liquidación inmediata en 12-24 meses y sustenta un resultado PASS con score 3/5.\n\nEl riesgo central no es la generación actual, sino la opacidad: deuda financiera total y covenants no están plenamente desglosados, AR/inventarios faltan y la conversión EBIT->CFO es históricamente volátil. Además, el peso de leasing (484.3M) obliga a disciplina de tamaño y kill criteria estrictos.",
         "_meta": {
           "agente": "FORENSIC_SCORING_v1",
           "version": "1.0.0",
-          "timestamp": "2026-02-23T23:30:00Z",
-          "inputs_hash": "sha256:6bb5a1d54d8274b739c6fbec8f6ac69e0c5cfab7f3cbda4525ce3da9b0ff0f89"
+          "timestamp": "2026-02-24T16:03:46Z",
+          "inputs_hash": "b8cfd90dcb9e88a20f8ee015c44fa59550be859d2fb670c70415c70987b6ecc3"
         }
-      },
-      "veredicto_forense": {
-        "status": "APTO",
-        "confianza_0_1": 0.66,
-        "razon_principal": "La liquidez actual y el CFO positivo sostienen supervivencia base, pero la rigidez de leases y la erosión de márgenes exigen disciplina de riesgo."
       },
       "supervivencia": {
         "horizonte_meses": {
@@ -530,37 +625,37 @@
         },
         "evaluacion": {
           "resultado": "PASS",
-          "score_0_5": 3.0,
+          "score_0_5": 3,
           "por_que": [
-            "Caja de 259.8M y CFO FY2024 de 158.1M sostienen operación base.",
-            "No se identifica muro de deuda financiera explícita en el horizonte inmediato.",
-            "Lease liabilities de 484.3M elevan rigidez y reducen margen de error.",
-            "Volatilidad EBIT→CFO sugiere dependencia de capital de trabajo.",
-            "Compresión de márgenes y salto de G&A pueden deteriorar FCF en desaceleración."
+            "Caja de 259.8M y FCF FY2024/TTM positivos reducen riesgo de iliquidez inmediata.",
+            "Existen 2 banderas ALTO: dominancia de leasing y opacidad de deuda financiera.",
+            "Múltiples banderas MEDIO en puentes de flujo y estructura de costes degradan visibilidad.",
+            "No hay evidencia directa de estrés de covenants, pero no es evaluable por falta de disclosure.",
+            "La supervivencia depende de mantener conversión de caja y transparencia de pasivos financieros."
           ]
         },
         "liquidez": {
           "caja_usd": 259759000,
           "linea_credito_disponible_usd": null,
           "otras_fuentes_liquidez": [
-            "CFO positivo recurrente",
-            "capacidad de ajuste de capex discrecional",
-            "optimización de capital de trabajo"
+            "cfo_recurrente_positivo",
+            "fcf_positivo",
+            "caja_operativa"
           ],
-          "runway_meses_estimado": 25.5,
-          "metodo_estimacion": "Escenario de estrés con CFO=0 usando arrendamientos corrientes + capex + CFF FY2024 como obligaciones proxy anuales.",
-          "notas": "No hay dato documentado de revolver o líneas comprometidas; la estimación es conservadora y depende de continuidad operativa."
+          "runway_meses_estimado": 24,
+          "metodo_estimacion": "Se tomó como base CFO/FCF positivos y cobertura de caja sobre lease corriente (2.93x). En escenario sin ingresos, referencia aproximada de 15 meses del detector.",
+          "notas": "No hay dato confirmado de revolver o ABL disponible."
         },
         "deuda_y_refinanciacion": {
           "deuda_total_usd": null,
           "deuda_neta_usd": null,
           "coste_deuda_aprox_pct": null,
-          "coverage_intereses": 510.24,
+          "coverage_intereses": null,
           "net_debt_ebitda": null,
           "maturity_wall": {
             "existe": true,
             "horizonte_meses": 24,
-            "comentario": "No se observa muro de deuda financiera explícito, pero sí obligaciones fijas elevadas por arrendamientos."
+            "comentario": "Existe pared de compromisos por leasing; la pared de deuda financiera no es evaluable por falta de desglose."
           },
           "vencimientos": [
             {
@@ -570,17 +665,17 @@
               "riesgo": "MEDIO",
               "fuente_ref": {
                 "source_id": "SRC_SEC_001_10-K_FY2024.htm",
-                "ubicacion": "Lease liabilities current"
+                "ubicacion": "lease_data.operating_lease_liabilities_current_usd + finance_current"
               }
             },
             {
               "anio": 2027,
-              "importe_usd": null,
-              "tipo": "unknown",
-              "riesgo": "UNKNOWN",
+              "importe_usd": 395617000,
+              "tipo": "leasing",
+              "riesgo": "MEDIO",
               "fuente_ref": {
                 "source_id": "SRC_SEC_001_10-K_FY2024.htm",
-                "ubicacion": "Lease maturity detail no disponible en input estructurado"
+                "ubicacion": "lease_data.operating_lease_liabilities_non_current_usd + finance_non_current"
               }
             }
           ],
@@ -591,40 +686,40 @@
               "other"
             ],
             "riesgo_breach": "UNKNOWN",
-            "comentario": "No se identificó deuda financiera explícita con covenants en los datos estructurados; revisar contratos de leasing y notas de deuda."
+            "comentario": "No hay desglose suficiente de covenants ni headroom."
           }
         },
         "riesgo_dilucion": {
-          "nivel": "ALTO",
+          "nivel": "UNKNOWN",
           "motores": [
-            "discrepancia entre acciones implícitas por EPS y market cap",
-            "posibles convertibles o warrants",
-            "opacidad de estructura accionaria diluida"
+            "acciones_diluidas_no_reportadas",
+            "opacidad_deuda_para_estimacion_de_capital",
+            "sbc_no_cuantificado_en_extracto"
           ],
           "share_count_yoy_pct": null,
-          "comentario": "La diferencia de 26.7% entre bases accionarias implica riesgo relevante de dilución económica por acción."
+          "comentario": "Sin dato de acciones diluidas YoY ni detalle completo de SBC."
         }
       },
       "calidad_de_resultados_y_contabilidad": {
-        "resumen": "La generación de caja es positiva, pero su calidad es volátil y dependiente de capital de trabajo. El puente EBIT→CFO muestra oscilaciones extremas históricas y trimestrales. Además, la compresión de margen bruto junto con el salto de G&A reduce resiliencia operativa.",
+        "resumen": "La compañía muestra fuerte generación de caja operativa, pero la serie de flujos está afectada por comparabilidad YTD y volatilidad de CFI/CFF. El puente EBIT->CFO no es estable históricamente y depende de partidas de capital de trabajo no completamente desagregadas. Persisten vacíos de disclosure en deuda financiera y componentes de working capital.",
         "red_flags": [
           {
             "flag_id": "RF-001",
-            "categoria": "SBC",
-            "descripcion": "Discrepancia material en acciones implícitas entre EPS y market cap, compatible con potencial dilución no totalmente transparente.",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "No aparecen cuentas por cobrar ni inventarios en el balance disponible, lo que impide validar DSO/DIO y la calidad del crecimiento de ingresos.",
             "severidad": "MEDIA",
-            "probabilidad_0_1": 0.55,
-            "por_que_importa": "Puede erosionar retorno por acción y elevar coste de capital.",
+            "probabilidad_0_1": 0.61,
+            "por_que_importa": "Sin AR/inventarios no se valida la sostenibilidad del CFO.",
             "evidencias": [
               {
-                "source_id": "TruthPack_v1.metricas_derivadas / mercado",
-                "ubicacion": "EPS vs market data",
-                "cita_corta": "29.16M acciones por EPS frente a 36.96M por market cap.",
-                "interpretacion": "Existe brecha accionaria de 26.7%."
+                "source_id": "TruthPack_v1.balance_sheet_ultimo",
+                "ubicacion": "cuentas_por_cobrar_usd; inventarios_usd",
+                "cita_corta": "AR e inventarios aparecen en null.",
+                "interpretacion": "Falta visibilidad del ciclo operativo."
               }
             ],
             "test_de_falsacion": {
-              "test": "Reconciliación oficial muestra diferencia técnica y dilución potencial inferior a 5%.",
+              "test": "Publicación de AR/inventarios y DSO/DIO estables o mejorando",
               "ventana_meses": {
                 "min": 3,
                 "max": 12
@@ -634,45 +729,93 @@
           },
           {
             "flag_id": "RF-002",
-            "categoria": "WORKING_CAPITAL",
-            "descripcion": "Volatilidad extrema en EBIT→CFO con picos de caja no explicados plenamente por operación recurrente.",
-            "severidad": "ALTA",
-            "probabilidad_0_1": 0.62,
-            "por_que_importa": "Un giro de capital de trabajo puede deteriorar caja rápidamente.",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "El capex luce inusualmente bajo para la escala del negocio (FY2024 ~1.3% de ventas) y el TTM muestra distorsión por Q4 sintético.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.48,
+            "por_que_importa": "Puede sobreestimar FCF sostenible.",
             "evidencias": [
               {
-                "source_id": "ForensicDetection_v1.puentes.ebit_a_cfo",
-                "ubicacion": "serie anual y trimestral",
-                "cita_corta": "Rango anual -78.3% a +41.8%; Q3-2025 ratio 3.12x.",
-                "interpretacion": "La conversión contable a caja es inestable."
+                "source_id": "TruthPack_v1.historico_anual[4]",
+                "ubicacion": "capex_usd FY2024",
+                "cita_corta": "Capex FY2024 -15.536M sobre ventas 1,161.0M.",
+                "interpretacion": "Intensidad de capex baja para tamaño del negocio."
               }
             ],
             "test_de_falsacion": {
-              "test": "CFO/EBIT se estabiliza entre 0.8x y 1.2x durante cuatro trimestres consecutivos.",
+              "test": "Capex normalizado y consistente en 10-Q/10-K, sin saltos sintéticos",
               "ventana_meses": {
-                "min": 6,
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-003",
+            "categoria": "ONE_OFFS",
+            "descripcion": "Los flujos de financiación presentan oscilaciones relevantes, incluyendo salida acumulada de -126.6M en 9M-2025.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.52,
+            "por_que_importa": "Cambios abruptos de CFF pueden erosionar caja.",
+            "evidencias": [
+              {
+                "source_id": "TruthPack_v1.historico_trimestral",
+                "ubicacion": "cff_usd 9M-2025",
+                "cita_corta": "CFF acumulado 9M-2025: -126.6M.",
+                "interpretacion": "Ritmo de salida financiera requiere seguimiento."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "CFF estabilizado en rango histórico y explicado por política de capital",
+              "ventana_meses": {
+                "min": 3,
                 "max": 12
               },
               "fuente_prevista": "earnings"
             }
           },
           {
-            "flag_id": "RF-003",
-            "categoria": "WORKING_CAPITAL",
-            "descripcion": "Faltan saldos de AR, inventarios y deuda total en el dataset estructurado.",
+            "flag_id": "RF-004",
+            "categoria": "OTHER",
+            "descripcion": "Los flujos de inversión muestran alta volatilidad y componentes no-capex materiales que dificultan estimar FCF sostenible.",
             "severidad": "MEDIA",
-            "probabilidad_0_1": 0.7,
-            "por_que_importa": "Impide medir calidad de ingresos y apalancamiento real.",
+            "probabilidad_0_1": 0.5,
+            "por_que_importa": "CFI no recurrente complica lectura de reinversión real.",
             "evidencias": [
               {
-                "source_id": "TruthPack_v1.log.limitaciones",
-                "ubicacion": "campos null recurrentes",
-                "cita_corta": "AR, inventarios y deuda total reportados como null.",
-                "interpretacion": "Hay limitación material del análisis forense."
+                "source_id": "TruthPack_v1.historico_anual",
+                "ubicacion": "FY2023 CFI vs Capex",
+                "cita_corta": "CFI -90.5M vs capex -4.4M.",
+                "interpretacion": "Existen flujos de inversión no-capex relevantes."
               }
             ],
             "test_de_falsacion": {
-              "test": "Se publican saldos y roll-forward completos de AR, inventarios y deuda total.",
+              "test": "Detalle consistente de componentes CFI no-capex en notas",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-005",
+            "categoria": "OTHER",
+            "descripcion": "La serie trimestral de cash flow incluye cortes YTD de 9 meses en Q3, reduciendo comparabilidad QoQ y pudiendo inflar conversiones intraanuales.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.42,
+            "por_que_importa": "Puede inducir señales falsas al comparar trimestres.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
+                "ubicacion": "log.limitaciones",
+                "cita_corta": "Flujos reportados a nueve meses al 30-09.",
+                "interpretacion": "Comparabilidad QoQ limitada."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Serie trimestral aislada completa y consistente",
               "ventana_meses": {
                 "min": 1,
                 "max": 6
@@ -681,70 +824,22 @@
             }
           },
           {
-            "flag_id": "RF-004",
-            "categoria": "ONE_OFFS",
-            "descripcion": "Brecha CFI-capex elevada indica consumo de caja por adquisiciones/inversiones fuera del FCF estándar.",
-            "severidad": "MEDIA",
-            "probabilidad_0_1": 0.48,
-            "por_que_importa": "Puede sobreestimar caja discrecional y elevar riesgo de integración.",
-            "evidencias": [
-              {
-                "source_id": "SRC_SEC_001_10-K_FY2024.htm",
-                "ubicacion": "Investing activities",
-                "cita_corta": "Gap CFI-capex de 86.2M en FY2023 y 39.9M en FY2024.",
-                "interpretacion": "El FCF reportado no captura todo el consumo de inversión."
-              }
-            ],
-            "test_de_falsacion": {
-              "test": "CFI no capex cae por debajo de 10M anual y M&A muestra retornos claros.",
-              "ventana_meses": {
-                "min": 6,
-                "max": 18
-              },
-              "fuente_prevista": "10-K"
-            }
-          },
-          {
-            "flag_id": "RF-005",
-            "categoria": "LEASES",
-            "descripcion": "Obligaciones de leasing elevadas frente a patrimonio y caja, con alta rigidez de costos fijos.",
-            "severidad": "ALTA",
-            "probabilidad_0_1": 0.64,
-            "por_que_importa": "Reduce flexibilidad financiera ante caída de demanda o márgenes.",
-            "evidencias": [
-              {
-                "source_id": "SRC_SEC_001_10-K_FY2024.htm",
-                "ubicacion": "Lease data / balance",
-                "cita_corta": "Leases 484.3M; patrimonio 405.2M; lease corriente/caja 34.1%.",
-                "interpretacion": "La estructura fija puede tensionar liquidez en estrés."
-              }
-            ],
-            "test_de_falsacion": {
-              "test": "Lease liabilities bajan sostenidamente y pagos corrientes/caja se mantienen por debajo de 25%.",
-              "ventana_meses": {
-                "min": 6,
-                "max": 24
-              },
-              "fuente_prevista": "10-K"
-            }
-          },
-          {
             "flag_id": "RF-006",
-            "categoria": "LEASES",
-            "descripcion": "Salidas de financiación elevadas en 2025 sin desglose suficiente.",
+            "categoria": "OTHER",
+            "descripcion": "G&A creció 146% en FY2024 (vs. ingresos +65%), elevando el ratio G&A/ingresos de 4.3% a 6.4%.",
             "severidad": "MEDIA",
-            "probabilidad_0_1": 0.49,
-            "por_que_importa": "Puede anticipar presión de caja por obligaciones no totalmente transparentes.",
+            "probabilidad_0_1": 0.54,
+            "por_que_importa": "Presiona margen operativo y reduce resiliencia.",
             "evidencias": [
               {
-                "source_id": "SRC_SEC_005_10-Q_Q2-2025.htm / SRC_SEC_004_10-Q_Q3-2025.htm",
-                "ubicacion": "Financing activities",
-                "cita_corta": "CFF de -103.9M acumulado en Q2-Q3 2025.",
-                "interpretacion": "Hay drenaje relevante de caja por financiación."
+                "source_id": "TruthPack_v1.historico_anual",
+                "ubicacion": "ga_usd FY2023-FY2024",
+                "cita_corta": "G&A 30.0M a 73.9M, ratio 4.3% a 6.4%.",
+                "interpretacion": "Escala de costes creció más rápido que ingresos."
               }
             ],
             "test_de_falsacion": {
-              "test": "CFF normaliza por encima de -25M por semestre con desglose claro de usos.",
+              "test": "G&A/ingresos vuelve por debajo de 5.5%",
               "ventana_meses": {
                 "min": 3,
                 "max": 12
@@ -754,69 +849,45 @@
           },
           {
             "flag_id": "RF-007",
-            "categoria": "OTHER",
-            "descripcion": "G&A se expandió muy por encima de ingresos, elevando la base de costo fijo.",
+            "categoria": "LEASES",
+            "descripcion": "La estructura del balance está dominada por compromisos de arrendamiento, con peso elevado sobre pasivos y patrimonio.",
             "severidad": "ALTA",
-            "probabilidad_0_1": 0.58,
-            "por_que_importa": "Complica sostener rentabilidad si crecimiento se desacelera.",
+            "probabilidad_0_1": 0.57,
+            "por_que_importa": "Compromisos fijos altos aumentan sensibilidad ante caída de ingresos.",
             "evidencias": [
               {
-                "source_id": "SRC_SEC_001_10-K_FY2024.htm",
-                "ubicacion": "Income statement",
-                "cita_corta": "G&A +146.4% YoY vs ingresos +65.0%; ratio 6.4%.",
-                "interpretacion": "Los gastos corporativos crecieron más rápido que la escala."
+                "source_id": "TruthPack_v1.lease_data",
+                "ubicacion": "total_lease_liabilities_usd",
+                "cita_corta": "Lease liabilities 484.3M; 72.7% de pasivos.",
+                "interpretacion": "La flexibilidad financiera está condicionada por arrendamientos."
               }
             ],
             "test_de_falsacion": {
-              "test": "G&A/ingresos vuelve por debajo de 6% durante dos trimestres consecutivos.",
-              "ventana_meses": {
-                "min": 3,
-                "max": 12
-              },
-              "fuente_prevista": "10-Q"
-            }
-          },
-          {
-            "flag_id": "RF-008",
-            "categoria": "OTHER",
-            "descripcion": "La estructura corporativa y transición regulatoria elevan opacidad para análisis de riesgo.",
-            "severidad": "MEDIA",
-            "probabilidad_0_1": 0.4,
-            "por_que_importa": "Aumenta prima de riesgo y dificulta atribuir flujos entre entidades.",
-            "evidencias": [
-              {
-                "source_id": "SRC_SEC_003_20-F_FY2023.htm / SRC_SEC_001_10-K_FY2024.htm",
-                "ubicacion": "Filing metadata",
-                "cita_corta": "Transición de 20-F a 10-K entre FY2023 y FY2024.",
-                "interpretacion": "Cambió el marco de reporte y comparabilidad."
-              }
-            ],
-            "test_de_falsacion": {
-              "test": "Mayor transparencia en estructura legal, partes relacionadas y flujos intragrupo.",
+              "test": "Lease liabilities/patrimonio cae por debajo de 100%",
               "ventana_meses": {
                 "min": 6,
-                "max": 18
+                "max": 24
               },
               "fuente_prevista": "10-K"
             }
           },
           {
-            "flag_id": "RF-009",
+            "flag_id": "RF-008",
             "categoria": "OTHER",
-            "descripcion": "Compresión de margen bruto pese al crecimiento de ingresos.",
+            "descripcion": "El margen bruto muestra compresión en tendencia (27.3% FY2020 a 24.6% FY2024; TTM 23.1%) pese al fuerte crecimiento de ingresos.",
             "severidad": "MEDIA",
-            "probabilidad_0_1": 0.47,
-            "por_que_importa": "Puede señalar pérdida de pricing power o mayor presión competitiva.",
+            "probabilidad_0_1": 0.56,
+            "por_que_importa": "La compresión del margen reduce colchón de supervivencia.",
             "evidencias": [
               {
-                "source_id": "SRC_SEC_001_10-K_FY2024.htm",
-                "ubicacion": "Income statement",
-                "cita_corta": "Margen bruto cayó de 26.8% a 24.6% en FY2024.",
-                "interpretacion": "La escala no se tradujo en mayor margen bruto."
+                "source_id": "TruthPack_v1.metricas_derivadas",
+                "ubicacion": "margen_bruto_pct TTM",
+                "cita_corta": "TTM margen bruto 23.12%.",
+                "interpretacion": "Deterioro de mix o presión competitiva potencial."
               }
             ],
             "test_de_falsacion": {
-              "test": "Margen bruto se recupera por encima de 25% por dos trimestres consecutivos.",
+              "test": "Margen bruto TTM vuelve y se sostiene por encima de 24.5%",
               "ventana_meses": {
                 "min": 3,
                 "max": 12
@@ -825,44 +896,140 @@
             }
           },
           {
-            "flag_id": "RF-010",
+            "flag_id": "RF-009",
             "categoria": "OTHER",
-            "descripcion": "Compresión de margen EBIT en un periodo de fuerte expansión de ventas.",
-            "severidad": "MEDIA",
-            "probabilidad_0_1": 0.45,
-            "por_que_importa": "Indica deterioro del apalancamiento operativo y menor resiliencia.",
+            "descripcion": "Desconexión marcada entre crecimiento y valoración: ingresos FY2024 +65% con valoración aproximada de ~6x P/FCF.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.44,
+            "por_que_importa": "Puede reflejar riesgo no capturado por métricas superficiales.",
             "evidencias": [
               {
-                "source_id": "SRC_SEC_001_10-K_FY2024.htm",
-                "ubicacion": "Income statement",
-                "cita_corta": "Margen EBIT cayó de 15.6% a 11.2%.",
-                "interpretacion": "La rentabilidad operativa se comprimió con fuerza."
+                "source_id": "TruthPack_v1.metricas_derivadas.p_fcf",
+                "ubicacion": "p_fcf",
+                "cita_corta": "P/FCF 6.2097 con crecimiento FY2024 de 65%.",
+                "interpretacion": "Mercado asigna descuento por riesgo percibido."
               }
             ],
             "test_de_falsacion": {
-              "test": "Margen EBIT vuelve por encima de 12% sostenidamente durante dos trimestres.",
+              "test": "Convergencia de múltiplos tras mejora de transparencia de deuda y márgenes",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "otro"
+            }
+          },
+          {
+            "flag_id": "RF-010",
+            "categoria": "OTHER",
+            "descripcion": "La deuda financiera total no está explícitamente desglosada, impidiendo evaluar con precisión apalancamiento, refinanciación y covenants.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.63,
+            "por_que_importa": "Bloquea evaluación de riesgo de evento de crédito.",
+            "evidencias": [
+              {
+                "source_id": "TruthPack_v1.mercado",
+                "ubicacion": "deuda_total_usd; enterprise_value_usd",
+                "cita_corta": "deuda_total_usd=null y enterprise_value_usd=null.",
+                "interpretacion": "No hay medición robusta de apalancamiento."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Divulgación completa de deuda, vencimientos y covenants",
+              "ventana_meses": {
+                "min": 1,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-011",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "La conversión EBIT->CFO exhibe distorsiones materiales y volatilidad histórica, sugiriendo dependencia de ajustes no desglosados de capital de trabajo.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.58,
+            "por_que_importa": "Puede revertir abruptamente la generación de caja.",
+            "evidencias": [
+              {
+                "source_id": "ForensicDetection_v1.puentes.ebit_a_cfo",
+                "ubicacion": "serie_fy2020_fy2024",
+                "cita_corta": "CFO/EBIT osciló de 0.22 a 1.42.",
+                "interpretacion": "Alta sensibilidad de caja operativa."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "CFO/EBIT estable en 0.9-1.2 por cuatro trimestres",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-012",
+            "categoria": "OTHER",
+            "descripcion": "R&D pasó de 0 (FY2020-2021) a 9.8M (FY2024) sin explicación explícita del cambio de política contable o de clasificación.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.37,
+            "por_que_importa": "Cambios de clasificación pueden afectar comparabilidad histórica.",
+            "evidencias": [
+              {
+                "source_id": "TruthPack_v1.historico_anual",
+                "ubicacion": "rd_usd FY2020-FY2024",
+                "cita_corta": "R&D 0, 0, 1.4M, 3.9M, 9.8M.",
+                "interpretacion": "Escalada requiere puente explicativo."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Nota contable que detalle metodología y reclasificaciones",
               "ventana_meses": {
                 "min": 3,
                 "max": 12
               },
-              "fuente_prevista": "10-Q"
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-013",
+            "categoria": "OTHER",
+            "descripcion": "La transición de 20-F a 10-K complica la comparabilidad histórica y puede introducir cambios de marco contable/reporting.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.35,
+            "por_que_importa": "Aumenta riesgo de lectura errónea de tendencias largas.",
+            "evidencias": [
+              {
+                "source_id": "TruthPack_v1.log.fuentes_consultadas",
+                "ubicacion": "20-F y 10-K",
+                "cita_corta": "FY2020 asociado a 20-F; FY2021+ a 10-K.",
+                "interpretacion": "Comparabilidad interperiodo menos limpia."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Reconciliación explícita de métricas comparables en filings",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "filing"
             }
           }
         ],
         "puentes_criticos": {
           "ebitda_a_cfo": {
-            "lectura": "En FY2024, CFO superó EBIT en 21.0%, pero la serie histórica muestra oscilaciones extremas. El patrón trimestral Q1 débil y Q3 fuerte sugiere dependencia estacional de capital de trabajo.",
+            "lectura": "En FY2024 la conversión es alta (CFO/EBIT 1.21), pero la serie histórica muestra amplitud extrema (0.22-1.42), compatible con distorsión por capital de trabajo.",
             "posibles_distorsiones": [
               "capital circulante",
               "one-offs",
-              "impuestos",
-              "otros"
+              "intereses",
+              "impuestos"
             ]
           },
           "cfo_a_fcf": {
-            "lectura": "La conversión CFO→FCF FY2024 fue alta (90.2%), pero no incorpora plenamente inversión inorgánica observada en CFI.",
+            "lectura": "FY2024 muestra puente sano (FCF/CFO 0.90), pero TTM está afectado por capex sintético y no debe extrapolarse sin ajuste.",
             "capex_riesgo": "MEDIO",
-            "notas": "FCF puede sobreestimar flujo discrecional si adquisiciones recurrentes y pagos de lease se comportan como gasto estructural."
+            "notas": "El FY2024 auditado es más confiable que el TTM para estimar FCF sostenible."
           }
         }
       },
@@ -870,242 +1037,222 @@
         "recompras": {
           "disponible": false,
           "sostenible_por_fcf": "UNKNOWN",
-          "comentario": "No hay desglose suficiente en input para atribuir CFF negativo a recompras."
+          "comentario": "No hay desglose suficiente de componentes de CFF para clasificar recompras."
         },
         "sbc_y_compensacion": {
           "sbc_relevante": "UNKNOWN",
-          "comentario": "Falta detalle de SBC para cuantificar dilución económica recurrente."
+          "comentario": "Falta cuantificación integrada de SBC y acciones diluidas."
         },
         "mna": {
           "riesgo_mala_asignacion": "MEDIO",
-          "comentario": "El gap CFI-capex sugiere uso material de caja en inversiones/adquisiciones fuera de capex orgánico."
+          "comentario": "Existe evidencia de operaciones corporativas, pero falta trazabilidad completa del retorno sobre adquisiciones."
         },
         "alineacion_management": {
           "insiders": "UNKNOWN",
-          "comentario": "Solicitar ownership de insiders y cambios de participación en DEF14A/Forms 3,4,5."
+          "comentario": "Solicitar ownership y política de remuneración en DEF14A/IR."
         }
       },
       "downside_engineering": {
         "escenarios_adversos": [
           {
             "escenario_id": "D-001",
-            "descripcion": "Compresión de margen bruto hacia 21-22% y persistencia de G&A elevado.",
+            "descripcion": "Compresión de margen bruto hacia <20% junto a desaceleración de ingresos.",
             "impacto_en_supervivencia": "ALTO",
             "mecanismo_de_dolor": [
               "caída de CFO",
+              "subida de working capital",
               "otros"
             ],
             "indicadores_tempranos": [
-              "margen bruto <23%",
-              "G&A/ingresos >7.5%",
-              "margen EBIT <10%"
+              "margen bruto TTM <22%",
+              "ingresos YoY <10%",
+              "G&A/ingresos >6.5%"
             ]
           },
           {
             "escenario_id": "D-002",
-            "descripcion": "Reversión de capital de trabajo tras picos de cobro, reduciendo CFO bruscamente.",
+            "descripcion": "Revelación de deuda financiera significativa y covenants exigentes.",
             "impacto_en_supervivencia": "ALTO",
-            "mecanismo_de_dolor": [
-              "caída de CFO",
-              "subida de working capital"
-            ],
-            "indicadores_tempranos": [
-              "CFO/EBIT <0.8x",
-              "CFO TTM <120M",
-              "crecimiento de AR superior a ingresos"
-            ]
-          },
-          {
-            "escenario_id": "D-003",
-            "descripcion": "Demanda más débil con obligaciones de lease rígidas y salidas de financiación elevadas.",
-            "impacto_en_supervivencia": "MEDIO",
             "mecanismo_de_dolor": [
               "vencimientos cercanos",
               "otros"
             ],
             "indicadores_tempranos": [
-              "caja <200M",
-              "CFF semestral < -90M",
-              "FCF TTM < arrendamientos corrientes"
+              "deuda_total_usd >150M",
+              "headroom de covenant estrecho",
+              "coste de deuda creciente"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "Reversión del puente EBIT->CFO por normalización negativa de capital de trabajo.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "caída de CFO",
+              "subida de working capital"
+            ],
+            "indicadores_tempranos": [
+              "CFO/EBIT <0.8",
+              "CFO < Net Income por dos trimestres",
+              "caja <150M"
             ]
           }
         ],
-        "conclusion_downside": "La compañía no muestra señal inmediata de insolvencia, pero sí un perfil sensible a desaceleración por rigidez de lease y calidad de caja variable. El downside se activa más por erosión operativa acumulada que por evento único de liquidez."
+        "conclusion_downside": "El downside se concentra en tres ejes: presión de márgenes, pasivos fijos de leasing y posibles sorpresas de deuda/covenants. La liquidez actual mitiga corto plazo, pero el riesgo de re-rating negativo es alto si falla la transparencia financiera o la conversión de caja."
       },
       "kill_criteria_propuestos": [
         {
-          "kc_id": "KC-001",
+          "kc_id": "KC-F001",
           "relacionado_con": "margen",
-          "definicion": "Margen bruto <20% durante dos trimestres consecutivos.",
+          "definicion": "Margen bruto TTM <20% en dos reportes consecutivos.",
           "ventana_meses": {
-            "min": 6,
-            "max": 12
-          },
-          "fuente_prevista": "earnings",
-          "accion_recomendada": "REDUCIR_50",
-          "por_que": "Indica pérdida severa de pricing power."
-        },
-        {
-          "kc_id": "KC-002",
-          "relacionado_con": "margen",
-          "definicion": "Margen EBIT <8% durante dos trimestres consecutivos.",
-          "ventana_meses": {
-            "min": 6,
+            "min": 1,
             "max": 12
           },
           "fuente_prevista": "10-Q",
           "accion_recomendada": "REDUCIR_50",
-          "por_que": "Señal de deterioro operativo estructural."
+          "por_que": "Señala deterioro estructural de rentabilidad."
         },
         {
-          "kc_id": "KC-003",
+          "kc_id": "KC-F002",
           "relacionado_con": "supervivencia",
-          "definicion": "CFO TTM <80M o dos trimestres consecutivos de CFO negativo.",
+          "definicion": "CFO acumulado de 4 trimestres <100M.",
           "ventana_meses": {
-            "min": 12,
-            "max": 18
-          },
-          "fuente_prevista": "10-Q",
-          "accion_recomendada": "SALIR",
-          "por_que": "Compromete cobertura de pagos fijos."
-        },
-        {
-          "kc_id": "KC-004",
-          "relacionado_con": "supervivencia",
-          "definicion": "Caja <100M sin líneas comprometidas >50M.",
-          "ventana_meses": {
-            "min": 12,
-            "max": 24
-          },
-          "fuente_prevista": "10-Q",
-          "accion_recomendada": "SALIR",
-          "por_que": "Buffer de liquidez insuficiente."
-        },
-        {
-          "kc_id": "KC-005",
-          "relacionado_con": "dilucion",
-          "definicion": "Dilución >15% interanual o >10% con CFO TTM <=0.",
-          "ventana_meses": {
-            "min": 6,
-            "max": 18
+            "min": 1,
+            "max": 12
           },
           "fuente_prevista": "filing",
           "accion_recomendada": "SALIR",
-          "por_que": "Destrucción material de valor por acción."
+          "por_que": "Implica debilitamiento material de capacidad de caja."
         },
         {
-          "kc_id": "KC-006",
-          "relacionado_con": "contabilidad",
-          "definicion": "Going concern, default o covenant breach divulgado en 10-Q/10-K/8-K.",
+          "kc_id": "KC-F003",
+          "relacionado_con": "deuda",
+          "definicion": "Deuda financiera >150M y deuda neta/EBITDA >3.0x.",
           "ventana_meses": {
-            "min": 12,
-            "max": 24
-          },
-          "fuente_prevista": "filing",
-          "accion_recomendada": "SALIR",
-          "por_que": "Señal directa de riesgo de continuidad."
-        },
-        {
-          "kc_id": "KC-007",
-          "relacionado_con": "fcf",
-          "definicion": "FCF TTM menor a arrendamientos corrientes y caja con caída YoY >30%.",
-          "ventana_meses": {
-            "min": 12,
+            "min": 1,
             "max": 24
           },
           "fuente_prevista": "10-K",
-          "accion_recomendada": "SALIR",
-          "por_que": "Comienza espiral de deterioro de balance."
-        },
-        {
-          "kc_id": "KC-008",
-          "relacionado_con": "contabilidad",
-          "definicion": "Divergencia EBIT→CFO <= -15% en dos periodos consecutivos.",
-          "ventana_meses": {
-            "min": 12,
-            "max": 24
-          },
-          "fuente_prevista": "earnings",
           "accion_recomendada": "REVISAR_COMITE",
-          "por_que": "Deterioro claro de calidad de beneficios."
+          "por_que": "Cambia de forma abrupta el perfil de solvencia."
         },
         {
-          "kc_id": "KC-009",
-          "relacionado_con": "otro",
-          "definicion": "G&A/ingresos >=8% por dos trimestres consecutivos sin plan correctivo.",
+          "kc_id": "KC-F005",
+          "relacionado_con": "supervivencia",
+          "definicion": "Lease liabilities/patrimonio >150%.",
           "ventana_meses": {
-            "min": 6,
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Aumenta rigidez de balance y fragilidad en stress."
+        },
+        {
+          "kc_id": "KC-F006",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja <100M sin líneas de crédito confirmadas.",
+          "ventana_meses": {
+            "min": 1,
             "max": 12
           },
           "fuente_prevista": "10-Q",
-          "accion_recomendada": "CONGELAR_COMPRAS",
-          "por_que": "Señal de descontrol en base de costos."
+          "accion_recomendada": "SALIR",
+          "por_que": "Reduce margen de maniobra frente a obligaciones fijas."
         },
         {
-          "kc_id": "KC-010",
-          "relacionado_con": "supervivencia",
-          "definicion": "Ingresos trimestrales <200M en dos trimestres consecutivos.",
+          "kc_id": "KC-F009",
+          "relacionado_con": "contabilidad",
+          "definicion": "CFO/EBIT <0.70 en dos reportes consecutivos.",
           "ventana_meses": {
-            "min": 12,
-            "max": 18
+            "min": 3,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Indica deterioro de calidad de beneficios."
+        },
+        {
+          "kc_id": "KC-F010",
+          "relacionado_con": "fcf",
+          "definicion": "FCF acumulado 12 meses <0.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Invalidaría tesis de autosostenibilidad financiera."
+        },
+        {
+          "kc_id": "KC-F012",
+          "relacionado_con": "contabilidad",
+          "definicion": "CFO < Net Income por dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
           },
           "fuente_prevista": "earnings",
-          "accion_recomendada": "REVISAR_COMITE",
-          "por_que": "Aumenta riesgo de desapalancamiento operativo."
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Señal temprana de tensión en capital de trabajo."
         }
       ],
       "recomendacion_para_arbitro": {
         "riesgo_global": "MEDIO",
-        "tamaño_maximo_sugerido_pct_cartera": 2.5,
+        "tamaño_maximo_sugerido_pct_cartera": 3.0,
         "condiciones_para_aumentar_tamaño": [
-          "Publicación de deuda total y vencimientos completos con riesgo de refinanciación bajo.",
-          "Estabilidad de margen bruto por encima de 24% y margen EBIT por encima de 11% en dos trimestres.",
-          "Reconciliación de dilución mostrando gap accionario inferior a 5%.",
-          "CFO TTM sostenido por encima de 140M sin dependencia extrema de working capital."
+          "Divulgación completa de deuda financiera y covenants con headroom holgado.",
+          "Margen bruto TTM >=24% durante dos reportes consecutivos.",
+          "CFO/EBIT estable entre 0.9 y 1.2 por al menos 4 trimestres."
         ],
         "condiciones_para_reducir_o_salir": [
-          "Activación de cualquier criterio KC-003, KC-004, KC-006 o KC-007.",
-          "Dos trimestres con margen EBIT por debajo de 8%.",
-          "Dilución anual superior a 15% o CFO TTM por debajo de 80M.",
-          "CFF semestral persistente inferior a -90M sin explicación operacional convincente."
+          "Activación de cualquier kill criterion de liquidez (KC-F002, KC-F006, KC-F010).",
+          "Lease liabilities/patrimonio >150% o cobertura de lease corriente por CFO <1.0x.",
+          "Revelación de deuda con net debt/EBITDA >3x."
         ]
       },
       "faltantes_criticos_forense": [
         {
-          "item": "tabla_vencimientos_deuda_financiera",
-          "por_que_importa": "Define riesgo de refinanciación y cobertura de liquidez real.",
-          "como_obtenerlo": "10-K nota de deuda y contractual obligations."
+          "item": "tabla_vencimientos",
+          "por_que_importa": "Permite medir concentración temporal de obligaciones financieras.",
+          "como_obtenerlo": "10-K nota de deuda y maturity schedule."
         },
         {
-          "item": "revolver_disponible_y_condiciones",
-          "por_que_importa": "Determina liquidez contingente y elasticidad ante estrés.",
-          "como_obtenerlo": "10-K sección liquidity and capital resources."
+          "item": "covenants",
+          "por_que_importa": "Define riesgo de default técnico y capacidad de maniobra.",
+          "como_obtenerlo": "Contratos de crédito en exhibits y notas de deuda."
         },
         {
-          "item": "detalle_cuentas_por_cobrar_e_inventarios",
-          "por_que_importa": "Permite validar calidad de ingresos y sostenibilidad de CFO.",
-          "como_obtenerlo": "10-Q notas de balance y MD&A sobre working capital."
+          "item": "acciones_diluidas",
+          "por_que_importa": "Necesario para evaluar dilución real y calidad del retorno por acción.",
+          "como_obtenerlo": "10-K/10-Q EPS note y DEF14A."
         },
         {
-          "item": "acciones_diluidas_y_convertibles",
-          "por_que_importa": "Cuantifica riesgo real de dilución por instrumentos potenciales.",
-          "como_obtenerlo": "10-K nota EPS, DEF14A y notas de equity instruments."
+          "item": "detalle_capex",
+          "por_que_importa": "Aísla capex de mantenimiento vs crecimiento para FCF sostenible.",
+          "como_obtenerlo": "MD&A de capex y notas de PP&E."
         },
         {
           "item": "detalle_sbc",
-          "por_que_importa": "Permite ajustar beneficio y caja por compensación no cash.",
-          "como_obtenerlo": "10-K nota de stock-based compensation."
+          "por_que_importa": "Sin SBC no se mide coste real de compensación.",
+          "como_obtenerlo": "10-K nota de stock compensation."
+        },
+        {
+          "item": "revolver_disponible",
+          "por_que_importa": "Ajusta estimación de liquidez bajo escenario adverso.",
+          "como_obtenerlo": "10-K sección Liquidity and Capital Resources."
         }
       ]
     }
   },
   "log": {
     "limitaciones": [
-      "SourcesPack no disponible; análisis basado en TruthPack, ImpliedExpectations y ForensicDetection.",
-      "deuda_total_usd, cuentas_por_cobrar_usd e inventarios_usd faltantes limitan precisión de apalancamiento y working capital.",
-      "Parte de flujos trimestrales 2025 es YTD, no trimestre puro, reduciendo granularidad.",
-      "No hay desglose completo de CFI para separar M&A de otras inversiones.",
-      "No hay detalle estructurado de SBC ni reconciliación completa de dilución."
+      "deuda_total_usd y deuda_neta_usd no están disponibles en el paquete base.",
+      "No hay saldos explícitos de cuentas por cobrar e inventarios para validar DSO/DIO.",
+      "enterprise_value_usd está en null, bloqueando lectura completa de apalancamiento de mercado.",
+      "Parte de la serie de cash flow trimestral se reporta en formato YTD (9 meses).",
+      "No hay confirmación de líneas de crédito disponibles ni headroom de covenants."
     ],
     "autochequeos": {
       "sin_metricas_inventadas": true,
@@ -1116,7 +1263,7 @@
   "_meta": {
     "agente": "FORENSIC_SCORING_v1",
     "version": "1.0.0",
-    "timestamp": "2026-02-23T23:30:00Z",
-    "inputs_hash": "sha256:6bb5a1d54d8274b739c6fbec8f6ac69e0c5cfab7f3cbda4525ce3da9b0ff0f89"
+    "timestamp": "2026-02-24T16:03:46Z",
+    "inputs_hash": "b8cfd90dcb9e88a20f8ee015c44fa59550be859d2fb670c70415c70987b6ecc3"
   }
 }

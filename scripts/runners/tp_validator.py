@@ -166,6 +166,26 @@ def _gate_balance_identity(tp: dict) -> dict:
                 assets, liabilities, equity = a, l, e
                 break
 
+    # ── Belt-and-suspenders imputation (V5.1 — A3, Codex Adj #4) ──
+    # Use temporary variables to avoid corrupting values from historico_anual fallback.
+    imputed_field = None
+    a_imp, l_imp, e_imp = assets, liabilities, equity
+    count_present = sum(1 for x in (a_imp, l_imp, e_imp) if x is not None)
+    if count_present == 2:
+        if a_imp is not None and e_imp is not None and l_imp is None:
+            l_imp = a_imp - e_imp
+            imputed_field = "pasivos_totales_usd"
+        elif a_imp is not None and l_imp is not None and e_imp is None:
+            e_imp = a_imp - l_imp
+            imputed_field = "patrimonio_usd"
+        elif l_imp is not None and e_imp is not None and a_imp is None:
+            a_imp = l_imp + e_imp
+            imputed_field = "activos_totales_usd"
+        if imputed_field and any(v is not None and v < 0 for v in (a_imp, l_imp, e_imp)):
+            imputed_field = None  # negative → invalid, discard imputation
+        else:
+            assets, liabilities, equity = a_imp, l_imp, e_imp
+
     if assets is None or liabilities is None or equity is None:
         return {"name": "BALANCE_IDENTITY", "status": "FAIL",
                 "note": "Missing balance sheet data — critical gate cannot be skipped"}
@@ -175,10 +195,11 @@ def _gate_balance_identity(tp: dict) -> dict:
         return {"name": "BALANCE_IDENTITY", "status": "SKIP", "note": "L+E = 0"}
 
     diff_pct = abs(assets - expected) / abs(expected)
+    imp_note = f" (imputed {imputed_field})" if imputed_field else ""
     if diff_pct <= 0.02:
-        return {"name": "BALANCE_IDENTITY", "status": "PASS", "note": f"Diff: {diff_pct:.2%}", "actual_value": diff_pct}
+        return {"name": "BALANCE_IDENTITY", "status": "PASS", "note": f"Diff: {diff_pct:.2%}{imp_note}", "actual_value": diff_pct}
     else:
-        return {"name": "BALANCE_IDENTITY", "status": "FAIL", "note": f"Diff: {diff_pct:.2%} > 2%", "actual_value": diff_pct}
+        return {"name": "BALANCE_IDENTITY", "status": "FAIL", "note": f"Diff: {diff_pct:.2%} > 2%{imp_note}", "actual_value": diff_pct}
 
 
 def _find_best_cf_entry(annual: list[dict]) -> tuple[Optional[dict], str]:

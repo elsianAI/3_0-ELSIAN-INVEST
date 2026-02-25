@@ -20,6 +20,27 @@ from pathlib import Path
 
 from .base import LLMBackend, DispatchResult, _try_recover_json
 
+# Steps that require tool access (browsing, web search). Must mirror
+# claude.py's _TOOLS_ENABLED_STEPS to keep behaviour consistent across
+# transports.
+_TOOLS_ENABLED_STEPS = {
+    "MONITOR",
+    "SCANNER",
+    "SCOUT_PREFILTRO",
+    "SCOUT_Q",
+    "SCOUT_E",
+    "OUTCOME",
+}
+
+# Prompt prefix injected for pipeline (non-tool) steps to compensate for
+# copilot CLI lacking --output-format json and --tools "" flags.
+_JSON_ONLY_PREFIX = (
+    "[SYSTEM CONSTRAINT] You MUST respond with ONLY a single valid JSON object. "
+    "Do NOT use markdown formatting, code fences, prose, or tool calls. "
+    "Start your response with { and end with }. "
+    "Do NOT execute any shell commands or read any files.\n\n"
+)
+
 # ── Cache TTLs ────────────────────────────────────────────────
 _AUTH_CACHE_TTL_OK   = 600   # 10 min
 _AUTH_CACHE_TTL_FAIL = 60    # 60 s — retry rápido tras fix
@@ -90,13 +111,20 @@ class CopilotBackend(LLMBackend):
         El CLI imprime la respuesta del modelo seguida de un footer de stats.
         Extraemos el JSON del bloque de respuesta y descartamos el footer.
         """
-        _ = step_name
+        step_key = (step_name or "").strip().upper()
+        tools_enabled = step_key in _TOOLS_ENABLED_STEPS
+
+        # For pipeline steps, prefix prompt to force JSON-only output.
+        # Copilot CLI has no --output-format json or --tools "" flags,
+        # so the only way to constrain output is via prompt injection.
+        effective_prompt = prompt if tools_enabled else (_JSON_ONLY_PREFIX + prompt)
+
         # Official models use --model flag; others use GITHUB_COPILOT_MODEL env var
         # (bypasses CLI validation, same backend pool as VS Code Copilot Chat).
         if self.model in _OFFICIAL_CLI_MODELS:
             cmd = [
                 self.binary_path,
-                "-p", prompt,
+                "-p", effective_prompt,
                 "--model", self.model,
                 "--no-color",
                 "--no-auto-update",
@@ -106,7 +134,7 @@ class CopilotBackend(LLMBackend):
         else:
             cmd = [
                 self.binary_path,
-                "-p", prompt,
+                "-p", effective_prompt,
                 "--no-color",
                 "--no-auto-update",
                 "--no-ask-user",

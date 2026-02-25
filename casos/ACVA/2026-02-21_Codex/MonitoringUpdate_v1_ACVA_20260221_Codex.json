@@ -2,8 +2,8 @@
   "version_esquema": "MonitoringUpdate_v1",
   "caso_id": "CASE_20260221_ACVA",
   "fecha_corte": "2026-02-24",
-  "fecha_ultima_revision": "2026-02-21",
-  "revision_numero": 1,
+  "fecha_ultima_revision": "2026-02-24",
+  "revision_numero": 3,
   "modo": "PULSO_DIARIO",
   "empresa": {
     "ticker": "ACVA",
@@ -13,309 +13,463 @@
     "decision_packet_version": "DecisionPacket_v2",
     "decision_packet_caso_id": "CASE_20260221_ACVA",
     "monitoring_update_previo_ref": {
-      "revision_numero": null,
-      "fecha_corte": null,
-      "nota": "Primera revisión de monitoring; no existe MonitoringUpdate anterior."
+      "revision_numero": 2,
+      "fecha_corte": "2026-02-24",
+      "nota": "Se usa la revisión 2 como contexto incremental; no se repiten hallazgos previos salvo estado vigente."
     },
-    "documentos_nuevos": []
+    "documentos_nuevos": [
+      {
+        "doc_id": "DOC_001",
+        "tipo": "OTRO",
+        "url": "https://www.google.com/finance/quote/ACVA:NYSE?hl=en",
+        "fecha_publicacion": "2026-02-24",
+        "descripcion": "Cotización intradía y variaciones 1D/5D/1M de ACVA en Google Finance."
+      },
+      {
+        "doc_id": "DOC_002",
+        "tipo": "OTRO",
+        "url": "https://query1.finance.yahoo.com/v8/finance/chart/ACVA?interval=1d&range=1mo",
+        "fecha_publicacion": "2026-02-24",
+        "descripcion": "Intento de validación en Yahoo Finance API; respuesta con limitación de acceso."
+      },
+      {
+        "doc_id": "DOC_003",
+        "tipo": "OTRO",
+        "url": "https://data.sec.gov/submissions/CIK0001637873.json",
+        "fecha_publicacion": "2026-02-24",
+        "descripcion": "Feed oficial SEC de filings recientes para verificar 10-Q/10-K/8-K/DEF14A desde la última revisión."
+      },
+      {
+        "doc_id": "DOC_004",
+        "tipo": "NOTICIA",
+        "url": "https://news.google.com/rss/search?q=ACVA+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "fecha_publicacion": "2026-02-24",
+        "descripcion": "Flujo de noticias del último día para detectar eventos materiales nuevos."
+      }
+    ]
   },
   "snapshot_mercado": {
     "fecha": "2026-02-24",
-    "precio_usd": null,
-    "variacion_1d_pct": null,
-    "variacion_5d_pct": null,
-    "variacion_1m_pct": null,
-    "nota": "No se pudo obtener cotización para la fecha simulada 2026-02-24. Precio de referencia del DecisionPacket: $21.08 (2026-02-21). La API de Yahoo Finance devuelve datos históricos reales hasta 2025-03-10 ($15.87), que no corresponden al horizonte temporal simulado."
+    "precio_usd": 4.83,
+    "variacion_1d_pct": -14.81,
+    "variacion_5d_pct": -28.44,
+    "variacion_1m_pct": -43.84,
+    "nota": "Google Finance intradía (11:27 ET aprox.). Yahoo devolvió limitación de acceso (Too Many Requests)."
   },
   "bandera": {
-    "estado": "GREEN",
+    "estado": "RED",
     "razones_principales": [
-      "Solo han transcurrido 3 días naturales (2 hábiles) desde el análisis original; insuficiente para cambios materiales.",
-      "No se han identificado nuevos filings SEC (8-K, 10-Q, 10-K) desde la fecha del análisis.",
-      "No se detectan noticias materiales (M&A, cambios directivos, guidance updates) en el período.",
-      "Ningún kill criterion muestra señales de activación en este intervalo.",
-      "Los catalizadores y predicciones permanecen en sus estados originales sin nueva evidencia que los altere."
+      "No hay evidencia nueva que revierta la degradación crítica previa (A-011 refutada por dilución).",
+      "El precio sigue deteriorándose: -14.81% 1D, -28.44% 5D y -43.84% 1M en Google Finance.",
+      "No hubo nuevos 10-Q/10-K/8-K/DEF14A desde 2026-02-24 para cerrar KCs pendientes.",
+      "El flujo de noticias incremental es mayormente de analistas/re-rating, sin nuevo hito fundamental verificable."
     ],
-    "nivel_confianza_0_1": 0.6
+    "nivel_confianza_0_1": 0.72
   },
   "accion_recomendada": {
-    "accion": "NO_HACER_NADA",
-    "urgencia": "BAJA",
+    "accion": "REVISAR_COMITE",
+    "urgencia": "ALTA",
     "por_que": [
-      "No hay evidencia nueva que altere la tesis de inversión original.",
-      "Todos los supuestos CRÍTICOS (A-001, A-002, A-004, A-005) permanecen en estado ABIERTA sin degradación.",
-      "El horizonte de inversión es 6-18 meses; 3 días no aportan señal significativa.",
-      "Se recomienda programar siguiente revisión para cuando se publique el reporte Q4-2025 (esperado ~mediados de febrero 2026, posiblemente ya disponible o inminente)."
+      "La bandera RED previa se mantiene y el precio profundiza la corrección.",
+      "No se activó un kill criterion crítico nuevo, pero tampoco hay evidencia para desescalar riesgo.",
+      "Persisten varios KCs en NO_EVALUABLE por falta de nuevo 10-Q/filing operativo.",
+      "El caso sigue en WATCHLIST y requiere revisión de comité para decidir mantenimiento de postura o ajuste de umbrales."
     ],
     "condiciones_para_ejecutar": [
-      "N/A — no se requiere acción."
+      "Revisar en comité con foco en próximos datos de 10-Q Q1-2026 (CFO ex-float, AP/AR, caja/deuda, capex).",
+      "Si aparece nuevo filing que active un KC crítico, escalar a acción más conservadora sin esperar ciclo semanal.",
+      "Mantener congeladas nuevas compras hasta tener evidencia fundamental incremental."
     ]
   },
   "cambios_detectados": {
-    "nueva_evidencia": [],
+    "nueva_evidencia": [
+      {
+        "evidence_id": "NE-001",
+        "doc_id": "DOC_001",
+        "resumen": "Google Finance muestra ACVA en $4.83 con caída de -14.81% diaria; en ventana 5D/1M marca -28.44% y -43.84%.",
+        "fiabilidad": "A",
+        "relevancia": "MEDIA",
+        "cita_corta": "$4.83 ... Down by 14.81% ... -1.92 5D ... -3.77 1M.",
+        "ubicacion": "Google Finance ACVA:NYSE, panel principal y tabs 5D/1M",
+        "afecta_a": [
+          {
+            "tipo": "KILL_CRITERIA",
+            "id": "KC-005"
+          },
+          {
+            "tipo": "CATALYST",
+            "id": "C-004"
+          }
+        ]
+      },
+      {
+        "evidence_id": "NE-002",
+        "doc_id": "DOC_003",
+        "resumen": "Consulta de EDGAR (submissions JSON) no muestra nuevos 10-Q/10-K/8-K/DEF14A desde 2026-02-24; los últimos relevantes siguen fechados 2026-02-23.",
+        "fiabilidad": "A",
+        "relevancia": "ALTA",
+        "cita_corta": "filingDate recientes: 2026-02-23; forms: S-8, 10-K, 8-K.",
+        "ubicacion": "data.sec.gov/submissions/CIK0001637873.json, filings.recent",
+        "afecta_a": [
+          {
+            "tipo": "KILL_CRITERIA",
+            "id": "KC-002"
+          },
+          {
+            "tipo": "KILL_CRITERIA",
+            "id": "KC-003"
+          },
+          {
+            "tipo": "KILL_CRITERIA",
+            "id": "KC-004"
+          },
+          {
+            "tipo": "KILL_CRITERIA",
+            "id": "KC-007"
+          },
+          {
+            "tipo": "KILL_CRITERIA",
+            "id": "KC-008"
+          }
+        ]
+      },
+      {
+        "evidence_id": "NE-003",
+        "doc_id": "DOC_004",
+        "resumen": "El flujo de noticias del día incorpora principalmente comentarios de analistas (p. ej., downgrade a Neutral) y notas de mercado tras resultados, sin nuevo hecho corporativo primario.",
+        "fiabilidad": "B",
+        "relevancia": "BAJA",
+        "cita_corta": "ACV Auctions ... Downgraded to Neutral Rating by Citigroup.",
+        "ubicacion": "Google News RSS (ACVA when:1d)",
+        "afecta_a": [
+          {
+            "tipo": "ASSUMPTION",
+            "id": "A-006"
+          },
+          {
+            "tipo": "CATALYST",
+            "id": "C-004"
+          }
+        ]
+      },
+      {
+        "evidence_id": "NE-004",
+        "doc_id": "DOC_002",
+        "resumen": "Yahoo Finance no permitió extraer serie de precios en esta revisión por limitación de acceso (Too Many Requests).",
+        "fiabilidad": "C",
+        "relevancia": "BAJA",
+        "cita_corta": "Edge: Too Many Requests",
+        "ubicacion": "query1.finance.yahoo.com/v8/finance/chart/ACVA",
+        "afecta_a": []
+      }
+    ],
     "supuestos_actualizados": [
-      {
-        "assumption_id": "A-001",
-        "cambio": "SIN_CAMBIO",
-        "nuevo_estado": "ABIERTA",
-        "probabilidad_antes_0_1": 0.85,
-        "probabilidad_despues_0_1": 0.85,
-        "confianza_despues_0_1": 0.8,
-        "razon": "Sin nueva evidencia en 3 días. La tendencia secular de digitalización de subastas no ha cambiado.",
-        "evidencias_ids": [],
-        "nota": "Próxima evaluación relevante: earnings Q4-2025 o noticias de competidores."
-      },
-      {
-        "assumption_id": "A-002",
-        "cambio": "SIN_CAMBIO",
-        "nuevo_estado": "ABIERTA",
-        "probabilidad_antes_0_1": 0.7,
-        "probabilidad_despues_0_1": 0.7,
-        "confianza_despues_0_1": 0.7,
-        "razon": "Sin datos de Q4-2025. Se mantiene la expectativa de crecimiento >20% basada en la trayectoria de trimestres previos.",
-        "evidencias_ids": [],
-        "nota": "El reporte Q4-2025 es el dato clave pendiente para validar o degradar este supuesto."
-      },
-      {
-        "assumption_id": "A-003",
-        "cambio": "SIN_CAMBIO",
-        "nuevo_estado": "ABIERTA",
-        "probabilidad_antes_0_1": 0.55,
-        "probabilidad_despues_0_1": 0.55,
-        "confianza_despues_0_1": 0.55,
-        "razon": "Path a profitabilidad GAAP sigue dependiendo de reducción de SBC y apalancamiento operativo. Sin nuevo dato.",
-        "evidencias_ids": [],
-        "nota": ""
-      },
-      {
-        "assumption_id": "A-004",
-        "cambio": "SIN_CAMBIO",
-        "nuevo_estado": "ABIERTA",
-        "probabilidad_antes_0_1": 0.65,
-        "probabilidad_despues_0_1": 0.65,
-        "confianza_despues_0_1": 0.55,
-        "razon": "No hay nuevos datos macro sobre volumen del mercado wholesale de usados. Riesgos de aranceles y tasas siguen vigentes pero sin cambio material en 3 días.",
-        "evidencias_ids": [],
-        "nota": "Monitorear políticas arancelarias y datos de Manheim Index mensualmente."
-      },
-      {
-        "assumption_id": "A-005",
-        "cambio": "SIN_CAMBIO",
-        "nuevo_estado": "ABIERTA",
-        "probabilidad_antes_0_1": 0.65,
-        "probabilidad_despues_0_1": 0.65,
-        "confianza_despues_0_1": 0.6,
-        "razon": "Sin noticias de movimientos competitivos de Manheim o ADESA en este período.",
-        "evidencias_ids": [],
-        "nota": ""
-      },
       {
         "assumption_id": "A-006",
         "cambio": "SIN_CAMBIO",
-        "nuevo_estado": "ABIERTA",
-        "probabilidad_antes_0_1": 0.7,
-        "probabilidad_despues_0_1": 0.7,
-        "confianza_despues_0_1": 0.65,
-        "razon": "Sin datos nuevos de attach rates o ARPU.",
-        "evidencias_ids": [],
-        "nota": ""
+        "nuevo_estado": "DEGRADADA",
+        "probabilidad_antes_0_1": 0.5,
+        "probabilidad_despues_0_1": 0.5,
+        "confianza_despues_0_1": 0.58,
+        "razon": "La evidencia incremental es de precio/sentimiento, no de fundamentales trimestrales nuevos. No hay base para ajustar probabilidad.",
+        "evidencias_ids": [
+          "NE-001",
+          "NE-003"
+        ],
+        "nota": "Se mantiene sin cambios hasta próximo reporte operativo."
       }
     ],
     "catalizadores_actualizados": [
       {
         "catalyst_id": "C-001",
         "estado": "EN_CURSO",
-        "probabilidad_antes_0_1": 0.7,
-        "probabilidad_despues_0_1": 0.7,
-        "siguiente_hito": "Datos de ARPU y attach rates en reporte Q4-2025.",
+        "probabilidad_antes_0_1": 0.6,
+        "probabilidad_despues_0_1": 0.6,
+        "siguiente_hito": "Verificar SG&A/revenue <=32% en 2 trimestres consecutivos de 2026.",
         "ventana_meses_restante": {
-          "min": 3,
-          "max": 12
+          "min": 5,
+          "max": 23
         },
-        "evidencias_ids": [],
-        "nota": "Sin cambio. Pendiente de validación en próximo earnings."
+        "evidencias_ids": [
+          "NE-002"
+        ],
+        "nota": "Sin nuevos filings operativos desde la última revisión."
       },
       {
         "catalyst_id": "C-002",
-        "estado": "EN_CURSO",
-        "probabilidad_antes_0_1": 0.65,
-        "probabilidad_despues_0_1": 0.65,
-        "siguiente_hito": "Adj. EBITDA margin Q4-2025 vs Q3-2025 para confirmar expansión secuencial.",
+        "estado": "RETRASADO",
+        "probabilidad_antes_0_1": 0.3,
+        "probabilidad_despues_0_1": 0.3,
+        "siguiente_hito": "Primer trimestre con EBIT GAAP >0 y repetición en el siguiente.",
         "ventana_meses_restante": {
-          "min": 3,
-          "max": 12
+          "min": 5,
+          "max": 23
         },
-        "evidencias_ids": [],
-        "nota": "Sin cambio."
+        "evidencias_ids": [
+          "NE-002"
+        ],
+        "nota": "No hay información incremental que acelere el cruce a EBIT positivo."
       },
       {
         "catalyst_id": "C-003",
         "estado": "EN_CURSO",
-        "probabilidad_antes_0_1": 0.6,
-        "probabilidad_despues_0_1": 0.6,
-        "siguiente_hito": "Datos de volúmenes off-lease y repos en informes de industria (Manheim, NADA).",
+        "probabilidad_antes_0_1": 0.72,
+        "probabilidad_despues_0_1": 0.72,
+        "siguiente_hito": "Publicar bridge completo NI→CFO y confirmar CFO ex-float no negativo.",
         "ventana_meses_restante": {
-          "min": 6,
-          "max": 18
+          "min": 2,
+          "max": 19
         },
-        "evidencias_ids": [],
-        "nota": "Sin cambio."
+        "evidencias_ids": [
+          "NE-002"
+        ],
+        "nota": "Sin nuevo 10-Q para validar calidad del flujo."
       },
       {
         "catalyst_id": "C-004",
-        "estado": "UNKNOWN",
-        "probabilidad_antes_0_1": 0.25,
-        "probabilidad_despues_0_1": 0.25,
-        "siguiente_hito": "Anuncio de expansión internacional o entrada en nuevos verticales.",
+        "estado": "EN_CURSO",
+        "probabilidad_antes_0_1": 0.52,
+        "probabilidad_despues_0_1": 0.52,
+        "siguiente_hito": "Confirmar en 2026 al menos 3 de 4 trimestres con crecimiento >15% YoY.",
         "ventana_meses_restante": {
-          "min": 12,
-          "max": 24
+          "min": 2,
+          "max": 17
         },
-        "evidencias_ids": [],
-        "nota": "Sin señales. Catalizador de baja probabilidad y largo plazo."
+        "evidencias_ids": [
+          "NE-001",
+          "NE-003"
+        ],
+        "nota": "La señal incremental es de mercado/analistas; sin dato operativo nuevo."
       },
       {
         "catalyst_id": "C-005",
         "estado": "UNKNOWN",
-        "probabilidad_antes_0_1": 0.4,
-        "probabilidad_despues_0_1": 0.4,
-        "siguiente_hito": "Próxima reconstitución de índices Russell (junio) o S&P (trimestral).",
+        "probabilidad_antes_0_1": 0.7,
+        "probabilidad_despues_0_1": 0.7,
+        "siguiente_hito": "Capex anualizado <=2% e información explícita de conversión CFO→FCF por acción.",
         "ventana_meses_restante": {
-          "min": 3,
-          "max": 12
+          "min": 2,
+          "max": 23
         },
-        "evidencias_ids": [],
-        "nota": "Sin cambio."
+        "evidencias_ids": [
+          "NE-002"
+        ],
+        "nota": "Sin nuevo dato incremental para recalibrar."
       }
     ]
   },
   "kill_criteria_check": [
     {
       "kc_id": "KC-001",
-      "relacionado_con_assumption_id": "A-002",
-      "status": "NO_EVALUABLE",
+      "relacionado_con_assumption_id": "A-011",
+      "status": "EN_RIESGO",
       "evidencia": [],
-      "comentario": "Requiere datos de revenue Q4-2025 para evaluar. Último dato conocido (Q3-2025) mostraba +26% YoY, por encima del umbral de 15%.",
+      "comentario": "Sin evidencia incremental posterior a la revisión previa; se mantiene condición conjunta no activada y riesgo alto por dilución.",
       "accion_si_activado": "SALIR",
-      "urgencia": "BAJA"
+      "urgencia": "ALTA"
     },
     {
       "kc_id": "KC-002",
-      "relacionado_con_assumption_id": "A-003",
-      "status": "NO_ACTIVADO",
-      "evidencia": [],
-      "comentario": "Adj. EBITDA fue positivo en los últimos trimestres reportados (Q3-2025: $16.8M). Sin nueva información que sugiera reversión.",
-      "accion_si_activado": "REDUCIR_50",
-      "urgencia": "BAJA"
+      "relacionado_con_assumption_id": "A-004",
+      "status": "NO_EVALUABLE",
+      "evidencia": [
+        "NE-002"
+      ],
+      "comentario": "No hubo nuevo reporte operativo para verificar secuencia de 3 trimestres >35% SG&A/revenue.",
+      "accion_si_activado": "SALIR",
+      "urgencia": "ALTA"
     },
     {
       "kc_id": "KC-003",
-      "relacionado_con_assumption_id": "A-005",
+      "relacionado_con_assumption_id": "A-007",
       "status": "NO_EVALUABLE",
-      "evidencia": [],
-      "comentario": "Market share digital difícil de medir en tiempo real. Sin noticias de pérdida de cuota. Próxima evaluación: datos de industria o earnings commentary.",
-      "accion_si_activado": "REVISAR_COMITE",
-      "urgencia": "BAJA"
+      "evidencia": [
+        "NE-002"
+      ],
+      "comentario": "Sin nuevo 10-Q para probar deuda neta positiva en dos cierres trimestrales.",
+      "accion_si_activado": "SALIR",
+      "urgencia": "ALTA"
     },
     {
       "kc_id": "KC-004",
-      "relacionado_con_assumption_id": "A-004",
-      "status": "NO_ACTIVADO",
-      "evidencia": [],
-      "comentario": "No hay datos que indiquen contracción del mercado wholesale >15%. El mercado mantiene volúmenes estables según últimos datos disponibles.",
-      "accion_si_activado": "CONGELAR_COMPRAS",
-      "urgencia": "BAJA"
+      "relacionado_con_assumption_id": "A-001",
+      "status": "NO_EVALUABLE",
+      "evidencia": [
+        "NE-002"
+      ],
+      "comentario": "No hay nuevo dato para recalcular CFO ex-float en dos trimestres consecutivos.",
+      "accion_si_activado": "SALIR",
+      "urgencia": "ALTA"
     },
     {
       "kc_id": "KC-005",
-      "relacionado_con_assumption_id": "A-003",
-      "status": "NO_EVALUABLE",
-      "evidencia": [],
-      "comentario": "SBC fue ~$25M/trimestre (~7% de revenue) en Q3-2025. Para evaluar dilución anualizada se necesita el dato de shares outstanding actualizado del próximo 10-K/10-Q.",
+      "relacionado_con_assumption_id": "A-006",
+      "status": "EN_RIESGO",
+      "evidencia": [
+        "NE-001",
+        "NE-003"
+      ],
+      "comentario": "La caída de precio y noticias de recorte de expectativas mantienen riesgo de desaceleración, sin activar aún el criterio cuantitativo.",
+      "accion_si_activado": "REDUCIR_50",
+      "urgencia": "ALTA"
+    },
+    {
+      "kc_id": "KC-006",
+      "relacionado_con_assumption_id": "A-008",
+      "status": "NO_ACTIVADO",
+      "evidencia": [
+        "NE-002",
+        "NE-003"
+      ],
+      "comentario": "No se detectó anuncio nuevo de impairment >$50M en el periodo incremental.",
       "accion_si_activado": "REVISAR_COMITE",
-      "urgencia": "BAJA"
+      "urgencia": "ALTA"
+    },
+    {
+      "kc_id": "KC-007",
+      "relacionado_con_assumption_id": "A-005",
+      "status": "NO_EVALUABLE",
+      "evidencia": [
+        "NE-002"
+      ],
+      "comentario": "Sin nuevo estado financiero para validar FCF 12M negativo con caja < $150M.",
+      "accion_si_activado": "SALIR",
+      "urgencia": "ALTA"
+    },
+    {
+      "kc_id": "KC-008",
+      "relacionado_con_assumption_id": "A-016",
+      "status": "NO_EVALUABLE",
+      "evidencia": [
+        "NE-002"
+      ],
+      "comentario": "No hay evidencia incremental sobre intereses anualizados >$12M o covenant breach.",
+      "accion_si_activado": "REVISAR_COMITE",
+      "urgencia": "MEDIA"
     }
   ],
   "predicciones_check": [
     {
       "pred_id": "CP-001",
-      "status": "PENDIENTE",
+      "status": "INCUMPLIDA",
       "fecha_evaluacion": "2026-02-24",
       "evidencias_ids": [],
-      "comentario": "Revenue Q4-2025 aún no reportado públicamente al momento de esta revisión. El reporte debería publicarse en torno a mediados de febrero 2026."
+      "comentario": "Sin evidencia nueva; se mantiene la evaluación previa."
     },
     {
       "pred_id": "CP-002",
-      "status": "PENDIENTE",
+      "status": "NO_EVALUABLE",
       "fecha_evaluacion": "2026-02-24",
-      "evidencias_ids": [],
-      "comentario": "Adj. EBITDA Q4-2025 pendiente de publicación junto con earnings Q4-2025."
+      "evidencias_ids": [
+        "NE-002"
+      ],
+      "comentario": "Sin nuevo filing desde la última revisión para actualizar cálculo incremental."
     },
     {
       "pred_id": "CP-003",
       "status": "PENDIENTE",
       "fecha_evaluacion": "2026-02-24",
-      "evidencias_ids": [],
-      "comentario": "FY2025 marketplace units growth pendiente de reporte anual. Los datos trimestrales previos (Q3: +18% YoY) sugieren que el umbral de 15% FY es alcanzable, pero no confirmado."
+      "evidencias_ids": [
+        "NE-003"
+      ],
+      "comentario": "Noticias no sustituyen evidencia trimestral suficiente para cerrar la predicción."
     },
     {
       "pred_id": "CP-004",
-      "status": "PENDIENTE",
+      "status": "NO_EVALUABLE",
       "fecha_evaluacion": "2026-02-24",
-      "evidencias_ids": [],
-      "comentario": "Horizonte de 12 meses (hasta Feb 2027). Precio de referencia del análisis: $21.08. Objetivo: >$25. Sin dato de precio actual verificable para 2026-02-24."
+      "evidencias_ids": [
+        "NE-002"
+      ],
+      "comentario": "No hay nuevo set de 4T para validar promedio SG&A/ingresos."
     },
     {
       "pred_id": "CP-005",
-      "status": "PENDIENTE",
+      "status": "CUMPLIDA",
       "fecha_evaluacion": "2026-02-24",
       "evidencias_ids": [],
-      "comentario": "SBC/Revenue <6% en al menos 1 trimestre de los próximos 4. Último dato conocido: ~7% en Q3-2025. Tendencia a monitorear."
+      "comentario": "Sin cambio frente a la evaluación previa."
+    },
+    {
+      "pred_id": "CP-006",
+      "status": "NO_EVALUABLE",
+      "fecha_evaluacion": "2026-02-24",
+      "evidencias_ids": [
+        "NE-002"
+      ],
+      "comentario": "Sin nuevo balance reportado desde la revisión anterior."
+    },
+    {
+      "pred_id": "CP-007",
+      "status": "NO_EVALUABLE",
+      "fecha_evaluacion": "2026-02-24",
+      "evidencias_ids": [
+        "NE-002"
+      ],
+      "comentario": "No hay datos incrementales para recalcular CFO-capex-SBC."
+    },
+    {
+      "pred_id": "CP-008",
+      "status": "CUMPLIDA",
+      "fecha_evaluacion": "2026-02-24",
+      "evidencias_ids": [],
+      "comentario": "Sin cambio frente a evaluación previa."
+    },
+    {
+      "pred_id": "CP-009",
+      "status": "NO_EVALUABLE",
+      "fecha_evaluacion": "2026-02-24",
+      "evidencias_ids": [
+        "NE-002"
+      ],
+      "comentario": "Sin nuevo dato incremental de capex/ingresos en el periodo."
+    },
+    {
+      "pred_id": "CP-010",
+      "status": "NO_EVALUABLE",
+      "fecha_evaluacion": "2026-02-24",
+      "evidencias_ids": [
+        "NE-002"
+      ],
+      "comentario": "Sin nuevos reportes para validar dos trimestres consecutivos de CFO ex-float positivo."
     }
   ],
   "recomendacion_para_arbitro": {
     "re_ejecutar_arbitro": false,
-    "motivo": "No hay nueva evidencia material que justifique reejecutar el Árbitro. Todos los supuestos, kill criteria y catalizadores permanecen sin cambio. Solo han pasado 3 días desde el análisis original.",
+    "motivo": "No hubo cambio incremental en supuestos CRÍTICOS ni activación nueva de kill criteria desde la revisión 2. La nueva señal es principalmente de mercado/sentimiento.",
     "inputs_adicionales_sugeridos": [
-      "Reporte de earnings Q4-2025 / FY2025 (inminente, esperado ~Feb 2026) — es el dato más importante para validar CP-001, CP-002, CP-003 y evaluar KC-001, KC-002.",
-      "Datos de precio actualizados para la fecha simulada.",
-      "Manheim Used Vehicle Value Index actualizado para evaluar A-004 y KC-004."
+      "10-Q Q1-2026 con detalle de AP/AR, bridge CFO ex-float y caja/deuda de cierre.",
+      "Desglose capex y conciliación CFO→FCF por acción para evaluar CP-002/CP-007/CP-009.",
+      "Transcripción oficial del próximo earnings call para validar ritmo de crecimiento y guía."
     ],
-    "propuesta_de_decision_si_se_reejecuta": "NO_OPINION"
+    "propuesta_de_decision_si_se_reejecuta": "WATCHLIST"
   },
   "proposed_patch_decision_packet": {
     "patch_version": "DecisionPacketPatch_v1",
     "ops": [],
-    "nota": "Sin cambios propuestos. No hay evidencia nueva que justifique modificaciones al DecisionPacket."
+    "nota": "Sin cambios incrementales de supuestos/probabilidades en esta revisión; no se propone patch nuevo."
   },
   "peticiones_de_fuentes": [
     {
       "prioridad": "ALTA",
-      "item": "Reporte de earnings Q4-2025 / FY2025 de ACV Auctions (8-K con Exhibit 99.1 y 10-K)",
-      "por_que_importa": "Es el dato crítico para validar o refutar las predicciones CP-001, CP-002, CP-003 y evaluar kill criteria KC-001, KC-002.",
-      "como_obtenerlo": "EDGAR CIK 0001817142 — buscar 8-K y 10-K con fecha de filing posterior a 2026-02-01. También en investors.acvaauctions.com."
+      "item": "10-Q Q1-2026 completo (incluyendo notas de WC, AP/AR y deuda).",
+      "por_que_importa": "Permite evaluar KC-003/KC-004/KC-007 y cerrar predicciones NO_EVALUABLE.",
+      "como_obtenerlo": "SEC EDGAR del emisor (CIK 1637873), filing 10-Q y exhibits financieros."
     },
     {
       "prioridad": "MEDIA",
-      "item": "Cotización actual de ACVA para fecha 2026-02-24",
-      "por_que_importa": "Necesario para evaluar si el precio se mantiene dentro del rango de entrada sugerido ($19.50-$22.00) y para tracking de CP-004.",
-      "como_obtenerlo": "Yahoo Finance, Google Finance, o terminal Bloomberg."
-    },
-    {
-      "prioridad": "MEDIA",
-      "item": "Manheim Used Vehicle Value Index — datos de enero/febrero 2026",
-      "por_que_importa": "Indicador adelantado del mercado wholesale de usados, relevante para A-004 y KC-004.",
-      "como_obtenerlo": "publish.manheim.com o suscripción a Cox Automotive."
+      "item": "Serie de precio redundante en Yahoo Finance sin bloqueo.",
+      "por_que_importa": "Aporta verificación cruzada de snapshot de mercado y reduce dependencia de una sola fuente.",
+      "como_obtenerlo": "Yahoo Finance quote ACVA con acceso web sin rate limit o endpoint habilitado."
     }
   ],
   "log": {
     "limitaciones": [
-      "Solo 3 días naturales (2 hábiles) desde el análisis original; ventana insuficiente para detectar cambios materiales.",
-      "No se pudo obtener cotización de ACVA para la fecha simulada 2026-02-24. La API de Yahoo Finance devuelve datos reales de 2025.",
-      "No se pudo acceder al endpoint EDGAR EFTS search-index (HTTP 404 persistente); la búsqueda de filings se realizó vía submissions API del CIK.",
-      "No se encontraron nuevos filings SEC posteriores al 2025-02-20 (último real disponible). El reporte Q4-2025/FY2025 simulado no pudo ser localizado.",
-      "Búsqueda de noticias vía Google Search no devolvió resultados parseable para el período simulado.",
-      "La fiabilidad general de esta revisión es limitada por la falta de datos de mercado y filings actualizados para el horizonte temporal simulado."
+      "Ventana incremental muy corta (misma fecha calendario que la revisión previa).",
+      "Yahoo Finance no accesible por limitación de consultas (Too Many Requests).",
+      "No se detectaron nuevos 10-Q/10-K/8-K/DEF14A desde 2026-02-24.",
+      "Las noticias incrementales son mayormente de analistas y agregadores, no filings corporativos nuevos.",
+      "Varias evaluaciones permanecen NO_EVALUABLE hasta próximo reporte trimestral."
     ],
     "autochequeos": {
       "no_inventar_datos": true,

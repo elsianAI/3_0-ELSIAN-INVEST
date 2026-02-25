@@ -1,11 +1,11 @@
 {
   "version_esquema": "AgentReport_v1",
   "caso_id": "CASE_20260223_GCT",
-  "fecha_corte": "2026-02-23",
+  "fecha_corte": "2026-02-24",
   "agente": {
-    "agent_role": "CATALYST",
-    "agent_nombre": "CATALYST_SCORING_v1",
-    "modelo": "gemini-2.0-flash-thinking",
+    "agent_role": "CATALYST_SCORING",
+    "agent_nombre": "CATALYST_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp",
     "idioma": "es"
   },
   "input_refs": {
@@ -15,280 +15,215 @@
   },
   "resumen_ejecutivo": {
     "bullets": [
-      "Discrepancia extrema: Mercado descuenta caída de FCF (-6% a -13% CAGR), pero CFO YTD Q3-2025 crece +41% interanual ($126M vs $89M).",
-      "G&A normalizándose agresivamente: De $74M en FY2024 a ~$48M anualizado en 2025 (Q3 $8.5M), expandiendo márgenes reales.",
-      "Caja neta masiva ($260M) sin deuda financiera material ofrece protección contra tesis bajista y opcionalidad de recompra.",
-      "Valuación distressed (8.8x P/FCF) ofrece margen de seguridad amplio; tesis de fraude/gobernanza es el único bloqueante real."
+      "La tesis alcista depende críticamente de la validación de la sostenibilidad del FCF (P/FCF ~6x) y la resolución de la opacidad del balance.",
+      "El catalizador de sostenibilidad de FCF (C-002) es el más fuerte (75% probabilidad) y actúa como soporte de valoración.",
+      "La opacidad en la estructura de capital (C-001) bloquea una revalorización inmediata; su resolución es el driver de upside más asimétrico.",
+      "El crecimiento orgánico (C-003) y la disciplina en G&A (C-004) ofrecen opcionalidad operativa secundaria.",
+      "La adquisición (C-006) y reducción de leases (C-005) tienen impacto marginal o baja probabilidad a corto plazo."
     ],
     "veredicto_role_local": "APTO",
-    "confianza_0_1": 0.78
+    "confianza_0_1": 0.72
   },
   "claims": [
     {
-      "claim_id": "CLM_SCORE_001",
-      "tipo": "HECHO",
+      "claim_id": "CLM_GCT_01",
+      "tipo": "HIPOTESIS",
       "criticidad": "CRITICO",
-      "enunciado": "El flujo de caja operativo (CFO) está acelerando, no contrayéndose, refutando la expectativa implícita del mercado.",
-      "confianza_0_1": 0.95,
+      "enunciado": "El mercado penaliza la valoración (P/FCF 6x) por opacidad en la deuda total y estructura de capital.",
+      "confianza_0_1": 0.85,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
-          "ubicacion": "Cash Flow Statement",
-          "cita_corta": "Net cash provided by operating activities $126,292 (9 months 2025) vs $89,660 (9 months 2024)",
-          "interpretacion": "Crecimiento del 41% YoY en generación de caja operativa."
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "motivo_blocked",
+          "cita_corta": "Falta enterprise_value_usd (EV); sin EV no se puede ejecutar valoración inversa.",
+          "interpretacion": "Bloqueo técnico en valoración confirma opacidad estructural."
         }
       ],
       "falsacion": {
-        "test": "CFO negativo o colapso de conversión de caja en Q4 2025",
+        "test": "Publicación de desglose de deuda que revele apalancamiento oculto significativo",
         "ventana_meses": {
-          "min": 1,
-          "max": 3
+          "min": 3,
+          "max": 12
         },
-        "fuente_prevista": "10-K FY2025"
+        "fuente_prevista": "filing"
       }
     },
     {
-      "claim_id": "CLM_SCORE_002",
-      "tipo": "HECHO",
-      "criticidad": "IMPORTANTE",
-      "enunciado": "Los gastos generales (G&A) se están racionalizando rápidamente tras el pico de FY2024.",
-      "confianza_0_1": 0.9,
-      "impacto": "MEDIO",
+      "claim_id": "CLM_GCT_02",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La generación de caja libre (TTM ~$200M) es estructural y no solo un movimiento de capital de trabajo.",
+      "confianza_0_1": 0.75,
+      "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
-          "ubicacion": "Income Statement",
-          "cita_corta": "General and administrative expenses $8,511 (Q3 2025) vs $15,296 (Q3 2024)",
-          "interpretacion": "Reducción del 44% YoY en gastos G&A trimestrales."
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.fcf_yield_pct",
+          "cita_corta": "fcf_yield_pct: 16.1038",
+          "interpretacion": "Rendimiento de FCF muy superior al coste de capital implica infravaloración si es sostenible."
         }
       ],
       "falsacion": {
-        "test": "Repunte de G&A por encima de $15M en Q4 2025 sin justificación de ingresos",
+        "test": "CFO cae por debajo de Net Income durante 2 trimestres consecutivos",
         "ventana_meses": {
-          "min": 1,
-          "max": 3
+          "min": 3,
+          "max": 9
         },
-        "fuente_prevista": "10-K FY2025"
+        "fuente_prevista": "earnings"
       }
     }
   ],
   "predicciones_calibracion": [
     {
       "pred_id": "PRED_001",
-      "descripcion": "Ingresos FY2025 superarán los $1,280M (implica Q4 > $353M conservador o flat vs Q3)",
-      "probabilidad_0_1": 0.85,
+      "descripcion": "Reporte de Deuda Total explícita en próximo 10-K o 20-F",
+      "probabilidad_0_1": 0.6,
       "ventana_meses": {
         "min": 1,
-        "max": 3
+        "max": 6
       },
-      "criterio_validacion": "Revenue reportado en 10-K FY2025 > 1.28B USD",
+      "criterio_validacion": "Aparición de línea 'Total Debt' o desglose claro de deuda financiera vs leases en notas.",
       "fuente_prevista": "10-K"
     },
     {
       "pred_id": "PRED_002",
-      "descripcion": "G&A trimestral Q4 2025 se mantendrá por debajo de $12M",
-      "probabilidad_0_1": 0.8,
+      "descripcion": "Mantenimiento de FCF TTM por encima de $180M",
+      "probabilidad_0_1": 0.7,
       "ventana_meses": {
-        "min": 1,
-        "max": 3
+        "min": 3,
+        "max": 9
       },
-      "criterio_validacion": "G&A expense Q4 < 12M USD (calculado como FY2025 total - 9M YTD)",
-      "fuente_prevista": "10-K"
+      "criterio_validacion": "FCF TTM calculado al cierre de próximos 2 trimestres >= 180M USD.",
+      "fuente_prevista": "earnings"
     },
     {
       "pred_id": "PRED_003",
-      "descripcion": "CFO anual FY2025 superará los $160M (Récord histórico)",
+      "descripcion": "Crecimiento de ingresos YoY positivo en Q4 2024 / Q1 2026",
       "probabilidad_0_1": 0.75,
       "ventana_meses": {
-        "min": 1,
-        "max": 3
+        "min": 3,
+        "max": 6
       },
-      "criterio_validacion": "Net cash from operating activities FY2025 > 160M USD",
-      "fuente_prevista": "10-K"
+      "criterio_validacion": "Revenue del trimestre > Revenue del mismo trimestre año anterior.",
+      "fuente_prevista": "earnings"
     },
     {
       "pred_id": "PRED_004",
-      "descripcion": "Recompras de acciones (Share Buybacks) en Q4 2025 superiores a $20M",
-      "probabilidad_0_1": 0.6,
+      "descripcion": "Margen Operativo se mantiene >= 10%",
+      "probabilidad_0_1": 0.65,
       "ventana_meses": {
-        "min": 1,
-        "max": 3
+        "min": 3,
+        "max": 12
       },
-      "criterio_validacion": "Cash flow from financing activities (repurchase of common stock) outflow > 20M USD",
-      "fuente_prevista": "10-K"
+      "criterio_validacion": "EBIT Margin reportado en próximos 4 trimestres promedio >= 10%.",
+      "fuente_prevista": "earnings"
     },
     {
       "pred_id": "PRED_005",
-      "descripcion": "Margen Bruto Q4 2025 se mantendrá estable entre 23% y 25%",
-      "probabilidad_0_1": 0.7,
+      "descripcion": "Disclosure cuantificado de integración de adquisición",
+      "probabilidad_0_1": 0.4,
       "ventana_meses": {
-        "min": 1,
-        "max": 3
+        "min": 6,
+        "max": 12
       },
-      "criterio_validacion": "Gross Profit / Revenue en rango [0.23, 0.25]",
+      "criterio_validacion": "Mención específica de ingresos/ebitda aportados por la adquirida en MD&A.",
       "fuente_prevista": "10-K"
     }
   ],
   "peticiones_de_fuentes": [
     {
       "prioridad": "ALTA",
-      "item": "Desglose de deuda total (Short-term + Long-term Financial Debt)",
-      "por_que_importa": "Esencial para calcular EV y deuda neta real; actualmente bloquea valoración precisa.",
-      "como_obtenerlo": "Nota de deuda en 10-K FY2025 o Balance Sheet detallado (no iXBRL sumario)."
+      "item": "Desglose de deuda financiera (corto/largo plazo) ex-leases",
+      "por_que_importa": "Esencial para calcular EV y validar si el P/FCF es real o un espejismo de apalancamiento.",
+      "como_obtenerlo": "Notas a los estados financieros en 10-K o búsqueda de covenants bancarios."
     },
     {
       "prioridad": "MEDIA",
-      "item": "Métricas orgánicas vs inorgánicas (Pro-forma revenue)",
-      "por_que_importa": "Para aislar el impacto real de la adquisición de New Classic ($70M revenue) y validar crecimiento orgánico.",
-      "como_obtenerlo": "Sección MD&A Results of Operations en 10-K."
+      "item": "Detalle de vencimientos de arrendamientos operativos",
+      "por_que_importa": "Para evaluar el riesgo de liquidez real de los $484M en pasivos de lease.",
+      "como_obtenerlo": "Tabla de 'Lease Maturities' en 10-K."
     }
   ],
   "payload": {
     "payload_version": "CatalystPayload_v1",
     "contenido": {
       "mapeo_con_expectativas_implicitas": {
-        "variable_critica_principal": "CRECIMIENTO_FCF",
-        "lectura_en_1_2_frases": "El mercado descuenta una contracción del FCF del 6-13% anual. Los catalizadores operativos (CFO récord, G&A a la baja) atacan frontalmente esta premisa, sugiriendo crecimiento o estabilidad, lo que forzaría un re-rating masivo."
+        "variable_critica_principal": "OTRO",
+        "lectura_en_1_2_frases": "Mercado descuenta riesgo de opacidad/gobierno corporativo (P/FCF 6x) más que fundamentales. Los catalizadores atacan la incertidumbre del balance y la sostenibilidad del flujo de caja."
       },
       "catalizadores": [
         {
-          "catalyst_id": "CAT_006",
-          "nombre": "Normalización Acelerada de G&A",
-          "categoria": "OPERATIVO",
+          "catalyst_id": "C-001",
+          "nombre": "Resolución de Opacidad de Estructura de Capital",
+          "categoria": "CORPORATIVO",
           "es_no_binario": true,
           "ventana_meses": {
-            "min": 1,
-            "probable": 3,
-            "max": 6
+            "min": 6,
+            "probable": 9,
+            "max": 18
           },
-          "probabilidad_0_1": 0.9,
-          "mecanismo_cierre_gap": "Reduce la base de costes fijos inflada en 2024, expandiendo márgenes EBIT y FCF inmediatamente, demostrando apalancamiento operativo.",
+          "probabilidad_0_1": 0.6,
+          "mecanismo_cierre_gap": "La publicación de deuda neta explícita y un puente de EV validaría la posición de caja neta, eliminando el descuento por 'black box'.",
           "impacto_esperado": {
             "tipo": "CUANTITATIVO",
             "drivers_afectados": [
-              {
-                "driver": "MARGEN_OPERATIVO",
-                "direccion": "MEJORA",
-                "magnitud_rango": "+200 a +400 bps",
-                "nota": "Base anualizada 2025 sugiere G&A ~$48M vs $74M en FY2024."
-              }
-            ],
-            "justificacion": "La tendencia trimestral es inequívoca: $14M -> $13M -> $8.5M en 2025."
-          },
-          "evidencia_actual": [
-            {
-              "tipo": "SOURCEPACK",
-              "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
-              "ubicacion": "Income Statement",
-              "cita_corta": "G&A expenses $8.5M (Q3-25) vs $15.3M (Q3-24)",
-              "interpretacion": "Reducción estructural de costes confirmada."
-            }
-          ],
-          "evidencia_confirmatoria_futura": [
-            {
-              "descripcion": "G&A Q4 2025 bajo control",
-              "fuente_prevista": "10-K",
-              "umbral_o_condicion": "G&A Q4 < $12M",
-              "ventana_meses": {
-                "min": 1,
-                "max": 3
-              }
-            }
-          ],
-          "leading_indicators": [
-            "Tendencia bajista secuencial en G&A durante Q1-Q3 2025."
-          ],
-          "riesgos_de_ejecucion": [
-            "Reclasificación de gastos a COGS o Sales & Marketing.",
-            "Costes extraordinarios de fin de año (auditoría/legal)."
-          ],
-          "contra_catalizadores": [
-            "Aumento súbito de G&A en Q4 por litigios o bonus."
-          ],
-          "plan_monitorizacion": {
-            "frecuencia": "TRIMESTRAL",
-            "que_mirar": [
-              "Línea 'General and administrative' en Income Statement."
-            ]
-          }
-        },
-        {
-          "catalyst_id": "CAT_004",
-          "nombre": "Generación de FCF Récord y Sostenible",
-          "categoria": "FINANCIERO",
-          "es_no_binario": true,
-          "ventana_meses": {
-            "min": 1,
-            "probable": 3,
-            "max": 12
-          },
-          "probabilidad_0_1": 0.85,
-          "mecanismo_cierre_gap": "Refuta la tesis de 'earnings quality' pobre y la expectativa de contracción de caja. Valida el modelo de negocio con cash real.",
-          "impacto_esperado": {
-            "tipo": "CUANTITATIVO",
-            "drivers_afectados": [
-              {
-                "driver": "FCF",
-                "direccion": "SUBE",
-                "magnitud_rango": "$150M - $180M Annual Run-rate",
-                "nota": "YTD Q3 2025 CFO ya es $126M."
-              },
               {
                 "driver": "MULTIPLO",
-                "direccion": "EXPANSION",
-                "magnitud_rango": "Re-rating a 12x-15x",
-                "nota": "Si el FCF es real y creciente, 8.8x es insostenible."
+                "direccion": "MEJORA",
+                "magnitud_rango": "Re-rating +20-40%",
+                "nota": "De 6x a 8-10x P/FCF al reducir prima de riesgo."
               }
             ],
-            "justificacion": "Crecimiento del CFO YTD es +41%, inconsistente con valoración distressed."
+            "justificacion": "La incertidumbre sobre el EV es el principal techo para la valoración actual."
           },
           "evidencia_actual": [
             {
               "tipo": "SOURCEPACK",
-              "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
-              "ubicacion": "Cash Flow Statement",
-              "cita_corta": "CFO 9-months $126.3M vs $89.7M prior year",
-              "interpretacion": "Aceleración de generación de caja."
+              "source_id": "TruthPack_v1",
+              "ubicacion": "mercado",
+              "cita_corta": "enterprise_value_usd: null, deuda_total_usd: null",
+              "interpretacion": "Falta de datos básicos de valoración."
             }
           ],
           "evidencia_confirmatoria_futura": [
             {
-              "descripcion": "Cierre anual FY2025 con CFO sólido",
-              "fuente_prevista": "10-K",
-              "umbral_o_condicion": "CFO FY2025 > $160M",
+              "descripcion": "Reporte de deuda total en balance",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "Dato numérico explícito en Balance Sheet o Notas",
               "ventana_meses": {
-                "min": 1,
-                "max": 3
+                "min": 3,
+                "max": 12
               }
             }
           ],
           "leading_indicators": [
-            "CFO trimestral consistente",
-            "Conversion ratio Net Income/CFO > 1"
+            "Mención de 'Net Cash Position' en press releases",
+            "Mejora en score de gobierno corporativo (externo)",
+            "Inclusión en índices que requieran transparencia de capital"
           ],
           "riesgos_de_ejecucion": [
-            "Acumulación de inventarios en Q4.",
-            "Cambios desfavorables en cuentas por pagar."
+            "La administración puede preferir la opacidad por motivos competitivos o de control.",
+            "Posible existencia de deuda fuera de balance no reportada."
           ],
           "contra_catalizadores": [
-            "Colapso de CFO en Q4.",
-            "Restatement de flujos de caja previos."
+            "Continuidad de reportes con campos vacíos en deuda.",
+            "Transacciones con partes relacionadas que aumenten la opacidad."
           ],
           "plan_monitorizacion": {
             "frecuencia": "TRIMESTRAL",
             "que_mirar": [
-              "Net Cash from Operating Activities",
-              "Changes in Working Capital"
+              "Notas de deuda en 10-Q/10-K",
+              "Presentaciones de inversores (sección de capital)"
             ]
           }
         },
         {
-          "catalyst_id": "CAT_008",
-          "nombre": "Resiliencia de Ingresos Post-Boom",
-          "categoria": "OPERATIVO",
+          "catalyst_id": "C-002",
+          "nombre": "Validación de Sostenibilidad de FCF",
+          "categoria": "FINANCIERO",
           "es_no_binario": true,
           "ventana_meses": {
             "min": 3,
@@ -296,140 +231,198 @@
             "max": 12
           },
           "probabilidad_0_1": 0.75,
-          "mecanismo_cierre_gap": "Demuestra que el crecimiento COVID/2023 no fue transitorio y que existe demanda estructural B2B.",
+          "mecanismo_cierre_gap": "Confirmar que el FCF no es cíclico ni dependiente de WC valida el yield del 16%, forzando a los value investors a entrar.",
           "impacto_esperado": {
-            "tipo": "CUALITATIVO",
+            "tipo": "CUANTITATIVO",
             "drivers_afectados": [
               {
-                "driver": "MULTIPLO_TERMINAL",
+                "driver": "FCF",
                 "direccion": "MEJORA",
-                "magnitud_rango": null,
-                "nota": "Reduce la percepción de riesgo de 'one-hit wonder'."
+                "magnitud_rango": "Sostenibilidad >$180M",
+                "nota": "Consolidación del piso de valoración."
               }
             ],
-            "justificacion": "Ingresos Q3 récord histórico ($333M) contradicen narrativa de contracción."
+            "justificacion": "Yield del 16% es insosteniblemente alto si el flujo es real; el precio debe subir."
           },
           "evidencia_actual": [
             {
               "tipo": "SOURCEPACK",
-              "source_id": "SRC_SEC_004_10-Q_Q3-2025.htm",
-              "ubicacion": "Income Statement",
-              "cita_corta": "Revenue $332.6M (record trimestral)",
-              "interpretacion": "Tendencia secuencial Q1($272)->Q2($323)->Q3($333) positiva."
+              "source_id": "TruthPack_v1",
+              "ubicacion": "ttm",
+              "cita_corta": "fcf_usd: 201M, fcf_yield: 16.1%",
+              "interpretacion": "Métricas de valoración extremas a favor."
             }
           ],
           "evidencia_confirmatoria_futura": [
             {
-              "descripcion": "Guidance o Reporte Q1 2026 estable",
-              "fuente_prevista": "Earnings Call / 10-Q",
-              "umbral_o_condicion": "Revenue Q1 2026 > $300M (considerando estacionalidad)",
+              "descripcion": "Conversión de Net Income a CFO",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Ratio CFO/Net Income > 0.9x",
               "ventana_meses": {
                 "min": 3,
-                "max": 6
+                "max": 9
               }
             }
           ],
           "leading_indicators": [
-            "GMV de marketplace",
-            "Spend per active buyer"
+            "Estabilidad en Días de Inventario y Cuentas por Cobrar",
+            "Ausencia de grandes salidas de Capex no anunciadas"
           ],
           "riesgos_de_ejecucion": [
-            "Desaceleración consumo US.",
-            "Competencia agresiva en tarifas."
+            "Reversión de capital de trabajo (necesidad de reponer inventario).",
+            "Aumento de costes logísticos que erosionen el margen de caja."
           ],
           "contra_catalizadores": [
-            "Caída de ingresos YoY en próximos trimestres."
+            "Quema de caja operativa en un trimestre estacionalmente fuerte.",
+            "Divergencia amplia entre Beneficio Neto y Flujo de Caja."
           ],
           "plan_monitorizacion": {
             "frecuencia": "TRIMESTRAL",
             "que_mirar": [
-              "Revenue",
-              "Service Revenue vs Product Revenue"
+              "Estado de Flujos de Efectivo (CFO)",
+              "Cambios en Working Capital"
             ]
           }
         },
         {
-          "catalyst_id": "CAT_001",
-          "nombre": "Mejora Percepción Gobernanza (Slow Burn)",
-          "categoria": "CORPORATIVO",
+          "catalyst_id": "C-003",
+          "nombre": "Crecimiento Orgánico Post-Escalado",
+          "categoria": "OPERATIVO",
           "es_no_binario": true,
           "ventana_meses": {
-            "min": 12,
-            "probable": 24,
-            "max": 36
+            "min": 6,
+            "probable": 12,
+            "max": 18
           },
-          "probabilidad_0_1": 0.4,
-          "mecanismo_cierre_gap": "Compresión de la prima de riesgo (actualmente 40-50% del descuento de valoración).",
+          "probabilidad_0_1": 0.7,
+          "mecanismo_cierre_gap": "Demostrar que la empresa puede crecer sobre una base de ingresos de $1.2B disipa los temores de 'COVID-bump' o saturación.",
           "impacto_esperado": {
-            "tipo": "CUALITATIVO",
+            "tipo": "CUANTITATIVO",
             "drivers_afectados": [
               {
-                "driver": "COSTE_DEUDA",
-                "direccion": "BAJA",
-                "magnitud_rango": null,
-                "nota": "Menor percepción de riesgo."
-              },
-              {
-                "driver": "MULTIPLO",
-                "direccion": "SUBE",
-                "magnitud_rango": "+2x a +5x turnos",
-                "nota": "Es el mayor driver de valor latente."
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "Apalancamiento operativo",
+                "nota": "Mantener crecimiento >10% con costes fijos estables."
               }
             ],
-            "justificacion": "Difícil de materializar a corto plazo sin auditor de primer nivel o buybacks masivos."
+            "justificacion": "El crecimiento valida el modelo de negocio a largo plazo."
           },
           "evidencia_actual": [
             {
-              "tipo": "EXTERNA",
-              "source_id": "TruthPack_v1",
-              "ubicacion": "General",
-              "cita_corta": "Transición a 10-K completada.",
-              "interpretacion": "Paso positivo pero insuficiente por sí solo."
+              "tipo": "SOURCEPACK",
+              "source_id": "CatalystDetection_v1",
+              "ubicacion": "CAT_GCT_03",
+              "cita_corta": "Ingresos Q3-25 vs Q3-24 muestran crecimiento continuado",
+              "interpretacion": "Tracción positiva reciente."
             }
           ],
           "evidencia_confirmatoria_futura": [
             {
-              "descripcion": "Sin restatements ni retrasos en 10-K FY2025",
-              "fuente_prevista": "SEC Filings",
-              "umbral_o_condicion": "Filing a tiempo (Marzo 2026)",
+              "descripcion": "Crecimiento de ingresos YoY",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "> 10% anualizado",
               "ventana_meses": {
-                "min": 1,
-                "max": 2
+                "min": 3,
+                "max": 12
               }
             }
           ],
           "leading_indicators": [
-            "Institucional ownership creciente",
-            "Cobertura de analistas tier-1"
+            "Métricas de tráfico web o GMV (Gross Merchandise Value)",
+            "Número de vendedores activos en la plataforma"
           ],
           "riesgos_de_ejecucion": [
-            "Short reports",
-            "Investigaciones regulatorias."
+            "Desaceleración del consumo discrecional (muebles/hogar).",
+            "Competencia agresiva en precios (Amazon, Wayfair)."
           ],
           "contra_catalizadores": [
-            "Late filing (NT 10-K)",
-            "Cambio de auditor."
+            "Crecimiento plano o negativo en dos trimestres.",
+            "Pérdida de cuota de mercado estimada."
           ],
           "plan_monitorizacion": {
-            "frecuencia": "SEMANAL",
+            "frecuencia": "TRIMESTRAL",
             "que_mirar": [
-              "Noticias corporativas",
-              "SEC filings"
+              "Top line revenue",
+              "Guidance de la gerencia"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "C-004",
+          "nombre": "Expansión de Margen por Disciplina G&A",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 18
+          },
+          "probabilidad_0_1": 0.65,
+          "mecanismo_cierre_gap": "La reducción relativa de G&A frente a mayores ventas mejora directamente el EBIT y FCF, justificando múltiplos más altos.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": "+50-100 bps",
+                "nota": "Control de costes administrativos."
+              }
+            ],
+            "justificacion": "Eficiencia operativa directa."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_trimestral",
+              "cita_corta": "G&A Q3-25 $8.5M vs $15.3M en Q3-24",
+              "interpretacion": "Reducción nominal significativa en G&A reciente."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Ratio G&A / Ventas",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Tendencia decreciente o estable < 4%",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Anuncios de reestructuración o eficiencia",
+            "Headcount trends"
+          ],
+          "riesgos_de_ejecucion": [
+            "Necesidad de reinversión en talento o sistemas.",
+            "Inflación salarial."
+          ],
+          "contra_catalizadores": [
+            "Explosión de costes administrativos sin explicación clara.",
+            "Litigios que aumenten costes legales (dentro de G&A)."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Línea de General & Administrative expenses"
             ]
           }
         }
       ],
       "conclusion_catalizadores": {
         "calidad_catalizador": "ALTA",
-        "por_que": "Los catalizadores operativos (CAT_004, CAT_006) tienen una probabilidad de ocurrencia muy alta (>85%) basada en datos YTD ya reportados y atacan directamente la premisa bajista de 'declive de negocio'. La valoración actual no requiere crecimiento, solo estabilidad, lo que otorga una asimetría muy favorable.",
+        "por_que": "La combinación de un catalizador de valoración defensivo (FCF sustainability) con uno de re-rating estructural (Transparencia) crea un perfil asimétrico favorable. La probabilidad conjunta de mejora es sólida.",
         "si_no_hay_catalizador_apto": false
       }
     }
   },
   "log": {
     "limitaciones": [
-      "No se pudo validar deuda financiera exacta para cálculo de EV (usado Market Cap como proxy conservador).",
-      "Dependencia alta de la veracidad de los estados financieros reportados (riesgo fraude no detectable en scoring)."
+      "Falta de EV impide cuantificar impacto exacto en múltiplos EV/EBITDA.",
+      "Dependencia alta de la voluntad de la gerencia para mejorar transparencia."
     ],
     "autochequeos": {
       "sin_metricas_inventadas": true,

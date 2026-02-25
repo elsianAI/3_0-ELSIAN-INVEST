@@ -37,6 +37,7 @@ class ModelTransport:
     version_flag: str = "--version"
     reasoning_effort: str | None = None
     preflight_disable_yolo: bool = False
+    capabilities: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -187,15 +188,15 @@ class EngineConfig:
             return multi_cfg.get("min_backends", len(multi_cfg.get("models", [])))
         return 1
 
-    def snapshot_pipeline_model_plan(self, step_names: list[str] | None = None):
+    def snapshot_pipeline_model_plan(self, step_names: list[str] | None = None, operation: str = "PIPELINE"):
         """Return a runtime plan snapshot for selected pipeline keys."""
         from .model_plan import build_step_plan
-        return build_step_plan(self, step_names)
+        return build_step_plan(self, step_names, operation=operation)
 
-    def effective_model_set(self, step_names: list[str] | None = None) -> set[str]:
+    def effective_model_set(self, step_names: list[str] | None = None, operation: str = "PIPELINE") -> set[str]:
         """Union of model profiles used by effective step plan."""
         from .model_plan import build_step_plan, build_effective_model_set
-        return build_effective_model_set(build_step_plan(self, step_names))
+        return build_effective_model_set(build_step_plan(self, step_names, operation=operation))
 
     def with_step_model_overrides(self, step_overrides: dict[str, dict]) -> "EngineConfig":
         """Return a runtime-only EngineConfig with patched step_overrides.
@@ -356,6 +357,18 @@ class EngineConfig:
     def get_dag(self, operation: str) -> list[dict]:
         return self.pipeline_dag.get(operation, [])
 
+    def get_step_requirements(self, step_name: str) -> set[str]:
+        """Return capability requirements for a step from the DAG.
+
+        Searches all operations for a step entry with `requires`.
+        Returns empty set if no requirements declared (backward compat).
+        """
+        for dag_steps in self.pipeline_dag.values():
+            for entry in dag_steps:
+                if entry.get("step") == step_name:
+                    return set(entry.get("requires", []))
+        return set()
+
     def get_backend_config(self, model_name: str) -> dict:
         """v1: returns full backend config dict. v2: returns transport config from catalog."""
         if self.is_v2:
@@ -396,6 +409,21 @@ class EngineConfig:
         if not self._backend_availability:
             return True
         return self._backend_availability.get(name, False)
+
+    def mark_backend_unavailable(self, name: str) -> None:
+        """Mark a backend transport as unavailable at runtime.
+
+        Called by the dispatcher when a transport fails consistently (all retries
+        exhausted with transport errors). This prevents subsequent steps from
+        wasting their full timeout on a transport that is known to be down
+        (e.g., Claude auth expired mid-pipeline).
+        """
+        if not self._backend_availability:
+            # Preflight was never run; initialise with only the failing transport
+            # marked. is_backend_available() treats empty dict as "all available",
+            # so we must not leave it empty after this call.
+            self._backend_availability = {}
+        self._backend_availability[name] = False
 
     # ── Naming helpers ────────────────────────────────────────
 
@@ -478,6 +506,7 @@ def _load_config_v2(raw: dict, workspace: Path) -> EngineConfig:
                         binary=copilot_binary.path,
                         model_id=cop_cfg.get("model_id", model_name),
                         timeout_seconds=copilot_cfg.get("timeout_seconds", 300),
+                        capabilities=cop_cfg.get("capabilities", ["text_only"]),
                     ))
             else:
                 t_cfg = model_cfg.get(transport_name, {})
@@ -499,6 +528,7 @@ def _load_config_v2(raw: dict, workspace: Path) -> EngineConfig:
                         version_flag=t_cfg.get("version_flag", "--version"),
                         reasoning_effort=t_cfg.get("reasoning_effort"),
                         preflight_disable_yolo=t_cfg.get("preflight_disable_yolo", False),
+                        capabilities=t_cfg.get("capabilities", []),
                     ))
                 # Register in v1-compat binaries dict (keyed by transport name)
                 if transport_name not in binaries:

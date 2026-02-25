@@ -24,6 +24,7 @@
         "model_id": "gpt-5.3-codex",
         "reasoning_effort": "xhigh",
         "timeout_seconds": 3600,
+        "capabilities": ["tools", "web_access", "output_schema"],
         "command_suffix": [
           "exec"
         ],
@@ -35,7 +36,8 @@
         "version_flag": "--version"
       },
       "copilot": {
-        "model_id": "gpt-5.3-codex"
+        "model_id": "gpt-5.3-codex",
+        "capabilities": ["text_only"]
       }
     },
     "gpt-5.3-codex-spark": {
@@ -50,6 +52,7 @@
         "model_id": "gpt-5.3-codex-spark",
         "reasoning_effort": "xhigh",
         "timeout_seconds": 3600,
+        "capabilities": ["tools", "web_access", "output_schema"],
         "command_suffix": [
           "exec"
         ],
@@ -61,7 +64,8 @@
         "version_flag": "--version"
       },
       "copilot": {
-        "model_id": "gpt-5.3-codex-spark"
+        "model_id": "gpt-5.3-codex-spark",
+        "capabilities": ["text_only"]
       }
     },
     "claude-opus-4.6": {
@@ -74,6 +78,7 @@
         "min_version": "2.0.0",
         "model_id": "opus",
         "timeout_seconds": 3600,
+        "capabilities": ["tools", "web_access", "output_schema"],
         "command_suffix": [
           "-p"
         ],
@@ -87,7 +92,8 @@
         "version_flag": "--version"
       },
       "copilot": {
-        "model_id": "claude-opus-4.6"
+        "model_id": "claude-opus-4.6",
+        "capabilities": ["text_only"]
       }
     },
     "claude-sonnet-4.6": {
@@ -100,6 +106,7 @@
         "min_version": "2.0.0",
         "model_id": "sonnet",
         "timeout_seconds": 3600,
+        "capabilities": ["tools", "web_access", "output_schema"],
         "command_suffix": [
           "-p"
         ],
@@ -113,7 +120,8 @@
         "version_flag": "--version"
       },
       "copilot": {
-        "model_id": "claude-sonnet-4.6"
+        "model_id": "claude-sonnet-4.6",
+        "capabilities": ["text_only"]
       }
     },
     "claude-haiku-4.5": {
@@ -126,6 +134,7 @@
         "min_version": "2.0.0",
         "model_id": "haiku",
         "timeout_seconds": 3600,
+        "capabilities": ["tools", "web_access", "output_schema"],
         "command_suffix": [
           "-p"
         ],
@@ -139,7 +148,8 @@
         "version_flag": "--version"
       },
       "copilot": {
-        "model_id": "claude-haiku-4.5"
+        "model_id": "claude-haiku-4.5",
+        "capabilities": ["text_only"]
       }
     },
     "gemini-3-pro": {
@@ -153,6 +163,7 @@
         "model_id": "gemini-3-pro-preview",
         "preflight_disable_yolo": true,
         "timeout_seconds": 3600,
+        "capabilities": ["tools", "web_access"],
         "command_suffix": [
           "-p"
         ],
@@ -166,7 +177,8 @@
         "version_flag": "--version"
       },
       "copilot": {
-        "model_id": "gemini-3-pro-preview"
+        "model_id": "gemini-3-pro-preview",
+        "capabilities": ["text_only"]
       }
     },
     "gemini-3-flash": {
@@ -180,6 +192,7 @@
         "model_id": "gemini-3-flash-preview",
         "preflight_disable_yolo": true,
         "timeout_seconds": 3600,
+        "capabilities": ["tools", "web_access"],
         "command_suffix": [
           "-p"
         ],
@@ -193,7 +206,8 @@
         "version_flag": "--version"
       },
       "copilot": {
-        "model_id": "gemini-3-flash-preview"
+        "model_id": "gemini-3-flash-preview",
+        "capabilities": ["text_only"]
       }
     }
   },
@@ -207,8 +221,8 @@
     "claude-opus-4.6",
     "gemini-3-pro"
   ],
-  "fusion_model": "claude-opus-4.6",
-  "default_single_model": "claude-opus-4.6",
+  "fusion_model": "gpt-5.3-codex",
+  "default_single_model": "gpt-5.3-codex",
   "retry": {
     "max_attempts": 2,
     "backoff_seconds": 5
@@ -220,7 +234,7 @@
   "step_overrides": {
     "TP_EXTRACTOR_FILING": {
       "models": [
-        "claude-opus-4.6"
+        "gpt-5.3-codex"
       ]
     }
   },
@@ -482,7 +496,8 @@
         "step": "MONITOR",
         "type": "llm",
         "instruction": "instrucciones_monitor_V2.md",
-        "pipeline_key": null
+        "pipeline_key": null,
+        "requires": ["tools", "web_access"]
       }
     ],
     "SCANNER": [
@@ -490,26 +505,30 @@
         "step": "SCANNER",
         "type": "llm",
         "instruction": "instrucciones_scanner_V1.md",
-        "pipeline_key": null
+        "pipeline_key": null,
+        "requires": ["tools", "web_access"]
       }
     ],
     "SCOUT": [
       {
         "step": "SCOUT_PREFILTRO",
         "type": "llm",
-        "instruction": "instrucciones_prefiltro_V1.md"
+        "instruction": "instrucciones_prefiltro_V1.md",
+        "requires": ["tools", "web_access"]
       },
       {
         "step": "SCOUT_Q",
         "type": "llm",
         "instruction": "instrucciones_scoutQ_V3.md",
-        "parallel_group": "SCOUT_QE"
+        "parallel_group": "SCOUT_QE",
+        "requires": ["tools", "web_access"]
       },
       {
         "step": "SCOUT_E",
         "type": "llm",
         "instruction": "instrucciones_scoutE_V3.md",
-        "parallel_group": "SCOUT_QE"
+        "parallel_group": "SCOUT_QE",
+        "requires": ["tools", "web_access"]
       },
       {
         "step": "SCOUT_SELECTOR",
@@ -521,7 +540,8 @@
       {
         "step": "OUTCOME",
         "type": "llm",
-        "instruction": "instrucciones_outcome_builder_V2.md"
+        "instruction": "instrucciones_outcome_builder_V2.md",
+        "requires": ["tools", "web_access"]
       }
     ],
     "EVALUAR": [

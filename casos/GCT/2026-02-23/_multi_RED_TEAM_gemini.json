@@ -1,11 +1,11 @@
 {
   "version_esquema": "AgentReport_v1",
   "caso_id": "CASE_20260223_GCT",
-  "fecha_corte": "2026-02-23",
+  "fecha_corte": "2026-02-24",
   "agente": {
     "agent_role": "RED_TEAM",
     "agent_nombre": "RED_TEAM_v1",
-    "modelo": "gemini-pro-experimental",
+    "modelo": "gemini-pro-optimized",
     "idioma": "es"
   },
   "input_refs": {
@@ -15,11 +15,11 @@
   },
   "resumen_ejecutivo": {
     "bullets": [
-      "La tesis alcista ignora la erosión estructural del Margen Bruto (26.8% FY23 -> 23.2% Q3-25), que ha neutralizado casi totalmente los ahorros en G&A, dejando el margen neto estancado.",
-      "El apalancamiento operativo es un arma de doble filo: $484M en pasivos por arrendamiento (superiores al patrimonio de $405M) convierten una desaceleración de ingresos en un riesgo de solvencia, no solo de valoración.",
-      "La 'aceleración del CFO' depende críticamente de la gestión de capital de trabajo (extensión de cuentas por pagar); si el crecimiento se detiene, esta fuente de efectivo desaparece, revelando un FCF subyacente mucho menor.",
-      "La discrepancia no resuelta del 27% en el conteo de acciones y la estructura opaca offshore sugieren un riesgo de dilución masiva o gobernanza deficiente que justifica plenamente el descuento de valoración.",
-      "Riesgo Principal: VALUE_TRAP por deterioro de fundamentales (margen bruto) y apalancamiento operativo oculto (leases)."
+      "El FCF de ~201M está inflado artificialmente por una financiación de proveedores (+78M en Cuentas por Pagar); el FCF estructural real es ~40% menor.",
+      "La valoración 'barata' (6.2x) ignora 484M en pasivos por arrendamiento; ajustando EV y normalizando FCF, el múltiplo efectivo se duplica a >12x.",
+      "La opacidad no es un 'riesgo de disclosure' pasivo, sino una barrera estructural: la falta de desglose de deuda y AR/Inv impide verificar la solvencia real.",
+      "El crecimiento reciente está contaminado por M&A (New Classic); sin desglose orgánico, la tesis de 'crecimiento real' es especulativa.",
+      "Riesgo de gobernanza crítico: estructura VIE y métricas inconsistentes sugieren un perfil de Value Trap clásico."
     ],
     "veredicto_role_local": "NO_APTO",
     "confianza_0_1": 0.85
@@ -29,70 +29,77 @@
       "claim_id": "CLM_RED_001",
       "tipo": "HECHO",
       "criticidad": "CRITICO",
-      "enunciado": "La compresión del margen bruto es estructural y anula la mejora por G&A: ha caído de 26.8% en FY2023 a 23.1% en Q3-2025, indicando pérdida de poder de fijación de precios o aumento de costes logísticos.",
-      "confianza_0_1": 0.9,
+      "enunciado": "El 39% del FCF TTM proviene de estirar pagos a proveedores (aumento de AP), no de generación operativa sostenible.",
+      "confianza_0_1": 0.95,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_001",
-          "ubicacion": "10-K FY2023 vs 10-Q Q3-2025",
-          "cita_corta": "FY23 GM 26.8% ($188M/$703M) -> Q3-25 GM 23.2% ($77M/$332M)",
-          "interpretacion": "Tendencia descendente clara en 7 trimestres consecutivos. La eficiencia en G&A solo está compensando esta pérdida, no expandiendo márgenes netos reales."
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas.wc_change",
+          "cita_corta": "accounts_payable: 78163000.0; fcf_usd: 201297000.0.",
+          "interpretacion": "El aumento de deuda con proveedores aporta casi 80M al flujo de caja reportado."
         }
       ],
       "falsacion": {
-        "test": "Margen bruto rebota a >25% en dos trimestres consecutivos sin caída de volumen.",
+        "test": "Cuentas por pagar se estabilizan o reducen en el próximo trimestre, causando una caída abrupta del CFO/FCF.",
         "ventana_meses": {
           "min": 3,
-          "max": 9
+          "max": 6
         },
         "fuente_prevista": "10-Q"
       }
     },
     {
       "claim_id": "CLM_RED_002",
-      "tipo": "HECHO",
+      "tipo": "INFERENCIA",
       "criticidad": "CRITICO",
-      "enunciado": "La posición de 'Caja Neta' es ilusoria frente a los pasivos por arrendamiento ($484M) que superan al patrimonio total ($405M), creando un apalancamiento operativo masivo y riesgoso.",
-      "confianza_0_1": 0.95,
+      "enunciado": "La inclusión de los pasivos por leasing (484M) en el EV destruye la tesis de infravaloración extrema.",
+      "confianza_0_1": 0.9,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_001",
-          "ubicacion": "10-K FY2024 Balance Sheet",
-          "cita_corta": "Total Lease Liabilities $484,278K vs Total Equity $405,217K",
-          "interpretacion": "Aunque no sea deuda financiera bancaria, son obligaciones fijas contractuales. En un escenario de caída de demanda, estos costes fijos destruirán la rentabilidad rápidamente."
+          "source_id": "TruthPack_v1",
+          "ubicacion": "lease_data.total_lease_liabilities_usd",
+          "cita_corta": "total_lease_liabilities_usd: 484278000.",
+          "interpretacion": "Pasivo financiero real equivalente al ~40% del Market Cap."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "mercado.market_cap_usd",
+          "cita_corta": "market_cap_usd: 1250000000.",
+          "interpretacion": "El EV real es significativamente mayor al Market Cap si se ajusta por leases."
         }
       ],
       "falsacion": {
-        "test": "Reducción de Lease Liabilities en >$50M sin reducción de capacidad de almacenamiento (renegociación exitosa).",
+        "test": "El mercado revalúa la acción basándose explícitamente en métricas post-lease (EV/EBITDAR), comprimiendo el upside aparente.",
         "ventana_meses": {
           "min": 6,
           "max": 12
         },
-        "fuente_prevista": "10-K"
+        "fuente_prevista": "precio"
       }
     },
     {
       "claim_id": "CLM_RED_003",
-      "tipo": "INFERENCIA",
+      "tipo": "HIPOTESIS",
       "criticidad": "IMPORTANTE",
-      "enunciado": "La calidad del CFO es baja: el flujo de caja operativo depende desproporcionadamente de la financiación de proveedores (cuentas por pagar), lo cual es insostenible si el crecimiento se desacelera.",
+      "enunciado": "La 'eficiencia' en G&A es insostenible o resultado de clasificación agresiva de gastos, dado el modelo logístico intensivo.",
       "confianza_0_1": 0.75,
       "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
           "source_id": "TruthPack_v1",
-          "ubicacion": "metricas_derivadas / wc_change",
-          "cita_corta": "Working Capital Change -$78M (Payables increase)",
-          "interpretacion": "Gran parte del CFO histórico ha venido de aumentar plazos a proveedores. Esto es un préstamo de corto plazo, no generación de valor operativo recurrente."
+          "ubicacion": "historico_trimestral[Q3-2025]",
+          "cita_corta": "ga_usd: 8511000 vs ingresos 332638000 (2.5%).",
+          "interpretacion": "Ratio G&A sospechosamente bajo para una empresa que gestiona inventario físico y logística global."
         }
       ],
       "falsacion": {
-        "test": "CFO > Net Income durante 2 trimestres con Working Capital neutro o negativo (sin aumento de payables).",
+        "test": "G&A revierte a la media (>5%) o aparecen cargos 'one-off' recurrentes que ajustan el margen real.",
         "ventana_meses": {
           "min": 3,
           "max": 9
@@ -104,39 +111,39 @@
   "predicciones_calibracion": [
     {
       "pred_id": "PRED_RED_001",
-      "descripcion": "El Margen Bruto continuará comprimiéndose o se mantendrá estancado por debajo del 23.5%.",
+      "descripcion": "El CFO se contraerá en los próximos 2 trimestres al normalizarse el ciclo de pagos a proveedores.",
       "probabilidad_0_1": 0.7,
       "ventana_meses": {
         "min": 3,
         "max": 9
       },
-      "criterio_validacion": "Gross Margin en próximos reportes trimestrales <= 23.5%.",
+      "criterio_validacion": "CFO trimestral < 30M en al menos uno de los próximos dos reportes.",
       "fuente_prevista": "10-Q"
     },
     {
       "pred_id": "PRED_RED_002",
-      "descripcion": "El crecimiento de ingresos se desacelerará a un solo dígito bajo (<8%) en los próximos 12 meses.",
-      "probabilidad_0_1": 0.6,
+      "descripcion": "No se proporcionará desglose claro de deuda total ni EV en el próximo 10-K, perpetuando la opacidad.",
+      "probabilidad_0_1": 0.8,
       "ventana_meses": {
-        "min": 6,
-        "max": 12
+        "min": 1,
+        "max": 4
       },
-      "criterio_validacion": "Revenue Growth YoY < 8% en reportes futuros.",
-      "fuente_prevista": "10-Q"
+      "criterio_validacion": "Campos de deuda financiera siguen sin desglose explícito en notas del 10-K.",
+      "fuente_prevista": "10-K"
     }
   ],
   "peticiones_de_fuentes": [
     {
       "prioridad": "ALTA",
-      "item": "Tabla de vencimientos de arrendamientos operativos (Maturity Analysis of Lease Liabilities)",
-      "por_que_importa": "Para cuantificar la rigidez de los compromisos de pago en los próximos 1-3 años y evaluar el riesgo de solvencia en un escenario bajista.",
-      "como_obtenerlo": "10-K Notes to Consolidated Financial Statements (Leases)."
+      "item": "Aging de Cuentas por Pagar y términos de pago con proveedores.",
+      "por_que_importa": "Confirmar si el FCF es financiado por proveedores (riesgo de liquidez oculto).",
+      "como_obtenerlo": "Notas a los estados financieros / Earnings Call Q&A."
     },
     {
       "prioridad": "ALTA",
-      "item": "Detalle de SBC (Stock-Based Compensation) en Cash Flow",
-      "por_que_importa": "Para confirmar si el 'Buyback' real es solo compensación de la dilución por SBC y no retorno de capital neto a los accionistas.",
-      "como_obtenerlo": "10-K/10-Q Cash Flow Statement (Operating Activities add-back)."
+      "item": "Auditoría de inventarios y ubicación física de activos.",
+      "por_que_importa": "Validar existencia real de activos en balance opaco.",
+      "como_obtenerlo": "Informe de auditoría detallado (CAMs)."
     }
   ],
   "payload": {
@@ -146,219 +153,186 @@
       "diagnostico_global": {
         "status": "NO_APTO",
         "confianza_0_1": 0.85,
-        "riesgo_principal": "VALUE_TRAP",
-        "resumen_1_2_frases": "Deterioro estructural de margen bruto y apalancamiento operativo oculto en leases ($484M) hacen que la valoración aparentemente barata sea una trampa."
+        "riesgo_principal": "GOBERNANZA",
+        "resumen_1_2_frases": "Estructura financiera opaca con FCF dopado por capital de trabajo (deuda proveedores) y pasivos ocultos en leases. Value Trap de manual con riesgo de integridad de datos."
       },
       "ataque_a_tesis_bull": {
         "mapa_claims_bull": [
           {
             "bull_claim_id": "CLM_BULL_001",
-            "resumen_claim_bull": "CFO acelerando (+41% YTD) desmiente contracción de FCF.",
+            "resumen_claim_bull": "GCT cotiza a ~6.2x P/FCF, descontando deterioro severo injustificado.",
             "evaluacion_red_team": {
               "estado": "FRAGIL",
-              "probabilidad_de_fallo_0_1": 0.6,
+              "probabilidad_de_fallo_0_1": 0.8,
               "por_que": [
-                "Dependencia excesiva de gestión de capital de trabajo (cuentas por pagar).",
-                "No sostenible si el crecimiento se detiene (los proveedores no financiarán indefinidamente)."
+                "Ignora 484M de deuda por leases.",
+                "Ignora que 78M del FCF vienen de no pagar a proveedores (AP increase).",
+                "FCF ajustado 'real' es ~120M, llevando el múltiplo a >10x con riesgo de ejecución."
               ]
             },
             "puntos_ciegos": [
-              "Calidad del flujo de caja (Operating Cash Flow quality).",
-              "Relación entre CFO y Net Income a largo plazo."
+              "Calidad del flujo de caja (Working Capital financing).",
+              "Efecto de los leases en la estructura de capital real."
             ],
             "evidencias_que_contradicen_o_debilitan": [
               {
                 "source_id": "TruthPack_v1",
-                "ubicacion": "metricas_derivadas",
-                "cita_corta": "WC change accounts payable +$78M",
-                "interpretacion": "CFO inflado por deuda comercial."
+                "ubicacion": "metricas_derivadas.wc_change.accounts_payable",
+                "cita_corta": "accounts_payable: 78163000.0 (fuente de caja).",
+                "interpretacion": "Casi el 40% del FCF es deuda comercial a corto plazo."
               }
             ],
             "test_falsacion_para_el_bull": {
-              "test": "CFO cae abruptamente si Payables se estabilizan.",
+              "test": "FCF se mantiene >180M con flujo de WC neutro o negativo (pagando a proveedores).",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_BULL_003",
+            "resumen_claim_bull": "Mejora de eficiencia operativa (G&A baja) sugiere apalancamiento operativo.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "G&A de 2.5% es anormalmente bajo para logística.",
+                "Riesgo de mala clasificación de gastos para inflar EBIT.",
+                "Falta de desglose SG&A impide verificar sostenibilidad."
+              ]
+            },
+            "puntos_ciegos": [
+              "Comparables de la industria tienen G&A estructural más alto.",
+              "Posible capitalización de gastos operativos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [],
+            "test_falsacion_para_el_bull": {
+              "test": "G&A sube repentinamente al auditarse o integrarse adquisiciones.",
               "ventana_meses": {
                 "min": 3,
-                "max": 6
+                "max": 9
               },
               "fuente_prevista": "10-Q"
-            }
-          },
-          {
-            "bull_claim_id": "CLM_BULL_002",
-            "resumen_claim_bull": "Normalización de G&A expande margen operativo.",
-            "evaluacion_red_team": {
-              "estado": "PARCIAL",
-              "probabilidad_de_fallo_0_1": 0.5,
-              "por_que": [
-                "La expansión de margen operativo está siendo canibalizada por la compresión del margen bruto.",
-                "Efecto neto en margen neto es neutral o negativo."
-              ]
-            },
-            "puntos_ciegos": [
-              "Tendencia de Margen Bruto (26.8% -> 23.2%).",
-              "Riesgo de que G&A vuelva a subir para mantener crecimiento en entorno más difícil."
-            ],
-            "evidencias_que_contradicen_o_debilitan": [
-              {
-                "source_id": "SRC_001",
-                "ubicacion": "Financial Statements",
-                "cita_corta": "Gross Margin declining sequence",
-                "interpretacion": "Eficiencia operativa anulada por ineficiencia comercial/logística."
-              }
-            ],
-            "test_falsacion_para_el_bull": {
-              "test": "Margen Operativo no supera 12% en FY2025 a pesar de cortes en G&A.",
-              "ventana_meses": {
-                "min": 6,
-                "max": 12
-              },
-              "fuente_prevista": "10-K"
-            }
-          },
-          {
-            "bull_claim_id": "CLM_BULL_005",
-            "resumen_claim_bull": "Balance fortaleza defensiva ($260M caja, sin deuda).",
-            "evaluacion_red_team": {
-              "estado": "FALSO",
-              "probabilidad_de_fallo_0_1": 0.8,
-              "por_que": [
-                "Ignora $484M en pasivos por arrendamiento.",
-                "Leases son deuda operativa senior en caso de estrés.",
-                "Equity real ajustado es mucho menor o negativo si se considera valor de liquidación de inventarios."
-              ]
-            },
-            "puntos_ciegos": [
-              "Apalancamiento operativo (Operating Leverage) a la baja.",
-              "Rigidez de contratos de arrendamiento de almacenes."
-            ],
-            "evidencias_que_contradicen_o_debilitan": [
-              {
-                "source_id": "SRC_001",
-                "ubicacion": "Balance Sheet",
-                "cita_corta": "Lease Liabilities > Total Equity",
-                "interpretacion": "Estructura de capital altamente apalancada operativamente."
-              }
-            ],
-            "test_falsacion_para_el_bull": {
-              "test": "Ratio Lease Liab / CFO aumenta por encima de 4x.",
-              "ventana_meses": {
-                "min": 6,
-                "max": 12
-              },
-              "fuente_prevista": "10-K"
             }
           }
         ],
         "donde_huele_a_especulacion": [
-          "Asumir que la 'discrepancia de acciones' se resolverá favorablemente; suele ser dilución oculta.",
-          "Proyectar expansión de múltiplos en una empresa offshore con gobernanza opaca y márgenes brutos decrecientes.",
-          "Considerar el CFO como proxy directo de rentabilidad sin ajustar por cambios en capital de trabajo."
+          "El Bull asume que la falta de reporte de deuda (null) implica deuda baja, cuando los Leases demuestran carga financiera alta.",
+          "Asume que la caja en balance es líquida y accesible, sin verificar restricciones VIE/China.",
+          "Asume que el crecimiento es orgánico y sostenible, ignorando el impacto no desglosado de M&A (New Classic)."
         ],
         "si_el_mercado_tuviera_razon": [
-          "El mercado está descontando correctamente que el modelo de negocio es un 'low margin logistics play' con riesgo regulatorio, no una plataforma tecnológica escalable.",
-          "El descuento de valoración refleja el riesgo real de los pasivos por arrendamiento y la estructura de gobernanza.",
-          "La compresión de márgenes es la nueva normalidad debido a competencia (Temu, Amazon) y costes de flete."
+          "El mercado está viendo un negocio logístico commoditizado con barreras de entrada bajas.",
+          "Está penalizando la opacidad del balance aplicando un descuento de gobernanza del 50%+. ",
+          "Está ajustando el EV por los Leases y la insostenibilidad del financiamiento vía proveedores."
         ]
       },
       "bear_case": {
         "tesis_bajista_5_lineas": [
-          "GCT es una trampa de valor clásica: parece barata por P/E y P/FCF, pero sus fundamentales se deterioran (Margen Bruto cayendo).",
-          "El apalancamiento operativo por arrendamientos masivos ($484M) magnifica cualquier desaceleración de ingresos.",
-          "La generación de caja depende de financiar el crecimiento con proveedores; si el crecimiento para, la caja se quema.",
-          "Riesgos de gobernanza y dilución oculta (discrepancia de acciones) impiden el re-rating del múltiplo.",
-          "Destino probable: cotización lateral o bajista mientras el mercado digiere la compresión de márgenes y riesgos estructurales."
+          "GCT es una 'Value Trap' donde la generación de caja es transitoria, impulsada por estirar pagos a proveedores (+78M).",
+          "Al ajustar el Enterprise Value por los pasivos de arrendamiento (484M), la valoración se duplica, eliminando el margen de seguridad.",
+          "La opacidad en AR, Inventarios y Deuda impide validar la realidad del negocio, sugiriendo riesgos de gobernanza severos.",
+          "La reversión del ciclo de capital de trabajo consumirá la caja reportada, revelando un FCF estructural mucho menor.",
+          "El crecimiento inorgánico enmascara la desaceleración del negocio base, comprimiendo márgenes futuros."
         ],
         "mecanismos_de_deterioro": [
           {
-            "mecanismo": "COMPETENCIA_PRECIOS",
-            "descripcion": "Presión de competidores más grandes y agresivos obliga a bajar precios o aumentar costes de marketing/logística.",
+            "mecanismo": "WC_UNWIND",
+            "descripcion": "Normalización de pagos a proveedores drena la caja.",
             "indicadores_tempranos": [
-              "Gross Margin < 23%",
-              "Revenue Growth desacelerando < 10%"
+              "Caída abrupta de Accounts Payable",
+              "CFO negativo divergente de Net Income"
             ]
           },
           {
-            "mecanismo": "ALQUILERES_FIJOS",
-            "descripcion": "Costes fijos de arrendamiento consumen flujo de caja si el volumen no llena los almacenes.",
+            "mecanismo": "LEASE_BURDEN",
+            "descripcion": "Los pagos por arrendamiento consumen liquidez real, actuando como deuda senior.",
             "indicadores_tempranos": [
-              "Aumento de ratio Lease/Revenue",
-              "Caída de utilización de almacenes (inferido por GM)"
+              "Flujo de financiación (CFF) negativo por pago de principal de leases"
             ]
           }
         ],
         "escenarios_bajistas": [
           {
             "scenario_id": "BEAR_BASE",
-            "descripcion": "Estancamiento: Ingresos planos, Margen Bruto ~22%, Margen Operativo ~8%. El mercado mantiene múltiplos deprimidos (6-8x P/FCF real ajustado).",
+            "descripcion": "Reversión de WC y compresión de múltiplos por opacidad persistente.",
             "ventana_meses": {
               "min": 6,
               "probable": 12,
               "max": 18
             },
-            "probabilidad_0_1": 0.45,
+            "probabilidad_0_1": 0.5,
             "drivers": [
               {
-                "variable": "MARGEN_OPERATIVO",
+                "variable": "FCF",
                 "direccion": "EMPEORA",
-                "rango": "8% - 10%",
-                "justificacion": "Compresión de GM supera ahorros en G&A."
+                "rango": "Cae a <100M anual por ajuste de WC",
+                "justificacion": "Fin del financiamiento barato vía proveedores."
+              },
+              {
+                "variable": "MULTIPLO",
+                "direccion": "NO_MEJORA",
+                "rango": "P/E se mantiene <8x",
+                "justificacion": "Mercado mantiene descuento por gobernanza."
               }
             ],
             "impacto_en_valoracion": {
               "tipo": "EARNINGS_CAEN",
-              "explicacion": "Menor rentabilidad por acción justifica menor precio.",
+              "explicacion": "Menor generación de caja y percepción de riesgo.",
               "resultado_retorno_12_24m_pct_rango": {
-                "min": -20,
-                "base": -10,
+                "min": -30,
+                "base": -15,
                 "max": 0
               },
-              "nota": "Dead money."
+              "nota": null
             }
           },
           {
             "scenario_id": "BEAR_WORST",
-            "descripcion": "Crisis de Liquidez/Modelo: Desaceleración provoca reversión de WC, quemando caja. Leases se vuelven onerosos. Dudas de gobernanza.",
+            "descripcion": "Crisis de gobernanza o liquidez (Short Seller Attack validado).",
             "ventana_meses": {
-              "min": 6,
+              "min": 3,
               "probable": 12,
               "max": 24
             },
             "probabilidad_0_1": 0.2,
-            "es_binario": false,
+            "es_binario": true,
             "drivers": [
               {
-                "variable": "LIQUIDEZ",
+                "variable": "GOBERNANZA",
                 "direccion": "EMPEORA",
-                "rango": "Caja cae < $100M",
-                "justificacion": "Pago a proveedores + Leases fijos."
+                "rango": "Dudas sobre veracidad de caja/activos",
+                "justificacion": "Opacidad actual no se resuelve."
               }
             ],
-            "impacto_en_supervivencia": "MEDIO",
-            "nota": "Posible dilución forzada o reestructuración."
+            "impacto_en_supervivencia": "ALTO",
+            "nota": "Riesgo de suspensión de cotización o caída >70%."
           }
         ]
       },
       "value_trap_checklist": {
-        "probabilidad_value_trap_0_1": 0.75,
+        "probabilidad_value_trap_0_1": 0.8,
         "razones": [
-          "Múltiplos bajos ópticos (P/E bajo) con fundamentales en deterioro (GM cayendo).",
-          "Alta dependencia de factores exógenos (fletes, tarifas).",
-          "Opacidad en estructura corporativa y accionarial.",
-          "Pasivos fuera de balance (leases) significativos."
+          "FCF de baja calidad (impulsado por WC/AP).",
+          "Opacidad estructural (faltan datos clave de deuda y activos).",
+          "Pasivos fuera de balance (Leases) significativos.",
+          "Márgenes 'demasiado buenos' (G&A) insostenibles."
         ],
         "como_distinguir_ciclo_vs_cambio_estructural": [
           {
             "hipotesis": "Es ciclo",
             "evidencia_necesaria": [
-              "Margen bruto rebota con tarifas de flete normalizadas.",
-              "Inventarios de la industria se limpian."
+              "Normalización de WC sin destruir caja neta.",
+              "Mantenimiento de ingresos orgánicos sin M&A."
             ]
           },
           {
-            "hipotesis": "Es estructural",
+            "hipotesis": "Es estructural/Trampa",
             "evidencia_necesaria": [
-              "Margen bruto sigue cayendo a pesar de entorno estable.",
-              "Pérdida de cuota de mercado frente a gigantes."
+              "CFO divergiendo negativamente del Net Income de forma sostenida.",
+              "Falta continua de disclosure sobre deuda y segmentos."
             ]
           }
         ]
@@ -366,68 +340,70 @@
       "kill_criteria_propuestos": [
         {
           "kc_id": "KC-RT-001",
-          "tipo": "TESIS",
-          "definicion": "Margen Bruto cae por debajo del 22% en cualquier trimestre.",
-          "ventana_meses": {
-            "min": 1,
-            "max": 6
-          },
-          "fuente_prevista": "10-Q",
-          "accion_recomendada": "SALIR",
-          "por_que": "Confirmaría deterioro estructural del modelo de negocio."
-        },
-        {
-          "kc_id": "KC-RT-002",
           "tipo": "CONTABILIDAD",
-          "definicion": "CFO negativo en un trimestre sin explicación extraordinaria clara.",
-          "ventana_meses": {
-            "min": 1,
-            "max": 6
-          },
-          "fuente_prevista": "10-Q",
-          "accion_recomendada": "SALIR",
-          "por_que": "Señalaría el fin de la financiación vía proveedores."
-        }
-      ],
-      "evidencia_que_me_haria_cambiar_de_opinion": [
-        {
-          "item": "Estabilización y repunte del Margen Bruto > 25%.",
-          "umbral_o_condicion": "2 trimestres consecutivos > 25%",
-          "ventana_meses": {
-            "min": 6,
-            "max": 12
-          },
-          "fuente_prevista": "10-Q"
-        },
-        {
-          "item": "Claridad total en share count y estructura de capital (sin discrepancias).",
-          "umbral_o_condicion": "Auditoría limpia y reconciliación explicita.",
+          "definicion": "CFO < 70% del Net Income en acumulado 12 meses.",
           "ventana_meses": {
             "min": 3,
             "max": 12
           },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Indicador líder de manipulación de beneficios o problemas de cobro."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "BALANCE",
+          "definicion": "Cuentas por pagar caen >20% QoQ sin caída proporcional de ingresos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Señal de stress de liquidez o pérdida de crédito con proveedores."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Auditoría limpia de 'Big 4' con detalle de inventarios y caja.",
+          "umbral_o_condicion": "Informe sin salvedades y con desglose granular.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
           "fuente_prevista": "10-K"
+        },
+        {
+          "item": "Recompra de acciones significativa ejecutada.",
+          "umbral_o_condicion": ">5% del float retirado con caja propia.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing"
         }
       ],
       "recomendacion_para_arbitro": {
         "riesgo_global": "ALTO",
-        "tamaño_maximo_sugerido_pct_cartera": "0.0",
+        "tamaño_maximo_sugerido_pct_cartera": 2.0,
         "si_se_invierte_igual": [
-          "Usar stops ajustados basados en niveles técnicos y fundamentales (ej. GM < 22%).",
-          "Monitorear obsesivamente el flujo de caja y los niveles de deuda de arrendamiento."
+          "Usar stops estrictos basados en precio.",
+          "Monitorizar ratio AP/Sales trimestralmente.",
+          "No promediar a la baja ante noticias de gobernanza."
         ],
         "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
-          "¿Por qué cae el Margen Bruto sistemáticamente?",
-          "¿Cuál es el conteo real de acciones totalmente diluido?",
-          "¿Qué porcentaje del CFO es sostenible sin aumento de payables?"
+          "¿Por qué aumentó tanto Cuentas por Pagar (+78M) y es sostenible?",
+          "¿Dónde está el desglose de Deuda Financiera Total?",
+          "¿Cuál es la contribución orgánica real vs M&A (New Classic)?",
+          "¿Son los 260M de caja totalmente accesibles fuera de China?"
         ]
       }
     }
   },
   "log": {
     "limitaciones": [
-      "Falta detalle de madurez de leases.",
-      "No se puede verificar la calidad de los inventarios ni la antigüedad de las cuentas por cobrar."
+      "Falta de desglose de deuda impide cálculo exacto de EV.",
+      "Métricas de WC calculadas sobre variaciones, no saldos absolutos (que faltan)."
     ],
     "autochequeos": {
       "sin_metricas_inventadas": true,

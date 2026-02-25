@@ -126,6 +126,16 @@ IR_HTML_HINTS = (
     "press release",
     "regulatory story",
 )
+IR_HTML_STRONG_DOC_HINTS = (
+    "annual results",
+    "full year",
+    "full-year",
+    "registration document",
+    "universal registration document",
+    "integrated report",
+    "interim results",
+    "financial results",
+)
 NAV_HINTS = (
     "home",
     "search",
@@ -153,6 +163,13 @@ FIN_HINTS = (
     "equity",
     "dividend",
     "capex",
+)
+ANNUAL_DOC_HINTS = (
+    "urd",
+    "universal registration document",
+    "document d'enregistrement universel",
+    "annual report",
+    "integrated report",
 )
 
 
@@ -576,9 +593,61 @@ def is_navigation_like_source(title: str, text: str, url: str) -> bool:
     return nav_hits >= 4 and _is_low_financial_density(sample)
 
 
-def extract_presentation_rows(ir_html: str, base_url: str) -> List[Tuple[str, str, Optional[str], str, str]]:
+def classify_presentation_source_type(title: str, url: str, row_text: str = "") -> str:
+    """Classify presentation-like sources into annual docs vs generic presentations."""
+    combined = clean_ws(f"{title} {row_text} {url}".lower())
+    normalized = re.sub(r"[-_/]+", " ", combined)
+    if any(h in normalized for h in ANNUAL_DOC_HINTS):
+        return "ANNUAL_REPORT"
+    return "INVESTOR_PRESENTATION"
+
+
+def _has_html_doc_evidence(
+    *,
+    period: str,
+    fecha_evento: Optional[str],
+    context_norm: str,
+    low_url: str,
+) -> bool:
+    if period != "UNKNOWN" or bool(fecha_evento):
+        return True
+    merged = f"{context_norm} {low_url}"
+    has_year = bool(re.search(r"\b(?:19|20)\d{2}\b", merged))
+    if not has_year:
+        return False
+    if any(hint in merged for hint in IR_HTML_STRONG_DOC_HINTS):
+        return True
+    if re.search(r"\bq[1-4]\b", merged):
+        return True
+    if re.search(r"\bh[12]\b", merged):
+        return True
+    return False
+
+
+def _is_index_like_html_url(low_url: str) -> bool:
+    if "engagestream" in low_url and re.search(r"/register/?(?:$|[?#])", low_url):
+        return True
+    if re.search(r"/register/?(?:$|[?#])", low_url):
+        return True
+    if "signup" in low_url:
+        return True
+    patterns = (
+        r"/investors/investors-homepage/?$",
+        r"/investors/?$",
+        r"/en-us/?$",
+        r"/publications-and-events/?$",
+        r"/publications-and-events/(?:press-releases|financial-publications|site-visits-investor-days|other-presentations|regulated-information)/?$",
+    )
+    return any(re.search(pat, low_url) for pat in patterns)
+
+
+def extract_presentation_rows(
+    ir_html: str,
+    base_url: str,
+) -> Tuple[List[Tuple[str, str, Optional[str], str, str]], List[Dict[str, str]]]:
     soup = BeautifulSoup(ir_html, "html.parser")
     rows: List[Tuple[str, str, Optional[str], str, str]] = []
+    rejected: List[Dict[str, str]] = []
 
     for a in soup.find_all("a", href=True):
         href = a.get("href", "").strip()
@@ -611,6 +680,42 @@ def extract_presentation_rows(ir_html: str, base_url: str) -> List[Tuple[str, st
         )
         period = normalize_period(period_match.group(1) if period_match else None)
         fecha_evento = parse_date_in_text(row_text) or parse_date_in_text(full_url)
+        if not is_pdf:
+            if _is_index_like_html_url(low_url):
+                rejected.append(
+                    {
+                        "url": full_url,
+                        "title": text or row_text[:180],
+                        "reason": "navigation_or_index_html",
+                        "detail": "index_like_url",
+                    }
+                )
+                continue
+            if not _has_html_doc_evidence(
+                period=period,
+                fecha_evento=fecha_evento,
+                context_norm=context_norm,
+                low_url=low_url,
+            ):
+                rejected.append(
+                    {
+                        "url": full_url,
+                        "title": text or row_text[:180],
+                        "reason": "navigation_or_index_html",
+                        "detail": "html_without_document_evidence",
+                    }
+                )
+                continue
+            if is_navigation_like_source(text or row_text[:120], f"{row_text} {full_url}", full_url):
+                rejected.append(
+                    {
+                        "url": full_url,
+                        "title": text or row_text[:180],
+                        "reason": "navigation_or_index_html",
+                        "detail": "navigation_like_pattern",
+                    }
+                )
+                continue
         rows.append((full_url, period, fecha_evento, row_text or text, "pdf" if is_pdf else "html"))
 
     # Dedup by URL and keep latest periods first.
@@ -629,7 +734,7 @@ def extract_presentation_rows(ir_html: str, base_url: str) -> List[Tuple[str, st
         if basename:
             seen_name.add(basename)
         deduped.append((href, period, fecha_evento, row_text, doc_kind))
-    return deduped
+    return deduped, rejected
 
 
 def normalize_web_ir(url: Optional[str]) -> Optional[str]:
@@ -679,13 +784,72 @@ def read_sources_context(case_dir: Path) -> Dict[str, Any]:
     return {}
 
 
+def _derive_ir_roots(base_url: str) -> List[str]:
+    parsed = urlparse(base_url)
+    host_root = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+    path = parsed.path.strip("/")
+    segments = [seg for seg in path.split("/") if seg]
+    original_segments = list(segments)
+    while segments and segments[-1].lower() in {
+        "investors-homepage",
+        "investor-homepage",
+        "homepage",
+        "home",
+    }:
+        segments.pop()
+
+    locale = segments[0].lower() if segments and re.fullmatch(r"[a-z]{2}-[a-z]{2}", segments[0].lower()) else None
+    investor_idx = next(
+        (idx for idx, seg in enumerate(segments) if seg.lower() in {"investors", "investor-relations"}),
+        None,
+    )
+
+    has_homepage_tail = bool(original_segments) and original_segments[-1].lower() in {
+        "investors-homepage",
+        "investor-homepage",
+        "homepage",
+        "home",
+    }
+
+    roots: List[str] = []
+    if locale and investor_idx is not None:
+        roots.append(f"{host_root}/{locale}/{segments[investor_idx]}")
+    elif investor_idx is not None:
+        roots.append(f"{host_root}/{segments[investor_idx]}")
+    if segments:
+        roots.append(f"{host_root}/{'/'.join(segments)}")
+    if locale:
+        roots.append(f"{host_root}/{locale}")
+    if locale:
+        roots.append(f"{host_root}/{locale}/investors")
+    if not has_homepage_tail:
+        roots.append(base_url.rstrip("/"))
+    roots.append(host_root)
+
+    deduped: List[str] = []
+    seen = set()
+    for root in roots:
+        norm = normalize_web_ir(root)
+        if not norm or norm in seen:
+            continue
+        seen.add(norm)
+        deduped.append(norm)
+    return deduped
+
+
 def build_ir_pages(web_ir: Optional[str]) -> List[str]:
     base = normalize_web_ir(web_ir)
     if not base:
         return []
-    pages = [base]
-    for suffix in IR_PRESENTATION_PATHS:
-        pages.append(urljoin(base + "/", suffix.lstrip("/")))
+    pages: List[str] = [base]
+    homepage_tail_re = re.compile(r"/(?:investors-homepage|investor-homepage|homepage|home)$")
+    for root in _derive_ir_roots(base):
+        pages.append(root)
+        low_path = (urlparse(root).path or "").rstrip("/").lower()
+        if homepage_tail_re.search(low_path):
+            continue
+        for suffix in IR_PRESENTATION_PATHS:
+            pages.append(urljoin(root + "/", suffix.lstrip("/")))
     return list(dict.fromkeys(pages))
 
 
@@ -966,6 +1130,7 @@ def main() -> int:
     # --------------------
     presentation_source_idx = 1
     presentation_rows: List[Tuple[str, str, Optional[str], str, str]] = []
+    presentation_rejected_rows: List[Dict[str, str]] = []
     web_ir_to_use = web_ir_override or empresa.get("web_ir")
     if web_ir_to_use:
         try:
@@ -991,9 +1156,30 @@ def main() -> int:
         for ir_page in ir_pages:
             try:
                 ir_html = request_text(session, ir_page)
-                presentation_rows.extend(extract_presentation_rows(ir_html, ir_page))
+                rows, rejected_rows = extract_presentation_rows(ir_html, ir_page)
+                presentation_rows.extend(rows)
+                for rej in rejected_rows:
+                    rej["discovered_from"] = ir_page
+                presentation_rejected_rows.extend(rejected_rows)
             except Exception as exc:
                 log_lim(f"No se pudo cargar/scrapear IR page {ir_page}: {exc}")
+    if presentation_rejected_rows:
+        for idx, rej in enumerate(presentation_rejected_rows, 1):
+            out["fuentes_descartadas"].append(
+                {
+                    "source_id": f"SRC_PR_REJ_{idx:03d}",
+                    "url": rej.get("url"),
+                    "title": rej.get("title"),
+                    "status": "REJECTED_NAVIGATION_OR_INDEX_HTML",
+                    "reason": rej.get("reason") or "navigation_or_index_html",
+                    "detail": rej.get("detail"),
+                    "discovered_from": rej.get("discovered_from"),
+                }
+            )
+        log_lim(
+            "Investor presentation HTML rows discarded as navigation/index: "
+            f"{len(presentation_rejected_rows)}"
+        )
     if presentation_rows:
         dedup_by_url = {row[0]: row for row in presentation_rows}
         dedup_by_name: Dict[str, Tuple[str, str, Optional[str], str, str]] = {}
@@ -1014,6 +1200,7 @@ def main() -> int:
     for href, period, fecha_evento, row_text, doc_kind in presentation_rows:
         source_id = f"SRC_PR_{presentation_source_idx:03d}"
         presentation_source_idx += 1
+        source_tipo = classify_presentation_source_type(row_text or "", href, row_text or "")
 
         try:
             base = f"{source_id}_PRESENTATION_{safe_slug(period)}"
@@ -1060,7 +1247,7 @@ def main() -> int:
                 {
                     "source_id": source_id,
                     "categoria": "IR",
-                    "tipo": "INVESTOR_PRESENTATION",
+                    "tipo": source_tipo,
                     "titulo": pretty_name,
                     "url": href,
                     "local_path": raw_dir_local_path(raw_dir, txt_name),
@@ -1139,11 +1326,16 @@ def main() -> int:
             fallback_idx += 1
             period = normalize_period(sec_src.get("fecha_publicacion") or today_iso())
             tipo_sec = clean_ws(str(sec_src.get("tipo") or "SEC"))
+            fallback_tipo = classify_presentation_source_type(
+                clean_ws(str(sec_src.get("titulo") or tipo_sec)),
+                clean_ws(str(sec_src.get("url") or "")),
+                clean_ws(str(sec_src.get("notas") or "")),
+            )
             out["fuentes"].append(
                 {
                     "source_id": source_id,
                     "categoria": "IR",
-                    "tipo": "INVESTOR_PRESENTATION",
+                    "tipo": fallback_tipo,
                     "titulo": f"SEC Filing Context - {tipo_sec} - {period}",
                     "url": sec_src.get("url") or "",
                     "local_path": local_path,

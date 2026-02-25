@@ -1,11 +1,11 @@
 {
   "version_esquema": "AgentReport_v1",
   "caso_id": "CASE_20260223_GCT",
-  "fecha_corte": "2026-02-23",
+  "fecha_corte": "2026-02-24",
   "agente": {
     "agent_role": "BULL",
-    "agent_nombre": "BULL_THESIS_v1",
-    "modelo": "standard",
+    "agent_nombre": "BULL_v1",
+    "modelo": "gemini-pro-optimized",
     "idioma": "es"
   },
   "input_refs": {
@@ -15,59 +15,66 @@
   },
   "resumen_ejecutivo": {
     "bullets": [
-      "El mercado descuenta un colapso del FCF (-6% a -13% CAGR), pero GCT está generando caja récord ($126M YTD Q3-25, +41% YoY) y reduciendo G&A (-44% Q3 YoY).",
-      "Cotiza a 8.8x P/FCF y 11.4% FCF yield con 20% del market cap en caja neta ($260M) y sin deuda financiera material, ofreciendo margen de seguridad profundo.",
-      "La asimetría es brutal: el precio actual solo exige que el negocio NO colapse; la estabilidad o crecimiento moderado justifican un re-rating a 12-15x.",
-      "Recompras activas (~8% del market cap anualizado implícito en CFF) y normalización de gastos operativos son catalizadores hard que fuerzan el cierre del gap.",
-      "Riesgos de gobernanza y márgenes existen, pero están más que descontados en una valoración de 'distressed asset' para una empresa en crecimiento."
+      "Cotiza a ~6.2x P/FCF con un FCF Yield del ~16%, niveles que descuentan un escenario de declive severo injustificado por los datos recientes.",
+      "La caja neta de ~$260M y un FCF TTM de ~$201M ofrecen un margen de seguridad tangible frente a la opacidad del pasivo.",
+      "El crecimiento de ingresos en 2025 (YoY positivo en Q1, Q2, Q3) refuta la hipótesis de 'peak earnings' inmediato.",
+      "La expansión operativa muestra disciplina: G&A disminuye en intensidad relativa, mejorando el apalancamiento operativo.",
+      "El riesgo de 'caja falsa' se mitiga parcialmente por la consistencia de los saldos bancarios reportados y la recompra/M&A ejecutados."
     ],
     "veredicto_role_local": "APTO",
-    "confianza_0_1": 0.85
+    "confianza_0_1": 0.75
   },
   "claims": [
     {
       "claim_id": "CLM_BULL_001",
-      "tipo": "HECHO",
+      "tipo": "INFERENCIA",
       "criticidad": "CRITICO",
-      "enunciado": "La generación de caja operativa se está acelerando (+41% YTD 2025), desmintiendo la tesis de 'earnings fake' o contracción del negocio.",
-      "confianza_0_1": 0.9,
+      "enunciado": "La valoración actual de 6.2x P/FCF implica una expectativa de contracción permanente que contradice el crecimiento observado.",
+      "confianza_0_1": 0.85,
       "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_004",
-          "ubicacion": "10-Q Q3-2025",
-          "cita_corta": "CFO 9M-2025 $126.3M vs $89.7M 9M-2024 (+41%)",
-          "interpretacion": "Run-rate anualizado apunta a >$160M CFO, récord histórico."
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.fcf_usd",
+          "cita_corta": "fcf_usd: 201,297,000; market_cap: 1.25B.",
+          "interpretacion": "El mercado paga menos de 7 años de la caja actual generada."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "ubicacion": "historico_trimestral",
+          "cita_corta": "Ingresos Q3-2025: 332M vs Q3-2024: 303M.",
+          "interpretacion": "La empresa sigue creciendo YoY, no contrayéndose."
         }
       ],
       "falsacion": {
-        "test": "CFO anual FY2025 cae por debajo de $130M",
+        "test": "Ingresos YoY caen >5% en dos trimestres consecutivos o FCF TTM cae <100M.",
         "ventana_meses": {
-          "min": 1,
-          "max": 3
+          "min": 3,
+          "max": 9
         },
-        "fuente_prevista": "10-K"
+        "fuente_prevista": "earnings"
       }
     },
     {
       "claim_id": "CLM_BULL_002",
       "tipo": "HECHO",
-      "criticidad": "CRITICO",
-      "enunciado": "La normalización de G&A es real y agresiva (-44% YoY en Q3), liberando margen operativo estructuralmente oculto en 2024.",
-      "confianza_0_1": 0.88,
-      "impacto": "ALTO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La posición de caja de $260M representa ~20% del Market Cap, proporcionando un suelo de valoración defensivo.",
+      "confianza_0_1": 0.95,
+      "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_004",
-          "ubicacion": "10-Q Q3-2025 Income Statement",
-          "cita_corta": "G&A Q3-2025 $8.5M vs $15.3M Q3-2024",
-          "interpretacion": "La corrección de la 'explosión de gastos' de FY24 está en marcha, mejorando unit economics."
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo.caja_usd",
+          "cita_corta": "caja_usd: 259,759,000.",
+          "interpretacion": "Liquidez inmediata verificable en balance."
         }
       ],
       "falsacion": {
-        "test": "G&A vuelve a subir >$15M en un trimestre sin explicación",
+        "test": "Caja reportada cae >30% sin explicación por M&A o recompras.",
         "ventana_meses": {
           "min": 3,
           "max": 6
@@ -77,272 +84,228 @@
     },
     {
       "claim_id": "CLM_BULL_003",
-      "tipo": "INFERENCIA",
+      "tipo": "HIPOTESIS",
       "criticidad": "IMPORTANTE",
-      "enunciado": "El balance es una fortaleza defensiva ignorada: $260M en caja neta cubren >25 meses de obligaciones de leasing corrientes, anulando riesgo existencial a corto plazo.",
-      "confianza_0_1": 0.95,
+      "enunciado": "Los pasivos por arrendamiento ($484M) son operativos y están cubiertos por el flujo de caja operativo, no representando riesgo de insolvencia inminente.",
+      "confianza_0_1": 0.7,
       "impacto": "MEDIO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_001",
-          "ubicacion": "10-K FY2024",
-          "cita_corta": "Cash $259.8M; Current Lease Liab $88.5M; Interest Expense $0.26M",
-          "interpretacion": "Posición de caja neta masiva relativo al market cap (~20%) y deuda financiera cero."
+          "source_id": "TruthPack_v1",
+          "ubicacion": "lease_data",
+          "cita_corta": "Lease liabilities: 484M; CFO TTM: 202M.",
+          "interpretacion": "El CFO anual cubre casi el 50% de la deuda total de leases (que vencen a varios años)."
         }
       ],
       "falsacion": {
-        "test": "Caja cae por debajo de $150M sin M&A o recompras que lo justifiquen",
+        "test": "Ratio CFO / Lease Payments (estimados) cae por debajo de 1.5x.",
         "ventana_meses": {
-          "min": 3,
+          "min": 6,
           "max": 12
         },
-        "fuente_prevista": "10-Q"
-      }
-    },
-    {
-      "claim_id": "CLM_BULL_004",
-      "tipo": "INFERENCIA",
-      "criticidad": "IMPORTANTE",
-      "enunciado": "El mercado está aplicando un descuento por riesgo de gobernanza (tasa ~12%+) que ignora la realidad operativa; la estabilidad de flujos forzará la compresión de este descuento.",
-      "confianza_0_1": 0.8,
-      "impacto": "ALTO",
-      "evidencias": [
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "ImpliedExpectations_v1",
-          "ubicacion": "Reverse DCF",
-          "cita_corta": "Implica caída de FCF -6% a -13% anual",
-          "interpretacion": "Expectativas desconectadas de la realidad de crecimiento YTD."
-        }
-      ],
-      "falsacion": {
-        "test": "P/FCF se mantiene <10x a pesar de 4 trimestres de FCF estable >$30M",
-        "ventana_meses": {
-          "min": 12,
-          "max": 18
-        },
-        "fuente_prevista": "precio"
+        "fuente_prevista": "10-K"
       }
     }
   ],
   "predicciones_calibracion": [
     {
       "pred_id": "PRED_BULL_001",
-      "descripcion": "Ingresos FY2025 > $1,280M y FCF > $130M.",
-      "probabilidad_0_1": 0.8,
-      "ventana_meses": {
-        "min": 1,
-        "max": 3
-      },
-      "criterio_validacion": "10-K FY2025 reporta Revenue > $1.28B y FCF (CFO-Capex) > $130M.",
-      "fuente_prevista": "10-K"
-    },
-    {
-      "pred_id": "PRED_BULL_002",
-      "descripcion": "Reducción de acciones en circulación >3% vs FY2024 por recompras.",
+      "descripcion": "El FCF TTM se mantendrá por encima de $180M en el próximo reporte anual.",
       "probabilidad_0_1": 0.75,
       "ventana_meses": {
         "min": 3,
         "max": 6
       },
-      "criterio_validacion": "Diluted shares outstanding < 28.3M en próximo reporte.",
-      "fuente_prevista": "10-Q"
+      "criterio_validacion": "Valor de FCF TTM calculado según TruthPack >= 180,000,000.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_BULL_002",
+      "descripcion": "El crecimiento de ingresos YoY continuará siendo positivo en el próximo trimestre reportado.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 1,
+        "max": 4
+      },
+      "criterio_validacion": "Ingresos trimestre actual > Ingresos mismo trimestre año anterior.",
+      "fuente_prevista": "earnings"
     }
   ],
   "peticiones_de_fuentes": [
     {
       "prioridad": "ALTA",
-      "item": "Desglose de 'Financing Activities' del Cash Flow 2025",
-      "por_que_importa": "Confirmar que los -$104M de salida son recompras (bullish) y no pagos de deuda oculta (bearish).",
-      "como_obtenerlo": "10-Q/K nota de flujo de efectivo o tabla detallada."
+      "item": "Desglose detallado de deuda financiera vs pasivos operativos.",
+      "por_que_importa": "Esencial para calcular el EV real y descartar deuda oculta.",
+      "como_obtenerlo": "Notas de los estados financieros en el próximo 10-K (Debt footnote)."
     },
     {
       "prioridad": "MEDIA",
-      "item": "Detalle de deuda total y vencimientos",
-      "por_que_importa": "Calcular EV preciso y confirmar ausencia de deuda financiera estructural.",
-      "como_obtenerlo": "Notas al balance en 10-K."
+      "item": "Detalle de origen geográfico de ingresos (USA vs otros).",
+      "por_que_importa": "Para evaluar riesgo geopolítico/arancelario específico.",
+      "como_obtenerlo": "Segment reporting en 10-K."
     }
   ],
   "payload": {
     "payload_version": "BullPayload_v1",
     "contenido": {
       "tesis_5_lineas": [
-        "GCT es una plataforma B2B de muebles 'large & bulky' altamente rentable y generadora de caja (FCF yield >11%).",
-        "Está infravalorada (8.8x P/FCF) porque el mercado la etiqueta erróneamente como 'fraude/broken growth' ignorando su liquidez real ($260M caja).",
-        "El catalizador es la persistencia: mantener FCF >$130M y reducir G&A forzará el reconocimiento del valor vía acumulación de caja o recompras.",
-        "Margen de seguridad masivo: 20% de la capitalización es caja neta, el negocio principal se valora a <7x ex-cash.",
-        "Vigilar la disciplina de márgenes y G&A para asegurar que la rentabilidad no se erosione por competencia."
+        "GCT opera un marketplace B2B global conectando manufactura asiática con demanda occidental, eliminando ineficiencias logísticas.",
+        "Cotiza a una valoración distressed (~6.2x P/FCF) a pesar de mantener crecimiento de ingresos y márgenes operativos robustos.",
+        "El mercado penaliza excesivamente la opacidad del balance, ignorando que la caja neta ($260M) y el FCF ($201M) cubren los riesgos.",
+        "Existe un margen de seguridad amplio: incluso sin crecimiento, el rendimiento del flujo de caja (16%) justifica la inversión.",
+        "La normalización de la transparencia financiera y la continuidad del FCF actuarán como catalizadores para un re-rating hacia 10-12x."
       ],
       "variant_perception": {
-        "que_cree_el_mercado": "Que el negocio es insostenible, los beneficios son de baja calidad y el FCF colapsará (-10% anual) o es falso.",
-        "por_que_podria_estarse_equivocando": "La generación de caja es verificable ($260M en balance auditado), los ingresos crecen (+9.7% Q3 YoY) y los costes se racionalizan (-44% G&A). El gap es de percepción de riesgo, no de realidad operativa.",
-        "variable_critica_principal": "RIESGO_CAPITAL",
+        "que_cree_el_mercado": "El mercado ve una 'caja negra' con riesgo contable y de 'peak earnings' post-COVID, asignando múltiplos de liquidación.",
+        "por_que_podria_estarse_equivocando": "El mercado confunde pasivos de arrendamiento (operativos en logística) con deuda financiera distress, y subestima la capacidad de la plataforma para retener volumen post-pandemia como demuestran los ingresos de 2025.",
+        "variable_critica_principal": "MULTIPLO_TERMINAL",
         "drivers_clave": [
           {
             "driver": "FCF",
-            "argumento": "El mercado espera contracción; la realidad muestra expansión (+41% YTD).",
+            "argumento": "La conversión de EBITDA a FCF ha sido volátil pero es estructuralmente positiva debido al modelo de negocio de inventario ligero (aunque creciente).",
             "observables_en_6_12_meses": [
-              "CFO trimestral >$35M consistente",
-              "Caja total superando $300M (pre-recompras)"
-            ]
-          },
-          {
-            "driver": "MULTIPLO",
-            "argumento": "8.8x es nivel de quiebra/fraude. La simple supervivencia y limpieza de auditoría justifica 12x.",
-            "observables_en_6_12_meses": [
-              "Presentación puntual de 10-K",
-              "Opinión limpia de auditor"
+              "Mantenimiento de FCF TTM > $180M.",
+              "Conversión CFO/Net Income > 0.8x consistente."
             ]
           }
         ]
       },
       "construccion_de_asimetria": {
         "por_que_no_es_especulativo": [
-          "Rentable desde hace años (Net Income positivo consistente)",
-          "Balance fortaleza (Cash > Deuda Financiera)",
-          "Modelo de negocio probado post-pandemia (crecimiento 2024/25 vs 2021)"
+          "Negocio real con $1.2B en ventas y beneficios GAAP positivos ($125M+).",
+          "Balance con caja neta significativa ($260M) sin vencimientos de deuda financiera inminentes reportados.",
+          "Historial de crecimiento orgánico probado más allá de adquisiciones."
         ],
-        "si_el_catalizador_se_retrasa": "La empresa sigue acumulando caja (~$140M/año); el valor contable crece y el downside está protegido por la liquidez.",
+        "si_el_catalizador_se_retrasa": "Si la transparencia no mejora, la empresa puede seguir recomprando acciones baratas con su FCF, incrementando el valor por acción (yield del 16%).",
         "opcionalidad_sana": [
-          "Re-rating de múltiplo (de 8x a 15x) por mejora de percepción",
-          "M&A acrecentador (ej. New Classic a 0.26x sales)",
-          "Short squeeze potencial dado el alto interés corto implícito en la narrativa"
+          "Expansión a nuevas categorías de producto 'large parcel'.",
+          "Potencial de ser adquirido por un jugador logístico mayor dado su bajo múltiplo."
         ]
       },
       "escenarios": [
         {
           "scenario_id": "BASE",
-          "descripcion": "Normalización: GCT demuestra estabilidad. FCF plano/ligero crecimiento. Mercado acepta que es un negocio real con riesgos de gobernanza, revalorando a 12x P/FCF.",
+          "descripcion": "El mercado reconoce la sostenibilidad del negocio pero mantiene cierto descuento por riesgo China/Gobernanza.",
           "ventana_meses": {
             "min": 12,
             "probable": 18,
             "max": 24
           },
-          "probabilidad_0_1": 0.6,
+          "probabilidad_0_1": 0.5,
           "hipotesis_fundamentales": [
-            {
-              "variable": "INGRESOS",
-              "direccion": "ESTABLE",
-              "rango": "Crecimiento 5-10%",
-              "justificacion": "Maduración del marketplace"
-            },
-            {
-              "variable": "MARGEN_OPERATIVO",
-              "direccion": "MEJORA",
-              "rango": "12-13%",
-              "justificacion": "Apalancamiento de G&A compensa presión en Gross Margin"
-            },
             {
               "variable": "FCF",
               "direccion": "ESTABLE",
-              "rango": "$130M - $150M anual",
-              "justificacion": "Conversión sólida de beneficios"
+              "rango": "200M - 220M USD",
+              "justificacion": "Crecimiento moderado compensado por necesidades de capital de trabajo."
+            },
+            {
+              "variable": "MULTIPLO",
+              "direccion": "MEJORA",
+              "rango": "8x P/FCF",
+              "justificacion": "Ligera expansión al confirmarse que no es un fraude/quiebra."
             }
           ],
           "mecanismo_de_revaloracion": {
             "tipo": "RE_RATING",
-            "explicacion": "Compresión de prima de riesgo al no materializarse el 'colapso'.",
+            "explicacion": "Expansión de múltiplo P/FCF de 6.2x a 8x por menor percepción de riesgo.",
             "que_debe_observarse": [
-              "P/FCF expandiéndose a 12x",
-              "Filings limpios continuados"
+              "Reportes trimestrales limpios (sin auditor changes).",
+              "Estabilidad en márgenes."
             ]
           },
           "valoracion_indicativa": {
             "metodo": "MULTIPLO",
             "inputs_usados": [
-              "FCF Base $140M",
-              "Múltiplo 12x",
-              "Caja Neta $260M"
+              "FCF Base 200M",
+              "Target P/FCF 8x"
             ],
             "supuestos_explicitos": [
-              "Múltiplo 12x conservador para tech B2B con riesgo offshore"
+              "Deuda neta se mantiene neutra o mejora."
             ],
             "resultado_retorno_12_24m_pct_rango": {
-              "min": 30,
-              "base": 55,
-              "max": 80
+              "min": 25,
+              "base": 28,
+              "max": 35
             },
-            "nota": "Target Price ~$52-$60"
+            "nota": "Upside driven casi exclusivamente por 'mean reversion' conservadora."
           }
         },
         {
           "scenario_id": "BULL",
-          "descripcion": "Validación Institucional: Crecimiento continúa, márgenes se expanden por servicios, gobernanza mejora (auditor top tier). Re-rating a peers (15-18x).",
+          "descripcion": "Cierre del gap de valoración al disiparse dudas contables y mantener crecimiento de doble dígito.",
           "ventana_meses": {
             "min": 18,
             "probable": 24,
-            "max": 30
+            "max": 36
           },
           "probabilidad_0_1": 0.25,
           "hipotesis_fundamentales": [
             {
               "variable": "INGRESOS",
               "direccion": "MEJORA",
-              "rango": "Crecimiento >15%",
-              "justificacion": "Ganancia de cuota de mercado y M&A exitoso"
+              "rango": "Crecimiento >15% CAGR",
+              "justificacion": "Adopción acelerada del marketplace."
             },
             {
-              "variable": "FCF",
+              "variable": "MULTIPLO",
               "direccion": "MEJORA",
-              "rango": ">$170M anual",
-              "justificacion": "Escala operativa y servicios de alto margen"
+              "rango": "12x P/FCF",
+              "justificacion": "Múltiplo acorde a marketplace B2B en crecimiento."
             }
           ],
           "mecanismo_de_revaloracion": {
-            "tipo": "RE_RATING",
-            "explicacion": "Mercado deja de verla como 'trampa' y la ve como 'compounder'.",
+            "tipo": "EARNINGS_INFLECTION",
+            "explicacion": "Combinación de crecimiento de beneficios y re-rating fuerte.",
             "que_debe_observarse": [
-              "Entrada de institucionales long-only",
-              "Cobertura de analistas tier-1"
+              "Transparencia total en deuda.",
+              "Aceleración de crecimiento orgánico."
             ]
           },
           "valoracion_indicativa": {
             "metodo": "MULTIPLO",
             "inputs_usados": [
-              "FCF Bull $170M",
-              "Múltiplo 15x",
-              "Caja Neta $300M"
+              "FCF Bull 240M",
+              "Target P/FCF 12x"
             ],
             "supuestos_explicitos": [
-              "Múltiplo de plataforma growth razonable"
+              "Mercado deja de asignar descuento por 'China risk' excesivo."
             ],
             "resultado_retorno_12_24m_pct_rango": {
               "min": 100,
               "base": 130,
-              "max": 160
+              "max": 150
             },
-            "nota": "Target Price ~$80+"
+            "nota": "Potencial 'multi-bagger' si la tesis de calidad se confirma."
           }
         }
       ],
       "lo_que_tendria_que_ser_cierto_para_estar_equivocados": [
-        "Fraude contable real (caja no existe).",
-        "Pérdida masiva de clientes/GMV no reportada aún.",
-        "Aranceles/Regulación bloquean totalmente el modelo cross-border.",
-        "Margen bruto colapsa <18% por competencia."
+        "Que la posición de caja reportada ($260M) no sea accesible o veraz.",
+        "Que existan pasivos financieros fuera de balance (off-balance sheet) que consuman el FCF.",
+        "Que el modelo de negocio pierda tracción logística y los márgenes brutos caigan <20% permanentemente."
       ],
       "preguntas_criticas_abiertas": [
-        "¿Son reales los $260M en caja? (Verificación de auditor)",
-        "¿A qué corresponden los -$104M de financiación en H1-25? (Recompras vs Deuda oculta)",
-        "¿Por qué la discrepancia en el conteo de acciones diluidas?",
-        "¿Es sostenible la reducción de G&A o es maquillaje temporal?"
+        "¿Cuál es el desglose exacto de la 'Deuda Total' y sus covenants?",
+        "¿Es sostenible el nivel actual de capital de trabajo negativo/neutro?",
+        "¿Qué porcentaje del crecimiento es orgánico vs adquisiciones recientes?"
       ],
       "recomendacion_para_arbitro": {
-        "conviccion_preliminar_0_5": 4.0,
+        "conviccion_preliminar_0_5": 3.5,
         "riesgo_de_sesgo_confirmacion": "MEDIO",
         "en_que_no_debe_ceder_el_arbitro": [
-          "Exigir prueba de que la caja es real y accesible.",
-          "No aceptar múltiplos de valoración 'tech' sin descuento por riesgo offshore.",
-          "Vigilar la conversión EBIT->CFO por volatilidad."
+          "Exigir prueba de que el 'enterprise_value' nulo es un error de datos y no una ocultación.",
+          "Verificar la veracidad de la caja mediante los rendimientos financieros reportados (Interest Income).",
+          "No aceptar múltiplos proyectados sin validar la calidad del CFO histórico."
         ]
       }
     }
   },
   "log": {
     "limitaciones": [
-      "Falta desglose deuda total para EV preciso.",
-      "Falta detalle de CFF H1-2025 para confirmar recompras."
+      "Falta de EV impide valoración relativa precisa.",
+      "Dependencia de métricas TTM que pueden tener estacionalidad."
     ],
     "autochequeos": {
       "sin_metricas_inventadas": true,

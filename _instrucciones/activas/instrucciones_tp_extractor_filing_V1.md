@@ -76,6 +76,17 @@ La ecuación contable es: `delta_cash = cfo + cfi + cff + fx_effect + otros_ajus
 Si un campo NO aparece en el filing, devuelve `null` (NO asumas 0).
 Busca líneas como "Effect of exchange rate changes on cash" o similar.
 
+## 7c. EXTRACCIÓN DE DEUDA (IFRS/US)
+Extrae componentes de deuda financiera en balance:
+- `deuda_largo_plazo_usd`: non-current borrowings / non-current financial liabilities
+- `deuda_corto_plazo_usd`: current borrowings / current financial liabilities
+- `deuda_total_usd`: total debt (si está explícita)
+
+Reglas:
+- Prioriza líneas de borrowings/financial liabilities.
+- NO incluyas `lease liabilities` dentro de `deuda_total_usd` ni de componentes de deuda.
+- Si solo hay lease liabilities y no hay deuda financiera, deja deuda en `null`.
+
 ## 8. ESTRUCTURA DE OUTPUT
 
 ```json

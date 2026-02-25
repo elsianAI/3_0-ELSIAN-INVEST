@@ -3,6 +3,10 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+try:
+    from scripts.runners.clean_md_quality import is_clean_md_useful as _is_clean_md_useful_common
+except Exception:
+    from clean_md_quality import is_clean_md_useful as _is_clean_md_useful_common
 
 # Default truncation limits (overridable via engine_config.json → truncation_limits)
 _DEFAULT_LIMITS = {
@@ -61,6 +65,195 @@ STEP_SCHEMAS = {
 }
 
 _HIGH_VOLUME_OUTPUT_STEPS = {"BULL", "RED_TEAM", "ARBITRO"}
+
+
+_EXCERPT_HEAD_CHARS = 70_000
+_EXCERPT_TAIL_CHARS = 40_000
+_EXCERPT_WINDOW_RADIUS = 5_000
+_EXCERPT_MAX_WINDOWS = 24
+
+_FINANCIAL_ANCHOR_PATTERNS: list[tuple[str, int, re.Pattern[str]]] = [
+    # Balance sheet (highest priority)
+    ("balance_sheet", 3, re.compile(r"\bbalance\s+sheet\b", re.IGNORECASE)),
+    ("balance_sheet", 3, re.compile(r"\bstatement\s+of\s+financial\s+position\b", re.IGNORECASE)),
+    ("balance_sheet", 3, re.compile(r"\bconsolidated\s+balance\s+sheets?\b", re.IGNORECASE)),
+    ("balance_sheet", 3, re.compile(r"\bbilan\s+consolid[ée]\b", re.IGNORECASE)),
+    ("balance_sheet", 3, re.compile(r"\btotal\s+assets?\b", re.IGNORECASE)),
+    ("balance_sheet", 3, re.compile(r"\btotal\s+liabilit(?:y|ies)\b", re.IGNORECASE)),
+    ("balance_sheet", 3, re.compile(r"\btotal\s+de\s+l[\'’]?\s*actif(?:s)?\b", re.IGNORECASE)),
+    ("balance_sheet", 3, re.compile(r"\btotal\s+du\s+passif(?:s)?\b", re.IGNORECASE)),
+    ("balance_sheet", 3, re.compile(r"\btotal\s+equity\b", re.IGNORECASE)),
+    # Cash flow
+    ("cash_flow", 2, re.compile(r"\bcash\s+flow\b", re.IGNORECASE)),
+    ("cash_flow", 2, re.compile(r"\bstatement\s+of\s+cash\s+flows?\b", re.IGNORECASE)),
+    ("cash_flow", 2, re.compile(r"\bnet\s+cash\s+provided\s+by\b", re.IGNORECASE)),
+    ("cash_flow", 2, re.compile(r"\bflux\s+de\s+tr[ée]sorerie\b", re.IGNORECASE)),
+    ("cash_flow", 2, re.compile(r"\btableau\s+des\s+flux\s+de\s+tr[ée]sorerie\b", re.IGNORECASE)),
+    # Income statement
+    ("income_statement", 1, re.compile(r"\bincome\s+statement\b", re.IGNORECASE)),
+    ("income_statement", 1, re.compile(r"\bstatement\s+of\s+operations\b", re.IGNORECASE)),
+    ("income_statement", 1, re.compile(r"\bstatement\s+of\s+profit\s+or\s+loss\b", re.IGNORECASE)),
+    ("income_statement", 1, re.compile(r"\bcompte\s+de\s+r[ée]sultat\b", re.IGNORECASE)),
+    ("income_statement", 1, re.compile(r"\bprofit\s+for\s+the\s+year\b", re.IGNORECASE)),
+]
+
+
+def _normalize_excerpt_chunk(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text or "")).strip()
+
+
+def _coerce_excerpt_chunk(chunk: str, budget: int) -> str:
+    if budget <= 0:
+        return ""
+    if len(chunk) <= budget:
+        return chunk
+    return chunk[:budget]
+
+
+def _build_financial_focus_excerpt(
+    content: str,
+    filing_type: str,
+    limit: int,
+) -> tuple[str, dict]:
+    original_chars = len(content or "")
+    meta: dict = {
+        "mode": "full",
+        "filing_type": filing_type,
+        "limit": int(limit),
+        "original_chars": original_chars,
+        "head_chars": 0,
+        "tail_chars": 0,
+        "window_radius": _EXCERPT_WINDOW_RADIUS,
+        "max_windows": _EXCERPT_MAX_WINDOWS,
+        "anchors_detected": 0,
+        "anchors_hit_sample": [],
+        "selected_windows": 0,
+    }
+    if original_chars <= limit:
+        meta["output_chars"] = original_chars
+        return content, meta
+
+    anchor_hits: list[dict] = []
+    for label, weight, pattern in _FINANCIAL_ANCHOR_PATTERNS:
+        for match in pattern.finditer(content):
+            anchor_hits.append(
+                {
+                    "label": label,
+                    "weight": weight,
+                    "start": int(match.start()),
+                    "end": int(match.end()),
+                    "match": _normalize_excerpt_chunk(match.group(0))[:120],
+                }
+            )
+    meta["anchors_detected"] = len(anchor_hits)
+    meta["anchors_hit_sample"] = [
+        f"{hit['label']}:{hit['match']}" for hit in anchor_hits[:12]
+    ]
+
+    if not anchor_hits:
+        excerpt = content[:limit]
+        meta["mode"] = "linear_fallback"
+        meta["output_chars"] = len(excerpt)
+        return excerpt, meta
+
+    anchor_hits.sort(key=lambda h: (-int(h["weight"]), int(h["start"])))
+    chosen_windows: list[dict] = []
+    for hit in anchor_hits:
+        start = max(0, int(hit["start"]) - _EXCERPT_WINDOW_RADIUS)
+        end = min(original_chars, int(hit["start"]) + _EXCERPT_WINDOW_RADIUS)
+        skip = False
+        for prev in chosen_windows:
+            prev_start = int(prev["start"])
+            prev_end = int(prev["end"])
+            if start <= prev_end and end >= prev_start:
+                prev["start"] = min(prev_start, start)
+                prev["end"] = max(prev_end, end)
+                prev["weight"] = max(int(prev.get("weight", 0)), int(hit["weight"]))
+                skip = True
+                break
+        if skip:
+            continue
+        chosen_windows.append(
+            {
+                "start": start,
+                "end": end,
+                "label": hit["label"],
+                "weight": hit["weight"],
+            }
+        )
+        if len(chosen_windows) >= _EXCERPT_MAX_WINDOWS:
+            break
+
+    chosen_windows.sort(key=lambda item: int(item["start"]))
+    merged_windows: list[tuple[int, int, str]] = []
+    for win in chosen_windows:
+        start = int(win["start"])
+        end = int(win["end"])
+        label = str(win["label"])
+        if merged_windows and start <= merged_windows[-1][1]:
+            prev_start, prev_end, prev_label = merged_windows[-1]
+            merged_windows[-1] = (
+                prev_start,
+                max(prev_end, end),
+                prev_label if prev_label else label,
+            )
+        else:
+            merged_windows.append((start, end, label))
+
+    head = _coerce_excerpt_chunk(content[:_EXCERPT_HEAD_CHARS], limit)
+    head_used = len(head)
+    remaining = max(0, limit - head_used)
+
+    tail_budget = min(_EXCERPT_TAIL_CHARS, remaining)
+    tail_start = max(0, original_chars - tail_budget)
+    tail = _coerce_excerpt_chunk(content[tail_start:], tail_budget)
+    tail_norm = _normalize_excerpt_chunk(tail)
+    middle_budget = max(0, limit - head_used - len(tail))
+
+    middle_parts: list[str] = []
+    seen_norm: set[str] = set()
+    if head:
+        seen_norm.add(_normalize_excerpt_chunk(head))
+    if tail_norm:
+        seen_norm.add(tail_norm)
+
+    selected_windows = 0
+    for idx, (start, end, label) in enumerate(merged_windows, start=1):
+        if middle_budget <= 0:
+            break
+        chunk = content[start:end]
+        chunk_norm = _normalize_excerpt_chunk(chunk)
+        if not chunk_norm or chunk_norm in seen_norm:
+            continue
+        marker = f"\n\n[[FOCUS_WINDOW_{idx}:{label}]]\n"
+        reserve_for_marker = len(marker)
+        if middle_budget <= reserve_for_marker:
+            break
+        allowed_chunk_budget = middle_budget - reserve_for_marker
+        chunk = _coerce_excerpt_chunk(chunk, allowed_chunk_budget)
+        if not chunk:
+            continue
+        middle_parts.append(marker + chunk)
+        middle_budget -= len(marker) + len(chunk)
+        seen_norm.add(chunk_norm)
+        selected_windows += 1
+
+    if selected_windows == 0:
+        excerpt = content[:limit]
+        meta["mode"] = "linear_fallback"
+        meta["output_chars"] = len(excerpt)
+        return excerpt, meta
+
+    excerpt = head + "".join(middle_parts) + tail
+    if len(excerpt) > limit:
+        excerpt = excerpt[:limit]
+
+    meta["mode"] = "smart_excerpt"
+    meta["head_chars"] = head_used
+    meta["tail_chars"] = len(tail)
+    meta["selected_windows"] = selected_windows
+    meta["output_chars"] = len(excerpt)
+    return excerpt, meta
 
 
 def build_prompt(
@@ -143,9 +336,12 @@ def build_filing_prompt(
     source_entry: dict,
     ticker: str,
     instrucciones_dir: Path,
-) -> str:
+) -> tuple[str, dict]:
     """
     Prompt para TP_EXTRACTOR por filing individual.
+
+    Returns:
+      (prompt, excerpt_meta)
 
     Strategy:
       1. If .ixbrl.json exists alongside the filing, inject pre-extracted
@@ -155,6 +351,12 @@ def build_filing_prompt(
       3. For .txt/.htm, truncate at 300k chars as safety net.
     """
     parts = []
+    excerpt_meta: dict = {
+        "mode": "not_applicable",
+        "filing_type": str(source_entry.get("form_type", source_entry.get("tipo", "UNKNOWN"))),
+        "source_id": str(source_entry.get("source_id", "N/A")),
+        "input_path": str(filing_path),
+    }
 
     # Instructions
     instr_path = instrucciones_dir / INSTRUCTION_MAP["TP_EXTRACTOR_FILING"]
@@ -195,24 +397,6 @@ def build_filing_prompt(
 
     # Filing content — prefer .clean.md over .htm/.txt for financial filings,
     # but only if the .clean.md has actual useful content (semantic quality gate).
-    def _clean_md_is_useful(text: str) -> bool:
-        """Check if .clean.md has real financial data, not just 'Section not found' stubs."""
-        # Criterion 1: must not have ALL 4 sections missing
-        if text.count("_Section not found in filing._") >= 4:
-            return False
-        # Criterion 2: at least 5 table rows with numeric data
-        numeric_rows = re.findall(r"^\|.*\d[\d,\.]*.*\|$", text, re.MULTILINE)
-        if len(numeric_rows) < 5:
-            return False
-        # Criterion 3: at least one valid financial section (heading NOT followed by "not found")
-        for section in ("INCOME STATEMENT", "BALANCE SHEET", "CASH FLOW"):
-            idx = text.find(f"## {section}")
-            if idx >= 0:
-                after = text[idx:idx + 200]
-                if "_Section not found" not in after:
-                    return True
-        return False
-
     # ── PDF safety: prefer .txt companion over raw PDF binary ──
     # PDF binaries contain null bytes that crash subprocess.run() when passed
     # as CLI arguments. Prefer the .txt companion if it has real content.
@@ -228,21 +412,48 @@ def build_filing_prompt(
         clean_candidate = filing_path.parent / (filing_path.stem + ".clean.md")
         if clean_candidate.exists():
             _clean_content = clean_candidate.read_text(errors="replace")
-            if _clean_md_is_useful(_clean_content):
+            if _is_clean_md_useful_common(_clean_content):
                 content_path = clean_candidate
 
     if content_path.exists():
         content = content_path.read_text(errors="replace")
+        excerpt_meta["input_path"] = str(content_path)
         content = content.replace("\x00", "")  # sanitize null bytes (safety net)
         is_clean_md = content_path.name.endswith(".clean.md")
         if is_clean_md:
             limit = _limits["filing_clean_md_chars"]
+            raw_chars = len(content)
             if len(content) > limit:
                 content = content[:limit] + f"\n\n... [TRUNCATED at {limit // 1000}k safety cap]"
+            excerpt_meta.update(
+                {
+                    "mode": "clean_md",
+                    "limit": int(limit),
+                    "original_chars": raw_chars,
+                    "output_chars": len(content),
+                    "selected_windows": 0,
+                }
+            )
         else:
             limit = _limits["filing_raw_chars"]
+            raw_chars = len(content)
             if len(content) > limit:
-                content = content[:limit] + f"\n\n... [TRUNCATED at {limit // 1000}k]"
+                filing_type_hint = str(
+                    source_entry.get("form_type", source_entry.get("tipo", "UNKNOWN"))
+                )
+                excerpted, focus_meta = _build_financial_focus_excerpt(content, filing_type_hint, limit)
+                content = excerpted
+                excerpt_meta.update(focus_meta)
+            else:
+                excerpt_meta.update(
+                    {
+                        "mode": "raw_full",
+                        "limit": int(limit),
+                        "original_chars": raw_chars,
+                        "output_chars": len(content),
+                        "selected_windows": 0,
+                    }
+                )
         parts.append(f"# FILING CONTENT\n\n```\n{content}\n```")
 
     # Canonical field map — tells the LLM exactly what field names to output
@@ -278,10 +489,15 @@ def build_filing_prompt(
         "- `pasivos_totales_usd` — Total liabilities\n"
         "- `patrimonio_usd` — Total stockholders' equity\n"
         "- `deuda_total_usd` — Total debt (short-term + long-term)\n"
+        "- `deuda_largo_plazo_usd` — Long-term borrowings / non-current financial liabilities (EXCLUDE lease liabilities)\n"
+        "- `deuda_corto_plazo_usd` — Short-term borrowings / current financial liabilities (EXCLUDE lease liabilities)\n"
         "- `caja_usd` — Cash and cash equivalents\n"
         "- `cuentas_por_cobrar_usd` — Accounts receivable\n"
         "- `inventarios_usd` — Inventories\n"
         "- `cuentas_por_pagar_usd` — Accounts payable\n\n"
+        "Debt extraction rule: map borrowings / financial liabilities into "
+        "`deuda_largo_plazo_usd` and `deuda_corto_plazo_usd`. "
+        "Do NOT include lease liabilities in debt fields.\n\n"
         "IMPORTANT: For each period entry, include `periodo` (format: FY2024 or Q1-2024) "
         "and `fecha_fin` (format: YYYY-MM-DD). Set values to `null` if not found in the filing.\n"
     )
@@ -303,7 +519,8 @@ def build_filing_prompt(
         "Responde ÚNICAMENTE con el JSON parcial TruthPack."
     )
 
-    return "\n\n---\n\n".join(parts)
+    prompt = "\n\n---\n\n".join(parts)
+    return prompt, excerpt_meta
 
 
 def _normalize_backend_output(output: dict) -> dict:

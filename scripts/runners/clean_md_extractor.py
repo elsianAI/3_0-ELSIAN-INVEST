@@ -20,6 +20,10 @@ from pathlib import Path
 from typing import Optional
 
 from bs4 import BeautifulSoup, Tag
+try:
+    from clean_md_quality import is_clean_md_useful as _is_clean_md_useful_common
+except Exception:
+    from scripts.runners.clean_md_quality import is_clean_md_useful as _is_clean_md_useful_common
 
 # ── Section heading patterns ─────────────────────────────────────────
 # Each tuple: (section_key, compiled regex for section heading)
@@ -29,23 +33,35 @@ SECTION_PATTERNS: list[tuple[str, re.Pattern]] = [
     ("balance_sheet", re.compile(
         r"(?:consolidated\s+)?balance\s+sheet|"
         r"(?:consolidated\s+)?statements?\s+of\s+financial\s+position|"
-        r"estado[s]?\s+de\s+situaci[oó]n\s+financiera",
+        r"estado[s]?\s+de\s+situaci[oó]n\s+financiera|"
+        # V5.1 A4 — IFRS/FR additions
+        r"bilan\s+consolid[ée]|"
+        r"[ée]tat.*situation\s+financi[èe]re",
         re.IGNORECASE)),
     ("income_statement", re.compile(
         r"(?:consolidated\s+)?(?:statements?\s+of\s+)?(?:income|operations|"
         r"comprehensive\s+(?:income|loss)|earnings|profit\s+(?:and|or)\s+loss)|"
         r"(?:consolidated\s+)?(?:income|profit)\s+statement|"
-        r"estado[s]?\s+de\s+resultados",
+        r"estado[s]?\s+de\s+resultados|"
+        # V5.1 A4 — IFRS/FR additions
+        r"compte\s+de\s+r[ée]sultat|"
+        r"r[ée]sultat\s+consolid[ée]",
         re.IGNORECASE)),
     ("cash_flow", re.compile(
-        r"(?:consolidated\s+)?statements?\s+of\s+cash\s*flow|"
-        r"(?:consolidated\s+)?cash\s*flow\s+statement|"
-        r"estado[s]?\s+de\s+flujos?\s+de\s+efectivo",
+        r"(?:consolidated\s+)?statements?\s+of\s+cash[\s-]?flow|"
+        r"(?:consolidated\s+)?cash[\s-]?flow\s+statement|"
+        r"estado[s]?\s+de\s+flujos?\s+de\s+efectivo|"
+        # V5.1 A4 — IFRS/FR additions
+        r"flux\s+de\s+tr[ée]sorerie|"
+        r"tableau\s+des\s+flux",
         re.IGNORECASE)),
     ("equity", re.compile(
         r"(?:consolidated\s+)?statements?\s+of\s+(?:stockholders|shareholders|changes\s+in)\s*(?:'s?)?\s*equity|"
         r"(?:consolidated\s+)?equity\s+statement|"
-        r"estado[s]?\s+de\s+cambios\s+en\s+el\s+patrimonio",
+        r"estado[s]?\s+de\s+cambios\s+en\s+el\s+patrimonio|"
+        # V5.1 A4 — IFRS/FR additions
+        r"capitaux\s+propres|"
+        r"variation.*capitaux",
         re.IGNORECASE)),
 ]
 
@@ -258,50 +274,15 @@ def extract_financial_tables(html_path: Path) -> str:
     assembled = "\n\n".join(parts)
 
     # Quality gate: return empty string if .clean.md would be useless
-    if not _is_clean_md_useful(assembled):
+    if not _is_clean_md_useful_common(assembled, mode="html_table"):
         return ""
 
     return assembled
 
 
 def _is_clean_md_useful(text: str) -> bool:
-    """Semantic quality gate for .clean.md content.
-
-    Returns True only if the extraction has real financial data.
-    Three criteria must ALL be met:
-    1. Not all 4 sections are 'Section not found'
-    2. At least 5 table rows with numeric data
-    3. At least one valid financial section (balance/income/cashflow)
-       with numeric table rows in that section
-    """
-    if not text:
-        return False
-
-    # Criterion 1: must not have all 4 sections missing
-    if text.count("_Section not found in filing._") >= 4:
-        return False
-
-    # Criterion 2: at least 5 table rows with numeric data globally
-    numeric_rows = re.findall(r"^\|.*\d[\d,\.]*.*\|$", text, re.MULTILINE)
-    if len(numeric_rows) < 5:
-        return False
-
-    # Criterion 3: at least one core financial section with numeric rows
-    for section_name in ("INCOME STATEMENT", "BALANCE SHEET", "CASH FLOW"):
-        idx = text.find(f"## {section_name}")
-        if idx < 0:
-            continue
-        # Find the end of this section (next ## or end of text)
-        next_section = text.find("\n## ", idx + 1)
-        section_text = text[idx:next_section] if next_section > 0 else text[idx:]
-        if "_Section not found" in section_text:
-            continue
-        # Check for numeric rows within this section
-        section_numeric = re.findall(r"^\|.*\d[\d,\.]*.*\|$", section_text, re.MULTILINE)
-        if len(section_numeric) >= 3:  # at least 3 numeric rows per valid section
-            return True
-
-    return False
+    """Backward-compatible wrapper around shared quality gate."""
+    return _is_clean_md_useful_common(text, mode="html_table")
 
 
 if __name__ == "__main__":

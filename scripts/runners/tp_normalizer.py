@@ -166,6 +166,31 @@ BS_FIELD_ALIASES: dict[str, set[str]] = {
         "accounts_payable_usd", "accounts_payable",
         "cuentas_por_pagar",
     },
+    # ── Debt components for imputation (V5.1 — A2) ──
+    "deuda_largo_plazo_usd": {
+        "long_term_debt_usd", "non_current_borrowings",
+        "non_current_financial_liabilities", "borrowings_non_current",
+        "emprunts_non_courants", "deuda_largo_plazo",
+        "long_term_borrowings", "non_current_debt",
+        "other_financial_liabilities_non_current",
+        "non_current_other_financial_liabilities",
+        "financial_liabilities_non_current",
+        "borrowings_and_other_financial_liabilities_non_current",
+        "emprunts_et_autres_passifs_financiers_non_courants",
+        "passifs_financiers_non_courants",
+    },
+    "deuda_corto_plazo_usd": {
+        "short_term_debt_usd", "current_borrowings",
+        "current_financial_liabilities", "borrowings_current",
+        "current_portion_of_long_term_debt", "emprunts_courants",
+        "deuda_corto_plazo", "short_term_borrowings", "current_debt",
+        "other_financial_liabilities_current",
+        "current_other_financial_liabilities",
+        "financial_liabilities_current",
+        "borrowings_and_other_financial_liabilities_current",
+        "emprunts_et_autres_passifs_financiers_courants",
+        "passifs_financiers_courants",
+    },
 }
 
 _BS_ALIAS_INDEX: dict[str, str] = {}

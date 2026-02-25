@@ -113,6 +113,11 @@ Examples:
         action="store_true",
         help="Skip interactive model plan (use defaults)",
     )
+    p_pipeline.add_argument(
+        "--reset",
+        action="store_true",
+        help="Reset state from scratch (V5.1 B1). Without this, existing progress is preserved.",
+    )
     _add_empresa_hint_args(p_pipeline)
 
     # continue
@@ -307,6 +312,7 @@ Examples:
     )
     p_monitor.add_argument("ticker", type=str)
     p_monitor.add_argument("--date", type=str, default=None)
+    p_monitor.add_argument("--no-plan", action="store_true", help="Skip interactive model plan")
 
     # scanner
     p_scanner = subparsers.add_parser(
@@ -315,6 +321,7 @@ Examples:
         description="Escaneo de nuevos candidatos/alertas de mercado.",
     )
     p_scanner.add_argument("--date", type=str, default=None)
+    p_scanner.add_argument("--no-plan", action="store_true", help="Skip interactive model plan")
 
     # scout
     p_scout = subparsers.add_parser(
@@ -323,6 +330,7 @@ Examples:
         description="Busca señales en transcripciones y eventos para generar candidatos.",
     )
     p_scout.add_argument("--type", type=str, default="Q", choices=["Q", "E"], help="Scout type (Q=quantitative, E=exploratory)")
+    p_scout.add_argument("--no-plan", action="store_true", help="Skip interactive model plan")
 
     # outcome
     p_outcome = subparsers.add_parser(
@@ -332,6 +340,7 @@ Examples:
     )
     p_outcome.add_argument("ticker", type=str)
     p_outcome.add_argument("--date", type=str, default=None)
+    p_outcome.add_argument("--no-plan", action="store_true", help="Skip interactive model plan")
 
     # evaluar
     p_evaluar = subparsers.add_parser(
@@ -341,6 +350,7 @@ Examples:
     )
     p_evaluar.add_argument("ticker", type=str)
     p_evaluar.add_argument("--date", type=str, default=None)
+    p_evaluar.add_argument("--no-plan", action="store_true", help="Skip interactive model plan")
 
     # review — compile meta-review prompt
     p_review = subparsers.add_parser(
@@ -378,6 +388,22 @@ Examples:
     )
     p_benchmark.add_argument("ticker", type=str)
     p_benchmark.add_argument("--date", type=str, default=None)
+
+    # errors — registro centralizado de errores del pipeline
+    p_errors = subparsers.add_parser(
+        "errors",
+        help="Consulta el registro centralizado de errores del pipeline.",
+        description="Muestra, reconstruye y gestiona el historial de errores en _errors/.",
+    )
+    errors_sub = p_errors.add_subparsers(dest="errors_command")
+
+    p_errors_list = errors_sub.add_parser("list", help="Lista errores abiertos.")
+    p_errors_list.add_argument("--ticker", type=str, default=None, help="Filtra por ticker")
+    p_errors_list.add_argument("--step", type=str, default=None, help="Filtra por paso del pipeline")
+    p_errors_list.add_argument("--all", dest="show_all", action="store_true", help="Muestra también RESOLVED")
+
+    errors_sub.add_parser("rebuild", help="Reconstruye open_errors.json escaneando todos los _estado.json.")
+    errors_sub.add_parser("stats", help="Muestra conteo de errores por step, ticker y tipo.")
 
     raw_argv = list(sys.argv[1:])
     parsed_argv: list[str] = []
@@ -471,6 +497,9 @@ Examples:
     elif args.command in ("monitor", "scanner", "scout", "outcome", "evaluar", "benchmark"):
         _cmd_operation(config, args)
 
+    elif args.command == "errors":
+        _cmd_errors(config, args)
+
 
 # ── Command implementations ────────────────────────────────
 
@@ -480,6 +509,7 @@ def _run_model_plan_assistant(
     *,
     no_plan: bool = False,
     step_names: list[str] | None = None,
+    operation: str = "PIPELINE",
 ) -> EngineConfig:
     """Ask the user to confirm or override model-profile plan before execution."""
     if not config.is_v2:
@@ -494,7 +524,7 @@ def _run_model_plan_assistant(
         resolve_model_list,
     )
 
-    plan = config.snapshot_pipeline_model_plan(step_names)
+    plan = config.snapshot_pipeline_model_plan(step_names, operation=operation)
     if not plan:
         return config
 
@@ -722,7 +752,7 @@ def _run_model_plan_assistant(
                 continue
 
             config = config.with_step_model_overrides(overrides)
-            new_plan = config.snapshot_pipeline_model_plan(step_names)
+            new_plan = config.snapshot_pipeline_model_plan(step_names, operation=operation)
             new_models = build_effective_model_set(new_plan)
             pending_models = new_models - checked
             if pending_models:
@@ -757,7 +787,7 @@ def _run_model_plan_assistant(
             continue
 
         config = config.with_step_model_overrides(overrides)
-        new_plan = config.snapshot_pipeline_model_plan(step_names)
+        new_plan = config.snapshot_pipeline_model_plan(step_names, operation=operation)
         new_models = build_effective_model_set(new_plan)
         pending_models = new_models - checked
         if pending_models:
@@ -1450,6 +1480,7 @@ def _cmd_pipeline(config, args):
         exchange=getattr(args, "exchange", ""),
         country=getattr(args, "country", ""),
         web_ir=getattr(args, "web_ir", ""),
+        reset=getattr(args, "reset", False),
     )
     final_state = result.get("state", {})
     if final_state.get("estado_pipeline") != "COMPLETO":
@@ -1840,6 +1871,14 @@ def _cmd_operation(config, args):
         print(f"[engine] Operation {op} not found in pipeline_dag config")
         return
 
+    # ── Model plan assistant + preflight (same UX as pipeline) ─
+    config = _run_model_plan_assistant(
+        config,
+        no_plan=getattr(args, "no_plan", False),
+        operation=op,
+    )
+    preflight_backends(config, model_profiles=config.effective_model_set(operation=op))
+
     print(f"[engine] Running operation: {op}")
     for step_def in dag:
         step = step_def.get("step", "?")
@@ -1855,13 +1894,13 @@ def _cmd_operation(config, args):
         else:
             ticker = getattr(args, "ticker", "SYSTEM")
             date_str = getattr(args, "date", None) or date.today().isoformat()
-            model = getattr(args, "model", "Codex")
             # System-level operations use their dedicated directories
             _OP_DEDICATED_PATHS = {"SCANNER": "scanner", "SCOUT": "scout"}
             if op in _OP_DEDICATED_PATHS:
                 case_dir = config.get_path(_OP_DEDICATED_PATHS[op]) / date_str
             else:
-                case_dir = config.get_path("casos") / ticker.upper() / f"{date_str}_{model}"
+                # Use the same folder as the pipeline (date only, no model suffix)
+                case_dir = config.get_path("casos") / ticker.upper() / date_str
             if not case_dir.exists():
                 case_dir.mkdir(parents=True, exist_ok=True)
             result = execute_step(config, case_dir, step, ticker.upper())
@@ -2067,6 +2106,78 @@ def _cmd_review_status(config, args):
             f"{r['caso']:<16} {r['pipeline']:<12} {r['prompt']:<10} "
             f"{r['respuesta']:<12} {r['ingesta']:<10} {r['veredicto']}"
         )
+
+
+def _cmd_errors(config, args) -> None:
+    """Comando: python3 -m engine errors {list|rebuild|stats}."""
+    from .error_tracker import (
+        list_open_errors,
+        rebuild_open_errors,
+        stats_open_errors,
+    )
+
+    sub = getattr(args, "errors_command", None)
+
+    if sub == "rebuild" or sub is None and not hasattr(args, "show_all"):
+        if sub == "rebuild":
+            count = rebuild_open_errors(config.workspace)
+            print(f"[errors] open_errors.json reconstruido. {count} error(s) activo(s) encontrado(s).")
+            return
+
+    if sub == "stats" or sub is None:
+        if sub == "stats":
+            stats = stats_open_errors()
+            print(f"[errors] Total errores abiertos: {stats['total_open']}")
+            if stats["by_step"]:
+                print("  Por paso:")
+                for step, n in stats["by_step"].items():
+                    print(f"    {step:<16} {n}")
+            if stats["by_ticker"]:
+                print("  Por ticker:")
+                for ticker, n in stats["by_ticker"].items():
+                    print(f"    {ticker:<12} {n}")
+            if stats["by_error_type"]:
+                print("  Por tipo:")
+                for etype, n in stats["by_error_type"].items():
+                    print(f"    {etype:<20} {n}")
+            return
+
+    # Default: list
+    ticker_filter = getattr(args, "ticker", None)
+    step_filter = getattr(args, "step", None)
+    errors = list_open_errors(
+        ticker=ticker_filter,
+        step=step_filter,
+    )
+
+    if not errors:
+        msg = "No hay errores abiertos"
+        filters = []
+        if ticker_filter:
+            filters.append(f"ticker={ticker_filter}")
+        if step_filter:
+            filters.append(f"step={step_filter}")
+        if filters:
+            msg += f" ({', '.join(filters)})"
+        print(f"[errors] {msg}.")
+        return
+
+    header = f"{'TICKER':<8} {'FECHA':<12} {'STEP':<12} {'TIPO':<20} {'MENSAJE'}"
+    print(header)
+    print("─" * 80)
+    for e in errors:
+        msg = (e.get("error_msg") or "")[:50]
+        if len(e.get("error_msg") or "") > 50:
+            msg += "..."
+        print(
+            f"{e.get('ticker','?'):<8} "
+            f"{e.get('fecha_caso','?'):<12} "
+            f"{e.get('step','?'):<12} "
+            f"{e.get('error_type','?'):<20} "
+            f"{msg}"
+        )
+    print(f"\n{len(errors)} error(s) abierto(s).")
+    print(f"Diagnóstico completo: casos/TICKER/DATE/_diagnostics/failures/")
 
 
 def _resolve_latest_case_dir(ticker_dir: Path) -> Path | None:

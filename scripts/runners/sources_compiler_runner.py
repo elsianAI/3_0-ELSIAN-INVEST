@@ -13,6 +13,14 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+try:
+    from clean_md_pipeline import generate_clean_md as _generate_clean_md_unified
+except Exception:
+    from scripts.runners.clean_md_pipeline import generate_clean_md as _generate_clean_md_unified
+try:
+    from clean_md_quality import is_clean_md_useful as _is_clean_md_useful_common
+except Exception:
+    from scripts.runners.clean_md_quality import is_clean_md_useful as _is_clean_md_useful_common
 
 
 def utc_now_iso() -> str:
@@ -170,23 +178,8 @@ def _clean_md_is_useful_check(path: Path) -> bool:
 
 
 def _clean_md_is_useful_check_text(text: str) -> bool:
-    """Semantic quality gate for .clean.md content (string version).
-
-    Returns True only if the text has markdown tables with numeric rows
-    and at least one valid financial section.
-    """
-    if not text:
-        return False
-    if text.count("_Section not found in filing._") >= 4:
-        return False
-    numeric_rows = re.findall(r"^\|.*\d[\d,\.]*.*\|$", text, re.MULTILINE)
-    if len(numeric_rows) < 5:
-        return False
-    for section in ("INCOME STATEMENT", "BALANCE SHEET", "CASH FLOW"):
-        idx = text.find(f"## {section}")
-        if idx >= 0 and "_Section not found" not in text[idx:idx + 200]:
-            return True
-    return False
+    """Semantic quality gate for .clean.md content (shared implementation)."""
+    return _is_clean_md_useful_common(text)
 
 
 def _txt_content_size(source: Dict[str, Any], repo_root: Path) -> int:
@@ -279,6 +272,28 @@ def _candidate_debug(matches: List[Path]) -> str:
         prio, size, _ = _candidate_rank(p)
         parts.append(f"{p.name}:{prio}/{size}")
     return ", ".join(parts)
+
+
+def _promotion_reason_for_annual_doc(src: Dict[str, Any]) -> Optional[str]:
+    src_type = normalize_type(src.get("tipo"))
+    if src_type not in {"INVESTOR_PRESENTATION", "SLIDES"}:
+        return None
+    title = str(src.get("titulo") or "")
+    url = str(src.get("url") or "")
+    notes = str(src.get("notas") or "")
+    local_path = str(src.get("local_path") or "")
+    combined = re.sub(r"[-_/]+", " ", f" {title} {url} {notes} {local_path} ".lower())
+    hints = (
+        " urd ",
+        "universal registration document",
+        "document d'enregistrement universel",
+        "annual report",
+        "integrated report",
+    )
+    for hint in hints:
+        if hint in combined:
+            return hint.strip()
+    return None
 
 
 def ensure_source_defaults(source: Dict[str, Any], today: str) -> Dict[str, Any]:
@@ -425,18 +440,20 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
     sec = load_json(case_dir / "_sec_fetcher_output.json") or {}
     mkt = load_json(case_dir / "_market_data_output.json") or {}
     tr = load_json(case_dir / "_transcript_finder_output.json") or {}
+    mkt_has_sources = isinstance(mkt.get("fuentes"), list) and len(mkt.get("fuentes") or []) > 0
+    mkt_empresa = (mkt.get("empresa") or {}) if mkt_has_sources else {}
 
     if not sec and not mkt and not tr:
         raise RuntimeError("No pre-fetch inputs found.")
 
     empresa = {
         "ticker": ticker.upper(),
-        "nombre": first_non_empty((sec.get("empresa") or {}).get("nombre"), (mkt.get("empresa") or {}).get("nombre"), (tr.get("empresa") or {}).get("nombre"), ticker.upper()),
-        "bolsa": first_non_empty((sec.get("empresa") or {}).get("bolsa"), (mkt.get("empresa") or {}).get("bolsa"), (tr.get("empresa") or {}).get("bolsa"), "UNKNOWN"),
-        "pais": first_non_empty((sec.get("empresa") or {}).get("pais"), (mkt.get("empresa") or {}).get("pais"), (tr.get("empresa") or {}).get("pais"), "US"),
-        "sector": first_non_empty((sec.get("empresa") or {}).get("sector"), (mkt.get("empresa") or {}).get("sector"), (tr.get("empresa") or {}).get("sector"), "UNKNOWN"),
-        "industria": first_non_empty((sec.get("empresa") or {}).get("industria"), (mkt.get("empresa") or {}).get("industria"), (tr.get("empresa") or {}).get("industria"), "UNKNOWN"),
-        "web_ir": first_non_empty((sec.get("empresa") or {}).get("web_ir"), (mkt.get("empresa") or {}).get("web_ir"), (tr.get("empresa") or {}).get("web_ir")),
+        "nombre": first_non_empty((sec.get("empresa") or {}).get("nombre"), mkt_empresa.get("nombre"), (tr.get("empresa") or {}).get("nombre"), ticker.upper()),
+        "bolsa": first_non_empty((sec.get("empresa") or {}).get("bolsa"), mkt_empresa.get("bolsa"), (tr.get("empresa") or {}).get("bolsa"), "UNKNOWN"),
+        "pais": first_non_empty((sec.get("empresa") or {}).get("pais"), mkt_empresa.get("pais"), (tr.get("empresa") or {}).get("pais"), "US"),
+        "sector": first_non_empty((sec.get("empresa") or {}).get("sector"), mkt_empresa.get("sector"), (tr.get("empresa") or {}).get("sector"), "UNKNOWN"),
+        "industria": first_non_empty((sec.get("empresa") or {}).get("industria"), mkt_empresa.get("industria"), (tr.get("empresa") or {}).get("industria"), "UNKNOWN"),
+        "web_ir": first_non_empty((sec.get("empresa") or {}).get("web_ir"), mkt_empresa.get("web_ir"), (tr.get("empresa") or {}).get("web_ir")),
     }
 
     merged: List[Dict[str, Any]] = []
@@ -570,6 +587,7 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
     market_count = 0
     transcript_count = 0
     presentation_count = 0
+    promotion_notes: List[str] = []
     final_sources: List[Dict[str, Any]] = []
     for idx, src in enumerate(merged, start=1):
         old_id = str(src.get("source_id") or "")
@@ -577,6 +595,13 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
         src["source_id"] = new_id
 
         src_type = normalize_type(src.get("tipo"))
+        promotion_reason = _promotion_reason_for_annual_doc(src)
+        if promotion_reason:
+            src["tipo"] = "ANNUAL_REPORT"
+            src_type = "ANNUAL_REPORT"
+            promotion_notes.append(
+                f"[sources_compiler] promotion_reason: {new_id} INVESTOR_PRESENTATION -> ANNUAL_REPORT ({promotion_reason})"
+            )
         if src_type == "MARKET_DATA":
             market_count += 1
         elif "TRANSCRIPT" in src_type:
@@ -655,62 +680,55 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
 
         final_sources.append(src)
 
-    # ── Fix D: self-heal .clean.md (prefer HTML extraction, fallback TXT) ──
-    # In the same run, regenerate low-quality/missing .clean.md from HTML
-    # companion when available. If HTML extraction fails, fallback to TXT
-    # extraction (only written when quality gate passes).
+    # ── Fix D: self-heal .clean.md with unified pipeline (HTML/PDF/TXT) ──
     _clean_md_generated = 0
 
-    def _try_regen_from_html(htm_path: Path, clean_path: Path, src_ref: Dict[str, Any]) -> bool:
+    def _pick_primary_source(txt_path: Path, current_path: Path) -> Optional[Path]:
+        candidates: List[Path] = []
+        for ext in (".htm", ".html", ".pdf"):
+            candidates.append(txt_path.with_suffix(ext))
+        current_ext = current_path.suffix.lower()
+        if current_ext in {".htm", ".html", ".pdf"}:
+            candidates.append(current_path)
+        if txt_path.exists():
+            candidates.append(txt_path)
+        seen: set[str] = set()
+        for cand in candidates:
+            key = str(cand)
+            if key in seen:
+                continue
+            seen.add(key)
+            if cand.exists():
+                return cand
+        return None
+
+    def _try_regen_clean(primary_path: Path, clean_path: Path, src_ref: Dict[str, Any]) -> bool:
         nonlocal _clean_md_generated
-        extract_financial_tables = None
-        import_errors: List[str] = []
-        try:
-            # Script execution context (sys.path[0]=.../scripts/runners).
-            from clean_md_extractor import extract_financial_tables as _extract_financial_tables
-            extract_financial_tables = _extract_financial_tables
-        except Exception as exc:
-            import_errors.append(f"clean_md_extractor.extract_financial_tables: {exc!r}")
-        if extract_financial_tables is None:
-            try:
-                # Package-style fallback.
-                from scripts.runners.clean_md_extractor import extract_financial_tables as _extract_financial_tables
-                extract_financial_tables = _extract_financial_tables
-            except Exception as exc:
-                import_errors.append(f"scripts.runners.clean_md_extractor.extract_financial_tables: {exc!r}")
-        if extract_financial_tables is None:
+        txt_companion = primary_path if primary_path.suffix.lower() == ".txt" else primary_path.with_suffix(".txt")
+        txt_content = ""
+        if txt_companion.exists():
+            txt_content = txt_companion.read_text(errors="replace")
+        clean_text, clean_meta = _generate_clean_md_unified(
+            source_path=primary_path,
+            txt_content=txt_content,
+            filing_type=str(src_ref.get("tipo", src_ref.get("form_type", "UNKNOWN"))),
+            source_id=str(src_ref.get("source_id", "UNKNOWN")),
+        )
+        if not clean_text:
+            reason = str(clean_meta.get("reason") or "LOW_QUALITY")
             print(
-                "[sources_compiler] WARNING: cannot import HTML clean extractor "
-                f"(cwd={Path.cwd()} sys.path[0]={sys.path[0] if sys.path else ''!r}) "
-                f"errors={'; '.join(import_errors)}",
+                f"[sources_compiler] clean.md regeneration rejected {clean_path.name}: {reason}",
                 file=sys.stderr,
             )
             return False
         try:
-            result = extract_financial_tables(htm_path)
-        except Exception as exc:
-            print(
-                f"[sources_compiler] WARNING: HTML clean extraction failed ({htm_path.name}): {exc}",
-                file=sys.stderr,
-            )
-            return False
-
-        if not result or not _clean_md_is_useful_check_text(result):
-            print(
-                f"[sources_compiler] HTML clean extraction not useful: {htm_path.name}",
-                file=sys.stderr,
-            )
-            return False
-
-        try:
-            clean_path.write_text(result, encoding="utf-8")
+            clean_path.write_text(clean_text, encoding="utf-8")
         except Exception as exc:
             print(
                 f"[sources_compiler] WARNING: cannot write regenerated clean.md ({clean_path.name}): {exc}",
                 file=sys.stderr,
             )
             return False
-
         _clean_md_generated += 1
         try:
             new_rel = str(clean_path.relative_to(REPO_ROOT))
@@ -718,7 +736,8 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
             pass
         else:
             src_ref["local_path"] = new_rel
-        print(f"[sources_compiler] Regenerated .clean.md from HTML: {clean_path.name}", file=sys.stderr)
+        mode = str(clean_meta.get("mode") or "unknown")
+        print(f"[sources_compiler] Regenerated .clean.md ({mode}): {clean_path.name}", file=sys.stderr)
         return True
 
     for src in final_sources:
@@ -726,15 +745,14 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
         if not lp:
             continue
         p = REPO_ROOT / lp
-        # Find the .txt companion
-        if p.suffix.lower() == ".txt":
+        if p.name.endswith(".clean.md"):
+            txt_p = p.with_name(p.name[:-9] + ".txt")
+        elif p.suffix.lower() == ".txt":
             txt_p = p
         else:
             txt_p = p.with_suffix(".txt")
         clean_p = txt_p.with_suffix(".clean.md")
-        htm_companion = txt_p.with_suffix(".htm")
-        if not htm_companion.exists():
-            htm_companion = txt_p.with_suffix(".html")
+        primary_path = _pick_primary_source(txt_p, p)
 
         # Existing clean.md: keep if useful; otherwise remove and self-heal.
         if clean_p.exists():
@@ -749,36 +767,19 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
                     file=sys.stderr,
                 )
                 continue
-            if htm_companion.exists() and _try_regen_from_html(htm_companion, clean_p, src):
+
+        # Primary regeneration first (HTML/PDF preferred over TXT).
+        if not clean_p.exists() and primary_path is not None:
+            if _try_regen_clean(primary_path, clean_p, src):
                 continue
 
-        # Missing clean.md but HTML exists: try inline regeneration now.
-        if not clean_p.exists() and htm_companion.exists():
-            if _try_regen_from_html(htm_companion, clean_p, src):
-                continue
-
-        # Fallback to TXT extraction (PDF/no-HTML or HTML regeneration failed).
+        # Last-resort TXT regeneration only when primary path failed or missing.
         if clean_p.exists():
             continue
-        if not txt_p.exists() or txt_p.stat().st_size < 5000:
-            continue
-        txt_content = txt_p.read_text(errors="replace")
-        if txt_content.startswith("[PDF original"):
-            continue
-        result = _generate_clean_md_from_txt(txt_p.stem, txt_content)
-        if result:
-            if _clean_md_is_useful_check_text(result):
-                clean_p.write_text(result, encoding="utf-8")
-                _clean_md_generated += 1
-                try:
-                    new_rel = str(clean_p.relative_to(REPO_ROOT))
-                except ValueError:
-                    pass
-                else:
-                    src["local_path"] = new_rel
-                print(f"[sources_compiler] Generated .clean.md from TXT: {clean_p.name}", file=sys.stderr)
-            else:
-                print(f"[sources_compiler] Skipped low-quality .clean.md (not written): {txt_p.stem}", file=sys.stderr)
+        if txt_p.exists() and txt_p.stat().st_size >= 5000:
+            if _try_regen_clean(txt_p, clean_p, src):
+                continue
+
     if _clean_md_generated:
         print(f"[sources_compiler] Total .clean.md generated: {_clean_md_generated}", file=sys.stderr)
 
@@ -793,6 +794,8 @@ def compile_sources(ticker: str, case_dir: Path) -> Path:
                 log_limitaciones.extend(x for x in log["limitaciones"] if isinstance(x, str))
             if isinstance(log.get("observaciones"), list):
                 log_observaciones.extend(x for x in log["observaciones"] if isinstance(x, str))
+    if promotion_notes:
+        log_limitaciones.extend(promotion_notes)
     if no_sources:
         log_limitaciones.append(
             "No sources available in PREFETCH outputs; generated empty SourcesPack and continued."

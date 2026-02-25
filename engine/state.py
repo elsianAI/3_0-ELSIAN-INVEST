@@ -152,7 +152,10 @@ def mark_step_done(
     """
     now = datetime.now(timezone.utc).isoformat()
 
+    resolved_target_step: str | None = None
+
     def _modifier(state: dict) -> None:
+        nonlocal resolved_target_step
         if step_name in PARENT_OF_SUB:
             parent = PARENT_OF_SUB[step_name]
             sub_steps = state.setdefault("sub_steps", {})
@@ -180,6 +183,7 @@ def mark_step_done(
                 # Clear stale parent error
                 if "_errors" in state and parent in state["_errors"]:
                     del state["_errors"][parent]
+                resolved_target_step = parent
         else:
             entry = {
                 "estado": "DONE",
@@ -192,6 +196,7 @@ def mark_step_done(
             # Clear stale error for this step
             if "_errors" in state and step_name in state["_errors"]:
                 del state["_errors"][step_name]
+            resolved_target_step = step_name
 
         # Update pipeline status
         all_pipeline_done = all(
@@ -202,6 +207,21 @@ def mark_step_done(
             state["estado_pipeline"] = "COMPLETO"
 
     read_modify_write(case_dir, _modifier)
+
+    # Notify error_tracker only when the step (or fully-completed parent) resolved.
+    if resolved_target_step:
+        try:
+            from .error_tracker import resolve_error  # local import to avoid circular
+            ticker = case_dir.parent.name
+            fecha_caso = case_dir.name
+            resolve_error(
+                ticker,
+                resolved_target_step,
+                fecha_caso,
+                resolved_by="engine:mark_step_done",
+            )
+        except Exception:
+            pass  # error_tracker is non-critical; never fail the pipeline
 
 
 def mark_step_failed(case_dir: Path, step_name: str, error: str | None, failure_meta: dict | None = None) -> None:
@@ -243,6 +263,21 @@ def mark_step_failed(case_dir: Path, step_name: str, error: str | None, failure_
             state.setdefault("_errors", {})[step_name] = failure_entry
 
     read_modify_write(case_dir, _modifier)
+
+    # Persist error in central _errors/ registry (only for main pipeline steps)
+    if step_name not in PARENT_OF_SUB:
+        try:
+            from .error_tracker import append_error  # local import to avoid circular
+            ticker = case_dir.parent.name
+            append_error(
+                case_dir=case_dir,
+                ticker=ticker,
+                step=step_name,
+                error_msg=normalized_error,
+                failure_meta=normalized_meta,
+            )
+        except Exception:
+            pass  # error_tracker is non-critical; never fail the pipeline
 
 
 def mark_step_in_progress(case_dir: Path, step_name: str) -> None:
@@ -328,6 +363,36 @@ def init_state(
     case_dir.mkdir(parents=True, exist_ok=True)
     save_state(case_dir, state)
     return state
+
+
+def init_or_load_state(
+    case_dir: Path,
+    ticker: str,
+    date: str,
+    *,
+    reset: bool = False,
+    exchange: str = "",
+    country: str = "",
+    web_ir: str = "",
+) -> dict:
+    """Load existing state or create fresh — V5.1 B1.
+
+    If ``reset=False`` and ``_estado.json`` exists, loads the existing state
+    and updates empresa_hints (CLI > saved).  Otherwise creates from scratch.
+    """
+    if not reset and (case_dir / "_estado.json").exists():
+        state = load_state(case_dir)
+        # Update hints: CLI values take precedence over saved
+        hints = _normalize_hints(
+            {"exchange": exchange, "country": country, "web_ir": web_ir}
+        )
+        saved = _normalize_hints(state.get("empresa_hints", {}))
+        merged_hints = {k: hints[k] or saved[k] or "" for k in _EMPRESA_HINT_KEYS}
+        state["empresa_hints"] = {k: (v or None) for k, v in merged_hints.items()}
+        state["_meta"]["ultima_actualizacion"] = datetime.now(timezone.utc).isoformat()
+        save_state(case_dir, state)
+        return state
+    return init_state(case_dir, ticker, date, exchange=exchange, country=country, web_ir=web_ir)
 
 
 def resolve_empresa_hints(

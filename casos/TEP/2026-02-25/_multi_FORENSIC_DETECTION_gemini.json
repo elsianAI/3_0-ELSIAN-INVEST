@@ -5,68 +5,79 @@
   "ticker": "TEP",
   "red_flags": [
     {
-      "categoria": "OPACIDAD_BALANCE",
-      "descripcion": "El reporte integrado carece de líneas canónicas explícitas para Pasivos Totales y Deuda Total consolidada. Esto limita la evaluación directa del apalancamiento.",
-      "source_id": "SRC_013",
-      "ubicacion": "Balance Sheet"
+      "area": "flujo_de_caja",
+      "descripcion": "Brecha anormal y persistente entre CFO y el beneficio neto impulsada fuertemente por variaciones de Capital de Trabajo no detalladas (CFO FY2024 de 1,813M vs Net Income de 523M y D&A de 293M, dejando ~1,000M inexplicados). Patrón similar en FY2023.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual FY2024 y FY2023",
+      "impacto_potencial": "Riesgo de reversión del capital de trabajo que podría deteriorar rápidamente la liquidez."
     },
     {
-      "categoria": "ANOMALIAS_CAPEX_DEPRECIACION",
-      "descripcion": "La depreciación reportada (779M USD) es significativamente mayor que el Capex (219M USD). Esto sugiere una alta amortización de intangibles o adquisiciones pasadas no desglosadas, dado que el Capex físico es muy inferior.",
-      "source_id": "SRC_013",
-      "ubicacion": "Cash Flow Statement"
+      "area": "transparencia_calidad_datos",
+      "descripcion": "Falta de desgloses críticos en el estado de resultados (COGS, gross profit, SG&A, R&D) e inventarios. Data completeness general muy bajo (26%).",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "data_quality.validaciones",
+      "impacto_potencial": "Opacidad en la estructura de costos operativos y exposición a posibles obsolescencias de inventarios."
     },
     {
-      "categoria": "OPACIDAD_INGRESOS_OPERATIVOS",
-      "descripcion": "Ausencia de líneas de COGS y Gross Profit en el estado de resultados consolidado simplificado.",
-      "source_id": "SRC_013",
-      "ubicacion": "Income Statement"
+      "area": "solvencia_corto_plazo",
+      "descripcion": "La deuda a corto plazo reportada (1,147M) supera el efectivo en caja disponible (1,058M) al cierre del FY2024.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "balance_sheet_ultimo",
+      "impacto_potencial": "Dependencia absoluta de la generación continua de FCF o refinanciación externa en los próximos 12 meses."
     },
     {
-      "categoria": "TRANSACCIONES_INVERSION",
-      "descripcion": "Fuerte volumen de CFI negativo en 2023 (-2587M USD) financiado con CFF positivo (1319M USD) que no se replica en 2024, indicando fuerte actividad de M&A sin desglose explícito de goodwill creado.",
-      "source_id": "SRC_003",
-      "ubicacion": "Cash Flow Statement 2023"
+      "area": "moneda_reporte",
+      "descripcion": "Los importes reportados están en EUR pero forzados en el esquema como USD sin tipo de cambio aplicado (1:1 de facto).",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "log.limitaciones",
+      "impacto_potencial": "Distorsión en métricas de valoración al cruzar cifras operativas en EUR con capitalización de mercado en USD."
     }
   ],
   "liquidez": {
-    "efectivo_disponible_usd": 1058000000,
-    "estimacion_runway_meses": "INF",
-    "vencimientos_deuda_proximos": "Lease liabilities current (216M USD) and non-current (580M USD). Vencimientos de deuda bancaria no reportados debido a opacidad.",
-    "riesgo_incumplimiento_covenants": "BAJO (Mitigado por alta generación de FCF)",
-    "riesgo_dilucion_accionaria": "BAJO"
+    "efectivo_disponible": 1058000000,
+    "deuda_corto_plazo": 1147000000,
+    "deuda_largo_plazo": 3007000000,
+    "fcf_estimado_anual": 1594000000,
+    "runway_estimado": "24+ meses (condicionado a estabilidad de FCF)",
+    "comentario_runway": "El efectivo actual (1,058M) es insuficiente por sí solo para cubrir los vencimientos de corto plazo (1,147M). La supervivencia depende enteramente de la generación continua del CFO (~1,800M anuales).",
+    "riesgo_covenants": "Desconocido (información bloqueada u omitida en los documentos base).",
+    "riesgo_dilucion": "BAJO (El fuerte CFO autogenerado mitiga la necesidad de emitir capital si las condiciones operativas se mantienen)."
   },
   "puentes": {
     "ebit_a_cfo": {
-      "ebit_usd": 1082000000,
-      "cfo_usd": 1813000000,
-      "depreciacion_usd": -779000000,
-      "distorsion_pct": 2.6,
-      "observacion": "Puente consistente. La depreciación sumada al EBIT explica la casi totalidad del CFO generado. Distorsión menor al umbral del 15%."
+      "distorsion_mayor_a_15_pct": true,
+      "ebit_fy2024": 1082000000,
+      "cfo_fy2024": 1813000000,
+      "diferencia_pct": 67.5,
+      "explicacion": "CFO es 67.5% superior al EBIT. Esta gran diferencia proviene principalmente de variaciones positivas masivas del Capital de Trabajo que compensan los intereses (-214M) e impuestos (-346M) pagados."
     },
     "cfo_a_fcf": {
-      "cfo_usd": 1813000000,
-      "fcf_usd": 1594000000,
-      "capex_usd": -219000000,
-      "distorsion_pct": 12.0,
-      "observacion": "Tasa de conversión a FCF excepcionalmente alta. El Capex representa sólo una fracción menor (12%) de la caja generada por operaciones. Distorsión menor al umbral del 15%."
+      "distorsion_mayor_a_15_pct": false,
+      "cfo_fy2024": 1813000000,
+      "capex_fy2024": -219000000,
+      "fcf_calculado": 1594000000,
+      "diferencia_pct": 12.0,
+      "explicacion": "Baja intensidad de capital. El CAPEX representa solo un 12% del CFO, por lo que la mayor parte del flujo operativo se traduce en caja libre."
     }
   },
   "kill_criteria_candidatos": [
     {
-      "criterio": "Caída sostenida del CFO anualizado por debajo de 1000M USD",
+      "condicion": "CFO de los últimos 12 meses (TTM) cae por debajo de los 1,000M",
       "ventana_temporal": "12 meses",
-      "probabilidad": "MEDIA"
+      "probabilidad": "MEDIA",
+      "justificacion": "Indicaría que la anómala contribución previa del Capital de Trabajo ha comenzado a revertirse, lo cual precipitaría un default técnico frente a los 1,147M de deuda a corto plazo."
     },
     {
-      "criterio": "Afloramiento explícito de deuda corporativa que ubique el apalancamiento neto consolidado sobre 3.0x EBITDA",
-      "ventana_temporal": "6-12 meses",
-      "probabilidad": "BAJA"
+      "condicion": "Incapacidad de renovar líneas de crédito o refinanciar deuda por un monto mínimo de 500M",
+      "ventana_temporal": "6 a 12 meses",
+      "probabilidad": "MEDIA",
+      "justificacion": "Ante una reducción del FCF, la caja (1,058M) no alcanzaría para pagar la porción corriente de la deuda y mantener el circulante mínimo operativo."
     },
     {
-      "criterio": "Deterioro del margen EBIT por debajo del umbral del 8%",
-      "ventana_temporal": "12-24 meses",
-      "probabilidad": "MEDIA"
+      "condicion": "Caída del margen operativo (EBIT/Ingresos) por debajo del 5%",
+      "ventana_temporal": "12 a 24 meses",
+      "probabilidad": "MEDIA",
+      "justificacion": "Dada la alta opacidad en los desgloses de costos (COGS, SG&A), una contracción sorpresiva del margen destruiría la base del EBIT, haciendo insostenibles las cargas por intereses y lease payments recurrentes."
     }
   ],
   "report_type": "FORENSIC_DETECTION",
@@ -74,13 +85,6 @@
     "truth_pack_version": "TruthPack_v1_partial"
   },
   "log": {
-    "limitaciones": [
-      "No se revisaron filings en crudo de manera exhaustiva para esta etapa, ejecución apoyada en la extracción de TruthPack y los extractos pre-computados.",
-      "TruthPack con calidad PARTIAL debido a la ausencia estructural de líneas canónicas en los Integrated Reports analizados (deuda consolidada, pasivos totales explícitos, cogs)."
-    ]
-  },
-  "_meta": {
-    "status": "COMPLETED",
-    "timestamp_validacion": "2026-02-25T00:00:00Z"
+    "limitaciones": "No se revisaron filings directamente (SourcesPack_v1 disponible no extraído) debido a la política de no especulación sobre la extracción automatizada y el estado PARTIAL de datos."
   }
 }

@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import html as html_lib
 import importlib
 import json
 import os
@@ -25,7 +26,7 @@ from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
-from urllib.parse import urljoin, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -95,6 +96,7 @@ LOCAL_FILING_NEGATIVE = (
     "privacy",
     "cookie",
     "terms",
+    "policy",
     "careers",
     "job",
     "linkedin",
@@ -163,6 +165,9 @@ LOCAL_EVENT_REGISTRATION_HINTS_STRONG = (
     "signup",
     "webcast",
 )
+LOCAL_UMBRACO_MAX_PAGES = 6
+LOCAL_UMBRACO_PAGE_SIZE = 50
+LOCAL_UMBRACO_TIMEOUT_SECONDS = 5
 
 
 def now_utc_iso() -> str:
@@ -180,10 +185,26 @@ class SecClient:
             time.sleep(RATE_LIMIT_SECONDS - elapsed)
         self._last_req = time.time()
 
-    def get(self, url: str, *, binary: bool = False) -> requests.Response:
+    def get(
+        self,
+        url: str,
+        *,
+        binary: bool = False,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, str]] = None,
+        timeout: Optional[int] = None,
+    ) -> requests.Response:
+        request_headers = headers or HEADERS
+        request_timeout = timeout or TIMEOUT
         self._throttle()
         try:
-            resp = self._session.get(url, headers=HEADERS, timeout=TIMEOUT, allow_redirects=True)
+            resp = self._session.get(
+                url,
+                headers=request_headers,
+                params=params,
+                timeout=request_timeout,
+                allow_redirects=True,
+            )
             resp.raise_for_status()
         except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as exc:
             status = getattr(getattr(exc, "response", None), "status_code", 0)
@@ -191,14 +212,27 @@ class SecClient:
             if status in (429, 500, 502, 503, 504) or isinstance(exc, requests.exceptions.ConnectionError):
                 time.sleep(3)
                 self._throttle()
-                resp = self._session.get(url, headers=HEADERS, timeout=TIMEOUT, allow_redirects=True)
+                resp = self._session.get(
+                    url,
+                    headers=request_headers,
+                    params=params,
+                    timeout=request_timeout,
+                    allow_redirects=True,
+                )
                 resp.raise_for_status()
             elif status == 403 and "sec.gov" not in host:
                 # Some IR portals block bot-like User-Agents; use a browser UA
                 # only for non-SEC domains to keep SEC requests policy-compliant.
                 time.sleep(1)
                 self._throttle()
-                resp = self._session.get(url, headers=ALT_HEADERS, timeout=TIMEOUT, allow_redirects=True)
+                fallback_headers = ALT_HEADERS if headers is None else headers
+                resp = self._session.get(
+                    url,
+                    headers=fallback_headers,
+                    params=params,
+                    timeout=request_timeout,
+                    allow_redirects=True,
+                )
                 resp.raise_for_status()
             else:
                 raise
@@ -511,32 +545,92 @@ def read_sources_context(case_dir: Path) -> Dict[str, Any]:
     return {}
 
 
+def _derive_local_ir_roots(base_url: str) -> List[str]:
+    parsed = urlparse(base_url)
+    host_root = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+    path = parsed.path.strip("/")
+    segments = [seg for seg in path.split("/") if seg]
+    original_segments = list(segments)
+
+    # Trim homepage tails that produce 404 when appending financial suffixes.
+    while segments and segments[-1].lower() in {
+        "investors-homepage",
+        "investor-homepage",
+        "homepage",
+        "home",
+    }:
+        segments.pop()
+
+    locale = segments[0].lower() if segments and re.fullmatch(r"[a-z]{2}-[a-z]{2}", segments[0].lower()) else None
+    investor_idx = next(
+        (idx for idx, seg in enumerate(segments) if seg.lower() in {"investors", "investor-relations"}),
+        None,
+    )
+
+    has_homepage_tail = bool(original_segments) and original_segments[-1].lower() in {
+        "investors-homepage",
+        "investor-homepage",
+        "homepage",
+        "home",
+    }
+
+    roots: List[str] = []
+    if locale and investor_idx is not None:
+        roots.append(f"{host_root}/{locale}/{segments[investor_idx]}")
+    elif investor_idx is not None:
+        roots.append(f"{host_root}/{segments[investor_idx]}")
+    if segments:
+        roots.append(f"{host_root}/{'/'.join(segments)}")
+    if locale:
+        roots.append(f"{host_root}/{locale}")
+    if locale:
+        roots.append(f"{host_root}/{locale}/investors")
+    if not has_homepage_tail:
+        roots.append(base_url.rstrip("/"))
+    roots.append(host_root)
+
+    deduped: List[str] = []
+    seen = set()
+    for root in roots:
+        cleaned = normalize_web_ir(root)
+        if not cleaned or cleaned in seen:
+            continue
+        seen.add(cleaned)
+        deduped.append(cleaned)
+    return deduped
+
+
 def build_local_ir_pages(web_ir: Optional[str]) -> List[str]:
     base = normalize_web_ir(web_ir)
     if not base:
         return []
     suffixes = (
-        "",
-        "/investor-relations",
-        "/investors",
+        "/publications-and-events/financial-publications",
+        "/publications-and-events/regulated-information",
+        "/publications-and-events/press-releases",
+        "/reports-results-and-presentations",
+        "/financial-results",
+        "/results",
         "/finance-kit",
         "/financial-reports",
         "/annual-reports",
+        "/investor-relations",
+        "/investors",
         "/company-announcements",
-        "/news",
-        "/news-events",
         "/announcements",
-        "/financial-results",
-        "/reports-results-and-presentations",
+        "/news-events",
+        "/news",
         "/publications",
-        "/results",
     )
-    pages: List[str] = []
-    for suffix in suffixes:
-        if not suffix:
-            pages.append(base)
+    pages: List[str] = [base]
+    homepage_tail_re = re.compile(r"/(?:investors-homepage|investor-homepage|homepage|home)$")
+    for ir_root in _derive_local_ir_roots(base):
+        pages.append(ir_root)
+        low_path = (urlparse(ir_root).path or "").rstrip("/").lower()
+        if homepage_tail_re.search(low_path):
             continue
-        pages.append(urljoin(base + "/", suffix.lstrip("/")))
+        for suffix in suffixes:
+            pages.append(urljoin(ir_root + "/", suffix.lstrip("/")))
     return list(dict.fromkeys(pages))
 
 
@@ -601,7 +695,41 @@ def _classify_local_filing_type(title: str, doc_url: str, snippet: str) -> str:
     )
     if _is_media_url:
         return "OTHER"
-    if any(w in _ctx for w in ("annual", "full year", "year-end", "year end")):
+
+    has_press_release = any(
+        w in _ctx
+        for w in (
+            "press release",
+            "press-release",
+            "news release",
+            "earnings release",
+            "communique",
+            "communiqué",
+        )
+    )
+    has_urd_strong = bool(
+        re.search(r"\burd\b", _ctx)
+        or "universal registration document" in _ctx
+        or "document d'enregistrement universel" in _ctx
+    )
+    has_annual_doc_signal = any(
+        w in _ctx
+        for w in (
+            "annual report",
+            "registration document",
+            "integrated report",
+            "integrated annual report",
+            "rapport annuel",
+        )
+    ) or has_urd_strong
+
+    # Press-releases mentioning "annual results" are not annual reports.
+    if has_press_release:
+        if "results" in _ctx or "financial" in _ctx or "earnings" in _ctx:
+            return "REGULATORY_FILING"
+        return "IR_NEWS"
+
+    if has_annual_doc_signal:
         return "ANNUAL_REPORT"
     if any(w in _ctx for w in ("interim", "half year", "h1 ", "h2 ", "half-year")):
         return "INTERIM_REPORT"
@@ -687,6 +815,406 @@ def _local_event_registration_penalty(context_norm: str, full_url: str) -> float
     if re.search(r"\bevents?\b", ctx):
         penalty -= 1.0
     return penalty
+
+
+def _clean_embedded_pdf_url(raw_url: str) -> str:
+    if not raw_url:
+        return ""
+    cleaned = str(raw_url).strip().strip("\"'`")
+    cleaned = html_lib.unescape(cleaned)
+    cleaned = cleaned.replace("\\/", "/")
+    cleaned = re.sub(r"\\u0*2f", "/", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\\x2f", "/", cleaned, flags=re.IGNORECASE)
+    cleaned = cleaned.replace("\\\\", "\\")
+    cleaned = cleaned.strip().strip("\"'`")
+    if cleaned.startswith("//"):
+        cleaned = f"https:{cleaned}"
+    return cleaned
+
+
+def _extract_embedded_title(context_window: str, full_url: str) -> str:
+    patterns = (
+        r'data-gtm-elem-text\\?"?\s*[:=]\s*["\']([^"\']{6,220})["\']',
+        r'"name"\s*:\s*\{\s*"Value"\s*:\s*"([^"]{6,220})"',
+        r'"name"\s*:\s*\{\s*"value"\s*:\s*"([^"]{6,220})"',
+        r'"title"\s*:\s*"([^"]{6,220})"',
+    )
+    for pat in patterns:
+        m = re.search(pat, context_window, flags=re.IGNORECASE)
+        if not m:
+            continue
+        candidate = re.sub(r"\s+", " ", html_lib.unescape(m.group(1))).strip()
+        if candidate:
+            return candidate[:240]
+    basename = unquote(Path(urlparse(full_url).path).name).replace("+", " ").strip()
+    return basename[:240] or "Local filing"
+
+
+def _extract_embedded_pdf_candidates(
+    html: str,
+    base_url: str,
+    exchange: Optional[str],
+) -> List[Dict[str, Any]]:
+    ex = (exchange or "").upper()
+    kws = set(LOCAL_FILING_KEYWORDS_COMMON)
+    kws.update(LOCAL_FILING_KEYWORDS_BY_EXCHANGE.get(ex, ()))
+
+    positive_plain_hints = (
+        "annual",
+        "results",
+        "registration document",
+        "universal registration document",
+        "integrated report",
+        "interim",
+        "financial",
+        "urd",
+    )
+    negative_plain_hints = ("privacy", "cookie", "terms", "policy")
+    event_register_re = re.compile(r"(webcast|event)[\w\s:/-]{0,40}register|signup", re.IGNORECASE)
+    period_hint_re = re.compile(r"\b(q[1-4]|h[12])\b", re.IGNORECASE)
+
+    pattern = re.compile(
+        r"""(?ix)
+        (?:
+            (?P<absolute>https?://[^\s"'<>\\]+?\.pdf(?:\?[^\s"'<>\\]*)?)
+            |
+            (?P<relative>(?:\\?/)?media/[^\s"'<>\\]+?\.pdf(?:\?[^\s"'<>\\]*)?)
+            |
+            (?P<slash_relative>\\?/media/[^\s"'<>\\]+?\.pdf(?:\?[^\s"'<>\\]*)?)
+        )
+        """
+    )
+
+    by_url: Dict[str, Dict[str, Any]] = {}
+    for match in pattern.finditer(html):
+        raw_url = match.group("absolute") or match.group("relative") or match.group("slash_relative") or ""
+        cleaned_url = _clean_embedded_pdf_url(raw_url)
+        if not cleaned_url:
+            continue
+
+        if not cleaned_url.startswith(("http://", "https://", "/")):
+            continue
+        if cleaned_url.startswith("media/"):
+            cleaned_url = f"/{cleaned_url}"
+        full_url = urljoin(base_url, cleaned_url)
+        if not full_url.lower().startswith(("http://", "https://")):
+            continue
+        if not full_url.lower().endswith(".pdf") and ".pdf?" not in full_url.lower():
+            continue
+
+        start, end = match.span()
+        left = max(0, start - 180)
+        right = min(len(html), end + 180)
+        context_window = html[left:right]
+        context_window = html_lib.unescape(context_window.replace("\\/", "/"))
+        context_window = re.sub(r"\s+", " ", context_window).strip()
+        context_low = context_window.lower()
+        context_norm = re.sub(r"[-_/]+", " ", context_low)
+        merged_ctx = f"{full_url.lower()} {context_low}"
+
+        if any(neg in merged_ctx for neg in negative_plain_hints):
+            continue
+        if event_register_re.search(merged_ctx):
+            continue
+
+        title = _extract_embedded_title(context_window, full_url)
+        url_title_ctx = f"{full_url.lower()} {title.lower()}"
+        has_positive = any(pos in url_title_ctx for pos in positive_plain_hints) or bool(
+            period_hint_re.search(url_title_ctx)
+        )
+        if not has_positive:
+            continue
+
+        date_guess, date_source, date_estimated = _resolve_local_candidate_date(
+            title,
+            context_window,
+            full_url,
+        )
+        basename_hint = unquote(Path(urlparse(full_url).path).name).replace("+", " ")
+        filing_type = _classify_local_filing_type(title, full_url, basename_hint)
+
+        score = 1  # Base score for embedded PDF match.
+        kw_hits = sum(1 for kw in kws if kw in context_norm or kw in url_title_ctx)
+        score += min(3, kw_hits)
+        if "annual" in url_title_ctx or "integrated report" in url_title_ctx or "urd" in url_title_ctx:
+            score += 2
+        if "interim" in url_title_ctx or re.search(r"\b(h1|h2|q[1-4])\b", url_title_ctx):
+            score += 2
+
+        selection_score = float(score)
+        if filing_type == "ANNUAL_REPORT":
+            selection_score += 4.0
+        elif filing_type == "INTERIM_REPORT":
+            selection_score += 3.0
+        elif filing_type == "REGULATORY_FILING":
+            selection_score += 2.0
+        elif filing_type == "IR_NEWS":
+            selection_score += 1.0
+        if date_guess:
+            selection_score += 0.5
+        selection_score += _local_event_registration_penalty(context_norm, full_url)
+
+        snippet = context_window[:280] if context_window else title[:280]
+        candidate = {
+            "url": full_url,
+            "titulo": title[:240],
+            "score": score,
+            "fecha_publicacion": date_guess,
+            "fecha_source": date_source,
+            "fecha_publicacion_estimated": date_estimated,
+            "snippet": snippet,
+            "tipo_guess": filing_type,
+            "selection_score": selection_score,
+            "discovered_via": "embedded_pdf",
+        }
+        prev = by_url.get(full_url)
+        if prev is None or _prefer_new_candidate(prev, candidate):
+            by_url[full_url] = candidate
+
+    return list(by_url.values())
+
+
+def _extract_umbraco_modules(html: str) -> List[Dict[str, str]]:
+    modules: List[Dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    patterns = (
+        re.compile(
+            r"new\s+filesDownloadList\(\s*['\"](?P<hash>[^'\"]+)['\"]\s*,\s*['\"](?P<node>[^'\"]+)['\"]",
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r"filesDownloadList\(\s*['\"](?P<hash>[^'\"]+)['\"]\s*,\s*['\"](?P<node>[^'\"]+)['\"]",
+            re.IGNORECASE,
+        ),
+    )
+    for pattern in patterns:
+        for match in pattern.finditer(html or ""):
+            hash_code = str(match.group("hash") or "").strip()
+            node_id = str(match.group("node") or "").strip()
+            if not hash_code or not node_id:
+                continue
+            key = (hash_code, node_id)
+            if key in seen:
+                continue
+            seen.add(key)
+            modules.append({"hash": hash_code, "node_id": node_id})
+    return modules
+
+
+def _infer_umbraco_cultures(base_url: str, country: Optional[str]) -> List[str]:
+    path = (urlparse(base_url).path or "").lower()
+    cultures: List[str] = []
+    match = re.search(r"/([a-z]{2}-[a-z]{2})(?:/|$)", path)
+    if match:
+        cultures.append(match.group(1))
+    if str(country or "").upper() == "FR":
+        cultures.append("fr-fr")
+    cultures.append("en-us")
+
+    deduped: List[str] = []
+    seen = set()
+    for culture in cultures:
+        if culture in seen:
+            continue
+        seen.add(culture)
+        deduped.append(culture)
+    return deduped
+
+
+def _is_umbraco_row_financial_candidate(title: str, file_url: str) -> bool:
+    merged = f"{title.lower()} {file_url.lower()}"
+    if any(neg in merged for neg in ("privacy", "cookie", "terms", "policy")):
+        return False
+    if any(bad in merged for bad in ("register", "webcast replay", "signup", "event replay", "event register")):
+        return False
+    if ".pdf" not in file_url.lower():
+        return False
+    if re.search(r"\b(q[1-4]|h[12])\b", merged):
+        return True
+    return any(
+        pos in merged
+        for pos in (
+            "annual",
+            "results",
+            "registration document",
+            "universal registration document",
+            "urd",
+            "integrated report",
+            "interim",
+            "financial",
+            "half-year",
+            "half year",
+        )
+    )
+
+
+def _rows_to_local_candidates(
+    rows: List[Dict[str, Any]],
+    page_url: str,
+    exchange: Optional[str],
+    culture: str,
+) -> List[Dict[str, Any]]:
+    ex = (exchange or "").upper()
+    kws = set(LOCAL_FILING_KEYWORDS_COMMON)
+    kws.update(LOCAL_FILING_KEYWORDS_BY_EXCHANGE.get(ex, ()))
+
+    by_url: Dict[str, Dict[str, Any]] = {}
+    for row in rows:
+        title = re.sub(r"\s+", " ", str(row.get("title") or "Local filing")).strip()
+        file_raw = str(row.get("file") or "").strip()
+        if not file_raw:
+            continue
+        full_url = urljoin(page_url, _clean_embedded_pdf_url(file_raw))
+        if not full_url.startswith(("http://", "https://")):
+            continue
+        if not _is_umbraco_row_financial_candidate(title, full_url):
+            continue
+
+        snippet = title[:280]
+        date_guess, date_source, date_estimated = _resolve_local_candidate_date(title, title, full_url)
+        filing_type = _classify_local_filing_type(title, full_url, snippet)
+        context_norm = re.sub(r"[-_/]+", " ", f"{title.lower()} {full_url.lower()}")
+
+        score = 1
+        score += min(3, sum(1 for kw in kws if kw in context_norm))
+        if filing_type == "ANNUAL_REPORT":
+            score += 3
+        elif filing_type == "INTERIM_REPORT":
+            score += 2
+        elif filing_type == "REGULATORY_FILING":
+            score += 1
+
+        selection_score = float(score)
+        if date_guess:
+            selection_score += 0.5
+        selection_score += _local_event_registration_penalty(context_norm, full_url)
+
+        candidate = {
+            "url": full_url,
+            "titulo": title[:240],
+            "score": score,
+            "fecha_publicacion": date_guess,
+            "fecha_source": date_source,
+            "fecha_publicacion_estimated": date_estimated,
+            "snippet": snippet,
+            "tipo_guess": filing_type,
+            "selection_score": selection_score,
+            "discovered_via": "umbraco_api",
+            "umbraco_culture": culture,
+        }
+        prev = by_url.get(full_url)
+        if prev is None or _prefer_new_candidate(prev, candidate):
+            by_url[full_url] = candidate
+    return list(by_url.values())
+
+
+def _collect_umbraco_candidates(
+    *,
+    client: SecClient,
+    html: str,
+    page_url: str,
+    exchange: Optional[str],
+    country: Optional[str],
+) -> tuple[List[Dict[str, Any]], Dict[str, int], List[str]]:
+    modules = _extract_umbraco_modules(html)
+    metrics = {
+        "modules_detected": len(modules),
+        "rows_collected": 0,
+        "candidates_added": 0,
+        "api_errors": 0,
+    }
+    errors: List[str] = []
+    if not modules:
+        return [], metrics, errors
+
+    parsed = urlparse(page_url)
+    host_root = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+    endpoint_candidates = (
+        f"{host_root}/Umbraco/Api/FileDownloadList/GetFileDownload",
+        f"{host_root}/Api/FileDownloadList/GetFileDownload",
+    )
+    cultures = _infer_umbraco_cultures(page_url, country)
+    all_candidates: List[Dict[str, Any]] = []
+    seen_url: set[str] = set()
+    seen_payload_warnings: set[tuple[str, str, str]] = set()
+
+    for module in modules:
+        node_id = module.get("node_id", "")
+        hash_code = module.get("hash", "")
+        if not node_id:
+            continue
+        module_rows: List[Dict[str, Any]] = []
+        module_ok = False
+        for culture in cultures:
+            culture_rows: List[Dict[str, Any]] = []
+            for endpoint in endpoint_candidates:
+                endpoint_ok = False
+                for page_num in range(1, LOCAL_UMBRACO_MAX_PAGES + 1):
+                    params = {
+                        "nodeId": node_id,
+                        "hash": hash_code,
+                        "type": "",
+                        "year": "",
+                        "page": page_num,
+                        "pageSize": LOCAL_UMBRACO_PAGE_SIZE,
+                        "culture": culture,
+                    }
+                    try:
+                        response = client.get(
+                            endpoint,
+                            params=params,
+                            timeout=LOCAL_UMBRACO_TIMEOUT_SECONDS,
+                        )
+                        payload = response.json()
+                    except Exception as exc:
+                        metrics["api_errors"] += 1
+                        errors.append(
+                            f"Umbraco API error node={node_id} culture={culture} endpoint={endpoint}: {exc}"
+                        )
+                        break
+
+                    rows = None
+                    if isinstance(payload, dict):
+                        for key in ("resultado", "results", "items", "rows", "data"):
+                            val = payload.get(key)
+                            if isinstance(val, list):
+                                rows = val
+                                break
+                    if rows is None:
+                        warn_key = (node_id, culture, endpoint)
+                        if warn_key not in seen_payload_warnings:
+                            seen_payload_warnings.add(warn_key)
+                            keys = list(payload.keys())[:6] if isinstance(payload, dict) else []
+                            errors.append(
+                                "Umbraco payload without list rows "
+                                f"node={node_id} culture={culture} endpoint={endpoint} keys={keys}"
+                            )
+                        break
+                    if not rows:
+                        break
+
+                    endpoint_ok = True
+                    culture_rows.extend(rows)
+                    if len(rows) < LOCAL_UMBRACO_PAGE_SIZE:
+                        break
+                if endpoint_ok:
+                    module_ok = True
+                    break
+            if culture_rows:
+                for candidate in _rows_to_local_candidates(culture_rows, page_url, exchange, culture):
+                    url = str(candidate.get("url") or "")
+                    if not url or url in seen_url:
+                        continue
+                    seen_url.add(url)
+                    all_candidates.append(candidate)
+                module_rows.extend(culture_rows)
+                if len(culture_rows) >= 3:
+                    break
+        if module_ok:
+            metrics["rows_collected"] += len(module_rows)
+
+    metrics["candidates_added"] = len(all_candidates)
+    return all_candidates, metrics, errors
 
 
 def _financial_signal_hits(text: str) -> Tuple[int, List[str]]:
@@ -789,6 +1317,10 @@ def extract_local_filing_candidates(
     ex = (exchange or "").upper()
     kws = set(LOCAL_FILING_KEYWORDS_COMMON)
     kws.update(LOCAL_FILING_KEYWORDS_BY_EXCHANGE.get(ex, ()))
+    event_register_re = re.compile(
+        r"(webcast|event)[\w\s:/-]{0,40}register|engagestream|signup|/register(?:$|[/?#])",
+        re.IGNORECASE,
+    )
 
     by_url: Dict[str, Dict[str, Any]] = {}
     for a in soup.find_all("a", href=True):
@@ -809,6 +1341,8 @@ def extract_local_filing_candidates(
         context_norm = re.sub(r"[-_/]+", " ", context)
 
         if any(neg in context for neg in LOCAL_FILING_NEGATIVE):
+            continue
+        if event_register_re.search(f"{context} {full_url.lower()}"):
             continue
         if "presentation" in context_norm or "deck" in context_norm or "slides" in context_norm:
             continue
@@ -863,6 +1397,17 @@ def extract_local_filing_candidates(
                     f"candidate replacement preserved? prev had date={prev.get('fecha_publicacion')} "
                     f"new had none (url={full_url})"
                 )
+            by_url[full_url] = candidate
+
+    for candidate in _extract_embedded_pdf_candidates(html, base_url, exchange):
+        full_url = str(candidate.get("url") or "")
+        if not full_url:
+            continue
+        prev = by_url.get(full_url)
+        if prev is None:
+            by_url[full_url] = candidate
+            continue
+        if _prefer_new_candidate(prev, candidate):
             by_url[full_url] = candidate
 
     candidates = sorted(
@@ -995,7 +1540,9 @@ def get_doc_text(client: SecClient, url: str) -> Tuple[bytes, str, Dict[str, Any
             chunks: List[str] = []
             for page in reader.pages:
                 page_text = page.extract_text() or ""
-                page_text = re.sub(r"\s+", " ", page_text).strip()
+                page_text = page_text.replace("\r\n", "\n").replace("\r", "\n")
+                page_text = re.sub(r"[ \t]+", " ", page_text)
+                page_text = re.sub(r"\n{3,}", "\n\n", page_text).strip()
                 if page_text:
                     chunks.append(page_text)
             text = "\n\n".join(chunks).strip()
@@ -1161,6 +1708,7 @@ def raw_dir_local_path(raw_dir: Path, filename: str) -> str:
 
 
 _EXTRACTORS_CACHE: Optional[Tuple[Any, Any]] = None
+_CLEAN_MD_GENERATOR_CACHE: Optional[Any] = None
 
 
 def _resolve_extractor_or_raise(local_module: str, package_module: str, attr: str) -> Any:
@@ -1204,6 +1752,44 @@ def _load_financial_extractors_or_raise() -> Tuple[Any, Any]:
     return _EXTRACTORS_CACHE
 
 
+def _load_clean_md_generator() -> Any:
+    global _CLEAN_MD_GENERATOR_CACHE
+    if _CLEAN_MD_GENERATOR_CACHE is not None:
+        return _CLEAN_MD_GENERATOR_CACHE
+    try:
+        mod = importlib.import_module("clean_md_pipeline")
+        _CLEAN_MD_GENERATOR_CACHE = getattr(mod, "generate_clean_md")
+        return _CLEAN_MD_GENERATOR_CACHE
+    except Exception:
+        pass
+    try:
+        mod = importlib.import_module("scripts.runners.clean_md_pipeline")
+        _CLEAN_MD_GENERATOR_CACHE = getattr(mod, "generate_clean_md")
+        return _CLEAN_MD_GENERATOR_CACHE
+    except Exception as exc:
+        raise RuntimeError(f"clean_md_pipeline.generate_clean_md import failed: {exc}") from exc
+
+
+def _is_financial_source_type(tipo: str) -> bool:
+    normalized = str(tipo or "").upper().replace(" ", "")
+    tokens = (
+        "10-K",
+        "10K",
+        "20-F",
+        "20F",
+        "40-F",
+        "40F",
+        "10-Q",
+        "10Q",
+        "6-K",
+        "6K",
+        "ANNUAL_REPORT",
+        "INTERIM_REPORT",
+        "REGULATORY_FILING",
+    )
+    return any(token in normalized for token in tokens)
+
+
 def write_raw_files(
     client: SecClient,
     raw_dir: Path,
@@ -1230,29 +1816,61 @@ def write_raw_files(
     (raw_dir / original_name).write_bytes(binary)
     (raw_dir / txt_name).write_text(text, encoding="utf-8")
 
-    # Generate .ixbrl.json and .clean.md for financial filings
-    htm_path = raw_dir / original_name
-    tipo_upper = tipo.upper().replace(" ", "")
-    is_financial = any(ft in tipo_upper for ft in ("10-K", "10K", "20-F", "20F", "10-Q", "10Q", "6-K", "6K"))
+    # Generate .ixbrl.json (HTML) and .clean.md (HTML/PDF/TXT) for financial filings.
+    source_path = raw_dir / original_name
+    is_financial = _is_financial_source_type(tipo)
+    clean_meta: Dict[str, Any] = {
+        "mode": "unknown",
+        "status": "SKIPPED_NOT_FINANCIAL" if not is_financial else "SKIPPED",
+        "reason": "",
+    }
     if is_financial and ext in ("htm", "html"):
         # Structural import failures must be explicit (fail-fast), not silent.
-        extract_ixbrl_facts, extract_financial_tables = _load_financial_extractors_or_raise()
+        extract_ixbrl_facts, _ = _load_financial_extractors_or_raise()
         try:
-            ixbrl_data = extract_ixbrl_facts(htm_path)
+            ixbrl_data = extract_ixbrl_facts(source_path)
             ixbrl_name = f"{base}.ixbrl.json"
             import json as _json
+
             (raw_dir / ixbrl_name).write_text(
-                _json.dumps(ixbrl_data, indent=2, ensure_ascii=False), encoding="utf-8")
+                _json.dumps(ixbrl_data, indent=2, ensure_ascii=False), encoding="utf-8"
+            )
         except Exception as e:
             print(f"WARNING: iXBRL extraction failed for {original_name}: {e}", file=sys.stderr)
 
+    if is_financial:
         try:
-            clean_md = extract_financial_tables(htm_path)
-            if clean_md:  # empty string = quality gate rejected
+            generate_clean_md = _load_clean_md_generator()
+            clean_md, clean_meta = generate_clean_md(
+                source_path=source_path,
+                txt_content=text,
+                filing_type=tipo,
+                source_id=source_id,
+            )
+            if clean_md:
                 clean_name = f"{base}.clean.md"
-                (raw_dir / clean_name).write_text(clean_md, encoding="utf-8")
+                clean_path = raw_dir / clean_name
+                clean_path.write_text(clean_md, encoding="utf-8")
+                try:
+                    clean_meta["clean_path"] = str(clean_path.relative_to(REPO_ROOT))
+                except ValueError:
+                    clean_meta["clean_path"] = str(clean_path)
         except Exception as e:
-            print(f"WARNING: clean.md extraction failed for {original_name}: {e}", file=sys.stderr)
+            clean_meta = {
+                "mode": "unknown",
+                "status": "ERROR",
+                "reason": f"clean_md pipeline failed: {e}",
+            }
+            print(f"WARNING: clean.md pipeline failed for {original_name}: {e}", file=sys.stderr)
+
+    extraction_meta["clean_md_mode"] = str(clean_meta.get("mode") or "unknown")
+    extraction_meta["clean_md_status"] = str(clean_meta.get("status") or "SKIPPED")
+    extraction_meta["clean_md_reason"] = str(clean_meta.get("reason") or "")
+    extraction_meta["clean_md_chars"] = int(clean_meta.get("output_chars") or 0)
+    if clean_meta.get("clean_path"):
+        extraction_meta["clean_md_path"] = str(clean_meta.get("clean_path"))
+    if isinstance(clean_meta.get("quality"), dict):
+        extraction_meta["clean_md_quality"] = clean_meta.get("quality")
 
     return raw_dir_local_path(raw_dir, txt_name), first_25_words(text), None, extraction_meta
 
@@ -1433,10 +2051,30 @@ def main() -> int:
         ).upper()
         extraction_reason = str(extraction_meta.get("extraction_reason") or "")
         extractor = str(extraction_meta.get("extractor") or "none")
+        clean_md_mode = str(extraction_meta.get("clean_md_mode") or "unknown")
+        clean_md_status = str(extraction_meta.get("clean_md_status") or "SKIPPED")
+        clean_md_reason = str(extraction_meta.get("clean_md_reason") or "")
+        try:
+            clean_md_chars = int(extraction_meta.get("clean_md_chars") or 0)
+        except Exception:
+            clean_md_chars = 0
         try:
             text_chars = int(extraction_meta.get("text_chars") or 0)
         except Exception:
             text_chars = 0
+        clean_md_diag_records.append(
+            {
+                "source_id": source_id,
+                "tipo": tipo,
+                "url": doc_url,
+                "mode": clean_md_mode,
+                "status": clean_md_status,
+                "reason": clean_md_reason,
+                "output_chars": clean_md_chars,
+                "text_chars": text_chars,
+                "clean_md_path": str(extraction_meta.get("clean_md_path") or ""),
+            }
+        )
 
         annual_like = {"10-K", "20-F", "40-F", "ANNUAL_REPORT"}
         if tipo.upper() in annual_like and extraction_status == "OK" and text_chars < 10000:
@@ -1465,6 +2103,10 @@ def main() -> int:
             "text_chars": text_chars,
             "content_hash": str(extraction_meta.get("content_hash") or ""),
             "contenido_disponible": extraction_status == "OK",
+            "clean_md_mode": clean_md_mode,
+            "clean_md_status": clean_md_status,
+            "clean_md_reason": clean_md_reason,
+            "clean_md_chars": clean_md_chars,
         }
         if ubicacion_relevante:
             source["ubicacion_relevante"] = ubicacion_relevante
@@ -1597,6 +2239,16 @@ def main() -> int:
     local_fallback_extractable_added = 0
     local_fallback_rejected_low_quality = 0
     local_fallback_annual_non_extractable = 0
+    local_fallback_umbraco_modules_detected = 0
+    local_fallback_umbraco_rows_collected = 0
+    local_fallback_umbraco_candidates_added = 0
+    local_fallback_umbraco_api_errors = 0
+    local_fallback_clean_md_generated_html = 0
+    local_fallback_clean_md_generated_pdf = 0
+    local_fallback_clean_md_rejected_quality = 0
+    local_fallback_clean_md_generation_errors = 0
+    local_fallback_clean_md_rejection_samples: List[Dict[str, Any]] = []
+    clean_md_diag_records: List[Dict[str, Any]] = []
     local_fallback_errors: List[str] = []
 
     sec_forms_present = {
@@ -1680,6 +2332,29 @@ def main() -> int:
                             )
                         collected[url] = candidate
 
+                umbraco_candidates, umbraco_metrics, umbraco_errors = _collect_umbraco_candidates(
+                    client=client,
+                    html=html,
+                    page_url=page,
+                    exchange=exchange,
+                    country=country,
+                )
+                local_fallback_umbraco_modules_detected += int(umbraco_metrics.get("modules_detected", 0))
+                local_fallback_umbraco_rows_collected += int(umbraco_metrics.get("rows_collected", 0))
+                local_fallback_umbraco_candidates_added += int(umbraco_metrics.get("candidates_added", 0))
+                local_fallback_umbraco_api_errors += int(umbraco_metrics.get("api_errors", 0))
+                if umbraco_errors:
+                    local_fallback_errors.extend(umbraco_errors)
+
+                for candidate in umbraco_candidates:
+                    url = str(candidate.get("url") or "")
+                    if not url:
+                        continue
+                    candidate["discovered_from"] = page
+                    prev = collected.get(url)
+                    if prev is None or _prefer_new_candidate(prev, candidate):
+                        collected[url] = candidate
+
             selected = _select_local_fallback_candidates(list(collected.values()))
 
             for cand in selected:
@@ -1714,6 +2389,13 @@ def main() -> int:
                 ).upper()
                 extraction_reason = str(extraction_meta.get("extraction_reason") or "")
                 extractor = str(extraction_meta.get("extractor") or "none")
+                clean_md_mode = str(extraction_meta.get("clean_md_mode") or "unknown")
+                clean_md_status = str(extraction_meta.get("clean_md_status") or "SKIPPED")
+                clean_md_reason = str(extraction_meta.get("clean_md_reason") or "")
+                try:
+                    clean_md_chars = int(extraction_meta.get("clean_md_chars") or 0)
+                except Exception:
+                    clean_md_chars = 0
                 text_sample = str(extraction_meta.get("text_sample") or "")
                 if not err and extraction_status == "OK" and is_navigation_like_source(title, text_sample, doc_url):
                     local_fallback_errors.append(
@@ -1738,6 +2420,42 @@ def main() -> int:
                     text_chars = int(extraction_meta.get("text_chars") or 0)
                 except Exception:
                     text_chars = 0
+                clean_md_diag_records.append(
+                    {
+                        "source_id": source_id,
+                        "tipo": _tipo,
+                        "url": doc_url,
+                        "mode": clean_md_mode,
+                        "status": clean_md_status,
+                        "reason": clean_md_reason,
+                        "output_chars": clean_md_chars,
+                        "text_chars": text_chars,
+                        "clean_md_path": str(extraction_meta.get("clean_md_path") or ""),
+                    }
+                )
+                if clean_md_status == "GENERATED":
+                    if clean_md_mode == "html_table":
+                        local_fallback_clean_md_generated_html += 1
+                    elif clean_md_mode == "pdf_text":
+                        local_fallback_clean_md_generated_pdf += 1
+                elif clean_md_status == "REJECTED_QUALITY":
+                    local_fallback_clean_md_rejected_quality += 1
+                    if len(local_fallback_clean_md_rejection_samples) < 10:
+                        local_fallback_clean_md_rejection_samples.append(
+                            {
+                                "source_id": source_id,
+                                "reason": clean_md_reason or "LOW_QUALITY",
+                            }
+                        )
+                elif clean_md_status.startswith("ERROR"):
+                    local_fallback_clean_md_generation_errors += 1
+                    if len(local_fallback_clean_md_rejection_samples) < 10:
+                        local_fallback_clean_md_rejection_samples.append(
+                            {
+                                "source_id": source_id,
+                                "reason": clean_md_reason or "PIPELINE_ERROR",
+                            }
+                        )
                 extraction_status, extraction_reason, annual_quality_eval = _classify_local_annual_extractability(
                     tipo=_tipo,
                     extraction_status=extraction_status,
@@ -1788,6 +2506,10 @@ def main() -> int:
                     "text_chars": text_chars,
                     "content_hash": str(extraction_meta.get("content_hash") or ""),
                     "contenido_disponible": extraction_status == "OK",
+                    "clean_md_mode": clean_md_mode,
+                    "clean_md_status": clean_md_status,
+                    "clean_md_reason": clean_md_reason,
+                    "clean_md_chars": clean_md_chars,
                 }
                 if local_path_val:
                     source["local_path"] = local_path_val
@@ -1872,6 +2594,15 @@ def main() -> int:
         "sources_extractable_added": local_fallback_extractable_added,
         "sources_rejected_low_quality": local_fallback_rejected_low_quality,
         "annual_non_extractable_count": local_fallback_annual_non_extractable,
+        "umbraco_modules_detected": local_fallback_umbraco_modules_detected,
+        "umbraco_rows_collected": local_fallback_umbraco_rows_collected,
+        "umbraco_candidates_added": local_fallback_umbraco_candidates_added,
+        "umbraco_api_errors": local_fallback_umbraco_api_errors,
+        "clean_md_generated_html": local_fallback_clean_md_generated_html,
+        "clean_md_generated_pdf": local_fallback_clean_md_generated_pdf,
+        "clean_md_rejected_quality": local_fallback_clean_md_rejected_quality,
+        "clean_md_generation_errors": local_fallback_clean_md_generation_errors,
+        "clean_md_rejection_samples": local_fallback_clean_md_rejection_samples[:10],
         "exchange": exchange,
         "country": country,
         "web_ir": web_ir,
@@ -1882,10 +2613,26 @@ def main() -> int:
             f"added_total={local_fallback_added}, "
             f"extractable_added={local_fallback_extractable_added}, "
             f"rejected_low_quality={local_fallback_rejected_low_quality}, "
-            f"annual_non_extractable={local_fallback_annual_non_extractable}."
+            f"annual_non_extractable={local_fallback_annual_non_extractable}, "
+            f"umbraco_modules={local_fallback_umbraco_modules_detected}, "
+            f"umbraco_rows={local_fallback_umbraco_rows_collected}, "
+            f"umbraco_candidates={local_fallback_umbraco_candidates_added}, "
+            f"umbraco_api_errors={local_fallback_umbraco_api_errors}, "
+            f"clean_md_html={local_fallback_clean_md_generated_html}, "
+            f"clean_md_pdf={local_fallback_clean_md_generated_pdf}, "
+            f"clean_md_rejected={local_fallback_clean_md_rejected_quality}, "
+            f"clean_md_errors={local_fallback_clean_md_generation_errors}."
         )
     if local_fallback_errors:
         out.setdefault("log", {}).setdefault("limitaciones", []).extend(local_fallback_errors)
+
+    if clean_md_diag_records:
+        diag_dir = case_dir / "_diagnostics" / "clean_md_generation"
+        diag_dir.mkdir(parents=True, exist_ok=True)
+        diag_path = diag_dir / "clean_md_meta.jsonl"
+        with diag_path.open("w", encoding="utf-8") as fh:
+            for rec in clean_md_diag_records:
+                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
     out_path = case_dir / "_sec_fetcher_output.json"
     out_path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

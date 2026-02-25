@@ -15,42 +15,42 @@
     "truth_pack_caso_id": "CASE_20260225_TEP"
   },
   "status": "BLOCKED",
-  "motivo_blocked": "Prerequisito incumplido: truth_pack.data_quality.status=PARTIAL (se requiere PASS). Adicionalmente falta enterprise_value_usd para traducir precio/EV en expectativas implícitas.",
+  "motivo_blocked": "N1 incumplido: truth_pack.data_quality.status debe ser 'PASS' y llega 'PARTIAL'.",
   "snapshot_mercado": {
     "fecha": "2026-02-25",
-    "precio_usd": null,
-    "market_cap_usd": null,
-    "enterprise_value_usd": null,
-    "deuda_total_usd": null,
-    "caja_usd": 1058000000,
-    "deuda_neta_usd": null,
+    "precio_usd": 50.6,
+    "market_cap_usd": 2941420000.0,
+    "enterprise_value_usd": 6037420000.0,
+    "deuda_total_usd": 4154000000.0,
+    "caja_usd": 1058000000.0,
+    "deuda_neta_usd": 3096000000.0,
     "acciones_diluidas": null
   },
   "metricas_base": {
     "periodo_base": "FY",
     "fecha_fin_periodo_base": "2024-12-31",
-    "ingresos_usd": 10280000000,
-    "ebit_usd": 1082000000,
-    "cfo_usd": 1813000000,
-    "capex_usd": -219000000,
+    "ingresos_usd": 10280000000.0,
+    "ebit_usd": 1082000000.0,
+    "cfo_usd": 1813000000.0,
+    "capex_usd": -219000000.0,
     "fcf_usd": null,
-    "margen_operativo_pct": null,
+    "margen_operativo_pct": 0.1053,
     "margen_fcf_pct": null
   },
   "seleccion_metodo": {
     "metodo_principal": "BLOCKED",
-    "razon": "No se puede ejecutar reverse valuation sin EV actual. Aunque existe EBIT positivo, falta la variable ancla de valoración (enterprise_value_usd).",
+    "razon": "La regla N1 exige calidad PASS antes de cualquier reverse valuation. El TruthPack está en PARTIAL, por lo que no procede ejecutar DCF inverso ni earnings power completo.",
     "metodos_secundarios": [
       "MULTIPLOS_IMPLICITOS_SOLO"
     ]
   },
   "multiples_implicitos": {
-    "disponible": false,
-    "ev_ebit": null,
+    "disponible": true,
+    "ev_ebit": 5.58,
     "ev_fcf": null,
     "p_fcf": null,
     "fcf_yield_pct": null,
-    "comentario": "No calculable: faltan EV y market cap."
+    "comentario": "Solo EV/EBIT es calculable con base FY2024; faltan insumos de FCF consistentes para una lectura integral de expectativas implícitas."
   },
   "parametros_modelo": {
     "horizonte_anos": 5,
@@ -69,7 +69,7 @@
       15,
       18
     ],
-    "nota_parametros": "Se mantienen rangos estándar para sensibilidad de coste de capital y valor terminal. En ausencia de EV verificable, no se ejecuta inversión de valoración; los grids quedan definidos para recálculo cuando el TruthPack pase gates.",
+    "nota_parametros": "Los rangos cubren escenarios prudentes a exigentes en costo de capital y valor terminal. Se usan grids para evitar dependencia en un único supuesto. No se ejecuta el grid por bloqueo de calidad de datos (N1).",
     "convenciones": {
       "definicion_fcf": "FCF = CFO - CAPEX (usando capex como salida de caja)",
       "ev_formula": "EV = market_cap + deuda_total - caja",
@@ -95,19 +95,19 @@
           "importancia": "MEDIA"
         }
       ],
-      "observacion": "No evaluable sin EV de referencia."
+      "observacion": "Sin FCF base validado y con estado PARTIAL no se puede cuantificar la sensibilidad de forma fiable."
     },
     "validaciones_modelo": {
-      "ev_presente": false,
+      "ev_presente": true,
       "fcf0_presente": false,
-      "resultados_sin_valores_absurdos": true,
-      "detalle": "Modelo no ejecutado por bloqueo de inputs."
+      "resultados_sin_valores_absurdos": false,
+      "detalle": "Modelo no ejecutado por bloqueo N1 y ausencia de FCF base utilizable."
     }
   },
   "reverse_earnings_power": {
     "aplicable": false,
     "metrica_base": "EBIT",
-    "valor_base_usd": 1082000000,
+    "valor_base_usd": 1082000000.0,
     "rango_normalizado_usd": {
       "min": null,
       "base": null,
@@ -118,71 +118,68 @@
       "multiple_base": null,
       "multiple_max": null
     },
-    "lectura": "No se puede inferir múltiplo implícito sobre earnings power sin EV/market cap. Se conserva EBIT como métrica base para recálculo posterior.",
+    "lectura": "No ejecutado por regla de bloqueo N1. Aunque existe EBIT FY, la política exige data_quality PASS para inferencias de expectativas implícitas.",
     "supuestos": [
-      "Usar EBIT (no EBITA) como métrica operativa principal.",
-      "No imputar deuda total ni market cap ausentes."
+      "No se realizó normalización de EBIT mientras el estado de calidad permanezca en PARTIAL."
     ]
   },
   "resumen_expectativas_implicitas": {
     "enunciados": [
-      "No es posible traducir el precio/EV actual en expectativas porque el EV no está disponible en el TruthPack validado."
+      "No puede derivarse una senda de crecimiento implícita defendible porque el gate de calidad de datos (N1) bloquea el motor.",
+      "Con la información actual solo se observa EV/EBIT FY2024 ~5.58x; esto no sustituye un reverse valuation completo con FCF o EBIT TTM normalizado."
     ],
     "variable_critica_principal": "RIESGO_CAPITAL",
     "que_deberia_observarse_en_6_12_meses": [
-      "Disponibilidad de market_cap_usd y enterprise_value_usd consistentes con la fórmula EV.",
-      "Publicación de deuda_total_usd explícita para completar estructura de capital.",
-      "Actualización de FCF canónico (CFO y CAPEX con convención de signo consistente)."
+      "Publicación de FCF TTM consistente (CFO y CAPEX completos y reconciliados).",
+      "Disponibilidad de EBIT TTM completo para evitar mezclar base FY con snapshot de mercado actual.",
+      "Reporte de acciones diluidas promedio para métricas por acción y contraste P/FCF."
     ]
   },
   "banderas": {
     "expectativas_extremas": false,
     "posible_value_trap": false,
     "posible_peak_earnings": false,
-    "alto_riesgo_balance": false,
+    "alto_riesgo_balance": true,
     "opacidad_alta": true,
     "notas": [
-      "Evaluación de banderas de valoración no concluyente por falta de EV.",
-      "Data completeness reportada en 26%."
+      "Deuda neta relevante frente a capitalización de mercado (3.096bn vs 2.941bn).",
+      "Data completeness total 26%, con fuerte nulidad en series históricas.",
+      "Sin FCF TTM canónico no se puede validar exigencia implícita de caja."
     ]
   },
   "faltantes_criticos": [
     {
-      "item": "enterprise_value_usd",
-      "por_que_importa": "Sin EV no existe ancla para inferir crecimiento/márgenes implícitos.",
-      "como_resolver": "Aportar market_cap_usd y deuda_total_usd para calcular EV = market_cap + deuda_total - caja."
+      "item": "fcf_ttm",
+      "por_que_importa": "Sin FCF base no puede correrse reverse DCF de forma robusta.",
+      "como_resolver": "Agregar CFO y CAPEX TTM completos en TruthPack, con convención de signo consistente."
     },
     {
-      "item": "market_cap_usd",
-      "por_que_importa": "Necesario para EV y múltiplos de equity (P/FCF).",
-      "como_resolver": "Incorporar snapshot de mercado con fecha y acciones diluidas."
-    },
-    {
-      "item": "deuda_total_usd",
-      "por_que_importa": "Sin deuda total no se puede construir EV ni riesgo financiero implícito.",
-      "como_resolver": "Extraer total debt explícito del filing o nota de deuda consolidada."
+      "item": "ebit_ttm",
+      "por_que_importa": "Permite usar earnings power con base homogénea respecto al precio/EV actual.",
+      "como_resolver": "Incorporar EBIT de los últimos 4 trimestres o TTM validado en el paquete."
     },
     {
       "item": "acciones_diluidas",
-      "por_que_importa": "Requerido para validar market cap y métricas por acción.",
-      "como_resolver": "Añadir weighted-average diluted shares del periodo base."
+      "por_que_importa": "Necesario para métricas por acción como P/FCF y validación de market cap.",
+      "como_resolver": "Añadir diluted shares outstanding del último periodo reportado."
     }
   ],
   "log": {
     "limitaciones": [
-      "truth_pack.data_quality.status no cumple PASS (valor actual: PARTIAL).",
-      "Campos *_usd contienen nominal en EUR sin conversión FX explícita.",
-      "deuda_total_usd y enterprise_value_usd ausentes en snapshot de mercado.",
-      "Cobertura de datos reportada: 26%."
+      "Gate de calidad N1 no satisfecho (status PARTIAL).",
+      "FCF canónico no disponible en TTM.",
+      "EBIT TTM no disponible; solo referencia FY para EBIT.",
+      "Acciones diluidas no reportadas explícitamente.",
+      "Campos *_usd contienen cifras con limitaciones de divisa en el propio TruthPack."
     ],
     "traza_calculo": [
-      "Modo detectado: NORMAL (no se recibió RemediationPlan + PatchBundle).",
-      "Gate N1 verificado: data_quality.status=PARTIAL -> bloqueo.",
-      "Gate N2 verificado: enterprise_value_usd ausente -> bloqueo confirmado.",
-      "Se tomó FY2024 como periodo base operativo para referencia de EBIT/CFO/CAPEX.",
-      "No se calcularon múltiplos implícitos por falta de EV/market cap.",
-      "No se ejecutó grid N6; por tanto no aplica validación de duplicados de 24 combinaciones.",
-      "Se aplicó convención de métrica operativa con EBIT (no EBITA) para evitar inconsistencia metodológica."
+      "Modo detectado: NORMAL (sin RemediationPlan adjunto).",
+      "Validación N1: data_quality.status = PARTIAL => bloqueo.",
+      "EV tomado de mercado.enterprise_value_usd = 6,037,420,000.",
+      "Base operativa usada solo para múltiplo observable: FY2024 EBIT = 1,082,000,000.",
+      "EV/EBIT calculado = 6,037,420,000 / 1,082,000,000 = 5.58x.",
+      "EV/FCF, P/FCF y FCF yield no calculables por ausencia de FCF utilizable.",
+      "Método principal fijado en BLOCKED conforme regla absoluta de prerequisito."
     ]
   }
 }

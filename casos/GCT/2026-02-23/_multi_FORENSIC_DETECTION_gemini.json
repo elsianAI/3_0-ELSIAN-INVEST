@@ -1,92 +1,90 @@
 {
   "version_esquema": "ForensicDetection_v1",
   "caso_id": "CASE_20260223_GCT",
-  "fecha_corte": "2026-02-23",
+  "fecha_corte": "2026-02-24",
   "ticker": "GCT",
   "red_flags": [
     {
-      "tipo": "GASTOS_OPERATIVOS",
-      "descripcion": "Explosión de gastos G&A (+146% YoY) superando ampliamente el crecimiento de ingresos (+65%), sugiriendo deseconomías de escala o partidas no recurrentes.",
-      "severidad_cualitativa": "ALTA",
-      "ubicacion": "Income Statement FY2023 vs FY2024",
-      "source_id": "SRC_SEC_001_10-K_FY2024.htm"
+      "tipo": "MARKET_DISCONNECT",
+      "descripcion": "Desconexión extrema entre crecimiento y valoración. La empresa reporta un crecimiento de ingresos del 65% (FY24) con márgenes estables, pero el mercado la valora a ~6x P/FCF. Esto implica que el mercado descuenta una probabilidad muy alta de que los flujos de caja no sean reales o sostenibles (Riesgo Fraude/China).",
+      "severidad_inferida": "ALTA",
+      "source_id": "TruthPack_v1.metricas_derivadas.p_fcf"
     },
     {
-      "tipo": "ESTRUCTURA_CAPITAL",
-      "descripcion": "Pasivos por arrendamiento ($484M) superan el Patrimonio Total ($405M). Alto apalancamiento operativo fijo encubierto como leases.",
-      "severidad_cualitativa": "MEDIA",
-      "ubicacion": "Balance Sheet / Lease Note FY2024",
-      "source_id": "SRC_SEC_001_10-K_FY2024.htm"
+      "tipo": "CAPEX_ANOMALY",
+      "descripcion": "Capex insosteniblemente bajo (1.3% de ventas en FY24). Para una plataforma 'GigaCloud' de logística y B2B, este nivel sugiere un modelo extremadamente 'asset-light' o un sub-reconocimiento de gastos de mantenimiento capitalizables/operativos necesarios para sostener la infraestructura a largo plazo.",
+      "severidad_inferida": "MEDIA",
+      "source_id": "TruthPack_v1.historico_anual[4].capex_usd"
     },
     {
-      "tipo": "RENTABILIDAD",
-      "descripcion": "Compresión de margen EBIT (15.6% en FY23 a 11.2% en FY24) en periodo de hiper-crecimiento de ventas.",
-      "severidad_cualitativa": "MEDIA",
-      "ubicacion": "Income Statement FY2024",
-      "source_id": "SRC_SEC_001_10-K_FY2024.htm"
-    },
-    {
-      "tipo": "OPACIDAD_DATOS",
-      "descripcion": "Ausencia de desglose explícito de Cuentas por Cobrar e Inventarios en los estados financieros procesados, impidiendo análisis de ciclo de conversión.",
-      "severidad_cualitativa": "MEDIA",
-      "ubicacion": "Balance Sheet FY2024",
-      "source_id": "TruthPack_v1_limitaciones"
+      "tipo": "DATA_OPACITY_WC",
+      "descripcion": "Falta de transparencia en componentes del Capital de Trabajo. La extracción automatizada no pudo identificar saldos explícitos de 'Cuentas por Cobrar' ni 'Inventarios' en el Balance Sheet consolidado. Sin estos datos, es imposible calcular DSO y DIO para validar la calidad de los ingresos explosivos.",
+      "severidad_inferida": "MEDIA",
+      "source_id": "TruthPack_v1.balance_sheet_ultimo"
     }
   ],
   "liquidez": {
-    "caja_disponible_usd": 259759000,
-    "deuda_financiera_usd": 0,
-    "lease_liabilities_total_usd": 484278000,
-    "runway_meses": "INFINITO (FCF Positivo)",
-    "comentario": "Posición de caja sólida ($260M) sin deuda bancaria aparente. El riesgo de solvencia no es inmediato, pero la carga fija de arrendamientos es muy elevada en relación al equity."
+    "estado": "SOLIDO",
+    "caja_disponible_usd": 259759000.0,
+    "deuda_financiera_usd": 0.0,
+    "pasivos_arrendamiento_total_usd": 484278000.0,
+    "vencimientos_corto_plazo_usd": 88521000.0,
+    "ratio_cobertura_caja_corto_plazo": 2.93,
+    "runway_estimado_meses": "INFINITO",
+    "comentario": "La empresa no tiene deuda financiera tradicional significativa (gasto por intereses < $1M). La principal obligación son los arrendamientos operativos. La caja cubre casi 3 veces los vencimientos de arrendamiento a corto plazo. El CFO positivo ($158M) autofinancia la operación."
   },
   "puentes": {
-    "ebit_cfo_bridge": {
-      "ebit_usd": 130622000,
-      "cfo_usd": 158078000,
-      "variacion_pct": 21.0,
-      "explicacion": "CFO > EBIT (Calidad de beneficios positiva). Impulsado por Depreciación ($8.5M) y gestión favorable de capital de trabajo (Payables ~$78M).",
-      "distorsion_significativa": true
+    "EBIT_CFO_FY2024": {
+      "ebit_usd": 130622000.0,
+      "depreciacion_amortizacion_usd": 8524000.0,
+      "impuestos_teoricos_usd": -14806000.0,
+      "variacion_capital_trabajo_implidica_usd": 33738000.0,
+      "cfo_real_usd": 158078000.0,
+      "discrepancia_pct": 0.0,
+      "analisis": "El CFO supera al EBIT. La generación de caja se ve impulsada por una contribución positiva del capital de trabajo (probablemente aumento de cuentas por pagar o gestión eficiente de cobros, aunque no verificable por falta de desglose de balances)."
     },
-    "cfo_fcf_bridge": {
-      "cfo_usd": 158078000,
-      "capex_usd": -15536000,
-      "fcf_usd": 142542000,
-      "conversion_cfo_pct": 90.1,
-      "explicacion": "Capex extremadamente bajo (1.3% de ventas) confirma modelo de negocio basado en arrendamiento de infraestructura en lugar de propiedad.",
-      "distorsion_significativa": false
+    "CFO_FCF_FY2024": {
+      "cfo_usd": 158078000.0,
+      "capex_usd": -15536000.0,
+      "fcf_real_usd": 142542000.0,
+      "conversion_cfo_fcf_pct": 90.1,
+      "analisis": "Conversión de caja operativa a libre extremadamente alta debido a requerimientos de Capex mínimos."
     }
   },
   "kill_criteria_candidatos": [
     {
-      "condicion": "Renuncia del auditor o 'Adverse Opinion' sobre controles internos.",
-      "ventana_observacion": "Próximos 12 meses",
-      "probabilidad": "MEDIA"
+      "criterio": "Validación de Rendimiento de Caja (Interest Check)",
+      "condicion": "Interest Income / Cash Balance < 2.0% (anualizado)",
+      "ventana_temporal": "Próximos 12 meses",
+      "racional": "Con tasas libres de riesgo >4%, un rendimiento nulo o muy bajo sobre los $260M de caja reportada sería el indicador definitivo de que el efectivo no existe o está restringido (fraude contable)."
     },
     {
-      "condicion": "Margen Operativo cayendo por debajo del 8% (tendencia actual negativa).",
-      "ventana_observacion": "Resultados Q4 2024 - Q2 2025",
-      "probabilidad": "MEDIA"
+      "criterio": "Deterioro de Margen Bruto",
+      "condicion": "Gross Margin < 18%",
+      "ventana_temporal": "Trimestral",
+      "racional": "El margen bruto ha sido volátil (21% -> 17% -> 27% -> 24%). Una caída por debajo del 18% indicaría que el modelo de negocio pierde tracción o que se están inflando ingresos con ventas de margen nulo."
     },
     {
-      "condicion": "Caja neta cayendo por debajo de $100M sin reducción proporcional de pasivos por lease.",
-      "ventana_observacion": "Próximos 24 meses",
-      "probabilidad": "BAJA"
+      "criterio": "Inversión de Ciclo de Caja",
+      "condicion": "CFO < Net Income por 2 trimestres consecutivos",
+      "ventana_temporal": "6 meses",
+      "racional": "Actualmente la empresa se financia con proveedores (CFO > NI). Si esto se revierte, la quema de caja acelerará drásticamente, revelando problemas de cobranza o acumulación de inventario invendible."
     }
   ],
-  "report_type": "FORENSIC_INITIAL",
+  "report_type": "Forensic_Analysis_Automated",
   "input_refs": {
-    "truth_pack": "TruthPack_v1_partial",
-    "implied_expectations": "ImpliedExpectations_v1"
+    "truth_pack": "TruthPack_v1 (GCT)",
+    "implied_expectations": "ImpliedExpectations_v1 (BLOCKED)"
   },
   "log": {
-    "limitaciones": [
-      "No se pudo calcular DSO/DIO por falta de datos de Receivables/Inventory en TruthPack.",
-      "Análisis de deuda limitado a Lease Liabilities por ausencia de deuda bancaria explícita."
+    "notas_proceso": [
+      "No se pudo realizar análisis de ciclo de conversión de efectivo (CCC) por falta de datos de AR e Inventario en el input.",
+      "Deuda total asumida como inmaterial basada en el gasto de intereses casi nulo reportado.",
+      "El análisis de supervivencia se basa en la premisa de que la caja reportada es real. Si es falsa (caso de fraude), el análisis de liquidez es inválido."
     ]
   },
   "_meta": {
-    "generator": "Gemini CLI Forensic Module",
-    "timestamp": "2026-02-23T22:30:00Z"
+    "generador": "Gemini_CLI_Forensic_Agent",
+    "fecha_generacion": "2026-02-24T15:55:00Z"
   }
 }

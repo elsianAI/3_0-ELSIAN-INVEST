@@ -10,6 +10,7 @@ Lógica:
 """
 
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -113,6 +114,18 @@ def merge(partial_extractions: list[dict]) -> dict:
             filing_index=1,
             warnings=local_warnings,
         )
+        # ── Imputation pass for single-filing (V5.1, Codex Adj #3) ──
+        bs = merged.get("balance_sheet_ultimo", {})
+        if bs and isinstance(bs, dict):
+            # Ensure _field_sources exists before imputation
+            if "_field_sources" not in bs:
+                ft = _resolve_filing_type(merged)
+                _seed_field_sources(bs, str(ft))
+            prov = dict(bs.get("_field_sources", {}))
+            _impute_balance_identity(bs, prov, local_warnings)
+            _impute_deuda_total(bs, prov, local_warnings)
+            bs["_field_sources"] = prov
+        _warn_lease_only_debt_missing(merged, local_warnings)
         if local_warnings:
             log_payload = merged.setdefault("log", {})
             if isinstance(log_payload, dict):
@@ -129,6 +142,7 @@ def merge(partial_extractions: list[dict]) -> dict:
     base["historico_trimestral"] = _merge_quarterly(normalized_extractions)
     base["balance_sheet_ultimo"] = _merge_balance_sheet(normalized_extractions, merger_warnings)
     base["lease_data"] = _merge_lease_data(normalized_extractions)
+    _warn_lease_only_debt_missing(base, merger_warnings)
 
     # Merge log/sources
     all_sources = []
@@ -220,6 +234,13 @@ _BS_METADATA_KEYS = {
     "fecha_fin", "fecha_corte", "moneda", "currency", "fuente_refs",
     "tipo_periodo", "duracion", "is_preliminary",
 }
+_CRITICAL_BS_FIELDS = (
+    "activos_totales_usd",
+    "pasivos_totales_usd",
+    "patrimonio_usd",
+    "deuda_total_usd",
+    "caja_usd",
+)
 
 
 def _is_bs_data_field(key: str, value) -> bool:
@@ -260,6 +281,81 @@ def _bs_sort_key(entry: dict) -> tuple[int, str]:
     return (1, "0000-00-00")
 
 
+def _bs_date_rank(entry: dict) -> int:
+    _, date_str = _bs_sort_key(entry)
+    m = re.match(r"(\d{4})-(\d{2})-(\d{2})", str(date_str))
+    if not m:
+        return 0
+    return int(f"{m.group(1)}{m.group(2)}{m.group(3)}")
+
+
+def _bs_period_key(entry: dict):
+    """Deterministic period key for BS fallback guards.
+
+    Priority:
+      1) fecha_fin (YYYY-MM-DD)
+      2) fecha_corte (YYYY-MM-DD)
+      3) periodo normalized (FY2024 / Q1-2024)
+    """
+    for date_field in ("fecha_fin", "fecha_corte"):
+        raw = entry.get(date_field)
+        if isinstance(raw, str):
+            m = re.search(r"(\d{4}-\d{2}-\d{2})", raw)
+            if m:
+                return m.group(1)
+
+    periodo = entry.get("periodo")
+    if not isinstance(periodo, str):
+        return None
+    normalized = re.sub(r"\s+", "", periodo.upper())
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", normalized)
+    if m:
+        return m.group(1)
+    m = re.match(r"Q([1-4])[-_/]?(20\d{2})$", normalized)
+    if m:
+        return f"Q{m.group(1)}-{m.group(2)}"
+    m = re.match(r"([1-4])Q[-_/]?(20\d{2})$", normalized)
+    if m:
+        return f"Q{m.group(1)}-{m.group(2)}"
+    m = re.match(r"Q([1-4])[-_/]?FY[-_/]?(20\d{2})$", normalized)
+    if m:
+        return f"Q{m.group(1)}-{m.group(2)}"
+    m = re.match(r"FY[-_/]?(20\d{2})$", normalized)
+    if m:
+        return f"FY{m.group(1)}"
+    m = re.match(r"(20\d{2})$", normalized)
+    if m:
+        return f"FY{m.group(1)}"
+    return None
+
+
+def _coerce_finite_number(value):
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        candidate = float(value)
+    elif isinstance(value, str):
+        raw = value.strip().replace(",", "")
+        if not raw:
+            return None
+        try:
+            candidate = float(raw)
+        except ValueError:
+            return None
+    else:
+        return None
+    if not math.isfinite(candidate):
+        return None
+    return candidate
+
+
+def _is_valid_critical_bs_value(value) -> bool:
+    candidate = _coerce_finite_number(value)
+    if candidate is None:
+        return False
+    return candidate >= 0
+
+
 def _normalize_balance_sheet(value, filing_index: int, warnings: list[str]) -> dict:
     """Normaliza balance_sheet_ultimo a dict, ignorando entradas no válidas."""
     if value is None:
@@ -292,34 +388,81 @@ def _normalize_balance_sheet(value, filing_index: int, warnings: list[str]) -> d
 
 
 def _merge_balance_sheet(extractions: list[dict], warnings: list[str]) -> dict:
-    """Usa el filing más reciente con datos de balance."""
-    best = {}
-    best_priority = 999
-    best_filing = "UNKNOWN"
-
+    """Pick best balance sheet and null-fill critical fields from lower-priority sources."""
+    snapshots: list[dict] = []
     for idx, ext in enumerate(extractions, start=1):
         bs = _normalize_balance_sheet(
             ext.get("balance_sheet_ultimo"),
             filing_index=idx,
             warnings=warnings,
         )
-        if not bs or all(
-            v is None for k, v in bs.items()
-            if _is_bs_data_field(k, v)
-        ):
+        if not bs or all(v is None for k, v in bs.items() if _is_bs_data_field(k, v)):
             continue
-
         filing_type = _resolve_filing_type(ext)
         priority = FILING_PRIORITY.get(filing_type, 99)
+        snapshots.append(
+            {
+                "bs": bs,
+                "filing_type": filing_type,
+                "priority": priority,
+                "date_key": _bs_sort_key(bs),
+                "date_rank": _bs_date_rank(bs),
+                "period_key": _bs_period_key(bs),
+            }
+        )
 
-        if priority < best_priority:
-            best = bs
-            best_priority = priority
-            best_filing = filing_type
+    if not snapshots:
+        return {}
 
-    if best:
-        best = _seed_field_sources(dict(best), best_filing)
-    return best
+    best_priority = min(int(item["priority"]) for item in snapshots)
+    best_priority_snaps = [item for item in snapshots if int(item["priority"]) == best_priority]
+    base_info = max(best_priority_snaps, key=lambda item: int(item["date_rank"]))
+    base_period_key = base_info.get("period_key")
+    base = _seed_field_sources(dict(base_info["bs"]), str(base_info["filing_type"]))
+    provenance = dict(base.get("_field_sources", {}))
+
+    candidates = sorted(
+        [item for item in snapshots if item is not base_info],
+        key=lambda item: (int(item["priority"]), -int(item["date_rank"])),
+    )
+    blocked_periods: set[tuple[str, str, str]] = set()
+    for field in _CRITICAL_BS_FIELDS:
+        if base.get(field) is not None:
+            continue
+        for candidate in candidates:
+            candidate_period_key = candidate.get("period_key")
+            if (not base_period_key) or (not candidate_period_key) or candidate_period_key != base_period_key:
+                warn_key = (
+                    str(candidate.get("filing_type", "UNKNOWN")),
+                    str(base_period_key or "UNKNOWN"),
+                    str(candidate_period_key or "UNKNOWN"),
+                )
+                if warn_key not in blocked_periods:
+                    blocked_periods.add(warn_key)
+                    warnings.append(
+                        "balance_sheet_ultimo cross_period_blocked "
+                        f"base={base_period_key or 'UNKNOWN'} "
+                        f"candidate={candidate_period_key or 'UNKNOWN'} "
+                        f"source={candidate.get('filing_type', 'UNKNOWN')}"
+                    )
+                continue
+            val = candidate["bs"].get(field)
+            if not _is_valid_critical_bs_value(val):
+                continue
+            base[field] = val
+            source_ft = str(candidate["filing_type"])
+            provenance[field] = f"{source_ft}:fallback_critical"
+            warnings.append(
+                f"balance_sheet_ultimo.{field} completado desde {source_ft} via fallback_critical"
+            )
+            break
+
+    # ── Imputation pass (V5.1) ──
+    _impute_balance_identity(base, provenance, warnings)
+    _impute_deuda_total(base, provenance, warnings)
+
+    base["_field_sources"] = provenance
+    return base
 
 
 def _merge_lease_data(extractions: list[dict]) -> dict:
@@ -370,6 +513,129 @@ def _seed_field_sources(entry: dict, filing_type: str) -> dict:
             provenance[k] = filing_type
     entry["_field_sources"] = provenance
     return entry
+
+
+# ── Imputation helpers (A1/A2 — V5.1 plan) ──────────────────────────
+
+_IDENTITY_FIELDS = ("activos_totales_usd", "pasivos_totales_usd", "patrimonio_usd")
+
+
+def _impute_balance_identity(
+    base: dict, provenance: dict, warnings: list[str]
+) -> None:
+    """Impute missing balance sheet component from accounting identity.
+
+    Rule: Assets = Liabilities + Equity.  If exactly 2 of 3 are non-null,
+    compute the third.  Guards: result must be finite and >= 0.
+    Never overwrites an existing non-null value.
+    """
+    vals = {f: _coerce_finite_number(base.get(f)) for f in _IDENTITY_FIELDS}
+    present = {f for f, v in vals.items() if v is not None}
+    missing = set(_IDENTITY_FIELDS) - present
+
+    if len(missing) != 1:
+        return  # need exactly 2-of-3
+
+    field = missing.pop()
+    a = vals["activos_totales_usd"]
+    p = vals["pasivos_totales_usd"]
+    e = vals["patrimonio_usd"]
+
+    if field == "pasivos_totales_usd":
+        computed = a - e  # type: ignore[operator]
+        formula = f"activos({a}) - patrimonio({e})"
+    elif field == "patrimonio_usd":
+        computed = a - p  # type: ignore[operator]
+        formula = f"activos({a}) - pasivos({p})"
+    else:  # activos_totales_usd
+        computed = p + e  # type: ignore[operator]
+        formula = f"pasivos({p}) + patrimonio({e})"
+
+    if not math.isfinite(computed) or computed < 0:
+        warnings.append(
+            f"balance_sheet_ultimo._impute_balance_identity: "
+            f"skipped {field} — computed {computed} via {formula} (negative/non-finite)"
+        )
+        return
+
+    base[field] = computed
+    provenance[field] = "IMPUTED:balance_identity"
+    warnings.append(
+        f"balance_sheet_ultimo.{field} imputed via identity: {formula} = {computed}"
+    )
+
+
+def _impute_deuda_total(
+    base: dict, provenance: dict, warnings: list[str]
+) -> None:
+    """Impute deuda_total_usd from long-term + short-term debt components.
+
+    Strategy:
+      - Both LT and ST present → sum  (IMPUTED:debt_components)
+      - Only LT present → conservative estimate (IMPUTED:long_term_only)
+    """
+    if _is_valid_critical_bs_value(base.get("deuda_total_usd")):
+        return  # already populated
+
+    lt = _coerce_finite_number(base.get("deuda_largo_plazo_usd"))
+    st = _coerce_finite_number(base.get("deuda_corto_plazo_usd"))
+
+    if lt is not None and st is not None:
+        computed = lt + st
+        tag = "IMPUTED:debt_components"
+        formula = f"LT({lt}) + ST({st})"
+    elif lt is not None:
+        computed = lt
+        tag = "IMPUTED:long_term_only"
+        formula = f"LT({lt}) only"
+    else:
+        return  # nothing to impute from
+
+    if not math.isfinite(computed) or computed < 0:
+        warnings.append(
+            f"balance_sheet_ultimo._impute_deuda_total: "
+            f"skipped — computed {computed} via {formula} (negative/non-finite)"
+        )
+        return
+
+    base["deuda_total_usd"] = computed
+    provenance["deuda_total_usd"] = tag
+    warnings.append(
+        f"balance_sheet_ultimo.deuda_total_usd imputed: {formula} = {computed}"
+    )
+
+
+def _warn_lease_only_debt_missing(tp_like: dict, warnings: list[str]) -> None:
+    """Warn when only lease liabilities exist but debt components are missing.
+
+    This is intentional: lease liabilities are not included in deuda_total_usd.
+    """
+    bs = tp_like.get("balance_sheet_ultimo", {})
+    if not isinstance(bs, dict):
+        return
+    if _is_valid_critical_bs_value(bs.get("deuda_total_usd")):
+        return
+
+    lt = _coerce_finite_number(bs.get("deuda_largo_plazo_usd"))
+    st = _coerce_finite_number(bs.get("deuda_corto_plazo_usd"))
+    if lt is not None or st is not None:
+        return
+
+    lease = tp_like.get("lease_data", {})
+    if not isinstance(lease, dict):
+        return
+    lease_total = _coerce_finite_number(lease.get("lease_liabilities_total_usd"))
+    lease_current = _coerce_finite_number(lease.get("lease_liabilities_current_usd"))
+    lease_non_current = _coerce_finite_number(lease.get("lease_liabilities_non_current_usd"))
+    if lease_total is None and lease_current is None and lease_non_current is None:
+        return
+
+    msg = (
+        "balance_sheet_ultimo lease_only_not_used_for_total_debt: "
+        "lease liabilities detected but financial debt components are missing"
+    )
+    if msg not in warnings:
+        warnings.append(msg)
 
 
 def _merge_period_entries(existing: dict, new_entry: dict,

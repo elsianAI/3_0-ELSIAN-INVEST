@@ -20,7 +20,8 @@ from .config import EngineConfig, get_step_config
 from .state import (
     load_state, save_state, mark_step_done, mark_step_failed,
     mark_step_in_progress, mark_pipeline_status, update_decision_fields,
-    get_next_step, init_state, resolve_empresa_hints, persist_empresa_hints, read_modify_write,
+    get_next_step, init_state, init_or_load_state,
+    resolve_empresa_hints, persist_empresa_hints, read_modify_write,
     PIPELINE_STEPS, SUB_STEPS,
 )
 from .step_contracts import get_primary_schema
@@ -68,6 +69,182 @@ STEP_INPUT_ARTIFACTS = {
     "ARBITRO": ["TruthPack_v1", "AgentReport_v1_BULL", "AgentReport_v1_REDTEAM",
                 "AgentReport_v1_CATALYST", "AgentReport_v1_FORENSIC", "ImpliedExpectations_v1"],
 }
+
+# ── V5.1 B2/B3/B4: Fingerprint + artifact reuse ─────────────────────
+
+_REUSABLE_STEPS = {"RED_TEAM", "ARBITRO"}
+
+
+def _compute_step_input_fingerprint(case_dir: Path, step_name: str) -> str:
+    """Compute deterministic SHA256 fingerprint of step inputs.
+
+    Includes:
+    - step_name
+    - target schema name
+    - expected input artifact names (stable sorted order)
+    - explicit missing markers per expected artifact
+    - resolved filename + content bytes when artifact exists
+    """
+    h = hashlib.sha256()
+    h.update(step_name.encode("utf-8"))
+    schema_name = _infer_schema_for_step(step_name) or "NO_SCHEMA"
+    h.update(f"SCHEMA:{schema_name}".encode("utf-8"))
+    expected_inputs = sorted(STEP_INPUT_ARTIFACTS.get(step_name, []))
+    for name in expected_inputs:
+        h.update(f"INPUT:{name}".encode("utf-8"))
+        p = _find_artifact(case_dir, name)
+        if p is None:
+            h.update(f"MISSING:{name}".encode("utf-8"))
+            continue
+        h.update(f"FILE:{p.name}".encode("utf-8"))
+        try:
+            h.update(p.read_bytes())
+        except (OSError, IOError):
+            h.update(f"MISSING:{name}".encode("utf-8"))
+    return h.hexdigest()
+
+
+def _persist_step_fingerprint(case_dir: Path, step_name: str, fingerprint: str) -> None:
+    """Persist fingerprint to step state (V5.1 B2)."""
+    def _mod(state: dict) -> None:
+        pipeline = state.setdefault("pipeline", {})
+        step_state = pipeline.setdefault(
+            step_name,
+            {"estado": "PENDING", "artefacto": None, "artefacto_previo": None},
+        )
+        step_state["input_fingerprint"] = fingerprint
+    read_modify_write(case_dir, _mod)
+
+
+def _recover_previous_artifact_if_valid(
+    config: EngineConfig,
+    case_dir: Path,
+    step_name: str,
+    error_msg: str,
+    failure_ctx: dict | None = None,
+) -> dict | None:
+    """Attempt to reuse a previous valid artifact on transport/timeout failure (V5.1 B3).
+
+    Returns a success-like result dict if recovery succeeded, None otherwise.
+    Only active for steps in _REUSABLE_STEPS.
+    """
+    if step_name not in _REUSABLE_STEPS:
+        return None
+
+    # Import here to avoid circular dep
+    from .dispatcher import _is_retryable_dispatch_error
+
+    # Check error is transport/timeout (not quality)
+    if not _is_retryable_dispatch_error(error_msg, failure_ctx.get("raw_output", "") if failure_ctx else ""):
+        return None
+
+    # Find previous artifact
+    state = load_state(case_dir)
+    step_state = state.get("pipeline", {}).get(step_name, {})
+    artifact_path_str = step_state.get("artefacto") or step_state.get("artefacto_previo")
+    artifact_path: Path | None = None
+    if artifact_path_str:
+        artifact_path = (
+            case_dir / artifact_path_str
+            if not Path(artifact_path_str).is_absolute()
+            else Path(artifact_path_str)
+        )
+    else:
+        # Fallback: legacy states may have no artifact pointer even when the
+        # artifact exists on disk. Recover deterministically from canonical prefix.
+        recover_pattern = None
+        if step_name == "RED_TEAM":
+            recover_pattern = "AgentReport_v1_REDTEAM"
+        elif step_name == "ARBITRO":
+            recover_pattern = "DecisionPacket_v2"
+        if recover_pattern:
+            found = _find_artifact(case_dir, recover_pattern)
+            if found is not None:
+                artifact_path = found
+                artifact_path_str = found.name
+                print(
+                    f"[router] {step_name}: artifact pointer missing in state; "
+                    f"recovered from disk: {found.name}"
+                )
+    if artifact_path is None:
+        return None
+    if not artifact_path.exists():
+        return None
+
+    # Validate artifact is valid JSON + schema
+    try:
+        with open(artifact_path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    schema_name = _infer_schema_for_step(step_name)
+    if not schema_name:
+        print(
+            f"[router] {step_name}: schema not configured — reuse blocked",
+            file=sys.stderr,
+        )
+        return None
+    is_valid, schema_errors = validate_artifact(payload, schema_name, config.get_path("schemas"))
+    if not is_valid:
+        print(
+            f"[router] {step_name}: previous artifact schema invalid — reuse blocked: {schema_errors}",
+            file=sys.stderr,
+        )
+        return None
+
+    # Fingerprint check (V5.1 B2)
+    current_fp = _compute_step_input_fingerprint(case_dir, step_name)
+    saved_fp = step_state.get("input_fingerprint")
+
+    bootstrap_legacy = False
+    if saved_fp is None:
+        # V5.1 B4 — Bootstrap legacy: no fingerprint persisted yet.
+        # Allow reuse once and persist fingerprint for future enforcement.
+        print(f"[router] {step_name}: bootstrap legacy — no fingerprint, allowing one-time reuse")
+        bootstrap_legacy = True
+    elif current_fp != saved_fp:
+        # Inputs changed → reuse not safe
+        print(
+            f"[router] {step_name}: fingerprint mismatch "
+            f"(saved={saved_fp[:12]}… current={current_fp[:12]}…) — reuse blocked"
+        )
+        return None
+
+    # All checks passed — reuse the artifact
+    print(
+        f"[router] {step_name}: reusing previous artifact {artifact_path.name} "
+        f"(transport/timeout failure, fingerprint OK)"
+    )
+
+    # Mark step DONE (NOT mark_step_failed — Codex Adj #1)
+    mark_step_done(
+        case_dir,
+        step_name,
+        artefacto=str(artifact_path_str),
+    )
+
+    # Persist fingerprint + reuse metadata after mark_step_done.
+    def _mark_reuse(s: dict) -> None:
+        step_s = s.setdefault("pipeline", {}).setdefault(
+            step_name,
+            {"estado": "DONE", "artefacto": str(artifact_path_str), "artefacto_previo": None},
+        )
+        step_s["input_fingerprint"] = current_fp
+        step_s["reused_previous_artifact"] = True
+        step_s["reuse_reason"] = "transport_or_timeout"
+        step_s["reused_artifact_path"] = str(artifact_path_str)
+        if bootstrap_legacy:
+            step_s["reuse_bootstrap_legacy"] = True
+    read_modify_write(case_dir, _mark_reuse)
+
+    return {
+        "success": True,
+        "artifact": str(artifact_path_str),
+        "reused_previous_artifact": True,
+        "reuse_reason": "transport_or_timeout",
+    }
 
 
 def _resolve_python_step_timeout(config: EngineConfig, step_name: str) -> int:
@@ -282,28 +459,34 @@ def execute_pipeline(
     exchange: str = "",
     country: str = "",
     web_ir: str = "",
+    reset: bool = False,
 ) -> dict:
     """
     Ejecuta pipeline completo para un caso.
     Supports parallel execution of CATALYST||FORENSIC.
+
+    V5.1 B1: If ``reset=False`` (default) and state already exists, resumes
+    from current progress.  Use ``reset=True`` to start from scratch.
     """
-    # 1. Resolve/persist company hints + init state
+    # 1. Resolve/persist company hints + init-or-load state (V5.1 B1)
     hints = resolve_empresa_hints(
         case_dir,
         exchange=exchange,
         country=country,
         web_ir=web_ir,
     )
-    state = init_state(
+    state = init_or_load_state(
         case_dir,
         ticker,
         date_str,
+        reset=reset,
         exchange=hints["exchange"],
         country=hints["country"],
         web_ir=hints["web_ir"],
     )
     mark_pipeline_status(case_dir, "EN_PROGRESO")
-    print(f"[pipeline] Initialized case: {state['caso_id']}")
+    mode = "reset" if reset else ("resumed" if (case_dir / "_estado.json").exists() else "new")
+    print(f"[pipeline] Initialized case: {state['caso_id']} (mode={mode})")
 
     results = {}
 
@@ -344,16 +527,31 @@ def execute_pipeline(
                         artefacto=res.get("artifact"),
                         model_profile=res.get("model_profile"),
                     )
+                    # V5.1 B2: Persist fingerprint on success
+                    if s in _REUSABLE_STEPS:
+                        fp = _compute_step_input_fingerprint(case_dir, s)
+                        _persist_step_fingerprint(case_dir, s, fp)
                     print(f"[pipeline] ✓ {s} completed")
                 else:
-                    mark_step_failed(
-                        case_dir,
-                        s,
+                    # V5.1 B3: Try artifact recovery before failing
+                    recovery = _recover_previous_artifact_if_valid(
+                        config,
+                        case_dir, s,
                         res.get("error", "unknown"),
-                        failure_meta=res.get("failure_ctx"),
+                        res.get("failure_ctx"),
                     )
-                    print(f"[pipeline] ✗ {s} failed: {res.get('error')}")
-                    all_ok = False
+                    if recovery:
+                        results[s] = recovery
+                        print(f"[pipeline] ⟳ {s} recovered via previous artifact")
+                    else:
+                        mark_step_failed(
+                            case_dir,
+                            s,
+                            res.get("error", "unknown"),
+                            failure_meta=res.get("failure_ctx"),
+                        )
+                        print(f"[pipeline] ✗ {s} failed: {res.get('error')}")
+                        all_ok = False
 
             if not all_ok and config.execution.get("fail_fast", True):
                 print("[pipeline] fail_fast=true — stopping pipeline")
@@ -379,21 +577,38 @@ def execute_pipeline(
                     artefacto=step_result.get("artifact"),
                     model_profile=step_result.get("model_profile"),
                 )
+                # V5.1 B2: Persist fingerprint on success for reusable steps
+                if step_name in _REUSABLE_STEPS:
+                    fp = _compute_step_input_fingerprint(case_dir, step_name)
+                    _persist_step_fingerprint(case_dir, step_name, fp)
                 print(f"[pipeline] ✓ {step_name} completed")
                 # Extract decision fields from ARBITRO
                 if step_name == "ARBITRO":
                     _extract_decision_fields(case_dir, step_result)
             else:
-                mark_step_failed(
-                    case_dir,
-                    step_name,
+                # V5.1 B3: Try artifact recovery before failing
+                recovery = _recover_previous_artifact_if_valid(
+                    config,
+                    case_dir, step_name,
                     step_result.get("error", "unknown"),
-                    failure_meta=step_result.get("failure_ctx"),
+                    step_result.get("failure_ctx"),
                 )
-                print(f"[pipeline] ✗ {step_name} failed: {step_result.get('error')}")
-                if config.execution.get("fail_fast", True):
-                    print("[pipeline] fail_fast=true — stopping pipeline")
-                    break
+                if recovery:
+                    results[step_name] = recovery
+                    print(f"[pipeline] ⟳ {step_name} recovered via previous artifact")
+                    if step_name == "ARBITRO":
+                        _extract_decision_fields(case_dir, recovery)
+                else:
+                    mark_step_failed(
+                        case_dir,
+                        step_name,
+                        step_result.get("error", "unknown"),
+                        failure_meta=step_result.get("failure_ctx"),
+                    )
+                    print(f"[pipeline] ✗ {step_name} failed: {step_result.get('error')}")
+                    if config.execution.get("fail_fast", True):
+                        print("[pipeline] fail_fast=true — stopping pipeline")
+                        break
         except Exception as e:
             print(f"[pipeline] ✗ {step_name} exception: {e}", file=sys.stderr)
             mark_step_failed(case_dir, step_name, str(e))
@@ -1002,7 +1217,21 @@ def _parse_filing_date(value: object) -> datetime | None:
         return None
 
 
-def _filing_sort_key(item: dict) -> tuple[int, int, float, str]:
+def _filing_doc_quality_rank(item: dict) -> int:
+    local_path = str(item.get("local_path") or "").strip().lower()
+    clean_status = str(item.get("clean_md_status") or "").strip().upper()
+    if local_path.endswith(".clean.md") and clean_status == "GENERATED":
+        return 0
+    if local_path.endswith(".clean.md"):
+        return 1
+    if local_path.endswith(".txt"):
+        return 2
+    if local_path:
+        return 3
+    return 4
+
+
+def _filing_sort_key(item: dict) -> tuple[int, int, int, float, str]:
     parsed = _parse_filing_date(item.get("fecha_publicacion"))
     estimated_raw = item.get("fecha_publicacion_estimated")
     if estimated_raw is None:
@@ -1018,8 +1247,12 @@ def _filing_sort_key(item: dict) -> tuple[int, int, float, str]:
     source_id = str(item.get("source_id") or "")
     date_ord = parsed.toordinal() if parsed else 0
     # Sort ascending by key:
-    # 1) non-estimated first, 2) newer dates first, 3) higher score first, 4) stable source_id
-    return (1 if estimated else 0, -date_ord, -selection_score, source_id)
+    # 1) better document quality (.clean.md GENERATED first),
+    # 2) non-estimated first,
+    # 3) newer dates first,
+    # 4) higher score first,
+    # 5) stable source_id.
+    return (_filing_doc_quality_rank(item), 1 if estimated else 0, -date_ord, -selection_score, source_id)
 
 
 def _select_filings(filings: list[dict], config: EngineConfig) -> list[dict]:

@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "error_record_v1",
+  "description": "Registro individual de error del pipeline. Vive en _errors/error_history.jsonl (append-only) y en _errors/open_errors.json (snapshot de abiertos). En caso de RESOLVED se añade una segunda línea al JSONL con los campos resolved_at/resolved_by.",
+  "type": "object",
+  "required": [
+    "error_id",
+    "version",
+    "timestamp_iso",
+    "estado",
+    "ticker",
+    "fecha_caso",
+    "step",
+    "error_type",
+    "error_msg",
+    "case_dir"
+  ],
+  "properties": {
+    "error_id": {
+      "type": "string",
+      "pattern": "^ERR_[A-Z0-9]+_\\d{8}_[A-Z_]+_\\d{8}T\\d{6}Z$",
+      "description": "ID único del error. Formato: ERR_{TICKER}_{YYYYMMDD}_{STEP}_{TS}Z"
+    },
+    "version": {
+      "const": "error_record_v1",
+      "description": "Versión del schema. Permite evolucionar sin romper lectores."
+    },
+    "timestamp_iso": {
+      "type": "string",
+      "description": "Momento exacto del fallo (UTC ISO-8601)"
+    },
+    "estado": {
+      "type": "string",
+      "enum": ["OPEN", "RESOLVED"],
+      "description": "OPEN = sin resolver. RESOLVED = el paso se completó con éxito en ejecución posterior."
+    },
+    "ticker": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ticker del caso afectado (ej. KAR, TZOO)"
+    },
+    "fecha_caso": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Fecha del caso en formato ISO 8601"
+    },
+    "step": {
+      "type": "string",
+      "enum": ["SOURCES", "TRUTH_PACK", "IMPLIED", "CATALYST", "FORENSIC", "BULL", "RED_TEAM", "ARBITRO"],
+      "description": "Paso del pipeline que falló"
+    },
+    "error_type": {
+      "type": "string",
+      "enum": ["LLM_FAILURE", "SCHEMA_VALIDATION", "TIMEOUT", "PARSE_ERROR", "PIPELINE_STATE", "UNKNOWN"],
+      "description": "Categoría del error inferida del mensaje y contexto. Ver _errors/README.md para descripción de cada tipo."
+    },
+    "error_msg": {
+      "type": "string",
+      "description": "Mensaje de error normalizado (mismo que _estado.json._errors[step].error)"
+    },
+    "stack_trace": {
+      "type": ["string", "null"],
+      "description": "Traceback Python si disponible en el contexto de fallo"
+    },
+    "source_context": {
+      "type": "object",
+      "description": "Localización en el código fuente del engine donde se originó el fallo",
+      "properties": {
+        "module": {
+          "type": ["string", "null"],
+          "description": "Módulo Python (ej. engine.router, engine.backends.claude)"
+        },
+        "file": {
+          "type": ["string", "null"],
+          "description": "Ruta relativa al archivo fuente (ej. engine/router.py)"
+        }
+      }
+    },
+    "engine_context": {
+      "type": "object",
+      "description": "Configuración activa del engine en el momento del fallo",
+      "properties": {
+        "backend": {
+          "type": ["string", "null"],
+          "description": "Backend LLM usado (ej. claude, codex, gemini, copilot)"
+        },
+        "transport": {
+          "type": ["string", "null"],
+          "description": "Tipo de transporte (ej. llm, llm_per_filing)"
+        },
+        "model_profile": {
+          "type": ["string", "null"],
+          "description": "Perfil de modelo activo (ej. claude-opus-4.6, gpt-5.3-codex)"
+        },
+        "attempts": {
+          "type": ["integer", "null"],
+          "description": "Número de intentos realizados antes del fallo"
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "description": "Rutas a los artefactos de diagnóstico detallados generados por diagnostics.py",
+      "properties": {
+        "compact_path": {
+          "type": ["string", "null"],
+          "description": "Ruta relativa al artefacto compacto (casos/TICKER/DATE/_diagnostics/failures/STEP.TS.compact.json)"
+        },
+        "full_path": {
+          "type": ["string", "null"],
+          "description": "Ruta relativa al artefacto completo con todos los intentos y outputs del LLM. Recurso principal para debugging."
+        }
+      }
+    },
+    "case_dir": {
+      "type": "string",
+      "description": "Ruta relativa al directorio del caso (ej. casos/KAR/2026-02-22)"
+    },
+    "resolved_at": {
+      "type": ["string", "null"],
+      "description": "Timestamp ISO-8601 del momento en que el paso se completó con éxito"
+    },
+    "resolved_by": {
+      "type": ["string", "null"],
+      "description": "Identificador de quién resolvió el error (ej. engine:mark_step_done, cli:errors_resolve)"
+    }
+  },
+  "additionalProperties": false
+}
