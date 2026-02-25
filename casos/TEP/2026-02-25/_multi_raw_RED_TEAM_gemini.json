@@ -1,0 +1,449 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260225_TEP",
+  "fecha_corte": "2026-02-25",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "claude-3-5-sonnet",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260225_TEP",
+    "implied_expectations_caso_id": "CASE_20260225_TEP",
+    "sources_pack_caso_id": "CASE_20260225_TEP"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La tesis de desapalancamiento se rompe con la caída del 24% en CFO H1-2025 (€588M vs €771M); anualizando, el FCF apenas cubre deuda CP.",
+      "El muro de vencimientos es crítico: €1,147M de deuda a corto plazo supera la caja disponible (€1,058M), creando riesgo de refinanciación inminente.",
+      "La 'mejora' de margen EBIT es ilusoria si se ajusta por la menor depreciación (-€134M vs -€148M), sugiriendo subinversión en Capex.",
+      "Opacidad severa (Data Completeness 26%) oculta covenants y calendarios de deuda; invertir aquí es apostar a ciegas contra un balance estresado.",
+      "Riesgo de Value Trap muy alto: EV/EBIT 5.6x no es barato para un negocio con beneficios planos y flujo de caja en contracción."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.85
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La generación de caja operativa se ha deteriorado gravemente en H1-2025 (-24% YoY), invalidando la proyección lineal del FY2024.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
+          "ubicacion": "Cash Flow Statement H1-2025",
+          "cita_corta": "CFO H1-2025 €588M vs H1-2024 €771M.",
+          "interpretacion": "Caída estructural de capacidad de pago no explicada por estacionalidad."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO H2-2025 supera €1,000M revirtiendo la tendencia del primer semestre.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La liquidez inmediata es negativa: Deuda Corto Plazo (€1,147M) excede Caja y Equivalentes (€1,058M).",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_014_PRESENTATION_2024.pdf",
+          "ubicacion": "Balance Sheet FY2024",
+          "cita_corta": "Deuda CP €1,147M vs Caja €1,058M.",
+          "interpretacion": "Déficit de liquidez inmediato que fuerza refinanciación obligatoria."
+        }
+      ],
+      "falsacion": {
+        "test": "Cierre de refinanciación por >€500M a vencimiento >3 años reportado en eventos posteriores.",
+        "ventana_meses": {
+          "min": 1,
+          "max": 3
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La mejora de EBIT en H1-2025 se debe parcialmente a menor depreciación (-9.5%), no a eficiencia real, señal de posible envejecimiento de activos.",
+      "confianza_0_1": 0.75,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_010",
+          "ubicacion": "Income Statement",
+          "cita_corta": "Depreciación H1-2025 -€134M vs H1-2024 -€148M.",
+          "interpretacion": "Menor carga de D&A infla artificialmente el EBIT; Capex H1 (-€117M) está por debajo de D&A (-€134M)."
+        }
+      ],
+      "falsacion": {
+        "test": "Capex FY2025 aumenta >20% para compensar subinversión, comprimiendo FCF.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "El CFO FY2025 cerrará por debajo de €1,500M (vs €1,813M en 2024).",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Cash Flow from Operations FY2025 < 1500M EUR.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "La deuda neta no bajará de €2,900M en FY2025 debido al menor flujo de caja.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Net Debt FY2025 >= 2900M EUR.",
+      "fuente_prevista": "10-K"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Schedule detallado de vencimientos de deuda mes a mes para los próximos 24 meses.",
+      "por_que_importa": "Esencial para validar riesgo de quiebra técnica por iliquidez.",
+      "como_obtenerlo": "Notas a los estados financieros (Debt profile)."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Explicación del management sobre la caída de CFO en H1-2025 (Working Capital vs Operativo).",
+      "por_que_importa": "Diferenciar problema transitorio de deterioro estructural de caja.",
+      "como_obtenerlo": "Earnings Call Transcript Q2/H1."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Demostrar que el apalancamiento es insostenible con la generación de caja actual en declive y que el múltiplo bajo es una trampa de valor justificada.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.85,
+        "riesgo_principal": "DETERIORO_FUNDAMENTAL",
+        "resumen_1_2_frases": "Deterioro acelerado de flujo de caja operativo (-24%) en estructura de capital altamente apalancada. Riesgo inminente de refinanciación con deuda CP superando caja disponible."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "CFO FY2024 (€1.8B) cubre capex y deuda, sosteniendo servicio.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.7,
+              "por_que": [
+                "Basa la tesis en el retrovisor (FY2024) ignorando el deterioro actual (H1-2025).",
+                "La caída de CFO H1 es de casi €200M; si se anualiza, el colchón desaparece.",
+                "Capex H1 (-€117M) es menor que Depreciación (-€134M), sugiriendo infra-inversión insostenible a largo plazo."
+              ]
+            },
+            "puntos_ciegos": [
+              "Estacionalidad negativa del H1 no explicada.",
+              "Dependencia de Working Capital positivo que podría revertir."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_010",
+                "ubicacion": "Cash Flow H1-2025",
+                "cita_corta": "CFO H1-2025 €588M (-24% vs H1-2024).",
+                "interpretacion": "Tendencia negativa fuerte en el periodo más reciente."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "CFO H2-2025 debe superar €1,200M para igualar FY2024.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_002",
+            "resumen_claim_bull": "Desapalancamiento en ejecución (CFF -€1.4B en FY2024).",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "El repago pasado no garantiza capacidad futura si el CFO cae.",
+                "Deuda Neta/EBITDA sigue siendo alta (implícita >3x si EBITDA ~€1.3B).",
+                "Deuda CP > Caja implica que el desapalancamiento neto se frena si no hay refinanciación."
+              ]
+            },
+            "puntos_ciegos": [
+              "Vencimientos inminentes vs caja disponible.",
+              "Coste de nueva deuda será probablemente mayor al histórico."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_014",
+                "ubicacion": "Balance Sheet",
+                "cita_corta": "Deuda CP €1,147M > Caja €1,058M.",
+                "interpretacion": "Estrés de liquidez inmediato."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Deuda Neta aumenta en Q3/Q4 por consumo de caja o incapacidad de repago.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_003",
+            "resumen_claim_bull": "EV/EBIT ~5.58x implica doble descuento excesivo.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.5,
+              "por_que": [
+                "El múltiplo es correcto para una empresa sin crecimiento (Revenue plano) y con problemas de gobierno (opacidad).",
+                "Ajustando por Capex de mantenimiento real (igual a D&A), el FCF yield es mucho menor.",
+                "Riesgo de dilución o ampliación de capital justifica el descuento."
+              ]
+            },
+            "puntos_ciegos": [
+              "Calidad del EBIT (inflado por baja depreciación).",
+              "Prima de riesgo por falta de información (26% completeness)."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [],
+            "test_falsacion_para_el_bull": {
+              "test": "El mercado mantiene el múltiplo bajo por 4 trimestres más a pesar de 'buenos' resultados.",
+              "ventana_meses": {
+                "min": 12,
+                "max": 12
+              },
+              "fuente_prevista": "precio"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Asumir que la caída de CFO H1-2025 es 'transitoria' sin evidencia.",
+          "Ignorar el déficit de liquidez (Deuda CP > Caja) asumiendo refinanciación automática.",
+          "Valorar sobre EV/EBIT cuando el problema es de conversión a Caja (FCF).",
+          "Confiar en 'mejoras de margen' impulsadas por menor depreciación contable."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El mercado ve un 'melting ice cube': ingresos estancados, márgenes mantenidos artificialmente por subinversión.",
+          "El descuento aplica por riesgo de gobernanza y opacidad (el mercado odia la incertidumbre).",
+          "La deuda es una soga al cuello; el mercado anticipa una ampliación de capital dilutiva para limpiar el balance."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "Deterioro acelerado de generación de caja (CFO -24%) en momento crítico de refinanciación.",
+          "Muro de deuda a corto plazo (€1.15B) supera caja disponible, forzando términos de crédito onerosos o dilución.",
+          "Beneficios operativos estancados y calidad de earnings sospechosa (Depreciación > Capex).",
+          "Opacidad inaceptable impide verificar solvencia real; riesgo de 'cucarachas en la cocina'.",
+          "Trampa de valor clásica: parece barata por múltiplo, pero es cara por riesgo de quiebra/dilución."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "El deterioro del CFO sugiere problemas de cobro o acumulación de inventario no visible.",
+            "indicadores_tempranos": [
+              "DSO aumentando.",
+              "CFO divergiendo negativamente del EBIT."
+            ]
+          },
+          {
+            "mecanismo": "CAPEX_MANTENIMIENTO_ALTO",
+            "descripcion": "La empresa infra-invierte (Capex < Depreciación) para inflar FCF temporalmente; la reversión golpeará la caja futura.",
+            "indicadores_tempranos": [
+              "Ratio Capex/Depreciación < 1.0 sostenido.",
+              "Envejecimiento de activos fijos."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Estancamiento secular con crisis de liquidez moderada. CFO FY2025 cae a €1.3B. Refinanciación cara consume márgenes.",
+            "ventana_meses": {
+              "min": 12,
+              "probable": 18,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "FCF",
+                "direccion": "EMPEORA",
+                "rango": "€1.0B - €1.2B",
+                "justificacion": "Persistencia de tendencias H1."
+              },
+              {
+                "variable": "COSTE_DEUDA",
+                "direccion": "EMPEORA",
+                "rango": "+100-200 bps en refinanciación",
+                "justificacion": "Mayor riesgo crediticio percibido."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "El mercado asigna múltiplo de distress (4x EV/EBIT) o precio cae por menor FCF.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -30,
+                "base": -15,
+                "max": -5
+              },
+              "nota": "Pérdida de valor por compresión de múltiplo y erosión de caja."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Cierre de mercados de crédito obliga a ampliación de capital masiva y muy dilutiva para pagar vencimientos.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 18
+            },
+            "probabilidad_0_1": 0.25,
+            "es_binario": true,
+            "drivers": [
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "Caja < €500M",
+                "justificacion": "Imposibilidad de refinanciar deuda CP."
+              },
+              {
+                "variable": "DILUCION",
+                "direccion": "EMPEORA",
+                "rango": ">30% nuevas acciones",
+                "justificacion": "Rescate de equity necesario."
+              }
+            ],
+            "impacto_en_supervivencia": "ALTO",
+            "nota": "Riesgo existencial para el accionista actual."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.75,
+        "razones": [
+          "Múltiplo bajo aparente (5.6x) con fundamentales en deterioro (CFO -24%).",
+          "Apalancamiento alto (Deuda Neta > Market Cap).",
+          "Opacidad en métricas clave (Data Completeness 26%).",
+          "Subinversión en Capex maquillando FCF.",
+          "Sector/Negocio sin crecimiento (Ingresos planos)."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "Recuperación rápida de CFO en Q3.",
+              "Ingresos volviendo a crecer >5%."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "CFO cayendo por 2+ semestres consecutivos.",
+              "Márgenes contrayéndose a pesar de recortes de costes."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "BALANCE",
+          "definicion": "Fallo en refinanciar la deuda de corto plazo (€1.15B) antes de 3 meses del vencimiento.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "Riesgo de insolvencia o dilución extrema."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "CONTABILIDAD",
+          "definicion": "CFO FY2025 < €1,300M confirmando deterioro estructural.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Rompe la tesis de capacidad de repago."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Refinanciación confirmada de deuda CP a tipos competitivos y plazos >3 años.",
+          "umbral_o_condicion": "Vencimiento promedio deuda > 3 años.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "PR"
+        },
+        {
+          "item": "Reporte de Q3/H2 mostrando recuperación total de CFO a niveles de >€1.8B run-rate.",
+          "umbral_o_condicion": "CFO trimestral > €500M.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "earnings"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0,
+        "si_se_invierte_igual": [
+          "Esperar imperativamente a la confirmación de la refinanciación de la deuda CP.",
+          "Monitorear mensualmente cualquier noticia sobre covenants o liquidez.",
+          "Usar stops ajustados dada la volatilidad potencial de una 'value trap'."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Por qué cayó el CFO un 24% en H1-2025 y qué componentes del WC lo causaron?",
+          "¿Cuál es el plan concreto para pagar los €1,147M de deuda corto plazo con solo €1,058M en caja?",
+          "¿Por qué el Capex está sistemáticamente por debajo de la Depreciación? ¿Están dejando obsoletos los activos?",
+          "¿Podemos ver el covenant package completo?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta desglose mensual de deuda para precisar 'fecha de muerte'.",
+      "Sin detalles de WC, el análisis de la caída de CFO es inferencial."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}
