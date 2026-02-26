@@ -484,49 +484,78 @@ def main() -> int:
     write_json(off_cfg_path, off_cfg)
     write_json(on_cfg_path, on_cfg)
 
+    # ── Header ──────────────────────────────────────────────
+    model_roles = _extract_model_roles(base_cfg)
+    cases_display = ", ".join(f"{t}({d})" for t, d in cases.items())
+    _log("═══ V6.2 Phase 2 A/B Benchmark ═══")
+    _log(f"Casos: {cases_display}")
+    _log(f"Modelos: primary={model_roles['primary']}, chunk={model_roles['chunk']}, "
+         f"fusion={model_roles['fusion']}, reconciliation={model_roles['reconciliation']}")
+    _log(f"Thresholds: delta>=+10pp, cost<=1.5x, latency<=2.5x")
+    _log(f"Output: {output_dir}")
+    _log(f"Configs: OFF={off_cfg_path.name}, ON={on_cfg_path.name}")
+    _log("")
+
     try:
         if args.keep_temp_configs:
             write_json(output_dir / "engine_config_ab_off.json", off_cfg)
             write_json(output_dir / "engine_config_ab_on.json", on_cfg)
 
         case_results: dict[str, dict[str, Any]] = {}
-        for ticker, date_str in cases.items():
+        total_cases = len(cases)
+        for case_idx, (ticker, date_str) in enumerate(cases.items(), 1):
             case_key = f"{ticker}:{date_str}"
             case_dir = CASOS_DIR / ticker / date_str
             per_case_dir = output_dir / ticker / date_str
             per_case_dir.mkdir(parents=True, exist_ok=True)
 
+            _log(f"═══ Caso {case_idx}/{total_cases}: {ticker} ({date_str}) ═══")
+
             try:
                 if not case_dir.exists():
                     raise FileNotFoundError(f"case dir not found: {case_dir}")
 
+                # ── OFF run ──
+                _log("  → OFF (chunked=false) ...")
                 cleanup_tmp_partials(case_dir)
                 off_run = run_rehacer(off_cfg_path, ticker, date_str, verbose=args.verbose)
                 (per_case_dir / "off_run.stdout.log").write_text(off_run.stdout, encoding="utf-8")
                 (per_case_dir / "off_run.stderr.log").write_text(off_run.stderr, encoding="utf-8")
                 if not off_run.ok:
+                    _log(f"    ✗ OFF failed rc={off_run.return_code}", err=True)
                     raise RuntimeError(f"OFF run failed rc={off_run.return_code}")
                 try:
                     assert_truthpack_done(case_dir)
                 except Exception as exc:
+                    _log(f"    ✗ OFF TRUTH_PACK not DONE: {exc}", err=True)
                     raise RuntimeError(f"off_truthpack_not_done: {exc}") from exc
                 snapshot_case(case_dir, per_case_dir / "off")
+                off_metrics = collect_snapshot_metrics(per_case_dir / "off")
+                _log(f"    ✓ TRUTH_PACK DONE ({off_run.duration_s:.1f}s)")
+                _log(f"    completitud_ajustada: {off_metrics['adjusted_completeness_pct']:.1f}%")
+                _log(f"    proxy_cost: {off_metrics['proxy_cost']:.1f}")
 
+                # ── ON run ──
+                _log("  → ON  (chunked=true) ...")
                 cleanup_tmp_partials(case_dir)
                 on_run = run_rehacer(on_cfg_path, ticker, date_str, verbose=args.verbose)
                 (per_case_dir / "on_run.stdout.log").write_text(on_run.stdout, encoding="utf-8")
                 (per_case_dir / "on_run.stderr.log").write_text(on_run.stderr, encoding="utf-8")
                 if not on_run.ok:
+                    _log(f"    ✗ ON failed rc={on_run.return_code}", err=True)
                     raise RuntimeError(f"ON run failed rc={on_run.return_code}")
                 try:
                     assert_truthpack_done(case_dir)
                 except Exception as exc:
+                    _log(f"    ✗ ON TRUTH_PACK not DONE: {exc}", err=True)
                     raise RuntimeError(f"on_truthpack_not_done: {exc}") from exc
                 snapshot_case(case_dir, per_case_dir / "on")
-
-                off_metrics = collect_snapshot_metrics(per_case_dir / "off")
                 on_metrics = collect_snapshot_metrics(per_case_dir / "on")
+                _log(f"    ✓ TRUTH_PACK DONE ({on_run.duration_s:.1f}s)")
+                _log(f"    completitud_ajustada: {on_metrics['adjusted_completeness_pct']:.1f}%")
+                _log(f"    proxy_cost: {on_metrics['proxy_cost']:.1f}")
 
+                # ── Per-case result ──
                 latency_ratio = (
                     on_run.duration_s / off_run.duration_s if off_run.duration_s > 0 else float("inf")
                 )
@@ -538,6 +567,10 @@ def main() -> int:
                 delta_pp = (
                     on_metrics["adjusted_completeness_pct"] - off_metrics["adjusted_completeness_pct"]
                 )
+
+                _log(f"  → Resultado {ticker}: delta={delta_pp:+.1f}pp, "
+                     f"cost={cost_ratio:.2f}x, latency={latency_ratio:.2f}x")
+                _log("")
 
                 metrics = {
                     "status": "ok",
@@ -556,12 +589,16 @@ def main() -> int:
                 write_json(per_case_dir / "metrics.json", metrics)
                 case_results[case_key] = metrics
             except Exception as exc:
+                _log(f"  ✗ {ticker} ERROR: {exc}", err=True)
+                _log("")
                 case_results[case_key] = {
                     "status": "error",
                     "error": str(exc),
                 }
                 write_json(per_case_dir / "metrics.json", case_results[case_key])
 
+        # ── Checks ──────────────────────────────────────────
+        _log("═══ Checks finales ═══")
         tickers_csv = ",".join(cases.keys())
         canary_ok = True
         regression_ok = True
@@ -577,6 +614,10 @@ def main() -> int:
                 output_path=output_dir / "canary.log",
                 verbose=args.verbose,
             )
+            _log(f"  → Canary validation: {'✓ PASS' if canary_ok else '✗ FAIL'}")
+        else:
+            _log("  → Canary validation: SKIPPED")
+
         if not args.skip_regression:
             regression_ok = run_aux_check(
                 [
@@ -589,7 +630,11 @@ def main() -> int:
                 output_path=output_dir / "regression.log",
                 verbose=args.verbose,
             )
+            _log(f"  → Regression check:  {'✓ PASS' if regression_ok else '✗ FAIL'}")
+        else:
+            _log("  → Regression check:  SKIPPED")
 
+        # ── Verdict ─────────────────────────────────────────
         verdict = evaluate_go_no_go(case_results, canary_ok=canary_ok, regression_ok=regression_ok)
         summary = {
             "version": "V6.2_Phase2_AB_v1",
@@ -609,12 +654,27 @@ def main() -> int:
         write_json(output_dir / "summary.json", summary)
         write_markdown_summary(output_dir / "summary.md", summary)
 
+        _log("")
+        _log("═══ Veredicto ═══")
+        g = verdict.get("metrics", {})
+        if g:
+            d = g.get("mean_delta_pp_adjusted", 0)
+            c = g.get("mean_cost_ratio", 0)
+            l = g.get("mean_latency_ratio", 0)
+            _log(f"  mean_delta_pp:      {d:+.1f}pp  (threshold: >=+10)  {'✓' if d >= 10.0 else '✗'}")
+            _log(f"  mean_cost_ratio:    {c:.2f}x   (threshold: <=1.5)  {'✓' if c <= 1.5 else '✗'}")
+            _log(f"  mean_latency_ratio: {l:.2f}x   (threshold: <=2.5)  {'✓' if l <= 2.5 else '✗'}")
+        else:
+            _log("  No valid metrics (cases failed)")
+
         if verdict["go"]:
-            print(f"[ab] GO — summary: {output_dir / 'summary.json'}")
+            _log("  → GO")
+            _log(f"  summary: {output_dir / 'summary.json'}")
             return 0
-        print(f"[ab] NO_GO — summary: {output_dir / 'summary.json'}", file=sys.stderr)
+        _log("  → NO_GO")
         for reason in verdict.get("reasons", []):
-            print(f"  - {reason}", file=sys.stderr)
+            _log(f"    - {reason}")
+        _log(f"  summary: {output_dir / 'summary.json'}")
         return 1
     finally:
         if not args.keep_temp_configs:
