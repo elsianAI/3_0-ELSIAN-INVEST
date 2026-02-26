@@ -308,6 +308,9 @@ def make_runtime_config(base_cfg: dict[str, Any], *, chunked_enabled: bool) -> d
     out = copy.deepcopy(base_cfg)
     out.setdefault("execution", {})
     out["execution"]["tp_extractor_chunked_enabled"] = bool(chunked_enabled)
+    # Benchmark mode: keep running to materialize artifacts/metrics even if
+    # TP_VALIDATOR marks data_quality FAIL in a given run.
+    out["execution"]["fail_fast"] = False
     out.setdefault("git", {})
     out["git"]["enabled"] = False
     return out
@@ -425,7 +428,26 @@ def _log(msg: str, *, err: bool = False) -> None:
     print(f"[benchmark] {msg}", file=sys.stderr if err else sys.stdout, flush=True)
 
 
-def assert_truthpack_done(case_dir: Path) -> None:
+def _looks_like_data_quality_failure(sub_state: dict[str, Any]) -> bool:
+    err = str(sub_state.get("error", "")).lower()
+    meta = sub_state.get("failure_meta", {})
+    last_error = ""
+    if isinstance(meta, dict):
+        last_error = str(meta.get("last_error", "")).lower()
+    text = f"{err} {last_error}"
+    return "data_quality" in text
+
+
+def _truthpack_has_data_quality(case_dir: Path) -> bool:
+    try:
+        tp = load_json(find_truthpack(case_dir))
+    except Exception:
+        return False
+    dq = tp.get("data_quality")
+    return isinstance(dq, dict) and bool(dq)
+
+
+def assert_truthpack_done(case_dir: Path, *, allow_validator_failed: bool = False) -> None:
     state_path = case_dir / "_estado.json"
     state = load_json(state_path)
 
@@ -454,8 +476,18 @@ def assert_truthpack_done(case_dir: Path) -> None:
         sub_state = sub_steps.get(sub)
         if not isinstance(sub_state, dict):
             raise RuntimeError(f"sub_steps.{sub} missing in _estado.json")
-        if sub_state.get("status") != "DONE":
-            raise RuntimeError(f"sub_steps.{sub}.status={sub_state.get('status')!r}")
+        status = sub_state.get("status")
+        if status == "DONE":
+            continue
+        if (
+            allow_validator_failed
+            and sub == "TP_VALIDATOR"
+            and status == "FAILED"
+            and _looks_like_data_quality_failure(sub_state)
+            and _truthpack_has_data_quality(case_dir)
+        ):
+            continue
+        raise RuntimeError(f"sub_steps.{sub}.status={status!r}")
 
 
 def main() -> int:
@@ -525,7 +557,7 @@ def main() -> int:
                     _log(f"    ✗ OFF failed rc={off_run.return_code}", err=True)
                     raise RuntimeError(f"OFF run failed rc={off_run.return_code}")
                 try:
-                    assert_truthpack_done(case_dir)
+                    assert_truthpack_done(case_dir, allow_validator_failed=True)
                 except Exception as exc:
                     _log(f"    ✗ OFF TRUTH_PACK not DONE: {exc}", err=True)
                     raise RuntimeError(f"off_truthpack_not_done: {exc}") from exc
@@ -545,7 +577,7 @@ def main() -> int:
                     _log(f"    ✗ ON failed rc={on_run.return_code}", err=True)
                     raise RuntimeError(f"ON run failed rc={on_run.return_code}")
                 try:
-                    assert_truthpack_done(case_dir)
+                    assert_truthpack_done(case_dir, allow_validator_failed=True)
                 except Exception as exc:
                     _log(f"    ✗ ON TRUTH_PACK not DONE: {exc}", err=True)
                     raise RuntimeError(f"on_truthpack_not_done: {exc}") from exc

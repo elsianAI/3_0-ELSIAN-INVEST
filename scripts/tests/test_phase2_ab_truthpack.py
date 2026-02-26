@@ -14,6 +14,13 @@ import scripts.phase2_ab_truthpack as phase2_ab
 
 
 class Phase2ABTruthPackTests(unittest.TestCase):
+    def test_make_runtime_config_sets_benchmark_non_fail_fast(self) -> None:
+        cfg = {"execution": {"fail_fast": True}, "git": {"enabled": True}}
+        out = phase2_ab.make_runtime_config(cfg, chunked_enabled=True)
+        self.assertTrue(out["execution"]["tp_extractor_chunked_enabled"])
+        self.assertFalse(out["execution"]["fail_fast"])
+        self.assertFalse(out["git"]["enabled"])
+
     def test_extract_adjusted_and_gate_completeness(self) -> None:
         tp = {
             "data_quality": {
@@ -171,6 +178,33 @@ class Phase2ABTruthPackTests(unittest.TestCase):
             )
             with self.assertRaises(RuntimeError):
                 phase2_ab.assert_truthpack_done(case_dir)
+
+    def test_assert_truthpack_done_allows_tp_validator_failed_on_data_quality(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            case_dir = Path(tmp)
+            (case_dir / "_estado.json").write_text(
+                json.dumps(
+                    {
+                        "pipeline": {"TRUTH_PACK": {"estado": "DONE"}},
+                        "sub_steps": {
+                            "TP_EXTRACTOR_FILING": {"status": "DONE"},
+                            "TP_EXTRACTOR_MERGER": {"status": "DONE"},
+                            "TP_CALCULATOR": {"status": "DONE"},
+                            "TP_VALIDATOR": {
+                                "status": "FAILED",
+                                "error": "TruthPack data_quality: FAIL",
+                                "failure_meta": {"last_error": "TruthPack data_quality: FAIL"},
+                            },
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (case_dir / "TruthPack_v1_TEP.json").write_text(
+                json.dumps({"data_quality": {"overall_status": "FAIL"}}),
+                encoding="utf-8",
+            )
+            phase2_ab.assert_truthpack_done(case_dir, allow_validator_failed=True)
 
     def test_main_marks_case_error_when_rc_zero_but_truthpack_state_invalid(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
