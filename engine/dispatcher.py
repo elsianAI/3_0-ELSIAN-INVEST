@@ -1649,6 +1649,31 @@ def _is_retryable_filing_error(error: str | None) -> bool:
     return any(p in text for p in patterns)
 
 
+def _score_tp_partial_payload(payload: dict | None) -> int:
+    """Simple completeness score for TruthPack partial candidates."""
+    if not isinstance(payload, dict):
+        return 0
+    score = 0
+    for key in ("historico_anual", "historico_trimestral"):
+        items = payload.get(key, [])
+        if isinstance(items, list):
+            for entry in items[:3]:
+                if not isinstance(entry, dict):
+                    continue
+                score += sum(
+                    1 for field, value in entry.items()
+                    if field not in {"periodo", "fecha_fin", "fuente_refs", "_field_sources", "_merge_conflicts"}
+                    and value is not None
+                )
+    bs = payload.get("balance_sheet_ultimo", {})
+    if isinstance(bs, dict):
+        score += sum(
+            1 for field, value in bs.items()
+            if field not in {"_field_sources"} and value is not None
+        )
+    return score
+
+
 def dispatch_parallel_filings(
     config: EngineConfig,
     filings: list[dict],
@@ -1663,12 +1688,29 @@ def dispatch_parallel_filings(
     """
     max_parallel = config.execution.get("max_parallel_filings", 4)
     timeout = int(config.timeouts.get("tp_extractor_per_filing", 300))
+    execution_cfg = config.execution if isinstance(config.execution, dict) else {}
+    chunk_cfg = execution_cfg.get("tp_extractor_chunking", {})
+    if not isinstance(chunk_cfg, dict):
+        chunk_cfg = {}
+    chunking_enabled = bool(execution_cfg.get("tp_extractor_chunked_enabled", False))
+    chunk_model_candidates = execution_cfg.get(
+        "tp_extractor_chunk_models",
+        ["claude-haiku-4.5", "gemini-3-flash"],
+    )
+    if not isinstance(chunk_model_candidates, list):
+        chunk_model_candidates = ["claude-haiku-4.5", "gemini-3-flash"]
 
     step_cfg = get_step_config(config, "TP_EXTRACTOR_FILING")
 
     if config.is_v2:
         model_profiles = step_cfg.get("models", [config.default_single_model])
         model_profile = model_profiles[0]
+        if chunking_enabled:
+            for candidate in chunk_model_candidates:
+                spec_candidate = config.get_model_spec(candidate)
+                if spec_candidate is not None and spec_candidate.transports:
+                    model_profile = candidate
+                    break
         spec = config.get_model_spec(model_profile)
         if spec is None or not spec.transports:
             return [DispatchResult(
@@ -1699,19 +1741,207 @@ def dispatch_parallel_filings(
                 f"Backend {backend_name} not available for TP_EXTRACTOR_FILING"
             )]
 
+    chunk_target_tokens = int(
+        chunk_cfg.get(
+            "target_tokens_flash"
+            if "flash" in str(model_profile).lower()
+            else "target_tokens_haiku",
+            16_000 if "flash" in str(model_profile).lower() else 12_000,
+        )
+    )
+    chunk_max_tokens = int(chunk_cfg.get("max_chunk_tokens", 18_000))
+    chunk_overlap_tokens = int(chunk_cfg.get("overlap_tokens", 1_000))
+    chunk_max_count = int(chunk_cfg.get("max_chunks_per_filing", 8))
+    chunk_fusion_model = (
+        chunk_cfg.get("fusion_model")
+        or execution_cfg.get("tp_extractor_chunk_fusion_model")
+        or (config.fusion_model if config.is_v2 else model_profile)
+    )
+
     total = len(filings)
-    print(f"[dispatch] Launching {total} filings → {backend_name} ({model_profile}), "
-          f"max_parallel={max_parallel}, timeout={timeout}s")
+    print(
+        f"[dispatch] Launching {total} filings → {backend_name} ({model_profile}), "
+        f"max_parallel={max_parallel}, timeout={timeout}s, chunked={chunking_enabled}"
+    )
 
     def _process_filing(filing_entry: dict) -> DispatchResult:
         local_path = filing_entry.get("local_path")
         filing_path = (case_dir.parent.parent.parent / local_path) if local_path else Path("/dev/null")
+        deterministic_hints = None
+        deterministic_stats: dict[str, object] = {"enabled": True, "entries": 0, "fields": 0}
+        selected_content_path = filing_path
+        selected_content = None
+
+        # Layer 1 deterministic extraction (fail-open): extract hints from filing text.
+        try:
+            from scripts.runners.clean_md_quality import is_clean_md_useful as _is_clean_md_useful
+
+            if filing_path.exists() and not filing_path.name.endswith(".clean.md"):
+                clean_candidate = filing_path.parent / (filing_path.stem + ".clean.md")
+                if clean_candidate.exists():
+                    clean_text = clean_candidate.read_text(errors="replace")
+                    if _is_clean_md_useful(clean_text):
+                        selected_content_path = clean_candidate
+                        selected_content = clean_text
+
+            if selected_content is None and selected_content_path.exists():
+                selected_content = selected_content_path.read_text(errors="replace")
+
+            if selected_content:
+                from scripts.runners.deterministic_extractor import extract_deterministic_facts
+
+                deterministic_hints = extract_deterministic_facts(selected_content)
+                deterministic_stats["entries"] = int(
+                    len(deterministic_hints.get("entries", []))
+                )
+                deterministic_stats["fields"] = int(
+                    len(deterministic_hints.get("best_by_field", {}))
+                )
+            else:
+                deterministic_stats["enabled"] = False
+                deterministic_stats["reason"] = "no_content"
+        except Exception as exc:
+            deterministic_hints = None
+            deterministic_stats = {"enabled": False, "error": str(exc)}
+
+        def _attach_dispatch_meta(result_obj: DispatchResult, extra: dict | None = None) -> DispatchResult:
+            ctx = result_obj.failure_ctx if isinstance(result_obj.failure_ctx, dict) else {}
+            meta = {
+                "source_id": filing_entry.get("source_id"),
+                "local_path": local_path,
+                "content_path": str(selected_content_path),
+                "deterministic": deterministic_stats,
+                "chunking_enabled": chunking_enabled,
+            }
+            if extra:
+                meta.update(extra)
+            ctx["filing_dispatch_meta"] = meta
+            result_obj.failure_ctx = ctx
+            return result_obj
+
+        # Layer 2: optional chunked extraction by semantic sections (flag OFF by default).
+        if (
+            config.is_v2
+            and chunking_enabled
+            and selected_content
+        ):
+            try:
+                from scripts.runners.deterministic_extractor import split_semantic_chunks
+
+                target_chars = chunk_target_tokens * 4
+                max_chars = chunk_max_tokens * 4
+                overlap_chars = chunk_overlap_tokens * 4
+                chunks = split_semantic_chunks(
+                    selected_content,
+                    target_chars=target_chars,
+                    max_chars=max_chars,
+                    overlap_chars=overlap_chars,
+                    max_chunks=chunk_max_count,
+                )
+            except Exception as exc:
+                chunks = []
+                deterministic_stats["chunking_error"] = str(exc)
+
+            chunk_results: list[DispatchResult] = []
+            if chunks:
+                for c in chunks:
+                    prompt, excerpt_meta = build_filing_prompt(
+                        filing_path=selected_content_path,
+                        source_entry=filing_entry,
+                        ticker=filing_entry.get("ticker", "UNKNOWN"),
+                        instrucciones_dir=instrucciones_dir,
+                        deterministic_hints=deterministic_hints,
+                        content_override=c.get("text"),
+                        chunk_context={
+                            "chunk_id": c.get("id"),
+                            "chunk_label": c.get("label"),
+                            "start": c.get("start"),
+                            "end": c.get("end"),
+                        },
+                        include_ixbrl=(int(c.get("id", 1)) == 1),
+                    )
+                    _append_prompt_excerpt_meta(
+                        case_dir,
+                        {
+                            "ts_utc": dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z"),
+                            "step": "TP_EXTRACTOR_FILING",
+                            "source_id": filing_entry.get("source_id"),
+                            "ticker": filing_entry.get("ticker"),
+                            "filing_type": filing_entry.get("tipo", filing_entry.get("form_type")),
+                            "local_path": local_path,
+                            "excerpt_meta": excerpt_meta,
+                        },
+                    )
+
+                    r = _dispatch_model_with_retry(
+                        config, model_profile, prompt, cwd=case_dir, timeout=timeout,
+                        step_name="TP_EXTRACTOR_FILING",
+                    )
+                    if r.success and isinstance(r.output, dict):
+                        chunk_results.append(r)
+
+                if chunk_results:
+                    if len(chunk_results) == 1:
+                        return _attach_dispatch_meta(
+                            chunk_results[0],
+                            {
+                                "method": "llm_chunked_single",
+                                "chunk_count": len(chunks),
+                                "chunk_successful": len(chunk_results),
+                                "model_profile": model_profile,
+                            },
+                        )
+
+                    # Layer 3: reconcile chunk outputs via fusion model; fallback to best chunk.
+                    outputs_map = {
+                        f"chunk_{i+1:03d}": r.output for i, r in enumerate(chunk_results)
+                        if isinstance(r.output, dict)
+                    }
+                    fusion_prompt = build_fusion_prompt(
+                        outputs=outputs_map,
+                        step_name="TP_EXTRACTOR_FILING",
+                        instrucciones_dir=instrucciones_dir,
+                    )
+                    fusion_result = _dispatch_model_with_retry(
+                        config, chunk_fusion_model, fusion_prompt, cwd=case_dir, timeout=timeout,
+                        step_name="TP_EXTRACTOR_FILING",
+                    )
+                    if fusion_result.success and isinstance(fusion_result.output, dict):
+                        return _attach_dispatch_meta(
+                            fusion_result,
+                            {
+                                "method": "llm_chunked_fusion",
+                                "chunk_count": len(chunks),
+                                "chunk_successful": len(chunk_results),
+                                "chunk_model_profile": model_profile,
+                                "fusion_model_profile": chunk_fusion_model,
+                            },
+                        )
+
+                    best_chunk = max(
+                        chunk_results,
+                        key=lambda r: _score_tp_partial_payload(r.output),
+                    )
+                    return _attach_dispatch_meta(
+                        best_chunk,
+                        {
+                            "method": "llm_chunked_best_chunk_fallback",
+                            "chunk_count": len(chunks),
+                            "chunk_successful": len(chunk_results),
+                            "chunk_model_profile": model_profile,
+                            "fusion_model_profile": chunk_fusion_model,
+                            "fusion_error": fusion_result.error if fusion_result else None,
+                        },
+                    )
+
+            # If chunking is enabled but yielded no successful chunk, continue to single mode fallback.
 
         prompt, excerpt_meta = build_filing_prompt(
-            filing_path=filing_path,
+            filing_path=selected_content_path,
             source_entry=filing_entry,
             ticker=filing_entry.get("ticker", "UNKNOWN"),
             instrucciones_dir=instrucciones_dir,
+            deterministic_hints=deterministic_hints,
         )
         _append_prompt_excerpt_meta(
             case_dir,
@@ -1727,40 +1957,38 @@ def dispatch_parallel_filings(
         )
 
         if config.is_v2:
-            # Fix-A: Delegate to the central orchestrator for retry + transport fallback.
-            # _dispatch_model_with_retry handles: retry on transport errors, copilot
-            # fallback (Fix-B gated), and JSON recovery — all in one consistent place.
-            return _dispatch_model_with_retry(
+            result = _dispatch_model_with_retry(
                 config, model_profile, prompt, cwd=case_dir, timeout=timeout,
                 step_name="TP_EXTRACTOR_FILING",
             )
-        else:
-            # v1: Direct backend dispatch with simple retry loop
-            attempts = 0
-            while True:
-                result = backend.dispatch(prompt, cwd=case_dir, timeout=timeout)
-                if result.success:
-                    return result
-                if not result.success and result.raw_output:
-                    recovered, recovery_method = _try_recover_json_ex(result.raw_output, result.error)
-                    if recovered is not None:
-                        result.success, result.output = True, recovered
-                        if recovery_method:
-                            if not isinstance(result.failure_ctx, dict):
-                                result.failure_ctx = {}
-                            result.failure_ctx["recovery_method"] = recovery_method
-                            if recovery_method == "truncation_repair":
-                                result.failure_ctx["truncation_repaired"] = True
-                        return result
-                if attempts >= max_retries or not _is_retryable_filing_error(result.error):
-                    return result
-                attempts += 1
-                label = _filing_label(filing_entry)
-                print(
-                    f"[dispatch]   ↻ retry {attempts}/{max_retries} for {label} "
-                    f"({(result.error or 'unknown')[:80]})"
-                )
-                time.sleep(1.0 * attempts)
+            return _attach_dispatch_meta(result, {"method": "llm_single", "model_profile": model_profile})
+
+        # v1: Direct backend dispatch with simple retry loop
+        attempts = 0
+        while True:
+            result = backend.dispatch(prompt, cwd=case_dir, timeout=timeout)
+            if result.success:
+                return _attach_dispatch_meta(result, {"method": "llm_single_v1", "model_profile": model_profile})
+            if not result.success and result.raw_output:
+                recovered, recovery_method = _try_recover_json_ex(result.raw_output, result.error)
+                if recovered is not None:
+                    result.success, result.output = True, recovered
+                    if recovery_method:
+                        if not isinstance(result.failure_ctx, dict):
+                            result.failure_ctx = {}
+                        result.failure_ctx["recovery_method"] = recovery_method
+                        if recovery_method == "truncation_repair":
+                            result.failure_ctx["truncation_repaired"] = True
+                    return _attach_dispatch_meta(result, {"method": "llm_single_v1_recovered", "model_profile": model_profile})
+            if attempts >= max_retries or not _is_retryable_filing_error(result.error):
+                return _attach_dispatch_meta(result, {"method": "llm_single_v1_failed", "model_profile": model_profile})
+            attempts += 1
+            label = _filing_label(filing_entry)
+            print(
+                f"[dispatch]   ↻ retry {attempts}/{max_retries} for {label} "
+                f"({(result.error or 'unknown')[:80]})"
+            )
+            time.sleep(1.0 * attempts)
 
     t0 = time.monotonic()
     results = []

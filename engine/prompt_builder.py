@@ -336,6 +336,10 @@ def build_filing_prompt(
     source_entry: dict,
     ticker: str,
     instrucciones_dir: Path,
+    deterministic_hints: dict | None = None,
+    content_override: str | None = None,
+    chunk_context: dict | None = None,
+    include_ixbrl: bool = True,
 ) -> tuple[str, dict]:
     """
     Prompt para TP_EXTRACTOR por filing individual.
@@ -349,6 +353,7 @@ def build_filing_prompt(
       2. For .clean.md files (pre-filtered financial tables), no truncation
          needed — they are already within budget (hard cap 220k).
       3. For .txt/.htm, truncate at 300k chars as safety net.
+      4. Optionally accepts deterministic hints and content_override for chunked mode.
     """
     parts = []
     excerpt_meta: dict = {
@@ -357,6 +362,8 @@ def build_filing_prompt(
         "source_id": str(source_entry.get("source_id", "N/A")),
         "input_path": str(filing_path),
     }
+    if chunk_context:
+        excerpt_meta["chunk_context"] = dict(chunk_context)
 
     # Instructions
     instr_path = instrucciones_dir / INSTRUCTION_MAP["TP_EXTRACTOR_FILING"]
@@ -379,7 +386,7 @@ def build_filing_prompt(
         if candidates:
             ixbrl_path = candidates[0]
 
-    if ixbrl_path.exists():
+    if include_ixbrl and ixbrl_path.exists():
         try:
             ixbrl_data = json.loads(ixbrl_path.read_text())
             consolidated = ixbrl_data.get("consolidated", {})
@@ -397,63 +404,79 @@ def build_filing_prompt(
 
     # Filing content — prefer .clean.md over .htm/.txt for financial filings,
     # but only if the .clean.md has actual useful content (semantic quality gate).
-    # ── PDF safety: prefer .txt companion over raw PDF binary ──
-    # PDF binaries contain null bytes that crash subprocess.run() when passed
-    # as CLI arguments. Prefer the .txt companion if it has real content.
-    if filing_path.suffix.lower() == ".pdf":
-        txt_candidate = filing_path.with_suffix(".txt")
-        if txt_candidate.exists():
-            _txt_peek = txt_candidate.read_text(errors="replace")
-            if len(_txt_peek) > 200 and not _txt_peek.startswith("[PDF original"):
-                filing_path = txt_candidate
-
     content_path = filing_path
-    if not filing_path.name.endswith(".clean.md"):
-        clean_candidate = filing_path.parent / (filing_path.stem + ".clean.md")
-        if clean_candidate.exists():
-            _clean_content = clean_candidate.read_text(errors="replace")
-            if _is_clean_md_useful_common(_clean_content):
-                content_path = clean_candidate
+    content: str | None = None
 
-    if content_path.exists():
-        content = content_path.read_text(errors="replace")
-        excerpt_meta["input_path"] = str(content_path)
-        content = content.replace("\x00", "")  # sanitize null bytes (safety net)
-        is_clean_md = content_path.name.endswith(".clean.md")
-        if is_clean_md:
-            limit = _limits["filing_clean_md_chars"]
-            raw_chars = len(content)
-            if len(content) > limit:
-                content = content[:limit] + f"\n\n... [TRUNCATED at {limit // 1000}k safety cap]"
-            excerpt_meta.update(
-                {
-                    "mode": "clean_md",
-                    "limit": int(limit),
-                    "original_chars": raw_chars,
-                    "output_chars": len(content),
-                    "selected_windows": 0,
-                }
-            )
-        else:
-            limit = _limits["filing_raw_chars"]
-            raw_chars = len(content)
-            if len(content) > limit:
-                filing_type_hint = str(
-                    source_entry.get("form_type", source_entry.get("tipo", "UNKNOWN"))
-                )
-                excerpted, focus_meta = _build_financial_focus_excerpt(content, filing_type_hint, limit)
-                content = excerpted
-                excerpt_meta.update(focus_meta)
-            else:
+    if content_override is not None:
+        content = str(content_override).replace("\x00", "")
+        excerpt_meta.update(
+            {
+                "mode": "chunk_override",
+                "original_chars": len(str(content_override)),
+                "output_chars": len(content),
+                "selected_windows": 0,
+            }
+        )
+    else:
+        # ── PDF safety: prefer .txt companion over raw PDF binary ──
+        # PDF binaries contain null bytes that crash subprocess.run() when passed
+        # as CLI arguments. Prefer the .txt companion if it has real content.
+        if filing_path.suffix.lower() == ".pdf":
+            txt_candidate = filing_path.with_suffix(".txt")
+            if txt_candidate.exists():
+                _txt_peek = txt_candidate.read_text(errors="replace")
+                if len(_txt_peek) > 200 and not _txt_peek.startswith("[PDF original"):
+                    filing_path = txt_candidate
+
+        content_path = filing_path
+        if not filing_path.name.endswith(".clean.md"):
+            clean_candidate = filing_path.parent / (filing_path.stem + ".clean.md")
+            if clean_candidate.exists():
+                _clean_content = clean_candidate.read_text(errors="replace")
+                if _is_clean_md_useful_common(_clean_content):
+                    content_path = clean_candidate
+
+        if content_path.exists():
+            content = content_path.read_text(errors="replace")
+            excerpt_meta["input_path"] = str(content_path)
+            content = content.replace("\x00", "")  # sanitize null bytes (safety net)
+            is_clean_md = content_path.name.endswith(".clean.md")
+            if is_clean_md:
+                limit = _limits["filing_clean_md_chars"]
+                raw_chars = len(content)
+                if len(content) > limit:
+                    content = content[:limit] + f"\n\n... [TRUNCATED at {limit // 1000}k safety cap]"
                 excerpt_meta.update(
                     {
-                        "mode": "raw_full",
+                        "mode": "clean_md",
                         "limit": int(limit),
                         "original_chars": raw_chars,
                         "output_chars": len(content),
                         "selected_windows": 0,
                     }
                 )
+            else:
+                limit = _limits["filing_raw_chars"]
+                raw_chars = len(content)
+                if len(content) > limit:
+                    filing_type_hint = str(
+                        source_entry.get("form_type", source_entry.get("tipo", "UNKNOWN"))
+                    )
+                    excerpted, focus_meta = _build_financial_focus_excerpt(content, filing_type_hint, limit)
+                    content = excerpted
+                    excerpt_meta.update(focus_meta)
+                else:
+                    excerpt_meta.update(
+                        {
+                            "mode": "raw_full",
+                            "limit": int(limit),
+                            "original_chars": raw_chars,
+                            "output_chars": len(content),
+                            "selected_windows": 0,
+                        }
+                    )
+
+    if content is not None:
         parts.append(f"# FILING CONTENT\n\n```\n{content}\n```")
 
     # Canonical field map — tells the LLM exactly what field names to output
@@ -501,6 +524,43 @@ def build_filing_prompt(
         "IMPORTANT: For each period entry, include `periodo` (format: FY2024 or Q1-2024) "
         "and `fecha_fin` (format: YYYY-MM-DD). Set values to `null` if not found in the filing.\n"
     )
+
+    # V6.2 1B.2: Pre-flight metadata determinista
+    try:
+        from scripts.runners.filing_preflight import preflight, format_prompt_block
+        if content is not None:
+            preflight_text = content[:100_000]
+            preflight_meta = preflight(preflight_text)
+            preflight_block = format_prompt_block(preflight_meta)
+            if preflight_block:
+                parts.append(preflight_block)
+            excerpt_meta["preflight"] = {
+                k: v for k, v in preflight_meta.items()
+                if k in ("language", "accounting_standard", "currency",
+                         "fiscal_year", "units_by_section", "restatement_detected")
+            }
+    except Exception as e:
+        # Degradation graceful: if preflight fails, extraction continues without hints
+        import sys
+        print(f"[prompt_builder] WARNING: Pre-flight failed: {e}", file=sys.stderr)
+
+    # Phase 2, Layer 1: deterministic hints for Layer 2 extraction
+    if deterministic_hints:
+        try:
+            from scripts.runners.deterministic_extractor import format_deterministic_hints_block
+
+            hints_block = format_deterministic_hints_block(deterministic_hints)
+            if hints_block:
+                parts.append(hints_block)
+            excerpt_meta["deterministic_hints"] = {
+                "entries": len(deterministic_hints.get("entries", []))
+                if isinstance(deterministic_hints, dict) else 0,
+                "fields": len(deterministic_hints.get("best_by_field", {}))
+                if isinstance(deterministic_hints, dict) else 0,
+            }
+        except Exception as e:
+            import sys
+            print(f"[prompt_builder] WARNING: deterministic hints failed: {e}", file=sys.stderr)
 
     # Filing metadata
     filing_type = source_entry.get("form_type", source_entry.get("tipo", "UNKNOWN"))

@@ -1535,7 +1535,13 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
     filing_records = []
     filing_failures = []
     filing_attempts: list[dict] = []
+    provenance_records: list[dict] = []
     for i, result in enumerate(results):
+        filing_entry = filings[i] if i < len(filings) else {}
+        dispatch_meta = {}
+        if isinstance(result.failure_ctx, dict):
+            dispatch_meta = result.failure_ctx.get("filing_dispatch_meta", {}) or {}
+
         if result.success and result.output:
             # Inject filing_type from SourcesPack so merger can attribute fields
             if i < len(filings):
@@ -1556,6 +1562,23 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
             })
             if not is_valid:
                 print(f"[router] WARNING: Partial TP filing {i:03d} inválido: {val_errors}", file=sys.stderr)
+
+            provenance_records.append(
+                {
+                    "index": i,
+                    "source_id": filing_entry.get("source_id"),
+                    "filing_type": filing_entry.get("tipo", filing_entry.get("filing_type")),
+                    "local_path": filing_entry.get("local_path"),
+                    "success": True,
+                    "valid_partial": is_valid,
+                    "model_profile": result.model_profile,
+                    "model": result.model,
+                    "backend": result.backend,
+                    "transport": result.transport,
+                    "dispatch_meta": dispatch_meta,
+                    "artifact_path": str(tmp_path),
+                }
+            )
         else:
             filing_failures.append(
                 {
@@ -1574,6 +1597,22 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
                         merged.setdefault("model_profile", result.model_profile or result.model)
                         merged.setdefault("index", i)
                         filing_attempts.append(merged)
+
+            provenance_records.append(
+                {
+                    "index": i,
+                    "source_id": filing_entry.get("source_id"),
+                    "filing_type": filing_entry.get("tipo", filing_entry.get("filing_type")),
+                    "local_path": filing_entry.get("local_path"),
+                    "success": False,
+                    "model_profile": result.model_profile,
+                    "model": result.model,
+                    "backend": result.backend,
+                    "transport": result.transport,
+                    "error": result.error or "No output",
+                    "dispatch_meta": dispatch_meta,
+                }
+            )
 
     if successful == 0:
         common_error = ""
@@ -1607,6 +1646,23 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
             "attempts": filing_attempts,
             "failure_ctx": failure_ctx,
         }
+
+    # Phase 2 provenance: per-filing extraction chain of custody (best-effort).
+    try:
+        provenance_payload = {
+            "version": "ExtractionProvenance_v1",
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "ticker": ticker,
+            "step": step_name,
+            "filings_total": len(filings),
+            "filings_successful": successful,
+            "records": provenance_records,
+        }
+        (case_dir / "_extraction_provenance.json").write_text(
+            json.dumps(provenance_payload, indent=2, ensure_ascii=False)
+        )
+    except Exception as exc:
+        print(f"[router] WARNING: could not write _extraction_provenance.json: {exc}", file=sys.stderr)
 
     # Quality voting (report-only): nunca bloquear pipeline por fallos de voting
     try:
