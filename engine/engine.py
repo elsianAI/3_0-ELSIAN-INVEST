@@ -1875,6 +1875,8 @@ def _cmd_rehacer(config, args):
             persist_state=True,
             step_result=result,
         )
+        print(f"[engine] Step {step_name}: failed", file=sys.stderr)
+        sys.exit(1)
 
     # V6.2: Conservative git — commit only if rehacer succeeded
     git_cfg = config.raw.get("git", {})

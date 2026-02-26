@@ -19,7 +19,6 @@ import json
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -401,6 +400,64 @@ def snapshot_case(case_dir: Path, target_dir: Path) -> None:
     shutil.copytree(case_dir, target_dir)
 
 
+def runtime_config_paths(run_id: str) -> tuple[Path, Path]:
+    return (
+        WORKSPACE / f".engine_config_ab_off_{run_id}.json",
+        WORKSPACE / f".engine_config_ab_on_{run_id}.json",
+    )
+
+
+def _extract_model_roles(cfg: dict[str, Any]) -> dict[str, str]:
+    """Extract model roles from config for display."""
+    overrides = cfg.get("step_overrides", {}).get("TP_EXTRACTOR_FILING", {})
+    models = overrides.get("models", [])
+    chunk_models = overrides.get("chunk_models", [])
+    return {
+        "primary": models[0] if models else cfg.get("default_single_model", "?"),
+        "chunk": chunk_models[0] if chunk_models else "?",
+        "fusion": overrides.get("chunk_fusion_model", "?"),
+        "reconciliation": overrides.get("reconciliation_model", "?"),
+    }
+
+
+def _log(msg: str, *, err: bool = False) -> None:
+    """Print a [benchmark] prefixed message."""
+    print(f"[benchmark] {msg}", file=sys.stderr if err else sys.stdout, flush=True)
+
+
+def assert_truthpack_done(case_dir: Path) -> None:
+    state_path = case_dir / "_estado.json"
+    state = load_json(state_path)
+
+    pipeline = state.get("pipeline")
+    if not isinstance(pipeline, dict):
+        raise RuntimeError("pipeline missing in _estado.json")
+
+    tp_state = pipeline.get("TRUTH_PACK")
+    if not isinstance(tp_state, dict):
+        raise RuntimeError("pipeline.TRUTH_PACK missing in _estado.json")
+
+    if tp_state.get("estado") != "DONE":
+        raise RuntimeError(f"pipeline.TRUTH_PACK.estado={tp_state.get('estado')!r}")
+
+    sub_steps = state.get("sub_steps")
+    if not isinstance(sub_steps, dict):
+        raise RuntimeError("sub_steps missing in _estado.json")
+
+    required_subs = (
+        "TP_EXTRACTOR_FILING",
+        "TP_EXTRACTOR_MERGER",
+        "TP_CALCULATOR",
+        "TP_VALIDATOR",
+    )
+    for sub in required_subs:
+        sub_state = sub_steps.get(sub)
+        if not isinstance(sub_state, dict):
+            raise RuntimeError(f"sub_steps.{sub} missing in _estado.json")
+        if sub_state.get("status") != "DONE":
+            raise RuntimeError(f"sub_steps.{sub}.status={sub_state.get('status')!r}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="V6.2 Phase 2 A/B benchmark (TRUTH_PACK).")
     parser.add_argument("--cases", type=str, default=",".join(CANARY_CASES.keys()))
@@ -422,14 +479,12 @@ def main() -> int:
     base_cfg_dir = args.base_config.resolve().parent
     off_cfg = absolutize_paths(off_cfg, base_config_dir=base_cfg_dir)
     on_cfg = absolutize_paths(on_cfg, base_config_dir=base_cfg_dir)
+    run_id = time.strftime("%Y%m%d_%H%M%S") + f"_{int(time.time() * 1000) % 1000000:06d}"
+    off_cfg_path, on_cfg_path = runtime_config_paths(run_id)
+    write_json(off_cfg_path, off_cfg)
+    write_json(on_cfg_path, on_cfg)
 
-    with tempfile.TemporaryDirectory(prefix="v62_ab_cfg_") as tmp:
-        cfg_tmp = Path(tmp)
-        off_cfg_path = cfg_tmp / "engine_config_ab_off.json"
-        on_cfg_path = cfg_tmp / "engine_config_ab_on.json"
-        write_json(off_cfg_path, off_cfg)
-        write_json(on_cfg_path, on_cfg)
-
+    try:
         if args.keep_temp_configs:
             write_json(output_dir / "engine_config_ab_off.json", off_cfg)
             write_json(output_dir / "engine_config_ab_on.json", on_cfg)
@@ -451,6 +506,10 @@ def main() -> int:
                 (per_case_dir / "off_run.stderr.log").write_text(off_run.stderr, encoding="utf-8")
                 if not off_run.ok:
                     raise RuntimeError(f"OFF run failed rc={off_run.return_code}")
+                try:
+                    assert_truthpack_done(case_dir)
+                except Exception as exc:
+                    raise RuntimeError(f"off_truthpack_not_done: {exc}") from exc
                 snapshot_case(case_dir, per_case_dir / "off")
 
                 cleanup_tmp_partials(case_dir)
@@ -459,6 +518,10 @@ def main() -> int:
                 (per_case_dir / "on_run.stderr.log").write_text(on_run.stderr, encoding="utf-8")
                 if not on_run.ok:
                     raise RuntimeError(f"ON run failed rc={on_run.return_code}")
+                try:
+                    assert_truthpack_done(case_dir)
+                except Exception as exc:
+                    raise RuntimeError(f"on_truthpack_not_done: {exc}") from exc
                 snapshot_case(case_dir, per_case_dir / "on")
 
                 off_metrics = collect_snapshot_metrics(per_case_dir / "off")
@@ -553,6 +616,10 @@ def main() -> int:
         for reason in verdict.get("reasons", []):
             print(f"  - {reason}", file=sys.stderr)
         return 1
+    finally:
+        if not args.keep_temp_configs:
+            off_cfg_path.unlink(missing_ok=True)
+            on_cfg_path.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":

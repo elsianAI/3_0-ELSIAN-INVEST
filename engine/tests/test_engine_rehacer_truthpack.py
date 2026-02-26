@@ -67,6 +67,35 @@ class RehacerGroupResetTests(unittest.TestCase):
                     msg=f"{sub} should be reset to PENDING",
                 )
 
+    def test_rehacer_exits_1_when_step_execution_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config = _FakeConfig(root)
+            ticker = "TST"
+            date_str = "2026-02-25"
+            case_dir = config.get_path("casos") / ticker / date_str
+            init_state(case_dir, ticker, date_str)
+
+            args = SimpleNamespace(
+                ticker=ticker,
+                step_name="TRUTH_PACK",
+                date=date_str,
+                exchange="",
+                country="",
+                web_ir="",
+            )
+
+            fail_result = {"success": False, "error": "boom", "failure_ctx": {"x": 1}}
+            with (
+                mock.patch("engine.engine.execute_step", return_value=fail_result),
+                mock.patch("engine.engine._report_step_failure") as mocked_report,
+                self.assertRaises(SystemExit) as ctx,
+            ):
+                _cmd_rehacer(config, args)
+
+            self.assertEqual(ctx.exception.code, 1)
+            mocked_report.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
