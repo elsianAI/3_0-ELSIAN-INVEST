@@ -109,10 +109,19 @@ def merge(partial_extractions: list[dict]) -> dict:
     normalized_extractions = [_apply_normalization(pe) for pe in partial_extractions]
     merger_warnings: list[str] = []
 
-    # V6.2: Enforce max_periods_per_filing on all partials before any merge
+    # V6.2: Enforce max_periods_per_filing and drop partial annual periods
+    # before any merge, including single-filing path.
     for ext in normalized_extractions:
+        annual_entries = ext.get("historico_anual", [])
+        if isinstance(annual_entries, list):
+            ext["historico_anual"] = [
+                e for e in annual_entries
+                if isinstance(e, dict) and not e.get("_periodo_parcial")
+            ]
         for section_key in ("historico_anual", "historico_trimestral"):
             entries = ext.get(section_key, [])
+            if not isinstance(entries, list):
+                continue
             if len(entries) > MAX_PERIODS_PER_FILING:
                 ext[section_key] = sorted(
                     entries,
@@ -202,6 +211,8 @@ def _merge_annual(extractions: list[dict]) -> list:
         priority = FILING_PRIORITY.get(filing_type, 99)
 
         for entry in ext.get("historico_anual", []):
+            if entry.get("_periodo_parcial"):
+                continue
             periodo = entry.get("periodo")
             if not periodo:
                 continue
@@ -738,6 +749,28 @@ def _merge_period_entries(existing: dict, new_entry: dict,
             # Capture the previous source BEFORE modifying provenance
             prev_source = provenance.get(key, "UNKNOWN")
 
+            # Scale guard: prevent tiny scale-corrupted values from overriding
+            # a plausible absolute amount (e.g. 15 vs 9_000_000_000).
+            scale_pref = _scale_guard_preference(key, existing_val, new_val)
+            if scale_pref == "new":
+                merged[key] = new_val
+                provenance[key] = f"{new_source}:scale_guard"
+                conflicts.append({
+                    "campo": key,
+                    "valor_kept": new_val, "valor_dropped": existing_val,
+                    "source_kept": new_source, "source_dropped": prev_source,
+                    "reason": "scale_guard",
+                })
+                continue
+            if scale_pref == "existing":
+                conflicts.append({
+                    "campo": key,
+                    "valor_kept": existing_val, "valor_dropped": new_val,
+                    "source_kept": prev_source, "source_dropped": new_source,
+                    "reason": "scale_guard",
+                })
+                continue
+
             # Conflict — use higher priority (lower number wins)
             if new_priority < existing_priority:
                 merged[key] = new_val
@@ -770,6 +803,37 @@ def _merge_period_entries(existing: dict, new_entry: dict,
     merged["_field_sources"] = provenance
     merged["_merge_conflicts"] = existing.get("_merge_conflicts", []) + conflicts
     return merged
+
+
+def _scale_guard_preference(field: str, existing_val, new_val):
+    """Return preferred side when one value is clearly scale-corrupted.
+
+    Guard criteria:
+    - monetary field (`*_usd`)
+    - both values numeric
+    - one value >= 1M and the other < 1M
+    - magnitude gap >= 1000x
+    """
+    if not isinstance(field, str) or not field.endswith("_usd"):
+        return None
+
+    existing_num = _coerce_finite_number(existing_val)
+    new_num = _coerce_finite_number(new_val)
+    if existing_num is None or new_num is None:
+        return None
+
+    existing_abs = abs(existing_num)
+    new_abs = abs(new_num)
+    high = max(existing_abs, new_abs)
+    low = min(existing_abs, new_abs)
+    if low <= 0:
+        return None
+    if high < 1_000_000 or low >= 1_000_000:
+        return None
+    if (high / low) < 1000.0:
+        return None
+
+    return "new" if new_abs > existing_abs else "existing"
 
 
 def _resolve_conflict(values: list[tuple], field: str):

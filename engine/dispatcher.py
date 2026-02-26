@@ -1801,6 +1801,26 @@ def _pick_latest_entry(entries: list[dict]) -> tuple[int, dict] | tuple[None, No
     return (best_idx, entries[best_idx])
 
 
+def _pick_latest_entry_with_field(entries: list[dict], field: str) -> tuple[int, dict] | tuple[None, None]:
+    if not isinstance(entries, list) or not entries:
+        return (None, None)
+    best_idx = None
+    best_key = (-1, -1, "")
+    for i, item in enumerate(entries):
+        if not isinstance(item, dict):
+            continue
+        value = _to_float(item.get(field))
+        if value is None:
+            continue
+        key = _period_sort_tuple(item.get("periodo"), item.get("fecha_fin"))
+        if key > best_key:
+            best_key = key
+            best_idx = i
+    if best_idx is None:
+        return (None, None)
+    return (best_idx, entries[best_idx])
+
+
 def _extract_llm_field_snapshot(payload: dict) -> dict[str, dict]:
     snapshot: dict[str, dict] = {}
     if not isinstance(payload, dict):
@@ -1819,9 +1839,9 @@ def _extract_llm_field_snapshot(payload: dict) -> dict[str, dict]:
                     "periodo": None,
                 }
 
-    annual_idx, annual = _pick_latest_entry(payload.get("historico_anual", []))
-    quarterly_idx, quarterly = _pick_latest_entry(payload.get("historico_trimestral", []))
     for field in _PERIOD_FIELDS:
+        annual_idx, annual = _pick_latest_entry_with_field(payload.get("historico_anual", []), field)
+        quarterly_idx, quarterly = _pick_latest_entry_with_field(payload.get("historico_trimestral", []), field)
         if isinstance(annual, dict):
             value = _to_float(annual.get(field))
             if value is not None:
@@ -1870,7 +1890,9 @@ def _set_llm_field_value(payload: dict, field: str, value: float, locator: dict 
         return
 
     annual = payload.get("historico_anual", [])
-    idx, item = _pick_latest_entry(annual if isinstance(annual, list) else [])
+    idx, item = _pick_latest_entry_with_field(annual if isinstance(annual, list) else [], field)
+    if idx is None:
+        idx, item = _pick_latest_entry(annual if isinstance(annual, list) else [])
     if isinstance(item, dict) and isinstance(idx, int):
         annual[idx][field] = value
 

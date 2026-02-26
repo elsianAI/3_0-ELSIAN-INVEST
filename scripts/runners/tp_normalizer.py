@@ -206,7 +206,7 @@ _NOISE_KEYS = {
     "periodo", "fecha", "fecha_fin", "fecha_inicio", "fecha_corte",
     "fuente_refs", "source_filing", "filing_type", "tipo_periodo",
     "is_preliminary", "duracion", "concepto", "metrica", "metric",
-    "valor", "moneda", "unidad", "escala", "scale", "currency", "unit",
+    "valor", "moneda", "currency",
     "entidad", "valores", "periodo_inicio", "periodo_fin",
     "resultado_integral", "flujo_caja_operativo_parcial",
     "tipo", "value",  # top-level "value" in single-metric entries
@@ -305,6 +305,38 @@ def _unwrap_value(val: Any) -> float | None:
     return None
 
 
+def _parse_scale_multiplier(raw_scale: Any) -> float | None:
+    """Parse textual/numeric scale hints into multipliers."""
+    if raw_scale is None:
+        return None
+    if isinstance(raw_scale, (int, float)) and raw_scale > 0:
+        return float(raw_scale)
+    if not isinstance(raw_scale, str):
+        return None
+
+    txt = raw_scale.strip().lower()
+    if not txt:
+        return None
+    if any(token in txt for token in ("billion", "billions", "milliard", "milliards")):
+        return 1_000_000_000.0
+    if any(token in txt for token in ("million", "millions", "millón", "millones", "mn", "m€", "m eur")):
+        return 1_000_000.0
+    if any(token in txt for token in ("thousand", "thousands", "mil", "k")):
+        return 1_000.0
+    if any(token in txt for token in ("unit", "units", "absolute", "abs")):
+        return 1.0
+    return None
+
+
+def _resolve_entry_scale_multiplier(flat_entry: dict) -> float | None:
+    for key in ("scale", "escala", "unidad", "unit"):
+        if key in flat_entry:
+            parsed = _parse_scale_multiplier(flat_entry.get(key))
+            if parsed is not None:
+                return parsed
+    return None
+
+
 # ── Detección de single-metric entries ─────────────────────
 
 def _is_single_metric_entry(entry: dict) -> bool:
@@ -363,6 +395,7 @@ def _normalize_entry(entry: dict, alias_index: dict[str, str]) -> dict:
 
     # Step 2+3: Alias resolution + unwrap
     normalized: dict[str, Any] = {}
+    entry_scale_multiplier = _resolve_entry_scale_multiplier(flat)
     for key, val in flat.items():
         k_lower = key.lower()
 
@@ -371,7 +404,11 @@ def _normalize_entry(entry: dict, alias_index: dict[str, str]) -> dict:
                         "fecha_corte", "fuente_refs", "source_filing",
                         "filing_type", "is_preliminary", "tipo_periodo",
                         "duracion", "periodo_inicio", "periodo_fin",
-                        "_periodo_parcial"):
+                        "_periodo_parcial", "escala", "scale",
+                        "unidad", "unit", "moneda_original"):
+            normalized[key] = val
+            continue
+        if key.startswith("_source_data_raw_"):
             normalized[key] = val
             continue
 
@@ -383,6 +420,15 @@ def _normalize_entry(entry: dict, alias_index: dict[str, str]) -> dict:
         canonical = alias_index.get(k_lower)
         if canonical:
             unwrapped = _unwrap_value(val)
+            if (
+                canonical.endswith("_usd")
+                and isinstance(unwrapped, (int, float))
+                and entry_scale_multiplier is not None
+                and entry_scale_multiplier > 0
+                and entry_scale_multiplier != 1.0
+                and abs(float(unwrapped)) < 1_000_000
+            ):
+                unwrapped = float(unwrapped) * entry_scale_multiplier
             # Only set if not already set, or if new value is not None
             if canonical not in normalized or (normalized[canonical] is None and unwrapped is not None):
                 normalized[canonical] = unwrapped
@@ -431,6 +477,33 @@ def _sanity_check_yoy(entries: list[dict]) -> list[str]:
                         f"{field}: {prev.get('periodo')}→{curr.get('periodo')} "
                         f"ratio={ratio:.1f}x (>10x)"
                     )
+    return warnings
+
+
+def _repair_entry_from_raw_sources(entry: dict, periodo: str) -> list[str]:
+    """Repair obvious scale issues using embedded raw source payloads."""
+    warnings: list[str] = []
+    raw = entry.get("_source_data_raw_eur_m")
+    if not isinstance(raw, dict):
+        return warnings
+    revenue_eur_m = _unwrap_value(raw.get("revenue_eur_m"))
+    if revenue_eur_m is None or revenue_eur_m <= 0:
+        return warnings
+
+    current = _unwrap_value(entry.get("ingresos_usd"))
+    repaired = float(revenue_eur_m) * 1_000_000.0
+    if current is None:
+        entry["ingresos_usd"] = repaired
+        warnings.append(
+            f"{periodo}: ingresos_usd reconstruido desde _source_data_raw_eur_m.revenue_eur_m ({revenue_eur_m})"
+        )
+        return warnings
+
+    if abs(float(current)) < 1_000_000 and repaired > 1_000_000:
+        entry["ingresos_usd"] = repaired
+        warnings.append(
+            f"{periodo}: ingresos_usd reemplazado por fuente raw EUR_m ({current} -> {repaired})"
+        )
     return warnings
 
 
@@ -493,6 +566,7 @@ def normalize(tp: dict) -> dict:
         # Sanity checks
         sw = _sanity_check_entry(normalized, periodo)
         log["sanity_warnings"].extend(sw)
+        log["sanity_warnings"].extend(_repair_entry_from_raw_sources(normalized, periodo))
 
         # Only keep if has at least one financial field with data
         has_data = any(
@@ -556,6 +630,7 @@ def normalize(tp: dict) -> dict:
 
         sw = _sanity_check_entry(normalized, periodo)
         log["sanity_warnings"].extend(sw)
+        log["sanity_warnings"].extend(_repair_entry_from_raw_sources(normalized, periodo))
 
         has_data = any(
             normalized.get(k) is not None

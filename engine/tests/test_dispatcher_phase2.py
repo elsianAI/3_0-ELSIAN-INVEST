@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from engine.backends.base import DispatchResult
 from engine.dispatcher import (
+    _extract_llm_field_snapshot,
     _resolve_tp_filing_model_roles,
     _run_cross_layer_reconciliation,
     dispatch_parallel_filings,
@@ -149,6 +150,25 @@ class DispatcherPhase2Tests(unittest.TestCase):
         self.assertEqual(meta["conflicts"], 1)
         self.assertEqual(meta["entries"][0]["status"], "material_conflict")
         self.assertTrue(field_prov[0]["material_conflict"])
+
+    def test_llm_snapshot_uses_latest_annual_with_value_per_field(self):
+        payload = {
+            "version_esquema": "TruthPack_v1",
+            "historico_anual": [
+                {"periodo": "FY2023", "fecha_fin": "2023-12-31", "ingresos_usd": 9_000_000_000.0},
+                {"periodo": "FY2024", "fecha_fin": "2024-12-31", "ingresos_usd": None},
+            ],
+            "historico_trimestral": [
+                {"periodo": "Q2-2025", "fecha_fin": "2025-06-30", "ingresos_usd": 2_000_000_000.0},
+            ],
+            "balance_sheet_ultimo": {},
+        }
+        snap = _extract_llm_field_snapshot(payload)
+        revenue = snap.get("ingresos_usd")
+        self.assertIsNotNone(revenue)
+        self.assertEqual(revenue["value"], 9_000_000_000.0)
+        self.assertEqual(revenue["section"], "historico_anual")
+        self.assertEqual(revenue["periodo"], "FY2023")
 
     def test_cross_layer_arbiter_selects_deterministic_value(self):
         llm_value = 1_500_000_000.0

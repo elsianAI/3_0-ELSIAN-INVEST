@@ -220,6 +220,51 @@ class RecencyEndToEndMergeTests(unittest.TestCase):
         self.assertEqual(entry_2023[0]["ingresos_usd"], 200,
                          "Index 0 (most recent) should win same-tier merge")
 
+    def test_annual_partial_periods_are_dropped(self):
+        """H1/H2 entries must not leak into historico_anual."""
+        partial = {
+            "filing_type": "10-K",
+            "filing_priority": 1,
+            "historico_anual": [
+                {
+                    "periodo": "FY2024",
+                    "fecha_fin": "2024-12-31",
+                    "tipo_periodo": "anual",
+                    "moneda_original": "USD",
+                    "ingresos_usd": 10_000_000_000,
+                },
+                {
+                    "periodo": "H1-2025",
+                    "fecha_fin": "2025-06-30",
+                    "tipo_periodo": "semestral",
+                    "moneda_original": "USD",
+                    "ingresos_usd": 5_000_000_000,
+                    "_periodo_parcial": True,
+                },
+            ],
+            "historico_trimestral": [],
+            "balance_sheet_ultimo": {},
+        }
+        result = merge([partial])
+        annual = result.get("historico_anual", [])
+        periodos = {e.get("periodo") for e in annual}
+        self.assertIn("FY2024", periodos)
+        self.assertNotIn("H1-2025", periodos)
+
+    def test_scale_guard_prevents_tiny_override(self):
+        """Tiny scale-corrupted value must not override plausible absolute value."""
+        partials = [
+            self._make_partial("10-K", 1, "2023", 9_095_850_000),  # plausible absolute
+            self._make_partial("10-K", 1, "2023", 15.0),  # likely scale-corrupted
+        ]
+        result = merge(partials)
+        annual = result.get("historico_anual", [])
+        entry_2023 = [e for e in annual if e.get("periodo") == "2023"]
+        self.assertEqual(len(entry_2023), 1)
+        self.assertEqual(entry_2023[0]["ingresos_usd"], 9_095_850_000)
+        conflicts = entry_2023[0].get("_merge_conflicts", [])
+        self.assertTrue(any(c.get("reason") == "scale_guard" for c in conflicts))
+
 
 # ─────────────────────────────────────────────
 # P1: Reconciliation classification tests
