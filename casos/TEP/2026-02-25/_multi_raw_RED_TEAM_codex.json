@@ -5,7 +5,7 @@
   "agente": {
     "agent_role": "RED_TEAM",
     "agent_nombre": "RED_TEAM_v1",
-    "modelo": "GPT-5",
+    "modelo": "GPT-5-Codex",
     "idioma": "es"
   },
   "input_refs": {
@@ -15,11 +15,11 @@
   },
   "resumen_ejecutivo": {
     "bullets": [
-      "Los múltiplos bajos no son prueba de infravaloración cuando deuda neta (3,096M) supera la market cap (2,941M).",
-      "La señal clave de 2025 empeora frente a 2024: CFO H1 cae de 771M a 588M y CFF pasa a +229M.",
-      "Existe riesgo de refinanciación/liquidez de corto plazo: deuda CP 1,147M frente a caja 1,058M, con covenants no visibles.",
-      "La calidad de evidencia sigue incompleta (PARTIAL, 41% de completitud, conflictos materiales en ingresos/EBIT).",
-      "Veredicto RED_TEAM: NO_APTO hasta validar calidad de caja, estructura de deuda y consistencia de datos."
+      "Los multiplos bajos no prueban infravaloracion: son compatibles con riesgo de value trap por balance y calidad de caja.",
+      "CFO H1-2025 cayo a EUR588M desde EUR771M en H1-2024 (-24%), mientras la deuda de corto plazo (EUR1,147M) casi iguala la caja (EUR1,058M).",
+      "La tesis alcista depende de supuestos no validados: refinanciacion no dilutiva, EV estable y recurrencia del FCF TTM.",
+      "La opacidad de datos (completitud 41% y conflictos materiales en ingresos/EBIT) aumenta el riesgo de error de estimacion.",
+      "Veredicto RED_TEAM: NO_APTO hasta validar refinanciacion, calidad de conversion EBIT->CFO y reduccion real de deuda neta."
     ],
     "veredicto_role_local": "NO_APTO",
     "confianza_0_1": 0.79
@@ -27,50 +27,10 @@
   "claims": [
     {
       "claim_id": "CLM_RT_001",
-      "tipo": "INFERENCIA",
-      "criticidad": "CRITICO",
-      "enunciado": "La aparente infravaloración de TEP es compatible con una value trap por riesgo financiero y calidad de caja no verificada.",
-      "confianza_0_1": 0.82,
-      "impacto": "ALTO",
-      "evidencias": [
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "TruthPack_v1",
-          "url": null,
-          "titulo": null,
-          "fecha": "2026-02-26",
-          "ubicacion": "metricas_derivadas / mercado",
-          "cita_corta": "EV/FCF 4.37x; FCF yield 46.98%; deuda neta 3,096M.",
-          "interpretacion": "El múltiplo bajo puede reflejar prima de riesgo real, no error de mercado."
-        },
-        {
-          "tipo": "SOURCEPACK",
-          "source_id": "TruthPack_v1",
-          "url": null,
-          "titulo": null,
-          "fecha": "2026-02-26",
-          "ubicacion": "mercado",
-          "cita_corta": "Market cap 2,941M frente a deuda neta 3,096M.",
-          "interpretacion": "El equity está subordinado a un pasivo elevado respecto a su tamaño."
-        }
-      ],
-      "falsacion": {
-        "test": "Si FY2025 reporta CFO >= 1,500M, FCF >= 1,200M y deuda neta <= 2,700M al 2025-12-31, este claim pierde validez.",
-        "ventana_meses": {
-          "min": 9,
-          "max": 15
-        },
-        "fuente_prevista": "earnings",
-        "ventana": "9-15 meses (cierre FY2025)",
-        "fuente_verificacion": "earnings/filing FY2025"
-      }
-    },
-    {
-      "claim_id": "CLM_RT_002",
       "tipo": "HECHO",
       "criticidad": "CRITICO",
-      "enunciado": "La narrativa de desapalancamiento sostenido no está demostrada con la evidencia semestral más reciente.",
-      "confianza_0_1": 0.84,
+      "enunciado": "La calidad del FCF es fragil: la caida de CFO y beneficio neto en H1-2025 cuestiona la sostenibilidad del run-rate TTM.",
+      "confianza_0_1": 0.83,
       "impacto": "ALTO",
       "evidencias": [
         {
@@ -78,39 +38,39 @@
           "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
           "url": null,
           "titulo": null,
-          "fecha": "2025-06-30",
-          "ubicacion": "H1-2025 cash flow",
-          "cita_corta": "CFO 588M y CFF +229M en H1-2025.",
-          "interpretacion": "El flujo financiero ya no muestra repago neto comparable al FY2024."
+          "fecha": "2025-07-31",
+          "ubicacion": "Cash Flow Statement H1-2025",
+          "cita_corta": "CFO H1-2025 EUR588M vs H1-2024 EUR771M.",
+          "interpretacion": "La conversion de caja empeora de forma material."
         },
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_014_PRESENTATION_2024.pdf",
+          "source_id": "TruthPack_v1",
           "url": null,
           "titulo": null,
-          "fecha": "2024-12-31",
-          "ubicacion": "FY2024 cash flow",
-          "cita_corta": "CFF FY2024 fue -1,403M.",
-          "interpretacion": "El dato de 2024 no garantiza persistencia en 2025."
+          "fecha": "2026-02-26",
+          "ubicacion": "historico_trimestral.H1-2025",
+          "cita_corta": "Net income H1-2025 EUR249M vs H1-2024 EUR291M.",
+          "interpretacion": "La rentabilidad neta cae simultaneamente."
         }
       ],
       "falsacion": {
-        "test": "Si FY2025 cierra con CFF <= -500M explicado por amortización neta de deuda y deuda neta <= 2,800M, el claim quedaría refutado.",
+        "test": "Si FY2025 reporta CFO >= EUR1,600M y FCF >= EUR1,200M con bridge EBIT->CFO detallado y sin efectos one-off dominantes, este claim se debilita.",
+        "ventana": "6-12 meses (hasta 2027-02-28)",
+        "fuente_verificacion": "earnings",
         "ventana_meses": {
           "min": 6,
-          "max": 15
+          "max": 12
         },
-        "fuente_prevista": "filing",
-        "ventana": "6-15 meses",
-        "fuente_verificacion": "filing anual FY2025"
+        "fuente_prevista": "earnings"
       }
     },
     {
-      "claim_id": "CLM_RT_003",
-      "tipo": "INFERENCIA",
+      "claim_id": "CLM_RT_002",
+      "tipo": "HECHO",
       "criticidad": "CRITICO",
-      "enunciado": "El riesgo de refinanciación y liquidez de corto plazo está infravalorado por falta de disclosure operativo del pasivo.",
-      "confianza_0_1": 0.78,
+      "enunciado": "El riesgo de refinanciacion es material porque la deuda de corto plazo casi iguala la caja y la caja operativa reciente se debilito.",
+      "confianza_0_1": 0.86,
       "impacto": "ALTO",
       "evidencias": [
         {
@@ -120,37 +80,37 @@
           "titulo": null,
           "fecha": "2026-02-26",
           "ubicacion": "balance_sheet_ultimo",
-          "cita_corta": "Deuda corto plazo 1,147M y caja 1,058M.",
-          "interpretacion": "La cobertura inmediata de vencimientos no es holgada."
+          "cita_corta": "Deuda corto plazo EUR1,147M; caja EUR1,058M.",
+          "interpretacion": "La cobertura de vencimientos cercanos es estrecha."
         },
         {
           "tipo": "SOURCEPACK",
-          "source_id": "TruthPack_v1",
+          "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
           "url": null,
           "titulo": null,
-          "fecha": "2026-02-26",
-          "ubicacion": "lease_data",
-          "cita_corta": "Lease liabilities totales 795M.",
-          "interpretacion": "El compromiso financiero total supera la deuda bancaria reportada."
+          "fecha": "2025-07-31",
+          "ubicacion": "Cash Flow Statement H1-2025",
+          "cita_corta": "CFO H1-2025 cae EUR183M interanual.",
+          "interpretacion": "Menor caja interna para atender deuda."
         }
       ],
       "falsacion": {
-        "test": "Si antes del 2026-09-30 se publica calendario 2026-2028 con cobertura de liquidez >1.5x de vencimientos 12m y coste medio de deuda <= 5.5%, este claim se debilita.",
+        "test": "Si antes de 2026-12-31 se refinancia >EUR1,100M sin dilucion >1% y con coste financiero FY2026 <= FY2024, este riesgo principal baja.",
+        "ventana": "3-12 meses (hasta 2027-02-28)",
+        "fuente_verificacion": "filing",
         "ventana_meses": {
           "min": 3,
           "max": 12
         },
-        "fuente_prevista": "filing",
-        "ventana": "3-12 meses",
-        "fuente_verificacion": "notas de deuda/covenants en filing"
+        "fuente_prevista": "filing"
       }
     },
     {
-      "claim_id": "CLM_RT_004",
-      "tipo": "HECHO",
+      "claim_id": "CLM_RT_003",
+      "tipo": "INFERENCIA",
       "criticidad": "CRITICO",
-      "enunciado": "La opacidad del set de datos es un riesgo de tesis, no solo una limitación de confort analítico.",
-      "confianza_0_1": 0.88,
+      "enunciado": "La aparente baratura puede ser value trap: hay opacidad informativa y conflictos de calidad justo en metricas clave.",
+      "confianza_0_1": 0.8,
       "impacto": "ALTO",
       "evidencias": [
         {
@@ -160,8 +120,8 @@
           "titulo": null,
           "fecha": "2026-02-26",
           "ubicacion": "data_quality",
-          "cita_corta": "overall_status PARTIAL; completitud 41%.",
-          "interpretacion": "La base cuantitativa puede estar sesgada por faltantes relevantes."
+          "cita_corta": "DATA_COMPLETENESS: Overall 41% complete.",
+          "interpretacion": "Cobertura incompleta limita inferencias fuertes."
         },
         {
           "tipo": "SOURCEPACK",
@@ -170,38 +130,38 @@
           "titulo": null,
           "fecha": "2026-02-26",
           "ubicacion": "_extraction_confidence",
-          "cita_corta": "Ingresos y EBIT con status material_conflict.",
-          "interpretacion": "Los KPIs más usados por la tesis alcista tienen menor fiabilidad."
+          "cita_corta": "ingresos_usd y ebit_usd: material_conflict.",
+          "interpretacion": "El ruido afecta exactamente los drivers de valoracion."
         }
       ],
       "falsacion": {
-        "test": "Si el próximo filing eleva completitud >= 65% y elimina conflictos materiales en ingresos/EBIT antes de 2026-09-30, este claim pierde fuerza.",
+        "test": "Si en 2 reportes consecutivos (FY2025 y H1-2026) se publica disclosure completo de vencimientos/covenants/bridge EBIT-CFO y se eliminan conflictos materiales, este claim baja.",
+        "ventana": "9-18 meses (hasta 2027-08-31)",
+        "fuente_verificacion": "filing",
         "ventana_meses": {
-          "min": 3,
-          "max": 12
+          "min": 9,
+          "max": 18
         },
-        "fuente_prevista": "filing",
-        "ventana": "3-12 meses",
-        "fuente_verificacion": "data_quality y reconciliación de extracción"
+        "fuente_prevista": "filing"
       }
     },
     {
-      "claim_id": "CLM_RT_005",
-      "tipo": "HIPOTESIS",
+      "claim_id": "CLM_RT_004",
+      "tipo": "INFERENCIA",
       "criticidad": "IMPORTANTE",
-      "enunciado": "La estructura de capital de trabajo (AR alta) puede erosionar FCF y bloquear el desapalancamiento esperado.",
-      "confianza_0_1": 0.67,
-      "impacto": "MEDIO",
+      "enunciado": "El upside por desapalancamiento no es mecanico porque depende de EV estable y coste de deuda no creciente.",
+      "confianza_0_1": 0.77,
+      "impacto": "ALTO",
       "evidencias": [
         {
           "tipo": "SOURCEPACK",
-          "source_id": "SRC_014_PRESENTATION_2024.pdf",
+          "source_id": "TruthPack_v1",
           "url": null,
           "titulo": null,
-          "fecha": "2024-12-31",
-          "ubicacion": "Balance sheet",
-          "cita_corta": "Accounts receivable 2,200M; DSO aproximado 78 días.",
-          "interpretacion": "La caja depende de cobro efectivo, no solo de EBIT."
+          "fecha": "2026-02-26",
+          "ubicacion": "mercado",
+          "cita_corta": "Deuda neta EUR3,096M vs market cap EUR2,941M.",
+          "interpretacion": "El equity es una capa delgada y muy sensible."
         },
         {
           "tipo": "SOURCEPACK",
@@ -209,157 +169,386 @@
           "url": null,
           "titulo": null,
           "fecha": "2026-02-26",
-          "ubicacion": "metricas_derivadas.wc_change",
-          "cita_corta": "Working capital reportado 1,867M.",
-          "interpretacion": "Pequeñas desviaciones en cobros pueden mover materialmente el CFO."
+          "ubicacion": "historico_anual.FY2023-FY2024",
+          "cita_corta": "Interest expense pasa de EUR126M a EUR214M.",
+          "interpretacion": "El coste financiero ya muestra tension."
         }
       ],
       "falsacion": {
-        "test": "Si FY2025 cierra con AR <= 2,100M, DSO <= 75 días y CFO >= 1,500M, este riesgo queda mayormente invalidado.",
+        "test": "Si FY2025-2026 muestran deuda neta < EUR2,800M y gasto financiero <= EUR210M con EV/EBIT >= 6.0x sostenido, el riesgo de esta inferencia baja.",
+        "ventana": "9-18 meses (hasta 2027-08-31)",
+        "fuente_verificacion": "earnings",
         "ventana_meses": {
-          "min": 6,
-          "max": 15
+          "min": 9,
+          "max": 18
         },
-        "fuente_prevista": "filing",
-        "ventana": "6-15 meses",
-        "fuente_verificacion": "balance + cash flow FY2025"
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_005",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CRITICO",
+      "enunciado": "Si no mejora la conversion de caja, el escenario adverso puede forzar dilucion o desinversiones defensivas.",
+      "confianza_0_1": 0.69,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-26",
+          "ubicacion": "balance_sheet_ultimo y lease_data",
+          "cita_corta": "Deuda total EUR4,154M; lease liabilities EUR795M.",
+          "interpretacion": "La carga financiera total es elevada."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-26",
+          "ubicacion": "historico_trimestral.H1-2025",
+          "cita_corta": "CFI H1-2025 es -EUR596M.",
+          "interpretacion": "Las salidas de inversion presionan la liquidez."
+        }
+      ],
+      "falsacion": {
+        "test": "Si FY2025-2026 no hay emision accionaria >1%, no hay ventas forzadas y la deuda neta cae >= EUR300M anual, la hipotesis pierde fuerza.",
+        "ventana": "12-24 meses (hasta 2028-02-29)",
+        "fuente_verificacion": "filing",
+        "ventana_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "fuente_prevista": "filing"
       }
     }
   ],
   "predicciones_calibracion": [
     {
       "pred_id": "PRED_RT_001",
-      "descripcion": "El CFO FY2025 no superará 1,500M.",
+      "descripcion": "CFO FY2025 cerrara en o por debajo de EUR1,400M.",
+      "probabilidad_0_1": 0.62,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "CFO FY2025 reportado <= EUR1,400,000,000.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "FCF FY2025 no superara EUR1,000M.",
+      "probabilidad_0_1": 0.57,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "FCF FY2025 (CFO-CAPEX) <= EUR1,000,000,000.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_003",
+      "descripcion": "La deuda neta FY2025 terminara en EUR3,000M o mas.",
+      "probabilidad_0_1": 0.58,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "Deuda neta FY2025 >= EUR3,000,000,000.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_004",
+      "descripcion": "El gasto financiero FY2025 sera igual o superior a EUR220M.",
       "probabilidad_0_1": 0.6,
       "ventana_meses": {
         "min": 9,
         "max": 15
       },
-      "criterio_validacion": "CFO FY2025 reportado <= 1,500,000,000.",
-      "fuente_prevista": "10-K"
-    },
-    {
-      "pred_id": "PRED_RT_002",
-      "descripcion": "La deuda neta FY2025 se mantendrá en >= 2,900M.",
-      "probabilidad_0_1": 0.65,
-      "ventana_meses": {
-        "min": 9,
-        "max": 15
-      },
-      "criterio_validacion": "Deuda neta al 2025-12-31 >= 2,900,000,000.",
-      "fuente_prevista": "10-K"
-    },
-    {
-      "pred_id": "PRED_RT_003",
-      "descripcion": "El EV/EBIT no sostendrá niveles >6.0x durante 2026.",
-      "probabilidad_0_1": 0.62,
-      "ventana_meses": {
-        "min": 6,
-        "max": 18
-      },
-      "criterio_validacion": "No hay tramo continuo de 90 días con EV/EBIT > 6.0x entre 2026-04-01 y 2026-12-31.",
-      "fuente_prevista": "otro"
-    },
-    {
-      "pred_id": "PRED_RT_004",
-      "descripcion": "AR FY2025 será >= 2,200M o DSO >= 78 días.",
-      "probabilidad_0_1": 0.55,
-      "ventana_meses": {
-        "min": 9,
-        "max": 15
-      },
-      "criterio_validacion": "En cierre FY2025, AR >= 2,200,000,000 o DSO >= 78.",
+      "criterio_validacion": "Interest expense FY2025 >= EUR220,000,000.",
       "fuente_prevista": "10-K"
     },
     {
       "pred_id": "PRED_RT_005",
-      "descripcion": "El coste financiero anual FY2025-FY2026 no caerá por debajo de 200M.",
-      "probabilidad_0_1": 0.57,
+      "descripcion": "No habra disclosure completo y consistente de vencimientos, covenants y bridge EBIT->CFO en dos reportes seguidos.",
+      "probabilidad_0_1": 0.65,
       "ventana_meses": {
-        "min": 9,
-        "max": 24
+        "min": 6,
+        "max": 18
       },
-      "criterio_validacion": "Interest expense reportado en FY2025 o FY2026 >= 200,000,000.",
-      "fuente_prevista": "10-K"
+      "criterio_validacion": "Falta alguno de los tres bloques en FY2025 o H1-2026, o persisten conflictos materiales.",
+      "fuente_prevista": "otro"
     }
   ],
   "peticiones_de_fuentes": [
     {
       "prioridad": "ALTA",
-      "item": "Tabla de vencimientos de deuda 2026-2028 con covenants y headroom",
-      "por_que_importa": "Sin esto no puede evaluarse riesgo real de refinanciación.",
-      "como_obtenerlo": "Notas de borrowings/liquidity del annual report y presentación de deuda."
+      "item": "Calendario 2026-2029 de vencimientos por instrumento con covenants y headroom trimestral",
+      "por_que_importa": "Define riesgo de refinanciacion y probabilidad de dilucion.",
+      "como_obtenerlo": "Annual Report: nota de borrowings/financial liabilities y covenant tables."
     },
     {
       "prioridad": "ALTA",
-      "item": "Puente completo EBIT->CFO FY2024 y FY2025 con detalle de capital de trabajo",
-      "por_que_importa": "Define si el FCF es repetible o transitorio.",
-      "como_obtenerlo": "Cash flow statement detallado y notas de working capital."
+      "item": "Bridge completo EBIT->CFO y CFO->FCF FY2024, FY2025 y H1-2026",
+      "por_que_importa": "Permite separar caja recurrente de efectos de capital circulante y ajustes no-cash.",
+      "como_obtenerlo": "Estado de flujos detallado y notas de working capital."
     },
     {
       "prioridad": "ALTA",
-      "item": "Aging de cuentas por cobrar y provisiones de incobrables por segmento",
-      "por_que_importa": "Permite discriminar opcionalidad de caja vs riesgo de cobro.",
-      "como_obtenerlo": "Notas de trade receivables/credit risk (IFRS 7/9)."
+      "item": "Aging de cuentas por cobrar, write-offs y DSO por segmento",
+      "por_que_importa": "Valida si la caja se frena por cobranza o por deterioro operativo.",
+      "como_obtenerlo": "Notas de trade receivables e impairment por segmento."
     },
     {
       "prioridad": "MEDIA",
-      "item": "Mix de deuda a tipo fijo/variable y sensibilidad a tipos",
-      "por_que_importa": "Cuantifica presión futura de interés sobre EBIT y FCF.",
-      "como_obtenerlo": "Notas de instrumentos financieros y sensitivities."
-    },
-    {
-      "prioridad": "MEDIA",
-      "item": "Número de acciones diluidas y potencial de dilución (convertibles/planes)",
-      "por_que_importa": "Evita sobreestimar creación de valor por acción.",
-      "como_obtenerlo": "Nota de EPS/capital social y anexos de instrumentos."
+      "item": "Desglose de CFI H1-2025 (-EUR596M): M&A, capex, pagos diferidos y otros",
+      "por_que_importa": "Aclara si el consumo de caja es recurrente o puntual.",
+      "como_obtenerlo": "Interim report, nota de inversiones y adquisiciones."
     }
   ],
   "payload": {
     "payload_version": "RedTeamPayload_v1",
     "contenido": {
-      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "objetivo_del_rol": "Encontrar la razon correcta para NO invertir: invalidar claims criticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
       "diagnostico_global": {
         "status": "NO_APTO",
         "confianza_0_1": 0.79,
         "riesgo_principal": "VALUE_TRAP",
-        "resumen_1_2_frases": "La tesis alcista depende de extrapolar un FCF que aún no demuestra recurrencia en 2025 y de asumir refinanciación benigna sin datos completos. Con deuda neta superior a market cap y calidad de datos parcial, el descuento puede estar justificado estructuralmente."
+        "resumen_1_2_frases": "El riesgo predominante es VALUE_TRAP, impulsado por fragilidad de conversion de caja, dependencia de refinanciacion y opacidad en metricas clave. Riesgos secundarios: REFINANCIACION y LIQUIDEZ."
       },
       "ataque_a_tesis_bull": {
         "mapa_claims_bull": [
           {
             "bull_claim_id": "CLM_FUS_001",
-            "resumen_claim_bull": "La valoración comprimida implica margen de revalorización si no hay deterioro severo.",
+            "resumen_claim_bull": "El mercado descuenta una contraccion severa del FCF a 5 anos.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.62,
+              "por_que": [
+                "La inferencia depende de un reverse DCF muy sensible a supuestos de tasa y terminal.",
+                "El FCF de referencia usa TTM semestral (FY+H1-H1), no cuatro trimestres completos.",
+                "Hay conflictos materiales en ingresos/EBIT que contaminan la calibracion."
+              ]
+            },
+            "puntos_ciegos": [
+              "Confunde 'precio bajo' con 'mercado espera colapso de FCF' sin prueba unica.",
+              "No separa descuento por riesgo de balance del descuento por crecimiento.",
+              "No prueba recurrencia del FCF frente a posible efecto de working capital.",
+              "No incorpora que disclosure incompleto puede sostener descuento permanentemente."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "ttm.nota",
+                "cita_corta": "TTM = FY2024 + H1-2025 - H1-2024 (metodo semestral).",
+                "interpretacion": "El ancla de FCF no es puramente trimestral y puede distorsionar tendencia."
+              },
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "_extraction_confidence",
+                "cita_corta": "ingresos_usd y ebit_usd en material_conflict.",
+                "interpretacion": "La base numerica del argumento tiene ruido estructural."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si FY2025 FCF >= EUR1,200M y deuda neta < EUR2,900M pero EV/EBIT sigue <=5.5x hasta 2027-02-28, este claim queda invalidado.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 18
+              },
+              "fuente_prevista": "precio"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_002",
+            "resumen_claim_bull": "TEP mantiene generacion robusta de caja y EBIT.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.68,
+              "por_que": [
+                "CFO H1-2025 cae 24% interanual.",
+                "Utilidad neta H1-2025 cae 14% interanual.",
+                "La calidad del FCF no esta desagregada con suficiente detalle."
+              ]
+            },
+            "puntos_ciegos": [
+              "Sobrepondera TTM y subpondera deterioro reciente semestral.",
+              "No cuantifica sensibilidad del FCF a cuentas por cobrar.",
+              "No vincula la caida de CFO con necesidades de refinanciacion."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
+                "ubicacion": "Cash Flow H1-2025",
+                "cita_corta": "CFO H1-2025 EUR588M vs EUR771M en H1-2024.",
+                "interpretacion": "La caja operativa pierde traccion."
+              },
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_trimestral.H1-2025",
+                "cita_corta": "Net income H1-2025 EUR249M vs EUR291M.",
+                "interpretacion": "La rentabilidad acompana el deterioro de caja."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si FY2025 CFO >= EUR1,600M y FCF >= EUR1,200M con AR/ventas <= 21%, el claim gana robustez.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 15
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_003",
+            "resumen_claim_bull": "El desapalancamiento transfiere valor casi euro a euro al equity.",
             "evaluacion_red_team": {
               "estado": "PLAUSIBLE_PERO_RIESGOSO",
               "probabilidad_de_fallo_0_1": 0.64,
               "por_que": [
-                "Múltiplos bajos son consistentes con apalancamiento elevado y visibilidad limitada, no necesariamente mispricing.",
-                "La data base tiene completitud 41% y conflictos materiales en ingresos/EBIT.",
-                "El equity es más pequeño que la deuda neta, amplificando fragilidad ante cualquier revisión de caja."
+                "Solo aplica con EV estable; eso no esta garantizado.",
+                "La refinanciacion puede elevar coste financiero y comprimir EV.",
+                "Con deuda neta mayor que market cap, el downside tambien se amplifica."
               ]
             },
             "puntos_ciegos": [
-              "Asume que EV/FCF actual usa FCF normalizado y no temporal.",
-              "No incorpora explícitamente el riesgo de refinanciación de deuda de corto plazo.",
-              "Subestima que múltiples deprimidos pueden persistir años en compañías opacas."
+              "Ignora riesgo de repricing de deuda en tasas mas altas.",
+              "Ignora lease liabilities al evaluar carga financiera total.",
+              "Asume disciplina de capital futura sin evidencia contractual."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "mercado y balance_sheet_ultimo",
+                "cita_corta": "Deuda neta EUR3,096M > market cap EUR2,941M.",
+                "interpretacion": "Pequenos shocks en EV destruyen equity rapidamente."
+              },
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_anual FY2023-FY2024",
+                "cita_corta": "Interest expense pasa de EUR126M a EUR214M.",
+                "interpretacion": "El coste de deuda no va en direccion favorable."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si refinanciacion >EUR1,100M se ejecuta sin dilucion >1%, deuda neta <= EUR2,800M y interest <= EUR210M en FY2026, el riesgo baja.",
+              "ventana_meses": {
+                "min": 9,
+                "max": 18
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_004",
+            "resumen_claim_bull": "Hay estabilizacion/mejora de margen EBIT en 2025.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.7,
+              "por_que": [
+                "La mejora de +50 bps es semestral y no anual.",
+                "El beneficio neto cae interanual en el mismo periodo.",
+                "La visibilidad de desglose trimestral sigue incompleta."
+              ]
+            },
+            "puntos_ciegos": [
+              "Extrapola una semestralidad puntual a tendencia anual.",
+              "No prueba que la mejora de margen convierta a caja.",
+              "No incorpora potencial presion por gasto financiero."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
+                "ubicacion": "Income Statement H1-2025",
+                "cita_corta": "Margen EBIT 10.4% vs 9.9% en H1-2024.",
+                "interpretacion": "Senal positiva, pero de corto tramo y poco concluyente."
+              },
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "historico_trimestral.H1-2025",
+                "cita_corta": "Net income baja de EUR291M a EUR249M.",
+                "interpretacion": "La mejora de margen no se traduce claramente en utilidad."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si FY2025 margen EBIT >= 10.5% y net income >= EUR523M, el claim se fortalece de forma material.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_005",
+            "resumen_claim_bull": "La caida de CFO en H1-2025 introduce riesgo real de ejecucion.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.28,
+              "por_que": [
+                "El diagnostico es correcto, pero el impacto puede estar subestimado.",
+                "El escenario base alcista mantiene probabilidad alta pese al warning.",
+                "No traduce la senal de CFO en recorte suficiente de asimetria."
+              ]
+            },
+            "puntos_ciegos": [
+              "No define umbral de CFO minimo para sostener desapalancamiento.",
+              "No vincula explicitamente CFO bajo con riesgo de dilucion.",
+              "No ajusta con dureza el tamano sugerido."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
+                "ubicacion": "Cash Flow H1-2025",
+                "cita_corta": "CFO H1-2025 EUR588M vs EUR771M.",
+                "interpretacion": "El warning existe y es cuantitativamente relevante."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si H2-2025 aporta CFO >= EUR1,000M (FY >= EUR1,600M), este riesgo era transitorio y el claim quedaria parcialmente sobredimensionado.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_006",
+            "resumen_claim_bull": "Deuda neta > market cap amplifica upside y downside.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.22,
+              "por_que": [
+                "El hecho es correcto, pero operacionalmente pesa mas el downside.",
+                "Refinanciacion y coste de deuda inclinan la distribucion de resultados.",
+                "La asimetria no es favorable sin evidencia de caja recurrente."
+              ]
+            },
+            "puntos_ciegos": [
+              "No integra lease liabilities en la lectura de apalancamiento total.",
+              "Subestima velocidad de destruccion de equity si EV cae.",
+              "No ancla umbrales de seguridad para posicionamiento."
             ],
             "evidencias_que_contradicen_o_debilitan": [
               {
                 "source_id": "TruthPack_v1",
                 "ubicacion": "mercado",
-                "cita_corta": "Deuda neta 3,096M vs market cap 2,941M.",
-                "interpretacion": "La prima de riesgo puede seguir alta aunque el negocio siga operativo."
+                "cita_corta": "Deuda neta EUR3,096M; market cap EUR2,941M.",
+                "interpretacion": "La convexidad existe, pero no es unilateral."
               },
               {
                 "source_id": "TruthPack_v1",
-                "ubicacion": "data_quality",
-                "cita_corta": "overall_status PARTIAL; completitud 41%.",
-                "interpretacion": "La robustez de los múltiplos está limitada por calidad de base."
+                "ubicacion": "lease_data",
+                "cita_corta": "Lease liabilities total EUR795M.",
+                "interpretacion": "La carga financiera efectiva es mayor que deuda bancaria neta."
               }
             ],
             "test_falsacion_para_el_bull": {
-              "test": "Entre 2026-04-01 y 2026-12-31, EV/EBIT > 6.0x durante al menos 90 días con deuda neta <= 2,700M y CFO FY2025 >= 1,500M.",
+              "test": "Si deuda neta/market cap baja por debajo de 0.8 durante dos cortes consecutivos, la sensibilidad extrema del equity se reduce.",
               "ventana_meses": {
                 "min": 6,
                 "max": 18
@@ -368,272 +557,112 @@
             }
           },
           {
-            "bull_claim_id": "CLM_FUS_002",
-            "resumen_claim_bull": "TEP ya demostró desapalancamiento con caja operativa.",
-            "evaluacion_red_team": {
-              "estado": "FRAGIL",
-              "probabilidad_de_fallo_0_1": 0.73,
-              "por_que": [
-                "La evidencia favorable está concentrada en FY2024.",
-                "H1-2025 muestra CFO menor y CFF positivo, lo contrario de desapalancamiento visible.",
-                "No hay desglose suficiente para separar repago de deuda vs otros usos financieros."
-              ]
-            },
-            "puntos_ciegos": [
-              "Extrapola FY2024 sin validar continuidad en FY2025.",
-              "No separa caja recurrente de movimientos de capital de trabajo.",
-              "No integra señal de mayor CFI en H1-2025."
-            ],
-            "evidencias_que_contradicen_o_debilitan": [
-              {
-                "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
-                "ubicacion": "H1-2025 cash flow",
-                "cita_corta": "CFO 588M y CFF +229M.",
-                "interpretacion": "La trayectoria 2025 no confirma repago neto sostenido."
-              },
-              {
-                "source_id": "TruthPack_v1",
-                "ubicacion": "ttm",
-                "cita_corta": "TTM CFO 1,630M vs FY2024 CFO 1,813M.",
-                "interpretacion": "La generación de caja ya se desacelera."
-              }
-            ],
-            "test_falsacion_para_el_bull": {
-              "test": "FY2025 reporta CFF <= -500M por amortización neta de deuda y deuda neta <= 2,800M al 2025-12-31.",
-              "ventana_meses": {
-                "min": 6,
-                "max": 15
-              },
-              "fuente_prevista": "earnings"
-            }
-          },
-          {
-            "bull_claim_id": "CLM_FUS_003",
-            "resumen_claim_bull": "Reducir deuda neta 300-500M crea valor para el equity aunque EV no suba.",
+            "bull_claim_id": "CLM_FUS_007",
+            "resumen_claim_bull": "El principal freno al rerating es la opacidad de disclosure.",
             "evaluacion_red_team": {
               "estado": "PARCIAL",
-              "probabilidad_de_fallo_0_1": 0.61,
+              "probabilidad_de_fallo_0_1": 0.55,
               "por_que": [
-                "La mecánica EV-equity es correcta, pero depende de que la deuda realmente baje.",
-                "EV puede caer si el mercado descuenta peor calidad de beneficios.",
-                "La evidencia 2025 no muestra aún reducción robusta de pasivo."
+                "La opacidad pesa, pero no es el unico ni principal driver.",
+                "Balance/refinanciacion y conversion de caja son riesgos fundamentales.",
+                "Puede mejorar disclosure y seguir sin rerating si no mejora caja."
               ]
             },
             "puntos_ciegos": [
-              "Trata EV como estable sin justificar por qué no debería comprimirse más.",
-              "No contempla impacto de refinanciación más cara en múltiplos.",
-              "No incorpora riesgo de dilución si se cierra la ventana de crédito."
+              "Sobreenfatiza percepcion y subenfatiza mecanica financiera.",
+              "No separa claramente riesgo de informacion vs riesgo economico real.",
+              "Puede confundir catalizador de narrativa con catalizador de valor."
             ],
             "evidencias_que_contradicen_o_debilitan": [
               {
                 "source_id": "TruthPack_v1",
-                "ubicacion": "balance_sheet_ultimo / mercado",
-                "cita_corta": "Deuda total 4,154M y deuda neta 3,096M.",
-                "interpretacion": "El punto de partida es exigente para capturar el upside mecánico."
+                "ubicacion": "balance_sheet_ultimo",
+                "cita_corta": "Deuda corto plazo EUR1,147M y caja EUR1,058M.",
+                "interpretacion": "El freno no es solo disclosure, tambien liquidez."
               },
               {
                 "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
-                "ubicacion": "H1-2025 cash flow",
-                "cita_corta": "CFI -596M en H1-2025.",
-                "interpretacion": "La absorción de caja limita velocidad de desapalancamiento."
+                "ubicacion": "Cash Flow H1-2025",
+                "cita_corta": "CFO cae de EUR771M a EUR588M.",
+                "interpretacion": "El mercado puede estar descontando deterioro operativo real."
               }
             ],
             "test_falsacion_para_el_bull": {
-              "test": "A 2025-12-31, deuda neta <= 2,700M y EV >= 5,800M sin emisión de acciones >2% del capital.",
+              "test": "Si mejora disclosure en FY2025 y H1-2026 pero CFO/FCF no mejoran y el multiplo no reratea, el claim queda invalidado.",
               "ventana_meses": {
-                "min": 6,
+                "min": 9,
                 "max": 18
-              },
-              "fuente_prevista": "filing"
-            }
-          },
-          {
-            "bull_claim_id": "CLM_FUS_004",
-            "resumen_claim_bull": "Hay tracción de margen EBIT y potencial de mejora adicional.",
-            "evaluacion_red_team": {
-              "estado": "PARCIAL",
-              "probabilidad_de_fallo_0_1": 0.56,
-              "por_que": [
-                "La mejora es de solo ~50 bps en base semestral.",
-                "El ingreso está prácticamente plano, lo que limita palancas operativas.",
-                "La mejora de EBIT no se tradujo en utilidad neta semestral."
-              ]
-            },
-            "puntos_ciegos": [
-              "Confunde mejora táctica de margen con cambio estructural.",
-              "No cuantifica sostenibilidad frente a presión financiera.",
-              "No valida sensibilidad del margen a menor crecimiento."
-            ],
-            "evidencias_que_contradicen_o_debilitan": [
-              {
-                "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
-                "ubicacion": "H1 comparativo",
-                "cita_corta": "EBIT 530M/5,116M vs 503M/5,076M.",
-                "interpretacion": "La mejora existe, pero en magnitud limitada."
-              },
-              {
-                "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
-                "ubicacion": "H1 net income",
-                "cita_corta": "Net income 249M vs 291M.",
-                "interpretacion": "La captura final de beneficio empeora pese al mejor EBIT."
-              }
-            ],
-            "test_falsacion_para_el_bull": {
-              "test": "FY2025 cierra con margen EBIT >= 10.8% y net income >= 523M (nivel FY2024).",
-              "ventana_meses": {
-                "min": 6,
-                "max": 15
-              },
-              "fuente_prevista": "earnings"
-            }
-          },
-          {
-            "bull_claim_id": "CLM_FUS_005",
-            "resumen_claim_bull": "La mayor limitación es opacidad y verificabilidad; al resolverse sube convicción.",
-            "evaluacion_red_team": {
-              "estado": "PARCIAL",
-              "probabilidad_de_fallo_0_1": 0.41,
-              "por_que": [
-                "El diagnóstico de opacidad es correcto.",
-                "La tesis bull lo trata como fricción temporal y no como riesgo de valoración permanente.",
-                "Sin resolver calidad de datos, los múltiplos y el FCF pueden estar mal inferidos."
-              ]
-            },
-            "puntos_ciegos": [
-              "No eleva explícitamente el riesgo global por opacidad al nivel de NO_APTO.",
-              "No ajusta suficientemente probabilidades de escenarios al problema de calidad.",
-              "No exige un umbral mínimo de completitud antes de recomendar entrada."
-            ],
-            "evidencias_que_contradicen_o_debilitan": [
-              {
-                "source_id": "TruthPack_v1",
-                "ubicacion": "data_quality",
-                "cita_corta": "Completitud global 41%, status PARTIAL.",
-                "interpretacion": "No es una brecha marginal; es una restricción estructural de inferencia."
-              },
-              {
-                "source_id": "TruthPack_v1",
-                "ubicacion": "_extraction_confidence",
-                "cita_corta": "Ingresos/EBIT en material_conflict.",
-                "interpretacion": "El núcleo de la tesis depende de métricas con conflicto."
-              }
-            ],
-            "test_falsacion_para_el_bull": {
-              "test": "Antes de 2026-09-30, completitud >= 70% y campos ingresos/EBIT/patrimonio quedan sin material_conflict.",
-              "ventana_meses": {
-                "min": 3,
-                "max": 12
-              },
-              "fuente_prevista": "filing"
-            }
-          },
-          {
-            "bull_claim_id": "CLM_FUS_006",
-            "resumen_claim_bull": "AR elevada es opcionalidad de liberación de caja vía mejora de cobros.",
-            "evaluacion_red_team": {
-              "estado": "NO_PROBADO",
-              "probabilidad_de_fallo_0_1": 0.67,
-              "por_que": [
-                "No hay evidencia de mejora efectiva de DSO en la serie entregada.",
-                "AR alta también puede señalar mayor riesgo de cobro.",
-                "Con CFO cayendo en H1-2025, la hipótesis de liberación no está observada."
-              ]
-            },
-            "puntos_ciegos": [
-              "No incluye aging de AR ni provisiones por incobrables.",
-              "No distingue cobros por segmento o geografía.",
-              "Supone que la mejora de cobro es administrable sin coste comercial."
-            ],
-            "evidencias_que_contradicen_o_debilitan": [
-              {
-                "source_id": "SRC_014_PRESENTATION_2024.pdf",
-                "ubicacion": "Balance FY2024",
-                "cita_corta": "AR 2,200M; DSO ~78 días.",
-                "interpretacion": "El punto de partida es exigente y no prueba reversión."
-              },
-              {
-                "source_id": "SRC_SEC_010_REGULATORY_FILING_2025-07-31.pdf",
-                "ubicacion": "H1-2025 cash flow",
-                "cita_corta": "CFO H1 cae a 588M.",
-                "interpretacion": "No se observa aún efecto positivo de cobros."
-              }
-            ],
-            "test_falsacion_para_el_bull": {
-              "test": "FY2025 cierra con AR <= 2,100M y DSO <= 75 días, manteniendo ingresos FY2025 >= 10,200M.",
-              "ventana_meses": {
-                "min": 6,
-                "max": 15
               },
               "fuente_prevista": "filing"
             }
           }
         ],
         "donde_huele_a_especulacion": [
-          "Se asume EV estable para convertir desapalancamiento en equity upside sin probar estabilidad de calidad de beneficios.",
-          "Se extrapola FY2024 (CFF -1,403M) ignorando reversión parcial en H1-2025 (CFF +229M).",
-          "Se toma FCF yield extremo como evidencia de baratura pese a base de datos PARTIAL y conflictos en EBIT/ingresos.",
-          "Se modela mejora de margen con solo +50 bps semestrales y utilidad neta en descenso.",
-          "Se trata AR como opcionalidad positiva sin evidencia de aging/provisiones ni caída efectiva de DSO.",
-          "Se presupone refinanciación no problemática sin curva de vencimientos/covenants publicada."
+          "Se asume EV estable para transferir desapalancamiento a equity sin modelar contraccion de EV por riesgo financiero.",
+          "Se presupone refinanciacion no dilutiva de >EUR1.1B sin term sheet ni detalle de covenants.",
+          "Se extrapola una mejora semestral de margen (+50 bps) a tendencia anual durable.",
+          "Se usa FCF TTM como si fuera plenamente recurrente pese a deterioro de CFO H1 y bridge incompleto.",
+          "Se espera rerating de multiplo sin evidencia de mejora simultanea en caja y transparencia.",
+          "Se minimiza la carga de leases al evaluar apalancamiento economico."
         ],
         "si_el_mercado_tuviera_razon": [
-          "El descuento actual refleja que el FCF reciente está inflado por factores no recurrentes de capital de trabajo.",
-          "El mercado anticipa que la deuda seguirá alta por necesidades de caja no visibles en disclosure actual.",
-          "La mejora de EBIT no se traduce en beneficio neto sostenible por mayor coste financiero e impuestos.",
-          "La opacidad contable-operativa impide rerating y mantiene prima de riesgo estructural.",
-          "La historia real es de negocio estable pero equity estructuralmente penalizado por balance y transparencia."
+          "El FCF FY2024 fue excepcional por efectos de capital circulante y no es repetible.",
+          "La cobranza se esta deteriorando y obliga a financiar crecimiento con balance.",
+          "La refinanciacion se logra, pero a coste mayor, absorbiendo buena parte del FCF.",
+          "El negocio entra en fase estructural de bajo crecimiento y presion de margen.",
+          "La opacidad no es ruido: refleja complejidad contable que justifica descuento persistente."
         ]
       },
       "bear_case": {
         "tesis_bajista_5_lineas": [
-          "TEP puede estar barata por una razón correcta: la calidad de caja no está suficientemente verificada.",
-          "El desapalancamiento observado en FY2024 no se confirma con la misma intensidad en H1-2025.",
-          "Con deuda neta superior a la market cap, pequeños desvíos operativos se amplifican en el equity.",
-          "Si el coste de deuda no baja y el capital de trabajo consume caja, el FCF normalizado cae.",
-          "En ese marco, el múltiplo deprimido persiste y el activo se comporta como value trap."
+          "TEP parece barata porque el mercado descuenta riesgo de balance y caja, no porque ignore valor obvio.",
+          "La caida de CFO en H1-2025 sugiere que el FCF reciente puede estar por encima de la capacidad normal.",
+          "Con deuda neta superior a market cap, cualquier fallo de ejecucion recae desproporcionadamente en el equity.",
+          "La refinanciacion de corto plazo puede hacerse en terminos mas duros y frenar el desapalancamiento.",
+          "Sin mejora verificable en disclosure y calidad de caja, el descuento puede persistir varios anos."
         ],
         "mecanismos_de_deterioro": [
           {
             "mecanismo": "WC_CONSUME_CAJA",
-            "descripcion": "El alto AR y la falta de visibilidad sobre cobros pueden convertir EBIT positivo en CFO débil. Esto frena repago de deuda.",
+            "descripcion": "El capital circulante absorbe caja y reduce conversion de EBIT a CFO.",
             "indicadores_tempranos": [
-              "AR crece por encima de ingresos durante 2 cierres consecutivos.",
-              "DSO sube por encima de 80-85 días.",
-              "CFO/EBIT cae por debajo de 1.1x en FY2025."
+              "CFO FY2025 <= EUR1,400M",
+              "AR/ventas >= 21%",
+              "DSO sin mejora en dos reportes consecutivos"
             ]
           },
           {
             "mecanismo": "COSTE_DEUDA_SUBE",
-            "descripcion": "Si la refinanciación se hace a mayor coste, la mejora operativa no llega al beneficio neto ni al FCF.",
+            "descripcion": "La refinanciacion de vencimientos incrementa interes y comprime FCF.",
             "indicadores_tempranos": [
-              "Interest expense anual >= 230M.",
-              "Cobertura EBIT/intereses < 4.5x.",
-              "Mayor proporción de deuda a tipo variable."
+              "Interest expense FY2025 >= EUR220M",
+              "No extension suficiente de vencimientos 2026",
+              "Menor headroom de covenants"
             ]
           },
           {
             "mecanismo": "DEMANDA_DEBIL",
-            "descripcion": "Con ingresos planos y margen acotado, la palanca de desapalancamiento pierde velocidad.",
+            "descripcion": "Ingresos estancados no absorben costes y limitan mejora operativa.",
             "indicadores_tempranos": [
-              "Ingresos FY2025 <= 10,200M.",
-              "Margen EBIT <= 10.0%.",
-              "Net income anual por debajo de 500M."
+              "Ingresos FY2025 <= EUR10,300M",
+              "Margen EBIT FY2025 < 10.0%",
+              "Net income FY2025 <= FY2024"
             ]
           },
           {
             "mecanismo": "DILUCION",
-            "descripcion": "Si el crédito se tensiona, la empresa puede recurrir a emisión de acciones o instrumentos convertibles para proteger liquidez.",
+            "descripcion": "Si la liquidez no alcanza, el equity puede financiar balance o desinversiones defensivas.",
             "indicadores_tempranos": [
-              "Anuncio de emisión primaria >5% del capital.",
-              "Uso de equity para cubrir vencimientos de corto plazo.",
-              "Cambio de política de capital hacia preservación de caja."
+              "Emision de acciones > 5%",
+              "Ventas de activos para cubrir deuda de corto plazo",
+              "Guia de caja recortada con deuda neta sin bajar"
             ]
           }
         ],
         "escenarios_bajistas": [
           {
             "scenario_id": "BEAR_BASE",
-            "descripcion": "El negocio se mantiene operativo, pero la caja se normaliza a la baja, el desapalancamiento se estanca y el descuento de riesgo persiste. No hay colapso, pero sí trampa de valor.",
+            "descripcion": "La compania evita un evento extremo, pero la caja normaliza a la baja y el desapalancamiento se ralentiza. El mercado mantiene descuento por riesgo financiero y baja visibilidad.",
             "ventana_meses": {
               "min": 6,
               "probable": 12,
@@ -644,151 +673,150 @@
               {
                 "variable": "INGRESOS",
                 "direccion": "NO_MEJORA",
-                "rango": "10.0B-10.4B anual",
-                "justificacion": "H1-2025 muestra crecimiento casi plano vs H1-2024."
+                "rango": "EUR10.0B-EUR10.4B",
+                "justificacion": "Base similar a FY2024/TTM, sin aceleracion visible."
               },
               {
                 "variable": "EBIT",
-                "direccion": "NO_MEJORA",
-                "rango": "1.0B-1.1B",
-                "justificacion": "La mejora reciente es limitada y vulnerable a coste financiero."
+                "direccion": "EMPEORA",
+                "rango": "EUR0.90B-EUR1.00B",
+                "justificacion": "Presion de margen y mayor friccion financiera."
               },
               {
                 "variable": "FCF",
                 "direccion": "EMPEORA",
-                "rango": "0.7B-1.0B",
-                "justificacion": "Mayor consumo de WC y menor conversión de EBIT a caja."
+                "rango": "EUR0.7B-EUR1.0B",
+                "justificacion": "Menor CFO y mayor coste de deuda reducen caja libre."
               },
               {
                 "variable": "COSTE_DEUDA",
                 "direccion": "EMPEORA",
-                "rango": "220M-260M de gasto financiero anual",
-                "justificacion": "Sin evidencia de refinanciación claramente más barata."
+                "rango": "EUR220M-EUR280M",
+                "justificacion": "Refinanciacion en condiciones menos favorables."
               }
             ],
             "impacto_en_valoracion": {
-              "tipo": "MULTIPLO_COMPRIME",
-              "explicacion": "Con menor visibilidad y FCF normalizado, el mercado mantiene o comprime el múltiplo frente al nivel actual.",
+              "tipo": "EARNINGS_CAEN",
+              "explicacion": "Con EBIT/FCF mas bajos, el equity no captura plenamente el desapalancamiento y el descuento persiste.",
               "resultado_retorno_12_24m_pct_rango": {
-                "min": -35.0,
-                "base": -20.0,
-                "max": -8.0
+                "min": -50,
+                "base": -35,
+                "max": -20
               },
-              "nota": "Rango consistente con persistencia de descuento y menor caja disponible para equity."
+              "nota": "Rango anclado a deterioro de caja y mantenimiento de multiples de estres."
             }
           },
           {
             "scenario_id": "BEAR_WORST",
-            "descripcion": "Escenario parcialmente binario: tensión de refinanciación + deterioro de caja obliga a medidas defensivas (activos, covenant waivers o dilución).",
+            "descripcion": "Escenario binario de estres de refinanciacion: el acceso a deuda se encarece o restringe y la compania prioriza supervivencia del balance sobre retorno al accionista.",
             "ventana_meses": {
               "min": 3,
               "probable": 12,
               "max": 24
             },
-            "probabilidad_0_1": 0.22,
+            "probabilidad_0_1": 0.25,
             "es_binario": true,
             "drivers": [
               {
                 "variable": "DEUDA",
                 "direccion": "EMPEORA",
-                "rango": "Deuda neta >= 3.2B",
-                "justificacion": "El repago no compensa consumo de caja y vencimientos."
+                "rango": "Deuda neta >= EUR3.3B",
+                "justificacion": "FCF insuficiente para compensar vencimientos y coste financiero."
               },
               {
                 "variable": "COVENANTS",
                 "direccion": "EMPEORA",
-                "rango": "Headroom <15% o waiver requerido",
-                "justificacion": "Riesgo de negociación defensiva con acreedores."
+                "rango": "Headroom cae a niveles de alerta",
+                "justificacion": "Mayor riesgo de restricciones operativas/financieras."
               },
               {
                 "variable": "DILUCION",
                 "direccion": "EMPEORA",
-                "rango": "Emisión >5% del capital",
-                "justificacion": "Salida de emergencia si la liquidez no alcanza."
+                "rango": "Emision accionaria > 5% o desinversiones forzadas",
+                "justificacion": "Proteccion de liquidez a costa del accionista."
               }
             ],
             "impacto_en_supervivencia": "ALTO",
-            "nota": "Depende explícitamente de refinanciación; si ésta falla o encarece de forma abrupta, sube el riesgo de daño permanente al equity."
+            "nota": "Este peor caso depende explicitamente de refinanciacion: si falla o se encarece mucho, el equity se vuelve residual."
           }
         ]
       },
       "value_trap_checklist": {
         "probabilidad_value_trap_0_1": 0.72,
         "razones": [
-          "Deuda neta (3,096M) superior a market cap (2,941M) limita margen de error en equity.",
-          "CFO H1-2025 cae ~24% vs H1-2024 (588M vs 771M).",
-          "CFF pasa de -1,403M FY2024 a +229M H1-2025, debilitando narrativa de desapalancamiento continuo.",
-          "Data quality PARTIAL y completitud de 41% reducen confiabilidad de múltiplos aparentes.",
-          "Conflictos materiales en ingresos/EBIT/patrimonio pueden sesgar el caso cuantitativo.",
-          "Deuda de corto plazo (1,147M) ligeramente por encima de caja (1,058M).",
-          "Mejora de EBIT no se traduce en mejor net income semestral.",
-          "AR alta (2,200M) mantiene riesgo de volatilidad en capital de trabajo."
+          "Deuda neta (EUR3,096M) supera market cap (EUR2,941M): estructura de equity vulnerable.",
+          "Deuda de corto plazo (EUR1,147M) cercana a caja (EUR1,058M): presion de refinanciacion.",
+          "CFO H1-2025 cae 24% interanual: riesgo de conversion de caja.",
+          "Net income H1-2025 cae 14% interanual: no hay mejora plena de calidad de beneficios.",
+          "Completitud de datos 41% y conflictos materiales en ingresos/EBIT.",
+          "El TTM de referencia se construye por metodo semestral, no por 4 trimestres completos.",
+          "Lease liabilities (EUR795M) elevan apalancamiento economico."
         ],
         "como_distinguir_ciclo_vs_cambio_estructural": [
           {
             "hipotesis": "Es ciclo",
             "evidencia_necesaria": [
-              "CFO FY2025 >= 1,500M y FY2026 >= 1,500M.",
-              "Deuda neta <= 2,700M en FY2025 y <= 2,400M en FY2026.",
-              "DSO <= 75 días en dos cierres consecutivos.",
-              "Interés anual <= 200M con cobertura EBIT/intereses > 5.5x."
+              "CFO FY2025 >= EUR1,600M y FCF >= EUR1,200M.",
+              "AR/ventas y DSO estabilizan o mejoran en dos cortes.",
+              "Refinanciacion cerrada sin dilucion >1%."
             ]
           },
           {
             "hipotesis": "Es estructural",
             "evidencia_necesaria": [
-              "CFO FY2025 <= 1,300M o FCF <= 900M.",
-              "Deuda neta permanece >= 2,900M en FY2025-FY2026.",
-              "Múltiplo EV/EBIT no supera 6.0x de forma sostenida pese a guidance favorable.",
-              "Se requiere dilución o venta de activos para sostener liquidez."
+              "CFO FY2025 <= EUR1,400M y FCF <= EUR1,000M.",
+              "Interest expense >= EUR220M con deuda neta sin bajar.",
+              "Persisten opacidad y conflictos materiales en reportes FY2025/H1-2026."
             ]
           }
         ],
         "prior_explicito": {
-          "baseline_0_1": 0.5,
-          "justificacion_baseline": "No hay evidencia en el input de que TEP venga documentado como Tier A/B top-5 de SCOUT; aplica baseline por defecto 0.50.",
-          "ajustes_al_alza": [
+          "baseline_utilizado_0_1": 0.5,
+          "justificacion_baseline": "No hay evidencia en el input de prefilter SCOUT Tier A/B top-5; aplica baseline por defecto 0.50.",
+          "factores_al_alza": [
             {
-              "factor_verificable": "data_quality.completitud 41% (PARTIAL)",
+              "factor": "Deterioro de CFO H1-2025",
               "direccion": "sube",
-              "delta": 0.08
+              "ajuste_0_1": 0.08,
+              "ancla": "CFO 771M -> 588M"
             },
             {
-              "factor_verificable": "_extraction_confidence con material_conflict en ingresos/EBIT/patrimonio",
+              "factor": "Riesgo de refinanciacion de corto plazo",
               "direccion": "sube",
-              "delta": 0.06
+              "ajuste_0_1": 0.06,
+              "ancla": "Deuda CP 1,147M vs caja 1,058M"
             },
             {
-              "factor_verificable": "deuda neta 3,096M > market cap 2,941M",
+              "factor": "Apalancamiento de equity",
               "direccion": "sube",
-              "delta": 0.05
+              "ajuste_0_1": 0.04,
+              "ancla": "Deuda neta 3,096M > market cap 2,941M"
             },
             {
-              "factor_verificable": "CFO H1-2025 588M vs 771M H1-2024",
+              "factor": "Opacidad/conflictos de datos",
               "direccion": "sube",
-              "delta": 0.05
+              "ajuste_0_1": 0.04,
+              "ancla": "Completitud 41% + material_conflict en ingresos/EBIT"
             },
             {
-              "factor_verificable": "deuda corto plazo 1,147M > caja 1,058M",
+              "factor": "Sensibilidad de capital circulante",
               "direccion": "sube",
-              "delta": 0.04
-            },
-            {
-              "factor_verificable": "net income H1-2025 249M < 291M H1-2024 pese a mejor EBIT",
-              "direccion": "sube",
-              "delta": 0.03
+              "ajuste_0_1": 0.03,
+              "ancla": "AR 2,200M y working capital 1,867M"
             }
           ],
-          "ajustes_a_la_baja": [
+          "factores_a_la_baja": [
             {
-              "factor_verificable": "FCF TTM 1,382M positivo",
+              "factor": "EBIT TTM aun > EUR1.1B",
               "direccion": "baja",
-              "delta": -0.05
+              "ajuste_0_1": -0.02,
+              "ancla": "EBIT TTM 1,109M"
             },
             {
-              "factor_verificable": "EBIT TTM 1,109M con margen operativo 10.75%",
+              "factor": "Evidencia de repago en FY2024",
               "direccion": "baja",
-              "delta": -0.04
+              "ajuste_0_1": -0.01,
+              "ancla": "CFF FY2024 -1,403M"
             }
           ],
           "probabilidad_final_0_1": 0.72
@@ -797,107 +825,98 @@
       "kill_criteria_propuestos": [
         {
           "kc_id": "KC-RT-001",
-          "tipo": "TESIS",
-          "definicion": "CFO FY2025 < 1,200,000,000.",
+          "tipo": "BALANCE",
+          "definicion": "Si deuda neta FY2025 no baja al menos EUR200M vs FY2024 (<= EUR2,896M), invalida la tesis de desapalancamiento.",
           "ventana_meses": {
             "min": 6,
-            "max": 15
+            "max": 12
           },
-          "fuente_prevista": "earnings",
+          "fuente_prevista": "filing",
           "accion_recomendada": "SALIR",
-          "por_que": "Invalida la hipótesis de caja suficiente para desapalancar sin fricción."
+          "por_que": "Sin reduccion tangible de deuda, la asimetria se rompe."
         },
         {
           "kc_id": "KC-RT-002",
-          "tipo": "BALANCE",
-          "definicion": "Deuda neta al 2025-12-31 > 3,100,000,000.",
+          "tipo": "TESIS",
+          "definicion": "Si FCF FY2025 <= EUR1,000M, la tesis alcista de caja sostenible queda invalidada.",
           "ventana_meses": {
             "min": 6,
-            "max": 15
+            "max": 12
           },
-          "fuente_prevista": "filing",
+          "fuente_prevista": "earnings",
           "accion_recomendada": "SALIR",
-          "por_que": "Confirma estancamiento de desapalancamiento en un equity frágil."
+          "por_que": "El supuesto central de valor depende de FCF elevado."
         },
         {
           "kc_id": "KC-RT-003",
-          "tipo": "TESIS",
-          "definicion": "DSO > 85 días o AR > 2,400,000,000 en FY2025.",
-          "ventana_meses": {
-            "min": 6,
-            "max": 15
-          },
-          "fuente_prevista": "filing",
-          "accion_recomendada": "REDUCIR_50",
-          "por_que": "Apunta a riesgo de cobro y presión sobre caja operativa."
-        },
-        {
-          "kc_id": "KC-RT-004",
           "tipo": "DILUCION",
-          "definicion": "Emisión de acciones o convertibles equivalente a >5% del capital para cubrir deuda/operación.",
+          "definicion": "Si hay emision de acciones >5% para cubrir balance/refinanciacion, salir.",
           "ventana_meses": {
             "min": 1,
-            "max": 18
+            "max": 12
           },
           "fuente_prevista": "filing",
           "accion_recomendada": "SALIR",
-          "por_que": "Traslada valor desde accionista actual a nuevo capital por estrés financiero."
+          "por_que": "La dilucion destruye el caso por accion."
+        },
+        {
+          "kc_id": "KC-RT-004",
+          "tipo": "BALANCE",
+          "definicion": "Si no hay refinanciacion/extension suficiente de >EUR1,100M de deuda de corto plazo antes de 2026-12-31.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Aumenta riesgo de evento de liquidez."
         },
         {
           "kc_id": "KC-RT-005",
           "tipo": "CONTABILIDAD",
-          "definicion": "Completitud de datos <55% y conflicto material en ingresos/EBIT persiste al 2026-09-30.",
+          "definicion": "Si aparece restatement material o alerta de auditor sobre continuidad/covenants.",
           "ventana_meses": {
-            "min": 3,
+            "min": 1,
             "max": 12
           },
-          "fuente_prevista": "otro",
-          "accion_recomendada": "CONGELAR_COMPRAS",
-          "por_que": "No hay base informacional suficiente para sostener tesis de re-rating."
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "La integridad del caso depende de calidad de reporte."
         }
       ],
       "evidencia_que_me_haria_cambiar_de_opinion": [
         {
-          "item": "Normalización robusta de caja",
-          "umbral_o_condicion": "CFO FY2025 >= 1,500M y FCF FY2025 >= 1,200M.",
+          "item": "Refinanciacion de corto plazo cerrada en terminos no dilutivos",
+          "umbral_o_condicion": "Extension/cobertura > EUR1,100M, sin dilucion >1%, y covenant headroom explicito",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing"
+        },
+        {
+          "item": "Recuperacion clara de conversion de caja",
+          "umbral_o_condicion": "CFO FY2025 >= EUR1,600M y FCF FY2025 >= EUR1,200M",
           "ventana_meses": {
             "min": 6,
-            "max": 15
+            "max": 12
           },
           "fuente_prevista": "earnings"
         },
         {
-          "item": "Desapalancamiento visible y sostenido",
-          "umbral_o_condicion": "Deuda neta <= 2,700M en FY2025 y <= 2,400M en FY2026 sin dilución >2%.",
+          "item": "Desapalancamiento visible y consistente",
+          "umbral_o_condicion": "Deuda neta FY2025 <= EUR2,800M y tendencia descendente en FY2026",
           "ventana_meses": {
             "min": 9,
-            "max": 24
+            "max": 18
           },
           "fuente_prevista": "filing"
         },
         {
-          "item": "Riesgo de refinanciación controlado",
-          "umbral_o_condicion": "Cobertura de liquidez >1.5x vencimientos 12m y covenants con headroom >25%.",
+          "item": "Mejora de transparencia que elimine opacidad critica",
+          "umbral_o_condicion": "Dos reportes consecutivos con vencimientos, covenants y bridge EBIT->CFO completos y consistentes",
           "ventana_meses": {
-            "min": 3,
-            "max": 12
-          },
-          "fuente_prevista": "filing"
-        },
-        {
-          "item": "Calidad de datos suficiente para tesis de múltiplo",
-          "umbral_o_condicion": "Completitud >=70% y campos críticos sin material_conflict.",
-          "ventana_meses": {
-            "min": 3,
-            "max": 12
-          },
-          "fuente_prevista": "otro"
-        },
-        {
-          "item": "Mejora real de capital de trabajo",
-          "umbral_o_condicion": "AR <=2,100M y DSO <=75 días en dos reportes consecutivos.",
-          "ventana_meses": {
-            "min": 6,
+            "min": 9,
             "max": 18
           },
           "fuente_prevista": "filing"
@@ -905,47 +924,44 @@
       ],
       "recomendacion_para_arbitro": {
         "riesgo_global": "ALTO",
-        "tamaño_maximo_sugerido_pct_cartera": 0.75,
+        "tamaño_maximo_sugerido_pct_cartera": 0.0,
         "si_se_invierte_igual": [
-          "Entrar por hitos verificables, no por valoración puntual: 33% tras FY2025, 33% tras detalle de deuda, 33% tras mejora de data quality.",
-          "Prohibir promediar a la baja hasta resolver KC-RT-005.",
-          "Exigir stop fundamental: si deuda neta >3.1B o CFO FY2025 <1.2B, cerrar posición.",
-          "Evitar exposición agregada al mismo factor crédito/refinanciación.",
-          "Revisar semestralmente AR/DSO antes de aumentar tamaño.",
-          "Usar tamaño táctico de vigilancia; no tratarlo como core holding."
+          "Limitar a posicion tactica <=0.5% hasta cerrar refinanciacion.",
+          "Exigir dos hitos previos de caja (CFO y FCF FY2025) antes de ampliar.",
+          "No promediar a la baja si deuda neta no cae al menos EUR200M.",
+          "Usar stop fundamental: romper KC-RT-001 o KC-RT-002 implica salida.",
+          "Revisar covenants y vencimientos en cada reporte, no solo multiplos.",
+          "Evitar narrativa de rerating sin evidencia de mejora operativa y de disclosure."
         ],
         "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
-          "¿Cuál es el calendario exacto de vencimientos 2026-2028 y su coste esperado?",
-          "¿Qué parte de CFF FY2024 fue repago de deuda vs dividendos/otros usos?",
-          "¿Por qué cayó CFO en H1-2025 con EBIT al alza?",
-          "¿Cuál es el aging de AR y la tasa de provisión/incobrables?",
-          "¿Existe riesgo de emisión de capital para sostener liquidez o covenants?",
-          "¿Qué reconciliación completa explica el puente EBIT-CFO sin residuales materiales?"
+          "Como se refinancia exactamente la deuda de corto plazo (monto, plazo, coste y covenants)?",
+          "Que parte de la caida de CFO H1-2025 es estructural vs temporal?",
+          "Cual es el bridge completo EBIT->CFO y CFO->FCF de FY2024-FY2025?",
+          "Que explica CFI H1-2025 de -EUR596M y su recurrencia esperada?",
+          "Cual es la trayectoria objetivo de deuda neta trimestral y politica de capital?",
+          "Que medidas concretas reducen opacidad en los proximos dos reportes?"
         ],
         "trazabilidad_sizing": {
           "prior_value_trap_0_1": 0.5,
-          "probabilidad_value_trap_final_0_1": 0.72,
-          "sizing_neutro_pct": 2.5,
-          "ajuste_por_riesgo_pct": -1.25,
-          "ajuste_por_bloqueadores_verificables_pct": -0.5,
+          "ajuste_neto_evidencia": 0.22,
+          "value_trap_final_0_1": 0.72,
+          "impacto_en_tamano": "Con value_trap >=0.70 y riesgo_global ALTO, el tamano maximo economico cae a 0.0%-0.5%. Recomendado: 0.0% hasta resolver bloqueadores.",
           "bloqueadores_verificables": [
-            "Completitud 41% con conflictos materiales en métricas núcleo.",
-            "Riesgo de refinanciación no cuantificado (sin covenants/headroom).",
-            "Desaceleración de CFO en H1-2025."
-          ],
-          "tamaño_maximo_final_pct": 0.75,
-          "puente_explicativo": "El salto de prior 0.50 a 0.72 reduce sizing desde 2.5% a 1.25%; los bloqueadores verificables imponen tope adicional hasta 0.75%."
+            "Refinanciacion >EUR1,100M no cerrada con terminos visibles",
+            "CFO H1-2025 en deterioro interanual",
+            "Conflictos de calidad en ingresos/EBIT y disclosure incompleto"
+          ]
         }
       }
     }
   },
   "log": {
     "limitaciones": [
-      "No se adjuntó artefacto ImpliedExpectations_v1 en el input del turno.",
-      "El TruthPack mantiene estado PARTIAL con completitud global 41%.",
-      "Hay conflictos materiales en campos críticos (ingresos/EBIT/patrimonio).",
-      "Varias inferencias dependen de disclosures de deuda y covenants no incluidos.",
-      "Las etiquetas *_usd conviven con moneda original EUR sin normalización FX en el paquete."
+      "No se adjunta tabla completa de vencimientos/covenants por instrumento para cuantificar riesgo de refinanciacion con precision.",
+      "Parte del analisis depende de cifras semestrales por falta de trimestrales completas de EBIT/CF.",
+      "Persisten conflictos de calidad en ingresos/EBIT dentro del TruthPack.",
+      "No hay desglose completo de CFI H1-2025 para separar uso recurrente vs no recurrente de caja.",
+      "El campo implied expectations detallado no se incluyo en crudo; se uso lo citado en el reporte BULL."
     ],
     "autochequeos": {
       "sin_metricas_inventadas": true,
