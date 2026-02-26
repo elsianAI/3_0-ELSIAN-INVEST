@@ -150,6 +150,169 @@ class DispatcherPhase2Tests(unittest.TestCase):
         self.assertEqual(meta["entries"][0]["status"], "material_conflict")
         self.assertTrue(field_prov[0]["material_conflict"])
 
+    def test_cross_layer_arbiter_selects_deterministic_value(self):
+        llm_value = 1_500_000_000.0
+        det_value = 900_000_000.0
+        llm_output = {
+            "version_esquema": "TruthPack_v1",
+            "historico_anual": [],
+            "historico_trimestral": [],
+            "balance_sheet_ultimo": {"activos_totales_usd": llm_value},
+        }
+        deterministic_hints = {
+            "best_by_field": {
+                "activos_totales_usd": {
+                    "field": "activos_totales_usd",
+                    "value": det_value,
+                    "section": "balance_sheet",
+                    "line": 99,
+                    "unit_applied": 1.0,
+                    "confidence": "high",
+                }
+            }
+        }
+
+        arbiter_result = DispatchResult(
+            True,
+            {
+                "selected_source": "deterministic",
+                "selected_value": det_value,
+                "confidence": "high",
+                "reason": "table match",
+            },
+            "",
+            "claude-opus-4.6",
+            "claude",
+            0.1,
+            model_profile="claude-opus-4.6",
+            transport="claude",
+        )
+
+        with patch("engine.dispatcher._dispatch_model_with_retry", return_value=arbiter_result) as mocked_dispatch:
+            out, meta, field_prov = _run_cross_layer_reconciliation(
+                config=SimpleNamespace(),
+                case_dir=Path("."),
+                timeout=5,
+                llm_output=llm_output,
+                deterministic_hints=deterministic_hints,
+                source_content="Total assets 900",
+                currency="USD",
+                reconciliation_model="claude-opus-4.6",
+                arbitration_enabled=True,
+                max_arbitrations=1,
+            )
+
+        mocked_dispatch.assert_called_once()
+        self.assertEqual(out["balance_sheet_ultimo"]["activos_totales_usd"], det_value)
+        self.assertEqual(meta["entries"][0]["status"], "resolved_by_arbiter")
+        self.assertEqual(meta["arbitrations"], 1)
+        self.assertEqual(meta["entries"][0]["selected_method"], "arbiter")
+        self.assertEqual(field_prov[0]["selected_method"], "arbiter")
+        self.assertEqual(field_prov[0]["selected_source"], "deterministic")
+
+    def test_cross_layer_arbiter_selects_llm_value(self):
+        llm_value = 1_500_000_000.0
+        det_value = 900_000_000.0
+        llm_output = {
+            "version_esquema": "TruthPack_v1",
+            "historico_anual": [],
+            "historico_trimestral": [],
+            "balance_sheet_ultimo": {"activos_totales_usd": llm_value},
+        }
+        deterministic_hints = {
+            "best_by_field": {
+                "activos_totales_usd": {
+                    "field": "activos_totales_usd",
+                    "value": det_value,
+                    "section": "balance_sheet",
+                    "line": 99,
+                    "unit_applied": 1.0,
+                    "confidence": "high",
+                }
+            }
+        }
+
+        arbiter_result = DispatchResult(
+            True,
+            {
+                "selected_source": "llm",
+                "selected_value": llm_value,
+                "confidence": "medium",
+                "reason": "period alignment",
+            },
+            "",
+            "claude-opus-4.6",
+            "claude",
+            0.1,
+            model_profile="claude-opus-4.6",
+            transport="claude",
+        )
+
+        with patch("engine.dispatcher._dispatch_model_with_retry", return_value=arbiter_result) as mocked_dispatch:
+            out, meta, field_prov = _run_cross_layer_reconciliation(
+                config=SimpleNamespace(),
+                case_dir=Path("."),
+                timeout=5,
+                llm_output=llm_output,
+                deterministic_hints=deterministic_hints,
+                source_content="Total assets 1500",
+                currency="USD",
+                reconciliation_model="claude-opus-4.6",
+                arbitration_enabled=True,
+                max_arbitrations=1,
+            )
+
+        mocked_dispatch.assert_called_once()
+        self.assertEqual(out["balance_sheet_ultimo"]["activos_totales_usd"], llm_value)
+        self.assertEqual(meta["entries"][0]["status"], "resolved_by_arbiter")
+        self.assertEqual(meta["arbitrations"], 1)
+        self.assertEqual(meta["entries"][0]["selected_method"], "arbiter")
+        self.assertEqual(field_prov[0]["selected_method"], "arbiter")
+        self.assertEqual(field_prov[0]["selected_source"], "llm")
+
+    def test_cross_layer_arbitration_budget_guard(self):
+        llm_value = 1_500_000_000.0
+        det_value = 900_000_000.0
+        llm_output = {
+            "version_esquema": "TruthPack_v1",
+            "historico_anual": [],
+            "historico_trimestral": [],
+            "balance_sheet_ultimo": {"activos_totales_usd": llm_value},
+        }
+        deterministic_hints = {
+            "best_by_field": {
+                "activos_totales_usd": {
+                    "field": "activos_totales_usd",
+                    "value": det_value,
+                    "section": "balance_sheet",
+                    "line": 99,
+                    "unit_applied": 1.0,
+                    "confidence": "high",
+                }
+            }
+        }
+
+        with patch("engine.dispatcher._dispatch_model_with_retry") as mocked_dispatch:
+            out, meta, field_prov = _run_cross_layer_reconciliation(
+                config=SimpleNamespace(),
+                case_dir=Path("."),
+                timeout=5,
+                llm_output=llm_output,
+                deterministic_hints=deterministic_hints,
+                source_content="Total assets 1500",
+                currency="USD",
+                reconciliation_model="claude-opus-4.6",
+                arbitration_enabled=True,
+                max_arbitrations=0,
+            )
+
+        mocked_dispatch.assert_not_called()
+        self.assertEqual(out["balance_sheet_ultimo"]["activos_totales_usd"], llm_value)
+        self.assertEqual(meta["entries"][0]["status"], "material_conflict")
+        self.assertEqual(meta["entries"][0]["selected_method"], "llm_conflict_default")
+        self.assertEqual(field_prov[0]["selected_method"], "llm_conflict_default")
+        self.assertEqual(meta["arbitrations"], 0)
+
     def test_chunk_fallback_uses_primary_model_not_chunk_model(self):
         cfg = _DummyConfig()
         with tempfile.TemporaryDirectory() as tmp:
