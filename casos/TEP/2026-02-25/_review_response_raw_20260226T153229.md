@@ -1,0 +1,294 @@
+{
+  "version_esquema": "MetaReview_v1",
+  "caso_id": "CASE_20260225_TEP",
+  "fecha_review": "2026-02-26T16:33:56+01:00",
+  "reviewer": {
+    "modelo": "gpt-5.2-pro",
+    "plataforma": "chatgpt",
+    "proyecto": "ELSIAN Meta-Review"
+  },
+  "decision_packet_ref": "DecisionPacket_CASE_20260225_TEP_rev001.json",
+  "decision_packet_snapshot": {
+    "hash_sha256": "NO_EVALUABLE",
+    "timestamp_compilacion": "2026-02-26T15:32:29+01:00",
+    "revision_num": 1
+  },
+  "veredicto_meta": {
+    "estado": "CUESTIONA",
+    "confianza_review_0_1": 0.66,
+    "resumen_1_parrafo": "La decisión de BLOQUEADO con sizing 0% es prudente y, en lo esencial, consistente con un data_quality_gate=FAIL y un survivability_gate=CONDITIONAL. Sin embargo, hay incoherencias internas (p. ej., non_speculative_gate marcado como CONDITIONAL pese a banderas fuertes; y el supuesto A-003 tratado como “confirmado” sin visibilidad de líneas de crédito/headsroom) y un exceso de precisión en el bloque probabilístico bajo completitud 26%. Recomiendo mantener el bloqueo, pero corregir semántica/estatus de gates y recalibrar probabilidades y supuestos tras WO-001/WO-002."
+  },
+  "evaluacion_gates": [
+    {
+      "gate": "data_quality_gate",
+      "arbitro_dijo": "FAIL",
+      "meta_evaluacion": "CORRECTO",
+      "justificacion": "Con TruthPack PARTIAL (26% complete) e ImpliedExpectations BLOCKED, faltan inputs mínimos (FCF canónico, bridge EBIT→CFO, vencimientos/covenants, diluted shares), por lo que el FAIL está bien aplicado.",
+      "riesgo_oculto": "Riesgo adicional de errores de unidad/moneda (convención *_usd vs importes EUR) que puede contaminar cualquier métrica derivada."
+    },
+    {
+      "gate": "survivability_gate",
+      "arbitro_dijo": "CONDITIONAL",
+      "meta_evaluacion": "CUESTIONABLE",
+      "justificacion": "La lectura de gap de liquidez estática (deuda CP + leases corrientes > caja) justifica CONDITIONAL, pero se sobre-infiere ‘déficit forzoso’ sin integrar posibles líneas comprometidas, factoring/RCF y estacionalidad de caja.",
+      "riesgo_oculto": "Sin covenants/headroom y disponibilidad de líneas, el riesgo real puede ir de ‘gestionable’ a ‘evento de crédito’; falta la distribución de outcomes."
+    },
+    {
+      "gate": "mispricing_gate",
+      "arbitro_dijo": "CONDITIONAL",
+      "meta_evaluacion": "CORRECTO",
+      "justificacion": "El ARBITRO lo reporta como UNKNOWN (aquí tratado como CONDITIONAL por limitación de schema): con IE bloqueado y datos por acción incompletos no se puede distinguir mispricing de riesgo real.",
+      "riesgo_oculto": "EV/EBIT y market cap citados pueden estar sesgados por perímetro/leases/moneda; riesgo de ‘múltiplo trampa’ por métrica mal construida."
+    },
+    {
+      "gate": "catalyst_gate",
+      "arbitro_dijo": "PASS",
+      "meta_evaluacion": "CORRECTO",
+      "justificacion": "Los catalizadores propuestos son en general medibles y no binarios (deuda neta, margen EBIT, disclosure) con tests confirmatorios definidos, por lo que PASS es defendible.",
+      "riesgo_oculto": "El catalizador ‘refinanciación disciplinada’ puede volverse binario si el mercado se cierra; conviene explicitar gatillos de binarización (spread, covenant breach)."
+    },
+    {
+      "gate": "non_speculative_gate",
+      "arbitro_dijo": "CONDITIONAL",
+      "meta_evaluacion": "INCORRECTO",
+      "justificacion": "Con banderas ‘dependencia_financiacion_salvadora=true’ y ‘opacidad_inaceptable=true’, el gate debería ser FAIL (o, como mínimo, redefinir formalmente CONDITIONAL en este gate). Mantenerlo en CONDITIONAL introduce ambigüedad respecto al estándar no especulativo.",
+      "riesgo_oculto": "Riesgo de que el pipeline ‘normalice’ dependencia de refinanciación como aceptable; esto erosiona el charter de no especulativo."
+    }
+  ],
+  "evaluacion_supuestos_criticos": [
+    {
+      "assumption_id": "A-001",
+      "enunciado": "La generación de caja operativa cubre holgadamente capex y financiamiento, permitiendo desapalancamiento.",
+      "arbitro_probabilidad": 0.65,
+      "meta_evaluacion": "OPTIMISTA",
+      "justificacion": "La evidencia soporta el hecho FY2024, pero la extrapolación a FY2025 está tensionada por la caída de CFO en H1-2025. Falta bridge EBIT→CFO y explicación de WC para sostener la continuidad.",
+      "sugerencia_probabilidad_0_1": 0.55
+    },
+    {
+      "assumption_id": "A-002",
+      "enunciado": "La señal de desapalancamiento se frenó en H1-2025 con CFO en caída y CFF positivo.",
+      "arbitro_probabilidad": 0.8,
+      "meta_evaluacion": "RAZONABLE",
+      "justificacion": "Los datos H1-2025 citados (CFO menor y CFF positivo) apoyan la lectura de ‘freno’ en el semestre. Lo que queda abierto es si es estacional o estructural; por eso no subiría más la probabilidad.",
+      "sugerencia_probabilidad_0_1": 0.75
+    },
+    {
+      "assumption_id": "A-003",
+      "enunciado": "La liquidez estática muestra déficit frente a obligaciones corrientes, forzando refinanciación inminente.",
+      "arbitro_probabilidad": 0.95,
+      "meta_evaluacion": "INSUFICIENTE_EVIDENCIA",
+      "justificacion": "Que deuda CP + lease corriente excedan caja es un hecho, pero ‘forzar refinanciación’ depende de líneas disponibles, calendario intra-año, capacidad de WC y covenants. El propio paquete reconoce que faltan líneas comprometidas/headroom, por lo que no es ‘confirmado’ aún.",
+      "sugerencia_probabilidad_0_1": 0.8
+    },
+    {
+      "assumption_id": "A-005",
+      "enunciado": "La opacidad informativa bloquea la estimación correcta de valoración e impone descuento persistente.",
+      "arbitro_probabilidad": 0.99,
+      "meta_evaluacion": "OPTIMISTA",
+      "justificacion": "La opacidad actual es clara (26% + IE bloqueado), pero ‘descuento persistente’ es una inferencia de horizonte. Si la empresa mejora disclosure en 1-2 reportes, el descuento podría comprimirse rápido; reduciría la certeza.",
+      "sugerencia_probabilidad_0_1": 0.9
+    }
+  ],
+  "evaluacion_escenarios": {
+    "base": {
+      "arbitro_probabilidad": 0.5,
+      "arbitro_retorno": 25,
+      "meta_evaluacion": "OPTIMISTA",
+      "justificacion": "El BASE asume refinanciación sin dilución y desapalancamiento moderado; con visibilidad incompleta de términos/covenants, 25% puede estar ‘a la derecha’ del centro de la distribución."
+    },
+    "bull": {
+      "arbitro_probabilidad": 0.15,
+      "arbitro_retorno": 80,
+      "meta_evaluacion": "REALISTA",
+      "justificacion": "Un 80% en 12–24m es plausible en un equity muy apalancado si se combina deleveraging + expansión de margen + mejora de disclosure; la probabilidad (15%) es discutible pero no absurda."
+    },
+    "bear": {
+      "arbitro_probabilidad": 0.35,
+      "arbitro_retorno": -25,
+      "meta_evaluacion": "OPTIMISTA",
+      "justificacion": "Dado el apalancamiento (deuda neta > market cap) y el riesgo de refinanciación, el downside en BEAR puede ser más severo (dilución/reestructuración). -25% podría infra-representar cola izquierda."
+    }
+  },
+  "evaluacion_sizing": {
+    "kelly_ajustado_arbitro": 5.0,
+    "sizing_final_arbitro": 0,
+    "meta_evaluacion": "ADECUADO",
+    "justificacion": "Con BLOQUEADO y gates críticos sin superar, sizing 0% es la decisión correcta. El Kelly preliminar (5%) es coherente con p=0.6 y asimetría ~1, pero no debería usarse operativamente hasta cerrar data_quality/survivability.",
+    "sizing_sugerido_0_1": null
+  },
+  "coherencia_logica": {
+    "score_0_10": 7,
+    "problemas_detectados": [
+      {
+        "tipo": "CONTRADICCION",
+        "descripcion": "A-003 se marca como CONFIRMADA con p=0.95 (‘forzando refinanciación’) mientras se reconoce falta de líneas comprometidas/covenants/headroom.",
+        "seccion_afectada": "assumption_ledger.supuestos[A-003] y gates.survivability_gate.por_que",
+        "severidad": "ALTA"
+      },
+      {
+        "tipo": "SALTO_LOGICO",
+        "descripcion": "Se reporta probabilidad_exito=0.6 y retornos detallados pese a data_quality_gate=FAIL (26% complete), lo que transmite falsa precisión.",
+        "seccion_afectada": "decision_probabilistica y gates.data_quality_gate",
+        "severidad": "MEDIA"
+      },
+      {
+        "tipo": "OMISION",
+        "descripcion": "non_speculative_gate usa status=CONDITIONAL (no PASS/FAIL) pese a banderas fuertes; la semántica queda ambigua y puede romper downstream.",
+        "seccion_afectada": "gates.non_speculative_gate",
+        "severidad": "MEDIA"
+      },
+      {
+        "tipo": "EVIDENCIA_DEBIL",
+        "descripcion": "Métricas de valoración (EV/EBIT 5.58x, market cap, net debt) aparecen en narrativa, pero no están trazadas en el assumption_ledger con fuentes primarias en este paquete.",
+        "seccion_afectada": "resumen_ejecutivo.racional_5_lineas y bullets BULL/FORENSIC/RED_TEAM",
+        "severidad": "MEDIA"
+      },
+      {
+        "tipo": "OMISION",
+        "descripcion": "No se puede evaluar riesgo regulatorio/competitivo por falta de identificación de empresa/sector/industria (campos UNKNOWN).",
+        "seccion_afectada": "empresa.* y puntos de riesgo sectorial en resumen_ejecutivo.principales_riesgos",
+        "severidad": "BAJA"
+      }
+    ]
+  },
+  "puntos_ciegos": [
+    {
+      "descripcion": "Liquidez dinámica no modelada: disponibilidad real de RCF/líneas comprometidas, factoring de AR, y calendario intra-anual de vencimientos vs estacionalidad de CFO.",
+      "impacto_potencial": "ALTO",
+      "sugerencia": "En WO-001 añadir explícitamente ‘liquidity sources’: undrawn committed facilities, covenant headroom, factoring/confirming, y un 12-month liquidity roll-forward (cash + CFO - capex - interest - maturities)."
+    },
+    {
+      "descripcion": "Riesgo de tipo de interés y cobertura: sensibilidad del coste de deuda a refi (base 5.15% con rango hasta 7.5%) sin detalle de mix fijo/variable, hedges y maturity wall.",
+      "impacto_potencial": "MEDIO",
+      "sugerencia": "Extraer de notas de deuda: % floating, swaps, vencimientos por tasa/moneda; construir stress test de interest expense vs CFO."
+    },
+    {
+      "descripcion": "Calidad de cuentas a cobrar: AR elevado (€2.2B, AR/AP ~6.6x) se menciona pero no hay aging, provisiones ni concentración de clientes.",
+      "impacto_potencial": "MEDIO",
+      "sugerencia": "Pedir aging de AR, allowances, write-offs y concentración top clientes; si no existe, inferir por notas de riesgo de crédito y políticas IFRS 9/CECL (según jurisdicción)."
+    },
+    {
+      "descripcion": "Riesgo de liquidez del activo (equity): sin datos de free float/volumen, un sizing futuro podría ser impracticable o costoso.",
+      "impacto_potencial": "BAJO",
+      "sugerencia": "Añadir al SOURCES pack métricas de liquidez (ADV, bid-ask, free float) antes de habilitar MONITOR/INVERTIR."
+    },
+    {
+      "descripcion": "Ambigüedad de moneda/unidades: coexistencia de campos *_usd con importes en EUR puede inducir errores sistemáticos en EV/FCF y en implied expectations.",
+      "impacto_potencial": "ALTO",
+      "sugerencia": "Normalizar moneda en TruthPack (ISO currency + unidad) y bloquear cálculos si hay mezcla no reconciliada."
+    }
+  ],
+  "coherencia_probabilistica_categorica": {
+    "alineadas": true,
+    "incongruencias": [
+      "Se calcula un bloque probabilístico relativamente optimista (p=0.6) aunque el caso está BLOQUEADO por data_quality_gate=FAIL; debería etiquetarse como ‘preliminar’ o recalibrarse con mayor incertidumbre."
+    ],
+    "justificacion": "La decisión categórica BLOQUEADO se justifica por gates (data_quality FAIL, survivability CONDITIONAL) y por el estándar no especulativo, aunque el bloque probabilístico debería reflejar explícitamente la incertidumbre extrema derivada de la falta de datos."
+  },
+  "evaluacion_calidad_pipeline": [
+    {
+      "paso": "TP_EXTRACTOR_FILING",
+      "score_fusion": 76.7,
+      "evaluacion_meta": "PREOCUPANTE",
+      "comentario": "Los scores ~73–80 son coherentes con data_completeness 26% y explican los bloqueos (deuda/covenants/FCF bridge)."
+    },
+    {
+      "paso": "IMPLIED",
+      "score_fusion": 85.8,
+      "evaluacion_meta": "PREOCUPANTE",
+      "comentario": "El motor IMPLIED aparece parcialmente y acaba BLOCKED; sin TruthPack completo no aporta."
+    },
+    {
+      "paso": "CATALYST",
+      "score_fusion": 100.0,
+      "evaluacion_meta": "ADECUADO",
+      "comentario": "Alta consistencia formal; los catalizadores están bien estructurados."
+    },
+    {
+      "paso": "FORENSIC",
+      "score_fusion": 99.7,
+      "evaluacion_meta": "ADECUADO",
+      "comentario": "Buen señalamiento de gap de liquidez y anomalías de CFI."
+    },
+    {
+      "paso": "BULL",
+      "score_fusion": 98.5,
+      "evaluacion_meta": "ADECUADO",
+      "comentario": "Caso alcista coherente, aunque depende de datos no extraídos."
+    },
+    {
+      "paso": "RED_TEAM",
+      "score_fusion": 100.0,
+      "evaluacion_meta": "ADECUADO",
+      "comentario": "Crítica consistente y focalizada en caja/refi/opacidad."
+    },
+    {
+      "paso": "ARBITRO",
+      "score_fusion": 92.2,
+      "evaluacion_meta": "ADECUADO",
+      "comentario": "La decisión conservadora y el plan REMEDIATE están bien integrados; ajustar semántica de gates/probabilidades."
+    }
+  ],
+  "alertas_compilador_respondidas": [],
+  "desacuerdos_agentes": {
+    "resolucion_arbitro_correcta": true,
+    "desacuerdos_mal_resueltos": null,
+    "comentarios": "El ARBITRO identifica los desacuerdos clave (desapalancamiento, mispricing vs value trap, veredicto) y los convierte en requisitos de evidencia/escenario, lo cual es una resolución razonable."
+  },
+  "kill_criteria_evaluacion": {
+    "completos": false,
+    "accionables": true,
+    "especificos": true,
+    "cubren_bear_scenario": true,
+    "comentarios": "KC-001/002/003 son medibles y cubren riesgos de refi/caja/dilución. Falta un kill criterion explícito para covenant breach/headroom < umbral o pérdida de acceso a líneas comprometidas."
+  },
+  "recomendaciones": [
+    {
+      "prioridad": "ALTA",
+      "accion": "Ejecutar WO-001 priorizando: (1) maturity wall 2025–2029 por instrumento/moneda/tasa, (2) covenants y headroom, (3) undrawn committed facilities y términos de refinanciación.",
+      "dirigida_a": "PIPELINE"
+    },
+    {
+      "prioridad": "ALTA",
+      "accion": "Reclasificar A-003 como ABIERTA y recalibrar su probabilidad hasta tener ‘credit_lines_available’ y headroom; separar el ‘hecho’ (deuda CP>caja) de la ‘inferencia’ (forzar refi).",
+      "dirigida_a": "ARBITRO"
+    },
+    {
+      "prioridad": "ALTA",
+      "accion": "Corregir semántica de non_speculative_gate a PASS/FAIL (o documentar formalmente CONDITIONAL) para evitar ambigüedad y asegurar compatibilidad con schema.",
+      "dirigida_a": "PIPELINE"
+    },
+    {
+      "prioridad": "MEDIA",
+      "accion": "En decision_probabilistica, etiquetar explícitamente el bloque como ‘preliminar bajo data_quality FAIL’ o rebajar p/ensanchar intervalos hasta cierre de TruthPack/IE.",
+      "dirigida_a": "ARBITRO"
+    },
+    {
+      "prioridad": "MEDIA",
+      "accion": "Añadir kill criterion ligado a covenants (p.ej., headroom <10% o breach) y a disponibilidad de líneas (p.ej., committed undrawn < X).",
+      "dirigida_a": "ARBITRO"
+    },
+    {
+      "prioridad": "MEDIA",
+      "accion": "Normalizar moneda/unidades en TruthPack (evitar mezcla *_usd con EUR) y bloquear cálculos automáticos si no hay reconciliación.",
+      "dirigida_a": "PIPELINE"
+    }
+  ],
+  "meta_decision": {
+    "accion": "APROBAR_CON_CONDICIONES",
+    "condiciones": [
+      "Mantener BLOQUEADO y sizing 0% hasta completar WO-001 (deuda/covenants/líneas) y WO-002 (FCF bridge + diluted shares).",
+      "Ajustar non_speculative_gate a un estado válido (preferible FAIL por ahora) y corregir A-003 (no ‘confirmado’ sin líneas/covenants).",
+      "Rerun de IMPLIED (WO-003) solo tras normalizar moneda y completar TruthPack >50%."
+    ],
+    "siguiente_paso_sugerido": "REMEDIATE (WO-001 → WO-002 → WO-003) y rearbitraje (WO-004) en la fecha sugerida 2026-03-31."
+  },
+  "_meta": {
+    "motor": "ASISTIDO",
+    "plataforma": "chatgpt",
+    "modelo": "gpt-5.2-pro",
+    "proyecto_chatgpt": "ELSIAN Meta-Review",
+    "timestamp": "2026-02-26T16:33:56+01:00",
+    "version_protocolo": "MetaReview_v1"
+  }
+}
