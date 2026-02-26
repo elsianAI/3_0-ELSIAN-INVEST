@@ -72,7 +72,46 @@ class TpNormalizerScaleRepairTests(unittest.TestCase):
         self.assertEqual(len(annual), 1)
         self.assertEqual(annual[0].get("ingresos_usd"), 7_115_000_000.0)
 
+    def test_prefers_eur_m_fallback_when_usd_alias_is_implausibly_small(self):
+        raw = {
+            "historico_anual": [
+                {
+                    "periodo": "FY2022",
+                    "fecha_fin": "2022-12-31",
+                    "tipo_periodo": "anual",
+                    "moneda_original": "EUR",
+                    "ingresos_usd": 1200.0,
+                    "ingresos_eur_m": 8154.0,
+                    "ebit_usd": None,
+                    "ebit_eur_m": 1262.0,
+                }
+            ],
+            "historico_trimestral": [],
+            "balance_sheet_ultimo": {},
+        }
+        out = normalize(raw)
+        annual = out.get("historico_anual", [])
+        self.assertEqual(len(annual), 1)
+        self.assertEqual(annual[0].get("ingresos_usd"), 8_154_000_000.0)
+        self.assertEqual(annual[0].get("ebit_usd"), 1_262_000_000.0)
+
+    def test_rejects_ty_period_label(self):
+        raw = {
+            "historico_anual": [
+                {
+                    "periodo": "TY2023",
+                    "fecha_fin": "2023-12-31",
+                    "tipo_periodo": "anual",
+                    "moneda_original": "USD",
+                    "revenue": 2000.0,
+                }
+            ],
+            "historico_trimestral": [],
+            "balance_sheet_ultimo": {},
+        }
+        out = normalize(raw)
+        self.assertEqual(out.get("historico_anual", []), [])
+
 
 if __name__ == "__main__":
     unittest.main()
-

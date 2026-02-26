@@ -127,13 +127,46 @@ FIELD_ALIASES: dict[str, set[str]] = {
     },
 }
 
+# Fallback aliases where model emits values in EUR millions.
+# They map to canonical *_usd fields but require x1,000,000 scaling.
+EUR_M_FALLBACK_ALIASES: dict[str, set[str]] = {
+    "ingresos_usd": {
+        "ingresos_eur_m", "revenue_eur_m", "revenues_eur_m", "sales_eur_m",
+    },
+    "ebit_usd": {
+        "ebit_eur_m", "operating_income_eur_m", "operating_profit_eur_m",
+    },
+    "net_income_usd": {
+        "net_income_eur_m", "resultado_neto_eur_m",
+    },
+    "cfo_usd": {
+        "cfo_eur_m", "operating_cash_flow_eur_m",
+        "net_cash_from_operating_activities_eur_m",
+    },
+    "cfi_usd": {
+        "cfi_eur_m", "net_cash_from_investing_activities_eur_m",
+    },
+    "cff_usd": {
+        "cff_eur_m", "net_cash_from_financing_activities_eur_m",
+    },
+    "capex_usd": {
+        "capex_eur_m", "capital_expenditures_eur_m",
+    },
+}
+
 # Índice invertido: alias (lowercase) → campo canónico
 _ALIAS_INDEX: dict[str, str] = {}
+_ALIAS_MULTIPLIER: dict[str, float] = {}
 for canonical, aliases in FIELD_ALIASES.items():
     for alias in aliases:
         _ALIAS_INDEX[alias.lower()] = canonical
     # También el propio canónico
     _ALIAS_INDEX[canonical.lower()] = canonical
+for canonical, aliases in EUR_M_FALLBACK_ALIASES.items():
+    for alias in aliases:
+        alias_l = alias.lower()
+        _ALIAS_INDEX[alias_l] = canonical
+        _ALIAS_MULTIPLIER[alias_l] = 1_000_000.0
 
 # Campos canónicos para balance sheet (tp_calculator los busca con _bs_val)
 BS_FIELD_ALIASES: dict[str, set[str]] = {
@@ -221,6 +254,7 @@ _NESTING_KEYS = {"metricas", "datos", "estado_resultados", "metrics",
 
 _RE_FY = re.compile(r"^FY\d{4}$")
 _RE_Q = re.compile(r"^Q[1-4]-\d{4}$")
+_RE_TY = re.compile(r"^TY\d{4}$", re.IGNORECASE)
 _RE_PARTIAL = re.compile(r"^(9M|H1|H2|6M|FY\d{4}_YTD_\d+M)-?\d{0,4}$", re.IGNORECASE)
 _RE_GUIDANCE = re.compile(r"guidance|estimate|\d{4}E$", re.IGNORECASE)
 
@@ -253,6 +287,8 @@ def _classify_period(periodo: str | None) -> str:
     p = periodo.strip()
     if _RE_FY.match(p) or _RE_Q.match(p):
         return "primary"
+    if _RE_TY.match(p):
+        return "rejected"
     if _RE_PARTIAL.match(p):
         return "partial"
     if p == "UNKNOWN" or _RE_GUIDANCE.search(p):
@@ -337,6 +373,41 @@ def _resolve_entry_scale_multiplier(flat_entry: dict) -> float | None:
     return None
 
 
+def _is_plausible_monetary_value(value: float | None) -> bool:
+    if value is None:
+        return False
+    return abs(float(value)) >= 1_000_000.0
+
+
+def _select_canonical_value(canonical: str, candidates: list[dict[str, Any]]) -> float | None:
+    """Select best candidate value for a canonical field.
+
+    Preference rules for monetary fields:
+      1) plausible *_usd aliases
+      2) plausible *_eur_m fallback aliases (scaled)
+      3) any *_usd alias
+      4) first available fallback
+    """
+    valid = [c for c in candidates if c.get("value") is not None]
+    if not valid:
+        return None
+    if not canonical.endswith("_usd"):
+        return valid[0]["value"]
+
+    direct = [c for c in valid if not c.get("is_fallback_eur_m")]
+    fallback = [c for c in valid if c.get("is_fallback_eur_m")]
+    direct_plausible = [c for c in direct if _is_plausible_monetary_value(c.get("value"))]
+    fallback_plausible = [c for c in fallback if _is_plausible_monetary_value(c.get("value"))]
+
+    if direct_plausible:
+        return direct_plausible[0]["value"]
+    if fallback_plausible:
+        return fallback_plausible[0]["value"]
+    if direct:
+        return direct[0]["value"]
+    return valid[0]["value"]
+
+
 # ── Detección de single-metric entries ─────────────────────
 
 def _is_single_metric_entry(entry: dict) -> bool:
@@ -395,6 +466,7 @@ def _normalize_entry(entry: dict, alias_index: dict[str, str]) -> dict:
 
     # Step 2+3: Alias resolution + unwrap
     normalized: dict[str, Any] = {}
+    candidates_by_field: dict[str, list[dict[str, Any]]] = {}
     entry_scale_multiplier = _resolve_entry_scale_multiplier(flat)
     for key, val in flat.items():
         k_lower = key.lower()
@@ -420,19 +492,35 @@ def _normalize_entry(entry: dict, alias_index: dict[str, str]) -> dict:
         canonical = alias_index.get(k_lower)
         if canonical:
             unwrapped = _unwrap_value(val)
+            alias_multiplier = _ALIAS_MULTIPLIER.get(k_lower)
             if (
                 canonical.endswith("_usd")
                 and isinstance(unwrapped, (int, float))
+                and alias_multiplier is not None
+                and alias_multiplier > 0
+            ):
+                unwrapped = float(unwrapped) * alias_multiplier
+            if (
+                canonical.endswith("_usd")
+                and isinstance(unwrapped, (int, float))
+                and alias_multiplier is None
                 and entry_scale_multiplier is not None
                 and entry_scale_multiplier > 0
                 and entry_scale_multiplier != 1.0
                 and abs(float(unwrapped)) < 1_000_000
             ):
                 unwrapped = float(unwrapped) * entry_scale_multiplier
-            # Only set if not already set, or if new value is not None
-            if canonical not in normalized or (normalized[canonical] is None and unwrapped is not None):
-                normalized[canonical] = unwrapped
+            candidates_by_field.setdefault(canonical, []).append(
+                {
+                    "value": unwrapped,
+                    "alias": k_lower,
+                    "is_fallback_eur_m": alias_multiplier is not None,
+                }
+            )
         # Else: unrecognized field — skip (don't litter output with noise)
+
+    for canonical, candidates in candidates_by_field.items():
+        normalized[canonical] = _select_canonical_value(canonical, candidates)
 
     return normalized
 

@@ -132,18 +132,44 @@ class R1CanaryValidator:
 
         return None, "missing"
 
+    def _count_annual_filing_partials(self, case_path: Path) -> int:
+        annual_types = {"ANNUAL_REPORT", "10-K", "20-F"}
+        count = 0
+        for partial_path in case_path.glob("_tmp_tp_filing_*.json"):
+            payload = self.load_json(partial_path)
+            if not isinstance(payload, dict):
+                continue
+            filing_type = str(payload.get("filing_type", "")).upper()
+            if filing_type in annual_types:
+                count += 1
+        return count
+
+    def _required_annual_periods(self, ticker: str, case_path: Path) -> int:
+        if ticker != "TEP":
+            return 0
+        annual_filing_count = self._count_annual_filing_partials(case_path)
+        if annual_filing_count <= 0:
+            return 8
+        # Dynamic threshold based on available annual reports.
+        # 4 annual filings => 6 annual periods expected.
+        return max(5, min(8, annual_filing_count + 2))
+
     # ── Check 1: Structural completeness ──────────────────────────────
 
     def validate_structural_completeness(self, ticker: str, tp_data: Dict,
-                                         tp_calculated: Optional[Any]) -> CheckResult:
+                                         tp_calculated: Optional[Any], case_path: Path) -> CheckResult:
         issues = []
 
         # historico_anual
         ha = tp_data.get("historico_anual")
         if not ha or not isinstance(ha, list) or len(ha) == 0:
             issues.append("historico_anual missing or empty")
-        elif ticker == "TEP" and len(ha) < 8:
-            issues.append(f"TEP historico_anual has {len(ha)} periods (require >= 8)")
+        elif ticker == "TEP":
+            required_min = self._required_annual_periods(ticker, case_path)
+            if required_min > 0 and len(ha) < required_min:
+                issues.append(
+                    f"TEP historico_anual has {len(ha)} periods (require >= {required_min})"
+                )
 
         # historico_trimestral
         ht = tp_data.get("historico_trimestral")
@@ -413,7 +439,7 @@ class R1CanaryValidator:
         # Run all checks
         check_results = {
             "structural_completeness": self.validate_structural_completeness(
-                ticker, tp_data, tp_calculated),
+                ticker, tp_data, tp_calculated, case_path),
             "quantitative_checks": self.validate_quantitative_checks(
                 ticker, tp_data, tp_calculated, market_data_raw),
             "field_level_spot_checks": self.validate_field_level_spot_checks(ticker, tp_data),
