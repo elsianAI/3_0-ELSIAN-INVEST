@@ -265,6 +265,42 @@ class RecencyEndToEndMergeTests(unittest.TestCase):
         conflicts = entry_2023[0].get("_merge_conflicts", [])
         self.assertTrue(any(c.get("reason") == "scale_guard" for c in conflicts))
 
+    def test_scale_repair_promotes_million_style_annual_outlier(self):
+        """If peer years are billion-scale, 1200 should be interpreted as 1,200M."""
+        partial = {
+            "filing_type": "10-K",
+            "filing_priority": 1,
+            "historico_anual": [
+                {
+                    "periodo": "FY2021",
+                    "fecha_fin": "2021-12-31",
+                    "tipo_periodo": "anual",
+                    "moneda_original": "USD",
+                    "ingresos_usd": 7_115_000_000.0,
+                },
+                {
+                    "periodo": "FY2022",
+                    "fecha_fin": "2022-12-31",
+                    "tipo_periodo": "anual",
+                    "moneda_original": "USD",
+                    "ingresos_usd": 1200.0,
+                },
+                {
+                    "periodo": "FY2023",
+                    "fecha_fin": "2023-12-31",
+                    "tipo_periodo": "anual",
+                    "moneda_original": "USD",
+                    "ingresos_usd": 9_095_850_000.0,
+                },
+            ],
+            "historico_trimestral": [],
+            "balance_sheet_ultimo": {},
+        }
+        result = merge([partial])
+        annual = {e.get("periodo"): e for e in result.get("historico_anual", [])}
+        self.assertIn("FY2022", annual)
+        self.assertEqual(annual["FY2022"].get("ingresos_usd"), 1_200_000_000.0)
+
 
 # ─────────────────────────────────────────────
 # P1: Reconciliation classification tests

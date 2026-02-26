@@ -128,9 +128,11 @@ def merge(partial_extractions: list[dict]) -> dict:
                     key=lambda e: _period_sort_key(e.get("periodo", ""), e),
                     reverse=True,
                 )[:MAX_PERIODS_PER_FILING]
+        _repair_annual_revenue_scale(ext.get("historico_anual", []))
 
     if len(normalized_extractions) == 1:
         merged = dict(normalized_extractions[0])
+        _repair_annual_revenue_scale(merged.get("historico_anual", []))
         local_warnings: list[str] = []
         merged["balance_sheet_ultimo"] = _normalize_balance_sheet(
             merged.get("balance_sheet_ultimo"),
@@ -162,6 +164,7 @@ def merge(partial_extractions: list[dict]) -> dict:
 
     # Merge sections
     base["historico_anual"] = _merge_annual(normalized_extractions)
+    _repair_annual_revenue_scale(base["historico_anual"])
     base["historico_trimestral"] = _merge_quarterly(normalized_extractions)
     base["balance_sheet_ultimo"] = _merge_balance_sheet(normalized_extractions, merger_warnings)
     base["lease_data"] = _merge_lease_data(normalized_extractions)
@@ -834,6 +837,52 @@ def _scale_guard_preference(field: str, existing_val, new_val):
         return None
 
     return "new" if new_abs > existing_abs else "existing"
+
+
+def _repair_annual_revenue_scale(entries: list) -> None:
+    """Repair obvious million-style annual revenue outliers in-place.
+
+    If the same annual series contains billion-scale revenues, values in the
+    [100, 1_000_000) range are treated as likely "millions" and scaled to
+    absolute units.
+    """
+    if not isinstance(entries, list) or not entries:
+        return
+
+    magnitudes = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        revenue = _coerce_finite_number(entry.get("ingresos_usd"))
+        if revenue is None:
+            continue
+        magnitudes.append(abs(revenue))
+    if not magnitudes:
+        return
+
+    peer_large = max((v for v in magnitudes if v >= 1_000_000_000), default=0.0)
+    if peer_large <= 0:
+        return
+
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        revenue = _coerce_finite_number(entry.get("ingresos_usd"))
+        if revenue is None:
+            continue
+        abs_revenue = abs(revenue)
+        if abs_revenue < 100 or abs_revenue >= 1_000_000:
+            continue
+
+        scaled = revenue * 1_000_000.0
+        if abs(scaled) > peer_large * 2.5:
+            continue
+
+        entry["ingresos_usd"] = scaled
+        provenance = entry.setdefault("_field_sources", {})
+        if isinstance(provenance, dict):
+            prev_source = str(provenance.get("ingresos_usd", "UNKNOWN"))
+            provenance["ingresos_usd"] = f"{prev_source}:scale_repair"
 
 
 def _resolve_conflict(values: list[tuple], field: str):
