@@ -234,6 +234,20 @@ def _compare_count(label: str, golden_val: int, current_val: int) -> str | None:
     return None
 
 
+def _period_key(entry: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Build a stable annual-period key from snapshot entries."""
+    if not isinstance(entry, dict):
+        return (None, None)
+    fecha_fin = entry.get("fecha_fin")
+    periodo = entry.get("periodo")
+    if isinstance(fecha_fin, str) and not fecha_fin.strip():
+        fecha_fin = None
+    if isinstance(periodo, str) and not periodo.strip():
+        periodo = None
+    return (fecha_fin if isinstance(fecha_fin, str) else None,
+            periodo if isinstance(periodo, str) else None)
+
+
 def check_case(
     ticker: str,
     date_str: str,
@@ -255,13 +269,57 @@ def check_case(
 
     issues: list[str] = []
 
-    # ── Compare annual periods (exact) ──
-    for i, (gp, cp) in enumerate(
-        zip(golden.get("annual_periods", []), current.get("annual_periods", []))
-    ):
+    # ── Compare annual periods (exact, aligned by period key not list position) ──
+    g_annual = [e for e in golden.get("annual_periods", []) if isinstance(e, dict)]
+    c_annual = [e for e in current.get("annual_periods", []) if isinstance(e, dict)]
+
+    golden_by_key: dict[tuple[str | None, str | None], dict[str, Any]] = {}
+    current_by_key: dict[tuple[str | None, str | None], dict[str, Any]] = {}
+    golden_unkeyed: list[tuple[int, dict[str, Any]]] = []
+    current_unkeyed: list[tuple[int, dict[str, Any]]] = []
+
+    for i, entry in enumerate(g_annual):
+        key = _period_key(entry)
+        if key == (None, None):
+            golden_unkeyed.append((i, entry))
+        else:
+            golden_by_key[key] = entry
+
+    for i, entry in enumerate(c_annual):
+        key = _period_key(entry)
+        if key == (None, None):
+            current_unkeyed.append((i, entry))
+        else:
+            current_by_key[key] = entry
+
+    for key, gp in golden_by_key.items():
+        cp = current_by_key.get(key)
+        if cp is None:
+            issues.append(
+                "  REGRESSION annual[periodo="
+                f"{key[1]},fecha_fin={key[0]}]: missing in current snapshot"
+            )
+            continue
         for field in CORE_ANNUAL_FIELDS:
             err = _compare_exact(
-                f"annual[{i}].{field}",
+                f"annual[periodo={key[1]},fecha_fin={key[0]}].{field}",
+                gp.get(field),
+                cp.get(field),
+            )
+            if err:
+                issues.append(err)
+
+    # Fallback for legacy/unkeyed entries: compare by position.
+    for i, (g_idx, gp) in enumerate(golden_unkeyed):
+        if i >= len(current_unkeyed):
+            issues.append(
+                f"  REGRESSION annual[{g_idx}]: missing unkeyed period in current snapshot"
+            )
+            continue
+        _, cp = current_unkeyed[i]
+        for field in CORE_ANNUAL_FIELDS:
+            err = _compare_exact(
+                f"annual_unkeyed[{g_idx}].{field}",
                 gp.get(field),
                 cp.get(field),
             )
@@ -311,6 +369,12 @@ def check_case(
               f"(golden: {golden.get('historico_trimestral_count', '?')})")
         print(f"  Confidence: {cq.get('confidence_score')} "
               f"(golden: {gq.get('confidence_score', '?')})")
+        if golden_by_key:
+            keys = sorted(golden_by_key.keys(), key=lambda k: (k[0] or "", k[1] or ""))
+            key_desc = ", ".join(f"{k[1]}@{k[0]}" for k in keys)
+            print(f"  Annual keys: {key_desc}")
+        if golden_unkeyed:
+            print(f"  Annual unkeyed compared by position: {len(golden_unkeyed)}")
 
     return passed, issues
 
