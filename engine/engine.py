@@ -26,7 +26,8 @@ from .state import (
 from .router import execute_pipeline, execute_step, is_step_ready, get_parallel_group
 from .dashboard import generate_dashboard, generate_decisions, build_dashboard, render_dashboard, show_menu
 from .changelog import append_entry
-from .git_utils import stage_case, prepare_commit_message, commit
+from .git_utils import stage_case, prepare_commit_message, commit  # legacy
+from .git_utils import is_git_enabled, auto_commit_case, push_if_needed
 from .diagnostics import (
     format_failure_block,
     save_failure_artifact,
@@ -212,7 +213,7 @@ Examples:
     defaults_set.add_argument(
         "--pipeline-models",
         dest="pipeline_models",
-        help="Comma/range/list of model profiles (e.g. 1,3,gemini-3-pro)",
+        help="Comma/range/list of model profiles (e.g. 1,3,gemini-3.1-pro-preview)",
     )
     defaults_set.add_argument(
         "--fusion-model",
@@ -1498,9 +1499,16 @@ def _cmd_pipeline(config, args):
             )
     _refresh_quality_stats(config, case_dir)
 
-    stage_case(case_dir, config.workspace)
-    msg = prepare_commit_message(ticker, "PIPELINE", "COMPLETO", date_str)
-    commit(config.workspace, msg)
+    # V6.2: Conservative git — commit only if pipeline completed successfully
+    final_status = final_state.get("estado_pipeline", "")
+    git_cfg = config.raw.get("git", {})
+    if is_git_enabled(config.raw) and final_status == "COMPLETO":
+        committed = auto_commit_case(
+            config.workspace, case_dir, ticker,
+            "PIPELINE", f"COMPLETO via {date_str}", git_cfg,
+        )
+        if committed:
+            push_if_needed(config.workspace, git_cfg)
 
     print(f"\n[engine] Pipeline finished. Status: {result['state']['estado_pipeline']}")
 
@@ -1696,6 +1704,18 @@ def _cmd_continue(config, args):
 
     final_state = load_state(case_dir)
     _refresh_quality_stats(config, case_dir)
+
+    # V6.2: Conservative git — commit only if continue reached COMPLETO
+    final_status = final_state.get("estado_pipeline", "")
+    git_cfg = config.raw.get("git", {})
+    if is_git_enabled(config.raw) and final_status == "COMPLETO":
+        committed = auto_commit_case(
+            config.workspace, case_dir, ticker,
+            "CONTINUE", f"COMPLETO via {date_str}", git_cfg,
+        )
+        if committed:
+            push_if_needed(config.workspace, git_cfg)
+
     print(f"\n[engine] Continue finished. Status: {final_state['estado_pipeline']}")
 
 
@@ -1769,6 +1789,17 @@ def _cmd_step(config, args):
             step_result=result,
         )
 
+    # V6.2: Conservative git — commit only if step succeeded
+    git_cfg = config.raw.get("git", {})
+    if is_git_enabled(config.raw) and result.get("success"):
+        model_used = result.get("model_profile") or result.get("model", "unknown")
+        committed = auto_commit_case(
+            config.workspace, case_dir, ticker,
+            "STEP", f"{step_name} DONE ({model_used})", git_cfg,
+        )
+        if committed:
+            push_if_needed(config.workspace, git_cfg)
+
     print(f"[engine] Step {step_name}: {'success' if result.get('success') else 'failed'}")
 
 
@@ -1802,6 +1833,12 @@ def _cmd_rehacer(config, args):
     # Reset in pipeline dict (main steps)
     if step_name in state.get("pipeline", {}):
         state["pipeline"][step_name] = {"estado": "PENDING", "artefacto": None, "artefacto_previo": None}
+        # For grouped steps, force all sub-steps to PENDING as well (V6.2 A/B precondition).
+        # This guarantees a real re-execution even when the parent group was DONE.
+        from .state import SUB_STEPS
+        for sub in SUB_STEPS.get(step_name, []):
+            if sub in state.get("sub_steps", {}):
+                state["sub_steps"][sub] = {"status": "PENDING"}
         state["estado_pipeline"] = "INCOMPLETO"
         reset_done = True
 
@@ -1838,6 +1875,17 @@ def _cmd_rehacer(config, args):
             persist_state=True,
             step_result=result,
         )
+
+    # V6.2: Conservative git — commit only if rehacer succeeded
+    git_cfg = config.raw.get("git", {})
+    if is_git_enabled(config.raw) and result.get("success"):
+        model_used = result.get("model_profile") or result.get("model", "unknown")
+        committed = auto_commit_case(
+            config.workspace, case_dir, ticker,
+            "REHACER", f"{step_name} DONE ({model_used})", git_cfg,
+        )
+        if committed:
+            push_if_needed(config.workspace, git_cfg)
 
     print(f"[engine] Step {step_name}: {'success' if result.get('success') else 'failed'}")
 
