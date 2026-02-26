@@ -1,0 +1,186 @@
+{
+  "version_esquema": "ImpliedExpectations_v1",
+  "caso_id": "CASE_20260226_GCT",
+  "fecha_corte": "2026-02-26",
+  "empresa": {
+    "ticker": "GCT",
+    "nombre": "UNKNOWN",
+    "bolsa": "UNKNOWN",
+    "pais": "UNKNOWN",
+    "sector": "UNKNOWN",
+    "industria": "UNKNOWN"
+  },
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1_partial",
+    "truth_pack_caso_id": "CASE_20260226_GCT"
+  },
+  "status": "BLOCKED",
+  "motivo_blocked": "Falta enterprise_value_usd (EV) en el TruthPack. Sin EV no se pueden traducir expectativas implicitas via reverse valuation ni calcular multiplos EV-based.",
+  "snapshot_mercado": {
+    "fecha": "2026-02-26",
+    "precio_usd": 43.71,
+    "market_cap_usd": 1620000000.0,
+    "enterprise_value_usd": null,
+    "deuda_total_usd": null,
+    "caja_usd": 379780000.0,
+    "deuda_neta_usd": null,
+    "acciones_diluidas": null
+  },
+  "metricas_base": {
+    "periodo_base": "FY",
+    "fecha_fin_periodo_base": "2025-12-31",
+    "ingresos_usd": 1289897000.0,
+    "ebit_usd": 144976000.0,
+    "cfo_usd": 190660000.0,
+    "capex_usd": -7873000.0,
+    "fcf_usd": 182787000.0,
+    "margen_operativo_pct": 11.24,
+    "margen_fcf_pct": 14.17
+  },
+  "seleccion_metodo": {
+    "metodo_principal": "BLOCKED",
+    "razon": "Aunque FCF base es positivo y normalmente aplicaria REVERSE_DCF_FCF, el EV requerido por la regla minima no esta disponible. Por lo tanto el motor queda bloqueado.",
+    "metodos_secundarios": [
+      "MULTIPLOS_IMPLICITOS_SOLO"
+    ]
+  },
+  "multiples_implicitos": {
+    "disponible": true,
+    "ev_ebit": null,
+    "ev_fcf": null,
+    "p_fcf": 8.86,
+    "fcf_yield_pct": 11.28,
+    "comentario": "Solo se pudo calcular la lectura sobre market cap (P/FCF y FCF yield). Los multiplos EV-based quedan indeterminados por EV nulo."
+  },
+  "parametros_modelo": {
+    "horizonte_anos": 5,
+    "tasa_descuento_grid": [
+      0.08,
+      0.1,
+      0.12
+    ],
+    "crecimiento_terminal_grid": [
+      0.02,
+      0.03
+    ],
+    "multiple_terminal_fcf_grid": [
+      10,
+      12,
+      15,
+      18
+    ],
+    "nota_parametros": "Se usan rangos estandar para evitar precision falsa: tres tasas de descuento, dos crecimientos terminales y cuatro multiplos terminales. El grid teorico tiene 24 combinaciones unicas (3x2x4). No se ejecuto por bloqueo de EV.",
+    "convenciones": {
+      "definicion_fcf": "FCF = CFO - CAPEX (usando capex como salida de caja)",
+      "ev_formula": "EV = market_cap + deuda_total - caja",
+      "si_fcf_negativo": "usar earnings power / EBIT y no reverse DCF de FCF"
+    }
+  },
+  "reverse_dcf_fcf": {
+    "aplicable": false,
+    "fcf0_usd": 182787000.0,
+    "resultado_grid": [],
+    "sensibilidades": {
+      "ranking_drivers": [
+        {
+          "driver": "cagr_fcf_5y",
+          "importancia": "ALTA"
+        },
+        {
+          "driver": "multiple_terminal",
+          "importancia": "MEDIA"
+        },
+        {
+          "driver": "tasa_descuento",
+          "importancia": "MEDIA"
+        }
+      ],
+      "observacion": "No calculado: falta EV para resolver el crecimiento implicito en cada celda del grid."
+    },
+    "validaciones_modelo": {
+      "ev_presente": false,
+      "fcf0_presente": true,
+      "resultados_sin_valores_absurdos": true,
+      "detalle": "Modelo no ejecutado por falta de EV; no hay celdas para validar."
+    }
+  },
+  "reverse_earnings_power": {
+    "aplicable": false,
+    "metrica_base": "EBIT",
+    "valor_base_usd": 144976000.0,
+    "rango_normalizado_usd": {
+      "min": null,
+      "base": null,
+      "max": null
+    },
+    "implied_multiple_sobre_normalizado": {
+      "multiple_min": null,
+      "multiple_base": null,
+      "multiple_max": null
+    },
+    "lectura": "No ejecutado en esta corrida: el bloqueo por EV ausente tambien impide convertir EBIT en multiplos implicitos de empresa.",
+    "supuestos": []
+  },
+  "resumen_expectativas_implicitas": {
+    "enunciados": [
+      "No es posible traducir el precio/EV actual a expectativas implicitas porque enterprise_value_usd esta ausente.",
+      "Con EV disponible, el motor resolveria el CAGR de FCF implicito en un grid de 24 combinaciones (descuento, crecimiento terminal, multiplo terminal)."
+    ],
+    "variable_critica_principal": "RIESGO_CAPITAL",
+    "que_deberia_observarse_en_6_12_meses": [
+      "Publicacion explicita de deuda_total_usd para poder construir EV sin supuestos.",
+      "Actualizacion de enterprise_value_usd o insumos completos de EV (market cap, deuda financiera, caja) en el TruthPack.",
+      "Confirmacion de FCF TTM completo (CFO y CAPEX de los cuatro trimestres) para alinear base operativa con la fecha de mercado."
+    ]
+  },
+  "banderas": {
+    "expectativas_extremas": false,
+    "posible_value_trap": false,
+    "posible_peak_earnings": false,
+    "alto_riesgo_balance": false,
+    "opacidad_alta": true,
+    "notas": [
+      "Falta deuda_total_usd, lo que impide medir apalancamiento financiero de forma directa.",
+      "EV nulo bloquea la inferencia principal de expectativas.",
+      "Existen lease liabilities reportadas, pero no sustituyen automaticamente deuda_total_usd para este motor."
+    ]
+  },
+  "faltantes_criticos": [
+    {
+      "item": "enterprise_value_usd",
+      "por_que_importa": "Es el ancla obligatoria para reverse valuation y multiplos EV-based.",
+      "como_resolver": "Incluir EV directo o completar deuda_total_usd para derivarlo con EV = market_cap + deuda_total - caja."
+    },
+    {
+      "item": "deuda_total",
+      "por_que_importa": "Sin deuda total no se puede derivar EV desde market cap y caja.",
+      "como_resolver": "Extraer borrowings/debt del balance y poblar deuda_corto_plazo_usd, deuda_largo_plazo_usd y deuda_total_usd."
+    },
+    {
+      "item": "acciones_diluidas",
+      "por_que_importa": "Mejora trazabilidad de metricas por accion y validaciones cruzadas de market cap/precio.",
+      "como_resolver": "Agregar promedio o cierre de acciones diluidas desde 10-K/10-Q."
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "EV no disponible en mercado/traza_calculo_ev por deuda_total_usd nula.",
+      "FCF TTM viene nulo en el bloque ttm; se uso FY2025 para referencia base.",
+      "No se ejecuto el grid reverse DCF por prerequisito incumplido.",
+      "Las conclusiones de expectativas quedan limitadas a multiples no-EV.",
+      "Se uso EBIT (no EBITA) conforme a regla metodologica."
+    ],
+    "traza_calculo": [
+      "Gate N1 validado: truth_pack.data_quality.status = PASS.",
+      "Gate N2 fallido: enterprise_value_usd = null (dato critico faltante).",
+      "Snapshot mercado tomado de TruthPack: precio=43.71, market_cap=1,620,000,000, caja=379,780,000.",
+      "Base operativa tomada de FY2025: ingresos=1,289,897,000; EBIT=144,976,000; CFO=190,660,000; CAPEX=-7,873,000.",
+      "FCF base calculado ajustando capex como salida de caja: 190,660,000 - 7,873,000 = 182,787,000.",
+      "Margen operativo = EBIT/Ingresos = 11.24%.",
+      "Margen FCF = FCF/Ingresos = 14.17%.",
+      "P/FCF = market_cap/FCF = 8.86x; FCF yield = FCF/market_cap = 11.28%.",
+      "Multiples EV/EBIT y EV/FCF no calculables por EV faltante.",
+      "Control de bug conocido: grid teorico 3x2x4 = 24 combinaciones unicas; sin ejecucion por bloqueo."
+    ]
+  }
+}

@@ -1,0 +1,241 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260226_GCT",
+  "fecha_corte": "2026-02-26",
+  "ticker": "GCT",
+  "red_flags": [
+    {
+      "id": "RF-01",
+      "categoria": "opacidad_balance",
+      "titulo": "Cuentas por cobrar e inventarios no reportados en balance consolidado",
+      "descripcion": "El balance sheet ultimo (FY2025) muestra cuentas_por_cobrar_usd e inventarios_usd como null. Con ingresos de $1,290M y COGS de $989M, la imposibilidad de evaluar DSO y DIO impide un analisis significativo de calidad de capital de trabajo y deteccion de channel stuffing o acumulacion de inventario obsoleto.",
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "balance_sheet_ultimo",
+      "cuantificacion": "Ingresos FY2025 $1,289.9M; COGS $989.2M; receivables e inventarios no disponibles para ratio analysis."
+    },
+    {
+      "id": "RF-02",
+      "categoria": "opacidad_deuda",
+      "titulo": "Deuda financiera no desagregada a pesar de $716.7M en pasivos totales",
+      "descripcion": "deuda_total_usd, deuda_largo_plazo_usd y deuda_corto_plazo_usd son null en todos los periodos. Los pasivos totales ascienden a $716.7M, de los cuales $469.7M son lease liabilities. Los ~$247M restantes no estan desagregados, imposibilitando medir apalancamiento financiero real, covenants o riesgo de refinanciacion.",
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "balance_sheet_ultimo / lease_data",
+      "cuantificacion": "Pasivos totales $716.7M - lease liabilities $469.7M = ~$247.0M en pasivos no clasificados."
+    },
+    {
+      "id": "RF-03",
+      "categoria": "concentracion_leases",
+      "titulo": "Lease liabilities representan 65.5% de pasivos totales y 39.1% de activos totales",
+      "descripcion": "Operating + finance lease liabilities suman $469.7M sobre $716.7M de pasivos totales. Los ROU assets ($432.7M) representan el 36.0% de activos totales ($1,202.5M). Esta concentracion implica obligaciones fijas elevadas de pago que reducen flexibilidad operativa en escenarios de contraccion de ingresos. Las lease liabilities corrientes de $100.7M representan un compromiso anual significativo.",
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "lease_data / FY2025",
+      "cuantificacion": "Lease liabilities FY2025: $469.7M (current $100.7M + non-current $369.0M). ROU assets: $432.7M. Ratio lease liabilities/pasivos totales: 65.5%."
+    },
+    {
+      "id": "RF-04",
+      "categoria": "discrepancia_historica",
+      "titulo": "Discrepancia material en net_income FY2022 entre 10-K y 20-F (43.9%)",
+      "descripcion": "El 10-K FY2024 reporta net_income FY2022 de $24.0M mientras que el 20-F FY2023 reporta $37.5M para el mismo periodo. La diferencia de $13.5M (43.9%) esta clasificada como potential_restatement en el reconciliation_log. Esto sugiere una posible reformulacion de resultados o diferencias de consolidacion no explicadas entre filings SEC.",
+      "source_id": "SRC_SEC_002_10-K_FY2024.htm / SRC_SEC_004_20-F_FY2023.htm",
+      "ubicacion": "historico_anual FY2022 / reconciliation_log",
+      "cuantificacion": "Net income 10-K: $23,972,000 vs 20-F: $37,455,000. Diferencia: $13,483,000 (43.9%)."
+    },
+    {
+      "id": "RF-05",
+      "categoria": "volatilidad_gastos",
+      "titulo": "G&A oscila erraticamente: +146% en FY2024 seguido de -37% en FY2025",
+      "descripcion": "General & administrative expenses pasaron de $30.0M (FY2023) a $73.9M (FY2024, +146.5%) y luego cayeron a $46.6M (FY2025, -37.0%). Estos movimientos son desproporcionados frente al crecimiento de ingresos y podrian indicar reclasificacion de costos entre lineas, gastos extraordinarios no desagregados o manipulacion de timing de reconocimiento de gastos.",
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "historico_anual FY2023-FY2025 campo ga_usd",
+      "cuantificacion": "ga_usd: FY2023 $30.0M → FY2024 $73.9M (+146.5%) → FY2025 $46.6M (-37.0%). Como % ingresos: 4.3% → 6.4% → 3.6%."
+    },
+    {
+      "id": "RF-06",
+      "categoria": "anomalia_cash_flow_trimestral",
+      "titulo": "CFO Q3-2025 de $126.3M vs EBIT de $40.5M (ratio 3.1x)",
+      "descripcion": "En Q3-2025 el CFO alcanza $126.3M con un EBIT de solo $40.5M, un ratio CFO/EBIT de 3.1x. Esta divergencia masiva sugiere un release significativo de capital de trabajo o cobro acelerado de receivables al cierre del trimestre. Sin visibilidad sobre receivables e inventarios, no es posible confirmar si es estacional o artificial.",
+      "source_id": "SRC_SEC_005_10-Q_Q3-2025.htm",
+      "ubicacion": "historico_trimestral Q3-2025",
+      "cuantificacion": "CFO $126,292,000 vs EBIT $40,520,000. Diferencia: +$85.8M. CFO/EBIT ratio: 3.12x."
+    },
+    {
+      "id": "RF-07",
+      "categoria": "anomalia_impuestos",
+      "titulo": "Credito fiscal en Q4-2024 (+$573K) cuando la norma es gasto fiscal",
+      "descripcion": "En Q4-2024, income_tax_usd muestra +$573,000 (beneficio fiscal) con net_income de $31.0M y EBIT de $27.6M. Todos los demas trimestres muestran gasto fiscal negativo. Esto sugiere una reversion de provisiones fiscales, creditos fiscales puntuales o ajustes de cierre de ejercicio que podrian inflar el beneficio neto del Q4.",
+      "source_id": "SRC_017_8-K_2026-02-26.htm",
+      "ubicacion": "historico_trimestral Q4-2024",
+      "cuantificacion": "income_tax_usd Q4-2024: +$573,000. Tasa impositiva efectiva implicita: -2.1% vs FY2025 anualizada ~17.4%."
+    },
+    {
+      "id": "RF-08",
+      "categoria": "desaceleracion_ingresos",
+      "titulo": "Crecimiento de ingresos se desacelera bruscamente de +65% a +11%",
+      "descripcion": "El crecimiento de ingresos paso de +43.6% (FY2023) a +65.0% (FY2024) a +11.1% (FY2025). Esta desaceleracion abrupta, combinada con la compresion del margen bruto (de 24.6% a 23.3%), puede presionar valoraciones basadas en crecimiento y sugiere posible saturacion o presion competitiva.",
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "historico_anual FY2023-FY2025",
+      "cuantificacion": "Ingresos YoY: FY2023 +43.6%, FY2024 +65.0%, FY2025 +11.1%. Margen bruto: FY2024 24.6% → FY2025 23.3%."
+    },
+    {
+      "id": "RF-09",
+      "categoria": "reconciliacion_masiva",
+      "titulo": "90+ entradas de reconciliation_log con discrepancias >40% entre fuentes",
+      "descripcion": "El reconciliation_log del TruthPack contiene numerosas entradas clasificadas como potential_restatement con diferencias >40% entre distintos filings para el mismo periodo. Muchas corresponden a confusion entre datos YTD (acumulados) vs trimestrales discretos, pero la frecuencia y magnitud sugieren riesgo de datos poco fiables en comparativas historicas.",
+      "source_id": "TruthPack reconciliation_log",
+      "ubicacion": "data_quality.reconciliation_log",
+      "cuantificacion": "Multiples conflictos con diff_pct >50% en periodos Q2-2023 a Q3-2025. Campos afectados: ingresos, COGS, EBIT, net_income, GA, taxes."
+    },
+    {
+      "id": "RF-10",
+      "categoria": "capex_bajo",
+      "titulo": "Capex extraordinariamente bajo vs escala de ingresos (0.6% de revenue)",
+      "descripcion": "En FY2025, capex es de solo $7.9M sobre ingresos de $1,290M (0.6%). Esto es muy bajo incluso para un modelo asset-light. Con ROU assets de $432.7M, la compania depende casi exclusivamente de leases para su infraestructura, lo que traslada el gasto de capital a obligaciones de lease y puede subestimar el verdadero gasto de mantenimiento del negocio.",
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "historico_anual FY2025",
+      "cuantificacion": "Capex FY2025: $7.9M. Capex/Revenue: 0.61%. Capex FY2024: $15.5M (1.34%). Lease payments corrientes: ~$100.7M."
+    }
+  ],
+  "liquidez": {
+    "efectivo_disponible_usd": 379780000.0,
+    "lineas_credito_disponibles_usd": null,
+    "nota_lineas_credito": "No se identificaron lineas de credito (revolving facilities) en el TruthPack ni SourcesPack.",
+    "runway_estimado_meses": "Sin riesgo inmediato",
+    "runway_detalle": "Con CFO FY2025 de $190.7M y caja de $379.8M, la compania genera efectivo neto positivo. Incluso asumiendo lease payments corrientes de ~$100.7M, el runway es virtualmente ilimitado mientras se mantenga CFO positivo.",
+    "vencimientos_deuda_12_24_meses": {
+      "lease_liabilities_current_usd": 100670000.0,
+      "deuda_financiera_corriente_usd": null,
+      "nota": "No se identifico deuda financiera separada de leases. Las obligaciones corrientes principales son lease payments de $100.7M."
+    },
+    "riesgo_covenants": "INDETERMINADO - No se reporta deuda financiera con covenants. Las lease obligations son contractuales fijas.",
+    "riesgo_dilucion": "BAJO a MEDIO - No hay evidencia de emisiones recientes, pero la falta de datos de acciones diluidas limita el analisis. variacion_acciones_yoy_pct es null.",
+    "ratio_caja_pasivos_corrientes": "Caja $379.8M vs lease liabilities corrientes $100.7M + AP $105.4M = ~$206.1M. Ratio ~1.84x.",
+    "patrimonio_usd": 485799000.0,
+    "ratio_pasivos_patrimonio": 1.47
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "periodo": "FY2025",
+      "ebit_usd": 144976000.0,
+      "cfo_usd": 190660000.0,
+      "diferencia_usd": 45684000.0,
+      "diferencia_pct": 31.5,
+      "distorsion_mayor_15pct": true,
+      "componentes_identificados": {
+        "depreciation_usd": 8332000.0,
+        "income_tax_paid_usd": -23818000.0,
+        "interest_expense_usd": -200000.0,
+        "net_income_menos_ebit_usd": -7604000.0,
+        "gap_residual_no_explicado_usd": 68974000.0,
+        "nota_gap": "El gap residual de ~$69.0M probablemente incluye stock-based compensation, cambios en working capital (no desagregados por falta de receivables/inventory), depreciacion de ROU assets, y otros ajustes no monetarios. Sin acceso al detalle del cash flow statement, no se puede desagregar completamente."
+      }
+    },
+    "cfo_a_fcf": {
+      "periodo": "FY2025",
+      "cfo_usd": 190660000.0,
+      "capex_usd": -7873000.0,
+      "fcf_usd": 182787000.0,
+      "diferencia_pct": 4.1,
+      "distorsion_mayor_15pct": false,
+      "nota": "FCF extremadamente cercano a CFO por capex minimo. Sin embargo, lease payments corrientes (~$100.7M) funcionan como gasto de capital de facto. Un FCF ajustado por leases seria ~$82.1M, lo que representaria una reduccion del 55% respecto al FCF reportado."
+    },
+    "ebit_a_cfo_historico": [
+      {
+        "periodo": "FY2023",
+        "ebit_usd": 110078000.0,
+        "cfo_usd": 133452000.0,
+        "diferencia_pct": 21.2,
+        "distorsion_mayor_15pct": true
+      },
+      {
+        "periodo": "FY2024",
+        "ebit_usd": 130622000.0,
+        "cfo_usd": 158078000.0,
+        "diferencia_pct": 21.0,
+        "distorsion_mayor_15pct": true
+      },
+      {
+        "periodo": "FY2025",
+        "ebit_usd": 144976000.0,
+        "cfo_usd": 190660000.0,
+        "diferencia_pct": 31.5,
+        "distorsion_mayor_15pct": true
+      }
+    ],
+    "nota_tendencia": "La brecha EBIT→CFO se ha ampliado de 21% a 31.5% en dos anos. Esto sugiere crecientes ajustes no monetarios (probablemente depreciacion de ROU assets y stock-based comp) o ganancias de working capital que podrian revertirse."
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC-01",
+      "condicion": "Margen bruto cae por debajo del 18% en dos trimestres consecutivos",
+      "ventana_temporal": "Proximos 12 meses",
+      "probabilidad": "BAJA",
+      "base_cuantitativa": "Margen bruto FY2025: 23.3%. Minimo reciente FY2022: 17.0%. Tendencia actual estable pero comprimida vs FY2023 (26.8%).",
+      "mecanismo": "Compresion de margen por presion competitiva o inflacion de costos de fulfillment/transporte eliminaria rentabilidad operativa dado el alto peso de COGS (~77% de revenue)."
+    },
+    {
+      "id": "KC-02",
+      "condicion": "CFO cae por debajo de lease payments corrientes anualizados ($100M) durante dos trimestres consecutivos en base trailing 12M",
+      "ventana_temporal": "Proximos 12-18 meses",
+      "probabilidad": "BAJA",
+      "base_cuantitativa": "CFO FY2025: $190.7M. Lease payments corrientes: $100.7M. Ratio CFO/lease corriente: 1.89x.",
+      "mecanismo": "Si el crecimiento se estanca y working capital revierte, CFO podria no cubrir obligaciones fijas de lease, forzando uso de caja o refinanciacion."
+    },
+    {
+      "id": "KC-03",
+      "condicion": "Crecimiento de ingresos YoY se torna negativo (contraccion de revenue) por dos trimestres consecutivos",
+      "ventana_temporal": "Proximos 12 meses",
+      "probabilidad": "MEDIA",
+      "base_cuantitativa": "Revenue growth ya desacelero de +65% a +11%. Q4-2025 revenue $362.7M vs Q4-2024 $295.8M (+22.6%), pero Q1-2025 $271.9M vs Q1-2024 $251.1M (+8.3%).",
+      "mecanismo": "La desaceleracion abrupta sugiere que la fase de hiper-crecimiento ha terminado. En un modelo con altos costos fijos de leases, contraccion de top-line puede generar apalancamiento operativo negativo rapido."
+    },
+    {
+      "id": "KC-04",
+      "condicion": "Se confirma restatement formal de estados financieros historicos o investigacion regulatoria",
+      "ventana_temporal": "Proximos 24 meses",
+      "probabilidad": "MEDIA",
+      "base_cuantitativa": "Existen discrepancias materiales entre 10-K y 20-F en FY2022 net income (43.9%) y multiples conflictos de reconciliacion clasificados como potential_restatement.",
+      "mecanismo": "Un restatement formal o investigacion SEC destruiria confianza de mercado, podria desencadenar covenants ocultos y limitar acceso a capital."
+    },
+    {
+      "id": "KC-05",
+      "condicion": "Caja neta cae por debajo de $150M (consumo acumulado >$230M desde posicion actual)",
+      "ventana_temporal": "Proximos 18-24 meses",
+      "probabilidad": "BAJA",
+      "base_cuantitativa": "Caja actual $379.8M. CFF FY2025 fue -$67.8M (dividendos/recompras). Si se mantiene distribucion similar + working capital adverso, caja podria erosionarse.",
+      "mecanismo": "Combinacion de distribuciones a accionistas, working capital adverso y potencial adquisicion (CFI FY2023: -$90.5M, FY2024: -$55.4M) podria drenar la posicion de caja."
+    }
+  ],
+  "report_type": "ForensicDetection_v1",
+  "input_refs": {
+    "truth_pack": "TruthPack_v1_partial",
+    "implied_expectations": "ImpliedExpectations_v1 (BLOCKED - EV no disponible)",
+    "sources_pack": null
+  },
+  "log": {
+    "limitaciones": [
+      "No se dispuso de SourcesPack_v1; analisis basado exclusivamente en TruthPack.",
+      "Cuentas por cobrar e inventarios no disponibles en balance; no fue posible calcular DSO, DIO ni analizar anomalias de working capital.",
+      "Deuda financiera no desagregada; no se pudo evaluar covenants, riesgo de refinanciacion ni construir EV.",
+      "El gap residual en el puente EBIT→CFO (~$69M en FY2025) no pudo desagregarse sin acceso al detalle del estado de flujos.",
+      "SGA_usd no disponible de forma combinada; analisis de gastos se baso en ga_usd (G&A).",
+      "No se identifico goodwill en el balance (no reportado); no fue posible evaluar riesgo de deterioro.",
+      "Acciones diluidas no disponibles; no se pudo analizar riesgo de dilucion cuantitativamente."
+    ],
+    "areas_revisadas": [
+      "Liquidez y runway",
+      "Concentracion de lease liabilities",
+      "Reconocimiento de ingresos (tendencia y crecimiento)",
+      "Volatilidad de gastos operativos (G&A)",
+      "Puentes EBIT→CFO→FCF",
+      "Anomalias de impuestos trimestrales",
+      "Discrepancias entre fuentes (10-K vs 20-F)",
+      "Capex vs lease como gasto de capital",
+      "Desaceleracion de crecimiento"
+    ]
+  },
+  "_meta": {
+    "timestamp": "2026-02-26T15:30:00Z",
+    "modelo": "ForensicDetection_v1",
+    "notas": "Analisis ejecutado con TruthPack PASS (90% confidence). SourcesPack no disponible. 10 red flags identificados, 5 kill criteria candidatos."
+  }
+}

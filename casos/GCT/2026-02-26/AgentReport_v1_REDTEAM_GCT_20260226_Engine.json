@@ -1,0 +1,1006 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260226_GCT",
+  "fecha_corte": "2026-02-26",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "fusion_gemini-2.5-pro__claude-opus-4-6__gpt-5-codex",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260226_GCT",
+    "implied_expectations_caso_id": "CASE_20260226_GCT",
+    "sources_pack_caso_id": "CASE_20260226_GCT"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "El FCF FY2025 (182.7-182.8M USD) existe, pero su calidad no está demostrada: faltan AR, inventarios y puente detallado EBIT->CFO por working capital.",
+      "La compresión de margen bruto es persistente (26.8% -> 24.6% -> 23.3% entre FY2023-FY2025) y no hay evidencia sólida de reversión.",
+      "La carga de leases (~469.7M USD) es material y coincide con opacidad de deuda financiera/EV (campos null), elevando el riesgo de apalancamiento económico real.",
+      "El reconciliation_log muestra discrepancias relevantes (incluyendo múltiples potential_restatement); deben tratarse como riesgo crítico, aunque parte podría ser artefacto de extracción/presentación.",
+      "Diagnóstico fusionado RED_TEAM: sesgo a value trap y recomendación local NO_APTO hasta que se cierre trazabilidad de caja, deuda y calidad contable."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.81
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La calidad del FCF FY2025 no puede considerarse estructural mientras falte el desglose de working capital (AR, inventarios, payables) y el puente completo EBIT->CFO.",
+      "confianza_0_1": 0.84,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita_corta": "cuentas_por_cobrar_usd: null, inventarios_usd: null",
+          "interpretacion": "Sin estos saldos no se puede separar FCF recurrente de efectos transitorios de WC."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "historico_anual FY2024-FY2025",
+          "cita_corta": "G&A: 73.9M -> 46.6M (-37%)",
+          "interpretacion": "Parte de la mejora podría ser no recurrente y distorsionar lectura de sostenibilidad."
+        }
+      ],
+      "falsacion": {
+        "test": "Se publican AR, inventarios y puente CFO-EBIT mostrando WC estable/mejorando y sin contribución extraordinaria material.",
+        "ventana_meses": {
+          "min": 1,
+          "max": 3
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El margen bruto cayó de 26.8% a 23.3% en dos años, señal compatible con deterioro estructural y no solo normalización cíclica.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "historico_anual FY2023-FY2025",
+          "cita_corta": "GP/Rev: 26.8% -> 24.6% -> 23.3%",
+          "interpretacion": "Secuencia de tres años consecutivos a la baja."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_017_8-K_2026-02-26.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-26",
+          "ubicacion": "Q4-2025",
+          "cita_corta": "Gross profit 82.9M sobre ingresos 362.7M (~22.9%)",
+          "interpretacion": "La presión de margen persiste también en el trimestre más reciente disponible."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen bruto trimestral >=23.5% en 2 trimestres consecutivos de 2026.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Las obligaciones de leases (~469.7M USD) son materialmente altas y, junto con deuda ex-lease no visible, impiden cerrar el riesgo real de apalancamiento.",
+      "confianza_0_1": 0.89,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "lease_data",
+          "cita_corta": "total_lease_liabilities_usd: 469681000",
+          "interpretacion": "Compromisos fijos relevantes en un negocio con margen bruto decreciente."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1_partial",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-26",
+          "ubicacion": "mercado / traza_calculo_ev",
+          "cita_corta": "deuda_total_usd: null; enterprise_value_usd: null",
+          "interpretacion": "No hay base completa para cuantificar estructura de capital."
+        }
+      ],
+      "falsacion": {
+        "test": "Se publica deuda financiera total ex-lease y resulta <50M USD, con EV plenamente reconciliable.",
+        "ventana_meses": {
+          "min": 1,
+          "max": 6
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_004",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Las discrepancias de reconciliación (incluyendo múltiples potential_restatement) son una bandera roja de trazabilidad contable hasta que se expliquen formalmente.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1_partial",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-26",
+          "ubicacion": "data_quality.reconciliation_log",
+          "cita_corta": "80+ entradas y múltiples potential_restatement con diff_pct >50%",
+          "interpretacion": "Magnitud y frecuencia atípicas para métricas críticas (ingresos, EBIT, NI)."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1_partial",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-26",
+          "ubicacion": "_extraction_confidence",
+          "cita_corta": "campos clave resolved_by_arbiter",
+          "interpretacion": "La consistencia depende de arbitraje adicional y no de trazabilidad directa limpia."
+        }
+      ],
+      "falsacion": {
+        "test": "La compañía y/o auditor confirma que las discrepancias son de presentación (no restatement) y no hay material weakness nueva.",
+        "ventana_meses": {
+          "min": 1,
+          "max": 6
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_005",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La caída de G&A del 37% en FY2025 es potencialmente insostenible sin desglose de componentes recurrentes vs one-off.",
+      "confianza_0_1": 0.72,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "historico_anual FY2024-FY2025",
+          "cita_corta": "G&A 73.9M -> 46.6M con ingresos +11%",
+          "interpretacion": "Movimiento grande sin detalle suficiente de composición."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "historico_trimestral",
+          "cita_corta": "G&A trimestral muestra alta volatilidad entre periodos",
+          "interpretacion": "Puede haber componentes transitorios y no estructurales."
+        }
+      ],
+      "falsacion": {
+        "test": "G&A/ingresos se mantiene <4% durante 4 trimestres consecutivos de 2026 con explicación consistente.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_006",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La tesis alcista depende de re-rating a 10x-11x P/FCF sin catalizador verificable de transparencia, patrón típico de value trap.",
+      "confianza_0_1": 0.79,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-26",
+          "ubicacion": "multiples_implicitos",
+          "cita_corta": "P/FCF 8.86x; bull asume re-rating a 10.5x-11x",
+          "interpretacion": "El upside base depende de expansión de múltiplo más que de cierre de incertidumbre."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1_partial",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-26",
+          "ubicacion": "mercado y faltantes_criticos",
+          "cita_corta": "EV y deuda total no calculables",
+          "interpretacion": "Sin disclosure duro, el descuento puede persistir."
+        }
+      ],
+      "falsacion": {
+        "test": "GCT publica deuda/EV completos, sin flags contables nuevos, y el mercado reratea >10x P/FCF de forma sostenida.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "precio"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "Margen bruto cae por debajo de 22.0% en al menos un trimestre de 2026.",
+      "probabilidad_0_1": 0.64,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "En 10-Q/earnings, Gross profit/Revenue <22.0% en cualquier trimestre de 2026.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "No se anuncia programa formal de retorno de capital >=50M USD en 12 meses.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Ausencia de 8-K/PR con buyback o dividendo >=50M USD.",
+      "fuente_prevista": "PR"
+    },
+    {
+      "pred_id": "PRED_RT_003",
+      "descripcion": "P/FCF permanece por debajo de 10x durante los próximos 12 meses.",
+      "probabilidad_0_1": 0.62,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Market cap / FCF TTM no supera 10x de forma sostenida.",
+      "fuente_prevista": "precio"
+    },
+    {
+      "pred_id": "PRED_RT_004",
+      "descripcion": "G&A/ingresos revierte por encima de 5% en al menos 2 trimestres de 2026.",
+      "probabilidad_0_1": 0.35,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "G&A / Revenue >5% en 2+ trimestres de 2026.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_005",
+      "descripcion": "FCF FY2026 cae por debajo de 160M USD.",
+      "probabilidad_0_1": 0.35,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "CFO - capex en 10-K FY2026 <160M USD.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_006",
+      "descripcion": "deuda_total_usd seguirá sin disclosure usable en al menos uno de los próximos dos 10-Q.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "deuda_total_usd permanece null o no reconciliable con notas de borrowings en al menos uno de los próximos dos filings.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Puente detallado CFO->EBIT con desglose de AR, inventarios, payables y otros cambios de WC.",
+      "por_que_importa": "Sin esto no se puede validar la calidad ni la sostenibilidad del FCF FY2025.",
+      "como_obtenerlo": "10-K FY2025/10-Q 2026, sección de cash flows y notas de working capital."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de deuda financiera ex-lease (corto/largo, costo, covenants) y reconciliación de EV.",
+      "por_que_importa": "Necesario para cuantificar apalancamiento real y validar cualquier valoración EV-based.",
+      "como_obtenerlo": "Notas de borrowings/debt en 10-K y 10-Q; tabla de vencimientos."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de la caída de G&A (73.9M->46.6M): componentes recurrentes vs one-off.",
+      "por_que_importa": "Determina si la mejora operativa es sostenible o transitoria.",
+      "como_obtenerlo": "Notas de gastos en 10-K FY2025 y transcript de earnings call."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Historial formal de restatements/enmiendas y estado de controles internos (SOX 404).",
+      "por_que_importa": "Aclara si las discrepancias del reconciliation_log implican riesgo contable real.",
+      "como_obtenerlo": "SEC EDGAR (10-K/A, 10-Q/A, NT) + auditor report + Item 9A."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Calendario anual de pagos de leases y sensibilidad a renovación/cancelación.",
+      "por_que_importa": "Cuantifica rigidez de costos fijos bajo escenarios de menor crecimiento.",
+      "como_obtenerlo": "Nota de leases en 10-K y actualización en 10-Q."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Concentración de ingresos por cliente y geografía.",
+      "por_que_importa": "Ayuda a distinguir ciclo vs cambio estructural y riesgo de churn/concentración.",
+      "como_obtenerlo": "Disclosures de revenue concentration y segment reporting en 10-K."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.81,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "GCT combina FCF atractivo con señales simultáneas de fragilidad: márgenes en compresión, apalancamiento económico por leases y opacidad de deuda/EV. Hasta validar calidad de caja y trazabilidad contable, el descuento de múltiplo puede ser correcto y persistente."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_FUS_001",
+            "resumen_claim_bull": "FCF FY2025 alto y caja elevada implican oportunidad clara por valoración.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.58,
+              "por_que": [
+                "El FCF está observado pero su calidad no está cerrada por faltantes de WC.",
+                "La caída de G&A puede incluir componentes no recurrentes.",
+                "Caja alta no elimina el riesgo de obligaciones fijas y deuda ex-lease no visible."
+              ]
+            },
+            "puntos_ciegos": [
+              "No distingue FCF recurrente de efecto temporal por capital de trabajo.",
+              "Asume permanencia de OPEX sin desglose de componentes.",
+              "No integra completamente la rigidez de leases totales."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+                "ubicacion": "balance_sheet_ultimo",
+                "cita_corta": "AR e inventarios en null",
+                "interpretacion": "Sin estos datos no se puede auditar calidad de conversión a caja."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Puente CFO completo mostrando contribución de WC baja y estable, con FCF recurrente defendible.",
+              "ventana_meses": {
+                "min": 1,
+                "max": 3
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_002",
+            "resumen_claim_bull": "El descuento es sobre todo prima de opacidad, no deterioro operativo.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.66,
+              "por_que": [
+                "Hay deterioro operativo observable en margen bruto, no solo opacidad.",
+                "La opacidad puede ser riesgo real y no mera ineficiencia de mercado.",
+                "Las discrepancias de reconciliación sostienen prima de riesgo contable."
+              ]
+            },
+            "puntos_ciegos": [
+              "No cuantifica cuánto del descuento es opacidad vs fundamentales.",
+              "No incorpora adecuadamente el historial de inconsistencias de datos.",
+              "Asume rerating sin prueba causal de cambio de disclosure."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1_partial",
+                "ubicacion": "data_quality.reconciliation_log",
+                "cita_corta": "80+ discrepancias con potencial restatement",
+                "interpretacion": "Riesgo de confianza contable no resuelto."
+              },
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+                "ubicacion": "historico_anual FY2023-FY2025",
+                "cita_corta": "margen bruto 26.8% -> 24.6% -> 23.3%",
+                "interpretacion": "Existe presión fundamental ya visible."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Tras dos filings con deuda/EV completos y sin flags contables nuevos, el múltiplo reratea de forma sostenida.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_003",
+            "resumen_claim_bull": "FY2025 mostró apalancamiento operativo por fuerte caída de G&A.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "El recorte de G&A es grande y no está completamente explicado.",
+                "La mejora de EBIT convivió con deterioro de margen bruto.",
+                "Puede revertirse parcialmente en 2026."
+              ]
+            },
+            "puntos_ciegos": [
+              "No separa one-off vs eficiencia estructural.",
+              "No modela reversión parcial de gasto.",
+              "No estresa combinación de margen bajo + leases altos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+                "ubicacion": "historico_anual",
+                "cita_corta": "G&A 73.9M -> 46.6M y margen bruto en caída",
+                "interpretacion": "La mejora de gasto no prueba mejora estructural del motor bruto."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "G&A/ingresos >5% en 2 trimestres de 2026 o deterioro adicional de margen bruto.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_004",
+            "resumen_claim_bull": "Q4-2025 confirma tracción secuencial y reduce riesgo de caída.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.64,
+              "por_que": [
+                "La lectura secuencial puede estar influida por estacionalidad.",
+                "Q4 aporta P&L, pero el flujo trimestral no vino completo en el pack.",
+                "Se necesitan Q1-Q2 2026 para validar régimen y calidad de caja."
+              ]
+            },
+            "puntos_ciegos": [
+              "Extrapola un trimestre sin validar persistencia.",
+              "No integra posible reversión tras pico estacional.",
+              "No liga crecimiento a recuperación de margen."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_017_8-K_2026-02-26.htm",
+                "ubicacion": "Q4-2025",
+                "cita_corta": "cfo_usd/cfi_usd/cff_usd en null en extracción parcial",
+                "interpretacion": "No se puede cerrar calidad integral de resultados trimestrales."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Q1 y Q2 2026 no muestran continuidad en crecimiento y margen bruto.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_FUS_008",
+            "resumen_claim_bull": "Con FCF estable y re-rating a 10x-11x P/FCF hay retorno de doble dígito.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.74,
+              "por_que": [
+                "El retorno depende de expansión de múltiplo antes de resolver opacidad.",
+                "No hay catalizador concreto y fechado para ese rerating.",
+                "Con margen en descenso, el mercado puede mantener múltiplo deprimido."
+              ]
+            },
+            "puntos_ciegos": [
+              "Supone mejora de percepción sin cierre de riesgos duros.",
+              "No modela escenario de múltiplo estancado con FCF menor.",
+              "Subestima persistencia de descuento en casos con gobernanza opaca."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "ImpliedExpectations_v1",
+                "ubicacion": "multiples_implicitos",
+                "cita_corta": "upside base anclado en P/FCF objetivo 10.5x-11x",
+                "interpretacion": "El motor principal no es una mejora fundamental ya verificada."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Si con FCF estable y disclosure completo no supera 10x de forma sostenida, la tesis de rerating falla.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "precio"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Asumir rerating a 10x-11x antes de cerrar deuda_total/EV.",
+          "Tratar FCF FY2025 como estructural sin desglose robusto de WC.",
+          "Tomar la caída de G&A como eficiencia permanente sin bridge de componentes.",
+          "Inferir cambio de régimen por un trimestre secuencial potencialmente estacional.",
+          "Presuponer que opacidad es temporal y no una prima de riesgo persistente."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El negocio atraviesa compresión estructural de margen por competencia y mix.",
+          "El FCF 2025 fue pico transitorio por dinámica de working capital.",
+          "Los leases fijos limitan flexibilidad y castigan desaceleraciones de ingresos.",
+          "La prima de riesgo contable/gobernanza está correctamente incorporada en el múltiplo.",
+          "Sin catalizador de transparencia y retorno de capital, el descuento puede durar."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "La rentabilidad bruta sigue comprimiéndose y reduce el poder de generación de beneficios.",
+          "El recorte fuerte de G&A no está demostrado como sostenible.",
+          "La calidad de caja puede deteriorarse al normalizarse el working capital.",
+          "Leases altos y deuda ex-lease opaca elevan el riesgo económico real.",
+          "Sin mejora verificable de disclosure y márgenes, el múltiplo bajo puede ser trampa de valor persistente."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "COMPETENCIA_PRECIOS",
+            "descripcion": "La presión competitiva y/o mix menos favorable sigue comprimiendo margen bruto y restringe el EBIT.",
+            "indicadores_tempranos": [
+              "Margen bruto <22% en 2 trimestres de 2026.",
+              "Crecimiento de ingresos <5% YoY con margen bruto a la baja.",
+              "COGS/ingresos al alza sin mejora proporcional de volumen."
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "Si FY2025 tuvo apoyo transitorio de working capital, FY2026 puede mostrar normalización negativa de caja.",
+            "indicadores_tempranos": [
+              "CFO/NI <=1.0 en TTM.",
+              "Aumento de AR/inventarios sin crecimiento equivalente de ventas.",
+              "FCF TTM por debajo de 150M USD."
+            ]
+          },
+          {
+            "mecanismo": "OTRO",
+            "descripcion": "Riesgo contable/regulatorio: discrepancias de reconciliación + opacidad de deuda pueden detonar evento de confianza.",
+            "indicadores_tempranos": [
+              "Restatement formal o filing enmendado material.",
+              "SEC comment letter/investigación relevante.",
+              "Material weakness o cambio de auditor con lenguaje adverso."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Continúa la compresión de margen hacia zona baja de 20s, G&A revierte parcialmente y el FCF se normaliza por debajo del pico FY2025. El mercado mantiene descuento por opacidad y ausencia de catalizador de transparencia.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.45,
+            "drivers": [
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "8.5%-9.5%",
+                "justificacion": "Compresión de margen bruto + reversión parcial de G&A."
+              },
+              {
+                "variable": "FCF",
+                "direccion": "EMPEORA",
+                "rango": "90000000-130000000 USD",
+                "justificacion": "Normalización de WC y capex por encima del mínimo FY2025."
+              },
+              {
+                "variable": "OTRO",
+                "direccion": "NO_MEJORA",
+                "rango": "P/FCF 7x-9x",
+                "justificacion": "Persistencia de prima de opacidad y dudas de calidad de caja."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "EARNINGS_CAEN",
+              "explicacion": "FCF menor y múltiplo deprimido sostienen downside sin necesidad de colapso operativo total.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -48,
+                "base": -25,
+                "max": -10
+              },
+              "nota": "El vector dominante es menor FCF de calidad, no solo compresión adicional de múltiplo."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Evento contable/regulatorio (restatement, investigación o short report) junto con revelación de deuda material y caída de demanda. Se produce crisis de confianza y fuerte compresión de valoración.",
+            "ventana_meses": {
+              "min": 3,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.15,
+            "es_binario": true,
+            "drivers": [
+              {
+                "variable": "OTRO",
+                "direccion": "EMPEORA",
+                "rango": "restatement/investigación + deuda ex-lease >100M USD",
+                "justificacion": "Las señales de reconciliación y opacidad vuelven plausible un shock de credibilidad."
+              },
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "-10% a -15% YoY",
+                "justificacion": "En B2B, un evento reputacional puede acelerar pérdida de clientes."
+              }
+            ],
+            "impacto_en_supervivencia": "ALTO",
+            "nota": "La caja actual puede amortiguar liquidez de corto plazo, pero no evita destrucción rápida de market cap ante pérdida de confianza."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.72,
+        "razones": [
+          "P/FCF bajo (~8.86x) puede ser descuento correcto por riesgo, no oportunidad automática.",
+          "Compresión de margen bruto 26.8% -> 23.3% en 3 años consecutivos.",
+          "Leases ~469.7M USD imponen rigidez relevante frente a desaceleración.",
+          "deuda_total_usd y EV permanecen no reconciliables en el dataset usado.",
+          "Reconciliation_log con discrepancias significativas y potenciales restatements.",
+          "Mitigantes existentes (caja alta y CFO observado) no alcanzan para neutralizar la prima de riesgo sin disclosure adicional."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "Margen bruto >=23.5% en 2 trimestres consecutivos de 2026.",
+              "Puente WC confirma contribución acotada y recurrente a CFO.",
+              "Deuda ex-lease plenamente divulgada y baja (<50M USD).",
+              "Sin restatements ni material weaknesses nuevas."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "Margen bruto <22% en múltiples trimestres de 2026.",
+              "FCF TTM cae hacia <=130M USD sin inversión productiva clara.",
+              "Persisten opacidad de deuda/EV y conflictos de reconciliación.",
+              "P/FCF permanece <=9x pese intentos de narrativa de re-rating."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "CONTABILIDAD",
+          "definicion": "Restatement formal, enmienda material de filings o nueva material weakness en controles financieros.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "Destruye confianza en calidad de cifras y eleva prima de riesgo de forma abrupta."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "TESIS",
+          "definicion": "Margen bruto <21% en 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma deterioro severo de la economía unitaria."
+        },
+        {
+          "kc_id": "KC-RT-003",
+          "tipo": "BALANCE",
+          "definicion": "Se revela deuda financiera ex-lease >100M USD no previamente transparentada.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Cambia materialmente la lectura de solvencia y múltiplos implícitos."
+        },
+        {
+          "kc_id": "KC-RT-004",
+          "tipo": "CATALIZADOR",
+          "definicion": "FCF TTM <130M USD sin inversión productiva identificable.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Invalida la premisa central de FCF sostenido."
+        },
+        {
+          "kc_id": "KC-RT-005",
+          "tipo": "DISCLOSURE",
+          "definicion": "Al cierre de Q3-2026 no hay disclosure completo de deuda/EV y P/FCF sigue <=9x.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "El catalizador de transparencia no se materializa y la tesis queda estancada."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Desglose completo de WC mostrando que su contribución al CFO es baja y estable",
+          "umbral_o_condicion": "Contribución de WC al CFO <20M USD y puente trimestral consistente",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "filing"
+        },
+        {
+          "item": "Publicación de deuda financiera total ex-lease y EV totalmente reconciliable",
+          "umbral_o_condicion": "Deuda ex-lease <30M USD o net cash claramente positivo y verificable",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "filing"
+        },
+        {
+          "item": "Estabilización/recuperación de margen bruto",
+          "umbral_o_condicion": "GP/Revenue >=23% durante 3 trimestres consecutivos de 2026",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Retorno de capital formal y material",
+          "umbral_o_condicion": "Autorización de buyback o dividendo >=75M USD",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "PR"
+        },
+        {
+          "item": "Cierre del riesgo contable",
+          "umbral_o_condicion": "Opinión de auditor limpia sin lenguaje adverso de controles y sin restatements",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "10-K"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0.5,
+        "si_se_invierte_igual": [
+          "Tamaño inicial <=0.25% y tope absoluto 0.5% hasta resolver opacidad de deuda y calidad de FCF.",
+          "No promediar a la baja mientras deuda_total/EV y puente WC sigan incompletos.",
+          "Exigir 10-K/10-Q con desglose de AR, inventarios, payables y deuda ex-lease antes de aumentar posición.",
+          "Aplicar kill criteria automáticos para margen, contabilidad y balance sin excepción narrativa.",
+          "Monitorear margen bruto trimestral y disclosure de auditor/SEC en cada filing.",
+          "Usar stop-loss técnico en rango -15% a -20% por riesgo de evento contable/regulatorio."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Cuál es la deuda financiera total ex-lease (corto/largo), costo y vencimientos?",
+          "¿Cuánto del CFO FY2025 provino de working capital vs operación recurrente?",
+          "¿Qué explica exactamente la caída de G&A del 37% y qué parte es repetible?",
+          "¿Existen restatements formales o SEC comment letters relacionados con discrepancias históricas?",
+          "¿Cuál es el calendario de pagos de leases y su sensibilidad si ventas se estancan?",
+          "¿Qué nivel de concentración por cliente/geografía está presionando márgenes?",
+          "¿Por qué no hay un programa formal de retorno de capital con caja reportada alta?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Sin acceso integral a notas completas del 10-K para cerrar todos los puentes contables.",
+      "No se verificó de forma independiente el historial completo de restatements/SEC letters fuera del pack entregado.",
+      "Parte de las discrepancias del reconciliation_log podría deberse a artefactos de presentación/extracción (Q vs YTD).",
+      "EV y deuda total no son calculables de forma robusta con los campos actuales (null/no reconciliables).",
+      "Q4-2025 no trajo flujo trimestral completo en el pack extraído, limitando validación fina de calidad de caja."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "fusion": {
+      "step_name": "RED_TEAM",
+      "schema": "AgentReport_v1",
+      "modelos_usados": [
+        "gemini-2.5-pro",
+        "claude-opus-4-6",
+        "gpt-5-codex"
+      ],
+      "criterios_resolucion": [
+        "Para datos cuantitativos en conflicto se priorizo el valor con mayor trazabilidad en source_id y consistencia entre modelos.",
+        "No se promediaron metricas duras (margen, leases, FCF observados); se uso el dato evidenciado o rango cuando aplicaba.",
+        "Para probabilidades se reporto rango inter-modelo [min,max] y valor recomendado basado en evidencia y calibracion conservadora.",
+        "Se integraron todas las alertas relevantes (opacidad deuda/EV, calidad FCF, reconciliaciones, posible artefacto de extraccion) sin descartarlas."
+      ],
+      "conflictos": [
+        {
+          "campo": "resumen_ejecutivo.veredicto_role_local",
+          "valores_modelos": {
+            "gemini": "NO_APTO",
+            "claude": "WATCHLIST",
+            "codex": "NO_APTO"
+          },
+          "resolucion": "NO_APTO",
+          "justificacion": "Mayoría 2/3 y convergencia en riesgos críticos no cerrados."
+        },
+        {
+          "campo": "resumen_ejecutivo.confianza_0_1",
+          "valores_modelos": {
+            "gemini": 0.88,
+            "claude": 0.68,
+            "codex": 0.81
+          },
+          "resolucion": 0.81,
+          "justificacion": "Se adopta valor intermedio-alto alineado con evidencia fuerte pero con incertidumbre de disclosure."
+        },
+        {
+          "campo": "payload.contenido.value_trap_checklist.probabilidad_value_trap_0_1",
+          "valores_modelos": {
+            "gemini": 0.85,
+            "claude": 0.45,
+            "codex": 0.72
+          },
+          "resolucion": 0.72,
+          "justificacion": "Se pondera convergencia de riesgos estructurales y se conserva mitigante de caja/crecimiento."
+        },
+        {
+          "campo": "payload.contenido.recomendacion_para_arbitro.tamaño_maximo_sugerido_pct_cartera",
+          "valores_modelos": {
+            "gemini": 0.0,
+            "claude": 2.0,
+            "codex": 0.5
+          },
+          "resolucion": 0.5,
+          "justificacion": "Compromiso conservador: permite observación táctica sin asumir exposición material."
+        },
+        {
+          "campo": "payload.contenido.bear_case.escenarios_bajistas.BEAR_WORST.es_binario",
+          "valores_modelos": {
+            "gemini": true,
+            "claude": true,
+            "codex": false
+          },
+          "resolucion": true,
+          "justificacion": "Predomina lectura de evento de confianza con comportamiento de cola y impacto discontinuo."
+        },
+        {
+          "campo": "interpretacion de reconciliation_log",
+          "valores_modelos": {
+            "gemini": "riesgo de gobernanza alto",
+            "claude": "riesgo alto pero posible artefacto Q vs YTD",
+            "codex": "trazabilidad fragil con arbitrajes"
+          },
+          "resolucion": "Riesgo critico abierto, no confirmado como restatement hasta validacion formal",
+          "justificacion": "Se retiene la alerta y tambien la cautela metodologica."
+        },
+        {
+          "campo": "rango FCF en BEAR_BASE",
+          "valores_modelos": {
+            "gemini": "80M-100M",
+            "claude": "120M-140M",
+            "codex": "90M-130M"
+          },
+          "resolucion": "90M-130M",
+          "justificacion": "Se elige rango intermedio que conserva severidad sin usar promedio ciego."
+        },
+        {
+          "campo": "prediccion de retorno de capital >=50M",
+          "valores_modelos": {
+            "gemini": 0.8,
+            "claude": 0.6,
+            "codex": null
+          },
+          "resolucion": 0.7,
+          "justificacion": "Rango estrecho y falta de evidencia de catalizador de capital return en inputs."
+        }
+      ],
+      "rangos_probabilidades": {
+        "resumen_ejecutivo_confianza_0_1": {
+          "min": 0.68,
+          "max": 0.88,
+          "recomendado": 0.81
+        },
+        "value_trap_probabilidad_0_1": {
+          "min": 0.45,
+          "max": 0.85,
+          "recomendado": 0.72
+        },
+        "escenarios_bajistas": {
+          "BEAR_BASE": {
+            "min": 0.35,
+            "max": 0.5,
+            "recomendado": 0.45
+          },
+          "BEAR_WORST": {
+            "min": 0.12,
+            "max": 0.22,
+            "recomendado": 0.15
+          }
+        },
+        "predicciones": {
+          "PRED_RT_001": {
+            "min": 0.4,
+            "max": 0.7,
+            "recomendado": 0.64
+          },
+          "PRED_RT_002": {
+            "min": 0.6,
+            "max": 0.8,
+            "recomendado": 0.7
+          },
+          "PRED_RT_003": {
+            "min": 0.55,
+            "max": 0.65,
+            "recomendado": 0.62
+          },
+          "PRED_RT_004": {
+            "min": 0.35,
+            "max": 0.35,
+            "recomendado": 0.35
+          },
+          "PRED_RT_005": {
+            "min": 0.35,
+            "max": 0.35,
+            "recomendado": 0.35
+          },
+          "PRED_RT_006": {
+            "min": 0.55,
+            "max": 0.55,
+            "recomendado": 0.55
+          }
+        }
+      }
+    }
+  }
+}

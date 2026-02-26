@@ -1,0 +1,687 @@
+{
+  "version_esquema": "CatalystDetection_v1",
+  "caso_id": "CASE_20260226_GCT",
+  "fecha_corte": "2026-02-26",
+  "ticker": "GCT",
+  "claims_list": [
+    {
+      "claim_id": "CLM_01",
+      "brecha": "La valoracion implicita esta incompleta por falta de EV y deuda total, manteniendo descuento por opacidad.",
+      "horizonte_meses": "6-12",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "motivo_blocked",
+          "cita": "Falta enterprise_value_usd (EV); sin EV no se pueden traducir expectativas implicitas."
+        }
+      ]
+    },
+    {
+      "claim_id": "CLM_02",
+      "brecha": "Existe duda sobre durabilidad de margen pese al crecimiento, por compresion de margen bruto y necesidad de sostener EBIT.",
+      "horizonte_meses": "6-18",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "historico_anual[FY2024,FY2025]",
+          "cita": "FY2024 gross_profit 285,236,000 sobre ingresos 1,161,042,000; FY2025 gross_profit 300,666,000 sobre ingresos 1,289,897,000."
+        }
+      ]
+    },
+    {
+      "claim_id": "CLM_03",
+      "brecha": "El mercado refleja alto rendimiento de FCF, sugiriendo brecha entre caja generada y percepcion de sostenibilidad.",
+      "horizonte_meses": "6-18",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "multiples_implicitos",
+          "cita": "p_fcf 8.86 y fcf_yield 11.28% con fcf_usd 182,787,000."
+        }
+      ]
+    },
+    {
+      "claim_id": "CLM_04",
+      "brecha": "Persisten obligaciones fijas elevadas por arrendamientos que pueden limitar rerating por riesgo de estructura de costos.",
+      "horizonte_meses": "12-24",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "lease_data/periodos[FY2024,FY2025]",
+          "cita": "total_lease_liabilities baja de 484,278,000 a 469,681,000, aun material."
+        }
+      ]
+    },
+    {
+      "claim_id": "CLM_05",
+      "brecha": "El mercado puede dudar del run-rate de fin de 2025 hasta ver continuidad multitrimestral.",
+      "horizonte_meses": "6-12",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_017_8-K_2026-02-26.htm",
+          "ubicacion": "historico_trimestral[Q4-2025,Q4-2024]",
+          "cita": "Q4-2025 ingresos 362,747,000 vs Q4-2024 295,782,000; EBIT 40,290,000 vs 27,634,000."
+        }
+      ]
+    },
+    {
+      "claim_id": "CLM_06",
+      "brecha": "Hay espacio para mejorar eficiencia de balance via asignacion explicita de caja excedente.",
+      "horizonte_meses": "6-18",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "balance_sheet_ultimo/historico_anual[FY2025]",
+          "cita": "caja_usd 379,780,000; cff_usd FY2025 -67,780,000."
+        }
+      ]
+    },
+    {
+      "claim_id": "CLM_07",
+      "brecha": "La calidad y consistencia de disclosure sigue siendo una prima de riesgo por conflictos historicos de reconciliacion.",
+      "horizonte_meses": "6-18",
+      "evidencia_actual": [
+        {
+          "source_id": "TruthPack_v1_partial",
+          "ubicacion": "data_quality/reconciliation_log",
+          "cita": "Se registran multiples eventos clasificados como potential_restatement y extraction_discrepancy."
+        }
+      ]
+    }
+  ],
+  "catalyst_candidates": [
+    {
+      "catalyst_id": "CAT_GCT_01",
+      "descripcion": "Estandarizar la divulgacion trimestral de deuda financiera, acciones diluidas y puente EV para eliminar opacidad de valoracion y habilitar comparables EV/EBIT y EV/FCF.",
+      "tipo": "CORPORATIVO",
+      "estado_actual": {
+        "brecha": "EV y deuda total nulos bloquean inferencia de expectativas y comparables EV-based.",
+        "horizonte_meses": "6-12"
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "motivo_blocked",
+          "cita": "Falta enterprise_value_usd (EV); sin EV no se pueden traducir expectativas implicitas."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "banderas/notas[0]",
+          "cita": "Falta deuda_total_usd, lo que impide medir apalancamiento financiero de forma directa."
+        },
+        {
+          "source_id": "TruthPack_v1_partial",
+          "ubicacion": "mercado/traza_calculo_ev",
+          "cita": "EV = market_cap + deuda_total - caja; deuda_total_usd es null."
+        }
+      ],
+      "evidencia_futura_confirmable": [
+        {
+          "test_medible": "Campos deuda_corto_plazo_usd, deuda_largo_plazo_usd, deuda_total_usd y acciones_diluidas completos",
+          "umbral": "No nulos en 2 reportes consecutivos",
+          "ventana": "6-12 meses",
+          "fuente_verificacion": "Proximos 10-Q/10-K y TruthPack actualizado"
+        },
+        {
+          "test_medible": "EV y multiples EV/EBIT, EV/FCF calculables",
+          "umbral": "No null en 2 cortes consecutivos",
+          "ventana": "6-12 meses",
+          "fuente_verificacion": "ImpliedExpectations posterior"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "multiple",
+          "direccion": "↑",
+          "magnitud_estimada": "media-alta (potencial rerating 15%-35% por menor opacidad)"
+        },
+        {
+          "driver": "deuda",
+          "direccion": "↓",
+          "magnitud_estimada": "baja-media (mejor disciplina de estructura de capital tras disclosure)"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "deuda_total_usd",
+          "senal_esperada": "publicada trimestralmente sin null",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "acciones_diluidas",
+          "senal_esperada": "publicadas en snapshots de mercado",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "enterprise_value_usd",
+          "senal_esperada": "calculable y estable",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "consistencia de definiciones",
+          "senal_esperada": "sin cambios de metodologia no explicados",
+          "frecuencia": "trimestral"
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Dificultad tecnica para separar deuda financiera de lease liabilities.",
+        "Retrasos internos de cierre y reporte.",
+        "Cambios contables que rompan comparabilidad historica.",
+        "Divulgacion parcial que no cierre los faltantes criticos."
+      ],
+      "contracatalizadores": [
+        "Persisten deuda_total_usd y EV en null en siguientes reportes.",
+        "Aumentan discrepancias de reconciliacion en campos de balance.",
+        "Se eliminan o reducen metricas de transparencia de capital."
+      ]
+    },
+    {
+      "catalyst_id": "CAT_GCT_02",
+      "descripcion": "Sostener crecimiento rentable con apalancamiento operativo, manteniendo margen EBIT >=11.5% mientras los ingresos crecen a ritmo de un digito medio-alto.",
+      "tipo": "OPERATIVO",
+      "estado_actual": {
+        "brecha": "El mercado puede dudar que la mejora operativa sea sostenible.",
+        "horizonte_meses": "6-18"
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "historico_anual[FY2025]",
+          "cita": "FY2025 ingresos 1,289,897,000; EBIT 144,976,000; net_income 137,372,000."
+        },
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "historico_anual[FY2024,FY2025]",
+          "cita": "GA baja de 73,944,000 en FY2024 a 46,559,000 en FY2025."
+        },
+        {
+          "source_id": "TruthPack_v1_partial",
+          "ubicacion": "metricas_derivadas",
+          "cita": "margen_operativo_pct 11.24; margen_bruto_pct 23.31."
+        }
+      ],
+      "evidencia_futura_confirmable": [
+        {
+          "test_medible": "Margen EBIT sostenido",
+          "umbral": ">=11.5% en al menos 3 de los proximos 4 trimestres",
+          "ventana": "6-18 meses",
+          "fuente_verificacion": "10-Q/10-K 2026-2027"
+        },
+        {
+          "test_medible": "Crecimiento de ingresos con disciplina de costos",
+          "umbral": "Ingresos YoY >=8% en al menos 3 trimestres y GA/ingresos <=4.0%",
+          "ventana": "6-18 meses",
+          "fuente_verificacion": "10-Q 2026"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "margen",
+          "direccion": "↑",
+          "magnitud_estimada": "media (50-150 pb en margen EBIT)"
+        },
+        {
+          "driver": "FCF",
+          "direccion": "↑",
+          "magnitud_estimada": "media (+20 a +50 millones anuales)"
+        },
+        {
+          "driver": "multiple",
+          "direccion": "↑",
+          "magnitud_estimada": "media (mejor calidad de crecimiento)"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "EBIT trimestral",
+          "senal_esperada": "crecimiento YoY positivo",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "GA/ingresos",
+          "senal_esperada": "tendencia <=4.0%",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "margen bruto",
+          "senal_esperada": "estabilizacion o mejora",
+          "frecuencia": "trimestral"
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Presion competitiva en precios.",
+        "Inflacion de costos logisticos.",
+        "Rebote de gastos operativos por expansion.",
+        "Mix de ventas menos favorable."
+      ],
+      "contracatalizadores": [
+        "Margen EBIT <10.5% en dos trimestres consecutivos.",
+        "GA/ingresos >5% sostenido.",
+        "Ingresos YoY <3% en dos trimestres consecutivos."
+      ]
+    },
+    {
+      "catalyst_id": "CAT_GCT_03",
+      "descripcion": "Consolidar conversion de utilidad a caja con FCF anual recurrente >USD170m mediante disciplina de capex y capital de trabajo.",
+      "tipo": "FINANCIERO",
+      "estado_actual": {
+        "brecha": "La valoracion actual no refleja plenamente la caja generada de forma recurrente.",
+        "horizonte_meses": "6-18"
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "metricas_base",
+          "cita": "cfo_usd 190,660,000; capex_usd -7,873,000; fcf_usd 182,787,000."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "multiples_implicitos",
+          "cita": "p_fcf 8.86 y fcf_yield_pct 11.28."
+        },
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "historico_anual[FY2025]",
+          "cita": "delta_cash_usd FY2025: 120,096,000."
+        }
+      ],
+      "evidencia_futura_confirmable": [
+        {
+          "test_medible": "FCF anual robusto",
+          "umbral": "FCF >=170,000,000 en FY2026 o TTM 2026",
+          "ventana": "6-18 meses",
+          "fuente_verificacion": "10-Q/10-K y TruthPack actualizado"
+        },
+        {
+          "test_medible": "Conversion utilidad-caja",
+          "umbral": "CFO/Net Income >=1.0 en 2 semestres consecutivos",
+          "ventana": "6-18 meses",
+          "fuente_verificacion": "10-Q 2026"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "↑",
+          "magnitud_estimada": "media-alta (sostener >13% margen FCF)"
+        },
+        {
+          "driver": "deuda",
+          "direccion": "↓",
+          "magnitud_estimada": "media (capacidad de amortizar obligaciones)"
+        },
+        {
+          "driver": "multiple",
+          "direccion": "↑",
+          "magnitud_estimada": "media (menor riesgo de calidad de beneficios)"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "CFO trimestral",
+          "senal_esperada": "positivo y creciendo YoY",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "capex/ingresos",
+          "senal_esperada": "<=1.2%",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "CFO/Net Income",
+          "senal_esperada": ">=1.0",
+          "frecuencia": "semestral"
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Deterioro de capital de trabajo por cuentas por cobrar o inventario.",
+        "Mayor capex de mantenimiento no previsto.",
+        "Salidas de caja por impuestos o litigios.",
+        "Volatilidad de cobros en periodos de alta estacionalidad."
+      ],
+      "contracatalizadores": [
+        "FCF cae por debajo de 120,000,000.",
+        "CFO/Net Income cae por debajo de 0.8.",
+        "capex/ingresos supera 2.0% sin mejora de crecimiento."
+      ]
+    },
+    {
+      "catalyst_id": "CAT_GCT_04",
+      "descripcion": "Reducir pasivos por arrendamiento y riesgo de costos fijos logisticos via renegociacion de contratos y mayor productividad de instalaciones.",
+      "tipo": "FINANCIERO",
+      "estado_actual": {
+        "brecha": "Los compromisos por lease siguen altos y pueden limitar expansion de multiple.",
+        "horizonte_meses": "12-24"
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "lease_data/periodos[FY2024,FY2025]",
+          "cita": "total_lease_liabilities: 484,278,000 en FY2024 y 469,681,000 en FY2025."
+        },
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "lease_data/periodos[FY2024,FY2025]",
+          "cita": "total_right_of_use_assets: 452,476,000 a 432,732,000."
+        }
+      ],
+      "evidencia_futura_confirmable": [
+        {
+          "test_medible": "Desapalancamiento de lease",
+          "umbral": "total_lease_liabilities <440,000,000",
+          "ventana": "12-24 meses",
+          "fuente_verificacion": "10-K FY2026/FY2027"
+        },
+        {
+          "test_medible": "Menor peso de lease sobre ventas",
+          "umbral": "lease liabilities/ingresos <33%",
+          "ventana": "12-24 meses",
+          "fuente_verificacion": "TruthPack anual actualizado"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "deuda",
+          "direccion": "↓",
+          "magnitud_estimada": "media (reduccion de obligaciones fijas ajustadas)"
+        },
+        {
+          "driver": "margen",
+          "direccion": "↑",
+          "magnitud_estimada": "baja-media (50-100 pb por eficiencia fija)"
+        },
+        {
+          "driver": "multiple",
+          "direccion": "↑",
+          "magnitud_estimada": "baja-media (menor riesgo de estructura fija)"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "total_lease_liabilities",
+          "senal_esperada": "caida YoY",
+          "frecuencia": "anual/trimestral"
+        },
+        {
+          "indicador": "operating_lease_liabilities_non_current",
+          "senal_esperada": "tendencia descendente",
+          "frecuencia": "anual"
+        },
+        {
+          "indicador": "ROU assets",
+          "senal_esperada": "descenso consistente",
+          "frecuencia": "anual"
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Necesidad de nueva capacidad y nuevas firmas de leases.",
+        "Costos de salida o renegociacion elevados.",
+        "Volatilidad de demanda que reduzca productividad de activos.",
+        "Condiciones inmobiliarias adversas."
+      ],
+      "contracatalizadores": [
+        "total_lease_liabilities vuelve a subir por encima de 500,000,000.",
+        "lease liabilities/ingresos sube por encima de 38%.",
+        "ROU assets crece de forma material por expansion no rentable."
+      ]
+    },
+    {
+      "catalyst_id": "CAT_GCT_05",
+      "descripcion": "Sostener el run-rate de Q4-2025 en 2026 para demostrar que FY2025 no fue pico de utilidades.",
+      "tipo": "OPERATIVO",
+      "estado_actual": {
+        "brecha": "La aceleracion reciente requiere confirmacion multitrimestral para cerrar gap de credibilidad.",
+        "horizonte_meses": "6-12"
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_017_8-K_2026-02-26.htm",
+          "ubicacion": "historico_trimestral[Q4-2025,Q4-2024]",
+          "cita": "Q4-2025 ingresos 362,747,000 vs 295,782,000; gross profit 82,947,000 vs 64,990,000."
+        },
+        {
+          "source_id": "SRC_017_8-K_2026-02-26.htm",
+          "ubicacion": "historico_trimestral[Q4-2025,Q4-2024]",
+          "cita": "EBIT Q4-2025 40,290,000 vs Q4-2024 27,634,000."
+        },
+        {
+          "source_id": "SRC_SEC_007_10-Q_Q1-2025.htm; SRC_SEC_006_10-Q_Q2-2025.htm; SRC_SEC_005_10-Q_Q3-2025.htm",
+          "ubicacion": "historico_trimestral[Q1-2025,Q2-2025,Q3-2025]",
+          "cita": "Ingresos 2025 por trimestre: 271,906,000; 322,606,000; 332,638,000."
+        }
+      ],
+      "evidencia_futura_confirmable": [
+        {
+          "test_medible": "Continuidad de crecimiento de ingresos",
+          "umbral": "YoY >=8% en al menos 3 de 4 trimestres de 2026",
+          "ventana": "6-12 meses",
+          "fuente_verificacion": "10-Q 2026"
+        },
+        {
+          "test_medible": "Mantenimiento de rentabilidad trimestral",
+          "umbral": "EBIT >=40,000,000 en al menos 2 trimestres de 2026",
+          "ventana": "6-12 meses",
+          "fuente_verificacion": "10-Q 2026"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "margen",
+          "direccion": "↑",
+          "magnitud_estimada": "media (50-120 pb si escala Q4 se mantiene)"
+        },
+        {
+          "driver": "FCF",
+          "direccion": "↑",
+          "magnitud_estimada": "media (+15 a +40 millones anuales)"
+        },
+        {
+          "driver": "multiple",
+          "direccion": "↑",
+          "magnitud_estimada": "media (menor probabilidad de peak earnings)"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "ingresos YoY trimestrales",
+          "senal_esperada": "positivo y >=8%",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "gross profit trimestral",
+          "senal_esperada": ">=80,000,000 en trimestres fuertes",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "EBIT trimestral",
+          "senal_esperada": ">=35,000,000 de forma recurrente",
+          "frecuencia": "trimestral"
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Desaceleracion de demanda en categorias clave.",
+        "Compresion de precios por competencia.",
+        "Interrupciones logisticas o arancelarias.",
+        "Mayor devolucion/cancelacion de pedidos."
+      ],
+      "contracatalizadores": [
+        "Dos trimestres consecutivos con ingresos YoY negativos.",
+        "gross profit trimestral por debajo de 70,000,000.",
+        "EBIT trimestral por debajo de 30,000,000."
+      ]
+    },
+    {
+      "catalyst_id": "CAT_GCT_06",
+      "descripcion": "Formalizar una politica de asignacion de capital para la caja excedente con criterios de retorno y devolucion al accionista.",
+      "tipo": "FINANCIERO",
+      "estado_actual": {
+        "brecha": "Existe caja significativa sin marco explicitado de uso que limite la eficiencia del equity.",
+        "horizonte_meses": "6-18"
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita": "caja_usd al cierre FY2025: 379,780,000."
+        },
+        {
+          "source_id": "TruthPack_v1_partial",
+          "ubicacion": "mercado",
+          "cita": "market_cap_usd: 1,620,000,000."
+        },
+        {
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "ubicacion": "historico_anual[FY2025]",
+          "cita": "cff_usd FY2025: -67,780,000."
+        }
+      ],
+      "evidencia_futura_confirmable": [
+        {
+          "test_medible": "Politica formal de capital allocation",
+          "umbral": "Anuncio con reglas de recompra/dividendo y umbrales de retorno",
+          "ventana": "6-12 meses",
+          "fuente_verificacion": "8-K, 10-Q, DEF14A"
+        },
+        {
+          "test_medible": "Mejora de eficiencia de caja",
+          "umbral": "caja/market_cap <20% sin deterioro de FCF anual",
+          "ventana": "12-18 meses",
+          "fuente_verificacion": "TruthPack e ImpliedExpectations posteriores"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "multiple",
+          "direccion": "↑",
+          "magnitud_estimada": "media (menor descuento por caja ociosa)"
+        },
+        {
+          "driver": "FCF",
+          "direccion": "↑",
+          "magnitud_estimada": "baja-media (mejora FCF por accion)"
+        },
+        {
+          "driver": "deuda",
+          "direccion": "↓",
+          "magnitud_estimada": "baja (si se prioriza amortizacion de obligaciones)"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "autorizacion de recompra/dividendo",
+          "senal_esperada": "publicada y ejecutada",
+          "frecuencia": "event-driven"
+        },
+        {
+          "indicador": "acciones diluidas",
+          "senal_esperada": "tendencia descendente",
+          "frecuencia": "trimestral"
+        },
+        {
+          "indicador": "caja/market_cap",
+          "senal_esperada": "descenso ordenado",
+          "frecuencia": "trimestral"
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Asignacion de capital en proyectos de bajo retorno.",
+        "Sobrepago en operaciones corporativas.",
+        "Necesidades de liquidez que retrasen devolucion al accionista.",
+        "Senales mixtas al mercado por cambios frecuentes de politica."
+      ],
+      "contracatalizadores": [
+        "La caja supera 450,000,000 sin plan explicitado.",
+        "Se emiten acciones de forma dilutiva.",
+        "Se realizan inversiones con retorno por debajo del costo de capital."
+      ]
+    },
+    {
+      "catalyst_id": "CAT_GCT_07",
+      "descripcion": "Mejorar consistencia de reportes y controles de disclosure para reducir descuento de gobernanza y comparabilidad.",
+      "tipo": "CORPORATIVO",
+      "estado_actual": {
+        "brecha": "Persisten conflictos historicos de reconciliacion que pueden sostener descuento de calidad.",
+        "horizonte_meses": "6-18"
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "TruthPack_v1_partial",
+          "ubicacion": "data_quality/reconciliation_log",
+          "cita": "Existen multiples entradas clasificadas como potential_restatement y extraction_discrepancy."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "banderas",
+          "cita": "opacidad_alta: true."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "log/limitaciones",
+          "cita": "EV no disponible por deuda_total_usd nula."
+        }
+      ],
+      "evidencia_futura_confirmable": [
+        {
+          "test_medible": "Reduccion de conflictos de reconciliacion",
+          "umbral": "Caida >=70% en conflictos materiales (>10%) vs corte 2026-02-26",
+          "ventana": "6-18 meses",
+          "fuente_verificacion": "TruthPack proximos cortes"
+        },
+        {
+          "test_medible": "Estabilidad de disclosure",
+          "umbral": "Sin notas de restatement y sin campos criticos nulos en 3 reportes seguidos",
+          "ventana": "6-18 meses",
+          "fuente_verificacion": "10-Q/10-K y logs de validacion"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "multiple",
+          "direccion": "↑",
+          "magnitud_estimada": "media (compresion del descuento por riesgo de calidad de datos)"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "conteo de conflictos en reconciliation_log",
+          "senal_esperada": "descenso secuencial",
+          "frecuencia": "por corte"
+        },
+        {
+          "indicador": "faltantes criticos",
+          "senal_esperada": "cero faltantes EV/deuda/acciones",
+          "frecuencia": "por corte"
+        },
+        {
+          "indicador": "consistencia de periodos y escalas",
+          "senal_esperada": "sin nuevas alertas de restatement",
+          "frecuencia": "trimestral"
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Complejidad de consolidacion multi-fuente.",
+        "Debilidades de control interno de datos financieros.",
+        "Errores de mapeo en periodos parciales vs trimestrales.",
+        "Cambios de priorizacion de fuentes que afecten comparabilidad."
+      ],
+      "contracatalizadores": [
+        "Nuevos restatements o correcciones materiales.",
+        "Reaparicion de discrepancias >20% en metricas clave.",
+        "Retrasos de filing por temas de control y auditoria."
+      ]
+    }
+  ],
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1_partial",
+    "implied_expectations_version": "ImpliedExpectations_v1"
+  },
+  "log": {
+    "validacion_n9": {
+      "catalizadores_binarios": false,
+      "especulacion_sin_base_empirica": false,
+      "puntuaciones_o_convicciones_incluidas": false
+    },
+    "alcance_horizonte_meses": "6-30",
+    "nota": "Catalizadores construidos con evidencia verificable de TruthPack_v1 e ImpliedExpectations_v1."
+  }
+}

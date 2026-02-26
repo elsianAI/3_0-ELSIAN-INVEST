@@ -1,0 +1,76 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260226_GCT",
+  "fecha_corte": "2026-02-26",
+  "ticker": "GCT",
+  "red_flags": [
+    {
+      "id": "RF_001",
+      "categoria": "OFF_BALANCE",
+      "descripcion": "Alta dependencia de arrendamientos operativos (Leases de $469.6M en total, $100.3M a corto plazo) que superan con creces el Capex tradicional y no se reflejan como deuda financiera clásica.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "lease_data"
+    },
+    {
+      "id": "RF_002",
+      "categoria": "CAPEX",
+      "descripcion": "Capex extraordinariamente bajo ($7.8M) en relación a ingresos ($1.28B) y CFO ($190M), indicando dependencia estructural en leases (registrados como operativos) para sostener infraestructura logística en lugar de capex real.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual FY2025 capex_usd vs ingresos_usd"
+    },
+    {
+      "id": "RF_003",
+      "categoria": "WORKING_CAPITAL",
+      "descripcion": "Ausencia de desglose claro de cuentas por cobrar e inventarios en balance condensado, combinado con un CFO consistentemente superior al EBIT (+31%), sugiriendo posible riesgo de alargamiento de payables como fuente de liquidez.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "balance_sheet_ultimo / log.limitaciones"
+    }
+  ],
+  "liquidez": {
+    "efectivo_disponible_usd": 379780000.0,
+    "estimacion_runway_meses": "Indefinido (>24 meses)",
+    "vencimientos_proximos_usd": 100670000.0,
+    "riesgo_covenants": "BAJO",
+    "riesgo_dilucion": "BAJO",
+    "nota_liquidez": "La empresa genera FCF positivo sustancial ($182.7M). Los vencimientos próximos listados corresponden a pasivos por arrendamiento a corto plazo, no a deuda financiera formal."
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "ebit_usd": 144976000.0,
+      "cfo_usd": 190660000.0,
+      "distorsion_pct": 31.5,
+      "nota": "CFO es consistentemente superior a EBIT (+31.5% en FY2025). Impulsado probablemente por working capital y otros ítems no monetarios, ya que la depreciación reportada es mínima ($8.3M)."
+    },
+    "cfo_a_fcf": {
+      "cfo_usd": 190660000.0,
+      "capex_usd": -7873000.0,
+      "fcf_usd": 182787000.0,
+      "distorsion_pct": -4.1,
+      "nota": "Conversión extremadamente alta de CFO a FCF (casi 1-a-1) debido a un Capex inusualmente bajo para el nivel de ingresos ($1.28B). Esto refuerza la observación de que la estructura se soporta en arrendamientos y no en activos propios."
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "condicion": "Caja y equivalentes caen por debajo de los $150M en un trimestre",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "BAJA"
+    },
+    {
+      "condicion": "Conversión CFO/EBIT cae por debajo del 80% (indicando salida brusca de Working Capital o pago de cuentas por pagar acumuladas)",
+      "ventana_temporal": "6-12 meses",
+      "probabilidad": "MEDIA"
+    },
+    {
+      "condicion": "Suscripción de nueva deuda financiera formal >$50M para sostener operaciones o cubrir pasivos de arrendamiento",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "MEDIA"
+    }
+  ],
+  "report_type": "FORENSIC",
+  "log": {
+    "limitaciones": [
+      "No se revisaron filings en crudo para corroborar desgloses de AR/Inventarios que faltaban en TruthPack.",
+      "La evaluación asume que la falta de deuda explícita no oculta instrumentos off-balance adicionales a los leases reportados."
+    ]
+  }
+}

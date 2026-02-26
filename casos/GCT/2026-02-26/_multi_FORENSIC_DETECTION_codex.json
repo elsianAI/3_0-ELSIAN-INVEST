@@ -1,0 +1,452 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260226_GCT",
+  "fecha_corte": "2026-02-26",
+  "ticker": "GCT",
+  "red_flags": [
+    {
+      "id": "RF-01",
+      "categoria": "Consistencia de ingresos y resultados reportados",
+      "hallazgo": "El registro de reconciliacion contiene discrepancias clasificadas como potential_restatement en metricas clave (ingresos, COGS, gross profit, EBIT, net income) con brechas muy elevadas entre fuentes para periodos equivalentes.",
+      "evidencia_cuantitativa": [
+        {
+          "periodo": "Q3-2025",
+          "campo": "ingresos_usd",
+          "valor_kept": 332638000.0,
+          "valor_dropped": 927150000.0,
+          "diff_pct": 94.38,
+          "clasificacion": "potential_restatement"
+        },
+        {
+          "periodo": "Q3-2024",
+          "campo": "ingresos_usd",
+          "valor_kept": 303316000.0,
+          "valor_dropped": 865260000.0,
+          "diff_pct": 96.18,
+          "clasificacion": "potential_restatement"
+        },
+        {
+          "periodo": "FY2022",
+          "campo": "net_income_usd",
+          "valor_kept": 23972000.0,
+          "valor_dropped": 37455000.0,
+          "diff_pct": 43.9,
+          "clasificacion": "potential_restatement"
+        }
+      ],
+      "source_id": "SRC_SEC_005_10-Q_Q3-2025.htm",
+      "ubicacion": "TruthPack_v1._cross_layer_reconciliation.reconciliation_log (entradas Q3-2025, Q3-2024, FY2022)"
+    },
+    {
+      "id": "RF-02",
+      "categoria": "Calidad de ganancias y conversion a caja",
+      "hallazgo": "La brecha EBIT->CFO es persistentemente mayor a 15% en magnitud absoluta y altamente volatil entre FY2020-FY2025.",
+      "evidencia_cuantitativa": [
+        {
+          "periodo": "FY2021",
+          "ebit_usd": 39353000.0,
+          "cfo_usd": 8556000.0,
+          "delta_pct_sobre_ebit": -78.26
+        },
+        {
+          "periodo": "FY2022",
+          "ebit_usd": 35023000.0,
+          "cfo_usd": 49656000.0,
+          "delta_pct_sobre_ebit": 41.78
+        },
+        {
+          "periodo": "FY2025",
+          "ebit_usd": 144976000.0,
+          "cfo_usd": 190660000.0,
+          "delta_pct_sobre_ebit": 31.51
+        }
+      ],
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.historico_anual (periodos FY2020-FY2025)"
+    },
+    {
+      "id": "RF-03",
+      "categoria": "Opacidad en capital de trabajo y deuda financiera",
+      "hallazgo": "Campos criticos para forense de working capital y riesgo de deuda aparecen en null en el balance ultimo.",
+      "evidencia_cuantitativa": {
+        "cuentas_por_cobrar_usd": null,
+        "inventarios_usd": null,
+        "deuda_total_usd": null,
+        "deuda_corto_plazo_usd": null,
+        "deuda_largo_plazo_usd": null
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.balance_sheet_ultimo"
+    },
+    {
+      "id": "RF-04",
+      "categoria": "Obligaciones economicas por arrendamientos",
+      "hallazgo": "El pasivo por arrendamientos es material frente al patrimonio y puede subestimar apalancamiento economico si solo se observa deuda financiera reportada.",
+      "evidencia_cuantitativa": {
+        "lease_liabilities_total_usd": 469681000.0,
+        "lease_liabilities_current_usd": 100670000.0,
+        "lease_liabilities_non_current_usd": 369011000.0,
+        "lease_sobre_patrimonio_ratio": 0.97,
+        "deuda_total_usd_reportada": null
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.lease_data.periodos (FY2025) y TruthPack_v1.balance_sheet_ultimo"
+    },
+    {
+      "id": "RF-05",
+      "categoria": "Cobertura TTM incompleta de caja",
+      "hallazgo": "El bloque TTM no incluye CFO/CAPEX/FCF y Q4-2025 carece de estado de flujos, limitando monitoreo de supervivencia en base TTM.",
+      "evidencia_cuantitativa": {
+        "ttm_cfo_usd": null,
+        "ttm_capex_usd": null,
+        "ttm_fcf_usd": null,
+        "q4_2025_cfo_usd": null,
+        "q4_2025_capex_usd": null
+      },
+      "source_id": "SRC_017_8-K_2026-02-26.htm",
+      "ubicacion": "TruthPack_v1.ttm y TruthPack_v1.historico_trimestral (Q4-2025)"
+    },
+    {
+      "id": "RF-06",
+      "categoria": "Salidas de financiacion sin desglose operativo",
+      "hallazgo": "El flujo de financiacion FY2025 es materialmente negativo y no hay desglose en TruthPack de dividendos/recompras/deuda para validar sostenibilidad.",
+      "evidencia_cuantitativa": {
+        "cff_fy2025_usd": -67780000.0,
+        "cfo_fy2025_usd": 190660000.0,
+        "cff_sobre_cfo_pct": -35.55
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.historico_anual (FY2025)"
+    }
+  ],
+  "liquidez": {
+    "efectivo_disponible_usd": 379780000.0,
+    "lineas_credito_disponibles_usd": null,
+    "efectivo_total_disponible_usd": 379780000.0,
+    "runway_meses_estimado": {
+      "escenario_base": ">24",
+      "escenario_estres_cfo_0_solo_obligaciones_lease_corriente": 45.27,
+      "metodologia": "runway_estres = caja_usd / (lease_liabilities_current_usd / 12)"
+    },
+    "vencimientos_deuda_12_24m": {
+      "proximos_12m": {
+        "lease_liabilities_current_usd": 100670000.0,
+        "deuda_financiera_no_lease_usd": null
+      },
+      "ventana_12_24m": {
+        "lease_liabilities_non_current_total_usd": 369011000.0,
+        "deuda_financiera_no_lease_usd": null,
+        "detalle_maduracion_12_24m": null
+      }
+    },
+    "riesgo_incumplimiento_covenants": {
+      "estado": "indeterminado_por_falta_deuda_financiera_y_texto_de_covenants",
+      "base_cuantitativa": {
+        "deuda_total_usd": null,
+        "deuda_corto_plazo_usd": null,
+        "deuda_largo_plazo_usd": null
+      }
+    },
+    "riesgo_dilucion_accionaria": {
+      "lectura_12_24m": "sin_presion_cuantitativa_inmediata_bajo_base_actual",
+      "base_cuantitativa": {
+        "caja_usd": 379780000.0,
+        "fcf_fy2025_usd": 182787000.0,
+        "market_cap_usd": 1620000000.0,
+        "caja_sobre_market_cap_pct": 23.44
+      }
+    },
+    "coberturas_clave": {
+      "caja_sobre_obligaciones_lease_corriente_12m_x": 3.77,
+      "fcf_fy2025_sobre_obligaciones_lease_corriente_12m_x": 1.82
+    },
+    "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+    "ubicacion": "TruthPack_v1.balance_sheet_ultimo, TruthPack_v1.lease_data.periodos[FY2025], TruthPack_v1.historico_anual[FY2025], TruthPack_v1.mercado"
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "formula": "delta_usd = cfo_usd - ebit_usd; delta_pct = delta_usd / ebit_usd",
+      "serie_anual": [
+        {
+          "periodo": "FY2020",
+          "ebit_usd": 44184000.0,
+          "cfo_usd": 33284000.0,
+          "delta_usd": -10900000.0,
+          "delta_pct_sobre_ebit": -24.67,
+          "distorsion_ge_15pct": true
+        },
+        {
+          "periodo": "FY2021",
+          "ebit_usd": 39353000.0,
+          "cfo_usd": 8556000.0,
+          "delta_usd": -30797000.0,
+          "delta_pct_sobre_ebit": -78.26,
+          "distorsion_ge_15pct": true
+        },
+        {
+          "periodo": "FY2022",
+          "ebit_usd": 35023000.0,
+          "cfo_usd": 49656000.0,
+          "delta_usd": 14633000.0,
+          "delta_pct_sobre_ebit": 41.78,
+          "distorsion_ge_15pct": true
+        },
+        {
+          "periodo": "FY2023",
+          "ebit_usd": 110078000.0,
+          "cfo_usd": 133452000.0,
+          "delta_usd": 23374000.0,
+          "delta_pct_sobre_ebit": 21.23,
+          "distorsion_ge_15pct": true
+        },
+        {
+          "periodo": "FY2024",
+          "ebit_usd": 130622000.0,
+          "cfo_usd": 158078000.0,
+          "delta_usd": 27456000.0,
+          "delta_pct_sobre_ebit": 21.02,
+          "distorsion_ge_15pct": true
+        },
+        {
+          "periodo": "FY2025",
+          "ebit_usd": 144976000.0,
+          "cfo_usd": 190660000.0,
+          "delta_usd": 45684000.0,
+          "delta_pct_sobre_ebit": 31.51,
+          "distorsion_ge_15pct": true
+        }
+      ],
+      "drivers_no_completamente_observables": {
+        "stock_based_comp_usd": null,
+        "cambios_capital_trabajo_detalle": null,
+        "impuestos_pagados_en_efectivo_usd": null
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.historico_anual"
+    },
+    "cfo_a_fcf": {
+      "formula": "fcf_usd = cfo_usd + capex_usd (capex con signo negativo)",
+      "serie_anual": [
+        {
+          "periodo": "FY2020",
+          "cfo_usd": 33284000.0,
+          "capex_usd": -654000.0,
+          "fcf_usd": 32630000.0,
+          "delta_usd": -654000.0,
+          "delta_pct_sobre_cfo": -1.96,
+          "distorsion_ge_15pct": false
+        },
+        {
+          "periodo": "FY2021",
+          "cfo_usd": 8556000.0,
+          "capex_usd": -1825000.0,
+          "fcf_usd": 6731000.0,
+          "delta_usd": -1825000.0,
+          "delta_pct_sobre_cfo": -21.33,
+          "distorsion_ge_15pct": true
+        },
+        {
+          "periodo": "FY2022",
+          "cfo_usd": 49656000.0,
+          "capex_usd": -709000.0,
+          "fcf_usd": 48947000.0,
+          "delta_usd": -709000.0,
+          "delta_pct_sobre_cfo": -1.43,
+          "distorsion_ge_15pct": false
+        },
+        {
+          "periodo": "FY2023",
+          "cfo_usd": 133452000.0,
+          "capex_usd": -4380000.0,
+          "fcf_usd": 129072000.0,
+          "delta_usd": -4380000.0,
+          "delta_pct_sobre_cfo": -3.28,
+          "distorsion_ge_15pct": false
+        },
+        {
+          "periodo": "FY2024",
+          "cfo_usd": 158078000.0,
+          "capex_usd": -15536000.0,
+          "fcf_usd": 142542000.0,
+          "delta_usd": -15536000.0,
+          "delta_pct_sobre_cfo": -9.83,
+          "distorsion_ge_15pct": false
+        },
+        {
+          "periodo": "FY2025",
+          "cfo_usd": 190660000.0,
+          "capex_usd": -7873000.0,
+          "fcf_usd": 182787000.0,
+          "delta_usd": -7873000.0,
+          "delta_pct_sobre_cfo": -4.13,
+          "distorsion_ge_15pct": false
+        }
+      ],
+      "desglose_no_disponible": {
+        "capex_mantenimiento_usd": null,
+        "capex_crecimiento_usd": null,
+        "dividendos_usd": null,
+        "recompras_usd": null
+      },
+      "referencia_salidas_financiacion": {
+        "cff_fy2025_usd": -67780000.0,
+        "cff_sobre_cfo_fy2025_pct": -35.55
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.historico_anual"
+    },
+    "distorsiones_ge_15pct": [
+      {
+        "tramo": "EBIT->CFO",
+        "periodo": "FY2020",
+        "distorsion_pct": -24.67
+      },
+      {
+        "tramo": "EBIT->CFO",
+        "periodo": "FY2021",
+        "distorsion_pct": -78.26
+      },
+      {
+        "tramo": "EBIT->CFO",
+        "periodo": "FY2022",
+        "distorsion_pct": 41.78
+      },
+      {
+        "tramo": "EBIT->CFO",
+        "periodo": "FY2023",
+        "distorsion_pct": 21.23
+      },
+      {
+        "tramo": "EBIT->CFO",
+        "periodo": "FY2024",
+        "distorsion_pct": 21.02
+      },
+      {
+        "tramo": "EBIT->CFO",
+        "periodo": "FY2025",
+        "distorsion_pct": 31.51
+      },
+      {
+        "tramo": "CFO->FCF",
+        "periodo": "FY2021",
+        "distorsion_pct": -21.33
+      }
+    ]
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC-01",
+      "condicion_objetiva": "CFO acumulado 12 meses <= 0 USD en dos reportes consecutivos",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "BAJA",
+      "base_actual": {
+        "cfo_fy2025_usd": 190660000.0
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025].cfo_usd"
+    },
+    {
+      "id": "KC-02",
+      "condicion_objetiva": "Caja y equivalentes < 100670000 USD (1.0x lease liabilities corrientes)",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "BAJA",
+      "base_actual": {
+        "caja_usd": 379780000.0,
+        "lease_liabilities_current_usd": 100670000.0,
+        "cobertura_actual_x": 3.77
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.balance_sheet_ultimo y TruthPack_v1.lease_data.periodos[FY2025]"
+    },
+    {
+      "id": "KC-03",
+      "condicion_objetiva": "Distorsion EBIT->CFO <= -15% por dos periodos anuales consecutivos",
+      "ventana_temporal": "24 meses",
+      "probabilidad": "MEDIA",
+      "base_actual": {
+        "delta_pct_ebit_cfo_fy2025": 31.51,
+        "historial_volatilidad": [
+          -24.67,
+          -78.26,
+          41.78,
+          21.23,
+          21.02,
+          31.51
+        ]
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.historico_anual[FY2020-FY2025]"
+    },
+    {
+      "id": "KC-04",
+      "condicion_objetiva": "Restatement formal o revision >10% en ingresos, EBIT o net income de FY2025/FY2026",
+      "ventana_temporal": "12-24 meses",
+      "probabilidad": "MEDIA",
+      "base_actual": {
+        "conflictos_potential_restatement_observados": true,
+        "rango_diff_pct_observado": "43.9%-96.19%"
+      },
+      "source_id": "SRC_SEC_005_10-Q_Q3-2025.htm",
+      "ubicacion": "TruthPack_v1._cross_layer_reconciliation.reconciliation_log"
+    },
+    {
+      "id": "KC-05",
+      "condicion_objetiva": "Salidas netas de financiacion (abs(CFF)/CFO) > 75% por dos reportes consecutivos y caida de caja >20% interanual",
+      "ventana_temporal": "12 meses",
+      "probabilidad": "MEDIA",
+      "base_actual": {
+        "abs_cff_sobre_cfo_fy2025_pct": 35.55,
+        "delta_cash_fy2025_usd": 120096000.0
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025] (cff_usd, cfo_usd, delta_cash_usd)"
+    },
+    {
+      "id": "KC-06",
+      "condicion_objetiva": "FCF anual < 100670000 USD (lease liabilities corrientes) por dos periodos consecutivos",
+      "ventana_temporal": "24 meses",
+      "probabilidad": "BAJA",
+      "base_actual": {
+        "fcf_fy2025_usd": 182787000.0,
+        "lease_liabilities_current_usd": 100670000.0,
+        "cobertura_fcf_actual_x": 1.82
+      },
+      "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+      "ubicacion": "TruthPack_v1.historico_anual[periodo=FY2025] y TruthPack_v1.lease_data.periodos[FY2025]"
+    }
+  ],
+  "report_type": "forensic_detection",
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1_partial",
+    "truth_pack_data_quality_status": "PASS",
+    "sources_pack_disponible": false
+  },
+  "log": {
+    "matriz_decision_inputs": {
+      "truth_pack_status": "PASS",
+      "sources_pack_disponible": false,
+      "accion": "Ejecucion solo con TruthPack"
+    },
+    "limitaciones": [
+      "SourcesPack_v1 no disponible; se ejecuto analisis solo con TruthPack y no se revisaron filings directamente fuera del pack.",
+      "No hay lineas de credito disponibles reportadas en el input.",
+      "No hay calendario detallado de vencimientos de deuda financiera no-lease en 12-24 meses.",
+      "No hay desglose de stock-based compensation, impuestos pagados en efectivo ni detalle completo de variacion de capital de trabajo para explicar completamente EBIT->CFO.",
+      "No hay desglose de capex de mantenimiento vs crecimiento ni de dividendos/recompras dentro de CFF.",
+      "No hay saldos de cuentas por cobrar e inventarios en el ultimo balance para pruebas completas de DSO/DIO."
+    ],
+    "exhaustividad_revision": {
+      "liquidez": "revisado",
+      "reconocimiento_ingresos": "revisado_con_evidencia_de_inconsistencias_entre_fuentes",
+      "capitalizacion_capex": "revisado_sin_indicio_cuantitativo_directo_de_reclasificacion_op_ex",
+      "capital_trabajo": "revisado_parcial_por_datos_faltantes",
+      "goodwill_deterioro": "no_evaluable_por_falta_de_dato_en_input",
+      "transacciones_relacionadas": "no_evaluable_por_falta_de_dato_en_input",
+      "fuera_de_balance_y_garantias": "revisado_via_obligaciones_de_arrendamiento"
+    }
+  },
+  "_meta": {
+    "fuente_analisis": "TruthPack_v1",
+    "timestamp_analisis": "2026-02-26T00:00:00Z"
+  }
+}

@@ -1,0 +1,757 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260226_GCT",
+  "fecha_corte": "2026-02-26",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "claude-opus-4-6",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260226_GCT",
+    "implied_expectations_caso_id": "CASE_20260226_GCT",
+    "sources_pack_caso_id": "CASE_20260226_GCT"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "GCT presenta liquidez fuerte con $379.8M en caja, CFO FY2025 de $190.7M y FCF de $182.8M, sin deuda financiera identificada.",
+      "La dependencia estructural de leases ($469.7M en pasivos lease, 65.5% de pasivos totales) es el principal riesgo de supervivencia.",
+      "Discrepancias de reconciliación entre filings (diff_pct 43%-96%) sugieren posible restatement histórico o errores de extracción que requieren vigilancia.",
+      "Desaceleración de ingresos de +65% a +11.1% YoY con compresión de margen bruto (24.6% a 23.3%) indica normalización post-hipercrecimiento.",
+      "Veredicto forense: APTO con confianza 0.72; supervivencia a 12-24 meses altamente probable salvo deterioro abrupto de demanda o evento regulatorio."
+    ],
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.72
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "GCT dispone de $379.8M en caja al cierre FY2025 con cobertura de 3.77x sobre lease liabilities corrientes ($100.7M).",
+      "confianza_0_1": 0.92,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita_corta": "Cash and cash equivalents $379,780,000",
+          "interpretacion": "Colchón de liquidez holgado para cubrir obligaciones corrientes de leases y operaciones."
+        }
+      ],
+      "falsacion": {
+        "test": "Caja cae por debajo de $200M en un reporte trimestral sin adquisición justificada",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Las lease liabilities totales ($469.7M) representan el 65.5% de los pasivos totales y constituyen la principal obligación contractual de GCT.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "lease_data FY2025",
+          "cita_corta": "Total lease liabilities $469,681,000; pasivos totales $716,660,000",
+          "interpretacion": "Modelo de negocio asset-light con dependencia estructural de arrendamientos operativos."
+        }
+      ],
+      "falsacion": {
+        "test": "Lease liabilities se reducen >15% sin contracción de negocio o GCT adquiere activos propios significativos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El FCF ajustado por lease corriente (~$82.1M) reduce la holgura aparente un 55% respecto al FCF reportado ($182.8M).",
+      "confianza_0_1": 0.8,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "lease_data y cash flow FY2025",
+          "cita_corta": "FCF $182.8M menos lease corriente $100.7M ≈ $82.1M ajustado",
+          "interpretacion": "La generación de caja real disponible tras compromisos de lease es materialmente menor que el FCF headline."
+        }
+      ],
+      "falsacion": {
+        "test": "GCT publica detalle de pagos de lease en cash flow mostrando que ya están incluidos en CFO",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Las discrepancias de reconciliación entre 10-K y 20-F para FY2022 (net income diff 43.9%) probablemente reflejan diferencias de presentación o extracción, no fraude contable.",
+      "confianza_0_1": 0.55,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_002_10-K_FY2024.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "reconciliation_log FY2022",
+          "cita_corta": "Net income 23,972,000 vs 37,455,000 (diff 43.9%)",
+          "interpretacion": "Los valores dropped corresponden consistentemente a cumulative/YTD vs quarterly, sugiriendo extracción de periodos acumulados vs discretos."
+        }
+      ],
+      "falsacion": {
+        "test": "GCT anuncia restatement formal o SEC abre investigación sobre estados financieros",
+        "ventana_meses": {
+          "min": 1,
+          "max": 12
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El crecimiento de ingresos se desaceleró de +65.0% (FY2024) a +11.1% (FY2025) con compresión de margen bruto de 24.6% a 23.3%.",
+      "confianza_0_1": 0.93,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "historico_anual FY2023-FY2025",
+          "cita_corta": "Ingresos FY2024 $1,161M (+65%), FY2025 $1,290M (+11.1%); margen bruto 24.6% → 23.3%",
+          "interpretacion": "Normalización post-hipercrecimiento; la compresión de márgenes requiere monitoreo de sostenibilidad."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos Q1/Q2-2026 muestran crecimiento YoY >15% con margen bruto estable o mejorando",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "INFERENCIA",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "La brecha EBIT→CFO creciente (+31.5% en FY2025) con gap residual no explicado de $69M sugiere beneficio de capital de trabajo favorable que podría revertir.",
+      "confianza_0_1": 0.65,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "puentes ebit_a_cfo FY2025",
+          "cita_corta": "CFO $190.7M vs EBIT $145.0M; gap residual no explicado $69.0M",
+          "interpretacion": "Parte del exceso de CFO sobre EBIT podría ser temporal (cobros anticipados, pagos diferidos) y revertir."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO/EBIT cae por debajo de 1.0x en dos trimestres consecutivos",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "GCT mantiene caja superior a $250M al cierre de Q2-2026.",
+      "probabilidad_0_1": 0.88,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Cash and cash equivalents reportado en 10-Q Q2-2026 ≥ $250M.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "No se produce restatement formal de estados financieros de GCT en los próximos 12 meses.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "criterio_validacion": "Ausencia de 8-K/NT con anuncio de restatement o NT filing antes de feb-2027.",
+      "fuente_prevista": "filing"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Ingresos Q1-2026 superiores a $260M (crecimiento YoY > -4.4% vs Q1-2025 $271.9M).",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 3,
+        "max": 4
+      },
+      "criterio_validacion": "Revenue reportado en 10-Q Q1-2026 o 8-K de earnings ≥ $260M.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "CFO acumulado 12 meses (TTM a Q2-2026) se mantiene por encima de $120M.",
+      "probabilidad_0_1": 0.78,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Suma de CFO de últimos 4 trimestres reportados ≥ $120M.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "Margen bruto FY2026 se mantiene por encima de 20%.",
+      "probabilidad_0_1": 0.72,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Gross profit / Revenue ≥ 20% en cada trimestre reportado de 2026.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "GCT no emite deuda financiera formal (bonds, term loans) superior a $50M en los próximos 12 meses.",
+      "probabilidad_0_1": 0.8,
+      "ventana_meses": {
+        "min": 1,
+        "max": 12
+      },
+      "criterio_validacion": "Ausencia de anuncio de emisión de deuda >$50M en 8-K o 10-Q notas.",
+      "fuente_prevista": "filing"
+    },
+    {
+      "pred_id": "PRED_007",
+      "descripcion": "Las lease liabilities corrientes no superan $120M al cierre de FY2026.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Operating + finance lease liabilities current ≤ $120M en 10-K FY2026.",
+      "fuente_prevista": "10-K"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose de deuda financiera (borrowings) vs lease liabilities en balance",
+      "por_que_importa": "Sin separar deuda financiera de leases no se puede calcular EV ni evaluar covenants.",
+      "como_obtenerlo": "10-K FY2025, Nota de deuda / borrowings / credit facilities."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de cuentas por cobrar e inventarios del balance consolidado",
+      "por_que_importa": "Necesarios para calcular DSO/DIO y evaluar calidad de capital de trabajo.",
+      "como_obtenerlo": "10-K FY2025, Balance sheet consolidado, sección current assets."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla de vencimientos de leases por año (maturity schedule)",
+      "por_que_importa": "Permite evaluar el perfil temporal de obligaciones y riesgo de maturity wall de leases.",
+      "como_obtenerlo": "10-K FY2025, Nota de arrendamientos / Lease commitments."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de SBC y acciones diluidas outstanding",
+      "por_que_importa": "Necesario para evaluar dilución y alinear EPS con share count real.",
+      "como_obtenerlo": "10-K FY2025, Nota de stock-based compensation y EPS diluted."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de componentes de CFO (working capital changes, non-cash items)",
+      "por_que_importa": "El gap residual no explicado EBIT→CFO de $69M requiere desglose para validar sostenibilidad.",
+      "como_obtenerlo": "10-K FY2025, Cash flow statement sección adjustments/reconciliation."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "APTO",
+        "confianza_0_1": 0.72,
+        "razon_principal": "Liquidez robusta ($379.8M caja, CFO $190.7M, FCF $182.8M) sin deuda financiera identificada. El principal riesgo estructural son las lease liabilities ($469.7M) y las discrepancias de reconciliación entre filings, pero ambos son gestionables con la generación de caja actual."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 4,
+          "por_que": [
+            "Caja de $379.8M cubre 3.77x las lease liabilities corrientes ($100.7M) y >45 meses de runway en escenario CFO=0.",
+            "CFO FY2025 de $190.7M positivo y creciente respecto a FY2024 ($158.1M), demostrando capacidad generadora.",
+            "FCF de $182.8M (ajustado por leases corrientes ~$82.1M) sigue siendo positivo y holgado.",
+            "Sin deuda financiera formal identificada; las obligaciones son principalmente operativas (leases).",
+            "Las 2 banderas ALTO (concentración de leases y discrepancias de reconciliación) son gestionables: leases están cubiertas y las discrepancias parecen reflejar extracción de periodos acumulados vs discretos.",
+            "Riesgo principal: desaceleración de ingresos (+11.1% YoY) podría comprometer cobertura de leases si se profundiza."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 379780000.0,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [],
+          "runway_meses_estimado": 45,
+          "metodo_estimacion": "Runway estimado en escenario estrés CFO=0: caja $379.8M dividida entre lease corriente mensualizada ($100.7M/12 = $8.4M/mes) = ~45 meses. En escenario base con CFO, runway es indefinido.",
+          "notas": "No se identificaron líneas de crédito revolventes en los inputs disponibles."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": null,
+          "deuda_neta_usd": null,
+          "coste_deuda_aprox_pct": null,
+          "coverage_intereses": 724.88,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "No se identifica deuda financiera formal. Las obligaciones de lease son escalonadas con $100.7M corrientes y $369.0M no corrientes, lo cual no constituye un maturity wall concentrado."
+          },
+          "vencimientos": [
+            {
+              "anio": 2026,
+              "importe_usd": 100670000.0,
+              "tipo": "leasing",
+              "riesgo": "BAJO",
+              "fuente_ref": {
+                "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+                "ubicacion": "lease_data FY2025"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "UNKNOWN",
+            "comentario": "No se identificaron covenants en los inputs disponibles. Sin deuda financiera formal, es probable que no existan covenants bancarios tradicionales."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "UNKNOWN",
+          "motores": [
+            "SBC"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "No se dispone de detalle de SBC ni de share count YoY. El EPS reportado ($4.71) sugiere ~29.2M acciones, pero sin serie temporal no se puede evaluar dilución."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "La calidad de resultados es razonable pero con áreas de opacidad. El CFO supera consistentemente al EBIT (+31.5% en FY2025) lo cual es positivo, aunque el gap residual no explicado ($69M) requiere desglose. El capex extremadamente bajo (0.6% de ingresos) refleja modelo asset-light dependiente de leases. Las discrepancias de reconciliación entre filings son la principal bandera de calidad contable.",
+        "red_flags": [
+          {
+            "flag_id": "F-001",
+            "categoria": "LEASES",
+            "descripcion": "Lease liabilities de $469.7M (65.5% de pasivos totales) con obligaciones corrientes de $100.7M crean dependencia estructural significativa.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.9,
+            "por_que_importa": "Si la demanda cae y GCT no puede renegociar leases, las salidas fijas comprimen CFO y la caja rápidamente.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+                "ubicacion": "lease_data FY2025",
+                "cita_corta": "Total lease liabilities $469,681,000; current $100,670,000",
+                "interpretacion": "El peso de leases sobre pasivos es dominante y crea apalancamiento operativo oculto."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Lease liabilities corrientes caen >10% YoY sin contracción de negocio o GCT transiciona a activos propios",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "F-002",
+            "categoria": "OTHER",
+            "descripcion": "Discrepancias materiales entre filings (10-K vs 20-F, periodos acumulados vs discretos) con diff_pct de 43.9%-96.2% clasificadas como potential_restatement.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.6,
+            "por_que_importa": "Si las discrepancias reflejan un restatement real (no extracción errónea), la fiabilidad de todo el historial financiero queda comprometida.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_002_10-K_FY2024.htm",
+                "ubicacion": "reconciliation_log FY2022",
+                "cita_corta": "Net income FY2022: 23,972,000 vs 37,455,000 (diff 43.9%)",
+                "interpretacion": "Los patrones de discrepancia (~2x en muchos campos) sugieren confusión YTD vs trimestral más que fraude, pero no se puede descartar restatement."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "GCT publica restatement formal o SEC emite comentarios/investigación",
+              "ventana_meses": {
+                "min": 1,
+                "max": 12
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "flag_id": "F-003",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Brecha EBIT→CFO creciente (+31.5% FY2025) con gap residual no explicado de $69M, patrón Q3-2025 extremo (CFO/EBIT 3.12x).",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.7,
+            "por_que_importa": "Si el exceso de CFO sobre EBIT proviene de cobros anticipados o pagos diferidos, podría revertir abruptamente.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+                "ubicacion": "puentes ebit_a_cfo FY2025",
+                "cita_corta": "CFO $190.7M vs EBIT $145.0M; gap residual $69.0M",
+                "interpretacion": "El gap es favorable pero su persistencia y magnitud creciente requieren explicación detallada."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "CFO/EBIT cae por debajo de 0.80x en un periodo anual completo",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "F-004",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "Capex FY2025 de $7.9M (0.6% de ingresos) es anormalmente bajo para una empresa de $1.3B en ingresos, sugiriendo sustitución por leases.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.85,
+            "por_que_importa": "El FCF headline ($182.8M) sobreestima la generación real de caja disponible al no capturar el costo de capacidad vía leases.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+                "ubicacion": "historico_anual FY2025",
+                "cita_corta": "Capex $7.9M; ingresos $1,290M; ratio 0.61%",
+                "interpretacion": "El modelo asset-light depende de la disponibilidad y costo de arrendamientos; FCF ajustado por leases corrientes es ~$82M."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Capex sube a >3% de ingresos indicando transición a modelo con activos propios",
+              "ventana_meses": {
+                "min": 6,
+                "max": 24
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "F-005",
+            "categoria": "ONE_OFFS",
+            "descripcion": "Crédito fiscal de +$573K en Q4-2024 invierte el patrón trimestral de gasto fiscal; G&A oscila +146.5% y -37.0% en FY2024-FY2025.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.5,
+            "por_que_importa": "Podría indicar ajustes puntuales de provisión fiscal y reclasificaciones de gastos que distorsionan comparabilidad trimestral.",
+            "evidencias": [
+              {
+                "source_id": "SRC_017_8-K_2026-02-26.htm",
+                "ubicacion": "historico_trimestral Q4-2024",
+                "cita_corta": "income_tax_usd +573,000 con net_income positivo",
+                "interpretacion": "Un crédito fiscal puntual en un trimestre no es necesariamente preocupante, pero el patrón de volatilidad en G&A sí requiere explicación."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Q4-2025 o siguientes muestran patrón fiscal normalizado sin créditos atípicos",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-006",
+            "categoria": "OTHER",
+            "descripcion": "Cuentas por cobrar, inventarios y deuda financiera no disponibles en balance, impidiendo análisis completo de working capital y leverage.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.8,
+            "por_que_importa": "Sin AR/inventarios no se puede detectar channel stuffing o inflado de activos corrientes; sin deuda no se puede calcular EV ni net debt/EBITDA.",
+            "evidencias": [
+              {
+                "source_id": "SRC_SEC_001_10-K_FY2025.htm",
+                "ubicacion": "balance_sheet_ultimo",
+                "cita_corta": "cuentas_por_cobrar_usd, inventarios_usd, deuda_total_usd en null",
+                "interpretacion": "Gaps de extracción que limitan el análisis forense; los datos existen en el 10-K pero no fueron capturados."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Extracción completa del balance revela AR/inventarios/deuda en niveles normales para el sector",
+              "ventana_meses": {
+                "min": 1,
+                "max": 3
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "EBIT FY2025 de $145.0M genera CFO de $190.7M (+31.5%), con depreciación $8.3M, impuestos -$23.8M e intereses -$0.2M explicando parcialmente; gap residual de $69.0M atribuible a cambios de working capital y ajustes no cash que no están desagregados en el TruthPack.",
+            "posibles_distorsiones": [
+              "capital circulante",
+              "one-offs",
+              "impuestos",
+              "otros ajustes no cash"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "FCF FY2025 de $182.8M resulta de CFO $190.7M menos capex $7.9M. Sin embargo, al ajustar por pagos corrientes de leases (~$100.7M), el FCF ajustado cae a ~$82.1M, una reducción del 55%. El capex reportado es estructuralmente bajo por el modelo de leasing.",
+            "capex_riesgo": "BAJO",
+            "notas": "El riesgo de capex no es en sí mismo sino en la dependencia de leases como sustituto. El capex de mantenimiento real es probablemente mucho mayor si se incluyen pagos de lease."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "UNKNOWN",
+          "comentario": "CFF FY2025 de -$67.8M podría incluir recompras, pero sin desglose no se puede confirmar."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "No hay detalle de SBC en los inputs. Es necesario extraer la nota de stock-based compensation del 10-K."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "CFI de -$55.4M en FY2024 y -$90.5M en FY2023 sugieren actividad de M&A o inversiones; sin detalle no se puede evaluar la calidad de estas asignaciones."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "No hay datos de insider ownership disponibles. Solicitar en DEF14A o proxy statement."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Contracción de ingresos de -10% a -20% combinada con incapacidad de reducir compromisos de lease, comprimiendo márgenes operativos por debajo de 5%.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "caída de CFO",
+              "lease payments fijos comprimen margen",
+              "consumo acelerado de caja"
+            ],
+            "indicadores_tempranos": [
+              "Crecimiento YoY negativo en dos trimestres consecutivos",
+              "Margen bruto por debajo de 20%",
+              "CFO trimestral negativo",
+              "Caja cayendo más de $40M por trimestre"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Restatement formal de estados financieros que provoque pérdida de confianza del mercado, caída de precio y posible investigación SEC.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "costes legales y de auditoría",
+              "restricción de acceso a mercados de capital",
+              "pérdida de confianza de contrapartes de lease"
+            ],
+            "indicadores_tempranos": [
+              "Cambio de auditor",
+              "NT filing (retraso en presentación de 10-K/10-Q)",
+              "Comentarios SEC sobre filings previos",
+              "Dimisión de CFO o controller"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "Reversión del working capital favorable que reduce CFO a niveles cercanos o inferiores a lease corriente, obligando a consumir caja para cubrir obligaciones.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "subida de working capital",
+              "caída de CFO",
+              "consumo de caja acelerado"
+            ],
+            "indicadores_tempranos": [
+              "CFO/EBIT cayendo por debajo de 0.80x",
+              "Aumento significativo de AR o inventarios (si se hacen visibles)",
+              "Q3-type CFO spike no se repite y following quarters weak"
+            ]
+          }
+        ],
+        "conclusion_downside": "El escenario más probable de estrés es una desaceleración profunda de ingresos que, combinada con obligaciones de lease fijas, comprima la generación de caja. Sin embargo, la caja actual ($379.8M) proporciona un colchón de >3 años en escenario extremo (CFO=0). El riesgo de restatement existe pero las discrepancias observadas parecen más artefactos de extracción que fraude. La reversión de working capital es el riesgo más sigiloso pero monitoreable trimestre a trimestre."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja y equivalentes por debajo de $150M en cualquier reporte trimestral.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Caída de caja >60% desde niveles actuales señala consumo acelerado incompatible con obligaciones de lease."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "fcf",
+          "definicion": "CFO acumulado 12 meses por debajo de lease liabilities corrientes anualizadas (~$100.7M) durante dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Si la generación operativa no cubre las obligaciones de lease corrientes, la empresa quema caja estructuralmente."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "contabilidad",
+          "definicion": "Restatement formal de estados financieros o anuncio de investigación SEC/DOJ material.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Restatement confirmaría que las discrepancias de reconciliación son sistémicas, no de extracción."
+        },
+        {
+          "kc_id": "KC-004",
+          "relacionado_con": "margen",
+          "definicion": "Margen bruto por debajo de 18% en dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Compresión de margen bruto desde 23.3% a <18% indicaría destrucción de poder de pricing incompatible con cobertura de costes fijos."
+        },
+        {
+          "kc_id": "KC-005",
+          "relacionado_con": "otro",
+          "definicion": "Crecimiento de ingresos YoY negativo durante dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Contracción de ingresos con base de costes fijos (leases) amplifica el impacto en rentabilidad y generación de caja."
+        },
+        {
+          "kc_id": "KC-006",
+          "relacionado_con": "deuda",
+          "definicion": "Suscripción de deuda financiera formal superior a $50M para sostener operaciones o cubrir pasivos de lease.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Empresa sin deuda que necesita endeudarse señala deterioro fundamental en la capacidad de autofinanciación."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 4.0,
+        "condiciones_para_aumentar_tamaño": [
+          "Publicación de detalle de AR/inventarios/deuda mostrando niveles saludables (resolviendo opacidad).",
+          "CFO TTM se mantiene >$150M con margen bruto estable >22% durante 2 trimestres consecutivos.",
+          "Resolución de discrepancias de reconciliación confirmando que son artefactos de extracción (no restatement).",
+          "Crecimiento de ingresos se estabiliza en rango positivo +5-15% YoY."
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Cualquier kill criterion (KC-001 a KC-006) se activa.",
+          "Caja cae por debajo de $250M sin explicación clara (M&A justificado, recompras autorizadas).",
+          "Cambio de auditor o NT filing que sugiera problemas contables.",
+          "Margen bruto cae por debajo de 20% en un trimestre.",
+          "Nueva deuda financiera >$25M sin uso claramente productivo."
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "tabla_vencimientos",
+          "por_que_importa": "Necesario para modelar el perfil temporal de lease liabilities y detectar concentraciones.",
+          "como_obtenerlo": "10-K FY2025, Nota de arrendamientos operativos, tabla de pagos mínimos futuros."
+        },
+        {
+          "item": "detalle_capex",
+          "por_que_importa": "Capex de 0.6% de ingresos es anormalmente bajo; necesario confirmar qué inversiones se canalizan vía leases.",
+          "como_obtenerlo": "10-K FY2025, Cash flow statement, nota de PP&E, nota de leases."
+        },
+        {
+          "item": "acciones_diluidas",
+          "por_que_importa": "Sin share count no se puede evaluar dilución ni validar market cap/precio.",
+          "como_obtenerlo": "10-K FY2025, nota de EPS diluted o portada del filing."
+        },
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "SBC podría ser material y contribuir al gap CFO-EBIT como ajuste no cash.",
+          "como_obtenerlo": "10-K FY2025, Nota de stock-based compensation."
+        },
+        {
+          "item": "revolver_disponible",
+          "por_que_importa": "Líneas de crédito disponibles son un backstop de liquidez no reflejado en caja.",
+          "como_obtenerlo": "10-K FY2025, Nota de credit facilities / borrowings."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "EV no disponible: impide cálculo de múltiplos EV-based y evaluación completa de apalancamiento.",
+      "AR, inventarios y deuda financiera no extraídos: análisis de working capital y leverage incompleto.",
+      "Detalle de componentes de CFO no disponible: gap residual de $69M no desagregado.",
+      "SBC y share count no disponibles: riesgo de dilución clasificado como UNKNOWN.",
+      "Las discrepancias de reconciliación podrían ser artefactos de extracción YTD vs discreto, no restatements reales."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-26T15:15:00Z",
+    "inputs_hash": "tp_v1_partial_GCT_20260226+ie_v1_blocked+fd_v1_12flags"
+  }
+}
