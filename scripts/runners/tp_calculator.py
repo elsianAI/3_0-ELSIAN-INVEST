@@ -95,7 +95,7 @@ def calculate(partial_tp: dict, market_data: dict) -> dict:
     # fabricated cross-era metrics.  If _ttm() returned no_disponible AND no
     # eligible FY0 exists, all metric inputs stay None (fail-closed).
     ttm_method = ttm.get("metodo", "no_disponible")
-    if ttm_method in ("suma_4_trimestres", "FY0_fallback") and ttm.get("ingresos_usd") is not None:
+    if ttm_method in ("suma_4_trimestres", "semestral_FY_H1", "FY0_fallback") and ttm.get("ingresos_usd") is not None:
         ingresos = ttm.get("ingresos_usd")
         ebit = ttm.get("ebit_usd")
         net_income = ttm.get("net_income_usd")
@@ -474,8 +474,118 @@ def _quarters_are_consecutive(quarters: list[dict], max_gap_days: int = 120) -> 
     return True
 
 
+def _ttm_needs_upgrade(result: dict) -> bool:
+    """Check if a TTM result from suma_4_trimestres is too sparse to be useful.
+
+    Returns True when the quarterly sum only produced revenue but lacks
+    key P&L/CF fields — typical for companies that report full financials
+    semestrally (H1+FY) but only publish quarterly revenue.
+    """
+    if result.get("metodo") != "suma_4_trimestres":
+        return False
+    key_fields = ("ebit_usd", "net_income_usd", "cfo_usd")
+    has_revenue = result.get("ingresos_usd") is not None
+    missing_keys = all(result.get(f) is None for f in key_fields)
+    return has_revenue and missing_keys
+
+
+def _ttm_semestral(annual: list, quarters: list) -> dict | None:
+    """Compute TTM from semestral data: TTM = FY_prior + H1_current - H1_prior.
+
+    This handles companies (common in Europe) that publish full P&L and cash
+    flow only in H1 interim and FY annual reports, with only revenue available
+    at the quarterly level.
+
+    Returns a TTM dict if successful, None otherwise.
+    """
+    _TTM_FIELDS = ("ingresos_usd", "ebit_usd", "net_income_usd", "cfo_usd", "capex_usd",
+                   "cogs_usd", "beneficio_bruto_usd", "gross_profit_usd",
+                   "interest_expense_usd", "depreciation_usd", "income_tax_usd",
+                   "cfi_usd", "cff_usd", "delta_cash_usd", "fx_effect_cash_usd")
+
+    # Find H1 periods (semestral, marked as _periodo_parcial).
+    # Note: tipo_periodo may be "semestral" OR "trimestral" depending on
+    # extractor; we identify by periodo name (H1-YYYY) + _periodo_parcial flag.
+    semestrals = [q for q in quarters
+                  if q.get("_periodo_parcial")
+                  and str(q.get("periodo", "")).upper().startswith("H1")]
+    semestrals = sorted(semestrals, key=_parse_period_sort_key)
+
+    if len(semestrals) < 2:
+        return None
+
+    h1_new = semestrals[-1]  # most recent H1
+    h1_old = semestrals[-2]  # prior H1
+
+    # Extract years
+    h1_new_year = _extract_year_from_period(h1_new)
+    h1_old_year = _extract_year_from_period(h1_old)
+    if h1_new_year is None or h1_old_year is None:
+        return None
+    if h1_new_year - h1_old_year != 1:
+        return None  # Must be consecutive years
+
+    # Find FY for the prior year (same year as h1_old)
+    fy_prior = None
+    for a in sorted(annual, key=_parse_period_sort_key):
+        if a.get("_periodo_parcial"):
+            continue
+        yr = _extract_year_from_annual(a)
+        if yr == h1_old_year:
+            fy_prior = a
+            break
+    if fy_prior is None:
+        return None
+
+    # Verify that at least ebit and cfo are available in all three sources
+    min_fields = ("ebit_usd", "cfo_usd")
+    for source in (fy_prior, h1_old, h1_new):
+        if not all(_to_number(source.get(f)) is not None for f in min_fields):
+            return None
+
+    # Compute TTM = FY_prior + H1_new - H1_old
+    result = {
+        "periodo": "TTM",
+        "fecha_fin": h1_new.get("fecha_fin"),
+        "metodo": "semestral_FY_H1",
+        "nota": f"TTM = FY{h1_old_year} + H1-{h1_new_year} - H1-{h1_old_year}",
+    }
+
+    for field in _TTM_FIELDS:
+        fy_val = _to_number(fy_prior.get(field))
+        h1o_val = _to_number(h1_old.get(field))
+        h1n_val = _to_number(h1_new.get(field))
+        if fy_val is not None and h1o_val is not None and h1n_val is not None:
+            result[field] = fy_val + h1n_val - h1o_val
+        else:
+            result[field] = None
+
+    # FCF from TTM CFO and capex
+    if result.get("cfo_usd") is not None and result.get("capex_usd") is not None:
+        result["fcf_usd"] = result["cfo_usd"] - abs(result["capex_usd"])
+    else:
+        result["fcf_usd"] = None
+
+    return result
+
+
+def _extract_year_from_period(entry: dict) -> int | None:
+    """Extract year from a period entry (H1-2025 → 2025, etc.)."""
+    fecha_fin = entry.get("fecha_fin")
+    if isinstance(fecha_fin, str) and re.match(r"\d{4}", fecha_fin):
+        return int(fecha_fin[:4])
+    periodo = str(entry.get("periodo", ""))
+    m = re.search(r"(\d{4})", periodo)
+    return int(m.group(1)) if m else None
+
+
 def _ttm(annual: list, quarters: list) -> dict:
     """Calcula TTM para items de income statement.
+
+    Strategy cascade:
+      1. suma_4_trimestres — standard 4-quarter sum
+      2. semestral_FY_H1  — FY + H1_new - H1_old (for semestral reporters)
+      3. FY0_fallback      — use most recent eligible full year
 
     Sorts chronologically by fecha_fin/periodo and validates that
     the 4 quarters used are actually consecutive.
@@ -535,6 +645,18 @@ def _ttm(annual: list, quarters: list) -> dict:
 
     elif len(quarters_full) > 0:
         result["nota"] = f"Solo {len(quarters_full)} trimestres completos (necesarios 4)"
+
+    # --- Semestral TTM upgrade ---
+    # If quarterly sum only yielded revenue (typical for semestral reporters),
+    # try computing TTM from FY + H1_new - H1_old before falling back to FY0.
+    if _ttm_needs_upgrade(result) or result["metodo"] == "no_disponible":
+        sem_ttm = _ttm_semestral(annual, quarters)
+        if sem_ttm is not None:
+            prev_nota = result.get("nota") or ""
+            if result["metodo"] == "suma_4_trimestres":
+                sem_ttm["nota"] = (f"Quarterly TTM sparse (only revenue). "
+                                   f"Upgraded to semestral: {sem_ttm['nota']}")
+            return sem_ttm
 
     if result["metodo"] == "no_disponible" and annual:
         fy0 = _find_eligible_fy0(annual)
