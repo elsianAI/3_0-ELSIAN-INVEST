@@ -1536,6 +1536,7 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
     filing_failures = []
     filing_attempts: list[dict] = []
     provenance_records: list[dict] = []
+    field_provenance_records: list[dict] = []
     for i, result in enumerate(results):
         filing_entry = filings[i] if i < len(filings) else {}
         dispatch_meta = {}
@@ -1579,6 +1580,33 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
                     "artifact_path": str(tmp_path),
                 }
             )
+            raw_field_records = dispatch_meta.get("field_provenance", [])
+            if isinstance(raw_field_records, list):
+                for rec in raw_field_records:
+                    if not isinstance(rec, dict):
+                        continue
+                    field_provenance_records.append(
+                        {
+                            "index": i,
+                            "source_id": filing_entry.get("source_id"),
+                            "filing_type": filing_entry.get("tipo", filing_entry.get("filing_type")),
+                            "local_path": filing_entry.get("local_path"),
+                            "field": rec.get("field"),
+                            "selected_value": rec.get("selected_value"),
+                            "currency_original": rec.get("currency_original"),
+                            "unit_applied": rec.get("unit_applied"),
+                            "selected_source": rec.get("selected_source"),
+                            "selected_method": rec.get("selected_method"),
+                            "selected_confidence": rec.get("selected_confidence"),
+                            "recency": rec.get("recency"),
+                            "status": rec.get("status"),
+                            "diff_pct": rec.get("diff_pct"),
+                            "diff_abs": rec.get("diff_abs"),
+                            "material_conflict": rec.get("material_conflict"),
+                            "deterministic": rec.get("deterministic"),
+                            "llm": rec.get("llm"),
+                        }
+                    )
         else:
             filing_failures.append(
                 {
@@ -1657,6 +1685,8 @@ def _run_parallel_filing_step(config: EngineConfig, case_dir: Path, step_name: s
             "filings_total": len(filings),
             "filings_successful": successful,
             "records": provenance_records,
+            "field_records_count": len(field_provenance_records),
+            "field_records": field_provenance_records,
         }
         (case_dir / "_extraction_provenance.json").write_text(
             json.dumps(provenance_payload, indent=2, ensure_ascii=False)

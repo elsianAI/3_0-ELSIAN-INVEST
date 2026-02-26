@@ -81,7 +81,18 @@ Lease liabilities non-current 795.4
         self.assertIn("DATOS PRE-EXTRAIDOS", block)
         self.assertIn("ingresos_usd", block)
 
+    def test_multicolumn_line_prefers_largest_numeric_value(self):
+        text = """
+## INCOME STATEMENT
+In millions of EUR
+Total revenue 10,280 9,512 12
+"""
+        out = extract_deterministic_facts(text)
+        best = out.get("best_by_field", {})
+        self.assertIn("ingresos_usd", best)
+        # Should select 10,280 (largest magnitude), not 12.
+        self.assertEqual(best["ingresos_usd"]["value"], 10_280_000_000.0)
+
 
 if __name__ == "__main__":
     unittest.main()
-

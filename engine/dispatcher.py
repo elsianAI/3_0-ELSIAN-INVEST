@@ -1674,6 +1674,428 @@ def _score_tp_partial_payload(payload: dict | None) -> int:
     return score
 
 
+_BALANCE_FIELDS = {
+    "activos_totales_usd",
+    "pasivos_totales_usd",
+    "patrimonio_usd",
+    "caja_usd",
+    "deuda_total_usd",
+    "deuda_largo_plazo_usd",
+    "deuda_corto_plazo_usd",
+}
+_PERIOD_FIELDS = {"ingresos_usd", "ebit_usd", "net_income_usd", "cfo_usd", "capex_usd"}
+_CROSS_LAYER_FIELDS = _BALANCE_FIELDS | _PERIOD_FIELDS
+
+
+def _tp_extractor_overrides(config: EngineConfig) -> dict:
+    overrides = config.raw.get("step_overrides", {}).get("TP_EXTRACTOR_FILING", {})
+    return overrides if isinstance(overrides, dict) else {}
+
+
+def _resolve_tp_filing_model_roles(
+    config: EngineConfig,
+    step_cfg: dict,
+    chunking_enabled: bool,
+) -> dict[str, str | list[str]]:
+    """Resolve model roles for TP_EXTRACTOR_FILING.
+
+    Keeps primary model from step config; chunk model is separate and never
+    overwrites primary fallback.
+    """
+    model_profiles = step_cfg.get("models", [config.default_single_model])
+    primary_model = model_profiles[0] if model_profiles else config.default_single_model
+    execution_cfg = config.execution if isinstance(config.execution, dict) else {}
+    chunk_cfg = execution_cfg.get("tp_extractor_chunking", {})
+    if not isinstance(chunk_cfg, dict):
+        chunk_cfg = {}
+    overrides = _tp_extractor_overrides(config)
+
+    chunk_model_candidates = overrides.get(
+        "chunk_models",
+        execution_cfg.get("tp_extractor_chunk_models", ["claude-haiku-4.5", "gemini-3-flash"]),
+    )
+    if not isinstance(chunk_model_candidates, list):
+        chunk_model_candidates = ["claude-haiku-4.5", "gemini-3-flash"]
+
+    chunk_model = primary_model
+    if chunking_enabled:
+        for candidate in chunk_model_candidates:
+            spec_candidate = config.get_model_spec(candidate)
+            if spec_candidate is not None and spec_candidate.transports:
+                chunk_model = candidate
+                break
+
+    chunk_fusion_model = (
+        overrides.get("chunk_fusion_model")
+        or chunk_cfg.get("fusion_model")
+        or execution_cfg.get("tp_extractor_chunk_fusion_model")
+        or (config.fusion_model if config.is_v2 else primary_model)
+    )
+    reconciliation_model = (
+        overrides.get("reconciliation_model")
+        or chunk_cfg.get("reconciliation_model")
+        or execution_cfg.get("tp_extractor_reconciliation_model")
+        or (config.fusion_model if config.is_v2 else primary_model)
+    )
+    return {
+        "primary_model": primary_model,
+        "chunk_model": chunk_model,
+        "chunk_model_candidates": chunk_model_candidates,
+        "chunk_fusion_model": str(chunk_fusion_model),
+        "reconciliation_model": str(reconciliation_model),
+    }
+
+
+def _to_float(value: object) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value.replace(",", "").strip())
+        except ValueError:
+            return None
+    return None
+
+
+def _period_sort_tuple(periodo: str | None, fecha_fin: str | None) -> tuple[int, int, str]:
+    p = (periodo or "").upper()
+    fecha = (fecha_fin or "").strip()
+    year = -1
+    quarter = 0
+    if fecha and len(fecha) >= 4 and fecha[:4].isdigit():
+        year = int(fecha[:4])
+    m = None
+    if p.startswith("FY"):
+        m = p[2:]
+    elif p.startswith("Q") and "-" in p:
+        try:
+            q_part, y_part = p.split("-", 1)
+            if q_part[1:].isdigit() and y_part.isdigit():
+                quarter = int(q_part[1:])
+                year = max(year, int(y_part))
+        except Exception:
+            pass
+    if m and m.isdigit():
+        year = max(year, int(m))
+    return (year, quarter, p)
+
+
+def _pick_latest_entry(entries: list[dict]) -> tuple[int, dict] | tuple[None, None]:
+    if not isinstance(entries, list) or not entries:
+        return (None, None)
+    best_idx = None
+    best_key = (-1, -1, "")
+    for i, item in enumerate(entries):
+        if not isinstance(item, dict):
+            continue
+        key = _period_sort_tuple(item.get("periodo"), item.get("fecha_fin"))
+        if key > best_key:
+            best_key = key
+            best_idx = i
+    if best_idx is None:
+        return (None, None)
+    return (best_idx, entries[best_idx])
+
+
+def _extract_llm_field_snapshot(payload: dict) -> dict[str, dict]:
+    snapshot: dict[str, dict] = {}
+    if not isinstance(payload, dict):
+        return snapshot
+
+    bs = payload.get("balance_sheet_ultimo", {})
+    if isinstance(bs, dict):
+        for field in _BALANCE_FIELDS:
+            value = _to_float(bs.get(field))
+            if value is not None:
+                snapshot[field] = {
+                    "value": value,
+                    "section": "balance_sheet_ultimo",
+                    "index": None,
+                    "path": f"balance_sheet_ultimo.{field}",
+                    "periodo": None,
+                }
+
+    annual_idx, annual = _pick_latest_entry(payload.get("historico_anual", []))
+    quarterly_idx, quarterly = _pick_latest_entry(payload.get("historico_trimestral", []))
+    for field in _PERIOD_FIELDS:
+        if isinstance(annual, dict):
+            value = _to_float(annual.get(field))
+            if value is not None:
+                snapshot[field] = {
+                    "value": value,
+                    "section": "historico_anual",
+                    "index": annual_idx,
+                    "path": f"historico_anual[{annual_idx}].{field}",
+                    "periodo": annual.get("periodo"),
+                }
+                continue
+        if isinstance(quarterly, dict):
+            value = _to_float(quarterly.get(field))
+            if value is not None:
+                snapshot[field] = {
+                    "value": value,
+                    "section": "historico_trimestral",
+                    "index": quarterly_idx,
+                    "path": f"historico_trimestral[{quarterly_idx}].{field}",
+                    "periodo": quarterly.get("periodo"),
+                }
+    return snapshot
+
+
+def _set_llm_field_value(payload: dict, field: str, value: float, locator: dict | None) -> None:
+    if not isinstance(payload, dict):
+        return
+    if isinstance(locator, dict):
+        section = locator.get("section")
+        if section == "balance_sheet_ultimo":
+            bs = payload.setdefault("balance_sheet_ultimo", {})
+            if isinstance(bs, dict):
+                bs[field] = value
+                return
+        if section in {"historico_anual", "historico_trimestral"}:
+            idx = locator.get("index")
+            arr = payload.get(section, [])
+            if isinstance(arr, list) and isinstance(idx, int) and 0 <= idx < len(arr) and isinstance(arr[idx], dict):
+                arr[idx][field] = value
+                return
+
+    if field in _BALANCE_FIELDS:
+        bs = payload.setdefault("balance_sheet_ultimo", {})
+        if isinstance(bs, dict):
+            bs[field] = value
+        return
+
+    annual = payload.get("historico_anual", [])
+    idx, item = _pick_latest_entry(annual if isinstance(annual, list) else [])
+    if isinstance(item, dict) and isinstance(idx, int):
+        annual[idx][field] = value
+
+
+def _material_threshold(field: str, det_val: float, llm_val: float, assets_ref: float | None) -> float:
+    if field in _BALANCE_FIELDS:
+        if assets_ref is not None and assets_ref > 0:
+            return max(5_000_000.0, 0.005 * assets_ref)
+        return 5_000_000.0
+    base = max(abs(det_val), abs(llm_val), 1.0)
+    return max(2_000_000.0, 0.02 * base)
+
+
+def _build_field_arbiter_prompt(
+    field: str,
+    det_item: dict,
+    llm_item: dict,
+    source_excerpt: str,
+    currency: str,
+) -> str:
+    return (
+        "Eres árbitro financiero de extracción.\n"
+        "Compara dos candidatos para UN campo y decide cuál es más fiable.\n"
+        "Responde SOLO JSON con este formato:\n"
+        "{\"selected_source\":\"deterministic|llm\",\"selected_value\":number|null,"
+        "\"confidence\":\"high|medium|low\",\"reason\":\"short\"}\n\n"
+        f"Campo: {field}\n"
+        f"Moneda original detectada: {currency}\n"
+        f"Candidato deterministic: value={det_item.get('value')} "
+        f"(section={det_item.get('section')}, line={det_item.get('line')}, "
+        f"unit={det_item.get('unit_applied')}, conf={det_item.get('confidence')})\n"
+        f"Candidato llm: value={llm_item.get('value')} "
+        f"(path={llm_item.get('path')}, periodo={llm_item.get('periodo')})\n\n"
+        "Fragmento del filing:\n"
+        "```text\n"
+        f"{source_excerpt}\n"
+        "```\n"
+    )
+
+
+def _run_cross_layer_reconciliation(
+    config: EngineConfig,
+    case_dir: Path,
+    timeout: int,
+    llm_output: dict,
+    deterministic_hints: dict | None,
+    source_content: str | None,
+    currency: str | None,
+    reconciliation_model: str,
+    arbitration_enabled: bool,
+    max_arbitrations: int,
+) -> tuple[dict, dict, list[dict]]:
+    """Reconcile Layer 1 deterministic hints vs Layer 2 LLM output."""
+    if not isinstance(llm_output, dict) or not isinstance(deterministic_hints, dict):
+        return llm_output, {"enabled": False, "reason": "missing_inputs"}, []
+
+    det_map = deterministic_hints.get("best_by_field", {})
+    if not isinstance(det_map, dict):
+        det_map = {}
+    llm_map = _extract_llm_field_snapshot(llm_output)
+    fields = [f for f in sorted(_CROSS_LAYER_FIELDS) if f in det_map or f in llm_map]
+    if not fields:
+        return llm_output, {"enabled": True, "fields": 0, "conflicts": 0, "arbitrations": 0}, []
+
+    assets_ref = None
+    det_assets = det_map.get("activos_totales_usd", {})
+    if isinstance(det_assets, dict):
+        assets_ref = _to_float(det_assets.get("value"))
+    if assets_ref is None:
+        llm_assets = llm_map.get("activos_totales_usd", {})
+        if isinstance(llm_assets, dict):
+            assets_ref = _to_float(llm_assets.get("value"))
+
+    meta_entries: list[dict] = []
+    field_provenance: list[dict] = []
+    confidence_by_field: dict[str, dict] = {}
+    arbitrations = 0
+    conflicts = 0
+    excerpt = (source_content or "")[:12000]
+
+    for field in fields:
+        det_item = det_map.get(field) if isinstance(det_map.get(field), dict) else None
+        llm_item = llm_map.get(field) if isinstance(llm_map.get(field), dict) else None
+        det_value = _to_float(det_item.get("value")) if det_item else None
+        llm_value = _to_float(llm_item.get("value")) if llm_item else None
+
+        status = "missing"
+        selected_source = "llm"
+        selected_method = "llm"
+        selected_value = llm_value
+        selected_conf = "medium"
+        diff_abs = None
+        diff_pct = None
+        material = False
+        arbiter_reason = None
+
+        if det_value is not None and llm_value is not None:
+            avg = max((abs(det_value) + abs(llm_value)) / 2.0, 1.0)
+            diff_abs = abs(det_value - llm_value)
+            diff_pct = (diff_abs / avg) * 100.0
+            threshold = _material_threshold(field, det_value, llm_value, assets_ref)
+            if diff_pct <= 5.0:
+                status = "match"
+                selected_source = "llm"
+                selected_method = "llm"
+                selected_value = llm_value
+                selected_conf = "high"
+            elif diff_pct > 10.0 and diff_abs > threshold:
+                status = "material_conflict"
+                conflicts += 1
+                material = True
+                selected_source = "llm"
+                selected_method = "llm_conflict_default"
+                selected_value = llm_value
+                selected_conf = "low"
+                if arbitration_enabled and arbitrations < max_arbitrations:
+                    prompt = _build_field_arbiter_prompt(
+                        field=field,
+                        det_item=det_item,
+                        llm_item=llm_item,
+                        source_excerpt=excerpt,
+                        currency=(currency or "UNKNOWN"),
+                    )
+                    arb = _dispatch_model_with_retry(
+                        config,
+                        reconciliation_model,
+                        prompt,
+                        cwd=case_dir,
+                        timeout=min(timeout, 180),
+                        step_name="TP_EXTRACTOR_FILING",
+                    )
+                    if arb.success and isinstance(arb.output, dict):
+                        source = str(arb.output.get("selected_source", "")).strip().lower()
+                        arb_value = _to_float(arb.output.get("selected_value"))
+                        if source in {"deterministic", "llm"}:
+                            selected_source = source
+                        if arb_value is not None:
+                            selected_value = arb_value
+                        elif selected_source == "deterministic":
+                            selected_value = det_value
+                        else:
+                            selected_value = llm_value
+                        selected_method = "arbiter"
+                        selected_conf = str(arb.output.get("confidence", "medium"))
+                        arbiter_reason = str(arb.output.get("reason", ""))[:240]
+                        status = "resolved_by_arbiter"
+                        arbitrations += 1
+            else:
+                status = "minor_mismatch"
+                selected_source = "llm"
+                selected_method = "llm_minor_mismatch"
+                selected_value = llm_value
+                selected_conf = "medium"
+        elif llm_value is not None:
+            status = "llm_only"
+            selected_source = "llm"
+            selected_method = "llm"
+            selected_value = llm_value
+            selected_conf = "medium"
+        elif det_value is not None:
+            status = "deterministic_fill"
+            selected_source = "deterministic"
+            selected_method = "deterministic"
+            selected_value = det_value
+            selected_conf = str(det_item.get("confidence", "medium"))
+            _set_llm_field_value(llm_output, field, det_value, llm_item)
+        else:
+            continue
+
+        if selected_value is not None:
+            _set_llm_field_value(
+                llm_output,
+                field,
+                float(selected_value),
+                llm_item,
+            )
+
+        meta_entries.append(
+            {
+                "field": field,
+                "status": status,
+                "selected_source": selected_source,
+                "selected_method": selected_method,
+                "selected_value": selected_value,
+                "diff_pct": round(diff_pct, 4) if isinstance(diff_pct, float) else None,
+                "diff_abs": round(diff_abs, 4) if isinstance(diff_abs, float) else None,
+                "material_conflict": material,
+                "arbiter_reason": arbiter_reason,
+            }
+        )
+        confidence_by_field[field] = {
+            "level": selected_conf,
+            "method": selected_method,
+            "status": status,
+        }
+        field_provenance.append(
+            {
+                "field": field,
+                "currency_original": currency or "UNKNOWN",
+                "unit_applied": det_item.get("unit_applied") if isinstance(det_item, dict) else None,
+                "selected_value": selected_value,
+                "selected_source": selected_source,
+                "selected_method": selected_method,
+                "selected_confidence": selected_conf,
+                "recency": llm_item.get("periodo") if isinstance(llm_item, dict) else None,
+                "deterministic": det_item or {},
+                "llm": llm_item or {},
+                "status": status,
+                "diff_pct": round(diff_pct, 4) if isinstance(diff_pct, float) else None,
+                "diff_abs": round(diff_abs, 4) if isinstance(diff_abs, float) else None,
+                "material_conflict": material,
+            }
+        )
+
+    reconcile_meta = {
+        "enabled": True,
+        "fields": len(fields),
+        "conflicts": conflicts,
+        "arbitrations": arbitrations,
+        "entries": meta_entries,
+        "confidence_by_field": confidence_by_field,
+    }
+    return llm_output, reconcile_meta, field_provenance
+
+
 def dispatch_parallel_filings(
     config: EngineConfig,
     filings: list[dict],
@@ -1693,45 +2115,50 @@ def dispatch_parallel_filings(
     if not isinstance(chunk_cfg, dict):
         chunk_cfg = {}
     chunking_enabled = bool(execution_cfg.get("tp_extractor_chunked_enabled", False))
-    chunk_model_candidates = execution_cfg.get(
-        "tp_extractor_chunk_models",
-        ["claude-haiku-4.5", "gemini-3-flash"],
-    )
-    if not isinstance(chunk_model_candidates, list):
-        chunk_model_candidates = ["claude-haiku-4.5", "gemini-3-flash"]
+    reconciliation_enabled = bool(chunk_cfg.get("cross_layer_reconciliation_enabled", True))
+    arbitration_enabled = bool(chunk_cfg.get("cross_layer_arbitration_enabled", True))
+    max_arbitrations = int(chunk_cfg.get("cross_layer_max_arbitrations", 3))
 
     step_cfg = get_step_config(config, "TP_EXTRACTOR_FILING")
+    primary_model = config.default_single_model
+    chunk_model = primary_model
+    chunk_model_candidates: list[str] = []
+    chunk_fusion_model = config.fusion_model if config.is_v2 else primary_model
+    reconciliation_model = chunk_fusion_model
 
     if config.is_v2:
-        model_profiles = step_cfg.get("models", [config.default_single_model])
-        model_profile = model_profiles[0]
-        if chunking_enabled:
-            for candidate in chunk_model_candidates:
-                spec_candidate = config.get_model_spec(candidate)
-                if spec_candidate is not None and spec_candidate.transports:
-                    model_profile = candidate
-                    break
-        spec = config.get_model_spec(model_profile)
+        roles = _resolve_tp_filing_model_roles(config, step_cfg, chunking_enabled)
+        primary_model = str(roles.get("primary_model") or config.default_single_model)
+        chunk_model = str(roles.get("chunk_model") or primary_model)
+        raw_candidates = roles.get("chunk_model_candidates", [])
+        chunk_model_candidates = raw_candidates if isinstance(raw_candidates, list) else []
+        chunk_fusion_model = str(roles.get("chunk_fusion_model") or primary_model)
+        reconciliation_model = str(roles.get("reconciliation_model") or primary_model)
+
+        spec = config.get_model_spec(primary_model)
         if spec is None or not spec.transports:
             return [DispatchResult(
                 False, None, "", "none", "none", 0.0,
-                f"Model {model_profile} not available for TP_EXTRACTOR_FILING"
+                f"Model {primary_model} not available for TP_EXTRACTOR_FILING"
             )]
         primary = spec.primary_transport
-        backend_name = primary.transport_name if primary else model_profile
+        backend_name = primary.transport_name if primary else primary_model
 
         # Availability check using a temporary backend instance
         check_backend = _instantiate_transport(primary, config.raw) if primary else None
         if not check_backend or not check_backend.check_available():
             return [DispatchResult(
                 False, None, "", "none", "none", 0.0,
-                f"Model {model_profile} ({backend_name}) not available for TP_EXTRACTOR_FILING"
+                f"Model {primary_model} ({backend_name}) not available for TP_EXTRACTOR_FILING"
             )]
     else:
         backend_name = step_cfg["backends"][0]
         backend = _get_backend(config, backend_name)
         model_cfg = config.get_backend_config(backend_name)
-        model_profile = backend_name
+        primary_model = backend_name
+        chunk_model = backend_name
+        chunk_fusion_model = backend_name
+        reconciliation_model = backend_name
         retry_cfg = config.retry_config
         max_retries = min(1, retry_cfg.get("max_attempts", 2) - 1)
 
@@ -1744,24 +2171,19 @@ def dispatch_parallel_filings(
     chunk_target_tokens = int(
         chunk_cfg.get(
             "target_tokens_flash"
-            if "flash" in str(model_profile).lower()
+            if "flash" in str(chunk_model).lower()
             else "target_tokens_haiku",
-            16_000 if "flash" in str(model_profile).lower() else 12_000,
+            16_000 if "flash" in str(chunk_model).lower() else 12_000,
         )
     )
     chunk_max_tokens = int(chunk_cfg.get("max_chunk_tokens", 18_000))
     chunk_overlap_tokens = int(chunk_cfg.get("overlap_tokens", 1_000))
     chunk_max_count = int(chunk_cfg.get("max_chunks_per_filing", 8))
-    chunk_fusion_model = (
-        chunk_cfg.get("fusion_model")
-        or execution_cfg.get("tp_extractor_chunk_fusion_model")
-        or (config.fusion_model if config.is_v2 else model_profile)
-    )
 
     total = len(filings)
     print(
-        f"[dispatch] Launching {total} filings → {backend_name} ({model_profile}), "
-        f"max_parallel={max_parallel}, timeout={timeout}s, chunked={chunking_enabled}"
+        f"[dispatch] Launching {total} filings → {backend_name} (primary={primary_model}, chunk={chunk_model}), "
+        f"max_parallel={max_parallel}, timeout={timeout}s, chunked={chunking_enabled}, cross_layer={reconciliation_enabled}"
     )
 
     def _process_filing(filing_entry: dict) -> DispatchResult:
@@ -1812,12 +2234,71 @@ def dispatch_parallel_filings(
                 "content_path": str(selected_content_path),
                 "deterministic": deterministic_stats,
                 "chunking_enabled": chunking_enabled,
+                "model_roles": {
+                    "primary_model": primary_model,
+                    "chunk_model": chunk_model,
+                    "chunk_model_candidates": chunk_model_candidates,
+                    "chunk_fusion_model": chunk_fusion_model,
+                    "reconciliation_model": reconciliation_model,
+                },
             }
             if extra:
                 meta.update(extra)
             ctx["filing_dispatch_meta"] = meta
             result_obj.failure_ctx = ctx
             return result_obj
+
+        def _reconcile_result(
+            result_obj: DispatchResult,
+            *,
+            method_meta: dict[str, object],
+        ) -> DispatchResult:
+            meta = dict(method_meta)
+            if not (
+                config.is_v2
+                and reconciliation_enabled
+                and result_obj.success
+                and isinstance(result_obj.output, dict)
+                and isinstance(deterministic_hints, dict)
+                and deterministic_hints.get("best_by_field")
+            ):
+                if not reconciliation_enabled:
+                    meta["cross_layer_reconciliation"] = {"enabled": False, "reason": "disabled"}
+                return _attach_dispatch_meta(result_obj, meta)
+            try:
+                currency_hint = (
+                    filing_entry.get("currency")
+                    or filing_entry.get("moneda")
+                    or filing_entry.get("divisa")
+                    or "UNKNOWN"
+                )
+                reconciled, reconcile_meta, field_provenance = _run_cross_layer_reconciliation(
+                    config=config,
+                    case_dir=case_dir,
+                    timeout=timeout,
+                    llm_output=result_obj.output,
+                    deterministic_hints=deterministic_hints,
+                    source_content=selected_content,
+                    currency=str(currency_hint),
+                    reconciliation_model=reconciliation_model,
+                    arbitration_enabled=arbitration_enabled,
+                    max_arbitrations=max_arbitrations,
+                )
+                result_obj.output = reconciled
+                if isinstance(reconciled, dict):
+                    confidence_map = reconcile_meta.get("confidence_by_field")
+                    if isinstance(confidence_map, dict):
+                        reconciled["_extraction_confidence"] = confidence_map
+                    reconciled["_cross_layer_reconciliation"] = {
+                        "fields": reconcile_meta.get("fields"),
+                        "conflicts": reconcile_meta.get("conflicts"),
+                        "arbitrations": reconcile_meta.get("arbitrations"),
+                    }
+                meta["cross_layer_reconciliation"] = reconcile_meta
+                meta["field_provenance"] = field_provenance
+            except Exception as exc:
+                meta["cross_layer_reconciliation"] = {"enabled": False, "reason": f"error:{exc}"}
+            return _attach_dispatch_meta(result_obj, meta)
 
         # Layer 2: optional chunked extraction by semantic sections (flag OFF by default).
         if (
@@ -1874,7 +2355,7 @@ def dispatch_parallel_filings(
                     )
 
                     r = _dispatch_model_with_retry(
-                        config, model_profile, prompt, cwd=case_dir, timeout=timeout,
+                        config, chunk_model, prompt, cwd=case_dir, timeout=timeout,
                         step_name="TP_EXTRACTOR_FILING",
                     )
                     if r.success and isinstance(r.output, dict):
@@ -1882,13 +2363,13 @@ def dispatch_parallel_filings(
 
                 if chunk_results:
                     if len(chunk_results) == 1:
-                        return _attach_dispatch_meta(
+                        return _reconcile_result(
                             chunk_results[0],
-                            {
+                            method_meta={
                                 "method": "llm_chunked_single",
                                 "chunk_count": len(chunks),
                                 "chunk_successful": len(chunk_results),
-                                "model_profile": model_profile,
+                                "chunk_model_profile": chunk_model,
                             },
                         )
 
@@ -1907,13 +2388,13 @@ def dispatch_parallel_filings(
                         step_name="TP_EXTRACTOR_FILING",
                     )
                     if fusion_result.success and isinstance(fusion_result.output, dict):
-                        return _attach_dispatch_meta(
+                        return _reconcile_result(
                             fusion_result,
-                            {
+                            method_meta={
                                 "method": "llm_chunked_fusion",
                                 "chunk_count": len(chunks),
                                 "chunk_successful": len(chunk_results),
-                                "chunk_model_profile": model_profile,
+                                "chunk_model_profile": chunk_model,
                                 "fusion_model_profile": chunk_fusion_model,
                             },
                         )
@@ -1922,13 +2403,13 @@ def dispatch_parallel_filings(
                         chunk_results,
                         key=lambda r: _score_tp_partial_payload(r.output),
                     )
-                    return _attach_dispatch_meta(
+                    return _reconcile_result(
                         best_chunk,
-                        {
+                        method_meta={
                             "method": "llm_chunked_best_chunk_fallback",
                             "chunk_count": len(chunks),
                             "chunk_successful": len(chunk_results),
-                            "chunk_model_profile": model_profile,
+                            "chunk_model_profile": chunk_model,
                             "fusion_model_profile": chunk_fusion_model,
                             "fusion_error": fusion_result.error if fusion_result else None,
                         },
@@ -1958,17 +2439,20 @@ def dispatch_parallel_filings(
 
         if config.is_v2:
             result = _dispatch_model_with_retry(
-                config, model_profile, prompt, cwd=case_dir, timeout=timeout,
+                config, primary_model, prompt, cwd=case_dir, timeout=timeout,
                 step_name="TP_EXTRACTOR_FILING",
             )
-            return _attach_dispatch_meta(result, {"method": "llm_single", "model_profile": model_profile})
+            return _reconcile_result(
+                result,
+                method_meta={"method": "llm_single", "model_profile": primary_model},
+            )
 
         # v1: Direct backend dispatch with simple retry loop
         attempts = 0
         while True:
             result = backend.dispatch(prompt, cwd=case_dir, timeout=timeout)
             if result.success:
-                return _attach_dispatch_meta(result, {"method": "llm_single_v1", "model_profile": model_profile})
+                    return _attach_dispatch_meta(result, {"method": "llm_single_v1", "model_profile": primary_model})
             if not result.success and result.raw_output:
                 recovered, recovery_method = _try_recover_json_ex(result.raw_output, result.error)
                 if recovered is not None:
@@ -1979,9 +2463,9 @@ def dispatch_parallel_filings(
                         result.failure_ctx["recovery_method"] = recovery_method
                         if recovery_method == "truncation_repair":
                             result.failure_ctx["truncation_repaired"] = True
-                    return _attach_dispatch_meta(result, {"method": "llm_single_v1_recovered", "model_profile": model_profile})
+                    return _attach_dispatch_meta(result, {"method": "llm_single_v1_recovered", "model_profile": primary_model})
             if attempts >= max_retries or not _is_retryable_filing_error(result.error):
-                return _attach_dispatch_meta(result, {"method": "llm_single_v1_failed", "model_profile": model_profile})
+                return _attach_dispatch_meta(result, {"method": "llm_single_v1_failed", "model_profile": primary_model})
             attempts += 1
             label = _filing_label(filing_entry)
             print(

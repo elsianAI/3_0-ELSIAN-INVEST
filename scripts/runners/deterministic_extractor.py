@@ -190,15 +190,32 @@ def _looks_like_year(token: str) -> bool:
 
 
 def _extract_numeric_value(line: str, multiplier: float) -> float | None:
+    values: list[float] = []
     for match in _NUM_TOKEN_RE.finditer(line):
         token = match.group(0)
-        if _looks_like_year(token):
-            continue
-        value = _parse_number(token)
-        if value is None:
-            continue
-        return value * multiplier
-    return None
+        sub_tokens = [token]
+        if " " in token:
+            # Keep numbers like "1 234" as one token; split obvious multi-column groups.
+            compact = token.replace("’", "").replace("'", "")
+            is_grouped_thousands = bool(
+                re.fullmatch(r"\(?-?\d{1,3}(?:\s\d{3})+(?:[.,]\d+)?\)?", compact)
+            )
+            if not is_grouped_thousands:
+                sub_tokens = re.findall(r"\(?-?\d[\d,.'’]*\)?", token)
+        for sub in sub_tokens:
+            if _looks_like_year(sub):
+                continue
+            value = _parse_number(sub)
+            if value is None:
+                continue
+            values.append(value)
+    if not values:
+        return None
+    # Multi-column heuristic: avoid always taking the first value.
+    # Prefer the value with the largest magnitude (typically financial amount,
+    # not a ratio/auxiliary small number).
+    chosen = max(values, key=lambda v: abs(v))
+    return chosen * multiplier
 
 
 def _confidence_for(field_sections: set[str], current_section: str) -> str:
@@ -509,4 +526,3 @@ def split_semantic_chunks(
     for idx, chunk in enumerate(chunks, start=1):
         chunk["id"] = idx
     return chunks
-
