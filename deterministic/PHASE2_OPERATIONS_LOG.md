@@ -100,3 +100,35 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: patch accepted; keep iterating in python-only mode.
 - Next step: fix label collisions (`net_income` vs EPS rows, liability/equity row ambiguity, tax line disambiguation), then re-eval TZOO.
 
+## 2026-02-27 16:30 - Iteration 4 - TZOO
+- Agent: Copilot (Claude Opus 4.6)
+- Objective: fix 5 semantic mapping errors (net_income↔EPS, total_liabilities↔equity, cash restricted, income_tax lines, shares_outstanding nominal vs weighted) and add collision resolution with max-value tiebreaker.
+- Hypothesis: context-based rejection patterns in AliasResolver + row-level table filtering + priority-based collision resolution will eliminate the 9 wrong fields and recover the 7 missed fields.
+- Files changed:
+  - `deterministic/src/normalize/aliases.py` — added `_REJECT_PATTERNS`, `_PRIORITY_PATTERNS`, `_is_rejected()`, `label_priority()` methods; integrated rejection into `resolve()`.
+  - `deterministic/src/extract/tables.py` — added row-level ignore for "total liabilities and stockholders' equity" rows.
+  - `deterministic/src/pipeline.py` — added collision resolution: priority-based with max-absolute-value tiebreaker.
+  - `deterministic/config/field_aliases.json` — added aliases for eps_basic/eps_diluted ("net income per share—basic/diluted"), shares_outstanding ("shares used in per share calculation", "weighted average common shares"), research_and_development ("product development"); removed "diluted shares outstanding" from shares_outstanding.
+  - `deterministic/tests/unit/test_normalize.py` — 20 new tests for disambiguation rules.
+  - `deterministic/tests/unit/test_tables.py` — 2 new tests for row filtering and EPS label preservation.
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v`
+  - `python3 -m deterministic.cli eval TZOO`
+- Metrics before:
+  - score=52.9% (18/34)
+  - wrong=9
+  - missed=7
+  - extra=90
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=79.4
+- Metrics after:
+  - score=100.0% (34/34)
+  - wrong=0
+  - missed=0
+  - extra=106
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=100.0
+- Tests: 110 passed, 0 failed (up from 90).
+- Decision: accept — all 5 targeted errors fixed plus R&D alias gap closed; score jumped from 52.9% to 100%.
+- Next step: evaluate GCT case; reduce `extra` field count via tighter alias boundaries.
+

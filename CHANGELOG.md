@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-02-27
+- [DETERMINISTIC] TZOO Iteration 4: semantic disambiguation (aliases rejection/priority, row-level table filter, collision max-value tiebreaker) — score 52.9% → 100.0% (34/34), 110 tests green.
 - [DETERMINISTIC] PHASE2: created operations trace log in `deterministic/PHASE2_OPERATIONS_LOG.md` (template + TZOO Iteration 0-3).  [14:08]
 - [DETERMINISTIC] TZOO: python-only patch validated (`tables.py`, `aliases.py`, `pipeline.py`) with 90/90 tests and eval improvement 8.8% -> 52.9%.  [14:08]
 

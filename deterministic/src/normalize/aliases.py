@@ -11,6 +11,59 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 
+# ── Context-based rejection rules ────────────────────────────────────
+# Maps canonical field name -> list of regex patterns. If a raw label
+# matches any pattern for the resolved canonical, that resolution is
+# rejected (returns None).
+_REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
+    "net_income": [
+        re.compile(r"per\s*share", re.I),
+        re.compile(r"\beps\b", re.I),
+        re.compile(r"\bdiluted\b", re.I),
+        re.compile(r"\bbasic\b", re.I),
+    ],
+    "total_liabilities": [
+        re.compile(r"liabilities\s+and\s+stockholders", re.I),
+        re.compile(r"liabilities\s+and\s+shareholders", re.I),
+        re.compile(r"liabilities\s+and\s+equity", re.I),
+    ],
+    "cash_and_equivalents": [
+        re.compile(r"restricted\s*cash", re.I),
+    ],
+    "income_tax": [
+        re.compile(r"prepaid\s+income\s+tax", re.I),
+        re.compile(r"income\s+tax\s+payable", re.I),
+        re.compile(r"cash\s+paid.*income\s+tax", re.I),
+        re.compile(r"cash.*refund.*income\s+tax", re.I),
+        re.compile(r"deferred\s+income\s+tax", re.I),
+    ],
+    "shares_outstanding": [
+        re.compile(r"common\s+stock.*par\s+value", re.I),
+        re.compile(r"common\s+stock.*\$\s*0\.\d", re.I),
+        re.compile(r"preferred\s+stock", re.I),
+        re.compile(r"\bdiluted\b", re.I),
+    ],
+}
+
+# Priority patterns: when multiple rows could map to same canonical,
+# a label matching one of these gets preference (score=100 exact, else 50).
+_PRIORITY_PATTERNS: Dict[str, List[re.Pattern]] = {
+    "cash_and_equivalents": [
+        re.compile(r"^cash\s+and\s+cash\s+equivalents$", re.I),
+    ],
+    "income_tax": [
+        re.compile(r"income\s+tax\s+expense", re.I),
+        re.compile(r"provision\s+for\s+income\s+tax", re.I),
+    ],
+    "shares_outstanding": [
+        re.compile(r"shares\s+used\s+in\s+per\s+share\s+calc", re.I),
+        re.compile(r"weighted\s+average.*shares.*outstanding", re.I),
+        re.compile(r"weighted\s+average\s+common\s+shares", re.I),
+        re.compile(r"\bbasic\b", re.I),
+    ],
+}
+
+
 class AliasResolver:
     """Resolves raw field labels to canonical names using aliases config."""
 
@@ -55,14 +108,40 @@ class AliasResolver:
         text = re.sub(r"\s+", " ", text).strip()
         return text
 
+    @staticmethod
+    def _is_rejected(canonical: str, raw_label: str) -> bool:
+        """Return True if raw_label is contextually invalid for canonical."""
+        patterns = _REJECT_PATTERNS.get(canonical, [])
+        for pat in patterns:
+            if pat.search(raw_label):
+                return True
+        return False
+
+    @staticmethod
+    def label_priority(canonical: str, raw_label: str) -> int:
+        """Return a priority score (higher = better) for label-to-canonical match.
+
+        100 = exact priority match, 50 = contains priority substring, 0 = default.
+        """
+        patterns = _PRIORITY_PATTERNS.get(canonical, [])
+        for pat in patterns:
+            if pat.fullmatch(raw_label.strip()):
+                return 100
+            if pat.search(raw_label):
+                return 50
+        return 0
+
     def resolve(self, raw_label: str) -> Optional[str]:
         """Resolve a raw label to its canonical field name.
 
-        Returns None if no match found.
+        Returns None if no match found or if contextual rejection applies.
         """
         normalized = self._normalize(raw_label)
         if normalized in self._lookup:
-            return self._lookup[normalized]
+            canonical = self._lookup[normalized]
+            if self._is_rejected(canonical, raw_label):
+                return None
+            return canonical
 
         # Fuzzy: try substring match (label contains a multi-word alias).
         # Only multi-word aliases (containing a space) are eligible for fuzzy,
@@ -70,6 +149,8 @@ class AliasResolver:
         # unrelated labels like "deferred revenue".
         for alias_norm, canonical in self._lookup.items():
             if " " in alias_norm and len(alias_norm) >= 6 and alias_norm in normalized:
+                if self._is_rejected(canonical, raw_label):
+                    continue
                 return canonical
 
         return None

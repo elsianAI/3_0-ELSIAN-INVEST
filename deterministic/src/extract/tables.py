@@ -239,11 +239,22 @@ def extract_from_markdown_table(
 
     results: List[TableField] = []
 
+    # Pre-compile row-level ignore patterns
+    _IGNORE_LABELS = [
+        re.compile(r"total\s+liabilities\s+and\s+stockholders", re.I),
+        re.compile(r"total\s+liabilities\s+and\s+shareholders", re.I),
+        re.compile(r"total\s+liabilities\s+and\s+equity", re.I),
+    ]
+
     for row_idx, row in enumerate(rows):
         if not row:
             continue
         label = row[0].strip() if row else ""
         if not label:
+            continue
+
+        # Skip rows whose label matches an aggregate we never want
+        if any(pat.search(label) for pat in _IGNORE_LABELS):
             continue
 
         # Skip header-like rows (all text, no numbers)

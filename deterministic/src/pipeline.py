@@ -201,13 +201,51 @@ class DeterministicPipeline:
                     if period_key not in period_fields:
                         period_fields[period_key] = {}
 
-                    period_fields[period_key][canonical] = FieldResult(
+                    # Collision resolution: if field already present, prefer
+                    # the candidate with higher label-semantic priority.
+                    # Tiebreaker (equal priority): keep higher absolute value
+                    # (consolidated > segment, absolute amounts > percentages).
+                    new_priority = self._alias_resolver.label_priority(
+                        canonical, tf.label
+                    )
+                    if canonical in period_fields[period_key]:
+                        existing = period_fields[period_key][canonical]
+                        old_priority = getattr(existing, "_label_priority", 0)
+                        if new_priority < old_priority:
+                            # New has strictly lower priority → discard
+                            audit.discard(
+                                field_name=canonical,
+                                period=period_key,
+                                reason="lower_priority_duplicate",
+                                source_filing=filing_path.name,
+                                raw_label=tf.label,
+                                raw_value=tf.value,
+                                scale=scale,
+                            )
+                            continue
+                        if new_priority == old_priority:
+                            # Equal priority → prefer larger absolute value
+                            if abs(tf.value) <= abs(existing.value):
+                                audit.discard(
+                                    field_name=canonical,
+                                    period=period_key,
+                                    reason="lower_value_duplicate",
+                                    source_filing=filing_path.name,
+                                    raw_label=tf.label,
+                                    raw_value=tf.value,
+                                    scale=scale,
+                                )
+                                continue
+
+                    fr = FieldResult(
                         value=tf.value,
                         scale=scale,
                         source_filing=filing_path.name,
                         source_location=tf.source_location,
                         confidence=confidence,
                     )
+                    fr._label_priority = new_priority  # type: ignore[attr-defined]
+                    period_fields[period_key][canonical] = fr
                     audit.accept(
                         field_name=canonical,
                         period=period_key,

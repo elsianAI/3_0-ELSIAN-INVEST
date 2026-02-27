@@ -132,6 +132,33 @@ class TestExtractFromMarkdownTable(unittest.TestCase):
         vals = [f.value for f in fields if f.label == "Revenues"]
         self.assertIn(83902.0, vals)
 
+    # ── Iteration 4: row-level filtering ────────────────────────────
+
+    def test_total_liabilities_and_equity_row_ignored(self):
+        """'Total liabilities and stockholders' equity' row must be filtered."""
+        table = """| | 2024 | 2023 |
+| --- | --- | --- |
+| Total liabilities | 50,369 | 46,499 |
+| Total liabilities and stockholders' equity | 54,722 | 55,382 |"""
+
+        fields = extract_from_markdown_table(table, "balance_sheet")
+        labels = [f.label for f in fields]
+        self.assertIn("Total liabilities", labels)
+        self.assertNotIn("Total liabilities and stockholders' equity", labels)
+
+    def test_eps_row_not_extracted_as_net_income(self):
+        """EPS row labels should not be extractable as generic net_income.\n\n        This is tested at the alias level; here we verify the row IS extracted
+        with its original label so the alias resolver can route it to eps_*."""
+        table = """| | 2024 | 2023 |
+| --- | --- | --- |
+| Net income per share—diluted | 1.06 | 0.83 |"""
+
+        fields = extract_from_markdown_table(table, "income_statement")
+        self.assertTrue(len(fields) >= 2)
+        # The label should still be present (not filtered out at table level)
+        labels = [f.label for f in fields]
+        self.assertIn("Net income per share—diluted", labels)
+
 
 class TestExtractTablesFromCleanMd(unittest.TestCase):
     def test_fixture_file(self):
