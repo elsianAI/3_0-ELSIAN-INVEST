@@ -1,0 +1,99 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260220_TZOO",
+  "fecha_corte": "2026-02-20",
+  "ticker": "TZOO",
+  "red_flags": [
+    {
+      "id_flag": "CFO_NI_DIVERGENCE_SEVERE",
+      "descripcion": "En el año fiscal 2022, la empresa reportó un beneficio neto (Net Income) de 6.6M USD pero un flujo de caja operativo (CFO) masivamente negativo de -23.1M USD. Una divergencia de esta magnitud, donde las ganancias contables no se convierten en efectivo, es una bandera roja importante que sugiere posibles problemas con el reconocimiento de ingresos o la gestión del capital de trabajo.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual[periodo=FY2022]"
+    },
+    {
+      "id_flag": "AGGRESSIVE_CASH_DEPLETION_VIA_CFF",
+      "descripcion": "La compañía muestra una quema de efectivo persistente y agresiva a través de actividades de financiación (CFF), principalmente por recompra de acciones. En los últimos 9 meses de 2025, el CFF fue de -13.1M USD, y en FY2023 fue de -14.1M USD. Esta política de retorno de capital está drenando rápidamente las reservas de efectivo, consumiendo más del 100% del FCF generado.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual[periodo=FY2025, periodo=FY2023]"
+    },
+    {
+      "id_flag": "UNDERSPENDING_ON_CAPEX",
+      "descripcion": "El gasto de capital (Capex) es consistentemente muy inferior al gasto por depreciación y amortización (D&A). En FY2023, el Capex fue de 0.26M USD mientras que la depreciación fue de 1.89M USD (Capex/D&A ~14%). Esto puede indicar un sub-inversión crónica en el mantenimiento y crecimiento de los activos, lo cual no es sostenible a largo plazo.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "historico_anual[periodo=FY2023]"
+    },
+    {
+      "id_flag": "POTENTIAL_NEGATIVE_TANGIBLE_EQUITY",
+      "descripcion": "El patrimonio neto reportado es muy bajo (4.35M USD). Al incluir los pasivos por arrendamientos operativos fuera de balance (11.86M USD), el patrimonio tangible se vuelve negativo, lo que indica un alto nivel de apalancamiento y riesgo financiero.",
+      "source_id": "TruthPack_v1",
+      "ubicacion": "balance_sheet_ultimo, lease_data"
+    }
+  ],
+  "liquidez": {
+    "efectivo_disponible_usd": 17064000,
+    "lineas_credito_disponibles_usd": null,
+    "deuda_vencimiento_12m_usd": 2972000,
+    "comentario_liquidez": "La empresa genera FCF positivo (TTM 4.16M USD), por lo que no tiene un problema de quema de efectivo operativo. Sin embargo, su política agresiva de recompra de acciones resultó en una disminución total de caja de 8.5M USD en los 9 meses hasta sep-2025. Si esta política continúa, la caja inicial de 17.1M USD podría agotarse en menos de 24 meses, creando un riesgo de supervivencia si el FCF se debilita.",
+    "fuente_datos": "TruthPack_v1 (balance_sheet_ultimo, historico_anual, lease_data)"
+  },
+  "puentes": {
+    "ebit_to_cfo": {
+      "periodo": "FY2022",
+      "ebit_usd": 7557000,
+      "cfo_usd": -23121000,
+      "distorsion_pct": -405.95,
+      "comentario": "La distorsión masiva entre EBIT y CFO en FY2022 (mayor al 15% umbral) se debe principalmente a un cambio negativo extremo en el capital de trabajo, no explicado por los datos disponibles. Un EBIT positivo se convirtió en una quema de caja operativa muy significativa.",
+      "source_id": "TruthPack_v1"
+    },
+    "cfo_to_fcf": {
+      "periodo": "TTM",
+      "cfo_usd": 4209000,
+      "capex_usd": -49000,
+      "fcf_usd": 4160000,
+      "distorsion_pct": -1.16,
+      "comentario": "La conversión de CFO a FCF es directa, con un Capex muy bajo que no causa distorsión significativa. El problema principal reside en la generación y volatilidad del CFO.",
+      "source_id": "TruthPack_v1"
+    }
+  },
+  "kill_criteria_candidatos": [
+    {
+      "nombre": "CFO DIVERGE NEGATIVAMENTE DE NET INCOME",
+      "condicion": "El Flujo de Caja Operativo (CFO) es negativo mientras el Beneficio Neto (Net Income) es positivo durante un año fiscal completo.",
+      "ventana_temporal": "FY2022",
+      "probabilidad_cualitativa": "ALTA",
+      "justificacion": "En FY2022, NI fue de +6.6M USD mientras CFO fue de -23.1M USD. Esto ya ocurrió."
+    },
+    {
+      "nombre": "AGOTAMIENTO DE CAJA POR RECOMPRAS",
+      "condicion": "La disminución neta de caja ('delta_cash_usd') anualizada supera el 75% del FCF anualizado, durante dos trimestres consecutivos.",
+      "ventana_temporal": "12 meses",
+      "probabilidad_cualitativa": "ALTA",
+      "justificacion": "La quema de caja por CFF es estructural y muy superior al FCF generado. En los 9M hasta sep-2025, la pérdida de caja (-8.5M) fue el doble del FCF generado en el TTM (4.2M)."
+    },
+    {
+      "nombre": "PATRIMONIO TANGIBLE NEGATIVO (INCL. ARRENDAMIENTOS)",
+      "condicion": "Activos Totales < (Pasivos Totales + Pasivos por Arrendamientos fuera de balance).",
+      "ventana_temporal": "Actual",
+      "probabilidad_cualitativa": "ALTA",
+      "justificacion": "54.7M (Activos) < 50.4M (Pasivos) + 11.9M (Arrendamientos). El patrimonio tangible ya es negativo."
+    },
+    {
+      "nombre": "SUB-INVERSIÓN CRÓNICA",
+      "condicion": "El ratio Capex / D&A se mantiene por debajo del 25% durante dos años fiscales consecutivos.",
+      "ventana_temporal": "24 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "justificacion": "El ratio fue ~14% en FY2023 y ~21% en FY2022. La tendencia ya está establecida."
+    }
+  ],
+  "input_refs": {
+    "truth_pack_ref": "TruthPack_v1_TZOO.json",
+    "sources_pack_ref": "SourcesPack_v1_TZOO_2026-02-20.json"
+  },
+  "log": {
+    "limitaciones": [
+      "El análisis se basa en los datos cuantitativos del TruthPack_v1. No se ha realizado una revisión cualitativa de los filings en SourcesPack para buscar explicaciones a las anomalías de capital de trabajo.",
+      "La información sobre Goodwill y Transacciones con Partes Relacionadas (RPT) no está disponible en el TruthPack.",
+      "Los detalles específicos de los cambios en cuentas de capital de trabajo (ej. cuentas por cobrar, inventarios) no están disponibles anualmente para validar las causas de la divergencia CFO-NI."
+    ]
+  }
+}

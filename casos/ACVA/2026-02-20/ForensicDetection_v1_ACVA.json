@@ -1,0 +1,247 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260220_ACVA",
+  "fecha_corte": "2026-02-19",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "Gemini_Forensic_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260220_ACVA",
+    "sources_pack_caso_id": "CASE_20260220_ACVA"
+  },
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "WATCHLIST",
+        "confianza_0_1": 0.85,
+        "razon_principal": "Dependencia estructural del 'Marketplace Float' que infla la caja reportada; EBIT persistentemente negativo con generación de caja (CFO) dependiente de SBC y capital de trabajo."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "CONDITIONAL",
+          "score_0_5": 3.0,
+          "por_que": [
+            "La caja reportada ($224M) incluye ~$200M de 'Marketplace Float' (fondos de clientes), dejando caja propia mínima o nula frente a deuda ($123M).",
+            "La generación de CFO es positiva ($65M FY24), lo que sostiene la operatividad mientras el volumen de transacciones (y el float) se mantenga o crezca.",
+            "EBIT negativo crónico (-$84M FY24) indica que el negocio 'core' sin subsidio de SBC/Float sigue perdiendo dinero.",
+            "Posición de capital de trabajo negativa (Payables $345M >> Receivables $169M) financia la operación, pero es un riesgo si el crecimiento se detiene."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 224065000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "Marketplace Float (fondos restringidos operativos)"
+          ],
+          "runway_meses_estimado": 24,
+          "metodo_estimacion": "Runway técnico 'infinito' mientras CFO sea positivo y el Float no se contraiga; riesgo de liquidez reside en la volatilidad del Float más que en el burn rate operativo actual.",
+          "notas": "La caja reportada no es totalmente libre; gran parte corresponde a obligaciones con vendedores (payables)."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 123000000,
+          "deuda_neta_usd": -101065000,
+          "coste_deuda_aprox_pct": null,
+          "coverage_intereses": -19.8,
+          "net_debt_ebitda": 1.2,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "Deuda principal parece ser a largo plazo; no se detecta muro de vencimientos inminente en 12 meses."
+          },
+          "vencimientos": [],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "UNKNOWN",
+            "comentario": "No se dispone de detalle de covenants en TruthPack."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "ALTO",
+          "motores": [
+            "SBC"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "La discrepancia masiva entre EBIT (-$84M) y CFO (+$65M) sugiere un uso intensivo de compensación en acciones (SBC) para preservar caja."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "Calidad de resultados BAJA. La rentabilidad operativa (EBIT) es negativa, mientras que el flujo de caja operativo (CFO) es positivo gracias a partidas no monetarias (SBC) y gestión favorable del capital de trabajo (Float).",
+        "red_flags": [
+          {
+            "flag_id": "F-001",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Dependencia crítica de 'Marketplace Float'. Pasivos corrientes (Payables $345M) exceden significativamente a la Caja ($224M).",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.95,
+            "por_que_importa": "Si el volumen de ventas cae, el Float se contrae, provocando una salida de caja masiva para pagar a vendedores sin nuevos ingresos de compradores (unwind risk).",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "Balance Sheet FY2024 / TruthPack Log",
+                "cita_corta": "caja incluye 200M de marketplace float",
+                "interpretacion": "La liquidez real de la empresa es mucho menor a la reportada en el balance consolidado."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Crecimiento de ingresos > 0% y mantenimiento del ratio Payables/Revenue.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "F-002",
+            "categoria": "SBC",
+            "descripcion": "Discrepancia extrema entre EBIT (-$84M) y CFO (+$65M) en FY2024.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.9,
+            "por_que_importa": "Indica que la generación de caja se financia diluyendo a los accionistas (SBC) en lugar de mediante beneficios operativos reales.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "TruthPack Cash Flow vs Income Statement",
+                "cita_corta": "EBIT -84M vs CFO +65M",
+                "interpretacion": "Bridge de ~$150M explicado principalmente por D&A y SBC."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Convergencia de EBIT hacia terreno positivo o reducción del peso de SBC/Revenue.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "Conversión distorsionada por Add-backs. EBIT negativo se convierte en CFO positivo por ~$150M de ajustes (D&A + SBC + WC).",
+            "posibles_distorsiones": [
+              "SBC elevado",
+              "Aumento de Payables (Float)"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "Conversión limpia. Capex es mínimo ($4.5M), típico de modelo asset-light software/marketplace.",
+            "capex_riesgo": "BAJO",
+            "notas": "El riesgo no está en el Capex, sino en la sostenibilidad del CFO base."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "NO",
+          "comentario": "Aunque FCF es positivo, la deuda neta 'real' (ex-float) y el EBIT negativo desaconsejan recompras."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "SI",
+          "comentario": "Motor principal del puente EBIT->CFO."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "Riesgo de usar el 'Float' o deuda para adquisiciones que enmascaren la falta de rentabilidad orgánica."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Verificar ownership en Proxy Statement (DEF14A)."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Contracción del volumen de subastas (GMV) reduce el Float disponible.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "caída de CFO",
+              "necesidad de usar caja propia para pagar vendedores",
+              "estrés de liquidez inmediato"
+            ],
+            "indicadores_tempranos": [
+              "Desaceleración de ingresos",
+              "Caída de Payables en balance",
+              "CFO negativo en trimestre estacionalmente fuerte"
+            ]
+          }
+        ],
+        "conclusion_downside": "El downside es agudo por el apalancamiento operativo del Float; una caída de volumen golpea doblemente (P&L y Liquidez)."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "fcf",
+          "definicion": "CFO trimestral negativo por dos trimestres consecutivos (excluyendo estacionalidad conocida).",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Rompería la tesis de 'autofinanciación' y expondría la falta de caja propia."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "contabilidad",
+          "definicion": "Ratio (Caja + Equivalentes) / Payables cae por debajo de 0.6x.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Indicaría un estrés severo en el manejo del capital de trabajo o uso indebido del float."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 3.0,
+        "condiciones_para_aumentar_tamaño": [
+          "EBIT Break-even o positivo durante 2 trimestres.",
+          "Reducción del peso del SBC sobre el CFO."
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "CFO negativo.",
+          "Deterioro del margen bruto o caída de ingresos >10% YoY."
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Para cuantificar exactamente la dilución y la 'calidad' del CFO.",
+          "como_obtenerlo": "Estado de flujos detallado (10-K) línea 'Stock-based compensation'."
+        },
+        {
+          "item": "desglose_float",
+          "por_que_importa": "Confirmar qué parte exacta de la caja es restringida o de clientes.",
+          "como_obtenerlo": "Notas a los estados financieros (Restricted Cash / Customer Obligations)."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "No se dispone del desglose exacto de SBC en el TruthPack (inferido de discrepancia EBIT-CFO).",
+      "No se tiene detalle de covenants de deuda.",
+      "La cifra de caja propia es una estimación basada en notas del log sobre el Float."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

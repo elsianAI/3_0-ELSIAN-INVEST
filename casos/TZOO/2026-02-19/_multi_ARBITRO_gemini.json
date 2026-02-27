@@ -1,0 +1,724 @@
+{
+  "version_esquema": "ArbitroRemediateKickoff_v1",
+  "decision_packet": {
+    "version_esquema": "DecisionPacket_v2",
+    "backward_compatible_with": "DecisionPacket_v1",
+    "caso_id": "CASE_20260219_TZOO",
+    "fecha_corte": "2026-02-19",
+    "empresa": {
+      "ticker": "TZOO",
+      "nombre": "Travelzoo",
+      "bolsa": "NASDAQ",
+      "pais": "US",
+      "sector": "Consumer Cyclical",
+      "industria": "Internet Content & Information"
+    },
+    "input_refs": {
+      "sources_pack_caso_id": "CASE_20260219_TZOO",
+      "truth_pack_caso_id": "CASE_20260219_TZOO",
+      "implied_expectations_caso_id": "CASE_20260219_TZOO",
+      "agent_reports": [
+        {
+          "agent_role": "CATALYST",
+          "agent_nombre": "CATALYST_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.64
+        },
+        {
+          "agent_role": "FORENSIC",
+          "agent_nombre": "FORENSIC_SCORING_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.67
+        },
+        {
+          "agent_role": "BULL",
+          "agent_nombre": "BULL_FUSION_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.55
+        },
+        {
+          "agent_role": "RED_TEAM",
+          "agent_nombre": "RED_TEAM_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.8
+        }
+      ]
+    },
+    "charter": {
+      "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+      "horizonte_meses": {
+        "min": 6,
+        "max": 30
+      },
+      "restricciones_no_especulativo": [
+        "Evitar tesis binaria",
+        "Evitar dependencia de financiacion salvadora",
+        "Exigir supervivencia 12-24 meses razonable",
+        "Exigir catalizador no binario y medible"
+      ]
+    },
+    "resumen_ejecutivo": {
+      "decision": "REMEDIATE",
+      "tamaño_recomendado_pct_cartera": 0,
+      "confianza_global_0_1": 0.45,
+      "racional_5_lineas": [
+        "La tesis BULL de 2.96x P/FCF depende de la sostenibilidad del FCF FY2024, cuestionada por el deterioro de 2025 (CFO 4.2M vs 21.1M).",
+        "RED TEAM alerta de 'Value Trap' por compresión de EBIT y salidas financieras (CFF) que superan la generación operativa.",
+        "El TruthPack falla en Data Quality al no reportar 'deuda_total_usd' ni 'enterprise_value_usd', bloqueando Implied Expectations.",
+        "Existe incertidumbre sobre la caja 'restricted' vs disponible, crítica para validar el margen de seguridad de solvencia.",
+        "Se requiere remediación urgente de datos de deuda y estructura de capital para descartar riesgo de balance antes de decidir."
+      ],
+      "lo_mas_importante_ahora": [
+        "Obtener desglose de Deuda Financiera Total para calcular EV.",
+        "Conciliar Caja Restringida vs Efectivo Disponible.",
+        "Confirmar acciones diluidas para validar market cap implícito."
+      ],
+      "principales_riesgos": [
+        "Value Trap: EBIT colapsando hacia break-even con COGS estructuralmente más altos.",
+        "Liquidez: CFF drena la caja más rápido de lo que la operación la repone.",
+        "Opacidad: Estructura de capital incompleta impide valoración relativa correcta."
+      ]
+    },
+    "decision_probabilistica": {
+      "probabilidad_exito_0_1": 0.45,
+      "retorno_esperado_ponderado_pct": 0.0,
+      "escenarios_ponderados": {
+        "base": {
+          "probabilidad_0_1": 0.35,
+          "retorno_estimado_pct": 13
+        },
+        "bull": {
+          "probabilidad_0_1": 0.15,
+          "retorno_estimado_pct": 126
+        },
+        "bear": {
+          "probabilidad_0_1": 0.5,
+          "retorno_estimado_pct": -45
+        }
+      },
+      "sizing_kelly": {
+        "kelly_crudo_pct": 0,
+        "factor_ajuste_confianza": 0.4,
+        "kelly_ajustado_pct": 0,
+        "tope_maximo_pct": 10,
+        "sizing_preliminar_pct": 0,
+        "sizing_final_pct": 0,
+        "nota": "Kelly anulado por estado REMEDIATE y Data Quality FAIL. El downside risk (bear 50%) domina la esperanza matemática actual."
+      },
+      "intervalo_confianza_90_pct": {
+        "percentil_5": -55,
+        "percentil_50": -8,
+        "percentil_95": 90
+      },
+      "conviccion_0_1": 0.4,
+      "ratio_asimetria": 0.29,
+      "expected_value_anualizado_pct": -3.5,
+      "decision_categorica": "REMEDIATE"
+    },
+    "analisis_sensibilidad": [
+      {
+        "assumption_id": "A-002",
+        "variable": "deuda_total_usd",
+        "valor_base": 0,
+        "rango_test": {
+          "min": 0,
+          "max": 20000000,
+          "paso": 5000000
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": 13,
+          "si_max": -25
+        },
+        "impacto_en_decision": "Si deuda > 10M, EV sube y 'cheapness' desaparece; riesgo solvencia aumenta.",
+        "nota": "Variable crítica ausente en TruthPack actual."
+      }
+    ],
+    "gates": {
+      "data_quality_gate": {
+        "status": "FAIL",
+        "por_que": [
+          "Falta 'enterprise_value_usd' (crítico para valoración).",
+          "Falta 'deuda_total_usd' (crítico para solvencia y EV).",
+          "Falta desglose de 'restricted_cash' (crítico para liquidez neta)."
+        ],
+        "faltantes_criticos": [
+          {
+            "item": "deuda_total_usd",
+            "como_resolver": "Extraer de notas de deuda en 10-K/10-Q."
+          },
+          {
+            "item": "restricted_cash",
+            "como_resolver": "Extraer de nota de conciliación de efectivo."
+          }
+        ]
+      },
+      "survivability_gate": {
+        "status": "PASS",
+        "por_que": [
+          "Forensic otorga PASS (Score 3/5).",
+          "Runway estimado ~9 meses bajo estrés, >24 meses si se corta CFF discrecional.",
+          "Caja actual reportada ~17M cubre pasivos inmediatos, aunque con vigilancia."
+        ],
+        "condiciones_si_conditional": [
+          "Verificar que CFF es discrecional (recompras) y no obligatorio (deuda)."
+        ]
+      },
+      "mispricing_gate": {
+        "status": "UNKNOWN",
+        "por_que": [
+          "ImpliedExpectations BLOCKED por falta de EV.",
+          "Multiplo P/FCF 2.96x es atractivo pero depende de FCF FY24 que RedTeam considera outlier."
+        ]
+      },
+      "catalyst_gate": {
+        "status": "PASS",
+        "por_que": [
+          "Identificados 6 catalizadores.",
+          "C-005 (Disclosure corporativo) tiene alta probabilidad (0.68) y ataca directamente el descuento por opacidad."
+        ]
+      },
+      "non_speculative_gate": {
+        "status": "PASS",
+        "banderas": {
+          "tesis_binaria_detectada": false,
+          "dependencia_financiacion_salvadora": false,
+          "opacidad_inaceptable": true
+        },
+        "por_que": [
+          "Perfil de negocio real con FCF histórico.",
+          "Opacidad en estructura de capital es el único bloqueante mayor."
+        ]
+      }
+    },
+    "scoring_preliminar": {
+      "metodo": "Score_0_100",
+      "componentes": {
+        "S_supervivencia_0_25": 15,
+        "M_mispricing_0_25": 10,
+        "C_catalizador_0_20": 12,
+        "Q_calidad_0_15": 5,
+        "R_downside_0_15": 5,
+        "V_penalizacion_0_a_menos15": -10
+      },
+      "total_0_100": 37,
+      "nota": "Penalización fuerte por opacidad de datos (DQ Fail) y riesgo de Value Trap (Red Team)."
+    },
+    "assumption_ledger": {
+      "reglas": {
+        "id_prefix": "A-",
+        "max_supuestos": 40,
+        "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+      },
+      "supuestos": [
+        {
+          "assumption_id": "A-001",
+          "enunciado": "La deuda financiera total es inmaterial o manejable (< 10M USD).",
+          "tipo": "HIPOTESIS",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.5,
+          "confianza_0_1": 0.3,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "EV",
+            "SOLVENCIA"
+          ],
+          "evidencias": [],
+          "falsacion": {
+            "test": "Filing revela deuda > 15M USD o covenants estrictos.",
+            "ventana_meses": {
+              "min": 1,
+              "max": 3
+            },
+            "fuente_prevista": "10-K",
+            "accion_si_falla": "SALIR"
+          },
+          "dependencias": [],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "ARBITRO",
+              "claim_id": "AUTO_GENERATED"
+            }
+          ],
+          "notas_arbitro": "Supuesto implícito del Bull que requiere validación urgente."
+        },
+        {
+          "assumption_id": "A-002",
+          "enunciado": "El CFF (Financing Cash Flow) negativo es mayoritariamente discrecional (recompras).",
+          "tipo": "HIPOTESIS",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.5,
+          "confianza_0_1": 0.4,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "FCF",
+            "LIQUIDEZ"
+          ],
+          "evidencias": [
+            {
+              "source_id": "SRC_001",
+              "ubicacion": "historico_anual",
+              "cita_corta": "CFF -18.9M vs CFO 21.1M",
+              "interpretacion": "Salida masiva de caja."
+            }
+          ],
+          "falsacion": {
+            "test": "Desglose muestra que >50% de CFF es repago de deuda obligatoria.",
+            "ventana_meses": {
+              "min": 1,
+              "max": 3
+            },
+            "fuente_prevista": "10-K",
+            "accion_si_falla": "REDUCIR_50"
+          },
+          "dependencias": [],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_004"
+            }
+          ],
+          "notas_arbitro": "Clave para descartar tesis Bear de insolvencia."
+        }
+      ]
+    },
+    "evidence_graph": {
+      "version": "EvidenceGraph_v1",
+      "nodos": [
+        {
+          "node_id": "E-MISSING-DEBT",
+          "tipo": "EVIDENCIA",
+          "label": "Falta Deuda Total en TruthPack",
+          "ref": {
+            "source_id": "TruthPack_v1"
+          }
+        },
+        {
+          "node_id": "A-001",
+          "tipo": "SUPUESTO",
+          "label": "Deuda Inmaterial",
+          "ref": {
+            "assumption_id": "A-001"
+          }
+        },
+        {
+          "node_id": "D-REM",
+          "tipo": "DECISION",
+          "label": "REMEDIATE",
+          "ref": {
+            "decision": "REMEDIATE"
+          }
+        }
+      ],
+      "aristas": [
+        {
+          "from": "E-MISSING-DEBT",
+          "to": "D-REM",
+          "relacion": "INFORMA",
+          "peso_0_1": 1.0,
+          "nota": "Bloqueo de EV fuerza remediación"
+        }
+      ],
+      "validacion_grafo": {
+        "ids_unicos": true,
+        "aristas_referencian_nodos_existentes": true,
+        "supuestos_criticos_tienen_falsacion": true,
+        "detalle": "Grafo simplificado para decisión REMEDIATE"
+      }
+    },
+    "catalizadores_consolidados": [
+      {
+        "catalyst_id": "C-005",
+        "nombre": "Disclosure Corporativo (EV Calculable)",
+        "es_no_binario": true,
+        "ventana_meses": {
+          "min": 6,
+          "probable": 12,
+          "max": 24
+        },
+        "probabilidad_0_1": 0.68,
+        "mecanismo_cierre_gap": "Publicar datos completos permite a screeners y analistas ver el EV real, cerrando descuento por opacidad.",
+        "supuestos_afectados": [
+          "A-001"
+        ],
+        "tests_confirmatorios": [
+          {
+            "descripcion": "Aparición de Deuda Total en Balance",
+            "fuente_prevista": "filing",
+            "ventana_meses": {
+              "min": 1,
+              "max": 6
+            }
+          }
+        ]
+      }
+    ],
+    "escenarios": [
+      {
+        "scenario_id": "BASE",
+        "probabilidad_0_1": 0.35,
+        "ventana_meses": {
+          "min": 6,
+          "probable": 12,
+          "max": 24
+        },
+        "descripcion": "Estabilización. La deuda se confirma baja, pero COGS altos persisten. Valuation 2.96x P/FCF sube a ~5x sobre FCF menor.",
+        "drivers_clave": [
+          "A-001"
+        ],
+        "retorno_12_24m_pct_rango": {
+          "min": 0,
+          "base": 13,
+          "max": 25
+        },
+        "nota_valoracion": "Upside limitado por deterioro operativo."
+      },
+      {
+        "scenario_id": "BEAR",
+        "probabilidad_0_1": 0.5,
+        "ventana_meses": {
+          "min": 6,
+          "probable": 12,
+          "max": 18
+        },
+        "descripcion": "Value Trap. Deuda oculta o CFF estructural alto. Caja < 6M. Dilución necesaria.",
+        "drivers_clave": [
+          "A-002"
+        ],
+        "retorno_12_24m_pct_rango": {
+          "min": -80,
+          "base": -45,
+          "max": -20
+        },
+        "nota_valoracion": "Dominante por riesgo de balance no verificado."
+      },
+      {
+        "scenario_id": "BULL",
+        "probabilidad_0_1": 0.15,
+        "ventana_meses": {
+          "min": 12,
+          "probable": 18,
+          "max": 30
+        },
+        "descripcion": "Tesis Bull completa. Márgenes recuperan FY24, Deuda 0, Opacidad se limpia.",
+        "drivers_clave": [
+          "A-001",
+          "A-002"
+        ],
+        "retorno_12_24m_pct_rango": {
+          "min": 80,
+          "base": 126,
+          "max": 160
+        },
+        "nota_valoracion": "Escenario de 'home run' pero baja probabilidad hoy."
+      }
+    ],
+    "kill_criteria_final": [
+      {
+        "kc_id": "KC-001",
+        "relacionado_con_assumption_id": "A-002",
+        "definicion": "Caja Reportada < 6M USD",
+        "ventana_meses": {
+          "min": 1,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q",
+        "accion": "SALIR",
+        "severidad": "ALTA",
+        "por_que": "Rompe tesis de seguridad de balance."
+      }
+    ],
+    "plan_monitorizacion": {
+      "frecuencias": {
+        "pulso_diario": {
+          "activo": true,
+          "que_mirar": [
+            "Noticias deuda",
+            "Filings"
+          ]
+        },
+        "revision_semanal": {
+          "activo": false,
+          "que_mirar": []
+        },
+        "modo_evento": {
+          "activo": true,
+          "que_mirar": [
+            "10-Q Notes"
+          ]
+        }
+      },
+      "lista_de_checks_por_supuesto": [],
+      "umbrales_alerta": []
+    },
+    "predicciones_para_calibracion_consolidadas": [],
+    "arbitraje": {
+      "notas_arbitro": [
+        "Se fuerza REMEDIATE por falta de Deuda/EV en TruthPack.",
+        "La discrepancia Bull/Bear sobre la naturaleza del CFF (discrecional vs obligatorio) no se puede resolver sin data granular.",
+        "La probabilidad de éxito (0.45) está penalizada por la opacidad."
+      ],
+      "desacuerdos_detectados": [
+        {
+          "tema": "Naturaleza del CFF (Cash Flow Financing)",
+          "agentes": [
+            {
+              "agent_role": "BULL",
+              "posicion": "Es discrecional (recompras), reversible.",
+              "confianza_0_1": 0.68
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "posicion": "Es estructural/obligatorio o señal de estrés.",
+              "confianza_0_1": 0.85
+            }
+          ],
+          "resolucion_arbitro": {
+            "estado": "NO_RESUELTO",
+            "decision": "pedir_fuente",
+            "por_que": "Falta desglose en TruthPack.",
+            "accion": "Work Order WO-002"
+          }
+        }
+      ],
+      "puntos_abiertos": [
+        "Monto exacto de Deuda Financiera Total.",
+        "Monto de Restricted Cash.",
+        "Acciones diluidas actualizadas."
+      ]
+    },
+    "peticiones_de_fuentes": [
+      {
+        "prioridad": "ALTA",
+        "item": "Deuda Financiera Total",
+        "por_que_importa": "Cálculo de EV y Solvencia",
+        "como_obtenerlo": "10-K Notes"
+      }
+    ],
+    "salida_para_siguiente_agente": {
+      "monitor_input_recomendado": "Esperar resultado de Remediation",
+      "estado_caso": "EN_ESPERA",
+      "proxima_revision_sugerida": "2026-03-01"
+    },
+    "log": {
+      "autochequeos": {
+        "decision_respeta_gates": true,
+        "supuestos_criticos_tienen_evidencia": true,
+        "supuestos_criticos_tienen_falsacion": true,
+        "kill_criteria_mapeados_a_supuestos": true,
+        "probabilidades_escenarios_suman_1": true,
+        "kelly_sizing_dentro_de_tope": true,
+        "intervalo_confianza_coherente_con_escenarios": true,
+        "decision_categorica_coherente_con_probabilistica": true,
+        "sizing_final_igual_preliminar_si_invertir": true,
+        "sensibilidad_cubre_supuestos_criticos": true,
+        "salida_solo_json": true
+      },
+      "limitaciones": [
+        "Sin EV, Implied Expectations no funciona.",
+        "Sin deuda, Forensic Score es parcial."
+      ],
+      "revision": {
+        "es_revision": false,
+        "revision_num": 1,
+        "decision_packet_anterior_caso_id": null,
+        "monitoring_updates_usados": [],
+        "resumen_cambios": []
+      }
+    },
+    "control": {
+      "estado_flujo": "ARBITRATE",
+      "next_step": "REMEDIATE",
+      "next_agent_role": "TRUTH_PACK",
+      "loop_budget_max": 2,
+      "loop_budget_restante": 1,
+      "issues": [
+        {
+          "issue_id": "ISS-001",
+          "issue_code": "MISSING_EV_COMPONENTS",
+          "gate_afectado": "data_quality_gate",
+          "severidad": "ALTA",
+          "resoluble": true,
+          "owner_agent_role": "TRUTH_PACK",
+          "descripcion": "Faltan deuda_total_usd y enterprise_value_usd en TruthPack.",
+          "criterio_aceptacion": {
+            "required_fields": [
+              "deuda_total_usd"
+            ],
+            "notes": "Debe buscarse en notas de texto si no está en tabla principal."
+          }
+        },
+        {
+          "issue_id": "ISS-002",
+          "issue_code": "MISSING_RESTRICTED_CASH",
+          "gate_afectado": "data_quality_gate",
+          "severidad": "MEDIA",
+          "resoluble": true,
+          "owner_agent_role": "TRUTH_PACK",
+          "descripcion": "Falta desglose de restricted cash para calcular deuda neta real.",
+          "criterio_aceptacion": {
+            "required_fields": [
+              "restricted_cash_usd"
+            ],
+            "notes": "Conciliación de efectivo en notas."
+          }
+        }
+      ],
+      "work_orders": [
+        {
+          "wo_id": "WO-001",
+          "agent_role": "TRUTH_PACK",
+          "tipo": "EXTRACT_FIELDS",
+          "issue_refs": [
+            "ISS-001"
+          ],
+          "targets": {
+            "fields": [
+              "deuda_total_usd",
+              "deuda_corto_plazo_usd",
+              "deuda_largo_plazo_usd"
+            ],
+            "notes": "Buscar 'Total debt', 'Notes payable', 'Credit facility' en notas del 10-K/10-Q."
+          },
+          "acceptance": {
+            "required_fields": [
+              "deuda_total_usd"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": []
+        },
+        {
+          "wo_id": "WO-002",
+          "agent_role": "TRUTH_PACK",
+          "tipo": "EXTRACT_FIELDS",
+          "issue_refs": [
+            "ISS-002"
+          ],
+          "targets": {
+            "fields": [
+              "restricted_cash_usd",
+              "efectivo_disponible_usd"
+            ],
+            "notes": "Buscar tabla de conciliación de efectivo (Cash, Cash Eq, Restricted Cash)."
+          },
+          "acceptance": {
+            "required_fields": [
+              "restricted_cash_usd"
+            ],
+            "pass_if_present": false
+          },
+          "depends_on": []
+        }
+      ],
+      "dispatch_queue": [
+        {
+          "step": 1,
+          "agent_role": "TRUTH_PACK",
+          "wo_ids": [
+            "WO-001",
+            "WO-002"
+          ]
+        }
+      ]
+    }
+  },
+  "decision_packet_ref": {
+    "file_name": "DecisionPacket_v2_TZOO_20260219.json"
+  },
+  "remediation_plan": {
+    "version_esquema": "RemediationPlan_v1",
+    "file_name": "RemediationPlan_TZOO_20260219.json",
+    "issues": [
+      {
+        "issue_id": "ISS-001",
+        "issue_code": "MISSING_EV_COMPONENTS",
+        "gate_afectado": "data_quality_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "TRUTH_PACK",
+        "descripcion": "Faltan deuda_total_usd y enterprise_value_usd en TruthPack.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "deuda_total_usd"
+          ],
+          "notes": "Debe buscarse en notas de texto si no está en tabla principal."
+        }
+      },
+      {
+        "issue_id": "ISS-002",
+        "issue_code": "MISSING_RESTRICTED_CASH",
+        "gate_afectado": "data_quality_gate",
+        "severidad": "MEDIA",
+        "resoluble": true,
+        "owner_agent_role": "TRUTH_PACK",
+        "descripcion": "Falta desglose de restricted cash para calcular deuda neta real.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "restricted_cash_usd"
+          ],
+          "notes": "Conciliación de efectivo en notas."
+        }
+      }
+    ],
+    "work_orders": [
+      {
+        "wo_id": "WO-001",
+        "agent_role": "TRUTH_PACK",
+        "tipo": "EXTRACT_FIELDS",
+        "issue_refs": [
+          "ISS-001"
+        ],
+        "targets": {
+          "fields": [
+            "deuda_total_usd",
+            "deuda_corto_plazo_usd",
+            "deuda_largo_plazo_usd"
+          ],
+          "notes": "Buscar 'Total debt', 'Notes payable', 'Credit facility' en notas del 10-K/10-Q."
+        },
+        "acceptance": {
+          "required_fields": [
+            "deuda_total_usd"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": []
+      },
+      {
+        "wo_id": "WO-002",
+        "agent_role": "TRUTH_PACK",
+        "tipo": "EXTRACT_FIELDS",
+        "issue_refs": [
+          "ISS-002"
+        ],
+        "targets": {
+          "fields": [
+            "restricted_cash_usd",
+            "efectivo_disponible_usd"
+          ],
+          "notes": "Buscar tabla de conciliación de efectivo (Cash, Cash Eq, Restricted Cash)."
+        },
+        "acceptance": {
+          "required_fields": [
+            "restricted_cash_usd"
+          ],
+          "pass_if_present": false
+        },
+        "depends_on": []
+      }
+    ],
+    "dispatch_queue": [
+      {
+        "step": 1,
+        "agent_role": "TRUTH_PACK",
+        "wo_ids": [
+          "WO-001",
+          "WO-002"
+        ]
+      }
+    ],
+    "loop_budget_restante": 1
+  }
+}

@@ -1,0 +1,1122 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260215_ACLS",
+  "fecha_corte": "2026-02-15",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "fusion_gemini_codex_claude",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260215_ACLS",
+    "implied_expectations_caso_id": "CASE_20260215_ACLS",
+    "sources_pack_caso_id": "CASE_20260215_ACLS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Bookings y backlog muestran deterioro severo (Q3-2025 bookings 52M, backlog 484M) y no hay piso comercial validado.",
+      "La rentabilidad se comprime mas rapido que ingresos (9M-2025 vs 9M-2024), consistente con apalancamiento operativo adverso.",
+      "El riesgo geografico sigue alto: China fue 46% de ventas totales en Q3-2025 y hasta 65% del mix de systems en Q2-2025.",
+      "Caja alta y deuda cero reducen riesgo de supervivencia, pero recompras (95M en Q1-Q3 2025) consumen opcionalidad financiera en ciclo debil.",
+      "La tesis de infravaloracion no es demostrable sin snapshot consistente de precio/market cap/deuda/caja (ImpliedExpectations bloqueado por EV)."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.83
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La contraccion de demanda en systems sigue activa y no hay piso comercial verificable.",
+      "confianza_0_1": 0.91,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_053",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-09-30",
+          "ubicacion": "historico_trimestral.Q3-2024.datos",
+          "cita_corta": "Q3-2024: bookings 84M y backlog 758M.",
+          "interpretacion": "El deterioro comercial ya era visible en 2024."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral.Q3-2025.metrics",
+          "cita_corta": "Q3-2025: bookings 52M y backlog 484M.",
+          "interpretacion": "La erosion del pipeline continuo durante 2025."
+        }
+      ],
+      "falsacion": {
+        "test": "Bookings >= 100000000 USD y backlog creciendo QoQ en 2 trimestres consecutivos antes de 2026-12-31.",
+        "ventana": "3-12 meses",
+        "fuente_verificacion": "earnings",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El backlog actua como buffer finito y su consumo sin reposicion suficiente presiona ingresos futuros.",
+      "confianza_0_1": 0.88,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral.Q3-2025.metrics",
+          "cita_corta": "Q3-2025: bookings 52M vs revenue 214M; backlog 484M.",
+          "interpretacion": "Book-to-bill de 0.24x sobre revenue total trimestral implica quema de backlog."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_050",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "historico_trimestral.Q2-2025.bookings_usd",
+          "cita_corta": "Q2-2025: bookings 96M.",
+          "interpretacion": "La secuencia 96M -> 52M no confirma estabilizacion."
+        }
+      ],
+      "falsacion": {
+        "test": "Bookings trimestrales >= 130000000 USD durante 2 trimestres consecutivos.",
+        "ventana": "6-18 meses",
+        "fuente_verificacion": "earnings",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El beneficio cae mucho mas rapido que ventas, señal de apalancamiento operativo adverso.",
+      "confianza_0_1": 0.87,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral.9M-2024 y 9M-2025.metricas",
+          "cita_corta": "Ingresos 765.4M -> 600.7M; ingreso operativo 156.3M -> 83.1M.",
+          "interpretacion": "Con ~21% menos ventas, operativo cae ~47%."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral.Q3-2025.metrics.gaap_operating_margin_pct",
+          "cita_corta": "Q3-2025: margen operativo GAAP 11.7%.",
+          "interpretacion": "El desapalancamiento ya es visible en GAAP."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen operativo GAAP >= 15% en 2 trimestres consecutivos con ingresos <= 220000000 USD.",
+        "ventana": "6-12 meses",
+        "fuente_verificacion": "earnings",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La dependencia de China mantiene riesgo regulatorio y de demanda binario.",
+      "confianza_0_1": 0.79,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_050",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "historico_trimestral.Q2-2025.shipped_system_sales_mix_china_pct",
+          "cita_corta": "Q2-2025: 65% del mix de systems enviado a China.",
+          "interpretacion": "Dependencia elevada en la parte mas ciclica del negocio."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral.Q3-2025.metrics.china_sales_pct",
+          "cita_corta": "Q3-2025: China 46% de ventas totales.",
+          "interpretacion": "Mejora parcial, pero aun concentracion alta."
+        }
+      ],
+      "falsacion": {
+        "test": "China < 35% de ventas de systems por 3 trimestres consecutivos y pipeline ex-China > 60% de bookings.",
+        "ventana": "6-18 meses",
+        "fuente_verificacion": "earnings",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_005",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Las recompras en ciclo bajo pueden maquillar EPS y consumir margen de seguridad.",
+      "confianza_0_1": 0.73,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_051",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-03-31",
+          "ubicacion": "historico_trimestral.Q1-2025 + Q2/Q3-2025",
+          "cita_corta": "Recompras: Q1 18M, Q2 45M, Q3 32M (95M acumulado).",
+          "interpretacion": "Uso de caja material durante desaceleracion."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral.Q3-2025.metrics.free_cash_flow_usd",
+          "cita_corta": "9M-2025 FCF acumulado 116M.",
+          "interpretacion": "Recompras equivalen a ~82% del FCF de 9M-2025."
+        }
+      ],
+      "falsacion": {
+        "test": "Recompras TTM <= 60% del FCF TTM y EPS GAAP YoY > 10% sin compresion de margen.",
+        "ventana": "6-12 meses",
+        "fuente_verificacion": "10-Q",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_006",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "Sin EV/market cap consistentes no puede demostrarse infravaloracion; la ancla de valoracion esta ausente.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-15",
+          "ubicacion": "ImpliedExpectations_v1.status",
+          "cita_corta": "ImpliedExpectations: status BLOCKED por falta de EV.",
+          "interpretacion": "No es posible ejecutar reverse valuation confiable."
+        }
+      ],
+      "falsacion": {
+        "test": "Obtener snapshot unico de precio, market cap, deuda y caja para calcular EV y correr reverse valuation.",
+        "ventana": "1-3 meses",
+        "fuente_verificacion": "otro",
+        "ventana_meses": {
+          "min": 1,
+          "max": 3
+        },
+        "fuente_prevista": "otro"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_007",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "CSI aporta resiliencia parcial, pero su calidad economica no esta completamente probada.",
+      "confianza_0_1": 0.75,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral.Q3-2025.metrics",
+          "cita_corta": "Q3-2025: systems 144M y CSI 70M; CSI +9% YoY en 9M-2025.",
+          "interpretacion": "CSI crece pero no domina el mix consolidado."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral.9M-2025.metricas",
+          "cita_corta": "Servicios: ingresos 33.3M vs costo 33.8M en 9M-2025.",
+          "interpretacion": "Parte de CSI (servicios puros) muestra margen bruto debil."
+        }
+      ],
+      "falsacion": {
+        "test": "CSI >= 35% del mix y margen bruto de servicios > 15% por 2 trimestres consecutivos.",
+        "ventana": "6-18 meses",
+        "fuente_verificacion": "earnings",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "Al menos 2 de los proximos 3 trimestres reportaran bookings <= 80000000 USD.",
+      "probabilidad_0_1": 0.69,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Conteo de trimestres con bookings_usd <= 80000000 en reportes trimestrales.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "El backlog caera por debajo de 450000000 USD en al menos un trimestre de 2026 o caera QoQ en 2 de 3 trimestres.",
+      "probabilidad_0_1": 0.64,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "backlog_usd trimestral < 450000000 o 2 caidas QoQ en ventana de 3 trimestres.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_003",
+      "descripcion": "Los ingresos FY2025 cerraran por debajo de 830000000 USD.",
+      "probabilidad_0_1": 0.72,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Ingresos totales FY2025 < 830000000 USD en 10-K.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_004",
+      "descripcion": "El margen operativo GAAP sera <= 12% en al menos 2 de los proximos 4 trimestres.",
+      "probabilidad_0_1": 0.63,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Conteo de trimestres con gaap_operating_margin_pct <= 12.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_005",
+      "descripcion": "Al menos 1 de los proximos 3 trimestres tendra China > 50% del mix de systems.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "shipped_system_sales_mix_china_pct > 50 en al menos 1 de 3 trimestres.",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Snapshot unico de precio, market_cap, deuda, caja y EV en la misma fecha.",
+      "por_que_importa": "Sin EV/market cap no puede medirse asimetria ni compresion de multiplo.",
+      "como_obtenerlo": "Consolidar feed de mercado + filing y validar EV = market_cap + deuda - caja."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Roll-forward de backlog con cancelaciones y reprogramaciones por trimestre.",
+      "por_que_importa": "Permite separar backlog firme de backlog vulnerable y medir riesgo de precipicio de ingresos.",
+      "como_obtenerlo": "10-Q/10-K + notas IR + transcript de earnings sobre backlog adjustments."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Serie trimestral completa de CFO y CAPEX para reconstruir FCF TTM homogeneo.",
+      "por_que_importa": "Necesario para evaluar calidad de caja y sostenibilidad de recompras.",
+      "como_obtenerlo": "Estados de flujo 10-Q/10-K y conciliacion con FCF reportado."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose de CSI: aftermarket producto vs servicios, margen bruto, renovaciones y churn.",
+      "por_que_importa": "La tesis de resiliencia depende de la calidad economica de CSI, no solo del crecimiento agregado.",
+      "como_obtenerlo": "Disclosure suplementario de earnings/IR y notas segmentadas."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Pipeline y bookings ex-China por geografia y vertical.",
+      "por_que_importa": "Cuantifica si la desconcentracion geografica es real y suficiente.",
+      "como_obtenerlo": "10-Q + earnings call + presentaciones IR por region/aplicacion."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razon correcta para NO invertir: invalidar claims criticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.83,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "La evidencia adelantada (bookings/backlog) sigue deteriorandose mientras la rentabilidad reportada aun refleja inercia de backlog. Sin ancla de valoracion (EV/market cap consistente), el riesgo de value trap domina pese al balance fuerte."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "ACLS mantiene piso de beneficios y caja en fase bajista.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.73,
+              "por_que": [
+                "9M-2025 muestra compresion operativa material vs 9M-2024.",
+                "El piso actual depende de backlog en consumo, no de reposicion comercial.",
+                "Book-to-bill sub-1.0 limita sostenibilidad del nivel de ingresos."
+              ]
+            },
+            "puntos_ciegos": [
+              "No cuantifica ingreso de breakeven GAAP en escenario de demanda baja.",
+              "No separa FCF estructural de efectos temporales de capital de trabajo.",
+              "No define umbrales operativos de ruptura del piso."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_007",
+                "ubicacion": "historico_trimestral.9M-2024 y 9M-2025.metricas",
+                "cita_corta": "Ingresos 765.4M a 600.7M; operativo 156.3M a 83.1M.",
+                "interpretacion": "El piso de beneficio ya se comprimio."
+              },
+              {
+                "source_id": "SRC_049",
+                "ubicacion": "historico_trimestral.Q3-2025.metrics",
+                "cita_corta": "Bookings 52M; backlog 484M.",
+                "interpretacion": "La visibilidad comercial sigue debilitandose."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Dos trimestres consecutivos con margen operativo GAAP >= 15% y FCF trimestral >= 35000000 USD con ingresos <= 220000000 USD.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_002",
+            "resumen_claim_bull": "Balance fuerte (caja alta y deuda cero) ofrece margen de seguridad suficiente.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.44,
+              "por_que": [
+                "Reduce riesgo de insolvencia, pero no elimina riesgo de deterioro del equity.",
+                "Recompras elevadas en ciclo debil pueden erosionar parte del colchon.",
+                "La falta de EV impide verificar si esa fortaleza ya esta plenamente en precio."
+              ]
+            },
+            "puntos_ciegos": [
+              "Confunde riesgo de quiebra con riesgo de retorno.",
+              "No ata recompras a regla dura de FCF/backlog.",
+              "No modela ciclo bajo prolongado con margenes comprimidos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_049",
+                "ubicacion": "historico_trimestral.Q3-2025.metrics",
+                "cita_corta": "Caja+valores corto 593M; valores largo 143M; deuda reportada 0.",
+                "interpretacion": "Balance fuerte, pero no infinito si la demanda no rebota."
+              },
+              {
+                "source_id": "SRC_051",
+                "ubicacion": "Q1-2025 + Q2/Q3-2025",
+                "cita_corta": "Recompras acumuladas Q1-Q3 2025: 95M.",
+                "interpretacion": "Uso de liquidez relevante durante desaceleracion."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Caja+inversiones >= 650000000 USD y recompras TTM <= FCF TTM al 2026-09-30.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_003",
+            "resumen_claim_bull": "CSI amortigua el ciclo y puede sostener caja mientras systems se normaliza.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.68,
+              "por_que": [
+                "CSI crece, pero systems sigue siendo el mayor determinante del consolidado.",
+                "Parte de CSI (servicios puros) muestra margen bruto debil en 9M-2025.",
+                "Faltan KPIs de calidad: churn, renovaciones y margen CSI desagregado."
+              ]
+            },
+            "puntos_ciegos": [
+              "No separa aftermarket producto de servicios recurrentes.",
+              "No demuestra que CSI sostenga margen consolidado en recesion de systems.",
+              "No modela dependencia de CSI respecto de nueva base instalada."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_049",
+                "ubicacion": "historico_trimestral.Q3-2025.metrics",
+                "cita_corta": "Q3-2025: systems 144M y CSI 70M.",
+                "interpretacion": "CSI aun no neutraliza la ciclicidad de systems."
+              },
+              {
+                "source_id": "SRC_007",
+                "ubicacion": "historico_trimestral.9M-2025.metricas",
+                "cita_corta": "Servicios 33.3M de ingresos vs 33.8M de costo.",
+                "interpretacion": "El componente de servicios puros no valida amortiguador de margen por si solo."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "CSI >= 35% del mix y crecimiento de ingresos totales YoY >= 0% por 3 trimestres consecutivos.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_004",
+            "resumen_claim_bull": "La recompra en valle crea asimetria por accion.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.57,
+              "por_que": [
+                "La reduccion de acciones no compenso la caida de ganancias en 9M-2025.",
+                "Sin precio medio de recompra no puede afirmarse acrecion economica.",
+                "El uso de caja en recompras reduce flexibilidad tactica."
+              ]
+            },
+            "puntos_ciegos": [
+              "No compara buyback vs valor intrinseco.",
+              "No fija limite de recompras vs FCF en entorno adverso.",
+              "No incorpora costo de oportunidad de liquidez."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_007",
+                "ubicacion": "historico_trimestral.9M-2024 y 9M-2025.metricas",
+                "cita_corta": "EPS diluido 4.61 a 2.70 pese a menor share count.",
+                "interpretacion": "La recompra no evita deterioro de EPS cuando cae el beneficio base."
+              },
+              {
+                "source_id": "SRC_051",
+                "ubicacion": "Q1-2025 + Q2/Q3-2025",
+                "cita_corta": "95M recomprados en 9M-2025.",
+                "interpretacion": "Ritmo de uso de caja elevado con baja visibilidad."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "EPS GAAP YoY >= +15% con recompras <= 70% del FCF TTM.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_005",
+            "resumen_claim_bull": "El crecimiento secular de SiC habilita re-aceleracion de ACLS.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.67,
+              "por_que": [
+                "TAM sectorial no implica captura de cuota de ACLS.",
+                "La serie reciente de bookings no muestra validacion operativa de esa opcionalidad.",
+                "Persisten riesgos de competencia y de concentracion geografica."
+              ]
+            },
+            "puntos_ciegos": [
+              "No muestra puente de cuota de mercado.",
+              "No cuantifica pipeline ex-China suficiente.",
+              "No acota timing falsable de re-aceleracion."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_053",
+                "ubicacion": "historico_trimestral.Q3-2024.datos",
+                "cita_corta": "Q3-2024: advanced logic 0 y memoria 1 sistema.",
+                "interpretacion": "Diversificacion de aplicaciones no consolidada."
+              },
+              {
+                "source_id": "SRC_049",
+                "ubicacion": "historico_trimestral.Q3-2025.metrics",
+                "cita_corta": "Bookings 52M y backlog 484M.",
+                "interpretacion": "No hay traccion comercial que valide re-aceleracion inminente."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Bookings systems >= 120000000 USD en 2 de 3 trimestres y mix China <= 40% antes de 2026-12-31.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_006",
+            "resumen_claim_bull": "La accion ya cotiza con descuento suficiente.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.8,
+              "por_que": [
+                "No existe ancla de EV/market cap validada para reverse valuation.",
+                "Sin puente de valoracion, la asimetria es narrativa y no cuantificada."
+              ]
+            },
+            "puntos_ciegos": [
+              "No hay snapshot de EV consistente en fecha de corte.",
+              "No hay sensibilidad de valor por escenarios de margen/ingresos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "ImpliedExpectations_v1.status",
+                "cita_corta": "Status BLOCKED por falta de EV.",
+                "interpretacion": "La supuesta infravaloracion no puede demostrarse con datos del caso."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "EV/EBIT calculable y < 12x sobre EBIT normalizado con snapshot consistente.",
+              "ventana_meses": {
+                "min": 1,
+                "max": 6
+              },
+              "fuente_prevista": "otro"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Asumir estabilizacion de bookings sin evidencia de giro sostenido.",
+          "Trasladar CAGR de mercado SiC directamente a resultados de ACLS sin puente de cuota.",
+          "Tratar recompra como creacion de valor sin precio medio ni EV consistente.",
+          "Confundir deuda cero con baja probabilidad de perdida de capital.",
+          "Usar non-GAAP como narrativa central ignorando compresion GAAP.",
+          "Asumir que la desconcentracion de China ya es estructural con solo 1-2 trimestres de mejora parcial."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El negocio estaria en normalizacion profunda post-superciclo y no en bache transitorio.",
+          "El backlog de 2022-2023 se consume mas rapido de lo que se repone.",
+          "El margen operativo normalizado seria bastante menor al pico 2023.",
+          "El riesgo China justifica descuento persistente de multiplo.",
+          "Las recompras sostienen EPS de corto plazo pero no la potencia de beneficio estructural."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "La demanda de systems no confirma piso: bookings y backlog siguen deteriorandose.",
+          "El desapalancamiento operativo ya aparece en margenes GAAP y en 9M-2025.",
+          "CSI ayuda pero no compensa por completo la debilidad de systems y su calidad economica no es totalmente transparente.",
+          "La exposicion a China mantiene vulnerabilidad a shocks regulatorios y de demanda.",
+          "Sin ancla de EV/market cap, el riesgo de value trap domina el caso."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "DEMANDA_DEBIL",
+            "descripcion": "La reposicion de pedidos no cubre el nivel de ingresos y el backlog continua cayendo.",
+            "indicadores_tempranos": [
+              "bookings_usd <= 80000000 por 2 trimestres",
+              "backlog_usd cae QoQ por 2 trimestres",
+              "book_to_bill sub-0.7x de forma persistente"
+            ]
+          },
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "Con menor volumen, la base de costos comprime margen y dificulta recuperacion GAAP.",
+            "indicadores_tempranos": [
+              "gaap_operating_margin_pct <= 12",
+              "gaap_gross_margin_pct <= 42",
+              "opex_non_gaap / ingresos >= 25%"
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "El FCF positivo pierde calidad por volatilidad de capital de trabajo y menor conversion operativa.",
+            "indicadores_tempranos": [
+              "free_cash_flow_usd < 20000000 en 2 trimestres",
+              "caja+valores cae de forma sostenida",
+              "inventario o cuentas por cobrar crecen mas rapido que ingresos"
+            ]
+          },
+          {
+            "mecanismo": "RIESGO_REGULATORIO_CHINA",
+            "descripcion": "Un endurecimiento regulatorio sobre exportaciones a China podria afectar de forma abrupta la demanda de systems.",
+            "indicadores_tempranos": [
+              "mix systems China > 55% por 2 trimestres",
+              "bookings ex-China insuficientes para compensar",
+              "nuevas restricciones de exportacion en equipos/tecnologia"
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "No hay rebote claro de demanda; ACLS mantiene rentabilidad positiva pero en menor escala y baja visibilidad comercial.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "Run-rate anual 0.78B-0.85B USD.",
+                "justificacion": "Book-to-bill bajo y backlog en descenso limitan recuperacion."
+              },
+              {
+                "variable": "EBIT",
+                "direccion": "EMPEORA",
+                "rango": "Margen operativo GAAP 10%-14%.",
+                "justificacion": "Desapalancamiento operativo con volumen bajo."
+              },
+              {
+                "variable": "FCF",
+                "direccion": "NO_MEJORA",
+                "rango": "FCF anual 80M-120M con alta variabilidad trimestral.",
+                "justificacion": "Menor base de ingresos y posible consumo de WC."
+              },
+              {
+                "variable": "OTRO",
+                "direccion": "NO_MEJORA",
+                "rango": "Backlog en banda 400M-500M.",
+                "justificacion": "Sin reposicion de pedidos no hay rerating sostenible."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "EARNINGS_CAEN",
+              "explicacion": "Menor EBIT y visibilidad reducida tienden a mantener descuento de multiplo en semicap ciclico.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": null,
+                "base": null,
+                "max": null
+              },
+              "nota": "No cuantificable sin snapshot de EV/precio consistente."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Shock regulatorio/geografico adicional en China con pedidos muy debiles acelera la caida de backlog e ingresos.",
+            "ventana_meses": {
+              "min": 3,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.22,
+            "es_binario": true,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "Run-rate anual 0.60B-0.70B USD.",
+                "justificacion": "Perdida parcial de demanda China y compensacion ex-China insuficiente."
+              },
+              {
+                "variable": "EBIT",
+                "direccion": "EMPEORA",
+                "rango": "Margen operativo GAAP 5%-8%.",
+                "justificacion": "OPEX fijo sobre revenue mas bajo."
+              },
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "Caja+valores potencialmente < 550000000 USD si no mejora FCF y continan recompras.",
+                "justificacion": "El colchon se reduce en bache prolongado."
+              }
+            ],
+            "impacto_en_supervivencia": "BAJO",
+            "nota": "Sin deuda financiera reportada, el riesgo principal es destruccion de valor del equity y costo de oportunidad."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.74,
+        "razones": [
+          "Book-to-bill y bookings recientes apuntan a demanda debilitada (Q3-2025 bookings 52M).",
+          "Backlog cae de forma sostenida y no hay evidencia robusta de inflexion.",
+          "Beneficio operativo cae mas rapido que ingresos, senal de desapalancamiento.",
+          "Fuerte exposicion a China mantiene riesgo exogeno de alta severidad.",
+          "Recompras altas durante desaceleracion pueden sostener EPS de forma cosmetica.",
+          "No existe ancla de EV/market cap para validar descuento real.",
+          "Mitigante: caja y valores altos con deuda reportada en cero reducen riesgo de supervivencia.",
+          "Mitigante: CSI crece, pero su capacidad de compensacion total aun es parcial."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "bookings systems >= 100M en 2 de 3 trimestres",
+              "backlog deja de caer y crece QoQ por 2 trimestres",
+              "margen operativo GAAP >= 15% con ingresos <= 220M",
+              "book-to-bill >= 1.0x por 2 trimestres"
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "bookings <= 80000000 por 4 trimestres consecutivos",
+              "backlog <= 450000000 y en descenso sostenido",
+              "margen operativo GAAP <= 12% persistente",
+              "falta de reemplazo ex-China en pipeline relevante"
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "bookings_usd <= 60000000 en 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Confirma ausencia de reposicion de demanda."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "CATALIZADOR",
+          "definicion": "backlog_usd < 450000000 y caida QoQ por 2 trimestres seguidos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Se debilita la visibilidad de ingresos futuros."
+        },
+        {
+          "kc_id": "KC-RT-003",
+          "tipo": "BALANCE",
+          "definicion": "caja+equivalentes+valores (corto+largo) < 500000000 USD.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "El colchon de seguridad cae por debajo de umbral prudente."
+        },
+        {
+          "kc_id": "KC-RT-004",
+          "tipo": "ASIGNACION_CAPITAL",
+          "definicion": "recompras TTM > FCF TTM y acciones diluidas YoY no caen al menos 1%.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "La politica de recompra deja de crear valor por accion."
+        },
+        {
+          "kc_id": "KC-RT-005",
+          "tipo": "REGULATORIO",
+          "definicion": "Nuevas restricciones de exportacion que afecten equipos clave de ACLS hacia China.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "otro",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Evento binario de alto impacto sobre la demanda de systems."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Recuperacion real de demanda systems",
+          "umbral_o_condicion": "bookings systems >= 120000000 USD en 2 de 3 trimestres.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Fin de erosion de backlog",
+          "umbral_o_condicion": "backlog_usd >= 550000000 y crecimiento QoQ en 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Resiliencia operativa demostrada",
+          "umbral_o_condicion": "margen operativo GAAP >= 15% durante 2 trimestres con ingresos <= 220000000 USD.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Menor fragilidad geografica",
+          "umbral_o_condicion": "mix de systems China < 35% por 3 trimestres y reemplazo ex-China verificable.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Ancla de valoracion verificable",
+          "umbral_o_condicion": "EV/EBIT calculable y < 12x sobre EBIT normalizado con snapshot consistente.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "otro"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0.5,
+        "si_se_invierte_igual": [
+          "Entrar solo por tramos condicionados a evidencia (bookings >= 100M y backlog estable por 2 trimestres).",
+          "No promediar a la baja si se activa KC-RT-001 o KC-RT-002.",
+          "Atar recompras a regla dura: recompras TTM <= FCF TTM.",
+          "Si mix systems China vuelve > 50% por 2 trimestres, recorte automatico del 50%.",
+          "Si en 9-12 meses no mejora la serie de pedidos, salir por costo de oportunidad.",
+          "Priorizar obtener snapshot EV/market cap antes de ampliar posicion."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "Que porcentaje del backlog actual es cancelable o reprogramable?",
+          "Que nivel de bookings trimestral estabiliza ingresos sin seguir consumiendo backlog?",
+          "Cual es el margen CSI real separado entre aftermarket y servicios?",
+          "Cuanto del EPS por accion reciente viene de recompras vs mejora operativa?",
+          "Que pipeline ex-China existe para 2026 y con que probabilidad de cierre?",
+          "Hay riesgo regulatorio concreto que pueda volver a subir dependencia de China?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "ImpliedExpectations permanece bloqueado por ausencia de EV/market_cap consistentes.",
+      "Falta serie completa y homogenea de CFO/CAPEX para validar calidad estructural de FCF.",
+      "No hay disclosure suficiente de cancelaciones/reprogramaciones de backlog.",
+      "Existe discrepancia de fuentes para Q3-2025 (SRC_007 vs SRC_049) en algunos puntos; se priorizo SRC_049 metrics por consistencia en el paquete reciente.",
+      "Parte de cifras recientes proviene de earnings transcript con componentes aproximados.",
+      "No hay desglose completo de KPIs de CSI (margen, renovaciones, churn)."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "fusion": {
+      "step_name": "RED_TEAM",
+      "schema": "AgentReport_v1",
+      "modelos_usados": [
+        {
+          "id": "gemini",
+          "modelo": "gemini-3-pro-preview"
+        },
+        {
+          "id": "codex",
+          "modelo": "gpt-5-codex"
+        },
+        {
+          "id": "claude",
+          "modelo": "claude-opus-4-6"
+        }
+      ],
+      "criterios_resolucion": [
+        "Se alinearon campos al schema AgentReport_v1 y se descarto metadata envolvente no perteneciente al schema.",
+        "Para cuantitativos en conflicto se priorizo el dato con trazabilidad explicita (source_id + ubicacion + consistencia interna).",
+        "Cuando una metrica usaba distinto denominador (ej. book-to-bill), se conservaron ambas lecturas con denominador explicitado.",
+        "Se fusionaron claims unicos no redundantes y se eliminaron duplicados semanticos.",
+        "Se conservaron todas las banderas de riesgo/limitaciones reportadas por cualquier modelo.",
+        "En probabilidades se reporto rango [min,max] de modelos y valor recomendado ponderado por evidencia y consistencia."
+      ],
+      "rangos_probabilidades": [
+        {
+          "tema": "resumen_ejecutivo.confianza_0_1",
+          "min": 0.72,
+          "max": 0.9,
+          "recomendado": 0.83
+        },
+        {
+          "tema": "payload.contenido.diagnostico_global.confianza_0_1",
+          "min": 0.72,
+          "max": 0.9,
+          "recomendado": 0.83
+        },
+        {
+          "tema": "payload.contenido.value_trap_checklist.probabilidad_value_trap_0_1",
+          "min": 0.45,
+          "max": 0.85,
+          "recomendado": 0.74
+        },
+        {
+          "tema": "payload.contenido.bear_case.escenarios_bajistas.BEAR_BASE.probabilidad_0_1",
+          "min": 0.4,
+          "max": 0.55,
+          "recomendado": 0.5
+        },
+        {
+          "tema": "payload.contenido.bear_case.escenarios_bajistas.BEAR_WORST.probabilidad_0_1",
+          "min": 0.15,
+          "max": 0.25,
+          "recomendado": 0.22
+        },
+        {
+          "tema": "demanda_debil_persistente_en_predicciones",
+          "min": 0.67,
+          "max": 0.75,
+          "recomendado": 0.69
+        },
+        {
+          "tema": "presion_margen_operativo_en_predicciones",
+          "min": 0.6,
+          "max": 0.7,
+          "recomendado": 0.63
+        }
+      ],
+      "conflictos": [
+        {
+          "conflicto_id": "C01",
+          "tema": "veredicto_role_local",
+          "valores_modelos": {
+            "gemini": "NO_APTO",
+            "codex": "NO_APTO",
+            "claude": "WATCHLIST"
+          },
+          "resolucion_fusion": "NO_APTO",
+          "criterio_aplicado": "Mayoria de modelos + sesgo conservador por riesgo alto y falta de ancla de valoracion."
+        },
+        {
+          "conflicto_id": "C02",
+          "tema": "diagnostico_global.status",
+          "valores_modelos": {
+            "gemini": "NO_APTO",
+            "codex": "NO_APTO",
+            "claude": "WATCHLIST"
+          },
+          "resolucion_fusion": "NO_APTO",
+          "criterio_aplicado": "Coherencia con veredicto local y evidencia de deterioro adelantado."
+        },
+        {
+          "conflicto_id": "C03",
+          "tema": "book_to_bill_Q3_2025",
+          "valores_modelos": {
+            "gemini": "0.24x (52/214, revenue total)",
+            "codex": "riesgo de desacople comercial, sin fijar unica razon",
+            "claude": "0.36x (52/144, systems revenue)"
+          },
+          "resolucion_fusion": "Se reportan ambas lecturas: 0.24x sobre revenue total y 0.36x sobre systems.",
+          "criterio_aplicado": "No mezclar denominadores; explicitarlos para eliminar contradiccion aparente."
+        },
+        {
+          "conflicto_id": "C04",
+          "tema": "probabilidad_value_trap_0_1",
+          "valores_modelos": {
+            "gemini": 0.85,
+            "codex": 0.72,
+            "claude": 0.45
+          },
+          "resolucion_fusion": 0.74,
+          "criterio_aplicado": "Ponderacion por densidad de evidencia operativa y consistencia con deterioro de bookings/backlog."
+        },
+        {
+          "conflicto_id": "C05",
+          "tema": "tamaño_maximo_sugerido_pct_cartera",
+          "valores_modelos": {
+            "gemini": 0.0,
+            "codex": 0.5,
+            "claude": 2.0
+          },
+          "resolucion_fusion": 0.5,
+          "criterio_aplicado": "Postura conservadora compatible con NO_APTO, permitiendo solo exposicion tactica minima si se invierte igual."
+        },
+        {
+          "conflicto_id": "C06",
+          "tema": "lectura_de_CSI",
+          "valores_modelos": {
+            "gemini": "no central",
+            "codex": "resiliencia parcial",
+            "claude": "servicios puros con margen debil/negativo"
+          },
+          "resolucion_fusion": "CSI aporta amortiguacion parcial, pero su calidad economica no esta plenamente demostrada.",
+          "criterio_aplicado": "Integracion de perspectivas unicas sin ignorar warning de margen de servicios."
+        },
+        {
+          "conflicto_id": "C07",
+          "tema": "es_binario_BEAR_WORST",
+          "valores_modelos": {
+            "gemini": false,
+            "codex": true,
+            "claude": true
+          },
+          "resolucion_fusion": true,
+          "criterio_aplicado": "Mayoria de modelos + naturaleza de shock regulatorio China como evento discreto."
+        },
+        {
+          "conflicto_id": "C08",
+          "tema": "discrepancia_de_fuentes_Q3_2025",
+          "valores_modelos": {
+            "gemini": "alerta SRC_007 vs SRC_049",
+            "codex": "prioriza SRC_049",
+            "claude": "usa metricas recientes y transcript"
+          },
+          "resolucion_fusion": "Se priorizo SRC_049 para metricas Q3-2025 y se mantuvo la advertencia en limitaciones.",
+          "criterio_aplicado": "Consistencia interna del bloque metrics y principio de no inventar datos."
+        }
+      ]
+    }
+  },
+  "autochequeos": {
+    "passed": true,
+    "source": "patched by fix_autochequeos.py"
+  }
+}

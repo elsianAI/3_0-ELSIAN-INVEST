@@ -1,0 +1,396 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260215_ACLS",
+  "fecha_corte": "2026-02-15",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "standard",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260215_ACLS",
+    "implied_expectations_caso_id": "CASE_20260215_ACLS",
+    "sources_pack_caso_id": "CASE_20260215_ACLS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Book-to-bill catastrófico de ~0.24x (Q3-2025) desmiente la tesis de 'estabilización'; la demanda real se está colapsando, no pausando.",
+      "La rentabilidad actual es un espejismo contable sostenido por la quema acelerada de backlog; cuando este se agote, el apalancamiento operativo operará en reversa.",
+      "La 'diversificación' fuera de China es en realidad una pérdida neta de mercado: el resto del mundo no está compensando la caída de pedidos chinos.",
+      "Sin Valuation Anchor (EV/Market Cap desconocidos), comprar la caída basándose en 'asimetría cualitativa' es apostar a ciegas en un negocio que se encoge.",
+      "Riesgo extremo de Value Trap: el mercado descuenta correctamente que las ganancias actuales son insostenibles."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.9
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El colapso de bookings a 52M USD en Q3-2025 indica que los ingresos futuros convergerán a niveles de supervivencia, no de rentabilidad.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q3-2025.metrics",
+          "cita_corta": "Q3-2025 Bookings: 52M USD vs Revenue: 214M USD. Book-to-bill ~0.24x.",
+          "interpretacion": "La empresa factura 4 veces más de lo que vende. Esto es insostenible a corto plazo."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_050",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q2-2025.bookings_usd",
+          "cita_corta": "Q2-2025 Bookings: 96M USD.",
+          "interpretacion": "La tendencia es a la baja (96M -> 52M), invalidando la tesis de 'suelo' o estabilización."
+        }
+      ],
+      "falsacion": {
+        "test": "Bookings trimestrales > 150M USD en los próximos 2 reportes.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 6
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "El backlog de 484M es un 'buffer' finito que se consume a ritmo alarmante; su agotamiento expondrá la estructura de costes real.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q3-2025.metrics.backlog_usd",
+          "cita_corta": "Q3-2025 Backlog: 484M USD.",
+          "interpretacion": "Bajó desde 1.06B en FY2023. A este ritmo de quema (Revenue > Bookings), cubre < 3-4 trimestres antes del precipicio."
+        }
+      ],
+      "falsacion": {
+        "test": "Backlog deja de caer secuencialmente sin un colapso en los ingresos reconocidos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "HIPOTESIS",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La 'diversificación' geográfica es un eufemismo para la pérdida de cuota en China sin tracción equivalente en Occidente.",
+      "confianza_0_1": 0.8,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q3-2025.metrics.china_sales_pct",
+          "cita_corta": "Ventas China: 46% (bajando de 55% en Q2).",
+          "interpretacion": "La caída de China golpea directamente el top-line; EE.UU. (14%) y Corea (10%) no están llenando el hueco."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos absolutos en USD de regiones NO-China crecen >20% YoY compensando la caída asiática.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "Ingresos trimestrales romperán a la baja el nivel de 180M USD en los próximos 12 meses al converger con bookings.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Revenue trimestral < 180M USD reportado.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "El margen operativo GAAP caerá a un dígito (o negativo) cuando se pierda el apalancamiento del backlog.",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "GAAP Operating Margin < 10%.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Datos de cancelaciones de backlog en Q3/Q4 2025.",
+      "por_que_importa": "Si el backlog no solo se consume sino que se cancela, el precipicio de ingresos está más cerca.",
+      "como_obtenerlo": "Notas en 10-Q/10-K sobre 'Backlog adjustments' o comentarios en earnings call."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.9,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "Classic Value Trap: la óptica de rentabilidad actual es temporal (backlog burn), mientras los indicadores adelantados (bookings 52M) gritan colapso estructural del negocio."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "ACLS mantiene un piso de beneficios y caja en fase bajista.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.8,
+              "por_que": [
+                "El 'piso' actual (Revenue ~200M) es 4 veces superior a la demanda real (Bookings ~52M).",
+                "El beneficio se mantiene por inercia de pedidos pasados; no es un piso estructural, es un retardo contable."
+              ]
+            },
+            "puntos_ciegos": [
+              "Ignora la magnitud del disconnect Book-to-Bill (0.24x).",
+              "Confunde ejecución de backlog con salud del negocio."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_049",
+                "ubicacion": "Q3-2025 Metrics",
+                "cita_corta": "Bookings 52M vs Revenue 214M.",
+                "interpretacion": "La entrada de nuevos pedidos se ha secado."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Bookings rebotan a >150M confirmando que 52M fue una anomalía y no tendencia.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_002",
+            "resumen_claim_bull": "Alto margen de seguridad por caja neta y sin deuda.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.4,
+              "por_que": [
+                "La caja es real, pero si el negocio quema efectivo operativamente (operating leverage reverso), la caja se convierte en runway, no en valor para el accionista."
+              ]
+            },
+            "puntos_ciegos": [
+              "Una empresa que se encoge estructuralmente destruye valor incluso con caja neta si el management sigue recomprando acciones agresivamente (quemando la caja)."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_050",
+                "ubicacion": "Q2-2025",
+                "cita_corta": "Recompras 45M en un trimestre.",
+                "interpretacion": "Están gastando la 'seguridad' en recomprar un negocio que se deteriora."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "La empresa detiene recompras para preservar liquidez ante la incertidumbre.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Asumir que la caída de Bookings a 52M es 'cíclica' y 'transitoria' sin evidencia de suelo.",
+          "Confiar en 'SiC growth' cuando la evidencia actual muestra pérdida de tracción.",
+          "Valorar la empresa por sus beneficios pasados (trailing) ignorando que los bookings adelantados sugieren una empresa 75% más pequeña."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El mercado está priceando (probablemente, aunque no tenemos EV) que el 'normalized earnings power' es mucho menor que el actual.",
+          "El mercado ve que el backlog es un puente hacia la nada si los bookings no reaccionan YA.",
+          "El mercado entiende que la dependencia de China era estructural y su pérdida no es fácilmente reemplazable."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "La demanda de sistemas se ha evaporado (Bookings 52M), indicando un problema estructural o pérdida masiva de cuota, no solo un ciclo.",
+          "El backlog ha enmascarado la gravedad de la situación, pero se agota rápidamente.",
+          "Cuando los ingresos converjan con los bookings, ACLS entrará en pérdidas operativas por desapalancamiento.",
+          "CSI (servicios) no es suficiente para sostener la estructura de costes de una empresa de hardware.",
+          "La dirección quema la caja en recompras a precios que resultarán ser caros, destruyendo el margen de seguridad."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "El OPEX fijo es demasiado alto para un nivel de ingresos de ~200M-300M anuales (run-rate de bookings actuales).",
+            "indicadores_tempranos": [
+              "Margen bruto cayendo por baja absorción de costes fijos.",
+              "Aumento de inventarios sobre ventas (ventas caen más rápido que producción)."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Ingresos caen a ~600M anuales, márgenes se comprimen a un dígito bajo. La empresa deja de ser atractiva por múltiplos y cotiza a valor de liquidación o menos.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 18
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "EMPEORA",
+                "rango": "Convergen a bookings x 4 + CSI (~300M + 100M = 400M-500M).",
+                "justificacion": "Matemática simple de book-to-bill."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "El mercado dejará de pagar por crecimiento y pagará por 'melting ice cube'.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": null,
+                "base": null,
+                "max": null
+              },
+              "nota": "No calculable sin precio inicial."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Pérdida total de tracción en China y competencia agresiva en SiC. ACLS entra en cash burn.",
+            "ventana_meses": {
+              "min": 12,
+              "probable": 18,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.25,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "EBIT",
+                "direccion": "EMPEORA",
+                "rango": "Negativo",
+                "justificacion": "Ingresos < Punto de equilibrio."
+              }
+            ],
+            "impacto_en_supervivencia": "BAJO",
+            "nota": "No quiebra inmediato por la caja, pero la acción es dinero muerto."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.85,
+        "razones": [
+          "Bajo P/E óptico basado en ganancias pico/pasadas.",
+          "Deterioro fundamental acelerado (Bookings -75% desde pico).",
+          "Management recomprando acciones mientras el negocio se encoge.",
+          "Dependencia de un ciclo que podría ser estructural (pérdida de China)."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "Book-to-bill rebota rápido a >0.9.",
+              "Inventarios de clientes se normalizan y vuelven pedidos."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "Bookings se estancan en niveles bajos (<80M) por >2 trimestres.",
+              "Pérdida de cuota de mercado vs competidores locales en China."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "Bookings trimestrales < 60M USD por segundo trimestre consecutivo.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma que el negocio se ha encogido estructuralmente a un nivel de ~250M/año."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "BALANCE",
+          "definicion": "Consumo de caja neto (FCF negativo) en un trimestre.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "Rompe la tesis de 'safety floor' de rentabilidad."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Rebote sostenido de Bookings",
+          "umbral_o_condicion": ">120M USD en un trimestre.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "earnings"
+        },
+        {
+          "item": "Stabilización del Backlog",
+          "umbral_o_condicion": "Backlog plano o creciente QoQ.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0,
+        "si_se_invierte_igual": [
+          "Esperar obligatoriamente a ver un trimestre con book-to-bill > 1.0.",
+          "No promediar a la baja bajo ninguna circunstancia."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Por qué los bookings colapsaron a 52M en Q3-2025 si hay un 'piso'?",
+          "¿Cuánto del backlog restante es real y cuánto es 'zombie' (pedidos chinos que nunca se entregarán)?",
+          "¿Cuál es el OPEX de equilibrio real si los ingresos bajan a 300M/año?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta EV/Market Cap impide valoración relativa precisa.",
+      "Datos de Q3-2025 en TruthPack muestran discrepancia de fuentes (SRC_007 vs SRC_049), se usó la más conservadora/reciente (metrics 52M bookings)."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

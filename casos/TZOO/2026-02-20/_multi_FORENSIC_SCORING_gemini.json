@@ -1,0 +1,293 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260220_TZOO",
+  "fecha_corte": "2026-02-20",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "UNKNOWN",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260220_TZOO",
+    "implied_expectations_caso_id": "CASE_20260220_TZOO",
+    "sources_pack_caso_id": "SourcesPack_v1_TZOO_2026-02-20.json"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La supervivencia de la empresa es CONDICIONAL, con un bajo puntaje de 2 sobre 5, debido a un balance frágil, múltiples banderas rojas de severidad ALTA y opacidad en su estructura de deuda.",
+      "Los márgenes operativos se están comprimiendo drásticamente y la conversión de EBIT a flujo de caja es altamente volátil, socavando la calidad de los beneficios.",
+      "La liquidez es ajustada; aunque la caja actual cubre las necesidades a corto plazo, un escenario de estrés histórico sugiere un runway de solo 9 meses.",
+      "La ausencia de una cifra de deuda total consolidada es una bandera roja crítica que impide una evaluación completa de la solvencia y el riesgo financiero.",
+      "Se recomienda un tamaño de posición máximo muy limitado (1%) hasta que se resuelvan las incertidumbres críticas sobre la deuda y la estabilidad del flujo de caja."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.4
+  },
+  "claims": [],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_FS_001",
+      "descripcion": "El flujo de caja operativo (CFO) reportado en un trimestre será negativo.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 0,
+        "max": 12
+      },
+      "criterio_validacion": "La línea 'Net cash provided by operating activities' en el estado de flujo de caja de un filing 10-Q o 10-K es menor a cero.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FS_002",
+      "descripcion": "El margen operativo (EBIT margin) se situará por debajo del 5% durante dos trimestres consecutivos.",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 0,
+        "max": 12
+      },
+      "criterio_validacion": "El (EBIT / Ingresos) calculado a partir de los reportes trimestrales es < 0.05 por dos trimestres seguidos.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FS_003",
+      "descripcion": "El saldo de caja y equivalentes caerá por debajo de los 10 millones de USD.",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 0,
+        "max": 18
+      },
+      "criterio_validacion": "La línea 'Cash and cash equivalents' en el balance de un filing trimestral o anual es inferior a 10,000,000 USD.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_FS_004",
+      "descripcion": "La compañía anunciará una ampliación de capital (emisión de acciones) con efecto dilutivo.",
+      "probabilidad_0_1": 0.3,
+      "ventana_meses": {
+        "min": 0,
+        "max": 24
+      },
+      "criterio_validacion": "Comunicado de prensa o filing (8-K, S-3) anunciando una oferta pública o privada de acciones.",
+      "fuente_prevista": "PR"
+    },
+    {
+      "pred_id": "PRED_FS_005",
+      "descripcion": "El ratio Pasivos Totales / Patrimonio Neto superará el 15x.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 0,
+        "max": 12
+      },
+      "criterio_validacion": "El cálculo (Total Liabilities / Total Equity) basado en el balance de un filing es > 15.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose completo de la deuda total (Deuda Total o Short-Term y Long-Term Debt)",
+      "por_que_importa": "Es imposible evaluar la solvencia, el apalancamiento real y el riesgo de refinanciación sin esta cifra.",
+      "como_obtenerlo": "Buscar en las notas a los estados financieros (Notes to Financial Statements) del próximo 10-K o 10-Q, bajo secciones de 'Debt' o 'Financing Arrangements'."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de Covenants financieros",
+      "por_que_importa": "Permite conocer las restricciones operativas y financieras impuestas por los acreedores y el riesgo de incumplimiento.",
+      "como_obtenerlo": "Buscar en los acuerdos de crédito (Credit Agreements) adjuntos como exhibits en los filings (10-K, 10-Q, 8-K) o en las notas sobre deuda."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Conciliación detallada del Stock-Based Compensation (SBC)",
+      "por_que_importa": "Ayuda a entender la magnitud del gasto no monetario que distorsiona la conversión de EBIT a CFO y el nivel real de dilución.",
+      "como_obtenerlo": "Nota sobre 'Stock-Based Compensation' o 'Shareholders' Equity' en el 10-K."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "red_flags_puntuadas": [
+        {
+          "id": "RF-01",
+          "categoria": "Alineacion y calidad de conversion EBIT->CFO",
+          "severidad": "ALTO"
+        },
+        {
+          "id": "RF-02",
+          "categoria": "Capex insuficiente frente a depreciacion y mantenimiento",
+          "severidad": "MEDIO"
+        },
+        {
+          "id": "RF-03",
+          "categoria": "Compresion de margen operativo y escalada de costos",
+          "severidad": "ALTO"
+        },
+        {
+          "id": "RF-04",
+          "categoria": "Cuentas por cobrar elevadas frente a ingresos trimestrales",
+          "severidad": "MEDIO"
+        },
+        {
+          "id": "RF-05",
+          "categoria": "Deterioro de ingresos y visibilidad de crecimiento",
+          "severidad": "MEDIO"
+        },
+        {
+          "id": "RF-06",
+          "categoria": "Dependencia de caja de financiacion",
+          "severidad": "MEDIO"
+        },
+        {
+          "id": "RF-07",
+          "categoria": "Integridad temporal insuficiente para señales de continuidad",
+          "severidad": "BAJO"
+        },
+        {
+          "id": "RF-08",
+          "categoria": "Incompletitud de estructura de financiacion en balance",
+          "severidad": "ALTO"
+        },
+        {
+          "id": "RF-09",
+          "categoria": "Obligaciones de fuera de balance operativo",
+          "severidad": "MEDIO"
+        },
+        {
+          "id": "RF-10",
+          "categoria": "Patrimonio y solvencia frágil",
+          "severidad": "ALTO"
+        }
+      ],
+      "supervivencia": {
+        "resultado": "CONDITIONAL",
+        "survival_score_0_5": 2,
+        "max_position_size": "1% de la cartera",
+        "justificacion_posicion": "El perfil de alto riesgo, la supervivencia condicional y las importantes lagunas de información justifican una exposición mínima o nula hasta que se aclare la visibilidad."
+      },
+      "kill_criteria_formalizados": [
+        {
+          "kc_id": "KC-FS-01",
+          "descripcion": "El Flujo de Caja Operativo (CFO) trimestral es negativo durante dos trimestres consecutivos.",
+          "probabilidad_0_1": 0.6,
+          "ventana_temporal": {
+            "min": 0,
+            "max": 12
+          },
+          "criterio_chequeo": "CFO < 0 en dos filings 10-Q/10-K consecutivos.",
+          "accion_si_activado": "SALIR"
+        },
+        {
+          "kc_id": "KC-FS-02",
+          "descripcion": "El patrimonio neto (Total Equity) reportado en el balance se vuelve negativo.",
+          "probabilidad_0_1": 0.55,
+          "ventana_temporal": {
+            "min": 0,
+            "max": 18
+          },
+          "criterio_chequeo": "Total Equity < 0 en un filing 10-Q o 10-K.",
+          "accion_si_activado": "SALIR"
+        },
+        {
+          "kc_id": "KC-FS-03",
+          "descripcion": "El saldo de caja y equivalentes cae por debajo del doble de las obligaciones por arrendamientos operativos corrientes (actualmente 2 * 2.97M = 5.94M USD).",
+          "probabilidad_0_1": 0.4,
+          "ventana_temporal": {
+            "min": 0,
+            "max": 18
+          },
+          "criterio_chequeo": "Cash and cash equivalents < 2 * 'Operating lease liability current' en el balance.",
+          "accion_si_activado": "REDUCIR_50"
+        },
+        {
+          "kc_id": "KC-FS-04",
+          "descripcion": "La compañía no clarifica su estructura de deuda total en los próximos dos reportes trimestrales.",
+          "probabilidad_0_1": 0.3,
+          "ventana_temporal": {
+            "min": 0,
+            "max": 6
+          },
+          "criterio_chequeo": "Los campos 'Total Debt' o un desglose sumable de deuda a corto y largo plazo siguen ausentes en dos 10-Q/10-K consecutivos.",
+          "accion_si_activado": "CONGELAR_COMPRAS"
+        }
+      ],
+      "resumen_ejecutivo": {
+        "veredicto": "WATCHLIST",
+        "confianza_0_1": 0.4,
+        "justificacion": "El análisis forense revela un perfil de supervivencia 'CONDICIONAL' con una puntuación de 2 sobre 5. La compañía presenta cuatro banderas rojas de severidad ALTA: conversión de beneficios a caja muy volátil, compresión aguda de márgenes, un balance extremadamente frágil (ratio Pasivo/Patrimonio > 11x) y una opacidad crítica en su estructura de deuda, al no reportar una cifra de deuda total. Estos factores indican un riesgo elevado y una capacidad muy limitada para absorber shocks.\n\nLa liquidez, aunque suficiente a muy corto plazo con 17M USD en caja, es precaria. Escenarios de estrés basados en el desempeño histórico o en el uso de caja para financiación (CFF negativo) apuntan a un 'runway' de solo 9-12 meses. Dado el alto riesgo, la baja confianza del análisis (0.4) por los datos faltantes y la naturaleza condicional de su viabilidad, el veredicto es 'WATCHLIST', recomendando una exposición máxima del 1% hasta que haya una mejora sustancial en la transparencia y en las métricas operativas."
+      },
+      "predicciones_calibracion": [
+        {
+          "pred_id": "PRED_FS_001",
+          "descripcion": "El flujo de caja operativo (CFO) reportado en un trimestre será negativo.",
+          "probabilidad_0_1": 0.6,
+          "ventana_temporal": {
+            "min": 0,
+            "max": 12
+          },
+          "criterio_validacion": "La línea 'Net cash provided by operating activities' en el estado de flujo de caja de un filing 10-Q o 10-K es menor a cero."
+        },
+        {
+          "pred_id": "PRED_FS_002",
+          "descripcion": "El margen operativo (EBIT margin) se situará por debajo del 5% durante dos trimestres consecutivos.",
+          "probabilidad_0_1": 0.5,
+          "ventana_temporal": {
+            "min": 0,
+            "max": 12
+          },
+          "criterio_validacion": "El (EBIT / Ingresos) calculado a partir de los reportes trimestrales es < 0.05 por dos trimestres seguidos."
+        },
+        {
+          "pred_id": "PRED_FS_003",
+          "descripcion": "El saldo de caja y equivalentes caerá por debajo de los 10 millones de USD.",
+          "probabilidad_0_1": 0.4,
+          "ventana_temporal": {
+            "min": 0,
+            "max": 18
+          },
+          "criterio_validacion": "La línea 'Cash and cash equivalents' en el balance de un filing trimestral o anual es inferior a 10,000,000 USD."
+        },
+        {
+          "pred_id": "PRED_FS_004",
+          "descripcion": "La compañía anunciará una ampliación de capital (emisión de acciones) con efecto dilutivo.",
+          "probabilidad_0_1": 0.3,
+          "ventana_temporal": {
+            "min": 0,
+            "max": 24
+          },
+          "criterio_validacion": "Comunicado de prensa o filing (8-K, S-3) anunciando una oferta pública o privada de acciones."
+        },
+        {
+          "pred_id": "PRED_FS_005",
+          "descripcion": "El ratio Pasivos Totales / Patrimonio Neto superará el 15x.",
+          "probabilidad_0_1": 0.7,
+          "ventana_temporal": {
+            "min": 0,
+            "max": 12
+          },
+          "criterio_validacion": "El cálculo (Total Liabilities / Total Equity) basado en el balance de un filing es > 15."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "La confianza del análisis es baja (0.4) debido a la ausencia crítica de la cifra de deuda total, lo que impide una evaluación completa de la solvencia.",
+      "La irregularidad de los datos trimestrales históricos (TTM por fallback) debilita la fiabilidad de las proyecciones de flujo de caja y runway.",
+      "La falta de desglose de los componentes del flujo de caja operativo (ej. SBC) limita la profundidad del análisis de la calidad de los beneficios.",
+      "La evaluación de riesgo de covenants no fue posible por falta de información."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-20T10:00:00.000000Z",
+    "inputs_hash": {
+      "truth_pack": "hash_del_truthpack_aqui",
+      "forensic_detection": "hash_del_forensic_detection_aqui"
+    }
+  }
+}

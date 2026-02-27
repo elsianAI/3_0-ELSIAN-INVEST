@@ -1,0 +1,1095 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260220_TZOO",
+  "fecha_corte": "2026-02-20",
+  "agente": {
+    "agent_role": "CATALYST",
+    "agent_nombre": "CATALYST_FUSION_v1",
+    "modelo": "fusion-codex_spark-gemini-claude",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260220_TZOO",
+    "implied_expectations_caso_id": "CASE_20260220_TZOO",
+    "sources_pack_caso_id": "CASE_20260220_TZOO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La valoración sigue bloqueada por opacidad de estructura de capital: no existe `deuda_total_usd` explícita y, por ello, no se puede calcular un EV consistente ni cerrar la valoración inversa por EV/EBIT/EV/FCF.",
+      "Los fundamentales operativos muestran presión: ingresos en descenso (FY2024 83.902M vs FY2025-9M 69.245M) y caída de margen operativo (22.0% a 9.2%), con COGS/revenue escalado de 12.5% a 19.0%.",
+      "Hay palanca mecánica de recuperación (SGA prácticamente estable y base operativa de FCF positiva), pero la señal está limitada por calidad de datos y por la falta de series trimestrales completas (TTM con fallback / warning de consecutividad).",
+      "El caso mantiene `WATCHLIST` por dependencia de catalizadores de transparencia y mejora de calidad de reporting antes de convertir la tesis en señal de re-rating.",
+      "El riesgo principal no es solo de negocio, sino de ejecución y visibilidad de reporting; sin mejora de estructura de capital y continuidad de datos, la tesis permanece condicionada."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.53
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_F_001",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CRITICO",
+      "enunciado": "La ausencia de `debt_total_usd` en el pack impide calcular EV consistente y bloquea la valoración inversa (EV/EBIT y EV/FCF) en condiciones de señalización de mercado.",
+      "confianza_0_1": 0.98,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1.market",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-20",
+          "ubicacion": "market and balance fields",
+          "cita_corta": "deuda_total_usd: null; enterprise_value_usd: null en el cálculo.",
+          "interpretacion": "Sin deuda consolidada explícita, el puente EV no cierra."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1.motivo_blocked",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-20",
+          "ubicacion": "status BLOCKED",
+          "cita_corta": "Blocked por falta de enterprise_value_usd dependiente de deuda_total_usd.",
+          "interpretacion": "El propio objeto de expectativas confirma el bloqueo por datos faltantes."
+        }
+      ],
+      "falsacion": {
+        "test": "Publicación de deuda total consolidada y EV calculable en filing (10-Q o 10-K), con reconciliación de pasivos financieros.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_F_002",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Ingresos de Travelzoo descendieron de 83.902M (FY2024) a 69.245M en FY2025-9M, con base anualizada cercana a -17.5%.",
+      "confianza_0_1": 0.99,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "historico_anual.FY2024",
+          "cita_corta": "Ingresos_usd 83,902,000 en FY2024.",
+          "interpretacion": "Base de comparación de mayor escala previa."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_anual.FY2025",
+          "cita_corta": "Ingresos_usd 69,245,000 en 9M-2025.",
+          "interpretacion": "La base reciente permanece por debajo de FY2024."
+        }
+      ],
+      "falsacion": {
+        "test": "Dos periodos trimestrales consecutivos con ingreso trimestral >22M y run-rate anual superior a ~85M sin deterioro de márgenes.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_F_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El margen operativo se contrajo de 22.0% en FY2024 a ~9.2% en FY2025-9M, con fuerte pérdida de palanca operativa sobre costos fijos.",
+      "confianza_0_1": 0.99,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "historico_anual.FY2024",
+          "cita_corta": "ebit 18,498,000 sobre ingresos 83,902,000.",
+          "interpretacion": "Margen operacional alto antes de la caída."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_anual.FY2025",
+          "cita_corta": "ebit 6,352,000 sobre ingresos 69,245,000.",
+          "interpretacion": "Evidencia de deterioro de rentabilidad base."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen EBIT trimestral ≥14% en dos trimestres consecutivos, manteniendo o mejorando ingresos.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_F_004",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "COGS/revenue aumentó de 12.5% en FY2024 a 19.0% en FY2025-9M, contribuyendo a la compresión de margen bruto y operativo.",
+      "confianza_0_1": 0.97,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "historico_anual.FY2024",
+          "cita_corta": "cogs_usd 10,469,000 vs ingresos_usd 83,902,000.",
+          "interpretacion": "Costes directos estructuralmente más eficientes en FY2024."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_anual.FY2025",
+          "cita_corta": "cogs_usd 13,132,000 sobre ingresos 69,245,000.",
+          "interpretacion": "Deterioro en eficiencia de ingresos reciente."
+        }
+      ],
+      "falsacion": {
+        "test": "COGS/ingresos cae por debajo de 16% durante dos trimestres consecutivos con ingresos estables.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_F_005",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El FCF publicado (~4.16M) es positivo pero materialmente menor al pico histórico previo de caja operativa y su evaluación está condicionada por datos TTM parciales/caída de calidad de reporting.",
+      "confianza_0_1": 0.95,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "ImpliedExpectations_v1.multiples_implicitos",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-20",
+          "ubicacion": "multiples_implicitos",
+          "cita_corta": "P/FCF de 13.2716 con FCF 4.16M.",
+          "interpretacion": "La señal de valuación no está blindada por base de datos completa."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1.ttm",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-20",
+          "ubicacion": "ttm.nota",
+          "cita_corta": "FY0_fallback activado por trimestres no consecutivos.",
+          "interpretacion": "Riesgo de inferencia en métricas de múltiplos de corto plazo."
+        }
+      ],
+      "falsacion": {
+        "test": "Cuatro trimestres consecutivos de FCF robusto confirman tendencia no artefactual y sin degradación relevante.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "kpi_operativo"
+      }
+    },
+    {
+      "claim_id": "CLM_F_006",
+      "tipo": "HECHO",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "La estructura de balance muestra patrimonio bajo (4.353M) frente a activos y pasivos altos, con `debt_total_usd` no separada explícitamente y exposición relevante de arrendamientos operativos.",
+      "confianza_0_1": 0.96,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1.balance_sheet_ultimo",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita_corta": "activos 54,722,000; pasivos 50,369,000; patrimonio 4,353,000.",
+          "interpretacion": "La foto de pasivos consolidados necesita desagregación financiera explícita."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1.lease_data",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "lease_data",
+          "cita_corta": "operating_lease_liability_total 11,298,000; commitments 12,133,000.",
+          "interpretacion": "Parte del riesgo de pasivo no está reflejado como deuda total explícita."
+        }
+      ],
+      "falsacion": {
+        "test": "Publicación de deuda total y desglose de pasivos financieros con reconciliación explícita de pasivos y arrendamientos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_F_007",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "El flujo de financiación (CFF negativo) ha drenado caja en periodos recientes pese a un CFO positivo, por lo que la generación de caja neta debe seguir siendo monitoreada.",
+      "confianza_0_1": 0.9,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_anual.FY2025",
+          "cita_corta": "cfo 4.209M, cff -13.068M, delta cash -8.493M.",
+          "interpretacion": "Hay retorno de capital o pagos financieros que contraen liquidez."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_021",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "historico_trimestral.Q2-2025",
+          "cita_corta": "delta cash trimestral negativo con cff -2.604M.",
+          "interpretacion": "La dinámica de caja requiere consistencia trimestral para validación."
+        }
+      ],
+      "falsacion": {
+        "test": "Delta de caja permanece positivo/neutral en 3 de 4 trimestres consecutivos con CFF mejorando.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "kpi_operativo"
+      }
+    },
+    {
+      "claim_id": "CLM_F_008",
+      "tipo": "HECHO",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "El patrón trimestral en 2025 muestra alta oscilación (picos cercanos a 23.14M en Q1 y tramo final alrededor de 22.47M), con recuperación puntual aún no sostenida.",
+      "confianza_0_1": 0.95,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_009",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-03-31",
+          "ubicacion": "historico_trimestral.Q1-2025",
+          "cita_corta": "ingresos 23.14M en Q1-2025.",
+          "interpretacion": "Existe capacidad de tramo fuerte, pero no secuencia persistente."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_019",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-12-31",
+          "ubicacion": "historico_trimestral.Q4-2025",
+          "cita_corta": "ingresos 22.474M en Q4-2025.",
+          "interpretacion": "La base final no confirma retorno de ritmo anual consistente."
+        }
+      ],
+      "falsacion": {
+        "test": "Cuatro trimestres con ingresos >20M y crecimiento YoY positivo en al menos dos.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_F_009",
+      "tipo": "INFERENCIA",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "El gasto de I+D aparece activo (~1.96M en FY2025-9M) y puede abrir palanca de monetización futura, pero no hay evidencia pública explícita aún de diversificación de ingresos material.",
+      "confianza_0_1": 0.9,
+      "impacto": "BAJO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_anual.FY2025",
+          "cita_corta": "R&D 1,963,000 USD.",
+          "interpretacion": "Confirma actividad de inversión, sin confirmación de retorno en ingresos."
+        }
+      ],
+      "falsacion": {
+        "test": "Aparece producto nuevo con contribución identificable >5% del revenue total.",
+        "ventana_meses": {
+          "min": 12,
+          "max": 30
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_F_010",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Con SGA estable (~34.4M) y margen comprimido, existe potencial de apalancamiento operativo en recuperación de volumen; el riesgo actual es no sostener caja y calidad de ingresos/márgenes durante la recuperación.",
+      "confianza_0_1": 0.88,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "historico_anual.FY2024",
+          "cita_corta": "SGA ~34.470M con margen 22%.",
+          "interpretacion": "Base operativa con potencial de mejora mecánica si el ingreso repunta."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_anual.FY2025",
+          "cita_corta": "SGA ~34.378M con ingresos 69.245M y margen 9.2%.",
+          "interpretacion": "Se observó desalineación entre estructura de costes y caída de ingresos."
+        }
+      ],
+      "falsacion": {
+        "test": "No mejora de margen y persistencia de gastos fijos altos tras recuperación de ingresos, con SGA >42% sobre ingresos durante 2 trimestres.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Publicación de deuda total consolidada (corto y largo) o desglose financiero equivalente en próximo 10-Q/10-K, habilitando EV y valoración por empresa sin supuestos.",
+      "probabilidad_0_1": 0.72,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Campo `deuda_total_usd` no nulo y reconciliable con pasivos totales y arrendamientos relevantes.",
+      "fuente_prevista": "filing"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Recalculo de TTM sin fallback (4 trimestres consecutivos con CFO/CFI/CFF completos y puente de caja consistente).",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Gate TTM_CONSECUTIVE = PASS y `ttm.nota` sin fallback por periodos incompletos.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Margen EBIT trimestral alcanza >=14% de forma sostenida en dos trimestres consecutivos.",
+      "probabilidad_0_1": 0.38,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "EBIT/Revenue > 14% en promedio de dos trimestres consecutivos.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "COGS/Revenue cae por debajo de 16% en al menos dos trimestres consecutivos.",
+      "probabilidad_0_1": 0.33,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Dos trimestres consecutivos con COGS/ingresos <=16%.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "Ingresos trimestrales recuperan tramos >22M con estabilidad y crecimiento YoY positivo (al menos dos trimestres consecutivos).",
+      "probabilidad_0_1": 0.43,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Dos trimestres consecutivos con ingresos >22M y crecimiento YoY >0%.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "FCF anualizado estable >6M o al menos 4 trimestres consecutivos con FCF trimestral >1M y delta_cash no negativo en 3/4 trimestres.",
+      "probabilidad_0_1": 0.47,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Cálculo consistente de flujo libre y caja con delta_cash >=0 en mayoría de trimestres reportados.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_007",
+      "descripcion": "Programa formal de retorno de capital (recompra/dividendo) con parámetros de volumen y calendario explícitos.",
+      "probabilidad_0_1": 0.25,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Anuncio formal (8-K/PR) con monto, calendario y régimen de ejecución.",
+      "fuente_prevista": "PR"
+    },
+    {
+      "pred_id": "PRED_008",
+      "descripcion": "Monetización efectiva de inversión en I+D (nuevo flujo de ingresos identificable) en al menos un segmento >5% del ingreso total.",
+      "probabilidad_0_1": 0.17,
+      "ventana_meses": {
+        "min": 12,
+        "max": 30
+      },
+      "criterio_validacion": "Reporte o comunicación de producto que identifique contribución de nuevo segmento >5% del revenue trimestral.",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "debt_total_usd, desglose de pasivos financieros (corto y largo), y reconciliación con pasivos totales del balance.",
+      "por_que_importa": "Es la variable crítica para desbloquear EV y aplicar valoración por empresa de forma consistente.",
+      "como_obtenerlo": "Filings 10-Q/10-K: nota de pasivos financieros/debt obligations, sección de borrowings y notas de conciliación."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Estados de flujo de caja trimestrales completos para 4 trimestres consecutivos.",
+      "por_que_importa": "Elimina fallback FY0, mejora robustez de FCF/TTM y de escenarios de sensibilidad.",
+      "como_obtenerlo": "10-Q con CFO, CFI, CFF, delta cash y fx effects completos por trimestre."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Acciones diluidas actualizadas",
+      "por_que_importa": "Permite métricas per-share y validación de impactos de recompra/reducción de base.",
+      "como_obtenerlo": "Nota EPS/equity structure en 10-Q o 10-K más reciente."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose operativo de COGS y drivers de costos (mix, proveedor, tipo de ingreso).",
+      "por_que_importa": "La reversión de COGS desde 19% es el principal escollo de margen; sin causa no es visible si es reversible o estructural.",
+      "como_obtenerlo": "Transcripciones de earnings y 10-K 10-Q con nota de coste de ingresos."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de arrendamientos operativos y compromisos por vencimiento.",
+      "por_que_importa": "Aclara costo implícito de financiación operacional y riesgo de liquidez fuera de deuda financiera consolidada.",
+      "como_obtenerlo": "Sección de lease data/obligaciones operativas, notas de deuda y compromisos futuros."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Guidance de management y métricas de miembros/engagement",
+      "por_que_importa": "Aumenta capacidad de discriminar si la caída de ingresos es temporal o estructural.",
+      "como_obtenerlo": "Earnings call transcript y presentaciones de inversionistas."
+    },
+    {
+      "prioridad": "BAJA",
+      "item": "Roadmap de productos e iniciativas de I+D.",
+      "por_que_importa": "Determina si la inversión en I+D puede convertirse en nueva fuente de ingresos escalable.",
+      "como_obtenerlo": "Earnings calls y comunicados de producto."
+    }
+  ],
+  "payload": {
+    "payload_version": "CatalystPayload_v1",
+    "contenido": {
+      "mapeo_con_expectativas_implicitas": {
+        "variable_critica_principal": "COSTE_DEUDA",
+        "lectura_en_1_2_frases": "El bloque central no es de insolvencia inmediata sino de incertidumbre de señalización: sin deuda total explícita y con datos trimestrales no consecutivos, la valoración inversa queda operativamente bloqueada. La clave de catalización es convertir información opaca en métrica ejecutable para EV/flujo y reducir la prima de riesgo informacional."
+      },
+      "catalizadores": [
+        {
+          "catalyst_id": "CAT_01",
+          "nombre": "Publicar deuda total consolidada y habilitar EV consistente",
+          "categoria": "CORPORATIVO",
+          "es_no_binario": true,
+          "probabilidad_0_1": 0.72,
+          "confianza_timing": 0.68,
+          "calidad": "CALIDAD_MEDIA",
+          "ventana_meses": {
+            "min": 3,
+            "probable": 9,
+            "max": 12
+          },
+          "mecanismo_cierre_gap": "Convierte la señal de valoración de especulativa a accionable al permitir EV/FCF y EV/EBIT comparables; reduce la prima de riesgo de opacidad.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Desbloquea métricas institucionales de valuación."
+              },
+              {
+                "driver": "COSTE_DEUDA",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Aclara riesgo de capital implícito."
+              }
+            ],
+            "justificacion": "Es el pre-requisito técnico más directo para recalibrar la tesis de valoración."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1.balance_sheet_ultimo",
+              "url": null,
+              "titulo": null,
+              "fecha": "2024-12-31",
+              "ubicacion": "pasivos totales y deuda_total_usd",
+              "cita_corta": "deuda_total_usd no aparece; pasivos totales reportados en 50,369,000.",
+              "interpretacion": "No existe línea consolidada de deuda financiera operativa para el cálculo de EV."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "ImpliedExpectations_v1.motivo_blocked",
+              "url": null,
+              "titulo": null,
+              "fecha": "2026-02-20",
+              "ubicacion": "status",
+              "cita_corta": "BLOCKED por dependencia de enterprise_value_usd sobre deuda_total_usd.",
+              "interpretacion": "La cadena de expectations ya formaliza el bloqueo."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "`debt_total_usd` no nulo en filing y EV calculable sin nulos.",
+              "fuente_prevista": "filing",
+              "umbral_o_condicion": "campo `debt_total_usd` explícito y reconciliado con pasivos.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Nota de debt/obligaciones financieras en 10-Q/10-K",
+            "Revisión de EV no nulo tras siguiente ciclo",
+            "Evitar ambigüedad entre pasivos financieros y arrendamientos"
+          ],
+          "riesgos_de_ejecucion": [
+            "Revelación de pasivos financieros mayor a lo esperado",
+            "Clasificación inconsistente entre trimestres",
+            "Corrección retroactiva de métricas de balance"
+          ],
+          "contra_catalizadores": [
+            "Persistencia de opacidad de deuda pese a filings",
+            "Nueva deuda adicional sin mejora operativa",
+            "Reclasificaciones no reconciliadas"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Nota de deuda financiera",
+              "cálculo EV post-filing",
+              "pasivo por arrendamientos y obligaciones"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_02",
+          "nombre": "Reconstruir series TTM y puente de flujo con 4 trimestres consecutivos",
+          "categoria": "CORPORATIVO",
+          "es_no_binario": true,
+          "probabilidad_0_1": 0.65,
+          "confianza_timing": 0.62,
+          "calidad": "CALIDAD_MEDIA",
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 12
+          },
+          "mecanismo_cierre_gap": "Elimina dependencia de FY0_fallback y permite validar tendencia de FCF, liquidez y sensibilidad sin ruido de ventanas parciales.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Mayor robustez de señal de caja trimestral."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Permite validación de gap de mercado con base comparable."
+              }
+            ],
+            "justificacion": "Hoy la falta de continuidad limita la modelización de escenarios en 6-12 meses."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "TruthPack_v1.ttm",
+              "url": null,
+              "titulo": null,
+              "fecha": "2026-02-20",
+              "ubicacion": "ttm.nota",
+              "cita_corta": "warning crítica por trimestres no consecutivos (FY0_fallback).",
+              "interpretacion": "La métrica principal de caja no es estable para escenarios de re-rating."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "TTM_CONSECUTIVE = PASS con 4 trimestres consecutivos completos.",
+              "fuente_prevista": "10-Q",
+              "umbral_o_condicion": "4 reportes con CFO, CFI y CFF completos",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Gate TTM_CONSECUTIVE",
+            "puentes de caja sin diferencias significativas",
+            "reportes trimestrales consecutivos"
+          ],
+          "riesgos_de_ejecucion": [
+            "Campos de flujo faltantes en reporting puntual",
+            "Cambios contables entre trimestres",
+            "Eventos extraordinarios que rompan comparabilidad"
+          ],
+          "contra_catalizadores": [
+            "Repetición de trimestres incompletos",
+            "Reclasificación de partidas con cambios de presentación"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "CFO, CFI, CFF trimestrales",
+              "gates de calidad de datos",
+              "delta_cash trimestral"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_03",
+          "nombre": "Reversión de COGS hacia rangos históricamente más eficientes",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "probabilidad_0_1": 0.33,
+          "confianza_timing": 0.45,
+          "calidad": "CALIDAD_MEDIA",
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 18
+          },
+          "mecanismo_cierre_gap": "Una caída de COGS desde 19% hacia 12-16% expande margen bruto y EBIT sin requerir cambios inmediatos de top-line.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Efecto directo y con alto coeficiente sobre EBIT."
+              },
+              {
+                "driver": "EBIT",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Restaura eficiencia bruta sobre base histórica."
+              }
+            ],
+            "justificacion": "El salto de costo unitario es un driver central del deterioro actual; su reversión es condición para normalizar rentabilidad."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_001",
+              "url": null,
+              "titulo": null,
+              "fecha": "2024-12-31",
+              "ubicacion": "historico_anual.FY2024",
+              "cita_corta": "COGS 12.5% de ingresos.",
+              "interpretacion": "Muestra eficiencia base en período pre-caída."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_007",
+              "url": null,
+              "titulo": null,
+              "fecha": "2025-09-30",
+              "ubicacion": "historico_anual.FY2025",
+              "cita_corta": "COGS 19.0% de ingresos en 9M.",
+              "interpretacion": "Confirma deterioro de rentabilidad bruta reciente."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "COGS/revenue <16% durante 2 trimestres consecutivos.",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "dos trimestres consecutivos con ratio COGS/Revenue <=16%",
+              "ventana_meses": {
+                "min": 6,
+                "max": 15
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Ratio COGS/revenue trimestral",
+            "mix de producto y pricing",
+            "comentarios de gestión sobre costo de ingresos"
+          ],
+          "riesgos_de_ejecucion": [
+            "Composición de ingresos más baja en margen",
+            "Presión de proveedores o condiciones macro",
+            "Estructura de descuentos agresivos"
+          ],
+          "contra_catalizadores": [
+            "Compresión competitiva del pricing",
+            "inflación persistente de costos transaccionales"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "COGS y gross profit trimestral",
+              "comentarios de earnings sobre mix"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_04",
+          "nombre": "Recuperar ingresos recurrentes con trimestres >20-22M y mejora de QoQ/YoY",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "probabilidad_0_1": 0.4,
+          "confianza_timing": 0.48,
+          "calidad": "CALIDAD_MEDIA",
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 24
+          },
+          "mecanismo_cierre_gap": "La escala de ingresos activa apalancamiento operativo sobre una base fija de gastos y mejora de forma multiplicadora FCF/EBIT si no crecen desproporcionadamente gastos.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "EBIT",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Cada recuperación de ingresos mejora marginación y caja incremental."
+              },
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Efecto apalancamiento con SGA estable."
+              }
+            ],
+            "justificacion": "Q1-2025 y Q4-2025 muestran tramos altos, lo que indica capacidad de topar los umbrales."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_009",
+              "url": null,
+              "titulo": null,
+              "fecha": "2025-03-31",
+              "ubicacion": "historico_trimestral.Q1-2025",
+              "cita_corta": "Q1-2025 con 23.14M.",
+              "interpretacion": "Existe capacidad de recaudar cerca de la zona objetivo de corto plazo."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_019",
+              "url": null,
+              "titulo": null,
+              "fecha": "2025-12-31",
+              "ubicacion": "historico_trimestral.Q4-2025",
+              "cita_corta": "Q4-2025 alrededor de 22.47M.",
+              "interpretacion": "Se observa estabilidad cercana sin secuencia robusta."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Dos trimestres consecutivos >22M con YoY positivo, y posteriormente trampa de secuencia positiva en 4 trimestres.",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "mínimo 2 trimestres >22M + tendencia positiva.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Revenue trimestral y YoY",
+            "margen bruto/operativo secuencial",
+            "tendencias de segmentación de producto"
+          ],
+          "riesgos_de_ejecucion": [
+            "Entorno macro adverso al gasto en viajes",
+            "Competencia con presión de descuentos",
+            "Dependencia de factores estacionales"
+          ],
+          "contra_catalizadores": [
+            "Recaída de demanda regional",
+            "Pérdida de membresía/retención",
+            "Cambios permanentes de mix"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "revenue absoluto y YoY",
+              "margen por trimestre",
+              "indicadores de retención"
+            ]
+          }
+        },
+        {
+          "catalyst_id": "CAT_05",
+          "nombre": "Consolidar caja operativa (FCF positivo sostenido con menor drenaje de CFF)",
+          "categoria": "FINANCIERO",
+          "es_no_binario": true,
+          "probabilidad_0_1": 0.47,
+          "confianza_timing": 0.5,
+          "calidad": "CALIDAD_MEDIA",
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 18
+          },
+          "mecanismo_cierre_gap": "Reducir consumo de caja por financiación/distribución para confirmar que la generación operativa sostiene resultados sin depender de entradas extraordinarias.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Mayores trimestres con FCF positivo y caja estable."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Mayor credibilidad de caja en múltiples de valuación."
+              }
+            ],
+            "justificacion": "El cashflow operativo no se contradice, pero el delta de caja requiere validación en 4 trimestres consecutivos."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_007",
+              "url": null,
+              "titulo": null,
+              "fecha": "2025-09-30",
+              "ubicacion": "historico_anual.FY2025",
+              "cita_corta": "CFO 4.209M, CFF -13.068M, FCF 4.160M.",
+              "interpretacion": "FCF positivo aislado no compensa totalmente caja por salidas de financiación."
+            },
+            {
+              "tipo": "SOURCEPACK",
+              "source_id": "SRC_021",
+              "url": null,
+              "titulo": null,
+              "fecha": "2025-06-30",
+              "ubicacion": "historico_trimestral.Q2-2025",
+              "cita_corta": "delta cash trimestral negativo.",
+              "interpretacion": "La dinámica de caja exige confirmación temporal."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "3 de 4 trimestres con delta cash >=0 y FCF positivo sostenido.",
+              "fuente_prevista": "10-Q",
+              "umbral_o_condicion": "FCF >1M trimestral y delta cash no decreciente.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              }
+            }
+          ],
+          "leading_indicators": [
+            "FCF trimestral",
+            "delta_cash por trimestre",
+            "CFF por subcomponente"
+          ],
+          "riesgos_de_ejecucion": [
+            "Caída del CFO por estacionalidad",
+            "Mayor carga de pagos de financiación",
+            "Reclasificaciones extraordinarias de caja"
+          ],
+          "contra_catalizadores": [
+            "Recompras intensivas sin soporte de caja",
+            "Pérdida de eficiencia en conversión ventas-cobranza",
+            "Eventos de liquidez no recurrentes"
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "CFO/FCF/cff",
+              "delta_cash",
+              "working capital trimestral"
+            ]
+          }
+        }
+      ],
+      "conclusion_catalizadores": {
+        "calidad_catalizador": "MEDIA",
+        "por_que": "El catalizador más decisivo es de calidad estructural (transparencia de deuda y continuidad de series). Es imprescindible para convertir el análisis de valuación en accionable. Catalizadores operativos existen (COGS y volumen), pero su ejecución depende de recuperación de demanda y de disciplina de coste, por lo que su materialización es moderada en probabilidad y media en precisión temporal.",
+        "si_no_hay_catalizador_apto": false
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "ImpliedExpectations permanece bloqueada por falta de datos de deuda total.",
+      "TTM y gates de validación dependen de series trimestrales no consecutivas actuales.",
+      "No se observa señal pública de acciones fully diluted actualizadas en el pack.",
+      "No hay evidencia suficiente del driver causal de la subida de COGS (mix/costos/renegociación).",
+      "Alta volatilidad trimestral de ingreso en 2025 dificulta inferir tendencia de crecimiento estable.",
+      "Posible desalineación temporal en fuentes de arrendamientos históricas al requerir actualización de FYs."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    },
+    "fusion": {
+      "step_name": "CATALYST_SCORING",
+      "modelos_usados": [
+        "codex_spark",
+        "gemini",
+        "claude"
+      ],
+      "criterios_resolucion": [
+        "Alineación de campos del esquema AgentReport_v1 sin alterar llaves obligatorias.",
+        "Para cuantitativos, se usó coincidencia de fuente y recuento de evidencias; cuando hay divergencia, se priorizó el valor más consistente con más cobertura y trazabilidad.",
+        "Para claims y texto, se consolidaron perspectivas complementarias evitando duplicados semánticos.",
+        "Para probabilidades y confianza se reporta valor recomendado con rango min/max implícito en _meta.fusion.conflictos.",
+        "Se preservaron explícitamente todas las advertencias y warnings de modelos (status BLOCKED, TTM fallback, data incompleta)."
+      ],
+      "conflictos": [
+        {
+          "campo": "veredicto_confianza",
+          "valores_por_modelo": {
+            "codex_spark": 0.57,
+            "gemini": 0.6,
+            "claude": 0.42
+          },
+          "resolucion": "Seleccionado 0.53 como valor recomendado por promedio truncado y convergencia en veredicto WATCHLIST."
+        },
+        {
+          "campo": "probabilidad_prediccion_deuda_total",
+          "valores_por_modelo": {
+            "codex_spark": 0.72,
+            "gemini": 0.9,
+            "claude": 0.55
+          },
+          "resolucion": "Rango [0.55, 0.9] reportado, recomendado 0.72 por equilibrio entre optimismo y conservadurismo."
+        },
+        {
+          "campo": "variable_critica_principal_payload",
+          "valores_por_modelo": {
+            "codex_spark": "COSTE_DEUDA",
+            "gemini": "OTRO",
+            "claude": "OTRO"
+          },
+          "resolucion": "Adoptado COSTE_DEUDA porque coincide con la fuente técnica del bloqueo de EV y concentra el cuello de botella de pricing de mercado."
+        },
+        {
+          "campo": "composición_payload_catalizadores",
+          "valores_por_modelo": {
+            "codex_spark": "enfoque amplio (12+ catalizadores)",
+            "gemini": "enfoque moderado",
+            "claude": "enfoque amplio con palancas operativas"
+          },
+          "resolucion": "Se mantiene set ampliado pero depurado a 6 catalizadores para evitar ruido; se conservan los de mayor sustancia (transparencia, TTM, COGS, ingreso, caja)."
+        }
+      ],
+      "probabilidad_rangos": {
+        "resumen_ejecutivo_confianza": [
+          0.42,
+          0.6
+        ],
+        "predicciones": [
+          {
+            "pred_id": "PRED_001",
+            "rango_0_1": [
+              0.55,
+              0.9
+            ],
+            "recomendado": 0.72
+          },
+          {
+            "pred_id": "PRED_002",
+            "rango_0_1": [
+              0.6,
+              0.85
+            ],
+            "recomendado": 0.65
+          },
+          {
+            "pred_id": "PRED_003",
+            "rango_0_1": [
+              0.3,
+              0.5
+            ],
+            "recomendado": 0.38
+          },
+          {
+            "pred_id": "PRED_004",
+            "rango_0_1": [
+              0.31,
+              0.35
+            ],
+            "recomendado": 0.33
+          }
+        ]
+      }
+    }
+  },
+  "_meta": {
+    "agente": "CATALYST_FUSION_v1",
+    "version": "1.1-fused",
+    "timestamp": "2026-02-20T10:15:00+00:00",
+    "inputs_hash": "sha256:6a3d2f4dcbf6f8e8a1f3b2d3c4e5f6a7d8c9b0e1f2a3d4c5e6f7a8b9c0d1e2f3"
+  }
+}

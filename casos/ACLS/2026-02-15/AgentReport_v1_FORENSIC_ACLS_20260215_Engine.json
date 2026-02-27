@@ -1,0 +1,923 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260215_ACLS",
+  "fecha_corte": "2026-02-15",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "gpt-5-codex",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260215_ACLS",
+    "implied_expectations_caso_id": "CASE_20260215_ACLS",
+    "sources_pack_caso_id": "CASE_20260215_ACLS"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Liquidez robusta: caja e inversiones ~USD 593M y deuda financiera reportada en USD 0.",
+      "Riesgo principal: deterioro de demanda con book-to-bill <1 y backlog en descenso hasta USD 484M.",
+      "La concentracion de ventas en China mantiene riesgo regulatorio y de volatilidad comercial.",
+      "Márgenes y beneficio neto se han comprimido en 2025, aunque el FCF sigue positivo.",
+      "Veredicto APTO con disciplina estricta de kill criteria y tamaño maximo acotado."
+    ],
+    "veredicto_role_local": "APTO",
+    "veredicto": "APTO",
+    "confianza_0_1": 0.74
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La supervivencia a 12-24 meses esta respaldada por caja alta y deuda financiera nula reportada.",
+      "confianza_0_1": 0.86,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "Q3-2025 metrics",
+          "cita_corta": "cash_cash_equivalents_marketable_securities_usd = 593000000.",
+          "interpretacion": "Existe un colchon de liquidez material."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_051",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-03-31",
+          "ubicacion": "Q1-2025 reported metrics",
+          "cita_corta": "debt_total_fin_periodo = 0.",
+          "interpretacion": "No hay presion inmediata por refinanciacion."
+        }
+      ],
+      "falsacion": {
+        "test": "Caja+inversiones cae por debajo de USD 300M o deuda total supera USD 200M.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El riesgo forense dominante es comercial: bookings y backlog no sostienen el nivel de ingresos actual.",
+      "confianza_0_1": 0.84,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "Q3-2025 metrics",
+          "cita_corta": "bookings_usd = 52000000; backlog_usd = 484000000.",
+          "interpretacion": "La reposicion de cartera es debil frente al run-rate de ventas."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_007",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "9M-2025 vs 9M-2024",
+          "cita_corta": "ingresos_totales 600718000 vs 765448000.",
+          "interpretacion": "La caida interanual de ingresos ya se materializa."
+        }
+      ],
+      "falsacion": {
+        "test": "Book-to-bill >=1.0 y backlog crece secuencialmente durante dos trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La concentracion geografica en China mantiene un riesgo exogeno material para ingresos y visibilidad.",
+      "confianza_0_1": 0.78,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_050",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "Q2-2025 mix geográfico",
+          "cita_corta": "total_revenue_mix_china_pct = 55.",
+          "interpretacion": "Una sola geografia explica una parte muy elevada de ventas."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "Q3-2025 mix geográfico",
+          "cita_corta": "china_sales_pct = 46.",
+          "interpretacion": "La dependencia sigue alta pese a moderacion trimestral."
+        }
+      ],
+      "falsacion": {
+        "test": "La mezcla de ingresos de China baja y se mantiene por debajo de 35% durante dos trimestres.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La compresion de margen sugiere apalancamiento operativo negativo en un ciclo de menor demanda.",
+      "confianza_0_1": 0.76,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_050",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "Q2-2025 métricas",
+          "cita_corta": "non_gaap_gross_margin_pct = 45.2; gaap_operating_margin_pct = 14.9.",
+          "interpretacion": "Nivel de rentabilidad aun alto pero con sensibilidad al volumen."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "Q3-2025 métricas",
+          "cita_corta": "non_gaap_gross_margin_pct = 41.8; gaap_operating_margin_pct = 11.7.",
+          "interpretacion": "La tendencia reciente confirma presion de margen."
+        }
+      ],
+      "falsacion": {
+        "test": "Margen bruto non-GAAP >=43% y margen operativo GAAP >=15% en dos trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HIPOTESIS",
+      "criticidad": "CONTEXTUAL",
+      "enunciado": "El ritmo de recompra puede tensionar flexibilidad si la desaceleracion se prolonga.",
+      "confianza_0_1": 0.67,
+      "impacto": "BAJO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_050",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "Q2-2025 cash deployment",
+          "cita_corta": "share_repurchases_usd = 45000000; free_cash_flow_usd = 38000000.",
+          "interpretacion": "La devolucion de capital supero el FCF del trimestre."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_049",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "Q3-2025 cash deployment",
+          "cita_corta": "share_repurchases_usd = 32000000; free_cash_flow_usd = 43000000.",
+          "interpretacion": "La situacion mejora, pero exige disciplina si cae la demanda."
+        }
+      ],
+      "falsacion": {
+        "test": "Recompras acumuladas <=50% del FCF TTM y caja+inversiones >=USD 550M.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Al menos 2 de los proximos 3 trimestres reportan bookings < USD 90M.",
+      "probabilidad_0_1": 0.62,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Comparar bookings trimestrales reportados en earnings contra umbral de USD 90M.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Backlog cae por debajo de USD 400M en algun trimestre de 2026.",
+      "probabilidad_0_1": 0.48,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Backlog trimestral reportado < USD 400M.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Margen bruto non-GAAP <=41% en al menos un trimestre de 2026.",
+      "probabilidad_0_1": 0.57,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "non_gaap_gross_margin_pct trimestral <= 41.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "La mezcla de ingresos de China vuelve a superar 50% en al menos dos trimestres de 2026.",
+      "probabilidad_0_1": 0.54,
+      "ventana_meses": {
+        "min": 3,
+        "max": 15
+      },
+      "criterio_validacion": "china_sales_pct o total_revenue_mix_china_pct > 50 en dos publicaciones trimestrales.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "FCF trimestral baja de USD 20M en al menos un trimestre de 2026.",
+      "probabilidad_0_1": 0.46,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "free_cash_flow_usd trimestral < 20000000.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "Margen operativo GAAP cae a <=10% en un trimestre de 2026.",
+      "probabilidad_0_1": 0.38,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "gaap_operating_margin_pct trimestral <= 10.",
+      "fuente_prevista": "earnings"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla detallada de vencimientos contractuales y compromisos fuera de balance (12-36 meses).",
+      "por_que_importa": "Reduce incertidumbre sobre riesgos de caja no visibles en el TruthPack parcial.",
+      "como_obtenerlo": "10-K FY2025, notas de deuda/arrendamientos/compromisos contractuales.",
+      "tipo_fuente": "10-K",
+      "costo_disponibilidad": "Bajo, publico SEC."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de covenants, revolver disponible y triggers de liquidez.",
+      "por_que_importa": "Permite cuantificar riesgo de breach y riesgo de refinanciacion contingente.",
+      "como_obtenerlo": "10-Q/10-K, nota de financiamiento y seccion Liquidity and Capital Resources.",
+      "tipo_fuente": "10-Q/10-K",
+      "costo_disponibilidad": "Bajo-medio, publico SEC."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Bridge trimestral EBITDA->CFO y CFO->FCF con desglose de capital circulante y capex.",
+      "por_que_importa": "Aclara sostenibilidad del FCF en ciclo bajista.",
+      "como_obtenerlo": "10-Q, estado de flujos y MD&A con variaciones de working capital.",
+      "tipo_fuente": "10-Q",
+      "costo_disponibilidad": "Bajo, publico SEC."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Aging de cuentas por cobrar y politica de provisiones por incobrables por region/cliente.",
+      "por_que_importa": "Evalua riesgo de conversion de ventas a caja y calidad de ingresos.",
+      "como_obtenerlo": "10-Q, nota de cuentas por cobrar y riesgo crediticio.",
+      "tipo_fuente": "10-Q",
+      "costo_disponibilidad": "Medio, puede requerir detalle suplementario IR."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de SBC, grants, vesting y impacto de recompra neta sobre dilution.",
+      "por_que_importa": "Mejora lectura de riesgo de dilucion y calidad del retorno al accionista.",
+      "como_obtenerlo": "10-K, nota de stock-based compensation y tabla de acciones diluidas.",
+      "tipo_fuente": "10-K",
+      "costo_disponibilidad": "Bajo, publico SEC."
+    }
+  ],
+  "kill_criteria_formalizados": [
+    {
+      "kc_id": "KC-001",
+      "descripcion": "Caja e inversiones < USD 300M y FCF negativo durante 2 trimestres consecutivos.",
+      "probabilidad_0_1": 0.22,
+      "ventana_temporal": {
+        "inicio": "2026-03-01",
+        "fin_esperado": "2027-12-31"
+      },
+      "criterio_chequeo": "cash_cash_equivalents_marketable_securities_usd < 300000000 y free_cash_flow_usd < 0 en dos trimestres seguidos.",
+      "accion_si_activado": "SALIR"
+    },
+    {
+      "kc_id": "KC-002",
+      "descripcion": "Book-to-bill < 0.7 y backlog < USD 400M durante 2 trimestres consecutivos.",
+      "probabilidad_0_1": 0.48,
+      "ventana_temporal": {
+        "inicio": "2026-03-01",
+        "fin_esperado": "2027-12-31"
+      },
+      "criterio_chequeo": "book_to_bill_x < 0.7 y backlog_usd < 400000000 en dos publicaciones trimestrales consecutivas.",
+      "accion_si_activado": "REDUCIR_50"
+    },
+    {
+      "kc_id": "KC-003",
+      "descripcion": "China >60% de ventas y caida interanual de ingresos de sistemas >30% en el mismo trimestre.",
+      "probabilidad_0_1": 0.35,
+      "ventana_temporal": {
+        "inicio": "2026-03-01",
+        "fin_esperado": "2027-12-31"
+      },
+      "criterio_chequeo": "china_sales_pct > 60 y systems_revenue_usd YoY <= -30%.",
+      "accion_si_activado": "REVISAR_COMITE"
+    },
+    {
+      "kc_id": "KC-004",
+      "descripcion": "Margen bruto non-GAAP <40% durante 2 trimestres consecutivos.",
+      "probabilidad_0_1": 0.33,
+      "ventana_temporal": {
+        "inicio": "2026-03-01",
+        "fin_esperado": "2027-12-31"
+      },
+      "criterio_chequeo": "non_gaap_gross_margin_pct < 40 en dos trimestres consecutivos.",
+      "accion_si_activado": "REDUCIR_50"
+    },
+    {
+      "kc_id": "KC-005",
+      "descripcion": "Recompras 2T acumuladas > FCF 2T acumulado con backlog cayendo >20% interanual.",
+      "probabilidad_0_1": 0.29,
+      "ventana_temporal": {
+        "inicio": "2026-03-01",
+        "fin_esperado": "2027-12-31"
+      },
+      "criterio_chequeo": "share_repurchases_usd(2T) > free_cash_flow_usd(2T) y backlog_yoy_pct <= -20.",
+      "accion_si_activado": "CONGELAR_COMPRAS"
+    }
+  ],
+  "supervivencia_resultado": "PASS",
+  "survival_score_0_5": 4,
+  "max_position_size": {
+    "tipo": "pct_cartera",
+    "valor_pct": 4.0,
+    "justificacion": "La liquidez neta y deuda cero soportan supervivencia, pero el deterioro de bookings/backlog y la concentracion geografica elevan volatilidad. Se limita tamaño para preservar opcionalidad ante un ciclo bajista prolongado."
+  },
+  "forensic_scoring_output": [
+    {
+      "red_flag_id": "F-001",
+      "severidad": "MEDIO",
+      "kill_criteria_formalizados": [
+        "KC-002"
+      ],
+      "supervivencia_resultado": "PASS",
+      "survival_score_0_5": 4,
+      "max_position_size": {
+        "tipo": "pct_cartera",
+        "valor_pct": 4.0
+      },
+      "predicciones_calibracion": [
+        "PRED_001",
+        "PRED_002"
+      ],
+      "resumen_ejecutivo": {
+        "veredicto": "APTO",
+        "confianza_0_1": 0.74
+      },
+      "_meta": {
+        "agente": "FORENSIC_SCORING_v1",
+        "version": "1.0.0",
+        "timestamp": "2026-02-15T18:39:59Z",
+        "inputs_hash": "sha256:bcdd550255f74e1b1c23b5e88c1d43cfefa72cce403345710709b4f6439de06c"
+      }
+    },
+    {
+      "red_flag_id": "F-002",
+      "severidad": "MEDIO",
+      "kill_criteria_formalizados": [
+        "KC-003"
+      ],
+      "supervivencia_resultado": "PASS",
+      "survival_score_0_5": 4,
+      "max_position_size": {
+        "tipo": "pct_cartera",
+        "valor_pct": 4.0
+      },
+      "predicciones_calibracion": [
+        "PRED_004"
+      ],
+      "resumen_ejecutivo": {
+        "veredicto": "APTO",
+        "confianza_0_1": 0.74
+      },
+      "_meta": {
+        "agente": "FORENSIC_SCORING_v1",
+        "version": "1.0.0",
+        "timestamp": "2026-02-15T18:39:59Z",
+        "inputs_hash": "sha256:bcdd550255f74e1b1c23b5e88c1d43cfefa72cce403345710709b4f6439de06c"
+      }
+    },
+    {
+      "red_flag_id": "F-003",
+      "severidad": "MEDIO",
+      "kill_criteria_formalizados": [
+        "KC-004"
+      ],
+      "supervivencia_resultado": "PASS",
+      "survival_score_0_5": 4,
+      "max_position_size": {
+        "tipo": "pct_cartera",
+        "valor_pct": 4.0
+      },
+      "predicciones_calibracion": [
+        "PRED_003",
+        "PRED_006"
+      ],
+      "resumen_ejecutivo": {
+        "veredicto": "APTO",
+        "confianza_0_1": 0.74
+      },
+      "_meta": {
+        "agente": "FORENSIC_SCORING_v1",
+        "version": "1.0.0",
+        "timestamp": "2026-02-15T18:39:59Z",
+        "inputs_hash": "sha256:bcdd550255f74e1b1c23b5e88c1d43cfefa72cce403345710709b4f6439de06c"
+      }
+    },
+    {
+      "red_flag_id": "F-004",
+      "severidad": "BAJO",
+      "kill_criteria_formalizados": [
+        "KC-005"
+      ],
+      "supervivencia_resultado": "PASS",
+      "survival_score_0_5": 4,
+      "max_position_size": {
+        "tipo": "pct_cartera",
+        "valor_pct": 4.0
+      },
+      "predicciones_calibracion": [
+        "PRED_005"
+      ],
+      "resumen_ejecutivo": {
+        "veredicto": "APTO",
+        "confianza_0_1": 0.74
+      },
+      "_meta": {
+        "agente": "FORENSIC_SCORING_v1",
+        "version": "1.0.0",
+        "timestamp": "2026-02-15T18:39:59Z",
+        "inputs_hash": "sha256:bcdd550255f74e1b1c23b5e88c1d43cfefa72cce403345710709b4f6439de06c"
+      }
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilucion/estres de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "APTO",
+        "confianza_0_1": 0.74,
+        "razon_principal": "La liquidez neta y deuda cero sostienen supervivencia, pero el deterioro comercial (bookings/backlog) y la concentracion geografica exigen posicion acotada y monitoreo estricto."
+      },
+      "resumen_ejecutivo_extendido": [
+        "ACLS llega a 2026 con una posicion financiera defensiva: caja e inversiones cercanas a USD 593M y deuda financiera reportada en USD 0. Esto reduce claramente el riesgo de liquidacion en 12-24 meses.",
+        "El riesgo forense principal no es de solvencia inmediata sino de trayectoria operativa: bookings y backlog se debilitan, con book-to-bill por debajo de 1 y compresion de margenes durante 2025. La exposicion a China mantiene sensibilidad a shocks regulatorios.",
+        "El resultado de supervivencia es PASS con survival_score 4/5. Se recomienda tamaño maximo de 4% de cartera y reglas de salida/reduccion cuantificadas para responder rapido a deterioro adicional."
+      ],
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 4,
+          "por_que": [
+            "Caja+inversiones reportadas de USD 593M en Q3-2025.",
+            "Deuda financiera reportada en USD 0.",
+            "FCF 9M-2025 positivo (USD 116M).",
+            "Book-to-bill <1 y backlog en descenso, presionando visibilidad 2026.",
+            "Compresion de margenes operativos y de margen bruto en 2025.",
+            "Riesgo exogeno por concentracion geográfica en China."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 593000000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "caja y valores negociables",
+            "flujo de caja libre positivo",
+            "flexibilidad de pausar recompra"
+          ],
+          "runway_meses_estimado": null,
+          "metodo_estimacion": "No se estima runway por burn porque la compania reporta FCF positivo en 2025.",
+          "notas": "Sin detalle suficiente de revolver/covenants para estres de liquidez contractual."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 0,
+          "deuda_neta_usd": -593000000,
+          "coste_deuda_aprox_pct": null,
+          "coverage_intereses": null,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "Con deuda financiera reportada en cero, no se observa muralla de vencimientos por deuda corporativa."
+          },
+          "vencimientos": [
+            {
+              "anio": 2026,
+              "importe_usd": 0,
+              "tipo": "unknown",
+              "riesgo": "BAJO",
+              "fuente_ref": {
+                "source_id": "SRC_051",
+                "ubicacion": "Q1-2025 debt_total_fin_periodo"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [
+              "other"
+            ],
+            "riesgo_breach": "UNKNOWN",
+            "comentario": "No hay detalle suficiente de covenants ni de lineas comprometidas en el paquete actual."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "BAJO",
+          "motores": [
+            "SBC",
+            "recompras netas",
+            "sin necesidad aparente de capital por burn"
+          ],
+          "share_count_yoy_pct": -3.7,
+          "comentario": "El conteo diluido promedio cae interanual por recompras; el riesgo dominante no es dilucion sino disciplina de asignacion de capital en ciclo bajista."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "No se detecta una señal contable de supervivencia inminente, pero si riesgos de calidad de resultados por mezcla geografica, compresion de margenes y ajustes no recurrentes. La conversion a caja sigue positiva. La principal alerta forense es comercial-operativa, no de fraude contable.",
+        "red_flags": [
+          {
+            "flag_id": "F-001",
+            "categoria": "OTHER",
+            "descripcion": "Deterioro de demanda observable en bookings y backlog frente al nivel de ingresos.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.72,
+            "por_que_importa": "Riesgo de caida de ingresos y menor absorcion de costos fijos en 12-24 meses.",
+            "evidencias": [
+              {
+                "source_id": "SRC_049",
+                "ubicacion": "Q3-2025 metrics",
+                "cita_corta": "bookings_usd = 52000000; backlog_usd = 484000000.",
+                "interpretacion": "La cartera no repone ventas al ritmo de ejecucion."
+              },
+              {
+                "source_id": "SRC_051",
+                "ubicacion": "Q1-2025 metrics",
+                "cita_corta": "book_to_bill = 0.8; backlog_fin_periodo = 618000000.",
+                "interpretacion": "La señal de debilidad no es puntual de un trimestre."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Book-to-bill >=1 y backlog estable/creciente por dos trimestres consecutivos.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-002",
+            "categoria": "OTHER",
+            "descripcion": "Concentracion de ingresos en China mantiene elevada sensibilidad a riesgo regulatorio/comercial.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.63,
+            "por_que_importa": "Un shock exogeno puede amplificar la caida de ingresos y backlog.",
+            "evidencias": [
+              {
+                "source_id": "SRC_050",
+                "ubicacion": "Q2-2025 geographic mix",
+                "cita_corta": "total_revenue_mix_china_pct = 55.",
+                "interpretacion": "Dependencia geografica alta."
+              },
+              {
+                "source_id": "SRC_049",
+                "ubicacion": "Q3-2025 geographic mix",
+                "cita_corta": "china_sales_pct = 46.",
+                "interpretacion": "Aun con mejora trimestral, la exposicion sigue material."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Mezcla de China <35% y sin deterioro de margen por dos trimestres.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-003",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Compresion de margen bruto y operativo en 2025 indica menor poder de absorcion.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.59,
+            "por_que_importa": "Presiona beneficio y capacidad de autofinanciacion si se prolonga.",
+            "evidencias": [
+              {
+                "source_id": "SRC_050",
+                "ubicacion": "Q2-2025",
+                "cita_corta": "non_gaap_gross_margin_pct = 45.2; gaap_operating_margin_pct = 14.9.",
+                "interpretacion": "Base comparativa previa mas alta."
+              },
+              {
+                "source_id": "SRC_049",
+                "ubicacion": "Q3-2025",
+                "cita_corta": "non_gaap_gross_margin_pct = 41.8; gaap_operating_margin_pct = 11.7.",
+                "interpretacion": "La presion de margen se acelero."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Recuperacion a margen bruto non-GAAP >=43% y margen operativo GAAP >=15% en dos trimestres.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "earnings"
+            }
+          },
+          {
+            "flag_id": "F-004",
+            "categoria": "ONE_OFFS",
+            "descripcion": "Uso de ajustes y recompra elevada durante desaceleracion puede distorsionar lectura de calidad de beneficios.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.44,
+            "por_que_importa": "Puede erosionar prudencia financiera si el ciclo empeora.",
+            "evidencias": [
+              {
+                "source_id": "SRC_053",
+                "ubicacion": "Q3-2024",
+                "cita_corta": "cargo_incobrable_unico_usd = 3400000.",
+                "interpretacion": "Existen impactos no recurrentes en comparabilidad."
+              },
+              {
+                "source_id": "SRC_050",
+                "ubicacion": "Q2-2025 capital allocation",
+                "cita_corta": "share_repurchases_usd = 45000000; free_cash_flow_usd = 38000000.",
+                "interpretacion": "El ritmo de recompra exige control cuando cae la demanda."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Ajustes no recurrentes <1% de ventas y recompras <=50% del FCF TTM.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "El FCF sigue positivo pese a la caida de resultados, lo que sugiere soporte operativo y/o circulante. Sin puente detallado de CFO, no se puede separar sostenibilidad estructural de efectos temporales de capital circulante.",
+            "posibles_distorsiones": [
+              "capital circulante",
+              "one-offs",
+              "impuestos",
+              "otros"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "La conversion a FCF es positiva en 2025, pero falta desglose de capex de mantenimiento vs crecimiento para estimar piso de caja en un ciclo bajista.",
+            "capex_riesgo": "UNKNOWN",
+            "notas": "Solicitar detalle de capex por naturaleza en 10-Q/10-K."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": true,
+          "sostenible_por_fcf": "UNKNOWN",
+          "comentario": "Con caja alta son factibles en el corto plazo, pero su sostenibilidad depende de la recuperacion de bookings/backlog."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "Falta detalle granular de SBC en el paquete actual para cuantificar dilucion economica neta."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "MEDIO",
+          "comentario": "En un ciclo de menor visibilidad, la prioridad deberia ser liquidez y disciplina de retorno."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Solicitar propiedad insider y cambios de participacion en peticiones_de_fuentes."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Book-to-bill se mantiene <0.8 y backlog cae bajo USD 400M, forzando nueva caida de ingresos.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "caida de CFO",
+              "subida de working capital",
+              "otros"
+            ],
+            "indicadores_tempranos": [
+              "book_to_bill_x < 0.8",
+              "backlog_usd < 500M",
+              "ingresos sistemas YoY negativos"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Shock regulatorio/comercial en China reduce entregas y aumenta volatilidad de pedidos.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "caida de CFO",
+              "otros"
+            ],
+            "indicadores_tempranos": [
+              "china_sales_pct > 50%",
+              "cancelaciones o aplazamientos de clientes",
+              "debilidad de bookings en trimestres consecutivos"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "Márgenes caen por debajo del umbral de rentabilidad objetivo mientras continúa recompra agresiva.",
+            "impacto_en_supervivencia": "BAJO",
+            "mecanismo_de_dolor": [
+              "caida de CFO",
+              "otros"
+            ],
+            "indicadores_tempranos": [
+              "non_gaap_gross_margin_pct < 41%",
+              "gaap_operating_margin_pct <= 10%",
+              "recompras > FCF trimestral"
+            ]
+          }
+        ],
+        "conclusion_downside": "El downside base es de compresion de valor y no de insolvencia inmediata por la caja neta actual. El riesgo cambia de categoria si coinciden deterioro de backlog, margen y liquidez. Por eso los kill criteria se definen en umbrales trimestrales observables."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja e inversiones < USD 300M y FCF negativo por 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Implica deterioro rapido de colchon de supervivencia."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "fcf",
+          "definicion": "Book-to-bill <0.7 con backlog <USD 400M durante 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "La visibilidad de ingresos queda comprometida."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "otro",
+          "definicion": "China >60% de ventas y caida YoY de sistemas >30% en el mismo trimestre.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Se eleva riesgo exogeno no diversificado."
+        },
+        {
+          "kc_id": "KC-004",
+          "relacionado_con": "margen",
+          "definicion": "Margen bruto non-GAAP <40% durante 2 trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Se debilita la capacidad de generar caja en ciclo bajo."
+        },
+        {
+          "kc_id": "KC-005",
+          "relacionado_con": "dilucion",
+          "definicion": "Recompras acumuladas 2T > FCF acumulado 2T con backlog cayendo >20% interanual.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Prioriza preservacion de caja frente a deterioro operativo."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 4.0,
+        "condiciones_para_aumentar_tamaño": [
+          "Book-to-bill >= 1.0 durante dos trimestres consecutivos.",
+          "Backlog estabilizado por encima de USD 550M.",
+          "Margen bruto non-GAAP >= 43% y margen operativo GAAP >= 15%.",
+          "Mezcla de ingresos de China por debajo de 40% con tendencia descendente."
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Activacion de KC-001 (criterio de liquidez).",
+          "Activacion de KC-002 o KC-004 (demanda/margen).",
+          "Deterioro simultaneo de backlog y FCF en dos trimestres seguidos.",
+          "Shock regulatorio que eleve riesgo de concentracion sin compensacion de demanda en otras regiones."
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "tabla_vencimientos",
+          "por_que_importa": "Permite validar obligaciones de caja futuras y riesgo de cliff financiero.",
+          "como_obtenerlo": "10-K FY2025, notas de deuda/arrendamientos/compromisos."
+        },
+        {
+          "item": "covenants",
+          "por_que_importa": "Cuantifica riesgo de restriccion financiera y eventos de incumplimiento.",
+          "como_obtenerlo": "10-Q/10-K, nota de financiamiento y covenants."
+        },
+        {
+          "item": "detalle_capex",
+          "por_que_importa": "Separa capex de mantenimiento vs crecimiento para estresar FCF.",
+          "como_obtenerlo": "10-Q, estado de flujos y MD&A."
+        },
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Ajusta lectura de rentabilidad y riesgo de dilucion economica.",
+          "como_obtenerlo": "10-K, nota de stock-based compensation."
+        },
+        {
+          "item": "revolver_disponible",
+          "por_que_importa": "Define liquidez contingente ante shock de demanda.",
+          "como_obtenerlo": "10-Q/10-K, Liquidity and Capital Resources."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "El TruthPack tiene datos de balance detallado y metricas derivadas clave en null.",
+      "ImpliedExpectations esta bloqueado por ausencia de EV/market_cap.",
+      "No hay detalle suficiente de covenants ni revolver disponible.",
+      "Parte de los datos proviene de transcripciones y guidance con cifras aproximadas.",
+      "No hay puente completo de CFO y CAPEX para stress test de FCF estructural."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-15T18:39:59Z",
+    "inputs_hash": "sha256:bcdd550255f74e1b1c23b5e88c1d43cfefa72cce403345710709b4f6439de06c"
+  }
+}

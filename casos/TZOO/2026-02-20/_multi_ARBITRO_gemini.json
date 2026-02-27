@@ -1,0 +1,581 @@
+{
+  "version_esquema": "DecisionPacket_v2",
+  "backward_compatible_with": "DecisionPacket_v1",
+  "caso_id": "CASE_20260220_TZOO",
+  "fecha_corte": "2026-02-20",
+  "empresa": {
+    "ticker": "TZOO",
+    "nombre": "Travelzoo",
+    "bolsa": "NASDAQ",
+    "pais": "US",
+    "sector": "Consumer Cyclical",
+    "industria": "Travel Services"
+  },
+  "input_refs": {
+    "sources_pack_caso_id": "CASE_20260220_TZOO",
+    "truth_pack_caso_id": "CASE_20260220_TZOO",
+    "implied_expectations_caso_id": "CASE_20260220_TZOO",
+    "agent_reports": [
+      {
+        "agent_role": "BULL",
+        "agent_nombre": "BULL_v1",
+        "report_ref": "AgentReport_v1_BULL",
+        "confianza_0_1": 0.5
+      },
+      {
+        "agent_role": "RED_TEAM",
+        "agent_nombre": "RED_TEAM_v1",
+        "report_ref": "AgentReport_v1_REDTEAM",
+        "confianza_0_1": 0.79
+      },
+      {
+        "agent_role": "CATALYST",
+        "agent_nombre": "CATALYST_FUSION_v1",
+        "report_ref": "AgentReport_v1_CATALYST",
+        "confianza_0_1": 0.53
+      },
+      {
+        "agent_role": "FORENSIC",
+        "agent_nombre": "FORENSIC_SCORING_v1",
+        "report_ref": "AgentReport_v1_FORENSIC",
+        "confianza_0_1": 0.5
+      }
+    ]
+  },
+  "charter": {
+    "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+    "horizonte_meses": {
+      "min": 6,
+      "max": 30
+    },
+    "restricciones_no_especulativo": [
+      "Evitar tesis binaria",
+      "Evitar dependencia de financiacion salvadora",
+      "Exigir supervivencia 12-24 meses razonable",
+      "Exigir catalizador no binario y medible"
+    ]
+  },
+  "resumen_ejecutivo": {
+    "decision": "BLOQUEADO",
+    "tamaño_recomendado_pct_cartera": 0,
+    "confianza_global_0_1": 0.0,
+    "racional_5_lineas": [
+      "La tesis está técnicamente bloqueada por la ausencia de 'deuda_total_usd' en los datos fundamentales, lo que impide calcular el Enterprise Value (EV) y validar múltiplos o valoración inversa.",
+      "Operativamente, la compañía muestra un deterioro severo de márgenes (EBIT margin cae de 22% a ~9%) y un aumento preocupante de COGS/Revenue (12.5% a ~19%).",
+      "Existe un riesgo de liquidez latente: aunque hay caja neta reportada (~17M), el CFF negativo persistente (-13M) y la falta de visibilidad de deuda total sugieren fragilidad estructural.",
+      "La supervivencia es condicional (Score Forense 2/5) debido a la calidad de conversión de caja y opacidad en pasivos.",
+      "No es auditable una decisión de inversión sin cerrar la ecuación de valor (EV); se requiere remediación de datos antes de reevaluar."
+    ],
+    "lo_mas_importante_ahora": [
+      "Obtener el dato de Deuda Total Consolidada para desbloquear el cálculo de EV.",
+      "Confirmar si la compresión de márgenes es estructural o coyuntural mediante monitoring de próximos 2 trimestres.",
+      "Verificar la sostenibilidad de la caja frente al drenaje por financiación (CFF)."
+    ],
+    "principales_riesgos": [
+      "Opacidad de Estructura de Capital: Pasivos totales altos vs Patrimonio bajo.",
+      "Value Trap: Deterioro de fundamentales operativos (Márgenes, COGS) sin precio de entrada validado.",
+      "Liquidez: Dependencia de caja existente con delta cash negativo reciente."
+    ]
+  },
+  "decision_probabilistica": {
+    "probabilidad_exito_0_1": 0.0,
+    "retorno_esperado_ponderado_pct": 0.0,
+    "escenarios_ponderados": {
+      "base": {
+        "probabilidad_0_1": 0.5,
+        "retorno_estimado_pct": 0
+      },
+      "bull": {
+        "probabilidad_0_1": 0.2,
+        "retorno_estimado_pct": 0
+      },
+      "bear": {
+        "probabilidad_0_1": 0.3,
+        "retorno_estimado_pct": 0
+      }
+    },
+    "sizing_kelly": {
+      "kelly_crudo_pct": 0,
+      "factor_ajuste_confianza": 0,
+      "kelly_ajustado_pct": 0,
+      "tope_maximo_pct": 10,
+      "sizing_preliminar_pct": 0,
+      "sizing_final_pct": 0,
+      "nota": "Kelly forzado a 0% por decisión BLOQUEADO (falta de datos críticos para valoración)."
+    },
+    "intervalo_confianza_90_pct": {
+      "percentil_5": 0,
+      "percentil_50": 0,
+      "percentil_95": 0
+    },
+    "conviccion_0_1": 0.0,
+    "ratio_asimetria": 0.0,
+    "expected_value_anualizado_pct": 0.0,
+    "decision_categorica": "BLOQUEADO"
+  },
+  "analisis_sensibilidad": [
+    {
+      "assumption_id": "A-001",
+      "variable": "deuda_total_usd",
+      "valor_base": null,
+      "rango_test": {
+        "min": 0,
+        "max": 50000000,
+        "paso": 10000000
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": null,
+        "si_max": null
+      },
+      "impacto_en_decision": "Si deuda > caja significativamente, EV aumenta y FCF Yield disminuye, confirmando NO_APTO. Si deuda ~0, desbloquea análisis.",
+      "nota": "Variable bloqueante. Sin valor base, no hay sensibilidad numérica posible."
+    }
+  ],
+  "gates": {
+    "data_quality_gate": {
+      "status": "FAIL",
+      "por_que": [
+        "Falta crítica de 'deuda_total_usd' impide cálculo de Enterprise Value.",
+        "Status 'PARTIAL' en TruthPack con advertencias en TTM (no consecutivo).",
+        "ImpliedExpectations está en estado 'BLOCKED'."
+      ],
+      "faltantes_criticos": [
+        {
+          "item": "deuda_total_usd",
+          "como_resolver": "Extraer nota de deuda de 10-K/10-Q."
+        }
+      ]
+    },
+    "survivability_gate": {
+      "status": "CONDITIONAL",
+      "por_que": [
+        "Score Forense 2/5.",
+        "CFF negativo persistente drena liquidez.",
+        "Patrimonio bajo respecto a pasivos totales."
+      ],
+      "condiciones_si_conditional": [
+        "Monitorear caja > 5M USD.",
+        "Verificar vencimientos de deuda una vez obtenidos los datos."
+      ]
+    },
+    "mispricing_gate": {
+      "status": "FAIL",
+      "por_que": [
+        "No evaluable sin EV."
+      ]
+    },
+    "catalyst_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Catalizador de transparencia (publicación de deuda) identificado.",
+        "Posible reversión de COGS."
+      ]
+    },
+    "non_speculative_gate": {
+      "status": "FAIL",
+      "banderas": {
+        "tesis_binaria_detectada": false,
+        "dependencia_financiacion_salvadora": true,
+        "opacidad_inaceptable": true
+      },
+      "por_que": [
+        "Opacidad en estructura de capital.",
+        "Deterioro operativo acelerado sugiere riesgo de Value Trap."
+      ]
+    }
+  },
+  "scoring_preliminar": {
+    "metodo": "Score_0_100",
+    "componentes": {
+      "S_supervivencia_0_25": 10,
+      "M_mispricing_0_25": 0,
+      "C_catalizador_0_20": 10,
+      "Q_calidad_0_15": 0,
+      "R_downside_0_15": 5,
+      "V_penalizacion_0_a_menos15": -15
+    },
+    "total_0_100": 10,
+    "nota": "Penalización máxima por bloqueo de datos críticos y riesgo de opacidad."
+  },
+  "assumption_ledger": {
+    "reglas": {
+      "id_prefix": "A-",
+      "max_supuestos": 40,
+      "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+    },
+    "supuestos": [
+      {
+        "assumption_id": "A-001",
+        "enunciado": "La estructura de capital permite solvencia a 12 meses pese a la falta de dato explícito de deuda.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.5,
+        "confianza_0_1": 0.4,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "SOLVENCIA"
+        ],
+        "evidencias": [],
+        "falsacion": {
+          "test": "Caja cae < 5M o aparece deuda vencida.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_007"
+          }
+        ],
+        "notas_arbitro": "Bloqueante actual."
+      },
+      {
+        "assumption_id": "A-002",
+        "enunciado": "La compresión de márgenes (22% -> 9%) es reversible y no estructural.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.4,
+        "confianza_0_1": 0.6,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "MARGEN_OPERATIVO",
+          "EBIT"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_007",
+            "ubicacion": "P&L",
+            "cita_corta": "COGS sube a 19%",
+            "interpretacion": "Deterioro actual fuerte."
+          }
+        ],
+        "falsacion": {
+          "test": "Margen operativo < 8% en próximos 2 trimestres.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_MERGE_002"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_FUSE_003"
+          }
+        ],
+        "notas_arbitro": "Clave para tesis Bull, muy cuestionada por Red Team."
+      }
+    ]
+  },
+  "evidence_graph": {
+    "version": "EvidenceGraph_v1",
+    "nodos": [
+      {
+        "node_id": "E-DATA-MISSING",
+        "tipo": "EVIDENCIA",
+        "label": "Falta deuda_total_usd",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "A-VAL-BLOCK",
+        "tipo": "SUPUESTO",
+        "label": "Valoración Bloqueada",
+        "ref": {
+          "assumption_id": "A-001"
+        }
+      },
+      {
+        "node_id": "D-BLOCK",
+        "tipo": "DECISION",
+        "label": "BLOQUEADO",
+        "ref": {
+          "decision": "BLOQUEADO"
+        }
+      }
+    ],
+    "aristas": [
+      {
+        "from": "E-DATA-MISSING",
+        "to": "A-VAL-BLOCK",
+        "relacion": "SOPORTA",
+        "peso_0_1": 1.0,
+        "nota": "Causa raíz"
+      },
+      {
+        "from": "A-VAL-BLOCK",
+        "to": "D-BLOCK",
+        "relacion": "INFORMA",
+        "peso_0_1": 1.0,
+        "nota": "Motivo directo"
+      }
+    ],
+    "validacion_grafo": {
+      "ids_unicos": true,
+      "aristas_referencian_nodos_existentes": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "detalle": "Grafo simple de bloqueo."
+    }
+  },
+  "catalizadores_consolidados": [
+    {
+      "catalyst_id": "C-001",
+      "nombre": "Publicación de Deuda Total y EV",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 3,
+        "probable": 6,
+        "max": 12
+      },
+      "probabilidad_0_1": 0.8,
+      "mecanismo_cierre_gap": "Permite calcular valoración y re-rating si no hay deuda tóxica oculta.",
+      "supuestos_afectados": [
+        "A-001"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Aparición de deuda_total_usd en TruthPack",
+          "fuente_prevista": "filing",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          }
+        }
+      ]
+    }
+  ],
+  "escenarios": [
+    {
+      "scenario_id": "BASE",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 18
+      },
+      "descripcion": "Resolución de opacidad de datos. Márgenes se estabilizan en ~10-12%. Valuación se vuelve racional.",
+      "drivers_clave": [
+        "A-001"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": -10,
+        "base": 10,
+        "max": 30
+      },
+      "nota_valoracion": "Estimativo sin EV."
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.2,
+      "ventana_meses": {
+        "min": 12,
+        "probable": 24,
+        "max": 30
+      },
+      "descripcion": "Reversión de COGS y recuperación de márgenes a niveles históricos (15%+). Re-rating múltiple.",
+      "drivers_clave": [
+        "A-002"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 40,
+        "base": 80,
+        "max": 120
+      },
+      "nota_valoracion": "Estimativo sin EV."
+    },
+    {
+      "scenario_id": "BEAR",
+      "probabilidad_0_1": 0.3,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 18
+      },
+      "descripcion": "Value trap. Márgenes siguen comprimidos (<8%). Problemas de liquidez por CFF negativo.",
+      "drivers_clave": [
+        "A-001"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": -50,
+        "base": -30,
+        "max": -15
+      },
+      "nota_valoracion": "Riesgo de dilución/quiebra."
+    }
+  ],
+  "kill_criteria_final": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con_assumption_id": "A-001",
+      "definicion": "Falta de publicación de deuda total en próximos 2 trimestres.",
+      "ventana_meses": {
+        "min": 6,
+        "max": 6
+      },
+      "fuente_prevista": "filing",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Opacidad estructural inaceptable."
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con_assumption_id": "A-002",
+      "definicion": "Margen operativo < 8% en 2 trimestres consecutivos.",
+      "ventana_meses": {
+        "min": 6,
+        "max": 6
+      },
+      "fuente_prevista": "earnings",
+      "accion": "SALIR",
+      "severidad": "MEDIA",
+      "por_que": "Confirma deterioro estructural."
+    }
+  ],
+  "plan_monitorizacion": {
+    "frecuencias": {
+      "pulso_diario": {
+        "activo": false,
+        "que_mirar": []
+      },
+      "revision_semanal": {
+        "activo": false,
+        "que_mirar": []
+      },
+      "modo_evento": {
+        "activo": true,
+        "que_mirar": [
+          "10-Q",
+          "10-K",
+          "Notas de deuda"
+        ]
+      }
+    },
+    "lista_de_checks_por_supuesto": [
+      {
+        "assumption_id": "A-001",
+        "indicadores": [
+          "deuda_total_usd",
+          "net_debt"
+        ],
+        "fuente": "filing",
+        "frecuencia": "TRIMESTRAL"
+      }
+    ],
+    "umbrales_alerta": []
+  },
+  "predicciones_para_calibracion_consolidadas": [
+    {
+      "pred_id": "CP-001",
+      "descripcion": "Publicación de deuda total en próximo 10-Q/K.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 6
+      },
+      "criterio_validacion": "Dato presente en TruthPack.",
+      "fuente_prevista": "filing",
+      "origen": [
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_001"
+        }
+      ]
+    }
+  ],
+  "arbitraje": {
+    "notas_arbitro": [
+      "Decisión forzada a BLOQUEADO por Gate de Data Quality (falta EV).",
+      "La tesis fundamental es débil (Forensic score 2, Red Team warning), pero no se puede descartar o validar precio sin EV.",
+      "Se requiere intervención de remediación para extraer datos de deuda si existen en los filings."
+    ],
+    "desacuerdos_detectados": [
+      {
+        "tema": "Potencial de Reversión",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Posible reversión de márgenes",
+            "confianza_0_1": 0.5
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "Deterioro estructural / Value Trap",
+            "confianza_0_1": 0.79
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "NO_RESUELTO",
+          "decision": "descartar",
+          "por_que": "Sin EV no se puede valorar el riesgo/recompensa de la reversión.",
+          "accion": "Esperar datos de deuda."
+        }
+      }
+    ],
+    "puntos_abiertos": [
+      "Valor real de la deuda total.",
+      "Sostenibilidad de la caja con CFF negativo."
+    ]
+  },
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "deuda_total_usd",
+      "por_que_importa": "Bloquea valoración.",
+      "como_obtenerlo": "10-K Notes"
+    }
+  ],
+  "salida_para_siguiente_agente": {
+    "monitor_input_recomendado": "Monitorear publicación de deuda.",
+    "estado_caso": "EN_ESPERA",
+    "proxima_revision_sugerida": "2026-05-20"
+  },
+  "log": {
+    "autochequeos": {
+      "decision_respeta_gates": true,
+      "supuestos_criticos_tienen_evidencia": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "kill_criteria_mapeados_a_supuestos": true,
+      "salida_solo_json": true,
+      "probabilidades_escenarios_suman_1": true,
+      "kelly_sizing_dentro_de_tope": true,
+      "intervalo_confianza_coherente_con_escenarios": true,
+      "decision_categorica_coherente_con_probabilistica": true,
+      "sizing_final_igual_preliminar_si_invertir": true,
+      "sensibilidad_cubre_supuestos_criticos": true
+    },
+    "limitaciones": [
+      "Sin valoración por falta de datos."
+    ],
+    "revision": {
+      "es_revision": false,
+      "revision_num": 1,
+      "decision_packet_anterior_caso_id": null,
+      "monitoring_updates_usados": [],
+      "resumen_cambios": []
+    }
+  },
+  "control": {
+    "estado_flujo": "ARBITRATE",
+    "next_step": "EXIT",
+    "next_agent_role": "NONE",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 2,
+    "issues": [],
+    "work_orders": [],
+    "dispatch_queue": []
+  }
+}

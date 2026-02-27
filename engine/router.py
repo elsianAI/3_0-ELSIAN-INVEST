@@ -59,6 +59,7 @@ PIPELINE_DAG = {
 STEP_INPUT_ARTIFACTS = {
     "SOURCES_COMPILER": ["_sec_fetcher_output", "_market_data_output", "_transcript_finder_output"],
     "TP_EXTRACTOR_FILING": ["SourcesPack_v1"],
+    "MONITOR": ["DecisionPacket_v2", "MonitoringUpdate_v1", "TruthPack_v1", "ImpliedExpectations_v1"],
     "IMPLIED": ["TruthPack_v1"],
     "CATALYST_DETECTION": ["TruthPack_v1", "ImpliedExpectations_v1"],
     "CATALYST_SCORING": ["TruthPack_v1", "ImpliedExpectations_v1", "CatalystDetection_v1"],
@@ -897,6 +898,10 @@ def _execute_single_step(
     schemas_dir = config.get_path("schemas")
     input_artifacts = _resolve_input_artifacts(case_dir, step_name)
 
+    extra_context = ""
+    if step_name == "MONITOR":
+        extra_context = _build_monitor_extra_context(case_dir, ticker)
+
     prompt = build_prompt(
         step_name=step_name,
         ticker=ticker,
@@ -904,6 +909,7 @@ def _execute_single_step(
         instrucciones_dir=instrucciones_dir,
         schemas_dir=schemas_dir,
         input_artifacts=input_artifacts,
+        extra_context=extra_context,
     )
 
     # For project-scoped steps (SCANNER, SCOUT, etc.) the LLM needs access
@@ -1896,6 +1902,72 @@ def _resolve_input_artifacts(case_dir: Path, step_name: str) -> dict[str, Path]:
                 )
 
     return artifacts
+
+
+def _build_monitor_extra_context(case_dir: Path, ticker: str) -> str:
+    """Inject local monitor context so MONITOR prioritizes operator-provided filings.
+
+    Includes:
+    - Recent local files from casos/{TICKER}/_raw_filings (absolute + relative paths)
+    - Explicit instruction to prioritize local evidence over web duplicates
+    """
+    raw_dir = case_dir.parent / "_raw_filings"
+    if not raw_dir.exists() or not raw_dir.is_dir():
+        return ""
+
+    allowed_suffixes = {
+        ".pdf", ".txt", ".htm", ".html", ".md", ".json",
+    }
+    try:
+        files = [
+            p for p in raw_dir.iterdir()
+            if p.is_file() and p.suffix.lower() in allowed_suffixes
+        ]
+    except OSError:
+        return ""
+
+    if not files:
+        return ""
+
+    # Prioritize newest uploads first to surface operator-provided filings.
+    files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    top = files[:40]
+    payload = []
+    for p in top:
+        try:
+            st = p.stat()
+        except OSError:
+            continue
+        try:
+            rel = str(p.relative_to(case_dir.parent))
+        except ValueError:
+            rel = p.name
+        payload.append(
+            {
+                "file": p.name,
+                "relative_path": rel,
+                "absolute_path": str(p.resolve()),
+                "size_bytes": int(st.st_size),
+                "mtime_utc": datetime.fromtimestamp(st.st_mtime, tz=timezone.utc).isoformat(),
+            }
+        )
+
+    if not payload:
+        return ""
+
+    return (
+        "# CONTEXTO LOCAL MONITOR\n\n"
+        f"Ticker: {ticker}\n"
+        f"Raw filings directory: {raw_dir}\n\n"
+        "INSTRUCCION OPERATIVA:\n"
+        "- Prioriza estos archivos locales para detectar evidencia nueva.\n"
+        "- Si una evidencia aparece también en web, usa el archivo local como fuente primaria.\n"
+        "- Si hay PDF local reciente, léelo antes de concluir que no hay filing.\n\n"
+        "## RAW_FILINGS_RECIENTES\n\n"
+        "```json\n"
+        + json.dumps(payload, indent=2, ensure_ascii=False)
+        + "\n```"
+    )
 
 
 def _find_artifact(case_dir: Path, pattern: str) -> Path | None:

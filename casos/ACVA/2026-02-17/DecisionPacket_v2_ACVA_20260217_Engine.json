@@ -1,0 +1,1349 @@
+{
+  "version_esquema": "DecisionPacket_v2",
+  "backward_compatible_with": "DecisionPacket_v1",
+  "caso_id": "CASE_20260217_ACVA",
+  "fecha_corte": "2026-02-19",
+  "empresa": {
+    "ticker": "ACVA",
+    "nombre": "ACV Auctions Inc.",
+    "bolsa": "NYSE",
+    "pais": "US",
+    "sector": "Technology",
+    "industria": "Software - Application"
+  },
+  "input_refs": {
+    "sources_pack_caso_id": "CASE_20260217_ACVA",
+    "truth_pack_caso_id": "CASE_20260217_ACVA",
+    "implied_expectations_caso_id": "CASE_20260217_ACVA",
+    "agent_reports": [
+      {
+        "agent_role": "CATALYST",
+        "agent_nombre": "CATALYST_v1",
+        "report_ref": "AgentReport_v1_CATALYST",
+        "confianza_0_1": 0.66
+      },
+      {
+        "agent_role": "FORENSIC",
+        "agent_nombre": "FORENSIC_SCORING_v1",
+        "report_ref": "AgentReport_v1_FORENSIC",
+        "confianza_0_1": 0.68
+      },
+      {
+        "agent_role": "BULL",
+        "agent_nombre": "BULL_FUSION_v1",
+        "report_ref": "AgentReport_v1_BULL",
+        "confianza_0_1": 0.65
+      },
+      {
+        "agent_role": "RED_TEAM",
+        "agent_nombre": "RED_TEAM_v1",
+        "report_ref": "AgentReport_v1_REDTEAM",
+        "confianza_0_1": 0.8
+      }
+    ]
+  },
+  "charter": {
+    "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+    "horizonte_meses": {
+      "min": 6,
+      "max": 30
+    },
+    "restricciones_no_especulativo": [
+      "Evitar tesis binaria",
+      "Evitar dependencia de financiacion salvadora",
+      "Exigir supervivencia 12-24 meses razonable",
+      "Exigir catalizador no binario y medible"
+    ]
+  },
+  "resumen_ejecutivo": {
+    "decision": "WATCHLIST",
+    "tamaño_recomendado_pct_cartera": 0,
+    "confianza_global_0_1": 0.59,
+    "racional_5_lineas": [
+      "ACVA mantiene escala comercial relevante (TTM ~$736M) y caja neta reportada positiva, superando el filtro de continuidad operativa en términos contables.",
+      "La calidad del FCF sigue sin validación ex-float: persiste la brecha CFO positivo vs EBIT negativo y la hipótesis de componente transitorio por working capital/funds payable.",
+      "El gate de supervivencia se mantiene en CONDITIONAL por ausencia de headroom detallado de covenants y desglose recurrente de caja corporativa ex-float.",
+      "La asimetría Base/Bear permanece débil (ratio 0.50) y Kelly crudo 0%, por lo que no hay edge suficiente para asignar capital hoy.",
+      "Se prioriza seguimiento activo hasta validar puente ex-float, estabilización de SG&A/G&A y mejora de EBIT en secuencia multitrimestral."
+    ],
+    "lo_mas_importante_ahora": [
+      "Publicar reconciliación trimestral CFO/FCF ex-float en dos reportes consecutivos.",
+      "Confirmar mejora de EBIT en al menos 2 de 4 trimestres sin rebote de SG&A/G&A.",
+      "Aportar tabla de covenants y headroom actualizada.",
+      "Completar TTM homogéneo de EBIT, CFO, CAPEX total y FCF.",
+      "Monitorear interés LTM y deuda total para evitar deriva financiera."
+    ],
+    "principales_riesgos": [
+      "Value Trap: FCF reportado inflado por float/WC mientras EBIT sigue negativo.",
+      "Solvencia real sobreestimada si la caja utilizable ex-float es sustancialmente menor que la caja reportada.",
+      "Volatilidad de SG&A/G&A que rompe narrativa de convergencia lineal de margen.",
+      "Aumento del coste financiero y potencial presión de refinanciación/covenants.",
+      "Dilución silenciosa por SBC/acciones si no mejora la rentabilidad operativa."
+    ]
+  },
+  "_comment_v2_decision_probabilistica": "Bloque probabilístico consolidado con sesgo prudente por conflicto no resuelto en calidad de FCF",
+  "decision_probabilistica": {
+    "probabilidad_exito_0_1": 0.65,
+    "retorno_esperado_ponderado_pct": 6.75,
+    "escenarios_ponderados": {
+      "base": {
+        "probabilidad_0_1": 0.5,
+        "retorno_estimado_pct": 15
+      },
+      "bull": {
+        "probabilidad_0_1": 0.15,
+        "retorno_estimado_pct": 65
+      },
+      "bear": {
+        "probabilidad_0_1": 0.35,
+        "retorno_estimado_pct": -30
+      }
+    },
+    "sizing_kelly": {
+      "kelly_crudo_pct": 0,
+      "factor_ajuste_confianza": 0.415,
+      "kelly_ajustado_pct": 0,
+      "tope_maximo_pct": 10,
+      "sizing_preliminar_pct": 0,
+      "sizing_final_pct": 0,
+      "nota": "Kelly crudo en 0% por asimetría desfavorable (b=0.50) pese a EV positivo; se mantiene WATCHLIST sin exposición."
+    },
+    "intervalo_confianza_90_pct": {
+      "percentil_5": -36,
+      "percentil_50": 6.8,
+      "percentil_95": 52
+    },
+    "conviccion_0_1": 0.59,
+    "ratio_asimetria": 0.5,
+    "_comment_ratio_asimetria": "upside_base / abs(downside_bear) = 15/30 = 0.50, desfavorable para entrada inmediata.",
+    "expected_value_anualizado_pct": 5.4,
+    "decision_categorica": "WATCHLIST"
+  },
+  "analisis_sensibilidad": [
+    {
+      "assumption_id": "A-002",
+      "variable": "fcf_ltm_ex_float_usd",
+      "valor_base": 70000000,
+      "rango_test": {
+        "min": 25000000,
+        "max": 90000000,
+        "paso": 10000000
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": -35,
+        "si_max": 30
+      },
+      "impacto_en_decision": "Si FCF ex-float < 40M sostenido, la decisión migra a DESCARTAR.",
+      "nota": "Driver más sensible de todo el caso."
+    },
+    {
+      "assumption_id": "A-001",
+      "variable": "ebit_ttm_usd",
+      "valor_base": -59000000,
+      "rango_test": {
+        "min": -95000000,
+        "max": -20000000,
+        "paso": 5000000
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": -15,
+        "si_max": 22
+      },
+      "impacto_en_decision": "Si EBIT TTM <= -90M, decisión pasa a DESCARTAR.",
+      "nota": "La convergencia operativa define sostenibilidad de caja."
+    },
+    {
+      "assumption_id": "A-004",
+      "variable": "sga_ga_sobre_ingresos_pct",
+      "valor_base": 43,
+      "rango_test": {
+        "min": 38,
+        "max": 52,
+        "paso": 1
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": 14,
+        "si_max": -12
+      },
+      "impacto_en_decision": "Si ratio > 50% en 2 trimestres, mantener WATCHLIST con sesgo a DESCARTAR.",
+      "nota": "Q3-2025 mostró salto de OPEX; requiere normalización."
+    }
+  ],
+  "gates": {
+    "data_quality_gate": {
+      "status": "PASS",
+      "por_que": [
+        "TruthPack y validaciones técnicas clave en PASS.",
+        "Implied expectations operativo para construir escenarios.",
+        "Datos base suficientes para decidir WATCHLIST."
+      ],
+      "faltantes_criticos": [
+        {
+          "item": "Desglose caja propia vs float",
+          "como_resolver": "Publicar reconciliación cuantitativa recurrente en 10-Q/10-K."
+        },
+        {
+          "item": "TTM homogéneo de EBIT/CFO/CAPEX/FCF",
+          "como_resolver": "Construir rolling 4Q con metodología consistente."
+        },
+        {
+          "item": "Tabla de covenants y headroom",
+          "como_resolver": "Extraer de nota de deuda + 8-K de credit facility."
+        }
+      ]
+    },
+    "survivability_gate": {
+      "status": "CONDITIONAL",
+      "por_que": [
+        "Caja reportada (224M) > deuda total (123M), con colchón inicial aparente.",
+        "Forensic score de supervivencia 4.0/5.0.",
+        "Persisten dudas sobre caja utilizable ex-float y falta de disclosure de headroom."
+      ],
+      "condiciones_si_conditional": [
+        "Confirmar caja corporativa ex-float > deuda total en dos reportes consecutivos.",
+        "Publicar covenants con umbral, valor actual y headroom.",
+        "Mantener CFO TTM positivo sin deterioro material de EBIT."
+      ]
+    },
+    "mispricing_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Expectativas implícitas centrales moderadas (~2.6% CAGR FCF).",
+        "Existe gap potencial si se valida FCF estructural y mejora de margen.",
+        "El cierre del gap depende de hitos observables, no de un evento binario único."
+      ]
+    },
+    "catalyst_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Catalizadores no binarios y medibles en ventana 6-24 meses.",
+        "Probabilidades moderadas: válidos para seguimiento, insuficientes para entrada hoy."
+      ]
+    },
+    "non_speculative_gate": {
+      "status": "PASS",
+      "banderas": {
+        "tesis_binaria_detectada": false,
+        "dependencia_financiacion_salvadora": false,
+        "opacidad_inaceptable": false
+      },
+      "por_que": [
+        "Negocio real con escala y runway financiero reportado.",
+        "Riesgo principal es de calidad/valoración, no de quiebra inminente.",
+        "La opacidad actual es relevante pero potencialmente resoluble."
+      ]
+    }
+  },
+  "scoring_preliminar": {
+    "metodo": "Score_0_100",
+    "componentes": {
+      "S_supervivencia_0_25": 20,
+      "M_mispricing_0_25": 12,
+      "C_catalizador_0_20": 10,
+      "Q_calidad_0_15": 9,
+      "R_downside_0_15": 8,
+      "V_penalizacion_0_a_menos15": -5
+    },
+    "total_0_100": 54,
+    "nota": "Score intermedio-bajo: supervivencia contable razonable, pero con penalización por opacidad en caja/FCF y ejecución operativa inconsistente."
+  },
+  "assumption_ledger": {
+    "reglas": {
+      "id_prefix": "A-",
+      "max_supuestos": 40,
+      "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+    },
+    "supuestos": [
+      {
+        "assumption_id": "A-001",
+        "enunciado": "La escala de ingresos actual permite apalancamiento operativo real.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.45,
+        "confianza_0_1": 0.55,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "MARGEN_OPERATIVO",
+          "EBIT"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_006",
+            "ubicacion": "Q2-2025",
+            "cita_corta": "Mejora puntual de EBIT a -7.2M",
+            "interpretacion": "Posible inflexión."
+          },
+          {
+            "source_id": "SRC_005",
+            "ubicacion": "Q3-2025",
+            "cita_corta": "Reversión de EBIT a -23.7M",
+            "interpretacion": "Inestabilidad de costes."
+          }
+        ],
+        "falsacion": {
+          "test": "EBIT anualizado no mejora >30% vs FY2024 en próximos 12m",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [
+          "A-004"
+        ],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_FUS_001"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_003"
+          }
+        ],
+        "notas_arbitro": "Evidencia mixta; no se confirma tendencia."
+      },
+      {
+        "assumption_id": "A-002",
+        "enunciado": "El FCF reportado es estructural y no depende mayoritariamente de float.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.4,
+        "confianza_0_1": 0.5,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "FCF",
+          "VALORACION"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_001",
+            "ubicacion": "FY2024",
+            "cita_corta": "CFO positivo vs EBIT negativo",
+            "interpretacion": "Brecha sospechosa."
+          },
+          {
+            "source_id": "SRC_046",
+            "ubicacion": "Log conversiones",
+            "cita_corta": "Caja reportada incluye float significativo",
+            "interpretacion": "Riesgo de sobreestimar FCF estructural."
+          }
+        ],
+        "falsacion": {
+          "test": "Bridge ex-float muestra FCF ajustado < 35M",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "filing",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_002"
+          },
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_FUS_004"
+          }
+        ],
+        "notas_arbitro": "Riesgo central de Value Trap."
+      },
+      {
+        "assumption_id": "A-003",
+        "enunciado": "La posición de caja neta es real y utilizable (no restringida por clientes).",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.45,
+        "confianza_0_1": 0.5,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "DEUDA_NETA",
+          "SUPERVIVENCIA"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_001",
+            "ubicacion": "FY2024",
+            "cita_corta": "Caja 224M y deuda 123M",
+            "interpretacion": "Lectura contable favorable."
+          },
+          {
+            "source_id": "SRC_046",
+            "ubicacion": "Log conversiones",
+            "cita_corta": "Caja incluye float aproximado de clientes",
+            "interpretacion": "La caja corporativa real podría ser mucho menor."
+          }
+        ],
+        "falsacion": {
+          "test": "Disclosure revela caja ex-float <= deuda total",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_001"
+          },
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_001"
+          }
+        ],
+        "notas_arbitro": "Crítico para diagnóstico de solvencia real."
+      },
+      {
+        "assumption_id": "A-004",
+        "enunciado": "El control de SG&A es sostenible y no un evento único.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.35,
+        "confianza_0_1": 0.6,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "MARGEN_OPERATIVO"
+        ],
+        "evidencias": [
+          {
+            "source_id": "SRC_006",
+            "ubicacion": "Q2-2025",
+            "cita_corta": "SG&A más contenido",
+            "interpretacion": "Disciplina puntual."
+          },
+          {
+            "source_id": "SRC_005",
+            "ubicacion": "Q3-2025",
+            "cita_corta": "SG&A subió materialmente",
+            "interpretacion": "Dificultad para mantener disciplina."
+          }
+        ],
+        "falsacion": {
+          "test": "Ratio SG&A/Ingresos sube YoY en próximos 2 trimestres",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_004"
+          },
+          {
+            "agent_role": "BULL",
+            "claim_id": "CLM_FUS_006"
+          }
+        ],
+        "notas_arbitro": "Bloqueador principal para migrar a INVERTIR."
+      },
+      {
+        "assumption_id": "A-005",
+        "enunciado": "No habrá breach de covenants ni maturity wall en 24 meses.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.62,
+        "confianza_0_1": 0.48,
+        "impacto": "ALTO",
+        "drivers_afectados": [
+          "COSTE_DEUDA",
+          "SUPERVIVENCIA"
+        ],
+        "evidencias": [
+          {
+            "source_id": "AgentReport_v1_FORENSIC",
+            "ubicacion": "supervivencia.deuda_y_refinanciacion",
+            "cita_corta": "Sin evidencia directa de maturity wall, pero covenants no detallados",
+            "interpretacion": "Supuesto positivo con evidencia incompleta."
+          }
+        ],
+        "falsacion": {
+          "test": "Disclosure de breach covenant, waiver por stress o deuda >200M",
+          "ventana_meses": {
+            "min": 1,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [
+          {
+            "agent_role": "FORENSIC",
+            "claim_id": "CLM_004"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "claim_id": "CLM_RT_005"
+          }
+        ],
+        "notas_arbitro": "Explica status CONDITIONAL en survivability_gate."
+      }
+    ]
+  },
+  "evidence_graph": {
+    "version": "EvidenceGraph_v1",
+    "nodos": [
+      {
+        "node_id": "E-001",
+        "tipo": "EVIDENCIA",
+        "label": "Ingresos TTM ~$736M",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-002",
+        "tipo": "EVIDENCIA",
+        "label": "EBIT negativo persistente",
+        "ref": {
+          "source_id": "TruthPack_v1"
+        }
+      },
+      {
+        "node_id": "E-003",
+        "tipo": "EVIDENCIA",
+        "label": "Caja reportada incluye float de clientes",
+        "ref": {
+          "source_id": "SRC_046"
+        }
+      },
+      {
+        "node_id": "A-002",
+        "tipo": "SUPUESTO",
+        "label": "FCF estructural ex-float",
+        "ref": {
+          "assumption_id": "A-002"
+        }
+      },
+      {
+        "node_id": "A-005",
+        "tipo": "SUPUESTO",
+        "label": "Sin estrés de covenants",
+        "ref": {
+          "assumption_id": "A-005"
+        }
+      },
+      {
+        "node_id": "SC-BASE",
+        "tipo": "ESCENARIO",
+        "label": "Escenario BASE",
+        "ref": {
+          "scenario_id": "BASE"
+        }
+      },
+      {
+        "node_id": "SC-BEAR",
+        "tipo": "ESCENARIO",
+        "label": "Escenario BEAR",
+        "ref": {
+          "scenario_id": "BEAR"
+        }
+      },
+      {
+        "node_id": "D-001",
+        "tipo": "DECISION",
+        "label": "WATCHLIST",
+        "ref": {
+          "decision": "WATCHLIST"
+        }
+      }
+    ],
+    "aristas": [
+      {
+        "from": "E-001",
+        "to": "SC-BASE",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.6,
+        "nota": "Escala comercial sostiene escenario de continuidad."
+      },
+      {
+        "from": "E-002",
+        "to": "SC-BEAR",
+        "relacion": "SOPORTA",
+        "peso_0_1": 0.8,
+        "nota": "Historial de EBIT negativo refuerza riesgo bear."
+      },
+      {
+        "from": "E-003",
+        "to": "A-002",
+        "relacion": "DEBILITA",
+        "peso_0_1": 0.85,
+        "nota": "Opacidad ex-float debilita calidad de FCF."
+      },
+      {
+        "from": "A-002",
+        "to": "SC-BEAR",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.9,
+        "nota": "Fallo de A-002 desplaza probabilidad hacia BEAR."
+      },
+      {
+        "from": "A-005",
+        "to": "D-001",
+        "relacion": "INFORMA",
+        "peso_0_1": 0.7,
+        "nota": "Falta de headroom confirmado justifica postura de espera."
+      },
+      {
+        "from": "SC-BEAR",
+        "to": "D-001",
+        "relacion": "SOPORTA",
+        "peso_0_1": 1,
+        "nota": "Downside significativo y no resuelto."
+      }
+    ],
+    "validacion_grafo": {
+      "ids_unicos": true,
+      "aristas_referencian_nodos_existentes": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "detalle": "Grafo coherente con foco en FCF ex-float, solvencia real y decisión WATCHLIST."
+    }
+  },
+  "catalizadores_consolidados": [
+    {
+      "catalyst_id": "C-004",
+      "nombre": "Sostenimiento run-rate de ingresos",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 18
+      },
+      "probabilidad_0_1": 0.57,
+      "mecanismo_cierre_gap": "Valida continuidad comercial y reduce riesgo de desaceleración de top-line.",
+      "supuestos_afectados": [
+        "A-001"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Al menos 3 de 4 trimestres con ingresos >=190M",
+          "fuente_prevista": "earnings",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-002",
+      "nombre": "Normalización de OPEX y mejora de EBIT",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 24
+      },
+      "probabilidad_0_1": 0.46,
+      "mecanismo_cierre_gap": "Si SG&A/G&A se estabiliza, cae el descuento por falta de conversión de escala en margen.",
+      "supuestos_afectados": [
+        "A-001",
+        "A-004"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Mejora YoY de EBIT en 3 de 4 trimestres",
+          "fuente_prevista": "10-Q",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-005",
+      "nombre": "Disclosure TTM y bridge ex-float",
+      "es_no_binario": true,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 12,
+        "max": 18
+      },
+      "probabilidad_0_1": 0.34,
+      "mecanismo_cierre_gap": "Reduce prima de riesgo por opacidad y habilita calibración de múltiplos.",
+      "supuestos_afectados": [
+        "A-002",
+        "A-003",
+        "A-005"
+      ],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Dos reportes consecutivos con reconciliación ex-float cuantitativa",
+          "fuente_prevista": "filing",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        }
+      ]
+    }
+  ],
+  "escenarios": [
+    {
+      "scenario_id": "BASE",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 6,
+        "probable": 15,
+        "max": 24
+      },
+      "descripcion": "Ingresos se sostienen, EBIT mejora parcialmente pero sigue negativo moderado y FCF conserva trazabilidad incompleta por tema ex-float.",
+      "drivers_clave": [
+        "A-001",
+        "A-002",
+        "A-004"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 5,
+        "base": 15,
+        "max": 25
+      },
+      "nota_valoracion": "Cierre parcial de descuento por opacidad, sin rerating agresivo."
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.15,
+      "ventana_meses": {
+        "min": 12,
+        "probable": 18,
+        "max": 30
+      },
+      "descripcion": "FCF ex-float validado, mejora de EBIT sostenida y reducción de prima de opacidad; rerating material.",
+      "drivers_clave": [
+        "A-001",
+        "A-002",
+        "A-004",
+        "A-005"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": 45,
+        "base": 65,
+        "max": 90
+      },
+      "nota_valoracion": "Requiere confirmaciones secuenciales en caja y margen."
+    },
+    {
+      "scenario_id": "BEAR",
+      "probabilidad_0_1": 0.35,
+      "ventana_meses": {
+        "min": 3,
+        "probable": 12,
+        "max": 24
+      },
+      "descripcion": "FCF ex-float resulta inferior a lo esperado, no se consolida mejora operativa y el múltiplo se comprime por tesis de value trap.",
+      "drivers_clave": [
+        "A-002",
+        "A-003",
+        "A-004",
+        "A-005"
+      ],
+      "retorno_12_24m_pct_rango": {
+        "min": -50,
+        "base": -30,
+        "max": -15
+      },
+      "nota_valoracion": "Downside relevante por pérdida de confianza en calidad de caja."
+    }
+  ],
+  "kill_criteria_final": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con_assumption_id": "A-003",
+      "definicion": "Caja neta ajustada ex-float <= 0",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "fuente_prevista": "filing",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Pérdida de soporte de liquidez real."
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con_assumption_id": "A-001",
+      "definicion": "EBIT TTM peor que -90M USD",
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "fuente_prevista": "10-Q",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Confirma deterioro operativo estructural."
+    },
+    {
+      "kc_id": "KC-003",
+      "relacionado_con_assumption_id": "A-002",
+      "definicion": "No se publica bridge ex-float en dos reportes consecutivos",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "fuente_prevista": "filing",
+      "accion": "CONGELAR_COMPRAS",
+      "severidad": "MEDIA",
+      "por_que": "Mantiene opacidad incompatible con aumento de convicción."
+    },
+    {
+      "kc_id": "KC-004",
+      "relacionado_con_assumption_id": "A-005",
+      "definicion": "Breach de covenant o deuda total >200M USD",
+      "ventana_meses": {
+        "min": 1,
+        "max": 24
+      },
+      "fuente_prevista": "filing",
+      "accion": "SALIR",
+      "severidad": "ALTA",
+      "por_que": "Eleva riesgo de refinanciación y pérdida permanente de capital."
+    }
+  ],
+  "plan_monitorizacion": {
+    "frecuencias": {
+      "pulso_diario": {
+        "activo": true,
+        "que_mirar": [
+          "Precio vs umbrales de alerta",
+          "Noticias corporativas y crediticias",
+          "Nuevos filings 8-K/10-Q"
+        ]
+      },
+      "revision_semanal": {
+        "activo": true,
+        "que_mirar": [
+          "Estado de A-002, A-003, A-004, A-005",
+          "Evolución de riesgos de caja y deuda",
+          "Avance de C-002, C-004 y C-005"
+        ]
+      },
+      "modo_evento": {
+        "activo": true,
+        "que_mirar": [
+          "Earnings y transcript",
+          "10-Q/10-K completos",
+          "Guidance de margen y caja",
+          "Disclosure de covenants y headroom"
+        ]
+      }
+    },
+    "lista_de_checks_por_supuesto": [
+      {
+        "assumption_id": "A-002",
+        "indicadores": [
+          "FCF LTM",
+          "CFO LTM",
+          "Ajuste ex-float"
+        ],
+        "fuente": "filing",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-003",
+        "indicadores": [
+          "Caja ex-float",
+          "Deuda total",
+          "Deuda neta ajustada"
+        ],
+        "fuente": "10-Q",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-004",
+        "indicadores": [
+          "SG&A/ingresos",
+          "G&A/ingresos",
+          "Dispersión QoQ de OPEX"
+        ],
+        "fuente": "10-Q",
+        "frecuencia": "TRIMESTRAL"
+      },
+      {
+        "assumption_id": "A-005",
+        "indicadores": [
+          "Covenants",
+          "Headroom",
+          "Waivers"
+        ],
+        "fuente": "filing",
+        "frecuencia": "TRIMESTRAL"
+      }
+    ],
+    "umbrales_alerta": [
+      {
+        "tipo": "FUNDAMENTAL",
+        "condicion": "Activación de KC-001, KC-002 o KC-004",
+        "accion": "SALIR",
+        "severidad": "ALTA"
+      },
+      {
+        "tipo": "DISCLOSURE",
+        "condicion": "Sin bridge ex-float en dos reportes consecutivos",
+        "accion": "CONGELAR_COMPRAS",
+        "severidad": "MEDIA"
+      },
+      {
+        "tipo": "PRECIO",
+        "condicion": "Caída >20% en 10 días sin nueva evidencia positiva",
+        "accion": "REVISAR_COMITE",
+        "severidad": "MEDIA"
+      }
+    ]
+  },
+  "predicciones_para_calibracion_consolidadas": [
+    {
+      "pred_id": "CP-001",
+      "descripcion": "EBIT anualizado permanece negativo en 2026",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "EBIT TTM < 0",
+      "fuente_prevista": "10-K",
+      "origen": [
+        {
+          "agent_role": "RED_TEAM",
+          "pred_id": "PRED_RT_001"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-002",
+      "descripcion": "Al menos 3 de 4 trimestres con ingresos >=190M USD",
+      "probabilidad_0_1": 0.63,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Conteo de trimestres reportados >=190M",
+      "fuente_prevista": "earnings",
+      "origen": [
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_002"
+        },
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_FUS_002"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-003",
+      "descripcion": "No habrá bridge ex-float cuantitativo en dos reportes consecutivos",
+      "probabilidad_0_1": 0.65,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Ausencia de tabla ex-float en dos publicaciones seguidas",
+      "fuente_prevista": "filing",
+      "origen": [
+        {
+          "agent_role": "RED_TEAM",
+          "pred_id": "PRED_RT_005"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-004",
+      "descripcion": "Interest expense anualizado superará 10M USD antes de fin de 2026",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Suma 4T de interest expense >=10M USD",
+      "fuente_prevista": "10-Q",
+      "origen": [
+        {
+          "agent_role": "RED_TEAM",
+          "pred_id": "PRED_RT_004"
+        }
+      ]
+    },
+    {
+      "pred_id": "CP-005",
+      "descripcion": "Deuda neta reportada se mantiene negativa en 4 trimestres",
+      "probabilidad_0_1": 0.73,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Caja reportada > deuda total en cada trimestre",
+      "fuente_prevista": "10-Q",
+      "origen": [
+        {
+          "agent_role": "CATALYST",
+          "pred_id": "PRED_008"
+        },
+        {
+          "agent_role": "BULL",
+          "pred_id": "PRED_FUS_005"
+        }
+      ]
+    }
+  ],
+  "arbitraje": {
+    "notas_arbitro": [
+      "Se mantiene WATCHLIST por conflicto no resuelto sobre calidad de FCF y composición de caja (float vs caja corporativa).",
+      "El bloque probabilístico muestra EV positivo, pero asimetría desfavorable (0.50) y Kelly=0%, lo que impide sizing.",
+      "El gate de supervivencia queda CONDITIONAL por falta de tabla de covenants/headroom y bridge recurrente ex-float.",
+      "Override documentado: aunque la tabla de asimetría sugiere mayor prudencia, se prioriza WATCHLIST por opcionalidad condicionada a hitos verificables."
+    ],
+    "desacuerdos_detectados": [
+      {
+        "tema": "Calidad estructural del FCF",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "FCF positivo es ancla de valor",
+            "confianza_0_1": 0.65
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "FCF puede estar inflado por float/WC",
+            "confianza_0_1": 0.8
+          },
+          {
+            "agent_role": "CATALYST",
+            "posicion": "Sin bridge ex-float no hay validación",
+            "confianza_0_1": 0.66
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "NO_RESUELTO",
+          "decision": "penalizar_tamaño",
+          "por_que": "No existe evidencia cuantitativa recurrente para separar caja estructural de transitoria.",
+          "accion": "Mantener WATCHLIST hasta dos bridges ex-float consecutivos."
+        }
+      },
+      {
+        "tema": "Solvencia real ex-float",
+        "agentes": [
+          {
+            "agent_role": "FORENSIC",
+            "posicion": "Supervivencia APTO con liquidez reportada",
+            "confianza_0_1": 0.68
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "Caja neta reportada podría sobreestimar liquidez utilizable",
+            "confianza_0_1": 0.8
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "NO_RESUELTO",
+          "decision": "convertir_gate_a_conditional",
+          "por_que": "Sin covenants/headroom y sin desglose ex-float, no procede PASS pleno de supervivencia.",
+          "accion": "Gate survivability en CONDITIONAL."
+        }
+      },
+      {
+        "tema": "Ritmo de mejora de margen",
+        "agentes": [
+          {
+            "agent_role": "BULL",
+            "posicion": "Apalancamiento operativo latente",
+            "confianza_0_1": 0.55
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "posicion": "No hay evidencia sostenida de mejora",
+            "confianza_0_1": 0.9
+          }
+        ],
+        "resolucion_arbitro": {
+          "estado": "RESUELTO",
+          "decision": "reducir_probabilidad_bull",
+          "por_que": "Q2 mejoró pero Q3 revirtió; la evidencia histórica favorece cautela.",
+          "accion": "BULL en 0.15 y exigencia de mejora 3/4 trimestres."
+        }
+      }
+    ],
+    "puntos_abiertos": [
+      "Composición exacta de caja entre efectivo corporativo y fondos de terceros.",
+      "Tabla completa de covenants, thresholds y headroom.",
+      "Serie homogénea de SBC y acciones diluidas para riesgo por acción.",
+      "Capex económico total incluyendo software capitalizado.",
+      "Puente consistente AP/AR/float para explicar recurrencia de CFO."
+    ]
+  },
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Reconciliación trimestral CFO/FCF ex-float",
+      "por_que_importa": "Define si el FCF es estructural o transitorio.",
+      "como_obtenerlo": "MD&A de liquidez + notas de funds payable/restricted cash en 10-Q/10-K."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla de covenants y headroom actualizados",
+      "por_que_importa": "Determina riesgo de supervivencia financiera en 12-24 meses.",
+      "como_obtenerlo": "Nota de deuda en 10-Q/10-K y 8-K de credit facility."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "TTM homogéneo de EBIT, CFO, CAPEX y FCF",
+      "por_que_importa": "Evita mezclar cortes y mejora trazabilidad de escenarios.",
+      "como_obtenerlo": "Construcción rolling 4Q desde estados financieros oficiales."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Capex económico total (PPE + software capitalizado)",
+      "por_que_importa": "Corrige posible sobreestimación de FCF.",
+      "como_obtenerlo": "Notas de intangibles/software y cash flow de 10-Q/10-K."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Serie trimestral de SBC y acciones diluidas",
+      "por_que_importa": "Mide riesgo de dilución y retorno por acción.",
+      "como_obtenerlo": "Notas de compensación en acciones y EPS diluido en 10-Q/10-K."
+    }
+  ],
+  "salida_para_siguiente_agente": {
+    "monitor_input_recomendado": "Usar este DecisionPacket_v2 fusionado como entrada base del MONITOR",
+    "estado_caso": "EN_ESPERA",
+    "proxima_revision_sugerida": "2026-05-15"
+  },
+  "log": {
+    "autochequeos": {
+      "decision_respeta_gates": true,
+      "supuestos_criticos_tienen_evidencia": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "kill_criteria_mapeados_a_supuestos": true,
+      "salida_solo_json": true,
+      "probabilidades_escenarios_suman_1": true,
+      "kelly_sizing_dentro_de_tope": true,
+      "intervalo_confianza_coherente_con_escenarios": true,
+      "decision_categorica_coherente_con_probabilistica": false,
+      "sizing_final_igual_preliminar_si_invertir": true,
+      "sensibilidad_cubre_supuestos_criticos": true
+    },
+    "limitaciones": [
+      "No existe aún serie ex-float recurrente para aislar FCF estructural.",
+      "Covenants y headroom no están detallados en el pack consolidado.",
+      "Capex de software no está integrado de forma homogénea en FCF base.",
+      "SBC y acciones diluidas no están consolidadas de forma consistente.",
+      "Persisten discrepancias entre modelos en asimetría y probabilidad bear."
+    ],
+    "revision": {
+      "es_revision": false,
+      "revision_num": 1,
+      "decision_packet_anterior_caso_id": null,
+      "monitoring_updates_usados": [],
+      "resumen_cambios": [
+        "Fusión multi-modelo ARBITRO con consolidación de conflictos críticos.",
+        "Se degradó survivability_gate de PASS a CONDITIONAL por evidencia de covenants incompleta.",
+        "Se incorporó override explícito de asimetría/kelly y se mantuvo WATCHLIST con sizing 0%."
+      ]
+    }
+  },
+  "control": {
+    "estado_flujo": "ARBITRATE",
+    "next_step": "MONITOR",
+    "next_agent_role": "MONITOR",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 2,
+    "issues": [
+      {
+        "issue_id": "ISS-001",
+        "issue_code": "FLOAT_BRIDGE_MISSING",
+        "gate_afectado": "survivability_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "SOURCES",
+        "descripcion": "Falta reconciliación cuantitativa recurrente de caja/FCF ex-float.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "cfo_reportado",
+            "ajuste_float",
+            "cfo_ex_float",
+            "fcf_ex_float"
+          ],
+          "notes": "Dos reportes trimestrales consecutivos con misma metodología y source_ref."
+        }
+      },
+      {
+        "issue_id": "ISS-002",
+        "issue_code": "COVENANT_HEADROOM_MISSING",
+        "gate_afectado": "survivability_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "SOURCES",
+        "descripcion": "No hay tabla completa de covenants, umbrales y headroom.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "covenant_name",
+            "threshold",
+            "actual_value",
+            "headroom_pct",
+            "maturity_schedule"
+          ],
+          "notes": "Debe venir con referencia a 10-Q/10-K/8-K."
+        }
+      },
+      {
+        "issue_id": "ISS-003",
+        "issue_code": "ECONOMIC_CAPEX_INCOMPLETE",
+        "gate_afectado": "mispricing_gate",
+        "severidad": "MEDIA",
+        "resoluble": true,
+        "owner_agent_role": "TRUTH_PACK",
+        "descripcion": "Capex base no integra software capitalizado y puede sesgar FCF.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "capex_ppe",
+            "software_capitalizado",
+            "capex_economico_total"
+          ],
+          "notes": "Construir serie trimestral homogénea para comparabilidad TTM."
+        }
+      }
+    ],
+    "work_orders": [],
+    "dispatch_queue": []
+  },
+  "_meta": {
+    "fusion": {
+      "step_name": "ARBITRO",
+      "schema": "DecisionPacket_v2",
+      "modelos_usados": [
+        "gemini",
+        "codex",
+        "claude"
+      ],
+      "criterios_resolucion": [
+        "Priorizar campos con mayor trazabilidad explícita a source_id y/o evidencia citada.",
+        "Ante conflicto cuantitativo, seleccionar valor conservador cuando afecta downside no resuelto.",
+        "Preservar warnings críticos de cualquier modelo (float, covenants, opacidad, dilución).",
+        "Mantener coherencia entre decisión categórica WATCHLIST y sizing final 0%."
+      ],
+      "conflictos_detectados": [
+        {
+          "campo": "schema_claude",
+          "modelos_en_conflicto": [
+            "claude",
+            "gemini/codex"
+          ],
+          "valores_modelo": {
+            "claude": "Output envoltorio no conforme + JSON interno no persistido",
+            "gemini": "DecisionPacket_v2 válido",
+            "codex": "DecisionPacket_v2 válido"
+          },
+          "resolucion": "Tomar estructura canónica de DecisionPacket_v2 y usar datos de Claude solo cuando explícitos y consistentes."
+        },
+        {
+          "campo": "gates.survivability_gate.status",
+          "modelos_en_conflicto": [
+            "gemini",
+            "codex",
+            "claude"
+          ],
+          "valores_modelo": {
+            "gemini": "PASS",
+            "codex": "CONDITIONAL",
+            "claude": "PASS"
+          },
+          "resolucion": "CONDITIONAL",
+          "criterio": "Se priorizó la advertencia más severa con evidencia de faltantes (covenants/headroom y ex-float)."
+        },
+        {
+          "campo": "decision_probabilistica.ratio_asimetria",
+          "modelos_en_conflicto": [
+            "gemini",
+            "codex",
+            "claude"
+          ],
+          "valores_modelo": {
+            "gemini": 0.33,
+            "codex": 1.06,
+            "claude": 0.5
+          },
+          "resolucion": 0.5,
+          "criterio": "Se eligió valor intermedio conservador coherente con Kelly=0 y postura WATCHLIST."
+        },
+        {
+          "campo": "empresa.sector/industria",
+          "modelos_en_conflicto": [
+            "gemini",
+            "codex",
+            "claude"
+          ],
+          "valores_modelo": {
+            "gemini": "Technology / Software - Application",
+            "codex": "UNKNOWN / UNKNOWN",
+            "claude": "Technology / Software - Application o variante de marketplace"
+          },
+          "resolucion": "Technology / Software - Application",
+          "criterio": "Se descartó UNKNOWN por menor calidad informativa."
+        }
+      ],
+      "rangos_scores_probabilidades": {
+        "probabilidad_exito_0_1": {
+          "min": 0.55,
+          "max": 0.65,
+          "recomendado": 0.65
+        },
+        "retorno_esperado_ponderado_pct": {
+          "min": 6,
+          "max": 12.55,
+          "recomendado": 6.75
+        },
+        "conviccion_0_1": {
+          "min": 0.56,
+          "max": 0.68,
+          "recomendado": 0.59
+        },
+        "ratio_asimetria": {
+          "min": 0.33,
+          "max": 1.06,
+          "recomendado": 0.5
+        },
+        "score_total_0_100": {
+          "min": 53,
+          "max": 60,
+          "recomendado": 54
+        },
+        "escenario_base_probabilidad_0_1": {
+          "min": 0.35,
+          "max": 0.5,
+          "recomendado": 0.5
+        },
+        "escenario_bull_probabilidad_0_1": {
+          "min": 0.15,
+          "max": 0.2,
+          "recomendado": 0.15
+        },
+        "escenario_bear_probabilidad_0_1": {
+          "min": 0.35,
+          "max": 0.45,
+          "recomendado": 0.35
+        }
+      },
+      "validacion": {
+        "json_valido": true,
+        "schema_objetivo": "DecisionPacket_v2",
+        "notas": "Se mantuvo estructura canónica y se añadió trazabilidad de fusión en _meta.fusion."
+      }
+    }
+  }
+}

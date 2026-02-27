@@ -55,11 +55,18 @@ absolutos.
 
 ## 7. TAREAS
 N1) Identificar tipo de filing y periodos cubiertos.
-N2) Extraer figuras anuales disponibles en este filing.
-N3) Extraer figuras trimestrales disponibles en este filing.
+N2) Extraer figuras anuales de TODOS los periodos visibles en este filing
+    (periodo actual + todos los comparativos). Un 10-K/20-F típicamente muestra
+    2-3 años de P&L/CF y 2 años de BS. Extrae TODOS. Máximo 10 periodos por filing.
+    Para cada periodo incluye: `periodo`, `fecha_fin`, `tipo_periodo` ("anual"|"trimestral"),
+    `moneda_original` (la moneda en que aparecen los datos antes de conversión).
+N3) Extraer figuras trimestrales de TODOS los periodos visibles (ídem que N2).
 N4) Extraer balance sheet si disponible (típicamente en 10-K/10-Q).
 N5) Extraer datos de leasing si disponible.
 N6) Verificar unidades y convertir a USD absolutos.
+    ATENCIÓN: Las unidades pueden variar por sección dentro del mismo filing
+    (e.g., Income Statement "in millions" pero Notes "in thousands").
+    Si se proporcionó METADATA DEL DOCUMENTO con unidades por sección, úsalas.
 N7) Marcar null para campos no encontrados en este filing.
 N8) Generar JSON parcial con source_filing anotado en cada dato.
 

@@ -1,0 +1,353 @@
+# FINANCIAL STATEMENTS — SRC_056_PRESENTATION_2025
+
+## INCOME STATEMENT
+
+```
+Relations
+Back to acvauto.com
+IR Overview
+News & Events
+Press Releases
+IR Calendar
+Presentations
+Email Alerts
+Company Info
+Company Profile
+Executive Team
+Contacts
+FAQ
+Financial Info
+Financial Results
+Income Statement
+Balance Sheet
+Cash Flow
+Stock Data
+Quote and Chart
+Historical Data
+Lock-Up Release FAQ
+ACVA Share Conversion Form
+SEC Filings
+All SEC Filings
+Annual Reports
+Quarterly Reports
+Section 16 Filings
+Governance
+At-a-Glance
+Board of Directors
+Board Committees
+Governance Documents
+Back to acvauto.com
+Press Releases
+News & Events
+News & Events
+Press Releases
+IR Calendar
+Presentations
+Email Alerts
+ACV Showcases AI-Powered Data Solutions at Used Car Week 2025
+November 17, 2025 2:26 pm EST
+Download as PDF
+Company leaders featured across marquee sessions and honored with industry awards as ACV highlights data-driven tools and commercial solutions at Used Car Week
+BUFFALO, N.Y.--(BUSINESS WIRE)--
+ACV
+(NYSE: ACVA), the leading digital automotive marketplace and data services partner for dealers and commercial partners, today announced its presence at
+Used Car Week 2025
+, where the company will spotlight its full suite of dealer and consignor solutions—from consumer vehicle acquisition and inventory management to precision appraisals and pricing—plus value-added services like Transportation and Capital, now expanding off-platform. ACV leaders will join multiple main-program sessions on fraud prevention, pricing science and the wholesale outlook, and two team members have been nominated for top industry awards: Auto Remarketing’s
+40 Under 40: Industry
+and
+Women in Remarketing
+.
+“This conference is a great opportunity for the ACV team to connect with commercial consignors and update them on the power of our AI enabled solutions,” said George Chamoun, CEO of ACV. “Our suite of tools is supported by our digital and physical auction footprint, tailored inspections and data-backed valuations. Our objective is a connected platform that reduces risk and delivers measurable outcomes, and we look forward to engaging with partners in Las Vegas to demonstrate exactly that. Also, at Used Car Week, we’re highlighting how ACV’s data-driven tools help dealers source inventory and instantly price with accuracy to improve overall performance.”
+ACV’s presence at Used Car Week extends beyond the expo floor. ACV leaders will participate in various educational sessions to tackle the industry’s most urgent challenges: vehicle transport fraud, integrating data rigor to pricing and inventory, and charting the wholesale outlook with peers from across the ecosystem.
+From Gut Feels to Real Deals: Pricing with Tech
+, moderated by ACV Vice President of Field Initiatives, Doug Hadden, and featuring ACV Vice President of Data Science & Analytics, John Coles; #1 Cochran Corporate Pre-Owned Director, Danny Papakalos; and Luther Automotive Group’s Used Car Director, Jamison Rohrbeck.
+Tired of guesswork and gut checks? This can’t-miss session shows how dealers are applying technology to bring precision and consistency to appraisals, pricing, and inventory management—turning cars faster, pricing with confidence, and making smarter buy/sell decisions.
+Transport Fraud Exposed: The Real Cost of Inaction
+,
+featuring Ross Yudkin, Head of ACV Transportation.
+Vehicle-transport fraud has shifted from occasional to systemic—hitting lenders, consignors, auctions, and dealers for millions. In this session, SYCN Auto Logistics Executive Vice President, John Robertson, leads a cross-industry panel through real cases—from AI impersonation and falsified credentials to stolen units and hacked systems—and the tactics that stop them. Attendees will walk away with updated vetting playbooks and deploy-now fraud-prevention tech.
+Wholesale Auto Industry Insights from Leading Executives — Part 2
+,
+featuring ACV CEO George Chamoun.
+Executives from leading physical auctions and digital platforms will share what’s shaping wholesale today—from shifting supply/demand dynamics to the next wave of technology. The discussion will dig into how ancillary services create value, where operations can be streamlined, and what best practices are emerging across channels. Attendees can expect a candid outlook on where the market is heading and how to prepare.
+Women in Remarketing Panel
+,
+featuring ACV’s Director of Enterprise Sales, Ashley Roseberry.
+Women leaders from across wholesale will share career lessons, mentorship strategies, and how inclusive teams drive measurable results. Expect candid takeaways on data-driven decision-making, navigating change, and accelerating performance.
+ACV team members will also be recognized at Used Car Week with award nominations that highlight leadership, innovation and rising talent across the remarketing ecosystem. The honors reflect contributions to enterprise partnerships, regional growth and industry impact.
+Women in Remarketing
+: Ashley Roseberry, Director of Enterprise Sales
+Auto Remarketing 40 Under 40
+: Dave Hurlbutt, Regional Sales Director
+“Recognition at Used Car Week underscores both the caliber of the ACV team and the tangible impact of their work,” said George Chamoun, CEO of ACV. “I’m fortunate to be surrounded by a team of true industry thought-leaders—people committed to customer service, ongoing learning, while advancing the use of data and AI across all areas of remarketing. Together, we aim to set a higher standard for what dealers and commercial consigners can expect from a partner.”
+For more information about ACV, visit
+www.acvauto.com
+.
+About ACV
+ACV is on a mission to transform the automotive industry by building the most trusted and efficient digital marketplaces and data solutions for sourcing, selling and managing used vehicles with transparency and comprehensive insights that were once unimaginable.
+ACV offerings include ACV Auctions, ACV Transportation, ACV Capital, MAX Digital, True360, and ClearCar. For more information about ACV, visit
+www.acvauto.com
+.
+Trademark reference: ACV, the ACV logo, and ClearCar are registered trademarks or trademarks of ACV Auctions, Inc. or its affiliates in the United States and/or other countries. All other trademarks referenced herein are the property of their respective owners.
+View source version on businesswire.com:
+https://www.businesswire.com/news/home/20251117505270/en/
+Media:
+Maura Duggan
+maura@acvauctions.com
+Source: ACV
+Released November 17, 2025
+email
+Email Alerts
+location_city
+Company Profile
+contact_page
+Contacts
+rss_feed
+RSS News Feed
+account_tree
+Sitemap
+©
+2026
+ACV Auctions Inc.
+All Rights Reserved.
+Privacy Policy
+Disclaimer
+Sitemap
+Accessibility Statement
+
+```
+
+---
+
+## BALANCE SHEET
+
+```
+ acvauto.com
+IR Overview
+News & Events
+Press Releases
+IR Calendar
+Presentations
+Email Alerts
+Company Info
+Company Profile
+Executive Team
+Contacts
+FAQ
+Financial Info
+Financial Results
+Income Statement
+Balance Sheet
+Cash Flow
+Stock Data
+Quote and Chart
+Historical Data
+Lock-Up Release FAQ
+ACVA Share Conversion Form
+SEC Filings
+All SEC Filings
+Annual Reports
+Quarterly Reports
+Section 16 Filings
+Governance
+At-a-Glance
+Board of Directors
+Board Committees
+Governance Documents
+Back to acvauto.com
+Press Releases
+News & Events
+News & Events
+Press Releases
+IR Calendar
+Presentations
+Email Alerts
+ACV Showcases AI-Powered Data Solutions at Used Car Week 2025
+November 17, 2025 2:26 pm EST
+Download as PDF
+Company leaders featured across marquee sessions and honored with industry awards as ACV highlights data-driven tools and commercial solutions at Used Car Week
+BUFFALO, N.Y.--(BUSINESS WIRE)--
+ACV
+(NYSE: ACVA), the leading digital automotive marketplace and data services partner for dealers and commercial partners, today announced its presence at
+Used Car Week 2025
+, where the company will spotlight its full suite of dealer and consignor solutions—from consumer vehicle acquisition and inventory management to precision appraisals and pricing—plus value-added services like Transportation and Capital, now expanding off-platform. ACV leaders will join multiple main-program sessions on fraud prevention, pricing science and the wholesale outlook, and two team members have been nominated for top industry awards: Auto Remarketing’s
+40 Under 40: Industry
+and
+Women in Remarketing
+.
+“This conference is a great opportunity for the ACV team to connect with commercial consignors and update them on the power of our AI enabled solutions,” said George Chamoun, CEO of ACV. “Our suite of tools is supported by our digital and physical auction footprint, tailored inspections and data-backed valuations. Our objective is a connected platform that reduces risk and delivers measurable outcomes, and we look forward to engaging with partners in Las Vegas to demonstrate exactly that. Also, at Used Car Week, we’re highlighting how ACV’s data-driven tools help dealers source inventory and instantly price with accuracy to improve overall performance.”
+ACV’s presence at Used Car Week extends beyond the expo floor. ACV leaders will participate in various educational sessions to tackle the industry’s most urgent challenges: vehicle transport fraud, integrating data rigor to pricing and inventory, and charting the wholesale outlook with peers from across the ecosystem.
+From Gut Feels to Real Deals: Pricing with Tech
+, moderated by ACV Vice President of Field Initiatives, Doug Hadden, and featuring ACV Vice President of Data Science & Analytics, John Coles; #1 Cochran Corporate Pre-Owned Director, Danny Papakalos; and Luther Automotive Group’s Used Car Director, Jamison Rohrbeck.
+Tired of guesswork and gut checks? This can’t-miss session shows how dealers are applying technology to bring precision and consistency to appraisals, pricing, and inventory management—turning cars faster, pricing with confidence, and making smarter buy/sell decisions.
+Transport Fraud Exposed: The Real Cost of Inaction
+,
+featuring Ross Yudkin, Head of ACV Transportation.
+Vehicle-transport fraud has shifted from occasional to systemic—hitting lenders, consignors, auctions, and dealers for millions. In this session, SYCN Auto Logistics Executive Vice President, John Robertson, leads a cross-industry panel through real cases—from AI impersonation and falsified credentials to stolen units and hacked systems—and the tactics that stop them. Attendees will walk away with updated vetting playbooks and deploy-now fraud-prevention tech.
+Wholesale Auto Industry Insights from Leading Executives — Part 2
+,
+featuring ACV CEO George Chamoun.
+Executives from leading physical auctions and digital platforms will share what’s shaping wholesale today—from shifting supply/demand dynamics to the next wave of technology. The discussion will dig into how ancillary services create value, where operations can be streamlined, and what best practices are emerging across channels. Attendees can expect a candid outlook on where the market is heading and how to prepare.
+Women in Remarketing Panel
+,
+featuring ACV’s Director of Enterprise Sales, Ashley Roseberry.
+Women leaders from across wholesale will share career lessons, mentorship strategies, and how inclusive teams drive measurable results. Expect candid takeaways on data-driven decision-making, navigating change, and accelerating performance.
+ACV team members will also be recognized at Used Car Week with award nominations that highlight leadership, innovation and rising talent across the remarketing ecosystem. The honors reflect contributions to enterprise partnerships, regional growth and industry impact.
+Women in Remarketing
+: Ashley Roseberry, Director of Enterprise Sales
+Auto Remarketing 40 Under 40
+: Dave Hurlbutt, Regional Sales Director
+“Recognition at Used Car Week underscores both the caliber of the ACV team and the tangible impact of their work,” said George Chamoun, CEO of ACV. “I’m fortunate to be surrounded by a team of true industry thought-leaders—people committed to customer service, ongoing learning, while advancing the use of data and AI across all areas of remarketing. Together, we aim to set a higher standard for what dealers and commercial consigners can expect from a partner.”
+For more information about ACV, visit
+www.acvauto.com
+.
+About ACV
+ACV is on a mission to transform the automotive industry by building the most trusted and efficient digital marketplaces and data solutions for sourcing, selling and managing used vehicles with transparency and comprehensive insights that were once unimaginable.
+ACV offerings include ACV Auctions, ACV Transportation, ACV Capital, MAX Digital, True360, and ClearCar. For more information about ACV, visit
+www.acvauto.com
+.
+Trademark reference: ACV, the ACV logo, and ClearCar are registered trademarks or trademarks of ACV Auctions, Inc. or its affiliates in the United States and/or other countries. All other trademarks referenced herein are the property of their respective owners.
+View source version on businesswire.com:
+https://www.businesswire.com/news/home/20251117505270/en/
+Media:
+Maura Duggan
+maura@acvauctions.com
+Source: ACV
+Released November 17, 2025
+email
+Email Alerts
+location_city
+Company Profile
+contact_page
+Contacts
+rss_feed
+RSS News Feed
+account_tree
+Sitemap
+©
+2026
+ACV Auctions Inc.
+All Rights Reserved.
+Privacy Policy
+Disclaimer
+Sitemap
+Accessibility Statement
+
+```
+
+---
+
+## CASH FLOW
+
+```
+R Overview
+News & Events
+Press Releases
+IR Calendar
+Presentations
+Email Alerts
+Company Info
+Company Profile
+Executive Team
+Contacts
+FAQ
+Financial Info
+Financial Results
+Income Statement
+Balance Sheet
+Cash Flow
+Stock Data
+Quote and Chart
+Historical Data
+Lock-Up Release FAQ
+ACVA Share Conversion Form
+SEC Filings
+All SEC Filings
+Annual Reports
+Quarterly Reports
+Section 16 Filings
+Governance
+At-a-Glance
+Board of Directors
+Board Committees
+Governance Documents
+Back to acvauto.com
+Press Releases
+News & Events
+News & Events
+Press Releases
+IR Calendar
+Presentations
+Email Alerts
+ACV Showcases AI-Powered Data Solutions at Used Car Week 2025
+November 17, 2025 2:26 pm EST
+Download as PDF
+Company leaders featured across marquee sessions and honored with industry awards as ACV highlights data-driven tools and commercial solutions at Used Car Week
+BUFFALO, N.Y.--(BUSINESS WIRE)--
+ACV
+(NYSE: ACVA), the leading digital automotive marketplace and data services partner for dealers and commercial partners, today announced its presence at
+Used Car Week 2025
+, where the company will spotlight its full suite of dealer and consignor solutions—from consumer vehicle acquisition and inventory management to precision appraisals and pricing—plus value-added services like Transportation and Capital, now expanding off-platform. ACV leaders will join multiple main-program sessions on fraud prevention, pricing science and the wholesale outlook, and two team members have been nominated for top industry awards: Auto Remarketing’s
+40 Under 40: Industry
+and
+Women in Remarketing
+.
+“This conference is a great opportunity for the ACV team to connect with commercial consignors and update them on the power of our AI enabled solutions,” said George Chamoun, CEO of ACV. “Our suite of tools is supported by our digital and physical auction footprint, tailored inspections and data-backed valuations. Our objective is a connected platform that reduces risk and delivers measurable outcomes, and we look forward to engaging with partners in Las Vegas to demonstrate exactly that. Also, at Used Car Week, we’re highlighting how ACV’s data-driven tools help dealers source inventory and instantly price with accuracy to improve overall performance.”
+ACV’s presence at Used Car Week extends beyond the expo floor. ACV leaders will participate in various educational sessions to tackle the industry’s most urgent challenges: vehicle transport fraud, integrating data rigor to pricing and inventory, and charting the wholesale outlook with peers from across the ecosystem.
+From Gut Feels to Real Deals: Pricing with Tech
+, moderated by ACV Vice President of Field Initiatives, Doug Hadden, and featuring ACV Vice President of Data Science & Analytics, John Coles; #1 Cochran Corporate Pre-Owned Director, Danny Papakalos; and Luther Automotive Group’s Used Car Director, Jamison Rohrbeck.
+Tired of guesswork and gut checks? This can’t-miss session shows how dealers are applying technology to bring precision and consistency to appraisals, pricing, and inventory management—turning cars faster, pricing with confidence, and making smarter buy/sell decisions.
+Transport Fraud Exposed: The Real Cost of Inaction
+,
+featuring Ross Yudkin, Head of ACV Transportation.
+Vehicle-transport fraud has shifted from occasional to systemic—hitting lenders, consignors, auctions, and dealers for millions. In this session, SYCN Auto Logistics Executive Vice President, John Robertson, leads a cross-industry panel through real cases—from AI impersonation and falsified credentials to stolen units and hacked systems—and the tactics that stop them. Attendees will walk away with updated vetting playbooks and deploy-now fraud-prevention tech.
+Wholesale Auto Industry Insights from Leading Executives — Part 2
+,
+featuring ACV CEO George Chamoun.
+Executives from leading physical auctions and digital platforms will share what’s shaping wholesale today—from shifting supply/demand dynamics to the next wave of technology. The discussion will dig into how ancillary services create value, where operations can be streamlined, and what best practices are emerging across channels. Attendees can expect a candid outlook on where the market is heading and how to prepare.
+Women in Remarketing Panel
+,
+featuring ACV’s Director of Enterprise Sales, Ashley Roseberry.
+Women leaders from across wholesale will share career lessons, mentorship strategies, and how inclusive teams drive measurable results. Expect candid takeaways on data-driven decision-making, navigating change, and accelerating performance.
+ACV team members will also be recognized at Used Car Week with award nominations that highlight leadership, innovation and rising talent across the remarketing ecosystem. The honors reflect contributions to enterprise partnerships, regional growth and industry impact.
+Women in Remarketing
+: Ashley Roseberry, Director of Enterprise Sales
+Auto Remarketing 40 Under 40
+: Dave Hurlbutt, Regional Sales Director
+“Recognition at Used Car Week underscores both the caliber of the ACV team and the tangible impact of their work,” said George Chamoun, CEO of ACV. “I’m fortunate to be surrounded by a team of true industry thought-leaders—people committed to customer service, ongoing learning, while advancing the use of data and AI across all areas of remarketing. Together, we aim to set a higher standard for what dealers and commercial consigners can expect from a partner.”
+For more information about ACV, visit
+www.acvauto.com
+.
+About ACV
+ACV is on a mission to transform the automotive industry by building the most trusted and efficient digital marketplaces and data solutions for sourcing, selling and managing used vehicles with transparency and comprehensive insights that were once unimaginable.
+ACV offerings include ACV Auctions, ACV Transportation, ACV Capital, MAX Digital, True360, and ClearCar. For more information about ACV, visit
+www.acvauto.com
+.
+Trademark reference: ACV, the ACV logo, and ClearCar are registered trademarks or trademarks of ACV Auctions, Inc. or its affiliates in the United States and/or other countries. All other trademarks referenced herein are the property of their respective owners.
+View source version on businesswire.com:
+https://www.businesswire.com/news/home/20251117505270/en/
+Media:
+Maura Duggan
+maura@acvauctions.com
+Source: ACV
+Released November 17, 2025
+email
+Email Alerts
+location_city
+Company Profile
+contact_page
+Contacts
+rss_feed
+RSS News Feed
+account_tree
+Sitemap
+©
+2026
+ACV Auctions Inc.
+All Rights Reserved.
+Privacy Policy
+Disclaimer
+Sitemap
+Accessibility Statement
+
+```

@@ -57,7 +57,7 @@ _OFFICIAL_CLI_MODELS = frozenset({
     "claude-sonnet-4.6", "claude-sonnet-4.5", "claude-haiku-4.5",
     "claude-opus-4.6", "claude-opus-4.6-fast", "claude-opus-4.5",
     "claude-sonnet-4",
-    "gemini-3-pro-preview", "gemini-3-flash",
+    "gemini-3.1-pro-preview", "gemini-3-flash",
     "gpt-5.3-codex-spark", "gpt-5.3-codex", "gpt-5.2-codex", "gpt-5.2",
     "gpt-5.1-codex-max", "gpt-5.1-codex", "gpt-5.1",
     "gpt-5.1-codex-mini", "gpt-5-mini", "gpt-4.1",

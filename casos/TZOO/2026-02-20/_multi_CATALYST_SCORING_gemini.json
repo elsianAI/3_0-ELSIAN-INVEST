@@ -1,0 +1,467 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260220_TZOO",
+  "fecha_corte": "2026-02-20",
+  "agente": {
+    "agent_role": "CATALYST",
+    "agent_nombre": "CATALYST_SCORING_v1",
+    "modelo": "UNKNOWN",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260220_TZOO",
+    "implied_expectations_caso_id": "CASE_20260220_TZOO",
+    "sources_pack_caso_id": "CASE_20260220_TZOO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La valoración de TZOO está bloqueada por una opacidad financiera crítica, principalmente la falta de un reporte de deuda total que impide calcular el Enterprise Value (EV).",
+      "El catalizador principal y más probable es la resolución de esta opacidad en próximos reportes, lo que podría desbloquear un re-rating significativo al reducir la prima de riesgo.",
+      "Operativamente, la compañía enfrenta una fuerte compresión de márgenes (del 22% al 9% EBIT) y caída de ingresos, presentando un riesgo de ejecución elevado.",
+      "A pesar de los vientos en contra operativos, la empresa genera FCF positivo ($4.2M TTM) y tiene una gran posición de caja neta en relación a su capitalización de mercado (>30%).",
+      "El veredicto es 'WATCHLIST', pendiente de la clarificación del balance y de señales tempranas de estabilización operativa."
+    ],
+    "veredicto_role_local": "WATCHLIST",
+    "confianza_0_1": 0.6
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La ausencia de una cifra de deuda total consolidada en los reportes financieros impide el cálculo del Enterprise Value (EV), bloqueando la valoración por múltiplos de empresa y DCF inverso.",
+      "confianza_0_1": 1,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "EXTERNA",
+          "source_id": "ImpliedExpectations_v1",
+          "url": null,
+          "titulo": "Implied Expectations Report",
+          "fecha": "2026-02-20",
+          "ubicacion": "motivo_blocked",
+          "cita_corta": "No es posible completar la valoración inversa porque faltan datos críticos: enterprise_value_usd depende de deuda_total_usd.",
+          "interpretacion": "La valoración fundamental está bloqueada por datos faltantes en el balance."
+        }
+      ],
+      "falsacion": {
+        "test": "Publicación de una cifra de deuda total explícita en el siguiente filing 10-K o 10-Q.",
+        "ventana_meses": {
+          "min": 1,
+          "max": 6
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El margen operativo se ha contraído drásticamente desde más del 20% en FY2024 a ~9% en TTM (base FY2025), debido a un aumento del coste de los ingresos (COGS) y a una base de gastos operativos (SGA) rígida.",
+      "confianza_0_1": 1,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "EXTERNA",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": "TruthPack Report",
+          "fecha": "2026-02-20",
+          "ubicacion": "historico_anual",
+          "cita_corta": "Margen EBIT FY2024 fue 22.0% ($18.5M/$83.9M) vs. 9.2% en FY2025-9M ($6.35M/$69.2M).",
+          "interpretacion": "La rentabilidad se ha deteriorado significativamente en el último año."
+        }
+      ],
+      "falsacion": {
+        "test": "La compañía reporta dos trimestres consecutivos con margen EBIT > 15%.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "A pesar de generar FCF positivo ($4.2M TTM), la caja de la compañía ha disminuido debido a agresivos flujos de financiación negativos (recompras de acciones), indicando una política de retorno de capital que consume liquidez.",
+      "confianza_0_1": 0.85,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "EXTERNA",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": "TruthPack Report",
+          "fecha": "2026-02-20",
+          "ubicacion": "historico_anual",
+          "cita_corta": "CFF para FY2025 (9M) fue de -$13.1M y para FY2023 fue de -$14.15M.",
+          "interpretacion": "La empresa está devolviendo capital a los accionistas de forma consistente, lo que explica la caída de la caja a pesar del FCF positivo."
+        }
+      ],
+      "falsacion": {
+        "test": "La compañía anuncia una pausa en su programa de recompra o el CFF se vuelve neutral/positivo durante dos trimestres.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "filing"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "TZOO reportará una línea explícita de 'Deuda Total' (o sus componentes de corto y largo plazo) en su próximo filing 10-K o 10-Q.",
+      "probabilidad_0_1": 0.9,
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "criterio_validacion": "El campo `deuda_total_usd` en el `TruthPack` generado a partir del próximo filing es un número no-nulo.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "El artefacto `ImpliedExpectations_v1` para TZOO del próximo ciclo de análisis (post-filing) tendrá un status 'PASS' y no 'BLOCKED'.",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 1,
+        "max": 6
+      },
+      "criterio_validacion": "El campo `status` del JSON `ImpliedExpectations_v1` es 'PASS'.",
+      "fuente_prevista": "otro"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "TZOO reportará un margen EBIT trimestral superior al 12% en al menos uno de los próximos cuatro trimestres.",
+      "probabilidad_0_1": 0.5,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "El cálculo (EBIT / Ingresos) es > 0.12 basado en los datos de un `TruthPack` trimestral.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "TZOO reportará crecimiento de ingresos interanual (YoY) positivo en al menos uno de los próximos cuatro trimestres.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "El cálculo (Ingresos QX 2026 / Ingresos QX 2025) es > 1.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "La ratio SGA/Ingresos se situará por debajo del 45% en el TTM calculado dentro de 12 meses.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 9,
+        "max": 15
+      },
+      "criterio_validacion": "El cálculo (SGA TTM / Ingresos TTM) < 0.45 en el `TruthPack` correspondiente.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "TZOO reportará un 'Delta de Caja' (Net increase/decrease in cash) positivo en al menos uno de los próximos 4 trimestres.",
+      "probabilidad_0_1": 0.4,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "`delta_cash_usd` > 0 en un reporte trimestral del `TruthPack`.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Reporte de Deuda Financiera Total (corto y largo plazo) y desglose de 'Otros Pasivos'.",
+      "por_que_importa": "Es indispensable para calcular el Enterprise Value (EV) y desbloquear la valoración fundamental.",
+      "como_obtenerlo": "Buscar en las notas a los estados financieros del próximo 10-K o 10-Q la sección de 'Deuda', 'Obligaciones Financieras' o 'Pasivos'."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Transcripción de la próxima 'earnings call' con sección de Q&A de analistas.",
+      "por_que_importa": "Para obtener color cualitativo del management sobre la estrategia de control de costes y recuperación de ingresos.",
+      "como_obtenerlo": "Servicios de transcripciones (e.g., Seeking Alpha, Bloomberg) o sección de Relación con Inversores de la web de TZOO."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Reporte de Acciones en Circulación Totalmente Diluidas.",
+      "por_que_importa": "Para refinar los cálculos por acción (FCF per share, EPS) y el impacto real de las recompras.",
+      "como_obtenerlo": "Buscar en el próximo 10-K/10-Q la tabla de reconciliación de acciones para el cálculo de EPS diluido."
+    }
+  ],
+  "payload": {
+    "payload_version": "CatalystPayload_v1",
+    "contenido": {
+      "mapeo_con_expectativas_implicitas": {
+        "variable_critica_principal": "OTRO",
+        "lectura_en_1_2_frases": "El mercado está descontando una elevada prima de riesgo por opacidad al no poder calcular el EV. El P/FCF implícito de ~13x es secundario frente al bloqueo fundamental. Un catalizador que resuelva la transparencia en el balance atacaría directamente esta incertidumbre."
+      },
+      "catalizadores": [
+        {
+          "catalyst_id": "C-001",
+          "nombre": "Resolución de la opacidad financiera mediante la publicación de la deuda total y el cálculo del Enterprise Value (EV).",
+          "categoria": "CORPORATIVO",
+          "es_no_binario": false,
+          "ventana_meses": {
+            "min": 3,
+            "probable": 6,
+            "max": 12
+          },
+          "probabilidad_0_1": 0.85,
+          "mecanismo_cierre_gap": "Al publicar una cifra de deuda total creíble, los inversores podrán calcular el Enterprise Value (EV), desbloqueando modelos de valoración estándar (DCF, EV/EBIT). Esto reduce la prima de riesgo por incertidumbre y permite que el precio refleje los fundamentales en lugar de la opacidad.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Potencial re-rating de +20-30% al eliminar el descuento por opacidad y habilitar la valoración por EV."
+              }
+            ],
+            "justificacion": "La eliminación de una barrera fundamental para el análisis institucional atrae a un universo más amplio de inversores."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "EXTERNA",
+              "source_id": "ImpliedExpectations_v1",
+              "ubicacion": "status",
+              "cita_corta": "status: 'BLOCKED', motivo: 'No es posible completar la valoración inversa porque ... faltan datos críticos: enterprise_value_usd depende de deuda_total_usd'",
+              "interpretacion": "La valoración está formalmente bloqueada por falta de datos."
+            },
+            {
+              "tipo": "EXTERNA",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "balance_sheet_ultimo",
+              "cita_corta": "deuda_total_usd: null",
+              "interpretacion": "El balance más reciente no especifica la deuda financiera total."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "Publicación de una cifra de deuda financiera total (o sus componentes) en un filing.",
+              "fuente_prevista": "10-K",
+              "umbral_o_condicion": "El campo `deuda_total_usd` en el siguiente `TruthPack` es un número explícito.",
+              "ventana_meses": {
+                "min": 1,
+                "max": 6
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Mención de la estructura de capital por parte del management en la próxima earnings call.",
+            "Mejora del status de `data_quality` en el `TruthPack` del próximo ciclo.",
+            "Publicación de un `ImpliedExpectations_v1` con status 'PASS'."
+          ],
+          "riesgos_de_ejecucion": [
+            "La cifra de deuda revelada es sustancialmente mayor a la esperada por el mercado.",
+            "La compañía continúa con un reporte opaco, proporcionando cifras no reconciliadas o confusas.",
+            "La revelación de la deuda coincide con un deterioro operativo, neutralizando el efecto positivo."
+          ],
+          "contra_catalizadores": [
+            "Un 'restatement' financiero que añada más confusión sobre la fiabilidad de los datos.",
+            "La adquisición de una compañía con deuda que complique aún más el balance consolidado."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Sección 'Balance Sheet' en filings 10-Q y 10-K.",
+              "Notas a los estados financieros sobre Deuda y Pasivos.",
+              "Artefactos `TruthPack_v1` y `ImpliedExpectations_v1` post-filing."
+            ]
+          }
+        },
+        {
+          "catalyst_id": "C-002",
+          "nombre": "Recuperación del margen operativo al 15%+ mediante control de costes (SGA y COGS).",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 12,
+            "max": 24
+          },
+          "probabilidad_0_1": 0.6,
+          "mecanismo_cierre_gap": "La estabilización de los ingresos, combinada con una disciplina estricta sobre la base de costes fijos (SGA) y la optimización de costes de producto (COGS), generará un apalancamiento operativo positivo, expandiendo los márgenes EBIT y FCF.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "MARGEN_OPERATIVO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "Retorno a un margen EBIT > 15%, desde el 9.2% actual."
+              },
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Potencial FCF adicional de $4-6M anuales."
+              }
+            ],
+            "justificacion": "La recuperación de la rentabilidad a niveles históricos demostraría la calidad y resiliencia del modelo de negocio."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "EXTERNA",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_anual",
+              "cita_corta": "El margen EBIT cayó del 22.0% en FY2024 al 9.2% en 9M-FY2025.",
+              "interpretacion": "Existe un deterioro severo y reciente de la rentabilidad."
+            },
+            {
+              "tipo": "EXTERNA",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_anual",
+              "cita_corta": "COGS/Ingresos subió del 12.5% al 19.0%; SGA se mantuvo fijo pese a la caída de ingresos.",
+              "interpretacion": "La compresión del margen tiene drivers tanto en costes variables como fijos."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "La compañía reporta dos trimestres consecutivos con un margen EBIT > 15%.",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "Margen EBIT trimestral > 0.15.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Anuncios de programas de eficiencia o reestructuración.",
+            "Mejora secuencial del margen bruto en los próximos trimestres.",
+            "Ratio SGA/Ingresos mostrando una tendencia a la baja."
+          ],
+          "riesgos_de_ejecucion": [
+            "Los recortes de costes (ej. marketing) impactan negativamente el crecimiento futuro.",
+            "Presiones inflacionarias en salarios y otros gastos operativos impiden la mejora.",
+            "La moral del equipo se resiente y afecta a la productividad."
+          ],
+          "contra_catalizadores": [
+            "Una guerra de precios en el sector que obligue a sacrificar margen.",
+            "Necesidad de realizar inversiones tecnológicas no planificadas que aumenten los gastos.",
+            "Pérdida de poder de negociación con proveedores de viajes."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "TRIMESTRAL",
+            "que_mirar": [
+              "Estado de Resultados en filings 10-Q y 10-K (líneas COGS, SGA, G&A).",
+              "Cálculo de margen bruto y operativo.",
+              "Transcripciones de earnings calls."
+            ]
+          }
+        },
+        {
+          "catalyst_id": "C-003",
+          "nombre": "Recuperación de ingresos a niveles pre-contracción (>$85M anuales).",
+          "categoria": "OPERATIVO",
+          "es_no_binario": true,
+          "ventana_meses": {
+            "min": 6,
+            "probable": 18,
+            "max": 30
+          },
+          "probabilidad_0_1": 0.55,
+          "mecanismo_cierre_gap": "Una normalización del gasto en viajes discrecionales, combinada con una ejecución comercial eficaz para monetizar su base de miembros, permitirá a TZOO volver a su nivel de ingresos históricos. El apalancamiento operativo magnificará el impacto en la rentabilidad.",
+          "impacto_esperado": {
+            "tipo": "CUANTITATIVO",
+            "drivers_afectados": [
+              {
+                "driver": "FCF",
+                "direccion": "SUBE",
+                "magnitud_rango": null,
+                "nota": "Potencial de FCF > $8M anuales si los ingresos superan los $85M y los márgenes se recuperan."
+              },
+              {
+                "driver": "MULTIPLO",
+                "direccion": "MEJORA",
+                "magnitud_rango": null,
+                "nota": "El mercado premiaría una historia de crecimiento renovado."
+              }
+            ],
+            "justificacion": "Volver a la senda del crecimiento es clave para cambiar la narrativa de estancamiento a 'turnaround'."
+          },
+          "evidencia_actual": [
+            {
+              "tipo": "EXTERNA",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_anual",
+              "cita_corta": "Ingresos cayeron de $104.9M en FY2019 y $83.9M en FY2024 a un run-rate de ~$69.2M en FY2025.",
+              "interpretacion": "La tendencia de ingresos es negativa y está lejos de los picos históricos."
+            },
+            {
+              "tipo": "EXTERNA",
+              "source_id": "TruthPack_v1",
+              "ubicacion": "historico_trimestral",
+              "cita_corta": "Q1-2025 fue el trimestre más fuerte del año ($23.1M ingresos), demostrando capacidad de generar trimestres sólidos.",
+              "interpretacion": "Existen focos de resiliencia en la generación de ingresos."
+            }
+          ],
+          "evidencia_confirmatoria_futura": [
+            {
+              "descripcion": "La compañía reporta dos trimestres consecutivos con crecimiento de ingresos interanual (YoY) > 5%.",
+              "fuente_prevista": "earnings",
+              "umbral_o_condicion": "(Ingresos Qx / Ingresos Qx-4) > 1.05",
+              "ventana_meses": {
+                "min": 6,
+                "max": 18
+              }
+            }
+          ],
+          "leading_indicators": [
+            "Datos macroeconómicos sobre el gasto en viajes y ocio.",
+            "Resultados financieros de competidores (Booking, Expedia, TripAdvisor).",
+            "Métricas de tráfico web y 'engagement' de la plataforma de TZOO.",
+            "Anuncios de nuevos acuerdos comerciales o expansiones geográficas."
+          ],
+          "riesgos_de_ejecucion": [
+            "La recuperación del sector de viajes es más lenta de lo previsto o se estanca.",
+            "TZOO pierde cuota de mercado frente a competidores más grandes o ágiles.",
+            "La estrategia de monetización de la base de miembros no da los frutos esperados."
+          ],
+          "contra_catalizadores": [
+            "Una recesión económica global que deprima el gasto discrecional.",
+            "Un nuevo shock exógeno que afecte a la industria de viajes (geopolítico, sanitario).",
+            "Disrupción tecnológica que haga obsoleto el modelo de negocio de curación de ofertas."
+          ],
+          "plan_monitorizacion": {
+            "frecuencia": "MENSUAL",
+            "que_mirar": [
+              "Reportes de la industria de viajes.",
+              "Resultados trimestrales de competidores.",
+              "Reportes trimestrales de TZOO (ingresos, segmentos geográficos)."
+            ]
+          }
+        }
+      ],
+      "conclusion_catalizadores": {
+        "calidad_catalizador": "MEDIA",
+        "por_que": "La tesis depende de un catalizador corporativo de alta calidad (mejora de la transparencia financiera), que es un prerrequisito para la re-valoración. Sin embargo, los catalizadores operativos (recuperación de margen y ingresos) son de menor certeza, ya que luchan contra tendencias negativas recientes y dependen tanto de la ejecución de la gerencia como de factores macroeconómicos. El potencial existe, pero el riesgo es considerable.",
+        "si_no_hay_catalizador_apto": false
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "La valoración está severamente limitada por la falta de un Enterprise Value calculable.",
+      "La calidad de los datos financieros históricos es 'PARTIAL', con TTM basado en un fallback anual, lo que reduce la fiabilidad de las métricas recientes.",
+      "El análisis depende de la materialización del catalizador de transparencia; sin él, la tesis operativa es difícil de cuantificar.",
+      "Las probabilidades asignadas son estimaciones sujetas a una elevada incertidumbre."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

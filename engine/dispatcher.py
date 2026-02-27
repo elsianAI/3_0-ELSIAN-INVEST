@@ -660,13 +660,18 @@ def _dispatch_model_with_retry(
                 return result
 
         if attempt < max_attempts and _is_retryable_dispatch_error(result.error, result.raw_output):
-            wait = backoff * attempt
+            # Use longer backoff for capacity/rate-limit errors (429)
+            err_text = f"{result.error or ''}\n{result.raw_output or ''}".lower()
+            _capacity_hints = ("429", "no capacity", "resource_exhausted", "capacity_exhausted", "rate limit")
+            is_capacity = any(h in err_text for h in _capacity_hints)
+            wait = max(30, backoff * attempt) if is_capacity else backoff * attempt
             decision_log.append(
-                f"primary:attempt_{attempt}_retry_wait_{wait}s_reason=retryable_error"
+                f"primary:attempt_{attempt}_retry_wait_{wait}s_reason={'capacity_error' if is_capacity else 'retryable_error'}"
             )
             print(
                 f"[dispatch] Retry {attempt}/{max_attempts} for {model_profile} "
-                f"via {primary.transport_name} (wait {wait}s): {(result.error or '')[:80]}",
+                f"via {primary.transport_name} (wait {wait}s{' [capacity backoff]' if is_capacity else ''}): "
+                f"{(result.error or '')[:80]}",
                 file=sys.stderr,
             )
             time.sleep(wait)

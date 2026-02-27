@@ -156,12 +156,12 @@ Principales comandos:
   "model_catalog": {
     "gpt-5.3-codex-spark": { "...": "..." },
     "claude-opus-4.6": { "...": "..." },
-    "gemini-3-pro": { "...": "..." }
+    "gemini-3.1-pro-preview": { "...": "..." }
   },
   "pipeline_models": [
     "gpt-5.3-codex-spark",
     "claude-opus-4.6",
-    "gemini-3-pro"
+    "gemini-3.1-pro-preview"
   ],
   "fusion_model": "claude-opus-4.6",
   "default_single_model": "gpt-5.3-codex-spark",

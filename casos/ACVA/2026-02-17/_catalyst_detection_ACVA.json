@@ -1,0 +1,783 @@
+{
+  "version_esquema": "PartialAgentReport_v1",
+  "caso_id": "CASE_20260217_ACVA",
+  "fecha_corte": "2026-02-19",
+  "agente": {
+    "agent_role": "CATALYST",
+    "agent_nombre": "CATALYST_v1",
+    "modelo": "GPT-5",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260217_ACVA",
+    "implied_expectations_caso_id": "CASE_20260217_ACVA",
+    "sources_pack_caso_id": "CASE_20260217_ACVA"
+  },
+  "claims_list": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "enunciado": "La valoracion actual de ACVA esta anclada en caja (FCF) mientras EBIT permanece negativo.",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "multiples_implicitos",
+          "cita_corta": "EV/FCF cercano a 15x con EBIT negativo."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual.FY2024",
+          "cita_corta": "FY2024 EBIT -84,105,000."
+        }
+      ],
+      "falsacion": {
+        "test": "EBIT anual pasa a positivo y se mantiene, desplazando la tesis basada en FCF.",
+        "umbral": "EBIT > 0 durante 4 trimestres consecutivos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 30
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "enunciado": "La exigencia implicita central de crecimiento de FCF es moderada, no extrema.",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf.resultado_grid[r=10%,g=3%,m=15x]",
+          "cita_corta": "CAGR FCF implicito 2.62% y FCF ano 5 ~79.6M."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "metricas_base",
+          "cita_corta": "FCF base FY2024: 69,936,000."
+        }
+      ],
+      "falsacion": {
+        "test": "El escenario central actualizado pasa a requerir crecimiento alto o contraccion estructural.",
+        "umbral": "CAGR implicito > 8% o < 0%",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "HECHO",
+      "enunciado": "Existe crecimiento de ingresos, pero la trayectoria de costos y EBIT sigue volatil.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q1-2025",
+          "cita_corta": "Q1-2025 ingresos 182,697,000; EBIT -14,431,000."
+        },
+        {
+          "source_id": "SRC_006",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q2-2025",
+          "cita_corta": "Q2-2025 ingresos 193,703,000; EBIT -7,195,000."
+        },
+        {
+          "source_id": "SRC_005",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q3-2025",
+          "cita_corta": "Q3-2025 EBIT -23,717,000; SG&A 72,826,000; G&A 48,212,000."
+        }
+      ],
+      "falsacion": {
+        "test": "La volatilidad operacional cae y mejora el margen operativo de forma consistente.",
+        "umbral": "Mejora YoY de margen EBIT en 3 de 4 trimestres",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "HECHO",
+      "enunciado": "La calidad del FCF es el debate principal por sensibilidad a capital de trabajo y float.",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "banderas",
+          "cita_corta": "possible_value_trap = true."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "log.limitaciones[1]",
+          "cita_corta": "FCF sensible a capital de trabajo, incluyendo float del marketplace."
+        }
+      ],
+      "falsacion": {
+        "test": "La empresa demuestra FCF recurrente con puente ex-float y menor ruido de working capital.",
+        "umbral": "FCF LTM >= 70M por 2 trimestres con disclosure ex-float",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "enunciado": "ACVA mantiene posicion de caja neta y capacidad para acciones financieras no dilutivas.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo",
+          "cita_corta": "deuda_total 123,000,000; caja 224,065,000."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "snapshot_mercado",
+          "cita_corta": "deuda_neta_usd = -101,065,000."
+        }
+      ],
+      "falsacion": {
+        "test": "La caja neta se erosiona y aparece tension financiera.",
+        "umbral": "deuda_neta > 0 durante 2 trimestres consecutivos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "HECHO",
+      "enunciado": "La opacidad de datos TTM y la sensibilidad al multiplo terminal elevan incertidumbre de rerating.",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "banderas",
+          "cita_corta": "opacidad_alta = true."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "faltantes_criticos",
+          "cita_corta": "Faltan fcf_ttm y ebit_ttm."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf.sensibilidades.ranking_drivers",
+          "cita_corta": "Driver mas sensible: multiple_terminal."
+        }
+      ],
+      "falsacion": {
+        "test": "La compania entrega series TTM completas y reconciliaciones consistentes.",
+        "umbral": "2 reportes consecutivos con TTM EBIT/FCF y puente de float",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        }
+      }
+    }
+  ],
+  "catalyst_candidates": [
+    {
+      "catalyst_id": "C-001",
+      "descripcion": "Disciplina de SG&A/G&A para que el crecimiento de ingresos se traduzca en menor perdida EBIT sostenida, cerrando la brecha entre caja positiva y rentabilidad operativa.",
+      "tipo": "OPERATIVO",
+      "estado_actual": {
+        "brecha_detectada": "El mercado paga EV/FCF alto con EBIT negativo; falta evidencia de apalancamiento operativo consistente.",
+        "evidencia_confirmada_futura": [
+          {
+            "test": "Mejora material de margen operativo anualizado.",
+            "umbral": "margen EBIT >= -11.2% (mejora >=200 pb vs FY2024)",
+            "ventana_meses": {
+              "min": 6,
+              "max": 24
+            }
+          },
+          {
+            "test": "Control estructural de costos fijos.",
+            "umbral": "(SG&A+G&A)/ingresos baja YoY en 3 de 4 trimestres",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            }
+          }
+        ]
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual.FY2024",
+          "cita_corta": "FY2024 ingresos 637,156,000; EBIT -84,105,000."
+        },
+        {
+          "source_id": "SRC_006",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q2-2025",
+          "cita_corta": "Q2-2025 ingresos 193,703,000; EBIT -7,195,000."
+        },
+        {
+          "source_id": "SRC_005",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q3-2025",
+          "cita_corta": "Q3-2025 EBIT -23,717,000; SG&A 72,826,000; G&A 48,212,000."
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "margen",
+          "direccion": "SUBE",
+          "magnitud_estimada": "200-400 pb"
+        },
+        {
+          "driver": "FCF",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+8M a +20M USD anual"
+        },
+        {
+          "driver": "multiplo",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+1x a +3x EV/FCF"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "(SG&A+G&A)/ingresos trimestral",
+          "umbral": "caida YoY >=150 pb",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        },
+        {
+          "indicador": "margen EBIT trimestral",
+          "umbral": ">= -10% en al menos 2 trimestres",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        },
+        {
+          "indicador": "perdida EBIT trimestral",
+          "umbral": "<= 10,000,000 en al menos 2 trimestres",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        },
+        {
+          "indicador": "ingresos trimestrales",
+          "umbral": ">= 190,000,000 con opex estable",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Reaceleracion de contratacion comercial eleva costos antes de madurar ingresos.",
+        "Inflacion salarial y costos tecnologicos sostienen presion en SG&A.",
+        "Costos regulatorios o legales deterioran la mejora de margen.",
+        "Nuevas iniciativas de producto incrementan G&A temporalmente.",
+        "Desaceleracion de demanda reduce apalancamiento operativo."
+      ],
+      "contracatalizadores": [
+        "Dos trimestres con (SG&A+G&A)/ingresos al alza >200 pb YoY.",
+        "Perdida EBIT trimestral >20M de forma recurrente.",
+        "Crecimiento de ingresos <8% YoY con opex de doble digito."
+      ]
+    },
+    {
+      "catalyst_id": "C-002",
+      "descripcion": "Convertir el FCF positivo en FCF recurrente menos dependiente de capital de trabajo y marketplace float para validar la lectura de valor por caja.",
+      "tipo": "OPERATIVO",
+      "estado_actual": {
+        "brecha_detectada": "Hay FCF positivo, pero existe riesgo de que no sea estructural por efectos de working capital.",
+        "evidencia_confirmada_futura": [
+          {
+            "test": "Sostenibilidad de caja libre en base LTM.",
+            "umbral": "FCF LTM >= 70,000,000 por 2 trimestres consecutivos",
+            "ventana_meses": {
+              "min": 6,
+              "max": 24
+            }
+          },
+          {
+            "test": "Menor dependencia de variaciones transitorias de capital de trabajo.",
+            "umbral": "margen FCF >= 11% con puente ex-float reportado",
+            "ventana_meses": {
+              "min": 6,
+              "max": 24
+            }
+          }
+        ]
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "metricas_base",
+          "cita_corta": "FY2024 FCF 69,936,000 y margen FCF 10.9763%."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "banderas",
+          "cita_corta": "possible_value_trap = true."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "log.limitaciones[1]",
+          "cita_corta": "FCF sensible a variaciones de capital de trabajo y float."
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+5M a +15M USD anual"
+        },
+        {
+          "driver": "margen",
+          "direccion": "SUBE",
+          "magnitud_estimada": "50-200 pb en margen FCF"
+        },
+        {
+          "driver": "multiplo",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+1x a +2x EV/FCF"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "FCF LTM",
+          "umbral": ">= 70,000,000",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        },
+        {
+          "indicador": "margen FCF",
+          "umbral": ">= 11%",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        },
+        {
+          "indicador": "CFO trimestral",
+          "umbral": "positivo en 4 de 4 trimestres",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        },
+        {
+          "indicador": "volatilidad de working capital",
+          "umbral": "menor dispersion intertrimestral",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Normalizacion de cuentas por pagar revierte parte de la caja operativa.",
+        "Caida del marketplace float reduce CFO reportado.",
+        "Cuentas por cobrar crecen mas rapido que ingresos.",
+        "Capex total o gastos capitalizados aumentan y erosionan FCF.",
+        "Sin disclosure ex-float no se puede verificar recurrencia."
+      ],
+      "contracatalizadores": [
+        "FCF LTM por debajo de 50M.",
+        "CFO trimestral negativo en 2 de 4 trimestres.",
+        "Variaciones de working capital explican la mayor parte del CFO."
+      ]
+    },
+    {
+      "catalyst_id": "C-003",
+      "descripcion": "Aplicar desapalancamiento tactico con caja neta para reducir gasto por intereses y mejorar la conversion de resultados a caja.",
+      "tipo": "FINANCIERO",
+      "estado_actual": {
+        "brecha_detectada": "Existe caja neta, pero el gasto financiero reciente subio y puede limitar la expansion de FCF.",
+        "evidencia_confirmada_futura": [
+          {
+            "test": "Reduccion de deuda bruta.",
+            "umbral": "deuda_total <= 100,000,000",
+            "ventana_meses": {
+              "min": 6,
+              "max": 24
+            }
+          },
+          {
+            "test": "Alivio en costo financiero anualizado.",
+            "umbral": "gasto por intereses <= 3,500,000 anual",
+            "ventana_meses": {
+              "min": 6,
+              "max": 24
+            }
+          }
+        ]
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.balance_sheet_ultimo",
+          "cita_corta": "deuda_total 123,000,000; caja 224,065,000."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "snapshot_mercado",
+          "cita_corta": "deuda_neta_usd = -101,065,000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual.FY2023-FY2024",
+          "cita_corta": "Intereses FY2024 -4,244,000 vs FY2023 -1,565,000."
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "deuda",
+          "direccion": "BAJA",
+          "magnitud_estimada": "-20M a -40M USD"
+        },
+        {
+          "driver": "FCF",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+1M a +4M USD anual"
+        },
+        {
+          "driver": "multiplo",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+0.5x a +1.5x EV/FCF"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "deuda_total trimestral",
+          "umbral": "tendencia descendente",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        },
+        {
+          "indicador": "intereses/ingresos",
+          "umbral": "caida YoY",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        },
+        {
+          "indicador": "deuda_neta",
+          "umbral": "mantenerse negativa",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        }
+      ],
+      "riesgos_ejecucion": [
+        "La empresa prioriza crecimiento y conserva deuda por flexibilidad.",
+        "Tasas y spreads se mantienen elevados.",
+        "Uso de caja para operacion limita prepagos.",
+        "Vencimientos concentrados fuerzan refinanciacion menos favorable."
+      ],
+      "contracatalizadores": [
+        "Deuda total supera 150M.",
+        "Gasto por intereses anualizado sube >20% YoY.",
+        "Deuda neta pasa a positiva y se mantiene."
+      ]
+    },
+    {
+      "catalyst_id": "C-004",
+      "descripcion": "Sostener el run-rate de ingresos 2025 para capturar escala operativa y respaldar el crecimiento de FCF implicito por valoracion.",
+      "tipo": "OPERATIVO",
+      "estado_actual": {
+        "brecha_detectada": "La valoracion requiere continuidad de crecimiento de caja; el crecimiento de ingresos debe sostenerse para financiarlo.",
+        "evidencia_confirmada_futura": [
+          {
+            "test": "Consolidacion de escala comercial.",
+            "umbral": "TTM ingresos >= 760,000,000",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            }
+          },
+          {
+            "test": "Persistencia de run-rate trimestral.",
+            "umbral": ">= 190,000,000 ingresos en 3 de 4 trimestres",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            }
+          }
+        ]
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm",
+          "cita_corta": "TTM ingresos 735,961,000 al 2025-09-30."
+        },
+        {
+          "source_id": "SRC_007/SRC_006/SRC_005",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q1-Q3 2025",
+          "cita_corta": "Q1 182,697,000; Q2 193,703,000; Q3 199,561,000."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf.resultado_grid[r=10%,g=3%,m=15x]",
+          "cita_corta": "Escenario central implica CAGR FCF 2.62%."
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+10M a +25M USD anual"
+        },
+        {
+          "driver": "margen",
+          "direccion": "SUBE",
+          "magnitud_estimada": "100-250 pb"
+        },
+        {
+          "driver": "multiplo",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+1x a +2x EV/FCF"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "crecimiento YoY de ingresos trimestrales",
+          "umbral": ">= 12%",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        },
+        {
+          "indicador": "TTM ingresos",
+          "umbral": ">= 760,000,000",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        },
+        {
+          "indicador": "margen FCF",
+          "umbral": ">= 10%",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Desaceleracion del mercado de vehiculos usados.",
+        "Presion competitiva en precios/comisiones.",
+        "Mezcla de ingresos menos favorable para monetizacion.",
+        "Ejecucion comercial insuficiente en nuevas cuentas.",
+        "Costos escalan mas rapido que ingresos."
+      ],
+      "contracatalizadores": [
+        "Ingresos trimestrales <180M en dos trimestres consecutivos.",
+        "Crecimiento YoY <8% por dos trimestres.",
+        "Margen FCF cae de forma sostenida pese crecimiento de ingresos."
+      ]
+    },
+    {
+      "catalyst_id": "C-005",
+      "descripcion": "Estandarizar disclosure con TTM completo de EBIT/FCF y puente explicito de marketplace float para reducir opacidad y riesgo de compresion de multiple terminal.",
+      "tipo": "CORPORATIVO",
+      "estado_actual": {
+        "brecha_detectada": "La sensibilidad al multiple terminal es alta y la transparencia de corto plazo es insuficiente.",
+        "evidencia_confirmada_futura": [
+          {
+            "test": "Publicacion sistematica de series TTM completas.",
+            "umbral": "2 reportes consecutivos con TTM EBIT, CFO, CAPEX y FCF",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            }
+          },
+          {
+            "test": "Reconciliacion explicita de efectos de float y non-GAAP.",
+            "umbral": "puente GAAP/non-GAAP + puente de float cada trimestre",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            }
+          }
+        ]
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "banderas",
+          "cita_corta": "opacidad_alta = true."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "faltantes_criticos",
+          "cita_corta": "Faltan fcf_ttm y ebit_ttm."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "reverse_dcf_fcf.sensibilidades",
+          "cita_corta": "multiple_terminal es el driver mas importante."
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "multiplo",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+1x a +3x EV/FCF"
+        },
+        {
+          "driver": "deuda",
+          "direccion": "BAJA",
+          "magnitud_estimada": "0M a -20M USD indirecto por menor prima de riesgo"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "presencia de tabla TTM en cada filing",
+          "umbral": "completa y consistente",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        },
+        {
+          "indicador": "puente de marketplace float",
+          "umbral": "publicado trimestralmente",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        },
+        {
+          "indicador": "consistencia de acciones diluidas y market cap",
+          "umbral": "sin discrepancias materiales",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          }
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Sistemas de reporte no integran datos operativos y financieros a tiempo.",
+        "Definiciones de KPI no estandarizadas entre periodos.",
+        "Comunicacion prioriza no-GAAP sin puentes completos.",
+        "Cambios de perimetro contable retrasan comparabilidad."
+      ],
+      "contracatalizadores": [
+        "Persisten faltantes criticos de TTM en reportes sucesivos.",
+        "Inconsistencias entre transcript, 10-Q y 10-K.",
+        "No se publica reconciliacion explicita de float."
+      ]
+    },
+    {
+      "catalyst_id": "C-006",
+      "descripcion": "Mantener capex total disciplinado, incluyendo software capitalizado, para preservar margen FCF mientras la compania escala ingresos.",
+      "tipo": "FINANCIERO",
+      "estado_actual": {
+        "brecha_detectada": "Capex reportado es bajo, pero existe riesgo de subestimacion por capitalizacion de software no integrada al capex base.",
+        "evidencia_confirmada_futura": [
+          {
+            "test": "Disciplina de inversion total en plataforma.",
+            "umbral": "capex total (PPE + software) <= 1.5% de ingresos",
+            "ventana_meses": {
+              "min": 6,
+              "max": 24
+            }
+          },
+          {
+            "test": "Transparencia del gasto de inversion tecnologica.",
+            "umbral": "divulgacion trimestral de software capitalizado y su variacion",
+            "ventana_meses": {
+              "min": 6,
+              "max": 24
+            }
+          }
+        ]
+      },
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "TruthPack_v1.historico_anual.FY2024",
+          "cita_corta": "FY2024 capex -4,539,000 sobre ingresos 637,156,000."
+        },
+        {
+          "source_id": "SRC_005",
+          "ubicacion": "TruthPack_v1.historico_trimestral.Q3-2025",
+          "cita_corta": "Q3-2025 capex -6,807,000."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "log.limitaciones[3]",
+          "cita_corta": "Capex no suma capitalizacion de software."
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+5M a +12M USD anual"
+        },
+        {
+          "driver": "margen",
+          "direccion": "SUBE",
+          "magnitud_estimada": "100-200 pb en margen FCF"
+        },
+        {
+          "driver": "multiplo",
+          "direccion": "SUBE",
+          "magnitud_estimada": "+0.5x a +1.5x EV/FCF"
+        }
+      ],
+      "indicadores_lideres": [
+        {
+          "indicador": "capex total/ingresos",
+          "umbral": "<= 1.5%",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        },
+        {
+          "indicador": "software capitalizado/ingresos",
+          "umbral": "estable o descendente",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        },
+        {
+          "indicador": "margen FCF",
+          "umbral": ">= 11%",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          }
+        }
+      ],
+      "riesgos_ejecucion": [
+        "Subinversion en tecnologia afecta disponibilidad y conversion comercial.",
+        "Nuevos productos requieren mayor inversion de infraestructura.",
+        "Cambios contables trasladan gasto a capex sin productividad.",
+        "Escala de volumen eleva cfi por encima de lo planificado."
+      ],
+      "contracatalizadores": [
+        "Capex total >2.5% de ingresos en dos trimestres.",
+        "Software capitalizado crece mas rapido que ingresos sin mejora de FCF.",
+        "CFI se deteriora sin aceleracion proporcional de ingresos."
+      ]
+    }
+  ],
+  "validacion_salida": {
+    "sin_scores": true,
+    "sin_convicciones": true,
+    "sin_catalizadores_binarios": true,
+    "sin_especulacion_sin_base_empirica": true,
+    "catalizadores_detectados": 6
+  }
+}

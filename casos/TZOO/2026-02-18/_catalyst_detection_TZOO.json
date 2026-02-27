@@ -1,0 +1,635 @@
+{
+  "report_type": "Partial AgentReport",
+  "caso_id": "CASE_20260218_TZOO",
+  "fecha_corte": "2026-02-18",
+  "claims_list": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "enunciado": "La lectura de expectativas implícitas está bloqueada por ausencia de EV y deuda total.",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "status/motivo_blocked",
+          "cita": "Falta enterprise_value_usd (EV) en el TruthPack."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "snapshot_mercado",
+          "cita": "enterprise_value_usd: null; deuda_total_usd: null."
+        }
+      ],
+      "falsacion": {
+        "test": "EV y deuda total dejan de ser nulos en reporting estándar",
+        "umbral": "enterprise_value_usd y deuda_total_usd reportados en 2 periodos consecutivos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "enunciado": "Hay compresión material del margen operativo frente a FY2024.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual/FY2024",
+          "cita": "FY2024: EBIT 18,498,000 sobre ingresos 83,902,000 (22.05%)."
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas/margen_operativo_pct",
+          "cita": "TTM margen_operativo_pct: 12.51."
+        },
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral/Q3-2025",
+          "cita": "Q3-2025: EBIT 488,000 sobre ingresos 22,198,000."
+        }
+      ],
+      "falsacion": {
+        "test": "Recuperación sostenida de margen trimestral",
+        "umbral": "margen EBIT >= 10% en 2 trimestres consecutivos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "HECHO",
+      "enunciado": "El costo directo se deterioró en 2025 y comprimió el margen bruto.",
+      "evidencia_actual": [
+        {
+          "source_id": "tzoo-20250630",
+          "ubicacion": "historico_trimestral/Q2-2025",
+          "cita": "Q2-2025: COGS 5,163,000 sobre ingresos 23,906,000."
+        },
+        {
+          "source_id": "tzoo-20250630",
+          "ubicacion": "historico_trimestral/Q2-2024",
+          "cita": "Q2-2024: COGS 2,520,000 sobre ingresos 21,141,000."
+        },
+        {
+          "source_id": "tzoo-20250331",
+          "ubicacion": "historico_trimestral/Q1-2025 y Q1-2024",
+          "cita": "Q1-2025 COGS 4,172,000 vs Q1-2024 COGS 2,640,000."
+        }
+      ],
+      "falsacion": {
+        "test": "Normalización del ratio COGS/ingresos",
+        "umbral": "COGS/ingresos <= 17% en 2 trimestres consecutivos",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "HECHO",
+      "enunciado": "La conversión de EBIT a caja operativa se debilitó en 2025.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual/FY2024",
+          "cita": "FY2024 CFO 21,100,000."
+        },
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral/9M-2025",
+          "cita": "9M-2025: CFO 4,209,000 y EBIT 6,352,000."
+        },
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral/9M-2024",
+          "cita": "9M-2024 CFO 13,257,000."
+        }
+      ],
+      "falsacion": {
+        "test": "Mejora sostenida de conversión caja-beneficio",
+        "umbral": "CFO/EBIT >= 0.9 en TTM",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "enunciado": "El balance muestra colchón patrimonial limitado frente a pasivos y compromisos de arrendamiento.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo/FY2024",
+          "cita": "Activos 54,722,000; pasivos 50,369,000; patrimonio 4,353,000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "lease_data/FY2024",
+          "cita": "Operating lease liabilities total: 8,118,000."
+        }
+      ],
+      "falsacion": {
+        "test": "Fortalecimiento gradual de estructura financiera",
+        "umbral": "patrimonio/pasivos mejora y lease liabilities bajan en 2 cortes anuales",
+        "ventana_meses": {
+          "min": 12,
+          "max": 30
+        }
+      }
+    },
+    {
+      "claim_id": "CLM_006",
+      "tipo": "INFERENCIA",
+      "enunciado": "La valoración parece descontar riesgo de sostenibilidad y opacidad, no solo nivel de FCF FY2024.",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "multiples_implicitos",
+          "cita": "P/FCF: 2.96; FCF yield: 33.78%."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "banderas",
+          "cita": "posible_peak_earnings: true; opacidad_alta: true."
+        }
+      ],
+      "falsacion": {
+        "test": "Si mejora operacional y de disclosure sin cambio de múltiplo",
+        "umbral": "margen y transparencia mejoran, pero P/FCF no se re-expande",
+        "ventana_meses": {
+          "min": 6,
+          "max": 24
+        }
+      }
+    }
+  ],
+  "catalyst_candidates": [
+    {
+      "catalyst_id": "C-001",
+      "descripción": "Disciplina comercial y de SG&A para recuperar margen EBIT, reduciendo la brecha entre rentabilidad FY2024 y deterioro observado en 2025.",
+      "tipo": "OPERATIVO",
+      "estado_actual": "Márgenes comprimidos y SG&A elevado en 2025, con caída fuerte del EBIT trimestral.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral/Q3-2025",
+          "cita": "Q3-2025: sga_usd 12,198,000 y EBIT 488,000 sobre ingresos 22,198,000."
+        },
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral/Q3-2024",
+          "cita": "Q3-2024: sga_usd 8,247,000 y EBIT 4,045,000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual/FY2024",
+          "cita": "FY2024 margen operativo 22.05%."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test": "Normalización del gasto operativo comercial",
+          "umbral": "sga_usd/ingresos <= 45% en 2 trimestres consecutivos",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "test": "Recuperación de rentabilidad operativa",
+          "umbral": "margen EBIT trimestral >= 10% en al menos 2 trimestres",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "earnings"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "margen",
+          "dirección": "↑",
+          "magnitud_estimada": "200-700 pb"
+        },
+        {
+          "driver": "FCF",
+          "dirección": "↑",
+          "magnitud_estimada": "USD 2m-6m anual"
+        },
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "re-rating por menor riesgo de peak earnings"
+        }
+      ],
+      "indicadores_líderes": [
+        "sga_usd/ingresos baja secuencialmente durante dos trimestres",
+        "EBIT trimestral vuelve por encima de USD 2m",
+        "Mantenimiento de ingresos mientras cae gasto comercial relativo",
+        "Mejora de margen operativo TTM trimestre a trimestre"
+      ],
+      "riesgos_ejecución": [
+        "Recorte comercial excesivo daña adquisición de tráfico",
+        "Elasticidad competitiva obliga a mantener gasto promocional alto",
+        "Mix de producto migra a líneas de menor rentabilidad",
+        "Ahorros de costos tardan más de lo esperado en reflejarse",
+        "Volatilidad macro del viaje frena apalancamiento operativo"
+      ],
+      "contracatalizadores": [
+        "sga_usd/ingresos se mantiene por encima de 50%",
+        "EBIT trimestral permanece por debajo de 5% de margen",
+        "Ingresos caen interanual al mismo tiempo que sube SG&A"
+      ]
+    },
+    {
+      "catalyst_id": "C-002",
+      "descripción": "Recuperación del margen bruto mediante mejora de mix y costos directos, tras el deterioro de COGS observado en 2025.",
+      "tipo": "OPERATIVO",
+      "estado_actual": "El ratio COGS/ingresos subió de forma marcada interanual en Q1-Q3 2025.",
+      "evidencia_actual": [
+        {
+          "source_id": "tzoo-20250630",
+          "ubicacion": "historico_trimestral/Q2-2025",
+          "cita": "Q2-2025: COGS 5,163,000 sobre ingresos 23,906,000."
+        },
+        {
+          "source_id": "tzoo-20250630",
+          "ubicacion": "historico_trimestral/Q2-2024",
+          "cita": "Q2-2024: COGS 2,520,000 sobre ingresos 21,141,000."
+        },
+        {
+          "source_id": "tzoo-20250331",
+          "ubicacion": "historico_trimestral/Q1-2025 y Q1-2024",
+          "cita": "Q1-2025 COGS 4,172,000 vs Q1-2024 COGS 2,640,000."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test": "Normalización del costo directo",
+          "umbral": "COGS/ingresos <= 17% en 2 trimestres consecutivos",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "test": "Recuperación de margen bruto en términos absolutos",
+          "umbral": "gross_profit trimestral > USD 19m en 2 de 3 trimestres",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "earnings"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "margen",
+          "dirección": "↑",
+          "magnitud_estimada": "300-600 pb"
+        },
+        {
+          "driver": "FCF",
+          "dirección": "↑",
+          "magnitud_estimada": "USD 2m-5m anual"
+        },
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "menor descuento por erosión de unidad económica"
+        }
+      ],
+      "indicadores_líderes": [
+        "COGS/ingresos cae interanual y secuencialmente",
+        "Gross profit crece más rápido que ingresos",
+        "Estabilidad de ingresos sin sacrificar margen",
+        "Menor volatilidad trimestral del margen bruto"
+      ],
+      "riesgos_ejecución": [
+        "Renegociaciones con proveedores no capturan ahorro",
+        "Presión competitiva traslada más costo a la compañía",
+        "Cambio de mix hacia productos de menor margen",
+        "Efectos de divisa adversos sobre costos",
+        "Riesgo de sobrecorrección comercial que reduzca volumen"
+      ],
+      "contracatalizadores": [
+        "COGS/ingresos permanece por encima de 20%",
+        "Gross profit trimestral se estanca pese a crecimiento de ingresos",
+        "Márgenes brutos vuelven a deteriorarse en temporada alta"
+      ]
+    },
+    {
+      "catalyst_id": "C-003",
+      "descripción": "Restaurar conversión de EBIT a caja mediante disciplina de capital de trabajo y cobros, para sostener FCF más allá de FY2024.",
+      "tipo": "FINANCIERO",
+      "estado_actual": "La caja operativa de 2025 se desaceleró frente a 2024 pese a ingresos todavía altos.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual/FY2024",
+          "cita": "FY2024 CFO 21,100,000."
+        },
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral/9M-2025",
+          "cita": "9M-2025: CFO 4,209,000 y EBIT 6,352,000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo/FY2024",
+          "cita": "Cuentas por cobrar 12,825,000; cuentas por pagar 6,138,000."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test": "Mejora de conversión de utilidades a caja",
+          "umbral": "CFO/EBIT TTM >= 0.9",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "test": "Disciplina de capital de trabajo",
+          "umbral": "cuentas por cobrar/ingresos <= 14% en cierre anual",
+          "ventana_meses": {
+            "min": 12,
+            "max": 24
+          },
+          "fuente_prevista": "10-K"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "FCF",
+          "dirección": "↑",
+          "magnitud_estimada": "USD 4m-10m anual"
+        },
+        {
+          "driver": "deuda",
+          "dirección": "↓",
+          "magnitud_estimada": "menor necesidad de financiar caja"
+        },
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "descuento menor por calidad de caja"
+        }
+      ],
+      "indicadores_líderes": [
+        "CFO trimestral sube en términos interanuales",
+        "CFO/EBIT mejora hacia 1.0",
+        "Menor crecimiento de cuentas por cobrar frente a ingresos",
+        "Delta de caja deja de ser estructuralmente negativo"
+      ],
+      "riesgos_ejecución": [
+        "Cobros más lentos por deterioro de demanda final",
+        "Mayor estacionalidad de working capital que retrasa conversión",
+        "Dependencia de socios con términos de pago más largos",
+        "Margen operativo insuficiente para generar caja aun con disciplina",
+        "Riesgo de usar caja en usos no operativos"
+      ],
+      "contracatalizadores": [
+        "CFO/EBIT se mantiene por debajo de 0.6",
+        "Cuentas por cobrar crecen más rápido que ingresos",
+        "Reaparece consumo de caja operativo en periodos de alta demanda"
+      ]
+    },
+    {
+      "catalyst_id": "C-004",
+      "descripción": "Rebalanceo de asignación de capital: moderar salidas de financiación para estabilizar caja y reducir prima de riesgo de balance.",
+      "tipo": "FINANCIERO",
+      "estado_actual": "Las salidas de financiación han sido elevadas respecto al flujo operativo reciente.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual/FY2024",
+          "cita": "FY2024 CFF -18,973,000; delta_cash 1,351,000."
+        },
+        {
+          "source_id": "SRC_007",
+          "ubicacion": "historico_trimestral/9M-2025",
+          "cita": "9M-2025 CFF -13,068,000; delta_cash -8,493,000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo/FY2024",
+          "cita": "Caja FY2024: 17,064,000."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test": "Moderación sostenible de salidas de financiación",
+          "umbral": "abs(CFF) <= 60% de CFO en 2 trimestres consecutivos",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "test": "Estabilización de liquidez",
+          "umbral": "caja y equivalentes >= 15,000,000 en 4 trimestres",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "10-Q"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "deuda",
+          "dirección": "↓",
+          "magnitud_estimada": "menor riesgo de tensión de liquidez"
+        },
+        {
+          "driver": "FCF",
+          "dirección": "↑",
+          "magnitud_estimada": "más caja retenida para balance"
+        },
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "descuento menor por riesgo financiero"
+        }
+      ],
+      "indicadores_líderes": [
+        "CFF negativo se reduce de forma secuencial",
+        "Delta cash trimestral deja de ser persistentemente negativo",
+        "Relación CFO/CFF mejora trimestre a trimestre",
+        "Mayor proporción de caja destinada a operación frente a financiación"
+      ],
+      "riesgos_ejecución": [
+        "Persistencia de políticas agresivas de recompra",
+        "Caída de EBIT reduce margen para rebalancear capital",
+        "Necesidad de mantener retornos al accionista limita flexibilidad",
+        "Shock macro de demanda consume caja operativa",
+        "Percepción de mercado negativa si cambia política sin explicación"
+      ],
+      "contracatalizadores": [
+        "CFF sigue más negativo que CFO de forma repetida",
+        "Caja cae por debajo de USD 10m",
+        "Aparecen nuevas obligaciones que absorben liquidez"
+      ]
+    },
+    {
+      "catalyst_id": "C-005",
+      "descripción": "Mejora de transparencia financiera para desbloquear EV y reducir descuento por opacidad en la valoración.",
+      "tipo": "CORPORATIVO",
+      "estado_actual": "El framework de expectativas está bloqueado por campos críticos ausentes de estructura de capital.",
+      "evidencia_actual": [
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "status/motivo_blocked",
+          "cita": "BLOCKED: falta enterprise_value_usd."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "faltantes_criticos",
+          "cita": "Faltan deuda_total, fcf_ttm y acciones_diluidas."
+        },
+        {
+          "source_id": "ImpliedExpectations_v1",
+          "ubicacion": "banderas",
+          "cita": "opacidad_alta: true."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test": "Cierre de brechas mínimas de disclosure",
+          "umbral": "deuda_total_usd y acciones_diluidas no nulos en 2 periodos consecutivos",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "test": "Desbloqueo del motor de expectativas implícitas",
+          "umbral": "status pasa de BLOCKED a activo con EV calculable",
+          "ventana_meses": {
+            "min": 6,
+            "max": 18
+          },
+          "fuente_prevista": "otro"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "múltiplo",
+          "dirección": "↑",
+          "magnitud_estimada": "re-rating por menor incertidumbre estructural"
+        },
+        {
+          "driver": "deuda",
+          "dirección": "↔",
+          "magnitud_estimada": "mejor medición y monitoreo de riesgo"
+        }
+      ],
+      "indicadores_líderes": [
+        "deuda_total_usd aparece de forma consistente en filings",
+        "acciones_diluidas reportadas y conciliables con market cap/precio",
+        "EV y deuda_neta dejan de estar en null",
+        "Mejora del estado de data_quality en campos hoy faltantes"
+      ],
+      "riesgos_ejecución": [
+        "Persistencia de presentación sin línea explícita de deuda total",
+        "Inconsistencia de criterio entre deuda financiera y leases",
+        "Campos críticos siguen llegando con retraso o incompletos",
+        "Complejidad de reconciliar series históricas sin rupturas"
+      ],
+      "contracatalizadores": [
+        "Se mantiene status BLOCKED más de 4 trimestres",
+        "Nuevos vacíos de disclosure en métricas base",
+        "Revisiones de datos que reduzcan credibilidad del histórico"
+      ]
+    },
+    {
+      "catalyst_id": "C-006",
+      "descripción": "Optimización de huella de arrendamientos para liberar caja y reducir presión fija sobre márgenes.",
+      "tipo": "OPERATIVO",
+      "estado_actual": "Los compromisos y costos de lease son materiales frente a beneficios operativos.",
+      "evidencia_actual": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "lease_data/FY2024",
+          "cita": "Operating lease liabilities total: 8,118,000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "lease_data/FY2024",
+          "cita": "Total lease cost 3,173,000; cash paid 3,368,000."
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "historico_anual/FY2024",
+          "cita": "FY2024 EBIT 18,498,000."
+        }
+      ],
+      "evidencia_confirmada_futura": [
+        {
+          "test": "Reducción de costo de arrendamiento",
+          "umbral": "cash paid for lease liabilities <= 3,000,000 anual",
+          "ventana_meses": {
+            "min": 12,
+            "max": 30
+          },
+          "fuente_prevista": "10-K"
+        },
+        {
+          "test": "Menor presión fija sobre ingresos",
+          "umbral": "total lease cost/ingresos <= 3.3%",
+          "ventana_meses": {
+            "min": 12,
+            "max": 30
+          },
+          "fuente_prevista": "10-K"
+        }
+      ],
+      "drivers_afectados": [
+        {
+          "driver": "margen",
+          "dirección": "↑",
+          "magnitud_estimada": "50-150 pb"
+        },
+        {
+          "driver": "FCF",
+          "dirección": "↑",
+          "magnitud_estimada": "USD 0.3m-0.8m anual"
+        },
+        {
+          "driver": "deuda",
+          "dirección": "↓",
+          "magnitud_estimada": "menor carga de obligaciones de lease"
+        }
+      ],
+      "indicadores_líderes": [
+        "Descenso anual de operating lease liabilities",
+        "Reducción de cash paid for lease liabilities",
+        "Menor ratio lease cost/ingresos",
+        "Estabilidad operativa sin expansión de compromisos de lease"
+      ],
+      "riesgos_ejecución": [
+        "Penalidades por terminación anticipada de contratos",
+        "Renegociación limitada por mercado inmobiliario",
+        "Ahorros inferiores por indexación inflacionaria de rentas",
+        "Necesidades operativas impiden reducir espacio arrendado"
+      ],
+      "contracatalizadores": [
+        "Lease liabilities suben por nuevos contratos",
+        "Lease cost crece más rápido que ingresos",
+        "Cash paid por leases se mantiene por encima de FY2024"
+      ]
+    }
+  ]
+}

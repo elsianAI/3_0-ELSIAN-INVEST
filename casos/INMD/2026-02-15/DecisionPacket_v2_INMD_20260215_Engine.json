@@ -1,0 +1,2150 @@
+{
+  "version_esquema": "ArbitroRemediateKickoff_v1",
+  "decision_packet": {
+    "version_esquema": "DecisionPacket_v2",
+    "backward_compatible_with": "DecisionPacket_v1",
+    "caso_id": "CASE_20260215_INMD",
+    "fecha_corte": "2026-02-16",
+    "empresa": {
+      "ticker": "INMD",
+      "nombre": "InMode Ltd.",
+      "bolsa": "NASDAQ",
+      "pais": "Israel",
+      "sector": "Healthcare",
+      "industria": "Medical Devices"
+    },
+    "input_refs": {
+      "sources_pack_caso_id": "CASE_20260215_INMD",
+      "truth_pack_caso_id": "CASE_20260215_INMD",
+      "implied_expectations_caso_id": "CASE_20260215_INMD",
+      "agent_reports": [
+        {
+          "agent_role": "CATALYST",
+          "agent_nombre": "CATALYST_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.63
+        },
+        {
+          "agent_role": "FORENSIC",
+          "agent_nombre": "FORENSIC_SCORING_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.58
+        },
+        {
+          "agent_role": "BULL",
+          "agent_nombre": "BULL_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.66
+        },
+        {
+          "agent_role": "RED_TEAM",
+          "agent_nombre": "RED_TEAM_v1",
+          "report_ref": "AgentReport_v1",
+          "confianza_0_1": 0.82
+        }
+      ]
+    },
+    "charter": {
+      "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+      "horizonte_meses": {
+        "min": 6,
+        "max": 30
+      },
+      "restricciones_no_especulativo": [
+        "Evitar tesis binaria",
+        "Evitar dependencia de financiacion salvadora",
+        "Exigir supervivencia 12-24 meses razonable",
+        "Exigir catalizador no binario y medible"
+      ]
+    },
+    "resumen_ejecutivo": {
+      "decision": "BLOQUEADO",
+      "tamaño_recomendado_pct_cartera": 0,
+      "confianza_global_0_1": 0.67,
+      "racional_5_lineas": [
+        "El Data Quality Gate falla: TruthPack esta en PARTIAL y ImpliedExpectations esta en BLOCKED.",
+        "No existe base auditable para mispricing porque faltan EV bridge, EBIT TTM consistente y FCF calculable.",
+        "Los ingresos reportados muestran una caida significativa (130.2M a 93.2M YoY) y sin visibilidad completa de liquidez/solvencia el riesgo sigue alto.",
+        "Hay catalizadores operativos no binarios, pero sin desbloqueo de disclosure no hay tesis invertible.",
+        "Se activa REMEDIATE con work orders verificables antes de cualquier decision de capital."
+      ],
+      "lo_mas_importante_ahora": [
+        "Completar 20-F/6-K con balance y cash flow completos",
+        "Publicar deuda, caja, vencimientos 24m y covenants",
+        "Reejecutar ImpliedExpectations hasta status OK",
+        "Calcular EV y FCF para desbloquear valoracion",
+        "Confirmar estabilidad operativa en 2 trimestres (ingresos y margenes)"
+      ],
+      "principales_riesgos": [
+        "Opacidad financiera critica puede ocultar riesgo de refinanciacion",
+        "Persistencia de caida de ingresos y compresion de margenes",
+        "Value trap por falta de ancla de valoracion robusta",
+        "Recompra no ejecutada neta frente a SBC",
+        "Desaceleracion de consumables/service antes de ganar escala"
+      ]
+    },
+    "_comment_v2_decision_probabilistica": "NUEVO EN V2: bloque probabilistico que complementa la decision categorica",
+    "decision_probabilistica": {
+      "probabilidad_exito_0_1": 0.45,
+      "retorno_esperado_ponderado_pct": -12.2,
+      "escenarios_ponderados": {
+        "base": {
+          "probabilidad_0_1": 0.3,
+          "retorno_estimado_pct": 4
+        },
+        "bull": {
+          "probabilidad_0_1": 0.15,
+          "retorno_estimado_pct": 28
+        },
+        "bear": {
+          "probabilidad_0_1": 0.55,
+          "retorno_estimado_pct": -32
+        }
+      },
+      "sizing_kelly": {
+        "kelly_crudo_pct": 0,
+        "factor_ajuste_confianza": 0.469,
+        "kelly_ajustado_pct": 0,
+        "tope_maximo_pct": 10,
+        "sizing_preliminar_pct": 0,
+        "sizing_final_pct": 0,
+        "nota": "Asimetria desfavorable y EV esperado negativo dejan Kelly en 0; con decision BLOQUEADO, sizing final permanece 0."
+      },
+      "intervalo_confianza_90_pct": {
+        "percentil_5": -38.4,
+        "percentil_50": -12.2,
+        "percentil_95": 22.4
+      },
+      "conviccion_0_1": 0.4,
+      "ratio_asimetria": 0.13,
+      "_comment_ratio_asimetria": "upside_base / abs(downside_bear). >2 = asimetria favorable. <1 = desfavorable.",
+      "expected_value_anualizado_pct": -11.3,
+      "decision_categorica": "BLOQUEADO",
+      "_comment_decision_categorica": "Retrocompatible: replica resumen_ejecutivo.decision para que downstream no se rompa."
+    },
+    "_comment_v2_sensibilidad": "NUEVO EN V2: analisis de sensibilidad sobre supuestos clave",
+    "analisis_sensibilidad": [
+      {
+        "assumption_id": "A-001",
+        "variable": "data_completeness_pct",
+        "valor_base": 66.7,
+        "rango_test": {
+          "min": 60,
+          "max": 90,
+          "paso": 5
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": -18,
+          "si_max": -2
+        },
+        "impacto_en_decision": "Si completitud <70% se mantiene BLOQUEADO; si >=85% habilita pasar a decision no bloqueada tras rearbitraje.",
+        "nota": "Es la sensibilidad estructural dominante porque controla la auditabilidad del caso."
+      },
+      {
+        "assumption_id": "A-002",
+        "variable": "ingresos_trimestrales_usd_millones",
+        "valor_base": 93.2,
+        "rango_test": {
+          "min": 85,
+          "max": 110,
+          "paso": 2.5
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": -24,
+          "si_max": 6
+        },
+        "impacto_en_decision": "Si ingresos <90M por 2 trimestres pasa a DESCARTAR; si >=100M por 2 trimestres reduce riesgo de bloqueo en revision.",
+        "nota": "Variable operativa mas vinculada a riesgo de deterioro estructural."
+      },
+      {
+        "assumption_id": "A-010",
+        "variable": "disclosure_deuda_covenants_score_0_1",
+        "valor_base": 0.3,
+        "rango_test": {
+          "min": 0.2,
+          "max": 1,
+          "paso": 0.2
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": -22,
+          "si_max": 8
+        },
+        "impacto_en_decision": "Con score <=0.4 se mantiene BLOQUEADO; con score >=0.8 se habilita evaluacion plena de supervivencia.",
+        "nota": "Controla riesgo de refinanciacion no observable en el estado actual."
+      },
+      {
+        "assumption_id": "A-013",
+        "variable": "estado_implied_modelo_0_bloqueado_1_ok",
+        "valor_base": 0,
+        "rango_test": {
+          "min": 0,
+          "max": 1,
+          "paso": 1
+        },
+        "impacto_en_retorno_pct": {
+          "si_min": -12,
+          "si_max": 14
+        },
+        "impacto_en_decision": "Si sigue BLOCKED tras remediacion, decision permanece BLOQUEADO; si pasa a OK habilita arbitraje de mispricing.",
+        "nota": "Es el switch metodologico para pasar de narrativa a valoracion."
+      }
+    ],
+    "gates": {
+      "data_quality_gate": {
+        "status": "FAIL",
+        "por_que": [
+          "TruthPack.data_quality.status = PARTIAL (se requiere PASS).",
+          "ImpliedExpectations.status = BLOCKED.",
+          "BALANCE_IDENTITY y CASHFLOW_IDENTITY estan en SKIP.",
+          "Faltan campos criticos para EV/FCF/EBIT consistentes.",
+          "Sources truncados impiden extraccion confiable."
+        ],
+        "faltantes_criticos": [
+          {
+            "item": "Balance Sheet (Cash, Debt, Assets)",
+            "como_resolver": "Extraer de 20-F/6-K completo sin truncamiento."
+          },
+          {
+            "item": "Cash Flow Statement (CFO, CAPEX)",
+            "como_resolver": "Extraer de 20-F/6-K completo."
+          },
+          {
+            "item": "EV",
+            "como_resolver": "Publicar market_cap, deuda_total y caja del mismo corte temporal."
+          },
+          {
+            "item": "FCF",
+            "como_resolver": "Completar CFO y CAPEX TTM/FY para derivar FCF."
+          },
+          {
+            "item": "EBIT",
+            "como_resolver": "Cargar EBIT TTM con 4 trimestres contiguos recientes."
+          },
+          {
+            "item": "covenants",
+            "como_resolver": "Incluir covenant package y headroom vigente."
+          }
+        ]
+      },
+      "survivability_gate": {
+        "status": "CONDITIONAL",
+        "por_que": [
+          "Forensic.supervivencia.evaluacion.resultado = CONDITIONAL.",
+          "Hay CFO trimestral positivo (24.5M), sin prueba de FCF por CAPEX ausente.",
+          "Imposible cuantificar runway robusto mientras caja/deuda/vencimientos no esten completos."
+        ],
+        "condiciones_si_conditional": [
+          "Divulgar balance completo con caja y pasivos",
+          "Divulgar deuda y cronograma de vencimientos 24m",
+          "Divulgar CAPEX para cerrar puente CFO->FCF",
+          "Divulgar covenants y headroom"
+        ]
+      },
+      "mispricing_gate": {
+        "status": "FAIL",
+        "por_que": [
+          "ImpliedExpectations no puede ejecutar reverse valuation por bloqueo de calidad.",
+          "No hay ancla cuantitativa defendible para expectation gap.",
+          "No se puede calcular EV/EBIT ni EV/FCF con consistencia de periodo base."
+        ]
+      },
+      "catalyst_gate": {
+        "status": "PASS",
+        "por_que": [
+          "Hay catalizadores no binarios y medibles en ventana 6-24 meses.",
+          "Recurrencia, disciplina OPEX y desbloqueo de disclosure son observables trimestralmente.",
+          "Cada catalizador tiene tests confirmatorios verificables."
+        ]
+      },
+      "non_speculative_gate": {
+        "status": "FAIL",
+        "banderas": {
+          "tesis_binaria_detectada": false,
+          "dependencia_financiacion_salvadora": true,
+          "opacidad_inaceptable": true
+        },
+        "por_que": [
+          "Opacidad inaceptable: faltan estados financieros basicos para auditar supervivencia y valoracion.",
+          "Riesgo de dependencia de financiacion no evaluable con el disclosure actual."
+        ]
+      }
+    },
+    "scoring_preliminar": {
+      "metodo": "Score_0_100",
+      "componentes": {
+        "S_supervivencia_0_25": 10,
+        "M_mispricing_0_25": 3,
+        "C_catalizador_0_20": 13,
+        "Q_calidad_0_15": 3,
+        "R_downside_0_15": 6,
+        "V_penalizacion_0_a_menos15": -10
+      },
+      "total_0_100": 25,
+      "nota": "Score bajo por bloqueo de calidad y mispricing no auditable; catalizadores operativos evitan un cero mecanico."
+    },
+    "assumption_ledger": {
+      "reglas": {
+        "id_prefix": "A-",
+        "max_supuestos": 40,
+        "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+      },
+      "supuestos": [
+        {
+          "assumption_id": "A-001",
+          "enunciado": "El caso no es invertible hasta completar EV, EBIT, CFO, CAPEX, FCF, caja y deuda del mismo periodo base.",
+          "tipo": "HECHO",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.95,
+          "confianza_0_1": 0.93,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "FCF",
+            "MULTIPLO",
+            "COSTE_DEUDA"
+          ],
+          "evidencias": [
+            {
+              "source_id": "ImpliedExpectations_v1",
+              "ubicacion": "status/motivo_blocked",
+              "cita_corta": "status=BLOCKED por PARTIAL y falta FCF/EBIT.",
+              "interpretacion": "Sin desbloqueo no hay valoracion inversa defendible."
+            },
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "data_quality.status y metricas_derivadas",
+              "cita_corta": "data_quality=PARTIAL con multiples campos clave en null.",
+              "interpretacion": "El gate de calidad falla por diseno."
+            }
+          ],
+          "falsacion": {
+            "test": "ImpliedExpectations pasa a OK con EV y FCF/EBIT consistentes del mismo periodo base.",
+            "ventana_meses": {
+              "min": 1,
+              "max": 6
+            },
+            "fuente_prevista": "filing",
+            "accion_si_falla": "REVISAR_COMITE"
+          },
+          "dependencias": [],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_001"
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_001"
+            }
+          ],
+          "notas_arbitro": "Bloqueador principal."
+        },
+        {
+          "assumption_id": "A-002",
+          "enunciado": "La caida de ingresos Q3-2025 vs Q3-2024 es material y exige estabilizacion para sostener tesis.",
+          "tipo": "HECHO",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.9,
+          "confianza_0_1": 0.88,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "FCF",
+            "MARGEN_OPERATIVO",
+            "MULTIPLO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "SRC_031",
+              "ubicacion": "Q3-2024.revenue_usd y Q3-2025.revenue_usd",
+              "cita_corta": "130.2M vs 93.2M en Q3 interanual.",
+              "interpretacion": "La contraccion de ventas es significativa."
+            }
+          ],
+          "falsacion": {
+            "test": "Ingresos >=100M en 2 trimestres consecutivos sin nuevo recorte de guia.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "earnings",
+            "accion_si_falla": "REDUCIR_50"
+          },
+          "dependencias": [],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "FORENSIC",
+              "claim_id": "CLM_001"
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_002"
+            }
+          ],
+          "notas_arbitro": "Driver de downside primario."
+        },
+        {
+          "assumption_id": "A-004",
+          "enunciado": "INMD conserva rentabilidad operativa positiva (78% gross non-GAAP, 25% op non-GAAP), mitigando riesgo inmediato.",
+          "tipo": "HECHO",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.78,
+          "confianza_0_1": 0.84,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "MARGEN_OPERATIVO",
+            "FCF"
+          ],
+          "evidencias": [
+            {
+              "source_id": "SRC_031",
+              "ubicacion": "Q3-2025.non_gaap_gross_margin_pct/non_gaap_operating_margin_pct",
+              "cita_corta": "Margen bruto 78% y operativo 25% non-GAAP.",
+              "interpretacion": "No hay colapso operativo inmediato."
+            }
+          ],
+          "falsacion": {
+            "test": "Margen bruto non-GAAP <75% o margen operativo non-GAAP <20% en 2 trimestres.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "earnings",
+            "accion_si_falla": "REDUCIR_50"
+          },
+          "dependencias": [
+            "A-002"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_001"
+            }
+          ],
+          "notas_arbitro": "Mitigante de corto plazo, no valida mispricing por si solo."
+        },
+        {
+          "assumption_id": "A-005",
+          "enunciado": "El bloque recurrente (consumables/servicio) aporta resiliencia incremental pero aun no compensa toda la caida de sistemas.",
+          "tipo": "HECHO",
+          "criticidad": "IMPORTANTE",
+          "probabilidad_0_1": 0.74,
+          "confianza_0_1": 0.82,
+          "impacto": "MEDIO",
+          "drivers_afectados": [
+            "FCF",
+            "MARGEN_OPERATIVO",
+            "OTRO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "SRC_031",
+              "ubicacion": "Q3-2025.consumables_and_service_revenue_usd/growth",
+              "cita_corta": "19.9M y +26% YoY.",
+              "interpretacion": "Traccion real en recurrencia."
+            }
+          ],
+          "falsacion": {
+            "test": "Consumables/service <10% YoY en 2 trimestres consecutivos.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "kpi_operativo",
+            "accion_si_falla": "REVISAR_COMITE"
+          },
+          "dependencias": [
+            "A-002"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_002"
+            },
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_004"
+            }
+          ],
+          "notas_arbitro": "Catalizador util, pero insuficiente en aislamiento."
+        },
+        {
+          "assumption_id": "A-006",
+          "enunciado": "La disciplina de OPEX observada en 2025 puede sostener margen si no daña traccion comercial.",
+          "tipo": "HECHO",
+          "criticidad": "IMPORTANTE",
+          "probabilidad_0_1": 0.71,
+          "confianza_0_1": 0.79,
+          "impacto": "MEDIO",
+          "drivers_afectados": [
+            "MARGEN_OPERATIVO",
+            "FCF"
+          ],
+          "evidencias": [
+            {
+              "source_id": "SRC_031",
+              "ubicacion": "Q3-2025 opex YoY",
+              "cita_corta": "OPEX non-GAAP -10% y GAAP -11% YoY.",
+              "interpretacion": "Hay palanca de costos visible."
+            }
+          ],
+          "falsacion": {
+            "test": "OPEX non-GAAP >5% YoY por 2 trimestres con ingresos planos/debiles.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "earnings",
+            "accion_si_falla": "REDUCIR_50"
+          },
+          "dependencias": [
+            "A-002"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_003"
+            },
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_003"
+            }
+          ],
+          "notas_arbitro": "Riesgo de subinversion comercial sigue abierto."
+        },
+        {
+          "assumption_id": "A-008",
+          "enunciado": "La supervivencia 12-24m es condicional por falta de auditabilidad de liquidez y deuda.",
+          "tipo": "HECHO",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.92,
+          "confianza_0_1": 0.9,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "COSTE_DEUDA",
+            "FCF",
+            "WC"
+          ],
+          "evidencias": [
+            {
+              "source_id": "FORENSIC_payload",
+              "ubicacion": "supervivencia.evaluacion.resultado",
+              "cita_corta": "Resultado de supervivencia: CONDITIONAL.",
+              "interpretacion": "No hay FAIL inmediato, pero tampoco PASS."
+            },
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "balance_sheet_ultimo y deuda/caja",
+              "cita_corta": "Caja y deuda en null.",
+              "interpretacion": "Runway no cuantificable con rigor."
+            }
+          ],
+          "falsacion": {
+            "test": "Divulgacion completa de caja, deuda, covenants y CAPEX con validaciones contables en PASS.",
+            "ventana_meses": {
+              "min": 1,
+              "max": 9
+            },
+            "fuente_prevista": "filing",
+            "accion_si_falla": "CONGELAR_COMPRAS"
+          },
+          "dependencias": [
+            "A-001",
+            "A-010"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "FORENSIC",
+              "claim_id": "CLM_003"
+            }
+          ],
+          "notas_arbitro": "No se permite sizing mientras siga en condicion abierta."
+        },
+        {
+          "assumption_id": "A-010",
+          "enunciado": "La opacidad en deuda, covenants y vencimientos puede ocultar riesgo de refinanciacion.",
+          "tipo": "HECHO",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.8,
+          "confianza_0_1": 0.91,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "COSTE_DEUDA",
+            "FCF",
+            "MULTIPLO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "mercado.deuda_total_usd y net_debt_ebitda",
+              "cita_corta": "Campos de deuda y apalancamiento en null.",
+              "interpretacion": "No se puede auditar riesgo financiero."
+            },
+            {
+              "source_id": "TruthPack_v1",
+              "ubicacion": "validaciones BALANCE_IDENTITY/CASHFLOW_IDENTITY",
+              "cita_corta": "Ambas validaciones criticas en SKIP.",
+              "interpretacion": "La contabilidad no es plenamente verificable."
+            }
+          ],
+          "falsacion": {
+            "test": "Publicacion de debt schedule 24m y covenants con headroom suficiente.",
+            "ventana_meses": {
+              "min": 1,
+              "max": 6
+            },
+            "fuente_prevista": "filing",
+            "accion_si_falla": "SALIR"
+          },
+          "dependencias": [
+            "A-001"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_004"
+            },
+            {
+              "agent_role": "FORENSIC",
+              "claim_id": "CLM_003"
+            }
+          ],
+          "notas_arbitro": "Bloqueador de survivability y mispricing."
+        },
+        {
+          "assumption_id": "A-013",
+          "enunciado": "Si el proximo ciclo de filings completa campos faltantes, se puede destrabar el test de mispricing.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "CRITICO",
+          "probabilidad_0_1": 0.68,
+          "confianza_0_1": 0.82,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "MULTIPLO",
+            "FCF",
+            "COSTE_DEUDA"
+          ],
+          "evidencias": [
+            {
+              "source_id": "BULL_predicciones",
+              "ubicacion": "PRED_005",
+              "cita_corta": "Probabilidad 0.68 de publicar datos suficientes de EV/FCF.",
+              "interpretacion": "Hay expectativa de desbloqueo en 3-12 meses."
+            },
+            {
+              "source_id": "ImpliedExpectations_v1",
+              "ubicacion": "faltantes_criticos",
+              "cita_corta": "Lista explicita de campos faltantes para correr modelo.",
+              "interpretacion": "Objetivo de remediacion es verificable."
+            }
+          ],
+          "falsacion": {
+            "test": "Tras el siguiente 20-F el estado de Implied sigue BLOCKED por los mismos faltantes.",
+            "ventana_meses": {
+              "min": 3,
+              "max": 12
+            },
+            "fuente_prevista": "filing",
+            "accion_si_falla": "CONGELAR_COMPRAS"
+          },
+          "dependencias": [
+            "A-001",
+            "A-010"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_006"
+            },
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_001"
+            }
+          ],
+          "notas_arbitro": "Supuesto clave para salir de BLOQUEADO."
+        },
+        {
+          "assumption_id": "A-014",
+          "enunciado": "El riesgo de value trap es elevado mientras persista opacidad y debilidad operativa.",
+          "tipo": "INFERENCIA",
+          "criticidad": "IMPORTANTE",
+          "probabilidad_0_1": 0.67,
+          "confianza_0_1": 0.8,
+          "impacto": "ALTO",
+          "drivers_afectados": [
+            "MULTIPLO",
+            "FCF"
+          ],
+          "evidencias": [
+            {
+              "source_id": "RED_TEAM_payload",
+              "ubicacion": "value_trap_checklist.probabilidad_value_trap_0_1",
+              "cita_corta": "Probabilidad value trap estimada en 0.67.",
+              "interpretacion": "Riesgo asimetrico negativo no trivial."
+            }
+          ],
+          "falsacion": {
+            "test": "Se cumplen a la vez disclosure completo + dos trimestres de estabilizacion operativa.",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            },
+            "fuente_prevista": "earnings",
+            "accion_si_falla": "REVISAR_COMITE"
+          },
+          "dependencias": [
+            "A-002",
+            "A-010",
+            "A-013"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "RED_TEAM",
+              "claim_id": "CLM_RT_001"
+            }
+          ],
+          "notas_arbitro": "Penaliza valor esperado y sizing."
+        },
+        {
+          "assumption_id": "A-015",
+          "enunciado": "Dos trimestres con ingresos >=95M y margen non-GAAP >=28% son condicion minima para subir conviccion.",
+          "tipo": "HIPOTESIS",
+          "criticidad": "IMPORTANTE",
+          "probabilidad_0_1": 0.53,
+          "confianza_0_1": 0.65,
+          "impacto": "MEDIO",
+          "drivers_afectados": [
+            "MARGEN_OPERATIVO",
+            "FCF",
+            "MULTIPLO"
+          ],
+          "evidencias": [
+            {
+              "source_id": "CATALYST_predicciones",
+              "ubicacion": "PRED_003/PRED_007",
+              "cita_corta": "Probabilidades 0.54 y 0.43 para umbrales de margen e ingresos.",
+              "interpretacion": "Hito medible para reclasificar estado del caso."
+            }
+          ],
+          "falsacion": {
+            "test": "No se cumplen umbrales en 12 meses.",
+            "ventana_meses": {
+              "min": 6,
+              "max": 12
+            },
+            "fuente_prevista": "earnings",
+            "accion_si_falla": "CONGELAR_COMPRAS"
+          },
+          "dependencias": [
+            "A-002",
+            "A-004",
+            "A-005",
+            "A-006"
+          ],
+          "estado": "ABIERTA",
+          "origen": [
+            {
+              "agent_role": "CATALYST",
+              "claim_id": "CLM_002"
+            },
+            {
+              "agent_role": "BULL",
+              "claim_id": "CLM_001"
+            }
+          ],
+          "notas_arbitro": "Umbral operativo para pasar de remediacion a monitor activo."
+        }
+      ]
+    },
+    "evidence_graph": {
+      "version": "EvidenceGraph_v1",
+      "nodos": [
+        {
+          "node_id": "E-001",
+          "tipo": "EVIDENCIA",
+          "label": "Implied: status BLOCKED",
+          "ref": {
+            "source_id": "ImpliedExpectations_v1"
+          }
+        },
+        {
+          "node_id": "E-002",
+          "tipo": "EVIDENCIA",
+          "label": "Q3 revenue 130.2M -> 93.2M",
+          "ref": {
+            "source_id": "SRC_031"
+          }
+        },
+        {
+          "node_id": "E-003",
+          "tipo": "EVIDENCIA",
+          "label": "Q3-2025 margins 78%/25% non-GAAP",
+          "ref": {
+            "source_id": "SRC_031"
+          }
+        },
+        {
+          "node_id": "E-004",
+          "tipo": "EVIDENCIA",
+          "label": "Consumables/service 19.9M +26% YoY",
+          "ref": {
+            "source_id": "SRC_031"
+          }
+        },
+        {
+          "node_id": "E-007",
+          "tipo": "EVIDENCIA",
+          "label": "Debt/cash/covenants unavailable",
+          "ref": {
+            "source_id": "TruthPack_v1"
+          }
+        },
+        {
+          "node_id": "A-001",
+          "tipo": "SUPUESTO",
+          "label": "A-001 bloqueo por datos incompletos",
+          "ref": {
+            "assumption_id": "A-001"
+          }
+        },
+        {
+          "node_id": "A-002",
+          "tipo": "SUPUESTO",
+          "label": "A-002 deterioro de ingresos",
+          "ref": {
+            "assumption_id": "A-002"
+          }
+        },
+        {
+          "node_id": "A-010",
+          "tipo": "SUPUESTO",
+          "label": "A-010 opacidad de deuda/covenants",
+          "ref": {
+            "assumption_id": "A-010"
+          }
+        },
+        {
+          "node_id": "C-003",
+          "tipo": "CATALIZADOR",
+          "label": "C-003 desbloqueo de disclosure",
+          "ref": {
+            "catalyst_id": "C-003"
+          }
+        },
+        {
+          "node_id": "SC-BEAR",
+          "tipo": "ESCENARIO",
+          "label": "Escenario BEAR",
+          "ref": {
+            "scenario_id": "BEAR"
+          }
+        },
+        {
+          "node_id": "D-001",
+          "tipo": "DECISION",
+          "label": "Decision final BLOQUEADO + REMEDIATE",
+          "ref": {
+            "decision": "BLOQUEADO"
+          }
+        }
+      ],
+      "aristas": [
+        {
+          "from": "E-001",
+          "to": "A-001",
+          "relacion": "SOPORTA",
+          "peso_0_1": 0.95,
+          "nota": "Bloqueo de Implied confirma faltantes criticos."
+        },
+        {
+          "from": "E-002",
+          "to": "A-002",
+          "relacion": "SOPORTA",
+          "peso_0_1": 0.9,
+          "nota": "Contraccion de ingresos interanual."
+        },
+        {
+          "from": "E-007",
+          "to": "A-010",
+          "relacion": "SOPORTA",
+          "peso_0_1": 0.92,
+          "nota": "Sin deuda/caja/covenants no hay auditabilidad."
+        },
+        {
+          "from": "A-001",
+          "to": "SC-BEAR",
+          "relacion": "DEPENDE_DE",
+          "peso_0_1": 0.84,
+          "nota": "Persistencia de bloqueo sesga a downside."
+        },
+        {
+          "from": "A-002",
+          "to": "SC-BEAR",
+          "relacion": "DEPENDE_DE",
+          "peso_0_1": 0.88,
+          "nota": "Ingresos debiles sostienen escenario adverso."
+        },
+        {
+          "from": "C-003",
+          "to": "A-001",
+          "relacion": "DISPARA",
+          "peso_0_1": 0.87,
+          "nota": "Filings completos habilitan rerun de valoracion."
+        },
+        {
+          "from": "SC-BEAR",
+          "to": "D-001",
+          "relacion": "INFORMA",
+          "peso_0_1": 0.86,
+          "nota": "Downside domina mientras no se cierre data gap."
+        }
+      ],
+      "validacion_grafo": {
+        "ids_unicos": true,
+        "aristas_referencian_nodos_existentes": true,
+        "supuestos_criticos_tienen_falsacion": true,
+        "detalle": "Validacion correcta; el grafo prioriza nodos causales de bloqueo y riesgo."
+      }
+    },
+    "catalizadores_consolidados": [
+      {
+        "catalyst_id": "C-001",
+        "nombre": "Escalar consumables y servicio",
+        "es_no_binario": true,
+        "ventana_meses": {
+          "min": 6,
+          "probable": 12,
+          "max": 18
+        },
+        "probabilidad_0_1": 0.58,
+        "mecanismo_cierre_gap": "Mayor recurrencia reduce volatilidad y mejora previsibilidad de caja.",
+        "supuestos_afectados": [
+          "A-005",
+          "A-015"
+        ],
+        "tests_confirmatorios": [
+          {
+            "descripcion": "Consumables/service >=22M y >=20% YoY en 2 trimestres consecutivos",
+            "fuente_prevista": "earnings",
+            "ventana_meses": {
+              "min": 6,
+              "max": 18
+            }
+          }
+        ]
+      },
+      {
+        "catalyst_id": "C-002",
+        "nombre": "Sostener OPEX <=50M y recuperar margen operativo",
+        "es_no_binario": true,
+        "ventana_meses": {
+          "min": 6,
+          "probable": 10,
+          "max": 15
+        },
+        "probabilidad_0_1": 0.54,
+        "mecanismo_cierre_gap": "Disciplina de costos con ventas estables eleva margen y reduce descuento de ejecucion.",
+        "supuestos_afectados": [
+          "A-004",
+          "A-006",
+          "A-015"
+        ],
+        "tests_confirmatorios": [
+          {
+            "descripcion": "OPEX non-GAAP <=50M y margen non-GAAP >=28% por 2 trimestres",
+            "fuente_prevista": "earnings",
+            "ventana_meses": {
+              "min": 6,
+              "max": 15
+            }
+          }
+        ]
+      },
+      {
+        "catalyst_id": "C-003",
+        "nombre": "Desbloqueo de disclosure financiero",
+        "es_no_binario": true,
+        "ventana_meses": {
+          "min": 3,
+          "probable": 6,
+          "max": 9
+        },
+        "probabilidad_0_1": 0.62,
+        "mecanismo_cierre_gap": "Completar EV/FCF/EBIT y balance permite medir expectation gap real.",
+        "supuestos_afectados": [
+          "A-001",
+          "A-010",
+          "A-013"
+        ],
+        "tests_confirmatorios": [
+          {
+            "descripcion": "ImpliedExpectations cambia de BLOCKED a OK",
+            "fuente_prevista": "filing",
+            "ventana_meses": {
+              "min": 3,
+              "max": 9
+            }
+          }
+        ]
+      }
+    ],
+    "escenarios": [
+      {
+        "scenario_id": "BASE",
+        "probabilidad_0_1": 0.3,
+        "ventana_meses": {
+          "min": 6,
+          "probable": 12,
+          "max": 18
+        },
+        "descripcion": "Estabilizacion parcial de ingresos y margenes con recurrencia creciendo. No hay rerating pleno hasta completar disclosure financiero.",
+        "drivers_clave": [
+          "A-004",
+          "A-005",
+          "A-006",
+          "A-015"
+        ],
+        "retorno_12_24m_pct_rango": {
+          "min": -12,
+          "base": 4,
+          "max": 12
+        },
+        "nota_valoracion": "Rango inferencial conservador; no sustituye valoracion completa mientras Implied siga bloqueado."
+      },
+      {
+        "scenario_id": "BULL",
+        "probabilidad_0_1": 0.15,
+        "ventana_meses": {
+          "min": 9,
+          "probable": 18,
+          "max": 30
+        },
+        "descripcion": "Se completa disclosure, se valida estabilidad multitrimestral y mejora per-share neta.",
+        "drivers_clave": [
+          "A-013",
+          "A-015"
+        ],
+        "retorno_12_24m_pct_rango": {
+          "min": 12,
+          "base": 28,
+          "max": 50
+        },
+        "nota_valoracion": "Escenario de rerating condicionado a cierre total de faltantes criticos."
+      },
+      {
+        "scenario_id": "BEAR",
+        "probabilidad_0_1": 0.55,
+        "ventana_meses": {
+          "min": 3,
+          "probable": 12,
+          "max": 24
+        },
+        "descripcion": "Persisten opacidad y debilidad comercial, con ingresos sub-95M y margen sin recuperacion.",
+        "drivers_clave": [
+          "A-002",
+          "A-010",
+          "A-014"
+        ],
+        "retorno_12_24m_pct_rango": {
+          "min": -45,
+          "base": -32,
+          "max": -18
+        },
+        "nota_valoracion": "Downside dominante mientras data_quality no pase a PASS y mispricing permanezca no auditable."
+      }
+    ],
+    "kill_criteria_final": [
+      {
+        "kc_id": "KC-001",
+        "relacionado_con_assumption_id": "A-001",
+        "definicion": "ImpliedExpectations permanece BLOCKED despues del siguiente ciclo anual completo.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "filing",
+        "accion": "CONGELAR_COMPRAS",
+        "severidad": "ALTA",
+        "por_que": "Sin desbloqueo no existe tesis cuantitativa invertible."
+      },
+      {
+        "kc_id": "KC-002",
+        "relacionado_con_assumption_id": "A-002",
+        "definicion": "Ingresos trimestrales <90M en 2 trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings",
+        "accion": "REDUCIR_50",
+        "severidad": "ALTA",
+        "por_que": "Confirma deterioro comercial por debajo de banda de estabilizacion."
+      },
+      {
+        "kc_id": "KC-003",
+        "relacionado_con_assumption_id": "A-004",
+        "definicion": "Margen bruto non-GAAP <75% o margen operativo non-GAAP <20% en 2 trimestres.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "earnings",
+        "accion": "REDUCIR_50",
+        "severidad": "ALTA",
+        "por_que": "Invalida el principal mitigante operativo del caso."
+      },
+      {
+        "kc_id": "KC-004",
+        "relacionado_con_assumption_id": "A-010",
+        "definicion": "Persistencia de deuda/covenants/vencimientos no divulgados en 2 filings consecutivos.",
+        "ventana_meses": {
+          "min": 1,
+          "max": 6
+        },
+        "fuente_prevista": "filing",
+        "accion": "SALIR",
+        "severidad": "ALTA",
+        "por_que": "Riesgo de refinanciacion no observable se vuelve inaceptable."
+      },
+      {
+        "kc_id": "KC-005",
+        "relacionado_con_assumption_id": "A-005",
+        "definicion": "Crecimiento de consumables/service <10% YoY en 2 trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "kpi_operativo",
+        "accion": "REVISAR_COMITE",
+        "severidad": "MEDIA",
+        "por_que": "Se debilita el principal catalizador no binario."
+      }
+    ],
+    "plan_monitorizacion": {
+      "frecuencias": {
+        "pulso_diario": {
+          "activo": true,
+          "que_mirar": [
+            "precio vs umbrales de riesgo",
+            "noticias corporativas",
+            "filings SEC nuevos"
+          ]
+        },
+        "revision_semanal": {
+          "activo": true,
+          "que_mirar": [
+            "estado de supuestos criticos A-001/A-010/A-013",
+            "progreso de work orders de remediacion",
+            "riesgo de bloqueo persistente"
+          ]
+        },
+        "modo_evento": {
+          "activo": true,
+          "que_mirar": [
+            "earnings y transcript",
+            "20-F/6-K completos",
+            "guidance",
+            "KPIs de recurrencia y margen"
+          ]
+        }
+      },
+      "lista_de_checks_por_supuesto": [
+        {
+          "assumption_id": "A-001",
+          "indicadores": [
+            "data_quality.status",
+            "implied.status",
+            "campos EV/FCF/EBIT completos"
+          ],
+          "fuente": "filing",
+          "frecuencia": "EVENTO"
+        },
+        {
+          "assumption_id": "A-002",
+          "indicadores": [
+            "revenue_usd trimestral",
+            "variacion YoY ingresos",
+            "guidance anual"
+          ],
+          "fuente": "earnings",
+          "frecuencia": "TRIMESTRAL"
+        },
+        {
+          "assumption_id": "A-004",
+          "indicadores": [
+            "non_gaap_gross_margin_pct",
+            "non_gaap_operating_margin_pct"
+          ],
+          "fuente": "earnings",
+          "frecuencia": "TRIMESTRAL"
+        },
+        {
+          "assumption_id": "A-010",
+          "indicadores": [
+            "deuda_total_usd",
+            "vencimientos_24m_usd",
+            "covenant_headroom"
+          ],
+          "fuente": "filing",
+          "frecuencia": "TRIMESTRAL"
+        },
+        {
+          "assumption_id": "A-013",
+          "indicadores": [
+            "implied.status",
+            "fcf_usd",
+            "ebit_usd"
+          ],
+          "fuente": "filing",
+          "frecuencia": "EVENTO"
+        }
+      ],
+      "umbrales_alerta": [
+        {
+          "tipo": "PRECIO",
+          "condicion": "caida >15% en 5 dias con noticias negativas de guidance/disclosure",
+          "accion": "REVISAR_COMITE",
+          "severidad": "MEDIA"
+        },
+        {
+          "tipo": "FILING",
+          "condicion": "dos reportes consecutivos sin deuda/covenants/capex",
+          "accion": "CONGELAR_COMPRAS",
+          "severidad": "ALTA"
+        },
+        {
+          "tipo": "OPERATIVO",
+          "condicion": "ingresos <90M por 2 trimestres",
+          "accion": "REDUCIR_50",
+          "severidad": "ALTA"
+        },
+        {
+          "tipo": "MARGEN",
+          "condicion": "non-GAAP operating margin <20% por 2 trimestres",
+          "accion": "REDUCIR_50",
+          "severidad": "ALTA"
+        }
+      ]
+    },
+    "predicciones_para_calibracion_consolidadas": [
+      {
+        "pred_id": "CP-001",
+        "descripcion": "Consumables/service alcanza >=22M con crecimiento YoY >=20% en al menos un trimestre.",
+        "probabilidad_0_1": 0.58,
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "criterio_validacion": "Mismo reporte trimestral cumple monto y crecimiento simultaneamente.",
+        "fuente_prevista": "earnings",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "pred_id": "PRED_001"
+          },
+          {
+            "agent_role": "CATALYST",
+            "pred_id": "PRED_001"
+          }
+        ]
+      },
+      {
+        "pred_id": "CP-003",
+        "descripcion": "OPEX non-GAAP <=50M y margen operativo non-GAAP >=28% en 2 trimestres consecutivos.",
+        "probabilidad_0_1": 0.53,
+        "ventana_meses": {
+          "min": 6,
+          "max": 15
+        },
+        "criterio_validacion": "Ambos umbrales en cada trimestre de una secuencia de 2.",
+        "fuente_prevista": "earnings",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "pred_id": "PRED_003"
+          },
+          {
+            "agent_role": "CATALYST",
+            "pred_id": "PRED_003"
+          }
+        ]
+      },
+      {
+        "pred_id": "CP-004",
+        "descripcion": "El siguiente ciclo anual completa EV/FCF/EBIT y permite estado OK en Implied.",
+        "probabilidad_0_1": 0.54,
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "criterio_validacion": "ImpliedExpectations deja de estar BLOCKED y publica outputs cuantitativos completos.",
+        "fuente_prevista": "filing",
+        "origen": [
+          {
+            "agent_role": "BULL",
+            "pred_id": "PRED_005"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "pred_id": "PRED_RT_005"
+          }
+        ]
+      },
+      {
+        "pred_id": "CP-006",
+        "descripcion": "No hay nuevo recorte de guia anual en los proximos 12 meses.",
+        "probabilidad_0_1": 0.47,
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "criterio_validacion": "Comunicados mantienen o mejoran rango anual sin revision a la baja.",
+        "fuente_prevista": "PR",
+        "origen": [
+          {
+            "agent_role": "CATALYST",
+            "pred_id": "PRED_008"
+          },
+          {
+            "agent_role": "RED_TEAM",
+            "pred_id": "PRED_RT_002"
+          }
+        ]
+      }
+    ],
+    "arbitraje": {
+      "notas_arbitro": [
+        "Se prioriza BLOQUEADO+REMEDIATE porque el fallo de data quality es resoluble y hoy impide validar mispricing.",
+        "La capa probabilistica sugiere perfil no invertible (EV esperado negativo y asimetria 0.13), pero la salida se mantiene en BLOQUEADO por bloqueo metodologico verificable.",
+        "Caso bloqueado por Data Quality; se requiere ejecucion de Remediation Plan."
+      ],
+      "desacuerdos_detectados": [
+        {
+          "tema": "Caida 2025: valle ciclico vs deterioro estructural",
+          "agentes": [
+            {
+              "agent_role": "BULL",
+              "posicion": "valle ciclico con margen resiliente",
+              "confianza_0_1": 0.67
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "posicion": "riesgo estructural no resuelto",
+              "confianza_0_1": 0.82
+            }
+          ],
+          "resolucion_arbitro": {
+            "estado": "NO_RESUELTO",
+            "decision": "convertir_en_escenario",
+            "por_que": "La evidencia actual valida ambas lecturas parciales.",
+            "accion": "Mantener umbrales operativos explicitos en monitor y kill criteria."
+          }
+        },
+        {
+          "tema": "Margenes altos actuales: mitigante suficiente o espejismo transitorio",
+          "agentes": [
+            {
+              "agent_role": "BULL",
+              "posicion": "mitigante fuerte de downside",
+              "confianza_0_1": 0.87
+            },
+            {
+              "agent_role": "FORENSIC",
+              "posicion": "mitigante parcial por falta de puente CFO->FCF",
+              "confianza_0_1": 0.58
+            }
+          ],
+          "resolucion_arbitro": {
+            "estado": "RESUELTO",
+            "decision": "penalizar_tamano",
+            "por_que": "Se reconoce mitigacion operativa, pero no se acepta sin auditabilidad de caja y balance.",
+            "accion": "sizing_final=0 hasta remediacion."
+          }
+        },
+        {
+          "tema": "Buyback como catalizador per-share",
+          "agentes": [
+            {
+              "agent_role": "BULL",
+              "posicion": "opcionalidad positiva",
+              "confianza_0_1": 0.62
+            },
+            {
+              "agent_role": "RED_TEAM",
+              "posicion": "no valido sin netting contra SBC",
+              "confianza_0_1": 0.7
+            }
+          ],
+          "resolucion_arbitro": {
+            "estado": "RESUELTO",
+            "decision": "pedir_fuente",
+            "por_que": "La autorizacion no equivale a ejecucion neta.",
+            "accion": "Solicitar tabla de buyback ejecutado y diluted shares YoY."
+          }
+        }
+      ],
+      "puntos_abiertos": [
+        "Liquidez real",
+        "Deuda total y vencimientos 24m",
+        "CAPEX FY2025/TTM y FCF real",
+        "Covenants y headroom",
+        "Detalle de buyback ejecutado vs SBC",
+        "Reconstruccion TTM con trimestres contiguos comparables"
+      ]
+    },
+    "peticiones_de_fuentes": [
+      {
+        "prioridad": "ALTA",
+        "item": "Full 20-F/6-K Filing",
+        "por_que_importa": "Obtener estados financieros completos.",
+        "como_obtenerlo": "Source fetcher."
+      },
+      {
+        "prioridad": "ALTA",
+        "item": "Balance completo con caja, deuda, AR, inventario y pasivos corrientes",
+        "por_que_importa": "Cierra gate de supervivencia y calidad de datos.",
+        "como_obtenerlo": "20-F auditado, estados consolidados y notas."
+      },
+      {
+        "prioridad": "ALTA",
+        "item": "Cash flow completo con CAPEX trimestral y anual",
+        "por_que_importa": "Permite calcular FCF y validar puente CFO->FCF.",
+        "como_obtenerlo": "20-F/6-K, seccion investing activities y nota PP&E."
+      },
+      {
+        "prioridad": "ALTA",
+        "item": "Bridge EV (precio, market cap, deuda total, caja) al mismo corte",
+        "por_que_importa": "Desbloquea reverse valuation y mispricing gate.",
+        "como_obtenerlo": "Snapshot de mercado reconciliado con filing."
+      },
+      {
+        "prioridad": "ALTA",
+        "item": "Tabla de vencimientos de deuda 12-24 meses y covenants",
+        "por_que_importa": "Cuantifica riesgo de refinanciacion y breach.",
+        "como_obtenerlo": "Nota de deuda en 20-F y acuerdos de credito."
+      },
+      {
+        "prioridad": "MEDIA",
+        "item": "Detalle de recompra ejecutada (acciones, monto, precio medio)",
+        "por_que_importa": "Valida efecto per-share real frente a SBC.",
+        "como_obtenerlo": "Notas de patrimonio y PR de resultados."
+      },
+      {
+        "prioridad": "MEDIA",
+        "item": "KPIs por region (instalaciones, ASP, productividad comercial)",
+        "por_que_importa": "Distingue ciclo temporal de cambio estructural.",
+        "como_obtenerlo": "Earnings supplement, IR deck y transcript."
+      }
+    ],
+    "salida_para_siguiente_agente": {
+      "monitor_input_recomendado": "Esperar remediacion y usar este DecisionPacket_v2 como base del siguiente ciclo.",
+      "estado_caso": "EN_ESPERA",
+      "proxima_revision_sugerida": "2026-02-17"
+    },
+    "log": {
+      "autochequeos": {
+        "decision_respeta_gates": true,
+        "supuestos_criticos_tienen_evidencia": true,
+        "supuestos_criticos_tienen_falsacion": true,
+        "kill_criteria_mapeados_a_supuestos": true,
+        "salida_solo_json": true,
+        "probabilidades_escenarios_suman_1": true,
+        "kelly_sizing_dentro_de_tope": true,
+        "intervalo_confianza_coherente_con_escenarios": true,
+        "decision_categorica_coherente_con_probabilistica": false,
+        "sizing_final_igual_preliminar_si_invertir": true,
+        "sensibilidad_cubre_supuestos_criticos": true
+      },
+      "limitaciones": [
+        "TruthPack no alcanza PASS; validaciones contables criticas en SKIP.",
+        "ImpliedExpectations permanece BLOCKED.",
+        "No hay EV/FCF/EBIT totalmente auditables en el mismo periodo base.",
+        "Balance y deuda/covenants incompletos elevan incertidumbre de supervivencia.",
+        "Parte del input proviene de contenidos truncados y exhibits no incluidos."
+      ],
+      "revision": {
+        "es_revision": false,
+        "revision_num": 1,
+        "decision_packet_anterior_caso_id": null,
+        "monitoring_updates_usados": [],
+        "resumen_cambios": [
+          "Fusion de outputs gemini/codex para ARBITRO.",
+          "Se preserva BLOQUEADO con REMEDIATE y sizing=0.",
+          "Se expande remediacion a cadena SOURCES->TRUTH_PACK->IMPLIED->ARBITRO."
+        ]
+      }
+    },
+    "control": {
+      "estado_flujo": "ARBITRATE",
+      "next_step": "REMEDIATE",
+      "next_agent_role": "SOURCES",
+      "loop_budget_max": 3,
+      "loop_budget_restante": 2,
+      "issues": [
+        {
+          "issue_id": "ISS-001",
+          "issue_code": "DATA_INCOMPLETE",
+          "gate_afectado": "data_quality_gate",
+          "severidad": "ALTA",
+          "resoluble": true,
+          "owner_agent_role": "SOURCES",
+          "descripcion": "Filing truncado y dataset parcial; faltan Balance Sheet, Cash Flow y campos clave para EV/FCF/EBIT.",
+          "criterio_aceptacion": {
+            "required_fields": [
+              "cash_and_cash_equivalents",
+              "total_debt",
+              "capex_usd",
+              "metricas_derivadas.ebit_usd",
+              "cash_from_operating_activities_usd"
+            ],
+            "notes": "Debe obtenerse el documento completo con source_id y ubicacion."
+          }
+        },
+        {
+          "issue_id": "ISS-002",
+          "issue_code": "BALANCE_CASHFLOW_IDENTITY_SKIPPED",
+          "gate_afectado": "survivability_gate",
+          "severidad": "ALTA",
+          "resoluble": true,
+          "owner_agent_role": "TRUTH_PACK",
+          "descripcion": "BALANCE_IDENTITY y CASHFLOW_IDENTITY en SKIP por ausencia de balance/cashflow completos.",
+          "criterio_aceptacion": {
+            "required_fields": [
+              "balance_sheet_ultimo.caja_usd",
+              "balance_sheet_ultimo.pasivos_totales_usd",
+              "ttm.cfo_usd",
+              "ttm.capex_usd",
+              "data_quality.validaciones.BALANCE_IDENTITY.status",
+              "data_quality.validaciones.CASHFLOW_IDENTITY.status"
+            ],
+            "notes": "Las validaciones criticas deben quedar en PASS."
+          }
+        },
+        {
+          "issue_id": "ISS-003",
+          "issue_code": "EXHIBIT_99_1_NUMERICS_MISSING",
+          "gate_afectado": "data_quality_gate",
+          "severidad": "MEDIA",
+          "resoluble": true,
+          "owner_agent_role": "SOURCES",
+          "descripcion": "Varios 6-K referencian Exhibit 99.1 sin contenido numerico incluido en el dataset.",
+          "criterio_aceptacion": {
+            "required_fields": [
+              "exhibit_99_1_numeric_tables",
+              "sources.filing_sections_complete"
+            ],
+            "notes": "Adjuntar texto/tablas numericas de exhibits faltantes."
+          }
+        },
+        {
+          "issue_id": "ISS-004",
+          "issue_code": "IMPLIED_MODEL_BLOCKED",
+          "gate_afectado": "mispricing_gate",
+          "severidad": "ALTA",
+          "resoluble": true,
+          "owner_agent_role": "IMPLIED",
+          "descripcion": "El motor de expectativas implicitas no se ejecuta por prerequisitos incumplidos.",
+          "criterio_aceptacion": {
+            "required_fields": [
+              "ImpliedExpectations.status",
+              "ImpliedExpectations.reverse_dcf_fcf.aplicable",
+              "ImpliedExpectations.reverse_earnings_power.aplicable",
+              "ImpliedExpectations.resumen_expectativas_implicitas"
+            ],
+            "notes": "Se acepta status OK o analisis cuantitativo completo con justificacion."
+          }
+        }
+      ],
+      "work_orders": [
+        {
+          "wo_id": "WO-001",
+          "agent_role": "SOURCES",
+          "tipo": "FETCH_FULL_FILING",
+          "issue_refs": [
+            "ISS-001",
+            "ISS-003"
+          ],
+          "targets": {
+            "fields": [
+              "exhibit_99_1_full_text",
+              "exhibit_99_1_numeric_tables",
+              "filing_links_with_source_ids"
+            ],
+            "notes": "Recuperar 20-F/6-K completos sin truncamiento y anexos numericos referenciados."
+          },
+          "acceptance": {
+            "required_fields": [
+              "exhibit_99_1_numeric_tables"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": []
+        },
+        {
+          "wo_id": "WO-002",
+          "agent_role": "TRUTH_PACK",
+          "tipo": "EXTRACT_FIELDS",
+          "issue_refs": [
+            "ISS-001",
+            "ISS-002"
+          ],
+          "targets": {
+            "fields": [
+              "mercado.deuda_total_usd",
+              "mercado.caja_y_equivalentes_usd",
+              "ttm.cfo_usd",
+              "ttm.capex_usd",
+              "ttm.fcf_usd",
+              "metricas_derivadas.ebit_usd",
+              "balance_sheet_ultimo.caja_usd",
+              "balance_sheet_ultimo.pasivos_totales_usd",
+              "deuda.vencimientos_12_24m",
+              "deuda.covenants_headroom"
+            ],
+            "notes": "Reconciliar unidades y periodos; incluir source_ref por cada campo."
+          },
+          "acceptance": {
+            "required_fields": [
+              "ttm.cfo_usd",
+              "ttm.capex_usd",
+              "metricas_derivadas.ebit_usd",
+              "mercado.deuda_total_usd",
+              "mercado.caja_y_equivalentes_usd"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": [
+            "WO-001"
+          ]
+        },
+        {
+          "wo_id": "WO-003",
+          "agent_role": "TRUTH_PACK",
+          "tipo": "REBUILD_TTM_AND_VALIDATIONS",
+          "issue_refs": [
+            "ISS-001",
+            "ISS-002"
+          ],
+          "targets": {
+            "fields": [
+              "ttm.periodo_contiguo",
+              "data_quality.validaciones.BALANCE_IDENTITY",
+              "data_quality.validaciones.CASHFLOW_IDENTITY",
+              "data_quality.status"
+            ],
+            "notes": "Recalcular TTM con 4 trimestres contiguos y rerun de validaciones."
+          },
+          "acceptance": {
+            "required_fields": [
+              "data_quality.status",
+              "data_quality.validaciones.BALANCE_IDENTITY.status",
+              "data_quality.validaciones.CASHFLOW_IDENTITY.status"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": [
+            "WO-002"
+          ]
+        },
+        {
+          "wo_id": "WO-004",
+          "agent_role": "IMPLIED",
+          "tipo": "RERUN_IMPLIED_EXPECTATIONS",
+          "issue_refs": [
+            "ISS-004"
+          ],
+          "targets": {
+            "fields": [
+              "status",
+              "snapshot_mercado.enterprise_value_usd",
+              "reverse_dcf_fcf",
+              "reverse_earnings_power",
+              "resumen_expectativas_implicitas"
+            ],
+            "notes": "Reejecutar con TruthPack actualizado y consistencia de periodo base."
+          },
+          "acceptance": {
+            "required_fields": [
+              "status",
+              "resumen_expectativas_implicitas"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": [
+            "WO-003"
+          ]
+        },
+        {
+          "wo_id": "WO-005",
+          "agent_role": "ARBITRO",
+          "tipo": "REARBITRATE",
+          "issue_refs": [
+            "ISS-001",
+            "ISS-002",
+            "ISS-003",
+            "ISS-004"
+          ],
+          "targets": {
+            "fields": [
+              "DecisionPacket_v2_actualizado",
+              "gates_recalculados",
+              "decision_probabilistica_recalculada"
+            ],
+            "notes": "Entradas requeridas: RemediationPlan + DecisionPacket + PatchBundle_v3."
+          },
+          "acceptance": {
+            "required_fields": [
+              "version_esquema",
+              "resumen_ejecutivo.decision",
+              "control.next_step"
+            ],
+            "pass_if_present": true
+          },
+          "depends_on": [
+            "WO-004"
+          ]
+        }
+      ],
+      "dispatch_queue": [
+        {
+          "step": 1,
+          "agent_role": "SOURCES",
+          "wo_ids": [
+            "WO-001"
+          ]
+        },
+        {
+          "step": 2,
+          "agent_role": "TRUTH_PACK",
+          "wo_ids": [
+            "WO-002"
+          ]
+        },
+        {
+          "step": 3,
+          "agent_role": "TRUTH_PACK",
+          "wo_ids": [
+            "WO-003"
+          ]
+        },
+        {
+          "step": 4,
+          "agent_role": "IMPLIED",
+          "wo_ids": [
+            "WO-004"
+          ]
+        },
+        {
+          "step": 5,
+          "agent_role": "ARBITRO",
+          "wo_ids": [
+            "WO-005"
+          ]
+        }
+      ]
+    }
+  },
+  "decision_packet_ref": {
+    "file_name": "DecisionPacket_CASE_20260215_INMD_rev001.json"
+  },
+  "remediation_plan": {
+    "version_esquema": "RemediationPlan_v1",
+    "file_name": "RemediationPlan_CASE_20260215_INMD.json",
+    "issues": [
+      {
+        "issue_id": "ISS-001",
+        "issue_code": "DATA_INCOMPLETE",
+        "gate_afectado": "data_quality_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "SOURCES",
+        "descripcion": "TruthPack en PARTIAL con filing truncado y faltantes de EV/FCF/EBIT.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "cash_and_cash_equivalents",
+            "total_debt",
+            "capex_usd",
+            "metricas_derivadas.ebit_usd",
+            "cash_from_operating_activities_usd"
+          ],
+          "notes": "Con source_ref por campo y documento completo."
+        }
+      },
+      {
+        "issue_id": "ISS-002",
+        "issue_code": "BALANCE_CASHFLOW_IDENTITY_SKIPPED",
+        "gate_afectado": "survivability_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "TRUTH_PACK",
+        "descripcion": "Validaciones contables criticas no ejecutadas por datos faltantes.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "balance_sheet_ultimo.caja_usd",
+            "ttm.cfo_usd",
+            "ttm.capex_usd",
+            "data_quality.validaciones.BALANCE_IDENTITY.status",
+            "data_quality.validaciones.CASHFLOW_IDENTITY.status"
+          ],
+          "notes": "BALANCE_IDENTITY y CASHFLOW_IDENTITY deben pasar a PASS."
+        }
+      },
+      {
+        "issue_id": "ISS-003",
+        "issue_code": "EXHIBIT_99_1_NUMERICS_MISSING",
+        "gate_afectado": "data_quality_gate",
+        "severidad": "MEDIA",
+        "resoluble": true,
+        "owner_agent_role": "SOURCES",
+        "descripcion": "Exhibits referenciados sin tablas numericas en el paquete actual.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "exhibit_99_1_numeric_tables"
+          ],
+          "notes": "Anexar texto/tablas y source_id."
+        }
+      },
+      {
+        "issue_id": "ISS-004",
+        "issue_code": "IMPLIED_MODEL_BLOCKED",
+        "gate_afectado": "mispricing_gate",
+        "severidad": "ALTA",
+        "resoluble": true,
+        "owner_agent_role": "IMPLIED",
+        "descripcion": "Implied no puede ejecutar valoracion inversa con datos actuales.",
+        "criterio_aceptacion": {
+          "required_fields": [
+            "ImpliedExpectations.status",
+            "ImpliedExpectations.resumen_expectativas_implicitas"
+          ],
+          "notes": "Preferible status OK."
+        }
+      }
+    ],
+    "work_orders": [
+      {
+        "wo_id": "WO-001",
+        "agent_role": "SOURCES",
+        "tipo": "FETCH_FULL_FILING",
+        "issue_refs": [
+          "ISS-001",
+          "ISS-003"
+        ],
+        "targets": {
+          "fields": [
+            "exhibit_99_1_full_text",
+            "exhibit_99_1_numeric_tables",
+            "filing_links_with_source_ids"
+          ],
+          "notes": "Recuperar filing completo (20-F/6-K) y anexos numericos faltantes."
+        },
+        "acceptance": {
+          "required_fields": [
+            "exhibit_99_1_numeric_tables"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": []
+      },
+      {
+        "wo_id": "WO-002",
+        "agent_role": "TRUTH_PACK",
+        "tipo": "EXTRACT_FIELDS",
+        "issue_refs": [
+          "ISS-001",
+          "ISS-002"
+        ],
+        "targets": {
+          "fields": [
+            "mercado.deuda_total_usd",
+            "mercado.caja_y_equivalentes_usd",
+            "ttm.cfo_usd",
+            "ttm.capex_usd",
+            "ttm.fcf_usd",
+            "metricas_derivadas.ebit_usd",
+            "deuda.vencimientos_12_24m",
+            "deuda.covenants_headroom"
+          ],
+          "notes": "Extraer y reconciliar desde filings completos."
+        },
+        "acceptance": {
+          "required_fields": [
+            "ttm.cfo_usd",
+            "ttm.capex_usd",
+            "metricas_derivadas.ebit_usd",
+            "mercado.deuda_total_usd",
+            "mercado.caja_y_equivalentes_usd"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": [
+          "WO-001"
+        ]
+      },
+      {
+        "wo_id": "WO-003",
+        "agent_role": "TRUTH_PACK",
+        "tipo": "REBUILD_TTM_AND_VALIDATIONS",
+        "issue_refs": [
+          "ISS-001",
+          "ISS-002"
+        ],
+        "targets": {
+          "fields": [
+            "data_quality.status",
+            "data_quality.validaciones.BALANCE_IDENTITY.status",
+            "data_quality.validaciones.CASHFLOW_IDENTITY.status"
+          ],
+          "notes": "Recalcular TTM y rerun de validaciones."
+        },
+        "acceptance": {
+          "required_fields": [
+            "data_quality.status"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": [
+          "WO-002"
+        ]
+      },
+      {
+        "wo_id": "WO-004",
+        "agent_role": "IMPLIED",
+        "tipo": "RERUN_IMPLIED_EXPECTATIONS",
+        "issue_refs": [
+          "ISS-004"
+        ],
+        "targets": {
+          "fields": [
+            "status",
+            "reverse_dcf_fcf",
+            "reverse_earnings_power",
+            "resumen_expectativas_implicitas"
+          ],
+          "notes": "Reejecutar con TruthPack actualizado."
+        },
+        "acceptance": {
+          "required_fields": [
+            "status"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": [
+          "WO-003"
+        ]
+      },
+      {
+        "wo_id": "WO-005",
+        "agent_role": "ARBITRO",
+        "tipo": "REARBITRATE",
+        "issue_refs": [
+          "ISS-001",
+          "ISS-002",
+          "ISS-003",
+          "ISS-004"
+        ],
+        "targets": {
+          "fields": [
+            "DecisionPacket_v2_actualizado",
+            "control.next_step"
+          ],
+          "notes": "Ejecutar REARBITRATE con PatchBundle_v3 actualizado."
+        },
+        "acceptance": {
+          "required_fields": [
+            "version_esquema",
+            "resumen_ejecutivo.decision"
+          ],
+          "pass_if_present": true
+        },
+        "depends_on": [
+          "WO-004"
+        ]
+      }
+    ],
+    "dispatch_queue": [
+      {
+        "step": 1,
+        "agent_role": "SOURCES",
+        "wo_ids": [
+          "WO-001"
+        ]
+      },
+      {
+        "step": 2,
+        "agent_role": "TRUTH_PACK",
+        "wo_ids": [
+          "WO-002"
+        ]
+      },
+      {
+        "step": 3,
+        "agent_role": "TRUTH_PACK",
+        "wo_ids": [
+          "WO-003"
+        ]
+      },
+      {
+        "step": 4,
+        "agent_role": "IMPLIED",
+        "wo_ids": [
+          "WO-004"
+        ]
+      },
+      {
+        "step": 5,
+        "agent_role": "ARBITRO",
+        "wo_ids": [
+          "WO-005"
+        ]
+      }
+    ],
+    "loop_budget_restante": 2
+  },
+  "_meta": {
+    "fusion": {
+      "step_name": "ARBITRO",
+      "schema": "ArbitroRemediateKickoff_v1",
+      "modelos_usados": [
+        "gemini-3-pro-preview",
+        "codex"
+      ],
+      "criterios_resolucion": [
+        "Alineacion de schema: se mantuvo ArbitroRemediateKickoff_v1 con DecisionPacket_v2 y RemediationPlan_v1.",
+        "Cuantitativos en conflicto: se eligio valor recomendado del output con mayor evidencia citada; se reportan rangos [min,max] multi-modelo.",
+        "Conflictos de gates: se priorizo resolucion conservadora cuando habia flags de riesgo critico.",
+        "Warnings y flags: se preservaron todos los bloqueos de data quality/implied y opacidad financiera reportados por ambos modelos.",
+        "Remediacion: se unifico en pipeline secuencial SOURCES -> TRUTH_PACK -> IMPLIED -> ARBITRO."
+      ],
+      "rangos_scores_probabilidades": {
+        "resumen_ejecutivo.confianza_global_0_1": {
+          "min": 0.0,
+          "max": 0.67,
+          "recomendado": 0.67
+        },
+        "scoring_preliminar.total_0_100": {
+          "min": 0,
+          "max": 25,
+          "recomendado": 25
+        },
+        "decision_probabilistica.probabilidad_exito_0_1": {
+          "min": 0.0,
+          "max": 0.45,
+          "recomendado": 0.45
+        },
+        "decision_probabilistica.retorno_esperado_ponderado_pct": {
+          "min": -12.2,
+          "max": 0.0,
+          "recomendado": -12.2
+        },
+        "decision_probabilistica.conviccion_0_1": {
+          "min": 0.0,
+          "max": 0.4,
+          "recomendado": 0.4
+        },
+        "decision_probabilistica.ratio_asimetria": {
+          "min": 0.0,
+          "max": 0.13,
+          "recomendado": 0.13
+        },
+        "decision_probabilistica.expected_value_anualizado_pct": {
+          "min": -11.3,
+          "max": 0.0,
+          "recomendado": -11.3
+        },
+        "decision_probabilistica.escenarios_ponderados.base.probabilidad_0_1": {
+          "min": 0.0,
+          "max": 0.3,
+          "recomendado": 0.3
+        },
+        "decision_probabilistica.escenarios_ponderados.bull.probabilidad_0_1": {
+          "min": 0.0,
+          "max": 0.15,
+          "recomendado": 0.15
+        },
+        "decision_probabilistica.escenarios_ponderados.bear.probabilidad_0_1": {
+          "min": 0.0,
+          "max": 0.55,
+          "recomendado": 0.55
+        }
+      },
+      "conflictos": [
+        {
+          "conflicto_id": "CF-001",
+          "campo": "empresa.*",
+          "valor_gemini": {
+            "nombre": "InMode Ltd.",
+            "bolsa": "NASDAQ",
+            "pais": "Israel",
+            "sector": "Healthcare",
+            "industria": "Medical Devices"
+          },
+          "valor_codex": {
+            "nombre": "UNKNOWN",
+            "bolsa": "UNKNOWN",
+            "pais": "UNKNOWN",
+            "sector": "UNKNOWN",
+            "industria": "UNKNOWN"
+          },
+          "resolucion": "Se adopto metadata de Gemini por completitud y coherencia con ticker INMD."
+        },
+        {
+          "conflicto_id": "CF-002",
+          "campo": "decision_probabilistica.*",
+          "valor_gemini": "bloque probabilistico en 0 por bloqueo de datos",
+          "valor_codex": "bloque probabilistico inferencial no nulo",
+          "resolucion": "Se conserva BLOQUEADO + sizing=0 y se adopta bloque inferencial de Codex con rangos multi-modelo."
+        },
+        {
+          "conflicto_id": "CF-003",
+          "campo": "gates.survivability_gate.status",
+          "valor_gemini": "UNKNOWN",
+          "valor_codex": "CONDITIONAL",
+          "resolucion": "Se fija CONDITIONAL por mayor granularidad, manteniendo razones de incertidumbre de Gemini."
+        },
+        {
+          "conflicto_id": "CF-004",
+          "campo": "gates.mispricing_gate.status",
+          "valor_gemini": "UNKNOWN",
+          "valor_codex": "FAIL",
+          "resolucion": "Se fija FAIL por bloqueo explicito de ImpliedExpectations y falta de EV/FCF/EBIT."
+        },
+        {
+          "conflicto_id": "CF-005",
+          "campo": "gates.non_speculative_gate.status",
+          "valor_gemini": "FAIL",
+          "valor_codex": "PASS",
+          "resolucion": "Se fija FAIL de forma conservadora para no ignorar flags de opacidad/dependencia de financiacion."
+        },
+        {
+          "conflicto_id": "CF-006",
+          "campo": "remediation.work_orders",
+          "valor_gemini": "2 work orders (fetch filing + extract financials)",
+          "valor_codex": "5 work orders (pipeline completo hasta rearbitraje)",
+          "resolucion": "Se adopta pipeline de 5 work orders e incorpora explicitamente FETCH_FULL_FILING en WO-001."
+        },
+        {
+          "conflicto_id": "CF-007",
+          "campo": "control.loop_budget_max",
+          "valor_gemini": 3,
+          "valor_codex": 2,
+          "resolucion": "Se adopta 3 para acomodar remediacion extendida sin perder el restante=2 reportado por ambos."
+        }
+      ],
+      "warnings_preservados": [
+        "Data Quality Gate en FAIL",
+        "ImpliedExpectations en BLOCKED",
+        "Faltantes criticos de balance/cash flow/deuda/caja/capex/covenants",
+        "Riesgo de value trap",
+        "Sizing final forzado a 0"
+      ]
+    }
+  }
+}

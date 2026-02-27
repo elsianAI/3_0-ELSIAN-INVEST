@@ -1,0 +1,476 @@
+{
+  "caso_id": "CASE_20260215_INMD",
+  "fecha_corte": "2026-02-15",
+  "red_flags": [
+    {
+      "red_flag_id": "RF-001",
+      "categoria": "REVENUE_RECOGNITION",
+      "descripcion": "En Q3-2024, las preventas fueron USD 31.9M sobre ingresos de USD 130.2M (24.5%). En Q3-2025, ingresos cayeron a USD 93.2M (-28.4% interanual). Se requiere validar cutoff y conversion de preordenes.",
+      "evidencia": [
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2024].preorder_sales_usd.value",
+          "valor": 31900000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2024].revenue_usd.value",
+          "valor": 130200000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].revenue_usd.value",
+          "valor": 93200000,
+          "unidad": "USD"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-002",
+      "categoria": "ONE_OFFS",
+      "descripcion": "Puente EBIT->CFO con distorsion critica en Q3-2025: EBIT proxy USD 20.504M (93.2M * 22%) vs CFO USD 24.5M, brecha +19.5%. La descomposicion completa de la brecha no es auditable con el paquete actual.",
+      "evidencia": [
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].revenue_usd.value",
+          "valor": 93200000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].gaap_operating_margin_pct.value",
+          "valor": 22,
+          "unidad": "percent"
+        },
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].cash_from_operating_activities_usd.value",
+          "valor": 24500000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].share_based_compensation_usd.value",
+          "valor": 2700000,
+          "unidad": "USD"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-003",
+      "categoria": "WORKING_CAPITAL",
+      "descripcion": "No hay datos de AR, inventario ni pasivos corrientes al 2025-12-31. No se puede testear calidad de ingresos ni tension de capital de trabajo.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo.accounts_receivable_net",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo.inventory",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo.total_current_assets",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo.total_current_liabilities",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.validaciones.BALANCE_IDENTITY.status",
+          "valor": "SKIP"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-004",
+      "categoria": "CAPEX_CAPITALIZATION",
+      "descripcion": "Puente CFO->FCF bloqueado: CAPEX y FCF en null. No puede separarse capex de mantenimiento vs crecimiento ni validar riesgo de capitalizacion agresiva.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.capex_usd",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.fcf_usd",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.validaciones.CASHFLOW_IDENTITY.status",
+          "valor": "SKIP"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-005",
+      "categoria": "SBC",
+      "descripcion": "Presion de dilucion por SBC y registro de acciones: SBC de USD 3.9M (Q3-2024) y USD 2.7M (Q3-2025), mas registro S-8 de 800,000 acciones (~1.26% de acciones en circulacion reportadas).",
+      "evidencia": [
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2024].share_based_compensation_usd.value",
+          "valor": 3900000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].share_based_compensation_usd.value",
+          "valor": 2700000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "SRC_021",
+          "ubicacion": "historico_anual[UNKNOWN].additional_ordinary_shares_registered_under_2018_plan",
+          "valor": 800000,
+          "unidad": "shares"
+        },
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "balance_sheet_ultimo.shares_outstanding.value",
+          "valor": 63358750,
+          "unidad": "shares"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-006",
+      "categoria": "LEASES",
+      "descripcion": "Compromisos de leasing no cuantificables: existe plazo contractual de 7 anos 4 meses, pero obligaciones corrientes/no corrientes y pagos de 12 meses estan en null.",
+      "evidencia": [
+        {
+          "source_id": "SRC_001",
+          "ubicacion": "lease_data.operating_lease_term_of_contract.value",
+          "valor": "P7Y4M",
+          "unidad": "iso8601_duration"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "lease_data.operating_lease_liability_current",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "lease_data.operating_lease_liability_noncurrent",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "lease_data.lease_payments_due_next_12_months",
+          "valor": null
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-007",
+      "categoria": "OTHER",
+      "descripcion": "Opacidad de deuda y covenants: no hay deuda total, deuda neta, vencimientos 12-24 meses ni condiciones de covenant para auditar riesgo de refinanciacion/incumplimiento.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "mercado.deuda_total_usd",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas.net_debt_ebitda",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.faltantes_criticos[enterprise_value]",
+          "valor": "Cannot calculate EV multiples"
+        }
+      ]
+    },
+    {
+      "red_flag_id": "RF-008",
+      "categoria": "GOODWILL_IMPAIRMENT",
+      "descripcion": "No hay detalle de goodwill/intangibles ni pruebas de deterioro en el paquete, por lo que no se puede validar riesgo de impairment.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo.total_assets",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.validaciones.DATA_COMPLETENESS.detalle",
+          "valor": "balance_sheet_ultimo: 9/12 null (75%)"
+        }
+      ]
+    }
+  ],
+  "liquidez": {
+    "efectivo_disponible": {
+      "caja_actual_usd": null,
+      "lineas_credito_disponibles_usd": null,
+      "efectivo_total_con_lineas_usd": null,
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo.cash_and_cash_equivalents",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "balance_sheet_ultimo.short_term_investments",
+          "valor": null
+        }
+      ]
+    },
+    "runway": {
+      "runway_meses_estimado": null,
+      "metodo_estimacion": "No estimable por ausencia de caja, deuda, capex y FCF.",
+      "dato_operativo_disponible": {
+        "periodo": "Q3-2025",
+        "cfo_usd": 24500000
+      },
+      "evidencia": [
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].cash_from_operating_activities_usd.value",
+          "valor": 24500000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.capex_usd",
+          "valor": null
+        }
+      ]
+    },
+    "vencimientos_deuda_12_24_meses": {
+      "deuda_total_usd": null,
+      "maturity_wall_24m": "NO_EVALUABLE",
+      "detalle_vencimientos": [],
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "mercado.deuda_total_usd",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "data_quality.faltantes_criticos",
+          "valor": "enterprise_value, free_cash_flow"
+        }
+      ]
+    },
+    "riesgo_incumplimiento_covenants": {
+      "estado": "NO_EVALUABLE",
+      "motivo": "No hay covenants ni ratios de deuda divulgados en el paquete estructurado.",
+      "evidencia": [
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "metricas_derivadas.net_debt_ebitda",
+          "valor": null
+        }
+      ]
+    },
+    "riesgo_dilucion_accionaria": {
+      "drivers": [
+        "SBC trimestral positivo",
+        "registro S-8 de 800,000 acciones",
+        "recompra autorizada de 10% (mitigante condicionado a caja no reportada)"
+      ],
+      "evidencia": [
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].share_based_compensation_usd.value",
+          "valor": 2700000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "SRC_021",
+          "ubicacion": "historico_anual[UNKNOWN].additional_ordinary_shares_registered_under_2018_plan",
+          "valor": 800000,
+          "unidad": "shares"
+        },
+        {
+          "source_id": "SRC_013",
+          "ubicacion": "historico_trimestral[Q1-2025].share_repurchase_authorized_pct_outstanding",
+          "valor": 10,
+          "unidad": "percent"
+        }
+      ]
+    }
+  },
+  "puentes": {
+    "ebit_a_cfo": {
+      "periodo": "Q3-2025",
+      "metodologia": "EBIT_proxy = revenue_usd * gaap_operating_margin_pct",
+      "ebit_proxy_usd": 20504000,
+      "cfo_usd": 24500000,
+      "diferencia_usd": 3996000,
+      "diferencia_pct_sobre_ebit": 19.49,
+      "distorsion_ge_15pct": true,
+      "drivers_observados": [
+        {
+          "concepto": "SBC",
+          "monto_usd": 2700000,
+          "aporte_pct_de_la_diferencia": 67.57,
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].share_based_compensation_usd.value"
+        }
+      ],
+      "drivers_no_observables": [
+        "cambio en cuentas por cobrar",
+        "cambio en inventarios",
+        "cambio en cuentas por pagar",
+        "impuestos pagados",
+        "intereses pagados"
+      ],
+      "evidencia": [
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].revenue_usd.value",
+          "valor": 93200000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].gaap_operating_margin_pct.value",
+          "valor": 22,
+          "unidad": "percent"
+        },
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].cash_from_operating_activities_usd.value",
+          "valor": 24500000,
+          "unidad": "USD"
+        }
+      ]
+    },
+    "cfo_a_fcf": {
+      "periodo": "Q3-2025",
+      "cfo_usd": 24500000,
+      "capex_usd": null,
+      "fcf_usd": null,
+      "diferencia_pct": null,
+      "distorsion_ge_15pct": "NO_EVALUABLE",
+      "lectura": "Sin capex no se puede cerrar el puente CFO->FCF ni evaluar distorsiones por encima de 15%.",
+      "evidencia": [
+        {
+          "source_id": "SRC_031",
+          "ubicacion": "historico_trimestral[Q3-2025].cash_from_operating_activities_usd.value",
+          "valor": 24500000,
+          "unidad": "USD"
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.capex_usd",
+          "valor": null
+        },
+        {
+          "source_id": "TruthPack_v1",
+          "ubicacion": "ttm.fcf_usd",
+          "valor": null
+        }
+      ]
+    },
+    "distorsiones_criticas": [
+      {
+        "tramo": "EBIT->CFO",
+        "periodo": "Q3-2025",
+        "diferencia_pct": 19.49,
+        "umbral_critico_pct": 15
+      }
+    ]
+  },
+  "kill_criteria_candidatos": [
+    {
+      "kc_id": "KC-001",
+      "definicion": "Dos reportes trimestrales consecutivos sin disclosure de caja+inversiones de corto plazo y sin tabla de vencimientos de deuda a 24 meses.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "probabilidad_cualitativa": "ALTA",
+      "fuente_prevista": "6-K|20-F",
+      "medicion_objetiva": "Ausencia simultanea de los campos en 2 publicaciones consecutivas."
+    },
+    {
+      "kc_id": "KC-002",
+      "definicion": "Ingresos trimestrales por debajo de USD 95M durante 2 trimestres consecutivos.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "6-K|earnings",
+      "medicion_objetiva": "revenue_usd < 95000000 en 2 trimestres seguidos."
+    },
+    {
+      "kc_id": "KC-003",
+      "definicion": "Deterioro de conversion EBIT->CFO: CFO <= 0 o CFO/EBIT_proxy < 0.80 en 2 trimestres consecutivos.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "6-K|20-F",
+      "medicion_objetiva": "Calculo trimestral repetido del ratio CFO/EBIT_proxy."
+    },
+    {
+      "kc_id": "KC-004",
+      "definicion": "Una vez divulgado CAPEX, FCF trimestral negativo en 2 trimestres consecutivos mientras exista recompra de acciones.",
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "6-K|20-F",
+      "medicion_objetiva": "FCF = CFO - CAPEX < 0 en 2 trimestres y evidencia de buyback activo."
+    },
+    {
+      "kc_id": "KC-005",
+      "definicion": "Dilucion neta >3% interanual de acciones en circulacion o nuevas registraciones >2% del total de acciones, sin mejora de FCF reportado.",
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "probabilidad_cualitativa": "MEDIA",
+      "fuente_prevista": "20-F|S-8|6-K",
+      "medicion_objetiva": "Variacion YoY de shares_outstanding y/o registros de acciones."
+    },
+    {
+      "kc_id": "KC-006",
+      "definicion": "Si al divulgarse deuda, los vencimientos de 24 meses superan 60% de caja+inversiones de corto plazo o se reporta breach de covenant.",
+      "ventana_meses": {
+        "min": 6,
+        "max": 24
+      },
+      "probabilidad_cualitativa": "BAJA",
+      "fuente_prevista": "20-F|notas de deuda|6-K",
+      "medicion_objetiva": "Comparacion directa entre maturity schedule y liquidez disponible."
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "SourcesPack_v1 no disponible; analisis ejecutado solo con TruthPack_v1.",
+      "No se revisaron filings completos de forma directa fuera de los campos estructurados del TruthPack.",
+      "Balance sheet 2025-12-31 incompleto (75% de campos clave en null).",
+      "Puente CFO->FCF incompleto por CAPEX nulo.",
+      "Deuda, covenants y vencimientos no disponibles en el dataset."
+    ],
+    "exhaustividad_revision_contable": {
+      "reconocimiento_ingresos": "REVISION_PARCIAL",
+      "capitalizacion_capex": "NO_EVALUABLE_POR_DATOS",
+      "capital_trabajo": "NO_EVALUABLE_POR_DATOS",
+      "goodwill_deterioro": "NO_EVALUABLE_POR_DATOS",
+      "related_parties": "NO_EVALUABLE_POR_DATOS",
+      "off_balance_liabilities": "REVISION_PARCIAL_LEASES"
+    }
+  }
+}

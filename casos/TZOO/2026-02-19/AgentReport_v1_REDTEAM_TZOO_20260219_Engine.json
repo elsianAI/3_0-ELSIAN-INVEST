@@ -1,0 +1,1358 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260219_TZOO",
+  "fecha_corte": "2026-02-19",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "fusion_codex_claude_gemini",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260219_TZOO",
+    "implied_expectations_caso_id": "CASE_20260219_TZOO",
+    "sources_pack_caso_id": "CASE_20260219_TZOO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "El supuesto ~2.96x P/FCF se ancla en FY2024 usado como fallback porque el TTM fue rechazado por no consecutividad trimestral.",
+      "El run-rate de caja 2025 se debilitó: CFO 9M-2025 de 4.209M versus CFO FY2024 de 21.1M.",
+      "El EBIT trimestral cayó con rapidez en 2025 (Q1: 3.804M, Q2: 2.060M, Q3: 0.488M), acercándose a break-even.",
+      "COGS/Ingresos subió desde ~12.5% en FY2024 a ~21.6% (Q2-2025) y ~20.4% (Q3-2025), señalando presión de márgenes.",
+      "La liquidez y solvencia siguen opacas: CFF 9M-2025 (-13.068M) excede 3x CFO, con deuda total/EV no reconciliados y patrimonio muy estrecho."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.8
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La lectura de infravaloración por P/FCF está sesgada por FY2024 y no representa de forma robusta la capacidad de caja post-2025.",
+      "confianza_0_1": 0.88,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-19",
+          "ubicacion": "data_quality.validaciones.TTM_CONSECUTIVE",
+          "cita_corta": "TTM rechazado; fallback a FY2024.",
+          "interpretacion": "El múltiplo principal se basa en un denominador retrospectivo no validado como run-rate actual."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "tzoo-20250930",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral[Q3-2025]",
+          "cita_corta": "CFO 9M-2025: 4,209,000.",
+          "interpretacion": "El flujo operativo acumulado de 2025 es muy inferior al nivel FY2024."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "historico_anual[FY2024]",
+          "cita_corta": "CFO 21,100,000; FCF 20,923,000.",
+          "interpretacion": "FY2024 aparece como nivel excepcional frente al desempeño más reciente."
+        }
+      ],
+      "falsacion": {
+        "test": "En 10-K FY2025, CFO > 15,000,000 USD y FCF > 12,000,000 USD.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "10-K",
+        "ventana": "3-9 meses",
+        "fuente_verificacion": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La trayectoria de EBIT en 2025 muestra deterioro acelerado y riesgo elevado de entrar en EBIT negativo.",
+      "confianza_0_1": 0.87,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_009",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-03-31",
+          "ubicacion": "historico_trimestral[Q1-2025]",
+          "cita_corta": "EBIT Q1-2025: 3,804,000.",
+          "interpretacion": "Punto de partida claramente superior al cierre de Q3."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_008",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "historico_trimestral[Q2-2025]",
+          "cita_corta": "EBIT Q2-2025: 2,060,000.",
+          "interpretacion": "La caída continúa en el trimestre intermedio."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "tzoo-20250930",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral[Q3-2025]",
+          "cita_corta": "EBIT Q3-2025: 488,000; net income: 150,000.",
+          "interpretacion": "La rentabilidad ya es marginal y sensible a shocks pequeños."
+        }
+      ],
+      "falsacion": {
+        "test": "Q4-2025 EBIT >= 3,000,000 USD y Q1-2026 EBIT >= 2,500,000 USD.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "earnings/10-Q",
+        "ventana": "3-9 meses",
+        "fuente_verificacion": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El salto de COGS/Ingresos en 2025 sugiere deterioro de economics que no puede tratarse como ruido sin evidencia adicional.",
+      "confianza_0_1": 0.82,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "historico_anual[FY2024]",
+          "cita_corta": "COGS 10.469M sobre ingresos 83.902M (~12.5%).",
+          "interpretacion": "La base 2024 refleja márgenes de costo notablemente mejores."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_008",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "historico_trimestral[Q2-2025]",
+          "cita_corta": "COGS 5.163M sobre ingresos 23.906M (~21.6%).",
+          "interpretacion": "La compresión de margen bruto emerge de forma material en 2025."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "tzoo-20250930",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral[Q3-2025]",
+          "cita_corta": "COGS 4.519M sobre ingresos 22.198M (~20.4%).",
+          "interpretacion": "La presión en costos persiste al menos dos trimestres consecutivos."
+        }
+      ],
+      "falsacion": {
+        "test": "COGS/Ingresos < 15.0% durante dos trimestres consecutivos con explicación causal verificable.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q",
+        "ventana": "6-12 meses",
+        "fuente_verificacion": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La liquidez efectiva está bajo presión: CFF domina al CFO y hay indicio de CFO trimestral estanco negativo en Q3-2025.",
+      "confianza_0_1": 0.85,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "tzoo-20250930",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral[Q3-2025-9M]",
+          "cita_corta": "CFO 9M: 4,209,000; CFF 9M: -13,068,000; delta_cash: -8,493,000.",
+          "interpretacion": "La salida financiera supera ampliamente a la generación operativa en el acumulado."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_008",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-06-30",
+          "ubicacion": "historico_trimestral[Q2-2025-6M]",
+          "cita_corta": "CFO 6M: 4,582,000; CFF 6M: -11,522,000.",
+          "interpretacion": "Comparando 9M vs 6M, el CFO estanco de Q3 es inferido como negativo (~ -373,000)."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "lease_data",
+          "cita_corta": "Cash paid for lease liabilities: 3,368,000.",
+          "interpretacion": "Existe al menos una porción no discrecional de la salida de caja financiera."
+        }
+      ],
+      "falsacion": {
+        "test": "En dos reportes consecutivos, |CFF| <= |CFO| y caja total reportada >= 12,000,000 USD.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q",
+        "ventana": "3-12 meses",
+        "fuente_verificacion": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_005",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El balance es frágil: patrimonio muy bajo frente a pasivos y obligaciones de lease.",
+      "confianza_0_1": 0.84,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita_corta": "Activos 54.722M; pasivos 50.369M; patrimonio 4.353M.",
+          "interpretacion": "El colchón patrimonial para absorber deterioros es reducido."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "lease_data",
+          "cita_corta": "Lease liabilities 8.118M.",
+          "interpretacion": "Los compromisos de lease superan el patrimonio contable."
+        }
+      ],
+      "falsacion": {
+        "test": "En FY2025, patrimonio > 10,000,000 USD y pasivos/patrimonio < 4.0x.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-K",
+        "ventana": "6-18 meses",
+        "fuente_verificacion": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_006",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La opacidad en deuda total, restricted cash y EV impide validar solvencia y múltiplos por EV.",
+      "confianza_0_1": 0.86,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-19",
+          "ubicacion": "mercado.traza_calculo_ev.inputs",
+          "cita_corta": "deuda_total_usd null; enterprise_value_usd null.",
+          "interpretacion": "No hay base suficiente para validar descuento por EV ni estructura de capital."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "TruthPack_v1",
+          "url": null,
+          "titulo": null,
+          "fecha": "2026-02-19",
+          "ubicacion": "data_quality.overall_status",
+          "cita_corta": "overall_status: PARTIAL; faltante crítico: enterprise_value.",
+          "interpretacion": "La incertidumbre de balance sigue abierta en el dataset de decisión."
+        }
+      ],
+      "falsacion": {
+        "test": "Dos filings consecutivos publican deuda total, separación de restricted cash y EV calculable sin supuestos externos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "filing",
+        "ventana": "3-12 meses",
+        "fuente_verificacion": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_007",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La conversión EBIT->CFO es históricamente errática, elevando el riesgo de extrapolar FCF linealmente.",
+      "confianza_0_1": 0.84,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_002",
+          "url": null,
+          "titulo": null,
+          "fecha": "2022-12-31",
+          "ubicacion": "historico_anual[FY2022]",
+          "cita_corta": "EBIT 7,557,000; CFO -23,121,000.",
+          "interpretacion": "Un año con EBIT positivo y CFO fuertemente negativo indica volatilidad de working capital."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_003",
+          "url": null,
+          "titulo": null,
+          "fecha": "2021-12-31",
+          "ubicacion": "historico_anual[FY2021]",
+          "cita_corta": "EBIT -1,313,000; CFO -8,083,000.",
+          "interpretacion": "Persisten desviaciones relevantes entre resultado operativo y caja."
+        }
+      ],
+      "falsacion": {
+        "test": "La conversión EBIT-a-CFO se mantiene entre 80% y 120% por cuatro trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-Q",
+        "ventana": "6-18 meses",
+        "fuente_verificacion": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_008",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "Existe riesgo de techo de escala: ingresos anuales estancados en ~84M y por debajo de niveles pre-COVID.",
+      "confianza_0_1": 0.73,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "historico_anual[FY2023-FY2024]",
+          "cita_corta": "FY2023: 84,477,000; FY2024: 83,902,000.",
+          "interpretacion": "No hay aceleración anual clara antes del deterioro de 2025."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_005",
+          "url": null,
+          "titulo": null,
+          "fecha": "2019-12-31",
+          "ubicacion": "historico_anual[FY2019]",
+          "cita_corta": "Ingresos FY2019: 104,925,000.",
+          "interpretacion": "El nivel actual sigue claramente por debajo de la escala previa al shock COVID."
+        }
+      ],
+      "falsacion": {
+        "test": "Ingresos anualizados de 4 trimestres superan 92,000,000 USD.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "10-Q/10-K",
+        "ventana": "6-18 meses",
+        "fuente_verificacion": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "Habrá al menos un trimestre con EBIT negativo en los próximos 12 meses.",
+      "probabilidad_0_1": 0.62,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "En algún 10-Q del periodo, EBIT trimestral reportado < 0 USD.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "FCF FY2025 será inferior a 8,000,000 USD.",
+      "probabilidad_0_1": 0.55,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "(CFO - CAPEX) FY2025 < 8,000,000 USD en 10-K.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_003",
+      "descripcion": "La caja reportada (incluyendo restricted cash) caerá por debajo de 10,000,000 USD al menos una vez en 12 meses.",
+      "probabilidad_0_1": 0.47,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Al menos un 10-Q reporta cash, cash equivalents and restricted cash < 10,000,000 USD.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_004",
+      "descripcion": "COGS/Ingresos se mantendrá por encima de 18% en los próximos dos trimestres reportados.",
+      "probabilidad_0_1": 0.6,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "COGS/Ingresos >= 18% en dos reportes trimestrales consecutivos.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_RT_005",
+      "descripcion": "El margen operativo FY2025 será inferior al 10%.",
+      "probabilidad_0_1": 0.7,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "EBIT FY2025 / Ingresos FY2025 < 10% en 10-K.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_006",
+      "descripcion": "CFF seguirá superando CFO en magnitud en el siguiente periodo semestral reportado.",
+      "probabilidad_0_1": 0.52,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "|CFF| > |CFO| en datos semestrales del siguiente 10-Q.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Desglose completo de CFF por rubro (recompras, dividendos, principal de lease, amortización de deuda, otros).",
+      "por_que_importa": "Sin desglose no puede validarse la hipótesis de CFF discrecional.",
+      "como_obtenerlo": "10-Q/10-K, estado de flujos y nota de financing activities con detalle de movimientos."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Deuda financiera total (corto/largo plazo), vencimientos y covenants.",
+      "por_que_importa": "Es crítico para solvencia, riesgo de refinanciación y cálculo de EV.",
+      "como_obtenerlo": "Notas de deuda en 10-Q/10-K y tabla de vencimientos."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Reconciliación explícita de cash & equivalents vs restricted cash por periodo.",
+      "por_que_importa": "La caja utilizable puede ser sustancialmente menor que la caja headline.",
+      "como_obtenerlo": "Notas de efectivo y conciliación cash/cash equivalents/restricted cash en 10-Q/10-K."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Explicación del management sobre el salto de COGS/Ingresos en 2025 y sus drivers (mix/take-rate/costos de suministro).",
+      "por_que_importa": "Permite distinguir choque temporal de cambio estructural de economics.",
+      "como_obtenerlo": "MD&A de 10-Q y transcripciones de earnings calls Q1-Q3 2025."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Acciones diluidas promedio, recompras netas y SBC detallado.",
+      "por_que_importa": "Permite medir riesgo de dilución y calidad del retorno de capital.",
+      "como_obtenerlo": "Notas de EPS y stock-based compensation en 10-Q/10-K."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Aging de cuentas por cobrar y condiciones de pago con merchants.",
+      "por_que_importa": "Ayuda a proyectar riesgo de consumo de caja por capital de trabajo.",
+      "como_obtenerlo": "Notas de AR y disclosure de working capital en 10-Q/10-K."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Encontrar la razón correcta para NO invertir: invalidar claims críticos, revelar riesgos no modelados, detectar binariedad oculta y proponer kill criteria falsables.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.8,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "El descuento aparente depende de FY2024 mientras 2025 muestra deterioro operativo y de caja. Con opacidad en deuda/restricted cash/EV y patrimonio estrecho, domina el riesgo de trampa de valor."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "La acción cotiza a ~2.96x P/FCF sobre FCF FY2024, implicando distress mal precio.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.75,
+              "por_que": [
+                "El TTM fue rechazado y se usó FY2024 como fallback.",
+                "CFO 9M-2025 (4.209M) queda muy por debajo del CFO FY2024 (21.1M).",
+                "El deterioro de EBIT 2025 reduce la probabilidad de repetir el FCF FY2024."
+              ]
+            },
+            "puntos_ciegos": [
+              "Usa FY2024 como normalidad sin validar run-rate 2025.",
+              "No ajusta por volatilidad histórica EBIT->CFO.",
+              "No incorpora plenamente la opacidad de deuda/restricted cash sobre el múltiplo."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "data_quality.validaciones.TTM_CONSECUTIVE",
+                "cita_corta": "TTM rechazado; fallback a FY2024.",
+                "interpretacion": "La base del P/FCF no es trailing robusto."
+              },
+              {
+                "source_id": "tzoo-20250930",
+                "ubicacion": "historico_trimestral[Q3-2025]",
+                "cita_corta": "CFO 9M-2025: 4,209,000.",
+                "interpretacion": "La capacidad operativa de caja reciente es mucho menor al ancla FY2024."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "FCF FY2025 > 12,000,000 USD y CFO FY2025 > 15,000,000 USD.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_002",
+            "resumen_claim_bull": "Modelo asset-light con margen bruto estructural alto y capex bajo.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "Capex bajo es cierto, pero no compensa compresión de márgenes por COGS.",
+                "COGS/Ingresos subió a ~21.6% en Q2-2025 y ~20.4% en Q3-2025.",
+                "El margen bruto reciente (~78-80% en 2025) quedó por debajo del régimen histórico."
+              ]
+            },
+            "puntos_ciegos": [
+              "Confunde baja intensidad de capital con defensividad de margen.",
+              "No demuestra reversión de COGS con mecanismo causal.",
+              "No modela persistencia de un nuevo nivel de costos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_008",
+                "ubicacion": "historico_trimestral[Q2-2025]",
+                "cita_corta": "COGS/Ingresos ~21.6%.",
+                "interpretacion": "La estructura de margen empeoró materialmente."
+              },
+              {
+                "source_id": "tzoo-20250930",
+                "ubicacion": "historico_trimestral[Q3-2025]",
+                "cita_corta": "COGS/Ingresos ~20.4%.",
+                "interpretacion": "No hay reversión inmediata visible."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Margen bruto > 85% durante dos trimestres consecutivos.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_003",
+            "resumen_claim_bull": "La compresión de EBIT en 2025 existe, pero EBIT sigue positivo.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.65,
+              "por_que": [
+                "El dato de EBIT positivo es correcto pero con tendencia fuertemente descendente.",
+                "Q1 3.804M -> Q2 2.060M -> Q3 0.488M implica pérdida de colchón operativo.",
+                "Una perturbación moderada puede llevar a EBIT negativo."
+              ]
+            },
+            "puntos_ciegos": [
+              "No modela sensibilidad a pequeños shocks.",
+              "No diferencia 'positivo pero colapsando' de 'positivo y estable'.",
+              "No incorpora operating deleverage con gastos relativamente rígidos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_009",
+                "ubicacion": "historico_trimestral[Q1-2025]",
+                "cita_corta": "EBIT 3,804,000.",
+                "interpretacion": "Referencia inicial desde la cual se observa el deterioro."
+              },
+              {
+                "source_id": "tzoo-20250930",
+                "ubicacion": "historico_trimestral[Q3-2025]",
+                "cita_corta": "EBIT 488,000; net income 150,000.",
+                "interpretacion": "Rentabilidad ya cerca de cero."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "EBIT Q4-2025 >= 2,000,000 USD y Q1-2026 >= 3,000,000 USD.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "earnings/10-Q"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_004",
+            "resumen_claim_bull": "La caída de caja es reversible si CFF es mayormente discrecional.",
+            "evaluacion_red_team": {
+              "estado": "NO_PROBADO",
+              "probabilidad_de_fallo_0_1": 0.73,
+              "por_que": [
+                "No hay desglose suficiente para sostener discrecionalidad mayoritaria del CFF.",
+                "CFF 9M-2025 (-13.068M) supera 3x el CFO 9M (4.209M).",
+                "Existe componente no discrecional documentado (leases)."
+              ]
+            },
+            "puntos_ciegos": [
+              "No separa recompras de obligaciones contractuales/deuda.",
+              "No cuantifica la porción no suspendible del CFF.",
+              "No modela escenario donde CFF permanezca estructuralmente alto."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "tzoo-20250930",
+                "ubicacion": "historico_trimestral[Q3-2025-9M]",
+                "cita_corta": "CFO 4,209,000; CFF -13,068,000.",
+                "interpretacion": "La salida financiera domina la caja operativa."
+              },
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "lease_data",
+                "cita_corta": "Cash paid for lease liabilities: 3,368,000.",
+                "interpretacion": "Hay obligaciones de salida de caja no plenamente discrecionales."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Filing muestra que >70% del CFF reciente fue discrecional y además se reduce/suspende.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "filing"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_005",
+            "resumen_claim_bull": "Resolver la opacidad de capital debería cerrar el descuento.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.52,
+              "por_que": [
+                "La opacidad existe, pero no prueba que sea el driver principal del descuento.",
+                "El deterioro operativo por sí solo puede explicar múltiplos bajos.",
+                "La resolución de opacidad podría revelar una estructura menos favorable."
+              ]
+            },
+            "puntos_ciegos": [
+              "Sobrepondera disclosure frente a calidad de beneficios.",
+              "No modela rerating fallido aun con más transparencia.",
+              "Asume implícitamente deuda no material sin evidencia confirmada."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "TruthPack_v1",
+                "ubicacion": "mercado.traza_calculo_ev.inputs",
+                "cita_corta": "deuda_total_usd null; enterprise_value_usd null.",
+                "interpretacion": "Hay opacidad real, pero sin dirección de signo sobre valoración."
+              },
+              {
+                "source_id": "tzoo-20250930",
+                "ubicacion": "historico_trimestral[Q3-2025]",
+                "cita_corta": "EBIT trimestral en 488,000.",
+                "interpretacion": "El deterioro de rentabilidad ya justifica compresión relevante."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Con disclosure completo, el múltiplo mejora de forma sostenida sin recuperación operativa material.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "filing/mercado"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_006",
+            "resumen_claim_bull": "Existe colchón de liquidez suficiente.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.6,
+              "por_que": [
+                "La caja FY2024 no representa necesariamente la liquidez utilizable actual.",
+                "9M-2025 reporta delta de caja de -8.493M y CFF dominando al CFO.",
+                "Sin separación de restricted cash, el buffer real puede ser menor."
+              ]
+            },
+            "puntos_ciegos": [
+              "No reconcilia caja utilizable vs restricted cash.",
+              "No integra stress de 12 meses con CFF persistentemente alto.",
+              "Subestima el riesgo de patrimonio estrecho."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "balance_sheet_ultimo",
+                "cita_corta": "Patrimonio 4.353M vs pasivos 50.369M.",
+                "interpretacion": "El margen patrimonial para absorber tensión de liquidez es bajo."
+              },
+              {
+                "source_id": "tzoo-20250930",
+                "ubicacion": "historico_trimestral[Q3-2025-9M]",
+                "cita_corta": "delta_cash 9M: -8,493,000.",
+                "interpretacion": "La trayectoria reciente de caja no es holgada."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Caja reportada > 12,000,000 USD en Q4-2025/Q1-2026 con moderación de CFF.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "10-Q/10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_007",
+            "resumen_claim_bull": "Recuperación post-COVID y GA estable sostienen opcionalidad operativa.",
+            "evaluacion_red_team": {
+              "estado": "PARCIAL",
+              "probabilidad_de_fallo_0_1": 0.55,
+              "por_que": [
+                "La disciplina de GA es un punto a favor, pero no compensa por sí sola la compresión de margen bruto.",
+                "FY2024 (83.9M) sigue por debajo de FY2019 (104.9M).",
+                "Con COGS más alto, el apalancamiento operativo puede actuar en contra."
+              ]
+            },
+            "puntos_ciegos": [
+              "No calcula breakeven con nuevo régimen de COGS.",
+              "No demuestra recuperación estructural de escala pre-COVID.",
+              "No incorpora riesgo de estancamiento con costos fijos."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "historico_anual[FY2023-FY2024]",
+                "cita_corta": "84,477,000 -> 83,902,000.",
+                "interpretacion": "La base anual de ingresos no venía acelerando."
+              },
+              {
+                "source_id": "SRC_005",
+                "ubicacion": "historico_anual[FY2019]",
+                "cita_corta": "Ingresos FY2019: 104,925,000.",
+                "interpretacion": "La recuperación de escala sigue incompleta."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "Ingresos anualizados > 95,000,000 USD y margen EBIT > 12% de forma sostenida.",
+              "ventana_meses": {
+                "min": 12,
+                "max": 24
+              },
+              "fuente_prevista": "10-Q/10-K"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Asumir CFF discrecional sin desglose documental.",
+          "Asumir FY2024 como base normalizable pese a validación TTM fallida.",
+          "Asumir reversión de COGS sin mecanismo causal verificable.",
+          "Asumir que resolver opacidad de EV/deuda, por sí solo, gatilla rerating.",
+          "Usar caja headline sin reconciliar restricted cash.",
+          "Subestimar dependencia de múltiples condiciones simultáneas (márgenes, caja y disclosure)."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "FY2024 fue un pico no repetible de conversión a caja.",
+          "El salto de COGS refleja un nuevo equilibrio competitivo más exigente.",
+          "El descuento no es solo opacidad: también descuenta deterioro de calidad de beneficios.",
+          "El CFF elevado incorpora obligaciones estructurales no plenamente discretas.",
+          "La combinación de patrimonio fino y opacidad de capital aumenta prima de riesgo."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "El múltiplo bajo depende de FCF FY2024, pero 2025 muestra una capacidad de caja sustancialmente menor.",
+          "COGS/Ingresos subió a ~20-22% en 2025 reportado, comprimiendo margen y EBIT.",
+          "EBIT cayó de 3.804M a 0.488M en tres trimestres, elevando probabilidad de EBIT negativo.",
+          "CFF persistentemente superior a CFO drena liquidez y su composición no está validada.",
+          "Con patrimonio estrecho y deuda/EV opacos, el perfil es de value trap con downside asimétrico."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "El aumento de COGS se vuelve persistente y reduce estructuralmente margen bruto y EBIT.",
+            "indicadores_tempranos": [
+              "COGS/Ingresos >= 18% sostenido.",
+              "Margen bruto no vuelve por encima de 82-85%.",
+              "EBIT trimestral <= 1,000,000 USD o negativo."
+            ]
+          },
+          {
+            "mecanismo": "WC_CONSUME_CAJA",
+            "descripcion": "El capital de trabajo deteriora la conversión EBIT->CFO y neutraliza el beneficio contable.",
+            "indicadores_tempranos": [
+              "CFO/EBIT < 50% en dos periodos.",
+              "AR crece más rápido que ingresos.",
+              "Delta de caja negativo con EBIT positivo."
+            ]
+          },
+          {
+            "mecanismo": "CFF_ESTRUCTURAL_ALTO",
+            "descripcion": "Si CFF contiene componentes no comprimibles (deuda/leases/obligaciones), la caja se erosiona incluso con EBIT positivo moderado.",
+            "indicadores_tempranos": [
+              "CFF anualizado > 10M con CFO débil.",
+              "No aparece reducción material del CFF en nuevos filings.",
+              "Caja reportada cae por debajo de 8M."
+            ]
+          },
+          {
+            "mecanismo": "DILUCION_O_REFINANCIACION",
+            "descripcion": "Con menor liquidez y rentabilidad, la compañía puede financiar brecha mediante emisión o deuda más costosa.",
+            "indicadores_tempranos": [
+              "Acciones diluidas +8% a +10% interanual.",
+              "Nueva deuda o convertible en términos exigentes.",
+              "Recompras se reducen por falta de caja disponible."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Ingresos relativamente estables pero economics peores: COGS alto, EBIT comprimido, FCF por debajo de FY2024 y rerating limitado.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "INGRESOS",
+                "direccion": "NO_MEJORA",
+                "rango": "84-90M USD anuales",
+                "justificacion": "La tensión principal está en margen/calidad de caja más que en desplome de ventas."
+              },
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "EMPEORA",
+                "rango": "9%-12%",
+                "justificacion": "Run-rate 2025 sugiere compresión relevante respecto a FY2024."
+              },
+              {
+                "variable": "FCF",
+                "direccion": "NO_MEJORA",
+                "rango": "0-8M USD",
+                "justificacion": "CFO reciente y presión de costos reducen la probabilidad de repetir FY2024."
+              },
+              {
+                "variable": "CFF",
+                "direccion": "NO_MEJORA",
+                "rango": "10-13M USD anualizados",
+                "justificacion": "Persistencia histórica de CFF elevado sin desglose concluyente."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "EARNINGS_CAEN",
+              "explicacion": "Al caer la caja recurrente, el ancla de múltiplo basada en FY2024 pierde validez.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -35,
+                "base": -15,
+                "max": 5
+              },
+              "nota": "Rango sensible a disclosure de deuda/restricted cash y estabilización de COGS."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Stress de liquidez: EBIT cruza a negativo, CFF no se modera, caja cae a zona crítica y fuerza financiación externa.",
+            "ventana_meses": {
+              "min": 3,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.25,
+            "es_binario": false,
+            "drivers": [
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "caja reportada < 5-8M USD",
+                "justificacion": "Con CFF > CFO, el buffer puede deteriorarse rápidamente."
+              },
+              {
+                "variable": "EBIT",
+                "direccion": "EMPEORA",
+                "rango": "EBIT anual negativo",
+                "justificacion": "La tendencia Q1->Q3 deja escaso margen ante shocks adicionales."
+              },
+              {
+                "variable": "DILUCION",
+                "direccion": "EMPEORA",
+                "rango": "+10%-20% acciones diluidas",
+                "justificacion": "Si no hay autofinanciación, el ajuste puede trasladarse al equity."
+              }
+            ],
+            "impacto_en_supervivencia": "ALTO",
+            "nota": "Este escenario depende de que no aparezca moderación de CFF ni reversión de COGS."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.8,
+        "razones": [
+          "Baseline aplicado: 0.50 por ausencia de señal fuerte de filtrado previo (coincidente entre modelos).",
+          "Factor al alza: deterioro de EBIT trimestral 2025 (3.804M -> 0.488M).",
+          "Factor al alza: ancla de valoración sobre FY2024 con TTM invalidado.",
+          "Factor al alza: deuda_total_usd/enterprise_value_usd no disponibles y restricted cash sin reconciliación suficiente.",
+          "Factor al alza: patrimonio 4.353M frente a pasivos 50.369M y lease liabilities 8.118M.",
+          "Factor a la baja: FY2024 mostró FCF alto y capex bajo.",
+          "Factor a la baja: ingresos trimestrales 2025 reportados se sostienen en >22M.",
+          "Rango explícito entre modelos: 0.62-0.90; valor recomendado: 0.80."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo",
+            "evidencia_necesaria": [
+              "COGS/Ingresos < 18% en dos trimestres consecutivos.",
+              "EBIT > 3,000,000 USD en al menos dos de tres trimestres.",
+              "|CFF| <= |CFO| en dos periodos consecutivos."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural",
+            "evidencia_necesaria": [
+              "COGS/Ingresos >= 18%-20% por 3-4 trimestres.",
+              "EBIT <= 1,000,000 USD por trimestre o negativo.",
+              "La caja sigue cayendo pese a ingresos relativamente estables."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "TESIS",
+          "definicion": "COGS/Ingresos >= 20.0% en 3 de los próximos 4 trimestres.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma deterioro de economics y debilita la tesis de reversión."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "BALANCE",
+          "definicion": "Caja reportada (incluyendo restricted cash) < 8,000,000 USD en cualquier cierre trimestral.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q/10-K",
+          "accion_recomendada": "SALIR",
+          "por_que": "Reduce materialmente el margen de seguridad de liquidez."
+        },
+        {
+          "kc_id": "KC-RT-003",
+          "tipo": "TESIS",
+          "definicion": "EBIT negativo en dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma que la compresión operativa no era transitoria."
+        },
+        {
+          "kc_id": "KC-RT-004",
+          "tipo": "BALANCE",
+          "definicion": "|CFF| > 1.5x |CFO| en dos reportes consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "La salida financiera no estaría siendo cubierta por caja operativa."
+        },
+        {
+          "kc_id": "KC-RT-005",
+          "tipo": "CATALIZADOR",
+          "definicion": "No se publica deuda total y reconciliación de restricted cash en dos filings consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "CONGELAR_COMPRAS",
+          "por_que": "Sin transparencia no se puede cerrar riesgo de balance ni validar EV."
+        },
+        {
+          "kc_id": "KC-RT-006",
+          "tipo": "DILUCION",
+          "definicion": "Emisión neta de acciones > 10% del float o emisión de deuda convertible.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Con equity estrecho, la dilución puede destruir rápidamente valor por acción."
+        },
+        {
+          "kc_id": "KC-RT-007",
+          "tipo": "TESIS",
+          "definicion": "FCF FY2025 < 3,000,000 USD.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-K",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirmaría que FY2024 fue outlier y que la asimetría de múltiplo era óptica."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Normalización creíble de márgenes",
+          "umbral_o_condicion": "COGS/Ingresos < 15% durante dos trimestres consecutivos con explicación causal verificable.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Ruptura de la tendencia de EBIT",
+          "umbral_o_condicion": "EBIT > 4,000,000 USD en dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q"
+        },
+        {
+          "item": "Calidad de caja sostenible",
+          "umbral_o_condicion": "CFO FY2025 > 15,000,000 USD y FCF FY2025 >= 12,000,000 USD.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 9
+          },
+          "fuente_prevista": "10-K"
+        },
+        {
+          "item": "Riesgo de balance acotado",
+          "umbral_o_condicion": "Disclosure completo de deuda total, restricted cash y covenants en dos filings consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing"
+        },
+        {
+          "item": "Desaceleración del drenaje financiero",
+          "umbral_o_condicion": "|CFF| <= |CFO| por dos periodos consecutivos con caja reportada estable > 12,000,000 USD.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "10-Q"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0.5,
+        "si_se_invierte_igual": [
+          "Limitar tamaño máximo a 0.5% hasta resolver deuda total, desglose CFF y restricted cash.",
+          "No promediar a la baja mientras no haya evidencia de reversión de COGS/EBIT.",
+          "Esperar 10-K FY2025 antes de aumentar exposición.",
+          "Aplicar stop fundamental con KC-RT-001, KC-RT-002 y KC-RT-003.",
+          "Exigir reconciliación explícita de caja utilizable antes de elevar riesgo.",
+          "Revisión trimestral obligatoria de la tesis (COGS, EBIT, CFF/CFO, deuda, dilución)."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Qué porcentaje exacto del CFF reciente fue discrecional vs obligatorio?",
+          "¿Cuál es la deuda financiera total (corto/largo) y su calendario de vencimientos?",
+          "¿Qué parte de la caja reportada corresponde a restricted cash no utilizable?",
+          "¿Qué explica el salto de COGS/Ingresos de ~12.5% a ~20-22% y qué evidencia hay de reversión?",
+          "¿Cuál fue la evolución real de acciones diluidas, SBC y recompras netas en 2025?",
+          "¿Existen covenants que puedan tensionarse con el EBIT actual?",
+          "¿Qué plan de asignación de capital aplica si EBIT no rebota en 2-3 trimestres?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "No se dispone de un objeto ImpliedExpectations_v1 completo (en un output figura como BLOCKED).",
+      "Persisten faltantes críticos de deuda_total_usd y enterprise_value_usd en TruthPack.",
+      "No hay desglose completo de CFF por rubro para separar discrecionalidad de obligatoriedad.",
+      "El bloque trimestral mezcla periodos acumulados (6M/9M) y standalone, limitando comparabilidad run-rate limpia.",
+      "La caja estimada al Q3-2025 (~8.5M) es inferida desde delta_cash acumulado; el valor standalone requiere confirmación en filing.",
+      "No se revisaron de forma completa transcripciones de management para atribuir causalidad final del salto de COGS.",
+      "La separación exacta cash vs restricted cash no está confirmada en todos los periodos usados."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "fusion": {
+      "step_name": "RED_TEAM",
+      "schema": "AgentReport_v1",
+      "modelos_usados": [
+        {
+          "modelo": "gpt-5-codex",
+          "aporte_clave": "Estructura completa del reporte, kill criteria detallados, trazabilidad de opacidad EV/deuda."
+        },
+        {
+          "modelo": "claude-opus-4-6",
+          "aporte_clave": "Cuantificación explícita de CFO/CFF 9M-2025 y mayor cobertura de riesgos de conversión EBIT->CFO."
+        },
+        {
+          "modelo": "gemini-2.0-flash-thinking-exp-01-21",
+          "aporte_clave": "Señal temprana del CFO estanco Q3 inferido y énfasis en deterioro secuencial."
+        }
+      ],
+      "criterios_resolucion": [
+        "Se preservó el schema AgentReport_v1 y se añadió _meta.fusion como requerido.",
+        "Datos cuantitativos coincidentes se adoptaron sin modificación.",
+        "Ante conflicto cuantitativo, se priorizó el valor con mejor trazabilidad a source_id y consistencia temporal.",
+        "No se promediaron cifras ciegamente; se seleccionó valor recomendado y se reportó rango explícito.",
+        "Se fusionaron claims no redundantes y se eliminaron duplicados semánticos.",
+        "Se integraron warnings/flags de los tres modelos en log.limitaciones y conflictos."
+      ],
+      "conflictos": [
+        {
+          "conflicto_id": "CF_001",
+          "campo": "resumen_ejecutivo.confianza_0_1",
+          "valores_modelos": {
+            "gpt-5-codex": 0.8,
+            "claude-opus-4-6": 0.72,
+            "gemini-2.0-flash-thinking-exp-01-21": 0.9
+          },
+          "resolucion": 0.8,
+          "criterio_aplicado": "Valor central del modelo con mayor trazabilidad estructural + rango reportado.",
+          "impacto": "Moderado"
+        },
+        {
+          "conflicto_id": "CF_002",
+          "campo": "payload.contenido.value_trap_checklist.probabilidad_value_trap_0_1",
+          "valores_modelos": {
+            "gpt-5-codex": 0.8,
+            "claude-opus-4-6": 0.62,
+            "gemini-2.0-flash-thinking-exp-01-21": 0.9
+          },
+          "resolucion": 0.8,
+          "criterio_aplicado": "Priorización por puente causal explícito y coherencia con evidencias financieras 2025.",
+          "impacto": "Alto"
+        },
+        {
+          "conflicto_id": "CF_003",
+          "campo": "kill_criteria liquidez (umbral de caja)",
+          "valores_modelos": {
+            "gpt-5-codex": "< 8M",
+            "claude-opus-4-6": "< 6M",
+            "gemini-2.0-flash-thinking-exp-01-21": "< 8M"
+          },
+          "resolucion": "< 8M",
+          "criterio_aplicado": "Umbral coincidente en 2/3 modelos y más prudente para control temprano.",
+          "impacto": "Alto"
+        },
+        {
+          "conflicto_id": "CF_004",
+          "campo": "recomendacion_para_arbitro.tamaño_maximo_sugerido_pct_cartera",
+          "valores_modelos": {
+            "gpt-5-codex": 0.5,
+            "claude-opus-4-6": 1.0,
+            "gemini-2.0-flash-thinking-exp-01-21": 0.0
+          },
+          "resolucion": 0.5,
+          "criterio_aplicado": "Control de riesgo conservador con opción táctica mínima, evitando extremos binarios.",
+          "impacto": "Alto"
+        },
+        {
+          "conflicto_id": "CF_005",
+          "campo": "interpretación CFO Q3-2025 estanco",
+          "valores_modelos": {
+            "gpt-5-codex": "no explícito",
+            "claude-opus-4-6": "implícito por 9M vs 6M",
+            "gemini-2.0-flash-thinking-exp-01-21": "explícito (Q3 CFO negativo inferido)"
+          },
+          "resolucion": "Incluido como INFERENCIA con cautela metodológica",
+          "criterio_aplicado": "Aceptado solo como inferencia derivada de datos acumulados con limitación explícita.",
+          "impacto": "Moderado"
+        },
+        {
+          "conflicto_id": "CF_006",
+          "campo": "bear_case.escenarios_bajistas[BEAR_WORST].es_binario",
+          "valores_modelos": {
+            "gpt-5-codex": false,
+            "claude-opus-4-6": false,
+            "gemini-2.0-flash-thinking-exp-01-21": true
+          },
+          "resolucion": false,
+          "criterio_aplicado": "Mayoría 2/3 y presencia de rutas intermedias (dilución/refinanciación).",
+          "impacto": "Moderado"
+        },
+        {
+          "conflicto_id": "CF_007",
+          "campo": "umbral de deterioro COGS para predicción principal",
+          "valores_modelos": {
+            "gpt-5-codex": ">=20% (2 de 3 trimestres)",
+            "claude-opus-4-6": ">=18% (2 trimestres)",
+            "gemini-2.0-flash-thinking-exp-01-21": "deterioro severo sin umbral único"
+          },
+          "resolucion": "Predicción principal en >=18% y kill criterion en >=20% (3 de 4)",
+          "criterio_aplicado": "Separación táctica: señal temprana vs criterio de salida estructural.",
+          "impacto": "Alto"
+        },
+        {
+          "conflicto_id": "CF_008",
+          "campo": "amplitud del set de claims",
+          "valores_modelos": {
+            "gpt-5-codex": 6,
+            "claude-opus-4-6": 8,
+            "gemini-2.0-flash-thinking-exp-01-21": 2
+          },
+          "resolucion": 8,
+          "criterio_aplicado": "Se preservaron claims únicos con evidencia trazable y sin duplicación semántica.",
+          "impacto": "Moderado"
+        }
+      ],
+      "rangos_probabilidades": [
+        {
+          "campo": "resumen_ejecutivo.confianza_0_1",
+          "rango_modelos_0_1": [
+            0.72,
+            0.9
+          ],
+          "recomendado_0_1": 0.8
+        },
+        {
+          "campo": "payload.contenido.diagnostico_global.confianza_0_1",
+          "rango_modelos_0_1": [
+            0.72,
+            0.9
+          ],
+          "recomendado_0_1": 0.8
+        },
+        {
+          "campo": "payload.contenido.value_trap_checklist.probabilidad_value_trap_0_1",
+          "rango_modelos_0_1": [
+            0.62,
+            0.9
+          ],
+          "recomendado_0_1": 0.8
+        },
+        {
+          "campo": "predicciones_calibracion[PRED_RT_001].probabilidad_0_1",
+          "rango_modelos_0_1": [
+            0.45,
+            0.75
+          ],
+          "recomendado_0_1": 0.62
+        },
+        {
+          "campo": "predicciones_calibracion[PRED_RT_002].probabilidad_0_1",
+          "rango_modelos_0_1": [
+            0.55,
+            0.6
+          ],
+          "recomendado_0_1": 0.55
+        },
+        {
+          "campo": "predicciones_calibracion[PRED_RT_003].probabilidad_0_1",
+          "rango_modelos_0_1": [
+            0.47,
+            0.85
+          ],
+          "recomendado_0_1": 0.47
+        },
+        {
+          "campo": "predicciones_calibracion[PRED_RT_004].probabilidad_0_1",
+          "rango_modelos_0_1": [
+            0.6,
+            0.68
+          ],
+          "recomendado_0_1": 0.6
+        },
+        {
+          "campo": "predicciones_calibracion[PRED_RT_005].probabilidad_0_1",
+          "rango_modelos_0_1": [
+            0.7,
+            0.7
+          ],
+          "recomendado_0_1": 0.7
+        },
+        {
+          "campo": "predicciones_calibracion[PRED_RT_006].probabilidad_0_1",
+          "rango_modelos_0_1": [
+            0.52,
+            0.52
+          ],
+          "recomendado_0_1": 0.52
+        },
+        {
+          "campo": "payload.contenido.bear_case.escenarios_bajistas[BEAR_BASE].probabilidad_0_1",
+          "rango_modelos_0_1": [
+            0.4,
+            0.55
+          ],
+          "recomendado_0_1": 0.5
+        },
+        {
+          "campo": "payload.contenido.bear_case.escenarios_bajistas[BEAR_WORST].probabilidad_0_1",
+          "rango_modelos_0_1": [
+            0.2,
+            0.35
+          ],
+          "recomendado_0_1": 0.25
+        }
+      ],
+      "flags_integrados": [
+        "Faltan deuda_total_usd y enterprise_value_usd.",
+        "No hay desglose completo de CFF.",
+        "Restricted cash no reconciliado en todos los periodos.",
+        "Comparabilidad limitada por mezcla de periodos 3M/6M/9M.",
+        "ImpliedExpectations_v1 incompleto o bloqueado en parte de los insumos."
+      ]
+    }
+  }
+}

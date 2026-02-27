@@ -1,0 +1,383 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260219_TZOO",
+  "fecha_corte": "2026-02-19",
+  "agente": {
+    "agent_role": "RED_TEAM",
+    "agent_nombre": "RED_TEAM_v1",
+    "modelo": "gemini-2.0-flash-thinking-exp-01-21",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260219_TZOO",
+    "implied_expectations_caso_id": "CASE_20260219_TZOO",
+    "sources_pack_caso_id": "CASE_20260219_TZOO"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Value Trap Clásica: La tesis 'barata' (2.9x P/FCF) usa datos FY24; el run-rate 2025 muestra colapso de FCF y quema de caja en Q3.",
+      "El CFO YTD a Q3-2025 ($4.2M) es MENOR que el de 6M ($4.6M), implicando CFO negativo en Q3, contradiciendo la tesis de 'generación robusta'.",
+      "Deterioro operativo agudo: EBIT Q3-2025 cayó 88% YoY ($0.48M vs $4.0M) con margen colapsando al 2% por explosión de COGS (+77%).",
+      "La liquidez se ha reducido a la mitad en 9 meses (de ~$17M a ~$8.5M est.) por combinación de buybacks agresivos y deterioro operativo.",
+      "Veredicto NO APTO: El descuento óptico esconde una empresa que quema caja operativamente en el margen y enfrenta un cambio estructural de costes."
+    ],
+    "veredicto_role_local": "NO_APTO",
+    "confianza_0_1": 0.9
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_RT_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La generación de caja operativa (CFO) se volvió negativa en el Q3-2025 estanco, invalidando la tesis de cash cow.",
+      "confianza_0_1": 0.95,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "tzoo-20250930",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral[Q3-2025] vs [Q2-2025-6M]",
+          "cita_corta": "CFO 9M (Q3) 4,209,000 vs CFO 6M (Q2) 4,582,000.",
+          "interpretacion": "El CFO acumulado bajó, lo que matemáticamente implica una salida de caja operativa de ~$373k en el Q3."
+        }
+      ],
+      "falsacion": {
+        "test": "CFO del Q4-2025 reportado > $2M positivo recuperando la tendencia.",
+        "ventana_meses": {
+          "min": 1,
+          "max": 3
+        },
+        "fuente_prevista": "10-K"
+      }
+    },
+    {
+      "claim_id": "CLM_RT_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El deterioro de márgenes es estructural, no temporal: COGS subió 77% YoY en Q3 con ingresos subiendo solo 10%.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "tzoo-20250930",
+          "url": null,
+          "titulo": null,
+          "fecha": "2025-09-30",
+          "ubicacion": "historico_trimestral[Q3-2025]",
+          "cita_corta": "Ingresos $22.2M (+10% YoY); COGS $4.5M (+77% vs $2.5M en Q3-24).",
+          "interpretacion": "La desproporción sugiere un cambio en el modelo de negocio (mix) o costes de adquisición permanentemente más altos."
+        }
+      ],
+      "falsacion": {
+        "test": "COGS/Ingresos vuelve a niveles históricos (<15%) en FY2026.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_RT_001",
+      "descripcion": "La caja neta reportada en el 10-K FY2025 estará por debajo de $10M (probablemente ~$8.5M).",
+      "probabilidad_0_1": 0.85,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "Cash and cash equivalents + restricted cash < 10,000,000 en Balance Sheet FY2025.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_RT_002",
+      "descripcion": "El EBIT del Q4-2025 será inferior a $1M o negativo.",
+      "probabilidad_0_1": 0.75,
+      "ventana_meses": {
+        "min": 1,
+        "max": 3
+      },
+      "criterio_validacion": "EBIT reportado < 1,000,000 USD.",
+      "fuente_prevista": "10-K"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de 'Cost of Revenues' en Q3-2025.",
+      "por_que_importa": "Es vital confirmar si el aumento de COGS es por un deal puntual o nuevos fees estructurales.",
+      "como_obtenerlo": "MD&A del 10-Q Q3-2025 (sección Results of Operations)."
+    }
+  ],
+  "payload": {
+    "payload_version": "RedTeamPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Demostrar que TZOO es una Value Trap donde el 'barato' múltiplo trailing oculta un deterioro fundamental acelerado y riesgo de iliquidez.",
+      "diagnostico_global": {
+        "status": "NO_APTO",
+        "confianza_0_1": 0.9,
+        "riesgo_principal": "VALUE_TRAP",
+        "resumen_1_2_frases": "Deterioro violento de fundamentales en 2025 enmascarado por cifras FY2024. CFO real negativo en el margen y caja halving en 9 meses."
+      },
+      "ataque_a_tesis_bull": {
+        "mapa_claims_bull": [
+          {
+            "bull_claim_id": "CLM_001",
+            "resumen_claim_bull": "La acción cotiza a múltiplos de distress (~2.96x P/FCF) basado en FY2024.",
+            "evaluacion_red_team": {
+              "estado": "FRAGIL",
+              "probabilidad_de_fallo_0_1": 0.9,
+              "por_que": [
+                "Usa el espejo retrovisor (FY24). El run-rate 2025 es radicalmente distinto.",
+                "CFO YTD 2025 es ~$4.2M vs ~$21M en FY24. El múltiplo forward es >10x, no 3x.",
+                "En Q3 estanco, el CFO fue negativo."
+              ]
+            },
+            "puntos_ciegos": [
+              "Ignora la tendencia secuencial negativa de los flujos de caja en 2025.",
+              "Asume que FY2024 es la 'norma' y 2025 la anomalía, cuando la tendencia Q1->Q2->Q3 sugiere deterioro progresivo."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "tzoo-20250930",
+                "ubicacion": "historico_trimestral[Q3-2025]",
+                "cita_corta": "CFO 9M $4.2M < CFO 6M $4.6M -> Q3 negativo.",
+                "interpretacion": "El motor de caja se ha calado en el último trimestre reportado."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "CFO FY2025 > $15M.",
+              "ventana_meses": {
+                "min": 1,
+                "max": 3
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "bull_claim_id": "CLM_003",
+            "resumen_claim_bull": "Compresión de EBIT por inflación de COGS, pero EBIT siguió positivo en Q1-Q3.",
+            "evaluacion_red_team": {
+              "estado": "PLAUSIBLE_PERO_RIESGOSO",
+              "probabilidad_de_fallo_0_1": 0.7,
+              "por_que": [
+                "Técnicamente positivo ($0.48M en Q3) pero el margen es error de redondeo (2%).",
+                "La tendencia es asintótica a cero: Q1 $3.8M -> Q2 $2.0M -> Q3 $0.4M.",
+                "Un trimestre más de esta tendencia y entra en pérdidas operativas."
+              ]
+            },
+            "puntos_ciegos": [
+              "La velocidad del deterioro (-88% YoY en EBIT Q3).",
+              "El apalancamiento operativo inverso: pequeña caída de gross profit destruye el EBIT."
+            ],
+            "evidencias_que_contradicen_o_debilitan": [
+              {
+                "source_id": "tzoo-20250930",
+                "ubicacion": "historico_trimestral[Q3-2025]",
+                "cita_corta": "EBIT $488k vs $4.04M en Q3-24.",
+                "interpretacion": "El margen de seguridad operativa ha desaparecido."
+              }
+            ],
+            "test_falsacion_para_el_bull": {
+              "test": "EBIT rebota a >$2M en Q4-25 o Q1-26.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 6
+              },
+              "fuente_prevista": "10-Q"
+            }
+          }
+        ],
+        "donde_huele_a_especulacion": [
+          "Asumir que el CFF (salida de caja financiera) es puramente discrecional (buybacks) sin evidencia de deuda. Si es repago de deuda forzoso o leases, la liquidez está comprometida.",
+          "Creer que el COGS revertirá 'mágicamente' a niveles de 2024 sin entender la causa raíz del aumento (estructural vs temporal).",
+          "Valorar la empresa por FCF histórico cuando el FCF actual es negativo/nulo."
+        ],
+        "si_el_mercado_tuviera_razon": [
+          "El mercado está priceando una quiebra o dilución masiva inminente.",
+          "El mercado ve el aumento de COGS como el fin de la ventaja competitiva (commoditización del inventario).",
+          "El descuento por 'opacidad' es en realidad un descuento por 'insolvencia probable' dada la quema de caja."
+        ]
+      },
+      "bear_case": {
+        "tesis_bajista_5_lineas": [
+          "TZOO ha sufrido un cambio estructural en sus unit economics (COGS +77%) que ha destruido el margen operativo.",
+          "La generación de caja ha pasado de robusta (FY24) a negativa (Q3-25 estanco), quemando el buffer de liquidez.",
+          "La caja disponible se ha reducido ~50% en 9 meses; al ritmo actual, necesitarán capital externo en <12 meses.",
+          "La falta de deuda visible sugiere que el apalancamiento puede estar en leases o working capital, aumentando la fragilidad.",
+          "Es una Value Trap de manual: óptica barata trailing, fundamentales colapsando forward."
+        ],
+        "mecanismos_de_deterioro": [
+          {
+            "mecanismo": "MARGEN_NO_REVIERTE",
+            "descripcion": "El aumento de COGS es permanente (ej. tarifas de medios más altas, menor take-rate), dejando el margen EBIT en <5% permanentemente.",
+            "indicadores_tempranos": [
+              "COGS > 18% de ventas en Q4-25.",
+              "EBIT Q4-25 negativo."
+            ]
+          },
+          {
+            "mecanismo": "LIQUIDEZ_ESTRESADA",
+            "descripcion": "La quema de caja por CFF y ahora CFO reduce el cash buffer a niveles críticos, forzando emisión de acciones a precios deprimidos.",
+            "indicadores_tempranos": [
+              "Caja total < $8M en 10-K.",
+              "Suspensión de buybacks (si los hubiera)."
+            ]
+          }
+        ],
+        "escenarios_bajistas": [
+          {
+            "scenario_id": "BEAR_BASE",
+            "descripcion": "Estancamiento en márgenes bajos. EBIT apenas positivo, FCF nulo. La acción languidece o cae por falta de catalizador y erosión de caja.",
+            "ventana_meses": {
+              "min": 6,
+              "probable": 12,
+              "max": 24
+            },
+            "probabilidad_0_1": 0.5,
+            "drivers": [
+              {
+                "variable": "MARGEN_OPERATIVO",
+                "direccion": "NO_MEJORA",
+                "rango": "0-3%",
+                "justificacion": "COGS se mantiene elevado por presión competitiva."
+              },
+              {
+                "variable": "FCF",
+                "direccion": "EMPEORA",
+                "rango": "~0 USD (Breakeven)",
+                "justificacion": "CFO apenas cubre Capex y WC."
+              }
+            ],
+            "impacto_en_valoracion": {
+              "tipo": "MULTIPLO_COMPRIME",
+              "explicacion": "El mercado deja de valorar por FCF y valora por 'net cash' o liquidación.",
+              "resultado_retorno_12_24m_pct_rango": {
+                "min": -30,
+                "base": -15,
+                "max": 0
+              },
+              "nota": "Dead money."
+            }
+          },
+          {
+            "scenario_id": "BEAR_WORST",
+            "descripcion": "Espiral de muerte. EBIT negativo, quema de caja se acelera, dilución forzosa o covenant breach (si hay deuda oculta).",
+            "ventana_meses": {
+              "min": 3,
+              "probable": 9,
+              "max": 18
+            },
+            "probabilidad_0_1": 0.35,
+            "es_binario": true,
+            "drivers": [
+              {
+                "variable": "LIQUIDEZ",
+                "direccion": "EMPEORA",
+                "rango": "< $5M",
+                "justificacion": "Continuación de tendencias Q3 (CFO negativo + CFF alto)."
+              }
+            ],
+            "impacto_en_supervivencia": "ALTO",
+            "nota": "Riesgo real de insolvencia técnica si no cortan CFF inmediatamente."
+          }
+        ]
+      },
+      "value_trap_checklist": {
+        "probabilidad_value_trap_0_1": 0.9,
+        "razones": [
+          "Divergencia extrema entre métricas Trailing (excelentes) y Forward/Run-rate (pésimas).",
+          "Deterioro secuencial rápido (Q1 -> Q2 -> Q3) ignorado por valoración anual.",
+          "CFO real negativo en el margen (Q3) oculto en cifras YTD.",
+          "Caja reduciéndose rápidamente (-50% en 9 meses) mientras la acción parece 'barata'.",
+          "Opacidad en deuda y estructura de capital impide ver el Enterprise Value real."
+        ],
+        "como_distinguir_ciclo_vs_cambio_estructural": [
+          {
+            "hipotesis": "Es ciclo (Bull)",
+            "evidencia_necesaria": [
+              "COGS baja drásticamente en Q4.",
+              "CFO rebota fuerte sin trucos de WC."
+            ]
+          },
+          {
+            "hipotesis": "Es estructural (Bear/Trap)",
+            "evidencia_necesaria": [
+              "Márgenes Q4 siguen deprimidos.",
+              "Caja sigue cayendo."
+            ]
+          }
+        ]
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-RT-001",
+          "tipo": "BALANCE",
+          "definicion": "Caja y equivalentes (Total Cash) reportados < $8,000,000.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 3
+          },
+          "fuente_prevista": "10-K / 10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Indica que el runway es < 12 meses al ritmo actual de quema."
+        },
+        {
+          "kc_id": "KC-RT-002",
+          "tipo": "TESIS",
+          "definicion": "EBIT negativo en dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirma que el deterioro de COGS destruyó la rentabilidad estructuralmente."
+        }
+      ],
+      "evidencia_que_me_haria_cambiar_de_opinion": [
+        {
+          "item": "Rebote de CFO trimestral estanco a >$4M.",
+          "umbral_o_condicion": "CFO trimestral > $4M con margen EBIT > 10%.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 6
+          },
+          "fuente_prevista": "10-Q"
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "ALTO",
+        "tamaño_maximo_sugerido_pct_cartera": 0,
+        "si_se_invierte_igual": [
+          "Esperar al 10-K FY2025 obligatoriamente.",
+          "No invertir hasta confirmar que Q4 no fue negativo en CFO/EBIT.",
+          "Usar stops ajustados al nivel de caja ($5.67 es el precio, stop si rompe soporte técnico ante mala news)."
+        ],
+        "preguntas_que_no_se_pueden_dejar_sin_respuesta": [
+          "¿Por qué el CFO del Q3-2025 estanco fue negativo?",
+          "¿A qué se debe el aumento explosivo del 77% en COGS en Q3?",
+          "¿Cuánta caja es realmente 'Restricted' vs utilizable?",
+          "¿Qué compone el CFF de -$13M YTD? ¿Es deuda exigible o buybacks opcionales?"
+        ]
+      }
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "Falta Q4-2025 para cerrar el año fiscal y confirmar tendencia final.",
+      "Cálculos de Q3 estanco son inferidos de YTD 9M menos YTD 6M.",
+      "Sin desglose de deuda, el riesgo de solvencia es cualitativo."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  }
+}

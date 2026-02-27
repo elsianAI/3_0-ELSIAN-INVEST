@@ -181,10 +181,27 @@ class GeminiBackend(LLMBackend):
                 preflight_cmd.append("--yolo")
             auth = subprocess.run(
                 preflight_cmd,
-                capture_output=True, text=True, timeout=30,
+                capture_output=True, text=True, timeout=60,
             )
             if auth.returncode != 0:
-                stderr_snippet = (auth.stderr or "")[:150]
+                stderr_full_pf = auth.stderr or ""
+                stderr_snippet = stderr_full_pf[:150]
+                # Capacity/rate-limit errors (429) are transient — the model exists
+                # but is temporarily overloaded. Treat as available with a warning
+                # so that the actual dispatch can handle retries.
+                _capacity_indicators = (
+                    "429", "rateLimitExceeded", "capacity", "RESOURCE_EXHAUSTED",
+                    "MODEL_CAPACITY_EXHAUSTED",
+                )
+                is_capacity_error = any(ind in stderr_full_pf for ind in _capacity_indicators)
+                if is_capacity_error:
+                    warn_msg = f"gemini capacity warning (exit={auth.returncode}): model is rate-limited but available"
+                    print(
+                        f"[gemini] Pre-flight WARNING (model={self.model}): "
+                        f"capacity/rate-limit error (429) — treating as available: {stderr_snippet}",
+                        file=sys.stderr,
+                    )
+                    return _cache_store(True, warning=warn_msg)
                 fail_reason = f"gemini preflight failed (exit={auth.returncode}): {stderr_snippet}"
                 print(
                     f"[gemini] Pre-flight check FAILED (model={self.model}): "
@@ -220,6 +237,6 @@ class GeminiBackend(LLMBackend):
             return _cache_store(True)
         except subprocess.TimeoutExpired:
             print(f"[gemini] Pre-flight check timed out (model={self.model})", file=sys.stderr)
-            return _cache_store(False, "gemini preflight timeout (30s)")
+            return _cache_store(False, "gemini preflight timeout (60s)")
         except Exception as exc:
             return _cache_store(False, f"gemini preflight error: {exc}")

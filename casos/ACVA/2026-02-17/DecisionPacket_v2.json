@@ -1,0 +1,546 @@
+{
+  "version_esquema": "DecisionPacket_v2",
+  "backward_compatible_with": "DecisionPacket_v1",
+  "caso_id": "CASE_20260217_ACVA",
+  "fecha_corte": "2026-02-19",
+  "empresa": {
+    "ticker": "ACVA",
+    "nombre": "ACV Auctions Inc.",
+    "bolsa": "NYSE",
+    "pais": "US",
+    "sector": "Technology",
+    "industria": "Software - Application"
+  },
+  "input_refs": {
+    "sources_pack_caso_id": "CASE_20260217_ACVA",
+    "truth_pack_caso_id": "CASE_20260217_ACVA",
+    "implied_expectations_caso_id": "CASE_20260217_ACVA",
+    "agent_reports": [
+      {
+        "agent_role": "CATALYST",
+        "agent_nombre": "CATALYST_v1",
+        "report_ref": "AgentReport_v1_CATALYST",
+        "confianza_0_1": 0.66
+      },
+      {
+        "agent_role": "FORENSIC",
+        "agent_nombre": "FORENSIC_SCORING_v1",
+        "report_ref": "AgentReport_v1_FORENSIC",
+        "confianza_0_1": 0.68
+      },
+      {
+        "agent_role": "BULL",
+        "agent_nombre": "BULL_FUSION_v1",
+        "report_ref": "AgentReport_v1_BULL",
+        "confianza_0_1": 0.65
+      },
+      {
+        "agent_role": "RED_TEAM",
+        "agent_nombre": "RED_TEAM_v1",
+        "report_ref": "AgentReport_v1_REDTEAM",
+        "confianza_0_1": 0.8
+      }
+    ]
+  },
+  "charter": {
+    "objetivo": "Rentabilidad extraordinaria en 6-30 meses con perfil no especulativo",
+    "horizonte_meses": {
+      "min": 6,
+      "max": 30
+    },
+    "restricciones_no_especulativo": [
+      "Evitar tesis binaria",
+      "Evitar dependencia de financiacion salvadora",
+      "Exigir supervivencia 12-24 meses razonable",
+      "Exigir catalizador no binario y medible"
+    ]
+  },
+  "resumen_ejecutivo": {
+    "decision": "WATCHLIST",
+    "tamaño_recomendado_pct_cartera": 0,
+    "confianza_global_0_1": 0.68,
+    "racional_5_lineas": [
+      "ACVA demuestra escala comercial relevante (ingresos TTM ~$736M) y mantiene caja neta aparente, superando el filtro de supervivencia.",
+      "Sin embargo, la calidad del FCF es cuestionable debido a la falta de un puente ex-float y la persistencia de pérdidas EBIT (-$84M FY2024).",
+      "El perfil de asimetría es desfavorable en el escenario base: la opacidad contable y la volatilidad de costos sugieren riesgo de 'Value Trap'.",
+      "Aunque el crecimiento de ingresos es real, la conversión a rentabilidad operativa no se ha confirmado estructuralmente (reversión en Q3-2025).",
+      "Se requiere validación de márgenes y limpieza de métricas de caja antes de asignar capital; el riesgo actual supera la recompensa base."
+    ],
+    "lo_mas_importante_ahora": [
+      "Confirmar si la caja reportada es estructural o depende del float de clientes (bridge cuantitativo necesario).",
+      "Verificar si la mejora de EBIT de Q2-2025 es repetible o si Q3-2025 marca la tendencia real.",
+      "Monitorear la deuda total y covenants, dado el aumento reciente de gastos por intereses."
+    ],
+    "principales_riesgos": [
+      "Value Trap: FCF reportado inflado por working capital/float mientras EBIT sigue negativo.",
+      "Dilución silenciosa y deterioro de métricas por acción (SBC, aumento de acciones).",
+      "Compresión de múltiplo si el mercado re-evalúa la calidad de la caja."
+    ]
+  },
+  "_comment_v2_decision_probabilistica": "Bloque probabilístico que fundamenta la decisión de WATCHLIST por asimetría débil",
+  "decision_probabilistica": {
+    "probabilidad_exito_0_1": 0.60,
+    "retorno_esperado_ponderado_pct": 6.0,
+    "escenarios_ponderados": {
+      "base": {
+        "probabilidad_0_1": 0.40,
+        "retorno_estimado_pct": 10
+      },
+      "bull": {
+        "probabilidad_0_1": 0.20,
+        "retorno_estimado_pct": 70
+      },
+      "bear": {
+        "probabilidad_0_1": 0.40,
+        "retorno_estimado_pct": -30
+      }
+    },
+    "sizing_kelly": {
+      "kelly_crudo_pct": 20.0,
+      "factor_ajuste_confianza": 0.476,
+      "kelly_ajustado_pct": 9.52,
+      "tope_maximo_pct": 10,
+      "sizing_preliminar_pct": 9.52,
+      "sizing_final_pct": 0,
+      "nota": "Kelly arroja un tamaño positivo (~9.5%) impulsado por la cola BULL, pero el ratio de asimetría del escenario BASE es muy desfavorable (0.33), activando la regla de WATCHLIST (sizing 0) para evitar trampas de valor."
+    },
+    "intervalo_confianza_90_pct": {
+      "percentil_5": -36.0,
+      "percentil_50": 6.0,
+      "percentil_95": 56.0
+    },
+    "conviccion_0_1": 0.68,
+    "ratio_asimetria": 0.33,
+    "_comment_ratio_asimetria": "Retorno Base (10%) / Abs(Retorno Bear (-30%)) = 0.33. Muy desfavorable (<0.8), lo que justifica NO invertir.",
+    "expected_value_anualizado_pct": 4.0,
+    "decision_categorica": "WATCHLIST"
+  },
+  "analisis_sensibilidad": [
+    {
+      "assumption_id": "A-002",
+      "variable": "FCF_ex_float_adjustment",
+      "valor_base": "Sin ajuste (FCF~$70M)",
+      "rango_test": {
+        "min": "Ajuste total (FCF~$30M)",
+        "max": "Sin ajuste (FCF~$70M)",
+        "paso": null
+      },
+      "impacto_en_retorno_pct": {
+        "si_min": -40,
+        "si_max": 20
+      },
+      "impacto_en_decision": "Si FCF real < 40M, la tesis pasa a DESCARTAR por valoración excesiva.",
+      "nota": "La calidad del FCF es el driver más sensible de la valoración actual."
+    }
+  ],
+  "gates": {
+    "data_quality_gate": {
+      "status": "PASS",
+      "por_que": [
+        "TruthPack pasa validaciones técnicas.",
+        "Datos financieros principales disponibles.",
+        "Nota: Opacidad alta en TTM y float, pero suficiente para decidir WATCHLIST."
+      ],
+      "faltantes_criticos": [
+        {
+          "item": "Desglose caja propia vs float",
+          "como_resolver": "Monitoring de notas en próximos 10-Q"
+        }
+      ]
+    },
+    "survivability_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Caja (224M) > Deuda (123M).",
+        "Forensic Score 4.0/5.0.",
+        "No hay maturity wall inminente evidente."
+      ]
+    },
+    "mispricing_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Expectativas implícitas moderadas (~2.6% growth FCF).",
+        "Gap potencial si se confirma escenario BULL de apalancamiento operativo."
+      ]
+    },
+    "catalyst_gate": {
+      "status": "PASS",
+      "por_que": [
+        "Existen catalizadores identificados (Disciplina SG&A, Disclosure).",
+        "Probabilidad media/baja, pero suficientes para seguimiento."
+      ]
+    },
+    "non_speculative_gate": {
+      "status": "PASS",
+      "banderas": {
+        "tesis_binaria_detectada": false,
+        "dependencia_financiacion_salvadora": false,
+        "opacidad_inaceptable": false
+      },
+      "por_que": [
+        "Negocio real con escala ($736M revenue).",
+        "Riesgos son de valoración y calidad, no de viabilidad binaria inmediata."
+      ]
+    }
+  },
+  "scoring_preliminar": {
+    "metodo": "Score_0_100",
+    "componentes": {
+      "S_supervivencia_0_25": 20,
+      "M_mispricing_0_25": 15,
+      "C_catalizador_0_20": 10,
+      "Q_calidad_0_15": 8,
+      "R_downside_0_15": 5,
+      "V_penalizacion_0_a_menos15": -5
+    },
+    "total_0_100": 53,
+    "nota": "Score medio. Penalizado por baja calidad de earnings (EBIT neg) y riesgo de downside (Value Trap)."
+  },
+  "assumption_ledger": {
+    "reglas": {
+      "id_prefix": "A-",
+      "max_supuestos": 40,
+      "supuesto_critico_sin_evidencia_fuerte": "penalizar_tamaño_o_watchlist"
+    },
+    "supuestos": [
+      {
+        "assumption_id": "A-001",
+        "enunciado": "La escala de ingresos actual permite apalancamiento operativo real.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.55,
+        "confianza_0_1": 0.6,
+        "impacto": "ALTO",
+        "drivers_afectados": ["MARGEN_OPERATIVO", "EBIT"],
+        "evidencias": [
+          {
+            "source_id": "SRC_006",
+            "ubicacion": "Q2-2025",
+            "cita_corta": "Mejora puntual EBIT a -7.2M",
+            "interpretacion": "Posible inflexión"
+          },
+          {
+            "source_id": "SRC_005",
+            "ubicacion": "Q3-2025",
+            "cita_corta": "Reversión EBIT a -23.7M",
+            "interpretacion": "Inestabilidad de costos"
+          }
+        ],
+        "falsacion": {
+          "test": "EBIT anualizado no mejora >30% vs FY2024 en próximos 12m",
+          "ventana_meses": {"min": 6, "max": 12},
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": ["A-004"],
+        "estado": "ABIERTA",
+        "origen": [{"agent_role": "BULL", "claim_id": "CLM_FUS_001"}],
+        "notas_arbitro": "Evidencia mixta impide dar por hecho el apalancamiento."
+      },
+      {
+        "assumption_id": "A-002",
+        "enunciado": "El FCF reportado es estructural y no depende mayoritariamente de float.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.45,
+        "confianza_0_1": 0.5,
+        "impacto": "ALTO",
+        "drivers_afectados": ["FCF", "VALORACION"],
+        "evidencias": [
+          {
+            "source_id": "SRC_001",
+            "ubicacion": "FY2024",
+            "cita_corta": "CFO positivo vs EBIT negativo",
+            "interpretacion": "Brecha sospechosa"
+          }
+        ],
+        "falsacion": {
+          "test": "Publicación de bridge ex-float muestra FCF ajustado < 30M",
+          "ventana_meses": {"min": 3, "max": 9},
+          "fuente_prevista": "filing",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [{"agent_role": "RED_TEAM", "claim_id": "CLM_RT_002"}],
+        "notas_arbitro": "Riesgo central de Value Trap."
+      },
+      {
+        "assumption_id": "A-003",
+        "enunciado": "La posición de caja neta es real y utilizable (no restringida por clientes).",
+        "tipo": "HIPOTESIS",
+        "criticidad": "CRITICO",
+        "probabilidad_0_1": 0.6,
+        "confianza_0_1": 0.7,
+        "impacto": "ALTO",
+        "drivers_afectados": ["DEUDA_NETA", "SUPERVIVENCIA"],
+        "evidencias": [
+          {
+            "source_id": "SRC_046",
+            "ubicacion": "Log conversiones",
+            "cita_corta": "Caja incluye ~200M float",
+            "interpretacion": "La caja corporativa real podría ser cercana a cero."
+          }
+        ],
+        "falsacion": {
+          "test": "Disclosure revela caja restringida > 80% de caja total",
+          "ventana_meses": {"min": 3, "max": 6},
+          "fuente_prevista": "10-Q",
+          "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [{"agent_role": "RED_TEAM", "claim_id": "CLM_RT_001"}],
+        "notas_arbitro": "Vital para la tesis de seguridad."
+      },
+      {
+        "assumption_id": "A-004",
+        "enunciado": "El control de SG&A es sostenible y no un evento único.",
+        "tipo": "HIPOTESIS",
+        "criticidad": "IMPORTANTE",
+        "probabilidad_0_1": 0.5,
+        "confianza_0_1": 0.6,
+        "impacto": "MEDIO",
+        "drivers_afectados": ["MARGEN_OPERATIVO"],
+        "evidencias": [
+            {
+                "source_id": "SRC_005",
+                "ubicacion": "Q3-2025",
+                "cita_corta": "SG&A subió materialmente",
+                "interpretacion": "Sugiere dificultad para mantener disciplina."
+            }
+        ],
+        "falsacion": {
+            "test": "Ratio SG&A/Ingresos sube YoY en próximos 2 trimestres",
+            "ventana_meses": {"min": 6, "max": 12},
+            "fuente_prevista": "10-Q",
+            "accion_si_falla": "SALIR"
+        },
+        "dependencias": [],
+        "estado": "ABIERTA",
+        "origen": [{"agent_role": "RED_TEAM", "claim_id": "CLM_RT_004"}],
+        "notas_arbitro": "Clave para escenario Bull."
+      }
+    ]
+  },
+  "evidence_graph": {
+    "version": "EvidenceGraph_v1",
+    "nodos": [
+      { "node_id": "E-001", "tipo": "EVIDENCIA", "label": "Ingresos TTM $736M", "ref": { "source_id": "TruthPack_v1" } },
+      { "node_id": "E-002", "tipo": "EVIDENCIA", "label": "EBIT negativo persistente", "ref": { "source_id": "TruthPack_v1" } },
+      { "node_id": "A-001", "tipo": "SUPUESTO", "label": "Apalancamiento Operativo", "ref": { "assumption_id": "A-001" } },
+      { "node_id": "SC-BASE", "tipo": "ESCENARIO", "label": "Escenario BASE (Stagnation)", "ref": { "scenario_id": "BASE" } },
+      { "node_id": "D-001", "tipo": "DECISION", "label": "WATCHLIST", "ref": { "decision": "WATCHLIST" } }
+    ],
+    "aristas": [
+      { "from": "E-001", "to": "A-001", "relacion": "SOPORTA", "peso_0_1": 0.6, "nota": "Escala ayuda" },
+      { "from": "E-002", "to": "A-001", "relacion": "DEBILITA", "peso_0_1": 0.8, "nota": "Historia contradice mejora" },
+      { "from": "A-001", "to": "SC-BASE", "relacion": "INFORMA", "peso_0_1": 0.9, "nota": "Fallo en A-001 lleva a Base/Bear" },
+      { "from": "SC-BASE", "to": "D-001", "relacion": "SOPORTA", "peso_0_1": 1.0, "nota": "Riesgo asimetrico dicta espera" }
+    ],
+    "validacion_grafo": {
+      "ids_unicos": true,
+      "aristas_referencian_nodos_existentes": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "detalle": "Grafo coherente"
+    }
+  },
+  "catalizadores_consolidados": [
+    {
+      "catalyst_id": "C-004",
+      "nombre": "Sostenimiento Run-Rate Ingresos",
+      "es_no_binario": true,
+      "ventana_meses": { "min": 6, "probable": 12, "max": 18 },
+      "probabilidad_0_1": 0.57,
+      "mecanismo_cierre_gap": "Valida tesis de crecimiento vs estancamiento",
+      "supuestos_afectados": ["A-001"],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Ingresos trimestrales >= 190M",
+          "fuente_prevista": "earnings",
+          "ventana_meses": {"min": 3, "max": 9}
+        }
+      ]
+    },
+    {
+      "catalyst_id": "C-005",
+      "nombre": "Disclosure TTM y Float",
+      "es_no_binario": true,
+      "ventana_meses": { "min": 6, "probable": 12, "max": 18 },
+      "probabilidad_0_1": 0.34,
+      "mecanismo_cierre_gap": "Reduce prima de riesgo por opacidad",
+      "supuestos_afectados": ["A-002", "A-003"],
+      "tests_confirmatorios": [
+        {
+          "descripcion": "Publicación bridge ex-float",
+          "fuente_prevista": "filing",
+          "ventana_meses": {"min": 3, "max": 9}
+        }
+      ]
+    }
+  ],
+  "escenarios": [
+    {
+      "scenario_id": "BASE",
+      "probabilidad_0_1": 0.40,
+      "ventana_meses": { "min": 12, "probable": 18, "max": 24 },
+      "descripcion": "Crecimiento de ingresos continúa pero márgenes no expanden materialmente. FCF positivo pero bajo (float-heavy). De-rating leve.",
+      "drivers_clave": ["A-001", "A-002"],
+      "retorno_12_24m_pct_rango": { "min": 0, "base": 10, "max": 20 },
+      "nota_valoracion": "Valoración se sostiene por crecimiento top-line."
+    },
+    {
+      "scenario_id": "BULL",
+      "probabilidad_0_1": 0.20,
+      "ventana_meses": { "min": 12, "probable": 24, "max": 30 },
+      "descripcion": "Apalancamiento operativo confirmado. EBIT positivo. FCF estructural validado. Re-rating a múltiplos SaaS/Marketplace.",
+      "drivers_clave": ["A-001", "A-002", "A-004"],
+      "retorno_12_24m_pct_rango": { "min": 50, "base": 70, "max": 100 },
+      "nota_valoracion": "Expansión de múltiplo + crecimiento earnings."
+    },
+    {
+      "scenario_id": "BEAR",
+      "probabilidad_0_1": 0.40,
+      "ventana_meses": { "min": 6, "probable": 12, "max": 18 },
+      "descripcion": "Value Trap. Float se normaliza revelando deuda neta real o FCF nulo. Dilución y costes financieros erosionan valor.",
+      "drivers_clave": ["A-002", "A-003"],
+      "retorno_12_24m_pct_rango": { "min": -50, "base": -30, "max": -20 },
+      "nota_valoracion": "Compresión de múltiplo por pérdida de confianza."
+    },
+    {
+      "scenario_id": "BEAR_WORST",
+      "probabilidad_0_1": 0.00,
+      "ventana_meses": { "min": 12, "probable": 24, "max": 24 },
+      "descripcion": "Placeholder for consistency, merged into BEAR in probability block",
+      "drivers_clave": [],
+      "retorno_12_24m_pct_rango": { "min": 0, "base": 0, "max": 0 },
+      "nota_valoracion": "Merged into BEAR"
+    }
+  ],
+  "kill_criteria_final": [
+    {
+      "kc_id": "KC-001",
+      "relacionado_con_assumption_id": "A-003",
+      "definicion": "Caja neta (caja - deuda) reportada <= 0",
+      "ventana_meses": { "min": 3, "max": 12 },
+      "fuente_prevista": "filing",
+      "accion": "REDUCIR_50",
+      "severidad": "ALTA",
+      "por_que": "Pérdida de soporte de liquidez."
+    },
+    {
+      "kc_id": "KC-002",
+      "relacionado_con_assumption_id": "A-001",
+      "definicion": "EBIT TTM peor que -90M USD",
+      "ventana_meses": { "min": 6, "max": 12 },
+      "fuente_prevista": "10-Q",
+      "accion": "SALIR",
+      "severidad": "MEDIA",
+      "por_que": "Deterioro operativo estructural."
+    }
+  ],
+  "plan_monitorizacion": {
+    "frecuencias": {
+      "pulso_diario": { "activo": false, "que_mirar": [] },
+      "revision_semanal": { "activo": false, "que_mirar": [] },
+      "modo_evento": {
+        "activo": true,
+        "que_mirar": ["Earnings Release", "10-Q Cash Flow Statement", "MD&A Liquidity"]
+      }
+    },
+    "lista_de_checks_por_supuesto": [
+      {
+        "assumption_id": "A-002",
+        "indicadores": ["Changes in Funds Payable to Customers", "CFO vs Net Income"],
+        "fuente": "filing",
+        "frecuencia": "TRIMESTRAL"
+      }
+    ],
+    "umbrales_alerta": []
+  },
+  "predicciones_para_calibracion_consolidadas": [
+    {
+      "pred_id": "CP-001",
+      "descripcion": "EBIT anualizado permanece negativo en 2026",
+      "probabilidad_0_1": 0.60,
+      "ventana_meses": { "min": 9, "max": 18 },
+      "criterio_validacion": "EBIT TTM < 0",
+      "fuente_prevista": "10-K",
+      "origen": [{"agent_role": "RED_TEAM", "pred_id": "PRED_RT_001"}]
+    }
+  ],
+  "arbitraje": {
+    "notas_arbitro": [
+      "Decisión WATCHLIST forzada por asimetría Base/Bear desfavorable (0.33) y riesgo de 'float' no resuelto.",
+      "El consenso de agentes es mixto (2 APTO vs 1 NO_APTO vs 1 WATCHLIST), pero la severidad del argumento Bear (Value Trap) pesa más que la opcionalidad Bull en este momento.",
+      "Se requiere limpieza de datos (TTM, Float) para re-evaluar."
+    ],
+    "desacuerdos_detectados": [
+      {
+        "tema": "Calidad del FCF",
+        "agentes": [
+          { "agent_role": "BULL", "posicion": "FCF positivo es ancla de valor", "confianza_0_1": 0.65 },
+          { "agent_role": "RED_TEAM", "posicion": "FCF es float/WC transitorio", "confianza_0_1": 0.8 }
+        ],
+        "resolucion_arbitro": {
+          "estado": "NO_RESUELTO",
+          "decision": "penalizar_tamaño",
+          "por_que": "No hay evidencia dura (bridge ex-float) para descartar la tesis Bear.",
+          "accion": "Monitorear próximos 2 trimestres."
+        }
+      }
+    ],
+    "puntos_abiertos": [
+      "Confirmación de 'Funds Payable to Customers' vs Caja Corporativa.",
+      "Sostenibilidad de márgenes tras volatilidad Q3-2025."
+    ]
+  },
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Reconciliación CFO ex-float",
+      "por_que_importa": "Crítico para valorar FCF real.",
+      "como_obtenerlo": "MD&A de 10-Q o notas."
+    }
+  ],
+  "salida_para_siguiente_agente": {
+    "monitor_input_recomendado": "Vigilar puente de caja y EBIT margin.",
+    "estado_caso": "EN_ESPERA",
+    "proxima_revision_sugerida": "2026-05-15"
+  },
+  "log": {
+    "autochequeos": {
+      "decision_respeta_gates": true,
+      "supuestos_criticos_tienen_evidencia": true,
+      "supuestos_criticos_tienen_falsacion": true,
+      "kill_criteria_mapeados_a_supuestos": true,
+      "salida_solo_json": true,
+      "probabilidades_escenarios_suman_1": true,
+      "kelly_sizing_dentro_de_tope": true,
+      "intervalo_confianza_coherente_con_escenarios": true,
+      "decision_categorica_coherente_con_probabilistica": true,
+      "sizing_final_igual_preliminar_si_invertir": true,
+      "sensibilidad_cubre_supuestos_criticos": true
+    },
+    "limitaciones": [
+      "Opacidad en desglose de caja y TTM impide convicción alta."
+    ],
+    "revision": {
+      "es_revision": false,
+      "revision_num": 1,
+      "decision_packet_anterior_caso_id": null,
+      "monitoring_updates_usados": [],
+      "resumen_cambios": []
+    }
+  },
+  "control": {
+    "estado_flujo": "ARBITRATE",
+    "next_step": "MONITOR",
+    "next_agent_role": "MONITOR",
+    "loop_budget_max": 2,
+    "loop_budget_restante": 2,
+    "issues": [],
+    "work_orders": [],
+    "dispatch_queue": []
+  }
+}

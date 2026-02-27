@@ -1,0 +1,671 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260217_ACVA",
+  "fecha_corte": "2026-02-19",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "gpt-5-codex",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260217_ACVA",
+    "implied_expectations_caso_id": "CASE_20260217_ACVA",
+    "sources_pack_caso_id": "CASE_20260217_ACVA"
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "Liquidez actual robusta: caja 224.1M USD frente a deuda total 123.0M USD (deuda neta negativa).",
+      "Persisten pérdidas operativas (EBIT FY2024: -84.1M USD), lo que impide calificar supervivencia en nivel máximo.",
+      "Las dos banderas detectadas (posible_value_trap y opacidad_alta) se puntúan en severidad media.",
+      "No hay evidencia explícita de maturity wall en 12-24 meses, pero faltan tabla de vencimientos y covenants.",
+      "Se recomienda tamaño máximo moderado y condicionado a validaciones trimestrales de calidad de caja."
+    ],
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.68,
+    "justificacion": "La compañía combina caja neta positiva y CFO anual positivo en FY2024, lo que reduce el riesgo de liquidación inmediata. El balance no muestra sobreapalancamiento y el EV implícito no exige crecimiento extremo de FCF en el escenario central.\n\nEl riesgo principal es de calidad de resultados: EBIT sigue negativo y la lectura de caja puede estar influida por capital de trabajo/float. Además, hay opacidad en métricas TTM críticas (FCF/EBIT completos, covenants y vencimientos), por lo que la tesis exige disciplina de seguimiento y kill criteria explícitos."
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "ACVA mantiene colchón de liquidez neta positiva, reduciendo riesgo de estrés financiero inmediato.",
+      "confianza_0_1": 0.82,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "balance_sheet_ultimo",
+          "cita_corta": "caja 224.065M, deuda total 123.000M, deuda neta -101.065M",
+          "interpretacion": "La caja excede la deuda y amortigua shocks de corto plazo."
+        }
+      ],
+      "falsacion": {
+        "test": "La caja y equivalentes cae por debajo de deuda total y CFO 12M pasa a negativo dos trimestres seguidos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La empresa aún no demuestra rentabilidad operativa GAAP, manteniendo vulnerabilidad de mediano plazo.",
+      "confianza_0_1": 0.79,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "historico_anual FY2024",
+          "cita_corta": "ingresos 637.156M, EBIT -84.105M, net income -79.700M",
+          "interpretacion": "El negocio sigue en pérdidas operativas pese al crecimiento de ingresos."
+        }
+      ],
+      "falsacion": {
+        "test": "EBIT anualizado pasa a positivo o margen EBIT mejora de forma sostenida por encima de -5%.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 18
+        },
+        "fuente_prevista": "earnings"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "INFERENCIA",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La bandera posible_value_trap es consistente con la brecha entre FCF positivo y EBIT negativo.",
+      "confianza_0_1": 0.71,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001",
+          "url": null,
+          "titulo": null,
+          "fecha": "2024-12-31",
+          "ubicacion": "historico_anual FY2024",
+          "cita_corta": "CFO 65.397M con EBIT -84.105M",
+          "interpretacion": "La caja supera al resultado operativo y exige validar sostenibilidad."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "IMPLIED_001",
+          "url": null,
+          "titulo": "ImpliedExpectations_v1",
+          "fecha": "2026-02-19",
+          "ubicacion": "banderas.notas",
+          "cita_corta": "tensión entre FCF positivo y EBIT persistentemente negativo",
+          "interpretacion": "La propia lectura de expectativas identifica riesgo de falsa comodidad por caja."
+        }
+      ],
+      "falsacion": {
+        "test": "FCF LTM se mantiene positivo junto con mejora material de EBIT y menor dependencia de working capital.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La bandera opacidad_alta reduce la precisión del diagnóstico forense de 12-24 meses.",
+      "confianza_0_1": 0.74,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "IMPLIED_001",
+          "url": null,
+          "titulo": "ImpliedExpectations_v1",
+          "fecha": "2026-02-19",
+          "ubicacion": "banderas.opacidad_alta y faltantes_criticos",
+          "cita_corta": "faltantes TTM clave y mezcla de fuentes reducen transparencia",
+          "interpretacion": "Faltan insumos para cerrar riesgos de covenants, dilución y calidad de FCF."
+        }
+      ],
+      "falsacion": {
+        "test": "Se publica set completo y consistente de TTM EBIT/FCF, vencimientos y covenants en filings.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 9
+        },
+        "fuente_prevista": "10-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "CFO LTM cae por debajo de 30M USD en algún cierre trimestral de 2026.",
+      "probabilidad_0_1": 0.34,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Se verifica si CFO LTM reportado en 10-Q/10-K es menor a 30,000,000 USD.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "EBIT anualizado permanece <= -60M USD al cierre FY2026.",
+      "probabilidad_0_1": 0.57,
+      "ventana_meses": {
+        "min": 9,
+        "max": 18
+      },
+      "criterio_validacion": "Suma de cuatro trimestres reporta EBIT <= -60,000,000 USD.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Gasto por intereses anualizado supera 8M USD sin mejora proporcional de EBIT.",
+      "probabilidad_0_1": 0.41,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Interest expense TTM > 8,000,000 USD y EBIT TTM no mejora al menos 20% interanual.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "La razón cuentas por pagar/ingresos se mantiene >55% por dos trimestres, señalando presión de capital de trabajo.",
+      "probabilidad_0_1": 0.39,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "AP/revenue > 0.55 en dos reportes consecutivos.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "Dilución anual de acciones diluidas supera 6% con EBIT aún negativo.",
+      "probabilidad_0_1": 0.33,
+      "ventana_meses": {
+        "min": 6,
+        "max": 18
+      },
+      "criterio_validacion": "Acciones diluidas promedio suben >6% YoY y EBIT TTM < 0.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "Caja neta se vuelve no positiva por combinación de menor caja y mayor deuda.",
+      "probabilidad_0_1": 0.28,
+      "ventana_meses": {
+        "min": 9,
+        "max": 24
+      },
+      "criterio_validacion": "caja_usd - deuda_total_usd <= 0 en un filing anual o trimestral.",
+      "fuente_prevista": "10-Q"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla completa de vencimientos de deuda 2026-2029 y tipo de instrumento",
+      "por_que_importa": "Permite estimar riesgo real de refinancing y confirmar ausencia de maturity wall.",
+      "como_obtenerlo": "10-K nota de deuda/MD&A liquidez; alta disponibilidad y bajo costo de acceso."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Covenants vigentes del crédito (leverage, cobertura, liquidez mínima) y headroom",
+      "por_que_importa": "Reduce incertidumbre sobre activadores de stress financiero antes de 24 meses.",
+      "como_obtenerlo": "8-K del credit agreement + 10-Q nota deuda; disponibilidad media, bajo costo documental."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Reconciliación CFO reportado vs CFO ajustado por marketplace float y working capital",
+      "por_que_importa": "Aísla si el FCF es estructural o dependiente de movimientos transitorios.",
+      "como_obtenerlo": "10-Q/10-K cash flow + notas de marketplace float; disponibilidad media, costo analítico medio."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Acciones diluidas trimestrales y detalle de SBC por trimestre",
+      "por_que_importa": "Cuantifica riesgo de dilución y su impacto por acción en escenarios adversos.",
+      "como_obtenerlo": "10-Q nota de equity compensation y EPS; alta disponibilidad, bajo costo."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Desglose de capex de mantenimiento vs crecimiento y software capitalizado",
+      "por_que_importa": "Mejora calidad del puente CFO->FCF y evita sobreestimar caja recurrente.",
+      "como_obtenerlo": "10-K notas de PP&E/software y MD&A capex; disponibilidad media, costo analítico medio."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "forensic_scoring": {
+        "red_flags_puntuados": [
+          {
+            "red_flag_id": "posible_value_trap",
+            "severidad": "MEDIO",
+            "base_cuantificable": "EBIT FY2024 -84.1M USD con FCF FY2024 69.9M USD; brecha elevada entre resultado operativo y caja."
+          },
+          {
+            "red_flag_id": "opacidad_alta",
+            "severidad": "MEDIO",
+            "base_cuantificable": "Faltan métricas TTM completas (fcf_ttm, ebit_ttm, covenants detallados), elevando incertidumbre de calibración."
+          }
+        ],
+        "kill_criteria_formalizados": [
+          {
+            "kc_id": "KC-001",
+            "descripcion": "Caja neta <= 0 USD en cualquier cierre trimestral o anual.",
+            "probabilidad_0_1": 0.28,
+            "ventana_temporal": {
+              "inicio": "2026-03-01",
+              "fin_esperado": "2027-12-31"
+            },
+            "criterio_chequeo": "(caja_usd - deuda_total_usd) <= 0 según 10-Q/10-K.",
+            "accion_si_activado": "REDUCIR_50"
+          },
+          {
+            "kc_id": "KC-002",
+            "descripcion": "CFO TTM <= 0 USD durante dos trimestres consecutivos.",
+            "probabilidad_0_1": 0.31,
+            "ventana_temporal": {
+              "inicio": "2026-03-01",
+              "fin_esperado": "2027-12-31"
+            },
+            "criterio_chequeo": "CFO TTM reportado <= 0 en dos 10-Q consecutivos.",
+            "accion_si_activado": "SALIR"
+          },
+          {
+            "kc_id": "KC-003",
+            "descripcion": "Interest expense TTM > 8M USD y EBIT TTM no mejora al menos 20% interanual.",
+            "probabilidad_0_1": 0.41,
+            "ventana_temporal": {
+              "inicio": "2026-06-01",
+              "fin_esperado": "2027-12-31"
+            },
+            "criterio_chequeo": "Comparar interest expense y EBIT TTM en 10-Q/10-K contra periodo comparable.",
+            "accion_si_activado": "REDUCIR_50"
+          },
+          {
+            "kc_id": "KC-004",
+            "descripcion": "Se reporta breach de covenant financiero o waiver extraordinario por stress de liquidez.",
+            "probabilidad_0_1": 0.22,
+            "ventana_temporal": {
+              "inicio": "2026-03-01",
+              "fin_esperado": "2027-12-31"
+            },
+            "criterio_chequeo": "Disclosure explícito en filing de incumplimiento, waiver o renegociación por covenant.",
+            "accion_si_activado": "SALIR"
+          }
+        ],
+        "supervivencia_resultado": "PASS",
+        "survival_score_0_5": 4.0,
+        "max_position_size": {
+          "limite": "2.5% de cartera",
+          "justificacion": "Score 4 con liquidez favorable, pero dos banderas medias y opacidad en drivers de caja aconsejan limitar concentración. El tamaño puede subir solo tras cerrar faltantes críticos y sostener mejora operativa."
+        }
+      },
+      "veredicto_forense": {
+        "status": "APTO",
+        "confianza_0_1": 0.68,
+        "razon_principal": "Liquidez neta positiva y CFO reciente favorable sostienen supervivencia base. La falta de transparencia en TTM/covenants y EBIT negativo obliga a control estricto con kill criteria."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 4.0,
+          "por_que": [
+            "Caja 224.1M USD y deuda total 123.0M USD implican deuda neta negativa.",
+            "No hay evidencia directa de maturity wall inminente en los datos disponibles.",
+            "Persisten pérdidas EBIT, por lo que la resiliencia depende de sostener generación de caja.",
+            "Dos banderas detectadas son de severidad media, no alta, pero requieren monitoreo continuo."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 224065000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "caja neta positiva",
+            "revolver potencial (monto disponible no confirmado en input)"
+          ],
+          "runway_meses_estimado": null,
+          "metodo_estimacion": "No se estima runway por burn lineal porque el CFO FY2024 es positivo y hay alta sensibilidad a capital de trabajo/float.",
+          "notas": "Solicitar disclosure de disponibilidad efectiva de línea y restricciones operativas."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": 123000000,
+          "deuda_neta_usd": -101065000,
+          "coste_deuda_aprox_pct": 0.0345,
+          "coverage_intereses": null,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "No se observa evidencia explícita de pared de vencimientos en el input; falta tabla detallada para confirmación plena."
+          },
+          "vencimientos": [
+            {
+              "anio": 2026,
+              "importe_usd": null,
+              "tipo": "unknown",
+              "riesgo": "UNKNOWN",
+              "fuente_ref": {
+                "source_id": "SRC_001",
+                "ubicacion": "nota deuda / MD&A"
+              }
+            },
+            {
+              "anio": 2027,
+              "importe_usd": null,
+              "tipo": "unknown",
+              "riesgo": "UNKNOWN",
+              "fuente_ref": {
+                "source_id": "SRC_001",
+                "ubicacion": "nota deuda / MD&A"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [
+              "leverage_ratio",
+              "interest_coverage",
+              "minimum_liquidity",
+              "other"
+            ],
+            "riesgo_breach": "UNKNOWN",
+            "comentario": "Sin thresholds ni headroom explícitos, no puede estimarse riesgo de breach con precisión forense suficiente."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "MEDIO",
+          "motores": [
+            "necesidad de capital si se revierte la generación de caja",
+            "SBC (dato incompleto en input)",
+            "potenciales emisiones oportunistas"
+          ],
+          "share_count_yoy_pct": null,
+          "comentario": "No hay métrica YoY completa de acciones diluidas en el pack; el riesgo no se considera bajo hasta confirmar SBC y dilución efectiva."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "La señal de liquidez mejora respecto a 2023, pero la estructura de beneficios sigue débil con EBIT negativo. La diferencia entre caja y resultado operativo sugiere que parte del soporte puede venir de capital de trabajo/float. La opacidad de TTM y covenants limita la verificabilidad del puente hacia caja recurrente.",
+        "red_flags": [
+          {
+            "flag_id": "posible_value_trap",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Bandera detectada en el input: posible_value_trap por tensión entre FCF positivo y EBIT persistentemente negativo.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.58,
+            "por_que_importa": "Puede sobreestimar calidad de caja y retrasar reacción ante deterioro operativo real.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001",
+                "ubicacion": "FY2024 CFO/EBIT",
+                "cita_corta": "CFO 65.397M con EBIT -84.105M",
+                "interpretacion": "La brecha exige confirmar recurrencia de caja sin apoyo transitorio."
+              },
+              {
+                "source_id": "IMPLIED_001",
+                "ubicacion": "banderas.notas",
+                "cita_corta": "value trap por tensión entre FCF y EBIT",
+                "interpretacion": "El propio modelo de expectativas lo marca como riesgo activo."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "EBIT TTM mejora de forma sostenida y FCF se mantiene positivo durante cuatro trimestres.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "opacidad_alta",
+            "categoria": "OTHER",
+            "descripcion": "Bandera detectada en el input: opacidad_alta por faltantes TTM críticos y mezcla de fuentes contables/no GAAP.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.61,
+            "por_que_importa": "Aumenta la probabilidad de error de diagnóstico y retraso en activar defensas de capital.",
+            "evidencias": [
+              {
+                "source_id": "IMPLIED_001",
+                "ubicacion": "banderas y faltantes_criticos",
+                "cita_corta": "faltantes TTM clave y mezcla de fuentes",
+                "interpretacion": "La transparencia actual no permite cerrar riesgos de forma robusta."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Se completan series TTM auditables de EBIT/FCF, vencimientos y covenants con consistencia trimestral.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "Con EBIT negativo y CFO positivo, el puente depende de ajustes no operativos y capital circulante. Esto no invalida la caja, pero sí reduce su calidad predictiva sin desglose adicional.",
+            "posibles_distorsiones": [
+              "capital circulante",
+              "one-offs",
+              "intereses",
+              "impuestos",
+              "otros"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "El capex reportado es bajo frente a CFO, favoreciendo FCF contable. Debe separarse capex de mantenimiento frente a crecimiento y software capitalizado.",
+            "capex_riesgo": "MEDIO",
+            "notas": "Sin desglose, el FCF puede sobreestimar caja libre estructural."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": false,
+          "sostenible_por_fcf": "UNKNOWN",
+          "comentario": "No hay evidencia suficiente en el input para evaluar recompra y su sostenibilidad."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "UNKNOWN",
+          "comentario": "Se requiere detalle trimestral de SBC para cuantificar dilución económica real."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "UNKNOWN",
+          "comentario": "No hay transacciones M&A suficientes en el input para puntuar riesgo con base objetiva."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Solicitar ownership y cambios de insiders en filings/DEF14A para evaluar alineación."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "Reversión de capital de trabajo y desaceleración de volumen, con caída del CFO sin recuperación de margen.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "caída de CFO",
+              "subida de working capital",
+              "otros"
+            ],
+            "indicadores_tempranos": [
+              "CFO TTM < 30M USD",
+              "AP/revenue > 55% dos trimestres",
+              "EBIT margin sin mejora YoY"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Aumento del coste de deuda y condiciones crediticias más duras con EBIT aún negativo.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "subida de intereses",
+              "vencimientos cercanos",
+              "otros"
+            ],
+            "indicadores_tempranos": [
+              "interest expense TTM > 8M USD",
+              "disclosure de covenant headroom estrecho",
+              "renegociación de facilidades"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "Dilución acelerada para sostener crecimiento sin consolidar rentabilidad operativa.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "otros"
+            ],
+            "indicadores_tempranos": [
+              "acciones diluidas +6% YoY",
+              "SBC como % de ingresos al alza",
+              "guidance de pérdidas operativas persistentes"
+            ]
+          }
+        ],
+        "conclusion_downside": "El downside no está dominado hoy por falta de caja, sino por calidad y sostenibilidad de la generación de efectivo. Si el puente EBIT->CFO no mejora y sube el coste financiero, el perfil puede transitar de PASS a CONDITIONAL rápidamente. La defensa principal es disciplina de tamaño y activación automática de kill criteria."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-001",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja neta (caja_usd - deuda_total_usd) <= 0 en cualquier reporte.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Se pierde el principal amortiguador de liquidez."
+        },
+        {
+          "kc_id": "KC-002",
+          "relacionado_con": "fcf",
+          "definicion": "CFO TTM <= 0 por dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 24
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "SALIR",
+          "por_que": "La tesis de supervivencia está anclada en caja operativa positiva."
+        },
+        {
+          "kc_id": "KC-003",
+          "relacionado_con": "deuda",
+          "definicion": "Interest expense TTM > 8M USD con EBIT TTM sin mejora >=20% YoY.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Sube fragilidad financiera sin avance operativo compensatorio."
+        },
+        {
+          "kc_id": "KC-004",
+          "relacionado_con": "contabilidad",
+          "definicion": "Disclosure explícito de breach covenant o waiver por tensión financiera.",
+          "ventana_meses": {
+            "min": 1,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "La probabilidad de pérdida permanente de capital aumenta materialmente."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 2.5,
+        "condiciones_para_aumentar_tamaño": [
+          "EBIT TTM mejora sostenida y margen operativo converge hacia break-even.",
+          "Publicación de tabla de vencimientos y covenants con headroom holgado.",
+          "FCF positivo validado sin dependencia dominante de movimientos de working capital."
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Activación de cualquier KC-002 o KC-004.",
+          "Caja neta cae por debajo de 50M USD sin plan de refinanciación claro.",
+          "Dilución anual >6% con EBIT persistentemente negativo.",
+          "Guidance o resultados muestran deterioro simultáneo de CFO y márgenes."
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "tabla_vencimientos",
+          "por_que_importa": "Define riesgo real de refinanciación y ventana de stress.",
+          "como_obtenerlo": "10-K nota de deuda y MD&A de liquidez."
+        },
+        {
+          "item": "covenants",
+          "por_que_importa": "Permite estimar probabilidad de breach con base medible.",
+          "como_obtenerlo": "8-K credit agreement y 10-Q nota de deuda."
+        },
+        {
+          "item": "acciones_diluidas",
+          "por_que_importa": "Cuantifica dilución efectiva y riesgo por acción.",
+          "como_obtenerlo": "10-Q/10-K EPS diluted weighted average shares."
+        },
+        {
+          "item": "detalle_sbc",
+          "por_que_importa": "Aclara si el crecimiento de caja se transfiere al accionista o se diluye.",
+          "como_obtenerlo": "10-Q nota de stock-based compensation."
+        },
+        {
+          "item": "detalle_capex",
+          "por_que_importa": "Distingue FCF estructural de caja temporal.",
+          "como_obtenerlo": "10-K notas de PP&E/software capitalizado y MD&A capex."
+        },
+        {
+          "item": "revolver_disponible",
+          "por_que_importa": "Ajusta la estimación de liquidez defensiva de corto plazo.",
+          "como_obtenerlo": "10-Q nota de deuda y líneas de crédito disponibles."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "La evaluación usa datos hasta fecha de corte 2026-02-19 y no incorpora eventos posteriores.",
+      "No se dispone de tabla detallada de vencimientos ni covenants numéricos en el input consolidado.",
+      "Varias métricas TTM críticas están incompletas o mezclan fuentes no homogéneas.",
+      "No hay desglose suficiente para separar FCF estructural de efectos de capital de trabajo/float.",
+      "No se reporta serie completa de acciones diluidas YoY para cuantificar dilución con precisión."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-02-19T11:45:00Z",
+    "inputs_hash": "bc102f07a218d66f849114dec43d62e2546b8f80406520dd3e69c9cf6a72e307"
+  }
+}

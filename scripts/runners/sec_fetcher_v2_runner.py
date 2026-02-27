@@ -2020,6 +2020,9 @@ def main() -> int:
 
     source_counter = 1
     used_source_keys: set[Tuple[str, str, str]] = set()
+    # Diagnostics collected during push_source() extraction.
+    # Must be initialized before the closure uses it.
+    clean_md_diag_records: List[Dict[str, Any]] = []
 
     def push_source(
         *,
@@ -2248,7 +2251,6 @@ def main() -> int:
     local_fallback_clean_md_rejected_quality = 0
     local_fallback_clean_md_generation_errors = 0
     local_fallback_clean_md_rejection_samples: List[Dict[str, Any]] = []
-    clean_md_diag_records: List[Dict[str, Any]] = []
     local_fallback_errors: List[str] = []
 
     sec_forms_present = {

@@ -153,7 +153,7 @@ Todo artefacto JSON generado debe incluir un bloque `_meta` en el top-level con 
 "_meta": {
   "motor": "AUTONOMO | ASISTIDO",
   "plataforma": "claude_code | codex | gemini_cli | chatgpt",
-  "modelo": "claude-opus-4.6 | gpt-5.3-codex | gemini-3-pro | chatgpt-4o | ...",
+  "modelo": "claude-opus-4.6 | gpt-5.3-codex | gemini-3.1-pro-preview | chatgpt-4o | ...",
   "proyecto_chatgpt": "<nombre del proyecto, solo si motor=ASISTIDO>",
   "timestamp": "YYYY-MM-DDTHH:MM:SSZ",
   "version_protocolo": "V3",
@@ -180,7 +180,7 @@ Todo artefacto JSON generado debe incluir un bloque `_meta` en el top-level con 
 |-------|------|-------------|-------------|
 | `motor` | enum | SÍ | `"AUTONOMO"` o `"ASISTIDO"` (legacy: `"DUAL_MODELO"`) |
 | `plataforma` | enum | SÍ | Runtime de ejecución: `"claude_code"`, `"codex"`, `"gemini_cli"`, `"chatgpt"` (legacy: `"cowork"`, `"openclaw"`) |
-| `modelo` | string | SÍ | Modelo LLM específico. Ej: `"claude-opus-4.6"`, `"gpt-5.3-codex"`, `"gemini-3-pro"`, `"chatgpt-4o"`, `"gpt-5.2-pro"` |
+| `modelo` | string | Sí | Modelo LLM específico. Ej: `"claude-opus-4.6"`, `"gpt-5.3-codex"`, `"gemini-3.1-pro-preview"`, `"chatgpt-4o"`, `"gpt-5.2-pro"` |
 | `proyecto_chatgpt` | string | Solo si ASISTIDO | Nombre del proyecto ChatGPT usado. Ej: `"ELSIAN_TRUTH_PACK"` |
 | `timestamp` | string (ISO 8601) | SÍ | Momento de generación del artefacto |
 | `version_protocolo` | string | SÍ | Versión del protocolo operativo (`"V3"` actualmente) |
@@ -202,7 +202,7 @@ Todo artefacto JSON generado debe incluir un bloque `_meta` en el top-level con 
 - El agente que genera el artefacto es responsable de rellenar `_meta` automáticamente.
 - En modo ASISTIDO, el copiloto AÑADE el bloque `_meta` al JSON que recibe del usuario (ChatGPT no lo genera — el copiloto lo inyecta antes de guardar). El copiloto pregunta al usuario qué modelo usó si no lo sabe.
 - En modo AUTÓNOMO con subagentes (CATALYST ‖ FORENSIC), el agente principal inyecta `_meta` en cada output antes de guardar.
-- `modelo` debe ser el identificador exacto del LLM (ej. `"gpt-5.3-codex"`, `"gemini-3-pro"`; no alias ambiguos como `"codex"`). `plataforma` identifica el runtime/entorno.
+- `modelo` debe ser el identificador exacto del LLM (ej. `"gpt-5.3-codex"`, `"gemini-3.1-pro-preview"`; no alias ambiguos como `"codex"`). `plataforma` identifica el runtime/entorno.
 - Si el agente no puede determinar su propio modelo, usar un identificador genérico (ej. `"cowork"`, `"chatgpt"`) como `modelo`.
 
 ---
