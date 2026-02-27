@@ -186,11 +186,17 @@ class DeterministicPipeline:
 
                     period_key = tf.column_header
                     if not period_key or period_key == "unknown":
-                        # Try to infer from metadata
-                        if metadata.periods_visible:
-                            period_key = metadata.periods_visible[0]
-                        else:
-                            continue
+                        # Discard: better to lose a field than assign wrong period
+                        audit.discard(
+                            field_name=canonical,
+                            period="unknown",
+                            reason="period_unknown",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                            scale=scale,
+                        )
+                        continue
 
                     if period_key not in period_fields:
                         period_fields[period_key] = {}
@@ -235,10 +241,17 @@ class DeterministicPipeline:
 
                     period_key = nf.period_hint
                     if not period_key:
-                        if metadata.periods_visible:
-                            period_key = metadata.periods_visible[0]
-                        else:
-                            continue
+                        # Discard: better to lose a field than assign wrong period
+                        audit.discard(
+                            field_name=canonical,
+                            period="unknown",
+                            reason="period_unknown",
+                            source_filing=filing_path.name,
+                            raw_label=nf.label,
+                            raw_value=nf.value,
+                            scale=scale,
+                        )
+                        continue
 
                     if period_key not in period_fields:
                         period_fields[period_key] = {}

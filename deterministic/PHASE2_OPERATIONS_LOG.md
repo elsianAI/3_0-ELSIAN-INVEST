@@ -1,0 +1,102 @@
+# Deterministic Phase 2 - Operations Log
+
+Purpose: single source of truth for the python-only iteration loop in Phase 2.
+Scope: deterministic module only (`deterministic/`), no LLM production pipeline events.
+
+## Entry Template
+
+```md
+## YYYY-MM-DD HH:MM - Iteration N - {CASE}
+- Agent:
+- Objective:
+- Hypothesis:
+- Files changed:
+- Commands executed:
+- Metrics before:
+- Metrics after:
+- Tests:
+- Decision:
+- Next step:
+```
+
+## 2026-02-27 12:53 - Iteration 0 - TZOO
+- Agent: Codex + User
+- Objective: restart TZOO from zero and validate clean bootstrap path.
+- Hypothesis: recreating case and re-running acquire/extract/eval from scratch will expose true parser issues.
+- Files changed: `deterministic/cases/TZOO/case.json`
+- Commands executed:
+  - `rm -rf deterministic/cases/TZOO`
+  - recreate `case.json`
+- Metrics before: N/A (case removed).
+- Metrics after: case scaffold created, source_hint=`sec`.
+- Tests: none.
+- Decision: continue with acquire first, then extract, then eval.
+- Next step: run `python3 -m deterministic.cli acquire TZOO`.
+
+## 2026-02-27 13:04 - Iteration 1 - TZOO
+- Agent: User
+- Objective: validate filing acquisition coverage.
+- Hypothesis: SEC fetcher should reach 100% of expected filings by policy (`expected=min(available,target)`).
+- Files changed:
+  - `deterministic/cases/TZOO/filings/`
+  - `deterministic/cases/TZOO/filings_manifest.json`
+- Commands executed:
+  - `python3 -m deterministic.cli acquire TZOO`
+- Metrics before: no filings downloaded.
+- Metrics after:
+  - filings_downloaded=28
+  - filings_failed=0
+  - filings_coverage_pct=100.0
+  - annual=6/6, quarterly=12/12, earnings=10/10
+- Tests: none.
+- Decision: acquisition stage accepted.
+- Next step: run `python3 -m deterministic.cli extract TZOO`.
+
+## 2026-02-27 13:15 - Iteration 2 - TZOO
+- Agent: Opus + User + Codex review
+- Objective: create first ground truth (`expected.json`) for FY2024/FY2023 and measure baseline.
+- Hypothesis: short, high-quality GT slice enables fast parser iteration before full GT expansion.
+- Files changed:
+  - `deterministic/cases/TZOO/expected.json`
+- Commands executed:
+  - `python3 -m deterministic.cli extract TZOO`
+  - `python3 -m deterministic.cli eval TZOO`
+- Metrics before: no expected file -> eval 0/0.
+- Metrics after (baseline with first expected):
+  - score=8.8% (3/34)
+  - wrong=19
+  - missed=12
+  - extra=179
+  - required_fields_coverage_pct=64.7
+- Tests: existing suite (83) had been green previously.
+- Decision: parser quality too low; prioritize table/alias/period fixes before widening GT coverage.
+- Next step: patch extraction for percent rows, sparse table columns, unknown period handling, and alias fuzzy hardening.
+
+## 2026-02-27 14:00 - Iteration 3 - TZOO
+- Agent: Opus (implementation) + Codex (validation)
+- Objective: apply first high-impact parser hardening patch.
+- Hypothesis: better table parsing + safer aliasing + no unknown-period fallback will materially raise score.
+- Files changed:
+  - `deterministic/src/extract/tables.py`
+  - `deterministic/src/pipeline.py`
+  - `deterministic/src/normalize/aliases.py`
+  - `deterministic/tests/unit/test_tables.py`
+  - `deterministic/tests/unit/test_normalize.py`
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v`
+  - `python3 -m deterministic.cli eval TZOO`
+- Metrics before:
+  - score=8.8% (3/34)
+  - wrong=19
+  - missed=12
+  - extra=179
+- Metrics after:
+  - score=52.9% (18/34)
+  - wrong=9
+  - missed=7
+  - extra=90
+  - required_fields_coverage_pct=79.4
+- Tests: 90 passed (up from 83).
+- Decision: patch accepted; keep iterating in python-only mode.
+- Next step: fix label collisions (`net_income` vs EPS rows, liability/equity row ambiguity, tax line disambiguation), then re-eval TZOO.
+

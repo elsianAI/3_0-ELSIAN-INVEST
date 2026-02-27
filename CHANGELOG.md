@@ -1,5 +1,9 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
+## 2026-02-27
+- [DETERMINISTIC] PHASE2: created operations trace log in `deterministic/PHASE2_OPERATIONS_LOG.md` (template + TZOO Iteration 0-3).  [14:08]
+- [DETERMINISTIC] TZOO: python-only patch validated (`tables.py`, `aliases.py`, `pipeline.py`) with 90/90 tests and eval improvement 8.8% -> 52.9%.  [14:08]
+
 ## 2026-02-26
 - [PIPELINE] TEP: TP_VALIDATOR (python)  [18:12]
 - [PIPELINE] TEP: TP_CALCULATOR (python)  [18:12]
@@ -652,4 +656,3 @@
 - [PIPELINE] AAPL: SOURCES_COMPILER (python)  [17:38]
 - [PIPELINE] AAPL: PREFETCH (python)  [17:38]
 - [PIPELINE] AAPL: PREFETCH (python)  [17:21]
-

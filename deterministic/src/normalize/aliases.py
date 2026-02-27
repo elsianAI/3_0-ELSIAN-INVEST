@@ -64,9 +64,12 @@ class AliasResolver:
         if normalized in self._lookup:
             return self._lookup[normalized]
 
-        # Fuzzy: try substring match (label contains an alias)
+        # Fuzzy: try substring match (label contains a multi-word alias).
+        # Only multi-word aliases (containing a space) are eligible for fuzzy,
+        # to prevent single-word aliases like "revenue" matching inside
+        # unrelated labels like "deferred revenue".
         for alias_norm, canonical in self._lookup.items():
-            if len(alias_norm) >= 4 and alias_norm in normalized:
+            if " " in alias_norm and len(alias_norm) >= 6 and alias_norm in normalized:
                 return canonical
 
         return None

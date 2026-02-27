@@ -85,6 +85,54 @@ class TestExtractFromMarkdownTable(unittest.TestCase):
         self.assertTrue(any(f.value == -98500.0 for f in costs))
 
 
+    def test_double_header_year_ended_plus_years(self):
+        """Double-header table: 'Year Ended December 31,' row then '2024 / 2023' sub-row."""
+        table = """| | Year Ended December 31, | | | | | | |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| | 2024 | | 2023 | | | | |
+| Revenues | $ | 83,902 | | | $ | 84,477 | |
+| Net income | $ | 13,682 | | | $ | 12,468 | |"""
+
+        fields = extract_from_markdown_table(table, "income_statement")
+        fy24_rev = [
+            f for f in fields
+            if f.label == "Revenues" and f.column_header == "FY2024"
+        ]
+        fy23_rev = [
+            f for f in fields
+            if f.label == "Revenues" and f.column_header == "FY2023"
+        ]
+        self.assertEqual(len(fy24_rev), 1)
+        self.assertEqual(fy24_rev[0].value, 83902.0)
+        self.assertEqual(len(fy23_rev), 1)
+        self.assertEqual(fy23_rev[0].value, 84477.0)
+
+    def test_percentage_rows_are_skipped(self):
+        """Rows with '%' in data cells must be filtered out."""
+        table = """| | 2024 | | 2023 | | |
+| --- | --- | --- | --- | --- | --- |
+| Revenues | 100.0 | % | | 100.0 | % |
+| Gross profit | 87.5 | | | 87.1 | |"""
+
+        fields = extract_from_markdown_table(table, "income_statement")
+        # "Revenues" row has "%" → skipped; "Gross profit" has no "%" → extracted
+        rev = [f for f in fields if f.label == "Revenues"]
+        self.assertEqual(len(rev), 0, "Percentage rows should be skipped")
+        gp = [f for f in fields if f.label == "Gross profit"]
+        self.assertTrue(len(gp) > 0, "Non-percentage rows should be extracted")
+
+    def test_currency_symbol_column_skip(self):
+        """When a column has '$' and the next column has the number, use the number."""
+        table = """| | 2024 | | 2023 | | | | |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Revenues | $ | 83,902 | | | $ | 84,477 | |"""
+
+        fields = extract_from_markdown_table(table, "income_statement")
+        # Should pick up 83,902 and 84,477 despite "$" in the mapped column
+        vals = [f.value for f in fields if f.label == "Revenues"]
+        self.assertIn(83902.0, vals)
+
+
 class TestExtractTablesFromCleanMd(unittest.TestCase):
     def test_fixture_file(self):
         fixture_path = (

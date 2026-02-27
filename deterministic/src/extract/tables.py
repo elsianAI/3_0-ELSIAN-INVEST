@@ -62,8 +62,33 @@ def parse_number(text: str) -> Optional[float]:
         return None
 
 
+def _is_subheader_row(cells: List[str]) -> bool:
+    """Check if a row is a sub-header containing year/period identifiers.
+
+    Detects rows like: | | 2024 | | 2023 | | | |
+    or: | | (In thousands) | | | | | |
+    These appear as the first data row after the separator in double-header tables.
+    """
+    first_cell = cells[0].strip() if cells else ""
+    if first_cell and not re.match(r"^\s*$", first_cell):
+        return False
+    # Check if any non-first cell contains a year or scale indicator
+    rest = [c.strip() for c in cells[1:] if c.strip()]
+    has_year = any(re.fullmatch(r"20\d{2}", c) for c in rest)
+    has_scale = any(
+        c.lower().strip("()") in {"in thousands", "in millions", "in billions"}
+        for c in rest
+    )
+    return has_year or has_scale
+
+
 def _parse_markdown_table(table_text: str) -> Tuple[List[str], List[List[str]]]:
-    """Parse a markdown table into headers and rows."""
+    """Parse a markdown table into headers and rows.
+
+    Supports double-header tables where the first data row after the separator
+    contains year identifiers (e.g. "| | 2024 | | 2023 | |").
+    In that case, the sub-header years are merged into the header row.
+    """
     lines = [
         line.strip()
         for line in table_text.strip().splitlines()
@@ -82,11 +107,27 @@ def _parse_markdown_table(table_text: str) -> Tuple[List[str], List[List[str]]]:
     # Skip separator line (lines[1])
 
     # Parse data rows
-    rows: List[List[str]] = []
+    raw_rows: List[List[str]] = []
     for line in lines[2:]:
         if line.startswith("|"):
             cells = [cell.strip() for cell in line.strip("|").split("|")]
-            rows.append(cells)
+            raw_rows.append(cells)
+
+    # Double-header support: if the first data row is a sub-header with years,
+    # merge it into headers and remove from data rows.
+    rows = raw_rows
+    if rows and _is_subheader_row(rows[0]):
+        sub = rows[0]
+        # Merge: for each column, if sub has a year and header is empty/generic,
+        # adopt the sub value as the header.
+        for idx in range(min(len(headers), len(sub))):
+            sub_val = sub[idx].strip()
+            if sub_val and re.fullmatch(r"20\d{2}", sub_val):
+                headers[idx] = sub_val
+        rows = rows[1:]
+        # Also skip a second sub-header row if it's a scale indicator like "(In thousands)"
+        if rows and _is_subheader_row(rows[0]):
+            rows = rows[1:]
 
     return headers, rows
 
@@ -212,10 +253,33 @@ def extract_from_markdown_table(
         if not has_number:
             continue
 
+        # Skip percentage rows: if any data cell contains "%", skip entire row.
+        # This avoids extracting margin/ratio tables as monetary values.
+        data_cells = row[1:]
+        if any("%" in cell for cell in data_cells):
+            continue
+
         for col_idx, period_key in period_map.items():
             if col_idx >= len(row):
                 continue
-            value = parse_number(row[col_idx])
+
+            cell_text = row[col_idx].strip()
+            value = parse_number(cell_text)
+
+            # Sparse-column scan: if cell has no numeric value (empty or
+            # currency symbol like "$"), scan forward through subsequent
+            # columns until we find a number or hit another period column.
+            # This handles EDGAR tables where each period spans multiple
+            # columns: | $ | 83,902 | | | $ | 84,477 | |
+            if value is None and re.fullmatch(r"[$€£¥]?", cell_text):
+                for scan_idx in range(col_idx + 1, len(row)):
+                    if scan_idx in period_map and scan_idx != col_idx:
+                        break  # Don't cross into another period's columns
+                    scan_val = parse_number(row[scan_idx].strip())
+                    if scan_val is not None:
+                        value = scan_val
+                        break
+
             if value is not None:
                 location = f"table:{section_name}:row{row_idx + 1}:col{col_idx}"
                 results.append(

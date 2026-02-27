@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# ============================================================================
+# Pre-commit hook: Deterministic Module Traceability Enforcement
+# ============================================================================
+# Ensures every commit touching deterministic/ includes:
+#   1. An entry in deterministic/PHASE2_OPERATIONS_LOG.md
+#   2. A line in CHANGELOG.md
+#   3. The log entry contains all 10 mandatory fields
+# ============================================================================
+
+set -euo pipefail
+
+# ── 1. Detect staged files in deterministic/ ────────────────────────────────
+
+DETERMINISTIC_PATHS=(
+    "deterministic/src/"
+    "deterministic/tests/"
+    "deterministic/config/"
+    "deterministic/schemas/"
+    "deterministic/cases/"
+    "deterministic/cli.py"
+    "deterministic/requirements.txt"
+)
+
+has_deterministic_changes=false
+
+for path in "${DETERMINISTIC_PATHS[@]}"; do
+    if git diff --cached --name-only | grep -q "^${path}"; then
+        has_deterministic_changes=true
+        break
+    fi
+done
+
+if [ "$has_deterministic_changes" = false ]; then
+    # No deterministic changes — nothing to enforce
+    exit 0
+fi
+
+echo "[pre-commit] Deterministic module changes detected. Checking traceability..."
+
+# ── 2. Check that PHASE2_OPERATIONS_LOG.md is staged ────────────────────────
+
+if ! git diff --cached --name-only | grep -q "^deterministic/PHASE2_OPERATIONS_LOG.md$"; then
+    echo ""
+    echo "ERROR: Commit touches deterministic/ but PHASE2_OPERATIONS_LOG.md is not staged."
+    echo ""
+    echo "  Fix: Add an entry to deterministic/PHASE2_OPERATIONS_LOG.md with all 10 fields:"
+    echo "    Agent, Objective, Hypothesis, Files changed, Commands executed,"
+    echo "    Metrics before, Metrics after, Tests, Decision, Next step"
+    echo ""
+    echo "  Then: git add deterministic/PHASE2_OPERATIONS_LOG.md"
+    echo ""
+    exit 1
+fi
+
+# ── 3. Check that CHANGELOG.md is staged ────────────────────────────────────
+
+if ! git diff --cached --name-only | grep -q "^CHANGELOG.md$"; then
+    echo ""
+    echo "ERROR: Commit touches deterministic/ but CHANGELOG.md is not staged."
+    echo ""
+    echo "  Fix: Add a [DETERMINISTIC] line under today's date in CHANGELOG.md."
+    echo "  Then: git add CHANGELOG.md"
+    echo ""
+    exit 1
+fi
+
+# ── 4. Validate last entry in PHASE2_OPERATIONS_LOG.md has all 10 fields ────
+
+LOG_FILE="deterministic/PHASE2_OPERATIONS_LOG.md"
+
+# Extract the staged version of the file
+LOG_CONTENT=$(git show ":${LOG_FILE}" 2>/dev/null || cat "${LOG_FILE}")
+
+# Get last entry (everything after the last "## 20" heading)
+LAST_ENTRY=$(echo "$LOG_CONTENT" | awk '/^## 20[0-9]{2}-/{block=$0; next} {block=block"\n"$0} END{print block}')
+
+REQUIRED_FIELDS=(
+    "Agent:"
+    "Objective:"
+    "Hypothesis:"
+    "Files changed:"
+    "Commands executed:"
+    "Metrics before:"
+    "Metrics after:"
+    "Tests:"
+    "Decision:"
+    "Next step:"
+)
+
+missing_fields=()
+
+for field in "${REQUIRED_FIELDS[@]}"; do
+    if ! echo "$LAST_ENTRY" | grep -Fqi -- "- ${field}"; then
+        missing_fields+=("$field")
+    fi
+done
+
+if [ ${#missing_fields[@]} -gt 0 ]; then
+    echo ""
+    echo "ERROR: Last entry in PHASE2_OPERATIONS_LOG.md is missing required fields:"
+    for f in "${missing_fields[@]}"; do
+        echo "  - $f"
+    done
+    echo ""
+    echo "  Fix: Complete the last entry with all 10 mandatory fields."
+    echo "  Then: git add deterministic/PHASE2_OPERATIONS_LOG.md"
+    echo ""
+    exit 1
+fi
+
+echo "[pre-commit] Traceability check PASSED. All fields present."
+exit 0

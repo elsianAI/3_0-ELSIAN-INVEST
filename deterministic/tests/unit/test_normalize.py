@@ -53,6 +53,23 @@ class TestAliasResolver(unittest.TestCase):
         self.assertIn("net_income", names)
         self.assertTrue(len(names) > 10)
 
+    def test_deferred_revenue_not_matched(self):
+        """'deferred revenue' must NOT resolve to 'ingresos' via fuzzy 'revenue'."""
+        self.assertIsNone(self.resolver.resolve("deferred revenue"))
+
+    def test_net_income_attributable_to_travelzoo(self):
+        """Long label containing 'net income' should still resolve via multi-word fuzzy."""
+        result = self.resolver.resolve("Net income attributable to Travelzoo")
+        self.assertEqual(result, "net_income")
+
+    def test_merchant_payables_not_matched(self):
+        """'merchant payables' should NOT match any canonical field."""
+        self.assertIsNone(self.resolver.resolve("merchant payables"))
+
+    def test_deferred_tax_assets_not_matched(self):
+        """'deferred tax assets' should NOT match 'total_assets'."""
+        self.assertIsNone(self.resolver.resolve("deferred tax assets"))
+
 
 if __name__ == "__main__":
     unittest.main()

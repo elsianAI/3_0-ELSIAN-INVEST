@@ -1,8 +1,8 @@
 # Plan Fase 2: Módulo de Extracción Determinista End-to-End
 
-> **Estado:** V5 — segunda ronda de ajustes Codex integrados. Pendiente aprobación final.
+> **Estado:** V6 — governance/SOP de trazabilidad integrado.
 > **Rama:** `codex/python-only-deterministic-phase2`
-> **Última revisión:** 27 Feb 2026 (V5)
+> **Última revisión:** 27 Feb 2026 (V6)
 
 ---
 
@@ -508,7 +508,47 @@ pypdf>=4.0
 
 ---
 
-## 15. Para arrancar (Subfase A — caso TZOO)
+## 15. Governance: SOP de trazabilidad obligatoria
+
+Todo commit que toque `deterministic/` requiere trazabilidad. Enforcement bloqueante vía pre-commit hook.
+
+### Artefactos obligatorios por commit
+
+1. **`deterministic/PHASE2_OPERATIONS_LOG.md`** — 1 entrada nueva con 10 campos: Agent, Objective, Hypothesis, Files changed, Commands executed, Metrics before, Metrics after, Tests, Decision, Next step.
+2. **`CHANGELOG.md`** — 1 línea `[DETERMINISTIC]` bajo la fecha actual.
+
+### Enforcement
+
+- Hook versionado en `.githooks/pre-commit`. Detecta cambios staged en `deterministic/`, verifica que log + changelog estén staged, valida los 10 campos.
+- Setup: `bash scripts/setup_git_hooks.sh` (configura `core.hooksPath .githooks`).
+- Sin excepciones por tamaño de cambio.
+
+### Alcance
+
+Aplica si se tocan ficheros bajo: `deterministic/src/`, `deterministic/tests/`, `deterministic/config/`, `deterministic/schemas/`, `deterministic/cases/`, `deterministic/cli.py`, `deterministic/requirements.txt`. No aplica a cambios fuera de `deterministic/`.
+
+### Contrato Operativo de Agentes (6 reglas)
+
+Todo agente (Opus, Codex, User) que trabaje en `deterministic/` debe cumplir estas 6 reglas:
+
+1. **Antes de tocar código:** leer la última entrada de `PHASE2_OPERATIONS_LOG.md` y anotar métricas actuales.
+2. **Cada cambio relevante = una iteración nueva** en `PHASE2_OPERATIONS_LOG.md` con los 10 campos obligatorios.
+3. **Siempre reportar métricas antes/después** (score, matched, wrong, missed, extra). Si no aplica, escribir `N/A` con razón.
+4. **Ejecutar tests** (`python3 -m unittest discover -s deterministic/tests -v`) y registrar resultado (pass/fail count).
+5. **Añadir línea resumen** en `CHANGELOG.md` bajo la fecha actual con tag `[DETERMINISTIC]`.
+6. **El trabajo no está hecho hasta que el commit sea válido.** Un cambio sin commit + trazabilidad no existe.
+
+### Cuándo commitear
+
+- Después de cada `eval` que produzca nuevas métricas (mejora o regresión).
+- Después de añadir un caso nuevo (case.json + acquire).
+- Después de añadir o modificar tests.
+- Después de cualquier refactor que toque más de 2 ficheros.
+- **Un commit = una iteración.** No acumular múltiples cambios en un solo commit.
+
+---
+
+## 16. Para arrancar (Subfase A — caso TZOO)
 
 > Alineado con Subfase A (sección 2). Solo se copia lo mínimo para que TZOO funcione.
 
