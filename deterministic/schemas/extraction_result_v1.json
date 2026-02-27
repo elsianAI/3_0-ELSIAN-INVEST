@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "extraction_result_v1",
+  "title": "ExtractionResult",
+  "description": "Output schema for the deterministic extraction module v1.0",
+  "type": "object",
+  "required": ["schema_version", "ticker", "currency", "extraction_date", "filings_used", "periods", "audit"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. v1.x = backwards-compatible additions only."
+    },
+    "ticker": {
+      "type": "string",
+      "description": "Ticker symbol (e.g. TZOO, GCT, TEP)"
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO currency code of the filing's native currency (e.g. USD, EUR)"
+    },
+    "extraction_date": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO date when the extraction was run"
+    },
+    "filings_used": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of filings processed"
+    },
+    "periods": {
+      "type": "object",
+      "description": "Extracted data by period (e.g. FY2024, Q3-2024)",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["fecha_fin", "tipo_periodo", "fields"],
+        "properties": {
+          "fecha_fin": {
+            "type": "string",
+            "description": "Period end date in ISO format"
+          },
+          "tipo_periodo": {
+            "type": "string",
+            "enum": ["anual", "trimestral", "semestral", "unknown"],
+            "description": "Period type"
+          },
+          "fields": {
+            "type": "object",
+            "description": "Extracted fields for this period",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["value", "scale", "source_filing", "source_location", "confidence"],
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "description": "Numeric value in the stated scale"
+                },
+                "scale": {
+                  "type": "string",
+                  "enum": ["raw", "thousands", "millions", "billions"],
+                  "description": "Numeric scale of the value"
+                },
+                "source_filing": {
+                  "type": "string",
+                  "description": "Filename of the source filing"
+                },
+                "source_location": {
+                  "type": "string",
+                  "description": "Location within the filing (e.g. table:income_statement:row3)"
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": ["high", "medium", "low"],
+                  "description": "Confidence level of the extraction"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "required": ["fields_extracted", "fields_discarded", "discarded_reasons"],
+      "properties": {
+        "fields_extracted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fields_discarded": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "discarded_reasons": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
