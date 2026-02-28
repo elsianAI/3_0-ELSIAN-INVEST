@@ -1,5 +1,8 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
+## 2026-03-01
+- [DETERMINISTIC] GCT Iteration 10: curated expected.json ground truth (108 fields, 6 annual periods FY2020-FY2025) — first eval baseline 65.7% (71/108), 21 wrong, 16 missed, 142 tests green.
+
 ## 2026-02-28
 - [DETERMINISTIC] TZOO Iteration 9: reject discontinued-ops labels + GT equity convention (NCI-inclusive) — wrong 9→0, score 37.0% (100/270), 142 tests green.
 - [DETERMINISTIC] TZOO Iteration 8: fix global tbl_idx counter (per-file instead of per-subsection) — eliminates 29 sort-key collisions; wrong 38→9, score 23.0%→33.7% (91/270), 138 tests green.

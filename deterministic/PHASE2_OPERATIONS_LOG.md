@@ -260,3 +260,30 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — wrong dropped from 9 to 0. All 100 extractable annual fields now match. 170 missed fields remain (168 quarterly + 2 FY2020 EPS). Score stable at 37.0%.
 - Next step: Implement 10-Q multi-header table parsing to recover quarterly fields (target: reduce missed from 170).
 
+## 2026-03-01 12:15 - Iteration 10 - GCT
+- Agent: Copilot
+- Objective: Create curated expected.json ground truth for GCT (GigaCloud Technology) covering 6 annual periods (FY2020-FY2025) to enable pipeline evaluation.
+- Hypothesis: Manually curating ground truth from the 4 annual filing clean.md files (SRC_001 10-K FY2025, SRC_002 10-K FY2024, SRC_003 10-K FY2023, SRC_004 20-F FY2020-FY2022) will produce a reliable expected.json with 108 fields. The pipeline should match a significant portion since it already extracts many fields correctly, but known issues (period collision, shares_outstanding extracting par value, VIE table confusion, eps_diluted extracting non-GAAP) will cause wrong/missed fields.
+- Files changed:
+  - `deterministic/cases/GCT/expected.json` — created from scratch with 108 fields across 6 annual periods (FY2025: 19, FY2024: 19, FY2023: 19, FY2022: 19, FY2021: 18, FY2020: 14). All values manually verified from filing source documents.
+  - `deterministic/PHASE2_OPERATIONS_LOG.md` — this entry
+  - `CHANGELOG.md` — new line
+- Commands executed:
+  - `python3 -m deterministic.cli extract GCT` — inspected current extraction output
+  - `python3 /tmp/write_gct.py deterministic/cases/GCT/expected.json` — generated clean JSON via Python script
+  - `python3 -m deterministic.cli eval GCT` — baseline eval
+  - `python3 -m unittest discover -s deterministic/tests -v` — 142 passed, 0 failed
+  - `python3 -m deterministic.cli dashboard` — combined dashboard
+- Metrics before: N/A — no expected.json existed for GCT, this is the first evaluation.
+- Metrics after:
+  - score=65.7% (71/108)
+  - matched=71
+  - wrong=21
+  - missed=16
+  - extra=6
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=85.2
+- Tests: 142 passed, 0 failed.
+- Decision: accept — first GCT ground truth established. 65.7% baseline is strong for a first eval. Key wrong patterns: eps_diluted (non-GAAP extraction), shares_outstanding (par value vs share count), FY2023 period collision (gets FY2024 values), FY2023 total_assets/total_liabilities (VIE sub-table confusion). 16 missed are mostly eps_basic and total_assets for FY2024/FY2025.
+- Next step: Fix GCT-specific pipeline issues (period collision FY2023, shares_outstanding extraction, VIE table filtering) to raise score above 80%.
+
