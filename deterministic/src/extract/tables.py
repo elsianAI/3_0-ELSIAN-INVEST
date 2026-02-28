@@ -228,7 +228,7 @@ def extract_from_markdown_table(
     Args:
         table_text: Raw markdown table text.
         section_name: Section/sub-section label for source_location.
-        table_idx: Zero-based index of this table within its sub-section.
+        table_idx: Zero-based index of this table within the file (global counter).
 
     Returns list of TableField with label, value, and period info.
     """

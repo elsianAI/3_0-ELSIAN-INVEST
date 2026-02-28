@@ -100,18 +100,157 @@ class DeterministicPipeline:
         re.I,
     )
     _DEPRIORITIZED_SECTION = re.compile(
-        r":loss_from_operations|:discontinued|:net_income_\(loss\)",
+        r":loss_from_operations"
+        r"|discontinued_operations"
+        r"|:discontinued"
+        r"|:net_income_\(loss\)"
+        r"|prepaid_income_taxes",
         re.I,
     )
 
+    # ── Selection rules (loaded from config/selection_rules.json) ────
+
+    _SELECTION_RULES: Optional[Dict] = None
+    _TBL_RE = re.compile(r"tbl(\d+)")
+    _ROW_RE = re.compile(r"row(\d+)")
+    _COL_RE = re.compile(r"col(\d+)")
+
+    @classmethod
+    def _load_selection_rules(cls, config_dir: str) -> Dict:
+        """Load selection_rules.json once and cache."""
+        if cls._SELECTION_RULES is not None:
+            return cls._SELECTION_RULES
+        path = Path(config_dir) / "selection_rules.json"
+        if path.exists():
+            cls._SELECTION_RULES = json.loads(
+                path.read_text(encoding="utf-8")
+            )
+        else:
+            cls._SELECTION_RULES = {}
+        return cls._SELECTION_RULES
+
     @staticmethod
-    def _section_bonus(source_location: str) -> int:
-        """Return a priority bonus based on the table's sub-section."""
+    def _section_bonus(source_location: str,
+                       rules: Optional[Dict] = None) -> int:
+        """Return a priority bonus based on the table's sub-section.
+
+        Reads bonus/penalty values from rules['section_weights'] if available,
+        otherwise defaults to +5 / -5.
+        """
+        bonus = 5
+        penalty = -5
+        if rules and "section_weights" in rules:
+            sw = rules["section_weights"]
+            bonus = sw.get("primary_is_bonus", 5)
+            penalty = sw.get("deprioritized_penalty", -5)
         if DeterministicPipeline._PRIMARY_IS_SECTION.search(source_location):
-            return 5
+            return bonus
         if DeterministicPipeline._DEPRIORITIZED_SECTION.search(source_location):
-            return -5
+            return penalty
         return 0
+
+    @staticmethod
+    def _filing_rank(period_key: str, filing_type: str,
+                     rules: Optional[Dict] = None) -> int:
+        """Rank a filing type for a given period (lower = better).
+
+        Uses filing_priority_by_period from selection_rules.json.
+        """
+        if rules and "filing_priority_by_period" in rules:
+            priorities = rules["filing_priority_by_period"]
+            # Determine period type prefix
+            if period_key.startswith("FY"):
+                period_type = "FY"
+            elif period_key.startswith("H"):
+                period_type = "H"
+            else:
+                period_type = "Q"
+            plist = priorities.get(period_type, [])
+            ft_upper = filing_type.upper()
+            for idx, ft in enumerate(plist):
+                if ft.upper() == ft_upper:
+                    return idx
+            return len(plist)  # unknown type goes last
+        # Fallback to merge.py-style priority
+        from deterministic.src.merge import _filing_priority
+        return _filing_priority(filing_type)
+
+    @staticmethod
+    def _source_type_rank(source_type: str,
+                          rules: Optional[Dict] = None) -> int:
+        """Rank a source type (lower = better). table < narrative."""
+        if rules and "source_type_priority" in rules:
+            plist = rules["source_type_priority"]
+            try:
+                return plist.index(source_type)
+            except ValueError:
+                return len(plist)
+        return 0 if source_type == "table" else 1
+
+    @staticmethod
+    def _parse_stable_order(source_filing: str,
+                            source_location: str,
+                            rules: Optional[Dict] = None,
+                            ) -> Tuple[str, int, int, int]:
+        """Extract (filing_name, tbl_index, row_number, col_number) for stable tiebreak.
+
+        Reads direction from rules['stable_tiebreaker'] if available.
+        Default: filing ASC, tbl DESC (later tables in same section win),
+        row DESCENDING (totals at bottom win), col ASC.
+        """
+        tbl_m = DeterministicPipeline._TBL_RE.search(source_location)
+        row_m = DeterministicPipeline._ROW_RE.search(source_location)
+        col_m = DeterministicPipeline._COL_RE.search(source_location)
+        tbl_num = int(tbl_m.group(1)) if tbl_m else 0
+        row_num = int(row_m.group(1)) if row_m else 0
+        col_num = int(col_m.group(1)) if col_m else 0
+
+        # Default directions: filing ASC, tbl DESC, row DESC, col ASC
+        tbl_sign = -1  # descending: higher table index → lower key → later tables win
+        row_sign = -1  # descending: higher row → lower key → wins
+        col_sign = 1   # ascending
+        if rules and "stable_tiebreaker" in rules:
+            st = rules["stable_tiebreaker"]
+            if st.get("tbl_order", "").startswith("ascending"):
+                tbl_sign = 1
+            if st.get("row_order", "").startswith("ascending"):
+                row_sign = 1
+            if st.get("col_order", "").startswith("descending"):
+                col_sign = -1
+
+        return (source_filing, tbl_sign * tbl_num, row_sign * row_num, col_sign * col_num)
+
+    @staticmethod
+    def compute_sort_key(
+        period_key: str,
+        filing_type: str,
+        source_type: str,
+        label_priority: int,
+        section_bonus: int,
+        source_filing: str,
+        source_location: str,
+        rules: Optional[Dict] = None,
+    ) -> Tuple:
+        """Compute a comparable sort key for collision resolution.
+
+        Lower key = better candidate. Comparison order:
+        1. primary_filing_rank (lower filing type rank is better)
+        2. source_type_rank (table < narrative)
+        3. semantic_rank (NEGATED label_priority + section_bonus; higher semantic = lower key)
+        4. stable_order_rank (filing ASC, tbl DESC, row DESC, col ASC by default)
+        """
+        filing_rank = DeterministicPipeline._filing_rank(
+            period_key, filing_type, rules
+        )
+        src_rank = DeterministicPipeline._source_type_rank(
+            source_type, rules
+        )
+        # Negate semantic priority so higher priority → lower sort key
+        semantic_rank = -(label_priority + section_bonus)
+        stable = DeterministicPipeline._parse_stable_order(
+            source_filing, source_location, rules
+        )
+        return (filing_rank, src_rank, semantic_rank, stable)
 
     def extract(self, case_dir: str) -> ExtractionResult:
         """Extract financial data from filings in a case directory."""
@@ -126,6 +265,12 @@ class DeterministicPipeline:
 
         ticker = config.get("ticker", case_path.name)
         currency = config.get("currency", "USD")
+
+        # Load selection rules (global + per-case overrides)
+        rules = dict(self._load_selection_rules(self._config_dir))
+        case_overrides = config.get("selection_overrides")
+        if case_overrides and isinstance(case_overrides, dict):
+            rules.update(case_overrides)
 
         if not filings_dir.exists() or not any(filings_dir.iterdir()):
             return ExtractionResult(
@@ -222,19 +367,32 @@ class DeterministicPipeline:
                     if period_key not in period_fields:
                         period_fields[period_key] = {}
 
-                    # Collision resolution: if field already present, prefer
-                    # the candidate with higher label-semantic priority.
-                    # Section-based bonus adjusts priority for primary vs note
-                    # sub-sections. Tiebreaker (equal priority): keep higher
-                    # absolute value (consolidated > segment).
-                    new_priority = self._alias_resolver.label_priority(
+                    # Collision resolution via hierarchical sort key.
+                    # Lower sort key = better candidate.
+                    new_label_priority = self._alias_resolver.label_priority(
                         canonical, tf.label
-                    ) + self._section_bonus(tf.source_location)
+                    )
+                    new_sec_bonus = self._section_bonus(
+                        tf.source_location, rules
+                    )
+                    new_sort_key = self.compute_sort_key(
+                        period_key=period_key,
+                        filing_type=metadata.filing_type,
+                        source_type="table",
+                        label_priority=new_label_priority,
+                        section_bonus=new_sec_bonus,
+                        source_filing=filing_path.name,
+                        source_location=tf.source_location,
+                        rules=rules,
+                    )
                     if canonical in period_fields[period_key]:
                         existing = period_fields[period_key][canonical]
-                        old_priority = getattr(existing, "_label_priority", 0)
-                        if new_priority < old_priority:
-                            # New has strictly lower priority → discard
+                        old_sort_key = getattr(
+                            existing, "_sort_key",
+                            (999, 999, 0, ("", 0, 0, 0)),
+                        )
+                        if new_sort_key >= old_sort_key:
+                            # New candidate is same or worse → discard
                             audit.discard(
                                 field_name=canonical,
                                 period=period_key,
@@ -245,19 +403,6 @@ class DeterministicPipeline:
                                 scale=scale,
                             )
                             continue
-                        if new_priority == old_priority:
-                            # Equal priority → prefer larger absolute value
-                            if abs(tf.value) <= abs(existing.value):
-                                audit.discard(
-                                    field_name=canonical,
-                                    period=period_key,
-                                    reason="lower_value_duplicate",
-                                    source_filing=filing_path.name,
-                                    raw_label=tf.label,
-                                    raw_value=tf.value,
-                                    scale=scale,
-                                )
-                                continue
 
                     fr = FieldResult(
                         value=tf.value,
@@ -266,7 +411,7 @@ class DeterministicPipeline:
                         source_location=tf.source_location,
                         confidence=confidence,
                     )
-                    fr._label_priority = new_priority  # type: ignore[attr-defined]
+                    fr._sort_key = new_sort_key  # type: ignore[attr-defined]
                     period_fields[period_key][canonical] = fr
                     audit.accept(
                         field_name=canonical,
@@ -316,23 +461,55 @@ class DeterministicPipeline:
                     if period_key not in period_fields:
                         period_fields[period_key] = {}
 
-                    # Only add if we don't already have this field from tables
-                    if canonical not in period_fields[period_key]:
-                        period_fields[period_key][canonical] = FieldResult(
-                            value=nf.value,
-                            scale=scale,
-                            source_filing=filing_path.name,
-                            source_location=nf.source_location,
-                            confidence=confidence,
+                    # Collision resolution: narrative uses sort key too
+                    new_label_priority = self._alias_resolver.label_priority(
+                        canonical, nf.label
+                    )
+                    new_sort_key = self.compute_sort_key(
+                        period_key=period_key,
+                        filing_type=metadata.filing_type,
+                        source_type="narrative",
+                        label_priority=new_label_priority,
+                        section_bonus=0,
+                        source_filing=filing_path.name,
+                        source_location=nf.source_location,
+                        rules=rules,
+                    )
+                    if canonical in period_fields[period_key]:
+                        existing = period_fields[period_key][canonical]
+                        old_sort_key = getattr(
+                            existing, "_sort_key",
+                            (999, 999, 0, ("", 0, 0, 0)),
                         )
-                        audit.accept(
-                            field_name=canonical,
-                            period=period_key,
-                            source_filing=filing_path.name,
-                            raw_label=nf.label,
-                            raw_value=nf.value,
-                            scale=scale,
-                        )
+                        if new_sort_key >= old_sort_key:
+                            audit.discard(
+                                field_name=canonical,
+                                period=period_key,
+                                reason="lower_priority_duplicate",
+                                source_filing=filing_path.name,
+                                raw_label=nf.label,
+                                raw_value=nf.value,
+                                scale=scale,
+                            )
+                            continue
+
+                    fr = FieldResult(
+                        value=nf.value,
+                        scale=scale,
+                        source_filing=filing_path.name,
+                        source_location=nf.source_location,
+                        confidence=confidence,
+                    )
+                    fr._sort_key = new_sort_key  # type: ignore[attr-defined]
+                    period_fields[period_key][canonical] = fr
+                    audit.accept(
+                        field_name=canonical,
+                        period=period_key,
+                        source_filing=filing_path.name,
+                        raw_label=nf.label,
+                        raw_value=nf.value,
+                        scale=scale,
+                    )
 
             if period_fields:
                 filing_extractions.append(

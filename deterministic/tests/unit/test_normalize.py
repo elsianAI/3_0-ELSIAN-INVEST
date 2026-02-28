@@ -198,6 +198,27 @@ class TestAliasResolver(unittest.TestCase):
         )
         self.assertGreater(score_exact, score_qualified)
 
+    # ── Iteration 9: discontinued operations & NCI equity tests ────
+
+    def test_total_assets_rejects_discontinued_operations(self):
+        """'Total assets from discontinued operations' must NOT resolve to total_assets."""
+        result = self.resolver.resolve("Total assets from discontinued operations")
+        self.assertIsNone(result, "Discontinued ops label should be rejected for total_assets")
+
+    def test_total_liabilities_rejects_discontinued_operations(self):
+        """'Total liabilities from discontinued operations' must NOT resolve to total_liabilities."""
+        result = self.resolver.resolve("Total liabilities from discontinued operations")
+        self.assertIsNone(result, "Discontinued ops label should be rejected for total_liabilities")
+
+    def test_total_equity_rejects_discontinued_operations(self):
+        """'Total equity from discontinued operations' must NOT resolve to total_equity."""
+        result = self.resolver.resolve("Total equity from discontinued operations")
+        self.assertIsNone(result, "Discontinued ops label should be rejected for total_equity")
+
+    def test_total_assets_matches_plain(self):
+        """Plain 'Total assets' must still resolve to total_assets."""
+        self.assertEqual(self.resolver.resolve("Total assets"), "total_assets")
+
 
 if __name__ == "__main__":
     unittest.main()

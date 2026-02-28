@@ -29,10 +29,17 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
     "ingresos": [
         re.compile(r"non[\s-]?gaap", re.I),
     ],
+    "total_assets": [
+        re.compile(r"discontinued\s+operations", re.I),
+    ],
     "total_liabilities": [
         re.compile(r"liabilities\s+and\s+stockholders", re.I),
         re.compile(r"liabilities\s+and\s+shareholders", re.I),
         re.compile(r"liabilities\s+and\s+equity", re.I),
+        re.compile(r"discontinued\s+operations", re.I),
+    ],
+    "total_equity": [
+        re.compile(r"discontinued\s+operations", re.I),
     ],
     "cash_and_equivalents": [
         re.compile(r"restricted\s*cash", re.I),
