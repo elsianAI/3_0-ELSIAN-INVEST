@@ -444,6 +444,18 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
   - **Note**: This is the first IFRS case (TZOO/IOSP are US GAAP). Labels use IFRS terminology (e.g., "Profit (loss) for the year" vs "Net income", "Trade receivables" vs "Accounts receivable").
 - Next step: Curate expected.json for NEXN using the curate-expected prompt template (20-F annual periods only), then run first eval.
 
+## 2026-02-28 24:30 - Iteration 20 - ALL
+- Agent: Copilot
+- Objective: Add sign normalization to pipeline — expense fields (cost_of_revenue, sga, R&D, D&A, interest_expense) always positive; income_tax positive unless label contains "benefit".
+- Hypothesis: GCT should recover from 88% to 100% (13 wrong were all sign flips). IOSP should improve significantly (15 of 21 wrong were sign related). TZOO should stay at 100% (FY2020 income_tax benefit correctly preserved via label check).
+- Files changed: deterministic/src/pipeline.py (_normalize_sign function + apply to table and narrative paths), deterministic/tests/unit/test_normalize.py (12 new tests)
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli eval --all
+- Metrics before: GCT=88.0% (95/108, 13 wrong), IOSP=72.6% (69/95, 21 wrong), NEXN=73.7% (56/76, 15 wrong), TZOO=100.0% (270/270)
+- Metrics after: GCT=100.0% (108/108, 0 wrong), IOSP=88.4% (84/95, 6 wrong), NEXN=73.7% (56/76, 15 wrong, unchanged — issues are scale/value not sign), TZOO=100.0% (270/270, preserved)
+- Tests: 181 passed, 0 failed (12 new tests for _normalize_sign).
+- Decision: accept — GCT recovered to 100%, IOSP +15.8pp, TZOO preserved. The _normalize_sign approach is minimal and correct: always-positive for 5 expense fields, conditional abs for income_tax based on label "benefit" check. IOSP remaining 6 wrong are non-sign issues (reclassification, period mismatch). NEXN remaining 15 wrong are scale/value mismatches.
+- Next step: Address IOSP remaining wrongs (FY2024 sga/R&D reclassification, FY2021-2023 income_tax period source mismatch). Add dividends_per_share extraction for IOSP.
+
 ## 2026-02-28 23:50 - Iteration 19 - GCT
 - Agent: Copilot
 - Objective: Fix sign convention inconsistency in GCT expected.json and formalize sign rules in curate-expected prompt template.

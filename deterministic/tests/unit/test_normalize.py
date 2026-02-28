@@ -268,5 +268,55 @@ class TestAliasResolver(unittest.TestCase):
         self.assertNotEqual(result, "total_equity")
 
 
+class TestNormalizeSign(unittest.TestCase):
+    """Tests for _normalize_sign in pipeline.py."""
+
+    def setUp(self):
+        from deterministic.src.pipeline import _normalize_sign
+        self.norm = _normalize_sign
+
+    def test_cost_of_revenue_always_positive(self):
+        self.assertEqual(self.norm("cost_of_revenue", "Cost of revenue", -500), 500)
+        self.assertEqual(self.norm("cost_of_revenue", "Cost of revenue", 500), 500)
+
+    def test_sga_always_positive(self):
+        self.assertEqual(self.norm("sga", "Selling, general and administrative", -100), 100)
+
+    def test_rd_always_positive(self):
+        self.assertEqual(self.norm("research_and_development", "R&D expense", -50), 50)
+
+    def test_da_always_positive(self):
+        self.assertEqual(self.norm("depreciation_amortization", "D&A", -30), 30)
+
+    def test_interest_expense_always_positive(self):
+        self.assertEqual(self.norm("interest_expense", "Interest expense", -200), 200)
+
+    def test_income_tax_expense_becomes_positive(self):
+        """Income tax expense (no 'benefit' in label) → abs()."""
+        self.assertEqual(self.norm("income_tax", "Income tax expense", -23818), 23818)
+
+    def test_income_tax_provision_becomes_positive(self):
+        self.assertEqual(self.norm("income_tax", "Provision for income taxes", -5000), 5000)
+
+    def test_income_tax_benefit_stays_negative(self):
+        """Income tax with 'benefit' in label preserves the negative (genuine benefit)."""
+        self.assertEqual(self.norm("income_tax", "Income tax expense (benefit)", -2438), -2438)
+
+    def test_income_tax_positive_unchanged(self):
+        """Positive income_tax stays positive regardless of label."""
+        self.assertEqual(self.norm("income_tax", "Income tax expense", 4712), 4712)
+
+    def test_capex_not_normalized(self):
+        """capex should NOT be abs'd — negative is the correct convention."""
+        self.assertEqual(self.norm("capex", "Capital expenditures", -7873), -7873)
+
+    def test_net_income_not_normalized(self):
+        """net_income losses should stay negative."""
+        self.assertEqual(self.norm("net_income", "Net income (loss)", -14570), -14570)
+
+    def test_ebit_not_normalized(self):
+        self.assertEqual(self.norm("ebit", "Operating income", -1313), -1313)
+
+
 if __name__ == "__main__":
     unittest.main()

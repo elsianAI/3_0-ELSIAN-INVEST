@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] Iteration 20: sign normalization in pipeline — expense fields abs(), income_tax conditional on 'benefit' label. GCT 88→100%, IOSP 72.6→88.4%, TZOO stays 100%. 12 new unit tests (181 total).
 - [DETERMINISTIC] Iteration 19: GCT sign convention fix — income_tax, interest_expense flipped to positive in all 6 periods, cost_of_revenue FY2020 flipped to positive. Formalized comprehensive sign convention rules in curate-expected.prompt.md. GCT eval 100%→88% (13 wrong = pipeline sign mismatch, ground truth now correct).
 - [DETERMINISTIC] Iteration 18: NEXN expected.json curated — 4 annual periods (FY2024-FY2021), 19 fields each (76 total), IFRS ground truth from 20-F filings. First eval: 73.7% (56/76 matched, 15 wrong, 5 missed).
 - [DETERMINISTIC] Iteration 17: new case NEXN (Nexxen International, Israel/UK FPI) — case.json created, 16 SEC filings acquired (4 annual 20-F, 12 quarterly 6-K, 0 earnings), 100% coverage. 6-K confirmed as wrapper cover pages (no financial tables). First IFRS case.

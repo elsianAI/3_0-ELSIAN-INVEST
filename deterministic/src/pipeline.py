@@ -41,6 +41,33 @@ from deterministic.src.merge import merge_extractions
 from deterministic.src.evaluate import evaluate
 
 
+# ── Sign normalisation ───────────────────────────────────────────────
+# Expense fields that should always be stored as positive magnitudes.
+_ALWAYS_POSITIVE_FIELDS = frozenset({
+    "cost_of_revenue",
+    "sga",
+    "research_and_development",
+    "depreciation_amortization",
+    "interest_expense",
+})
+
+_BENEFIT_RE = re.compile(r"\bbenefit\b", re.IGNORECASE)
+
+
+def _normalize_sign(canonical: str, raw_label: str, value: float) -> float:
+    """Ensure expense fields use the correct sign convention.
+
+    Pure-expense fields are always positive (abs).
+    income_tax is positive unless the label indicates a benefit.
+    """
+    if canonical in _ALWAYS_POSITIVE_FIELDS:
+        return abs(value)
+    if canonical == "income_tax" and value < 0:
+        if not _BENEFIT_RE.search(raw_label):
+            return abs(value)
+    return value
+
+
 class DeterministicPipeline:
     """Main pipeline class. Zero LLM calls, pure Python extraction."""
 
@@ -430,7 +457,7 @@ class DeterministicPipeline:
                             continue
 
                     fr = FieldResult(
-                        value=tf.value,
+                        value=_normalize_sign(canonical, tf.label, tf.value),
                         scale=scale,
                         source_filing=filing_path.name,
                         source_location=tf.source_location,
@@ -519,7 +546,7 @@ class DeterministicPipeline:
                             continue
 
                     fr = FieldResult(
-                        value=nf.value,
+                        value=_normalize_sign(canonical, nf.label, nf.value),
                         scale=scale,
                         source_filing=filing_path.name,
                         source_location=nf.source_location,
