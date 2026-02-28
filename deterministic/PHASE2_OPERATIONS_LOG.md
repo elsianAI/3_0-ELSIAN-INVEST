@@ -163,3 +163,66 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — wrong dropped from 18 to 0 (target achieved). Score rose from 31.9% to 37.0% (+14 net matched). 170 missed fields remain (mostly quarterly periods from 10-Q multi-header table parsing not yet implemented). 5 new unit tests added.
 - Next step: fix 10-Q multi-header table parsing to recover quarterly fields (target: reduce missed from 170); evaluate GCT case.
 
+## 2026-02-28 13:00 - Iteration 7 - TZOO
+- Agent: Copilot
+- Objective: Ground truth coherence + deterministic reproducible selection. Phase A: fix FY2022 total_equity (8851→4256, SRC_028_8-K→SRC_003_10-K) and FY2019 original_source_filing (SRC_005→SRC_006). Phase B: create validate_expected.py with 3 rules + CLI validate command + pre-commit hook. Phase C: replace abs-value tiebreaker with configurable hierarchical comparator (filing_rank→source_type→semantic→stable_order with descending row). Phase D: new unit tests + regression guard.
+- Hypothesis: Fixing GT inconsistencies removes false wrongs; hierarchical sort key with descending-row tiebreaker makes collision resolution 100% reproducible without abs(value); validate hook prevents future GT corruption.
+- Files changed:
+  - `deterministic/cases/TZOO/expected.json` — FY2022 total_equity value 8851→4256, source SRC_028→SRC_003; FY2019 7 restatements original_source_filing SRC_005→SRC_006
+  - `deterministic/src/validate_expected.py` — new: validates expected.json (source_filing required, restatement completeness, original_source_filing consistency)
+  - `deterministic/src/pipeline.py` — added compute_sort_key(), _filing_rank(), _source_type_rank(), _parse_stable_order(rules), _load_selection_rules(), _section_bonus(rules); collision resolution now uses hierarchical sort key with descending row order default; _section_bonus reads config/section_weights
+  - `deterministic/cli.py` — added cmd_validate + validate subparser; removed dead return
+  - `deterministic/config/selection_rules.json` — new: filing_priority_by_period, source_type_priority, section_weights, stable_tiebreaker (row_order=descending)
+  - `.githooks/pre-commit` — added step 5: validate staged expected.json files
+  - `deterministic/tests/unit/test_validate_expected.py` — new: 7 tests (valid, restatement valid, missing source, incomplete restatement, same-source restatement, file not found, invalid JSON)
+  - `deterministic/tests/unit/test_selection.py` — new: 11 tests (primary vs 8-K, table vs narrative, semantic rank, stable tiebreak filing/row_desc/col, consolidated vs segment, note vs main, later_row_beats_pct, section_bonus_reads_config, config loading, period types)
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v` → 136 passed, 0 failed
+  - `python3 -m deterministic.cli validate TZOO` → VALID
+  - `python3 -m deterministic.cli eval TZOO` → Score 23.0% (62/270)
+- Metrics before:
+  - score=37.0% (100/270)
+  - wrong=0
+  - missed=170
+  - extra=36
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=37.0
+- Metrics after:
+  - score=23.0% (62/270)
+  - wrong=38
+  - missed=170
+  - extra=36
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=23.0
+- Tests: 136 passed, 0 failed.
+- Decision: accept with regression — hierarchical comparator is correct design but tbl_idx resets per sub-block causing collisions (two tables both get tbl0). Regression of wrong 0→38 due to identical sort keys making first-seen (often percentage) value win.
+- Next step: Fix tbl_idx to be global per file (iteration 8).
+
+## 2026-02-28 15:30 - Iteration 8 - TZOO
+- Agent: Copilot
+- Objective: Fix table_idx counter to be global per file instead of per-subsection, so that two tables in different subsections get unique tbl indices and the hierarchical comparator can distinguish them.
+- Hypothesis: With global tbl_idx, tables across subsections get tbl0, tbl1, tbl2... uniquely. The descending-tbl tiebreaker then correctly picks later tables (monetary) over earlier ones (percentage), eliminating the 38→9 wrong regression.
+- Files changed:
+  - `deterministic/src/extract/tables.py` — replaced `enumerate(table_blocks)` with `global_tbl_idx` counter that increments across sections/subsections
+  - `deterministic/tests/unit/test_tables.py` — added 2 tests: `test_global_table_index_across_subsections` (unique tbl indices), `test_global_tbl_idx_collision_correct_value_wins` (later table wins via sort key); added imports for `re`, `DeterministicPipeline`
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v` → 138 passed, 0 failed
+  - `python3 -m deterministic.cli eval TZOO` → Score 33.7% (91/270)
+- Metrics before:
+  - score=23.0% (62/270)
+  - wrong=38
+  - missed=170
+  - extra=36
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=23.0
+- Metrics after:
+  - score=33.7% (91/270)
+  - wrong=9
+  - missed=170
+  - extra=36
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=37.0
+- Tests: 138 passed, 0 failed.
+- Decision: accept — wrong dropped from 38 to 9 (29 collisions resolved). Remaining 9 wrong are balance sheet fields (total_assets, total_liabilities, total_equity for FY2019-FY2022) with suspiciously small actual values (11.0, 452.0, etc.) suggesting a different table/scale issue.
+- Next step: Investigate 9 remaining wrong balance sheet values — likely percentage-table or scale-cascade issue for older FY balance sheets. Target: wrong=0.
+

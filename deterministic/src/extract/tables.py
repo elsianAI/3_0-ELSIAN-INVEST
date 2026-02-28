@@ -221,9 +221,14 @@ def _identify_period_columns(
 
 
 def extract_from_markdown_table(
-    table_text: str, section_name: str = ""
+    table_text: str, section_name: str = "", table_idx: int = 0
 ) -> List[TableField]:
     """Extract field-value pairs from a single markdown table.
+
+    Args:
+        table_text: Raw markdown table text.
+        section_name: Section/sub-section label for source_location.
+        table_idx: Zero-based index of this table within its sub-section.
 
     Returns list of TableField with label, value, and period info.
     """
@@ -292,7 +297,7 @@ def extract_from_markdown_table(
                         break
 
             if value is not None:
-                location = f"table:{section_name}:row{row_idx + 1}:col{col_idx}"
+                location = f"table:{section_name}:tbl{table_idx}:row{row_idx + 1}:col{col_idx}"
                 results.append(
                     TableField(
                         label=label,
@@ -314,6 +319,10 @@ def extract_tables_from_clean_md(
     Uses ### sub-sections within each ## section for finer-grained context.
     """
     all_fields: List[TableField] = []
+
+    # Global table counter across the entire file — ensures every table
+    # gets a unique tbl index regardless of section/subsection boundaries.
+    global_tbl_idx = 0
 
     # Split by section (## SECTION NAME)
     section_pattern = re.compile(
@@ -351,7 +360,8 @@ def extract_tables_from_clean_md(
             )
 
             for table_text in table_blocks:
-                fields = extract_from_markdown_table(table_text, section_label)
+                fields = extract_from_markdown_table(table_text, section_label, table_idx=global_tbl_idx)
+                global_tbl_idx += 1
                 for f in fields:
                     f.source_location = (
                         f"{source_filename}:{f.source_location}"

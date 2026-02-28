@@ -1,5 +1,6 @@
 """Tests for deterministic.src.extract.tables"""
 
+import re
 import unittest
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from deterministic.src.extract.tables import (
     extract_from_markdown_table,
     extract_tables_from_clean_md,
 )
+from deterministic.src.pipeline import DeterministicPipeline
 
 
 class TestParseNumber(unittest.TestCase):
@@ -177,6 +179,92 @@ class TestExtractTablesFromCleanMd(unittest.TestCase):
         # Check that Revenue is extracted
         revenues = [f for f in fields if "Revenue" in f.label or "revenue" in f.label.lower()]
         self.assertTrue(len(revenues) > 0)
+
+    def test_global_table_index_across_subsections(self):
+        """Tables in different subsections must get unique global tbl indices.
+
+        Reproduces the collision: two tables (one percentage, one monetary)
+        in different subsections of the same section both ended up as tbl0,
+        making their source_locations identical and causing wrong collision
+        resolution.
+        """
+        md = (
+            "## Income Statement\n"
+            "### Operating Income\n"
+            "| | 2024 |\n"
+            "| --- | --- |\n"
+            "| Cost of revenue | 12.5 |\n"
+            "\n"
+            "### Revenue Breakdown\n"
+            "| | 2024 |\n"
+            "| --- | --- |\n"
+            "| Cost of revenue | 10,469 |\n"
+        )
+        fields = extract_tables_from_clean_md(md, "test.clean.md")
+        cost_fields = [f for f in fields if "Cost of revenue" in f.label]
+        self.assertEqual(len(cost_fields), 2, "Should find 2 cost_of_revenue entries")
+
+        # Extract tbl indices from source_location
+        tbl_indices = []
+        for f in cost_fields:
+            m = re.search(r"tbl(\d+)", f.source_location)
+            self.assertIsNotNone(m, f"No tbl index in {f.source_location}")
+            tbl_indices.append(int(m.group(1)))
+
+        # Must be different indices (global counter, not per-subsection)
+        self.assertNotEqual(
+            tbl_indices[0], tbl_indices[1],
+            f"Both tables got same tbl index {tbl_indices[0]}; "
+            "global counter not working"
+        )
+        # First table should be tbl0, second tbl1
+        self.assertEqual(tbl_indices[0], 0)
+        self.assertEqual(tbl_indices[1], 1)
+
+    def test_global_tbl_idx_collision_correct_value_wins(self):
+        """With global tbl indexing + descending tbl tiebreak, the later table
+        (monetary value 10469) must win over the earlier table (pct value 12.5)
+        when both map to the same canonical field in the same period.
+        """
+        md = (
+            "## Income Statement\n"
+            "### Operating Income\n"
+            "| | 2024 |\n"
+            "| --- | --- |\n"
+            "| Cost of revenue | 12.5 |\n"
+            "\n"
+            "### Revenue Breakdown\n"
+            "| | 2024 |\n"
+            "| --- | --- |\n"
+            "| Cost of revenue | 10,469 |\n"
+        )
+        fields = extract_tables_from_clean_md(md, "test.clean.md")
+        cost_fields = [f for f in fields if "Cost of revenue" in f.label]
+        self.assertEqual(len(cost_fields), 2)
+
+        # Compute sort keys and verify later table wins
+        key0 = DeterministicPipeline.compute_sort_key(
+            period_key="FY2024",
+            filing_type="10-K",
+            source_type="table",
+            label_priority=0,
+            section_bonus=0,
+            source_filing="test.clean.md",
+            source_location=cost_fields[0].source_location,
+        )
+        key1 = DeterministicPipeline.compute_sort_key(
+            period_key="FY2024",
+            filing_type="10-K",
+            source_type="table",
+            label_priority=0,
+            section_bonus=0,
+            source_filing="test.clean.md",
+            source_location=cost_fields[1].source_location,
+        )
+        # Later table (tbl1, value=10469) should have lower sort key → wins
+        self.assertLess(key1, key0,
+                        "Later table (10469) should beat earlier table (12.5)")
+        self.assertEqual(cost_fields[1].value, 10469.0)
 
 
 if __name__ == "__main__":

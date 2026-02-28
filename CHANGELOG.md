@@ -1,6 +1,8 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-02-28
+- [DETERMINISTIC] TZOO Iteration 8: fix global tbl_idx counter (per-file instead of per-subsection) — eliminates 29 sort-key collisions; wrong 38→9, score 23.0%→33.7% (91/270), 138 tests green.
+- [DETERMINISTIC] TZOO Iteration 7: coherent ground truth (FY2022 total_equity 8851→4256 SRC_003, FY2019 original_source_filing→SRC_006), validate expected CLI+hook, configurable hierarchical selection (filing_rank→source_type→semantic→stable_tiebreaker with descending row order), section_weights/stable_tiebreaker read from config, 18 new unit tests. Regression: wrong 0→38 (tbl_idx reset bug).
 - [DETERMINISTIC] TZOO Iteration 6: FY2019 restatement in expected.json (7 fields + metadata), pipeline disambiguation fixes (aliases reject/priority, Non-GAAP/comparative narrative rejection, sub-section priority, Unicode normalizer) — wrong 18→0, score 31.9%→37.0% (100/270), 115 tests green.
 
 ## 2026-02-27
