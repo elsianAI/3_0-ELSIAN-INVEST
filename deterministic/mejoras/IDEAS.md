@@ -89,3 +89,89 @@ Un sistema de inversión completo, construido desde cero con arquitectura de cla
 
 #### Cuándo arrancarlo
 Cuando `deterministic` esté estable en TZOO y GCT (extractor HTML/PDF robusto, selection rules configurables, validador de expected). Ese es el punto donde tenemos suficiente conocimiento validado para diseñar las clases con confianza.
+
+---
+
+### 12. Data Provenance — Trazabilidad completa del origen de cada dato
+**PRIORIDAD ALTA para el 4.0 — diseñar desde el inicio, no retrofitear.**
+
+#### El problema
+Hoy el pipeline registra `source_filing` (de qué archivo viene el dato), pero no registra la ubicación exacta dentro del filing. Un usuario profesional que ve "revenue = 1,289,897" quiere poder hacer clic y ver exactamente la celda del estado financiero de donde sale ese número. Sin eso, la herramienta no es auditable y pierde la confianza de usuarios financieros serios.
+
+#### Tres niveles de trazabilidad
+
+**Nivel 1 — Filing source (ya implementado):**
+`"source_filing": "SRC_001_10-K_FY2024.clean.md"` → identifica el archivo, pero no el punto exacto.
+
+**Nivel 2 — Coordenadas dentro del clean.md:**
+Añadir localización precisa: tabla, fila, columna, texto original de la celda.
+```json
+{
+  "value": 1289897,
+  "source_filing": "SRC_001_10-K_FY2024.clean.md",
+  "provenance": {
+    "table_index": 3,
+    "table_title": "Consolidated Statements of Operations",
+    "row_label": "Net revenues",
+    "col_label": "Year Ended December 31, 2024",
+    "row": 12,
+    "col": 2,
+    "raw_text": "1,289,897"
+  }
+}
+```
+Esto permite que la interfaz web resalte la celda exacta en el clean.md renderizado.
+
+**Nivel 3 — Vínculo al documento original (SEC/EDGAR):**
+Mapear las coordenadas del clean.md de vuelta al HTML o PDF original. Requiere que el converter (HTML → markdown) preserve un mapeo de posiciones durante la conversión. El resultado final sería un deep link tipo:
+`https://www.sec.gov/Archives/edgar/data/12345/filing.htm#table3-row12-col2`
+O en la web de ELSIAN: el PDF/HTML original con la celda resaltada con CSS/JS.
+
+#### Requisitos de diseño para el 4.0
+1. **El converter debe preservar el mapeo.** Durante la conversión HTML → clean.md, guardar un archivo auxiliar (ej: `.source_map.json`) que vincule cada tabla/fila/columna del markdown con su posición en el HTML original.
+2. **El extractor debe propagar coordenadas.** Cuando extrae un valor de una tabla, debe anotar las coordenadas, no solo el valor.
+3. **El iXBRL extractor ya tiene trazabilidad nativa.** Los tags XBRL incluyen referencia al concepto, periodo, y contexto. Eso es provenance de nivel 2 gratis.
+4. **La interfaz web necesita un visor de filings.** Renderizar el HTML original del filing con capacidad de resaltar celdas específicas por coordenadas.
+
+#### Valor comercial
+- **Diferenciador competitivo:** Bloomberg y Capital IQ te dan el dato pero no te enseñan de dónde sale. ELSIAN sí.
+- **Confianza institucional:** fondos, analistas y auditores necesitan poder verificar cualquier cifra. "Click to source" convierte a ELSIAN en una herramienta auditable.
+- **Defensa ante alucinaciones:** en un sistema que usa LLM en capas superiores, poder demostrar que el dato cuantitativo viene directamente del filing es la mejor defensa contra el escepticismo de "la IA se inventa los números".
+
+---
+
+### 13. Visión comercial — La capa de datos con provenance como producto independiente
+**REFLEXIÓN ESTRATÉGICA — no es una tarea técnica, es una decisión de negocio.**
+
+#### Insight clave
+Lo que se está construyendo en el módulo deterministic + data provenance (idea #12) no es solo un paso previo para el pipeline de análisis. **Es un producto comercial en sí mismo.** Una base de datos financiera global, estructurada, con trazabilidad hasta la celda del filing original, compite directamente con Bloomberg, Capital IQ y FactSet — pero con un diferenciador que ellos no tienen: el "click to source".
+
+#### Por qué ahora
+- La confianza es el cuello de botella del mercado, no la inteligencia. Todo el mundo está lanzando chatbots financieros con IA, pero nadie puede demostrar que los datos son correctos.
+- La tendencia regulatoria (SEC con iXBRL obligatorio, Europa con ESEF, Japón con EDINET) empuja hacia filings estructurados y machine-readable. ELSIAN surfea esa corriente en vez de luchar contra ella.
+- Los incumbentes (Bloomberg ~25.000$/año, FactSet ~12.000$/año) son inaccesibles para la mayoría del mercado: analistas independientes, family offices pequeños, fintech, fondos emergentes, investigadores académicos.
+
+#### Ventaja competitiva: el efecto de red de reglas
+Cada ticker que se procesa genera reglas de extracción validadas contra ground truth curado. Esas reglas se acumulan y hacen más fácil y preciso el siguiente ticker. Un competidor que empiece de cero tiene que recorrer el mismo camino. Es un moat de datos propietario que crece con el uso.
+
+#### Cuatro líneas de producto naturales
+
+**Línea 1 — API de datos con provenance.**
+Datos financieros estructurados (los 22+ campos canónicos) con trazabilidad completa por ticker. Clientes: quant funds, fintech que necesitan datos limpios para sus modelos, plataformas de inversión. Modelo: suscripción por ticker/mes o por llamada API.
+
+**Línea 2 — Visor de filings inteligente (web).**
+Interfaz web donde cualquiera puede ver los estados financieros de una empresa con cada número vinculado al filing original (click to source). Modelo freemium: datos básicos gratis (atrae tráfico, construye marca), provenance completa + histórico = premium. Este producto solo, sin análisis, ya tiene valor.
+
+**Línea 3 — Sistema de análisis completo (Capas 2-4).**
+TruthPack, CATALYST, BULL, RED_TEAM, ARBITRO. El producto premium de ELSIAN para inversores que quieren no solo datos sino conclusiones. Se apoya en las Líneas 1-2 como base de datos verificada.
+
+**Línea 4 — Licencia de datos.**
+Vender el dataset limpio y estructurado a terceros: otras plataformas fintech, investigación académica, reguladores, auditoras. Los datos con provenance tienen valor para cualquiera que necesite datos financieros verificados.
+
+#### Arquitectura de producto alineada con las capas técnicas
+- **Capa 0+1 (Sources + Extracción determinista)** → Líneas 1 y 2. Zero-LLM, auditable, certificable. Vendible a clientes institucionales que desconfían de la IA.
+- **Capa 2+3 (Extracción cualitativa + LLM fallback)** → Enriquece Líneas 1-2 con señales cualitativas.
+- **Capa 4 (Análisis y decisión)** → Línea 3. Donde entra la inteligencia diferencial de ELSIAN.
+
+#### Implicación para el 4.0
+Diseñar el 4.0 sabiendo que las Capas 0+1 deben poder funcionar como producto independiente. Esto significa: API limpia desde el día uno, documentación de cada endpoint, rate limiting, autenticación, y sobre todo — que la capa de datos no dependa de la capa de análisis para tener valor.

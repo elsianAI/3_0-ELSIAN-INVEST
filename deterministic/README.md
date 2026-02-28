@@ -130,6 +130,35 @@ The error message tells you exactly what's missing. Fix it, re-stage, and commit
 
 Not affected. The hook only triggers for changes under `deterministic/`.
 
+## Ground Truth Sign Convention
+
+Policy: **as-presented on the face of the financial statement**.
+
+All values in `expected.json` use the sign as it appears on the primary financial statement. This means:
+
+**Income Statement fields** — positive values represent the reported amount:
+- `ingresos`, `cost_of_revenue`, `gross_profit`, `research_and_development`, `sga`, `depreciation_amortization`, `interest_expense`, `income_tax`: **POSITIVE** as reported on the face of the income statement (expenses are shown as positive numbers that reduce profit).
+- `ebit`, `ebitda`, `net_income`: **POSITIVE** when profit, **NEGATIVE** when loss. The sign reflects the economic reality (a loss in FY2020 → negative net_income).
+- `eps_basic`, `eps_diluted`: follow the sign of `net_income`.
+- Exception: `income_tax` can be **NEGATIVE** only when the filing explicitly shows a tax benefit/credit (e.g., "benefit from income taxes" or a negative provision).
+
+**Balance Sheet fields** — always positive as reported:
+- `total_assets`, `total_liabilities`, `cash_and_equivalents`, `total_debt`: **POSITIVE**.
+- `total_equity`: **POSITIVE** when positive equity, **NEGATIVE** when accumulated deficit exceeds contributed capital.
+
+**Cash Flow fields:**
+- `cfo`: **POSITIVE** when "net cash provided by operating activities", **NEGATIVE** when "net cash used in".
+- `capex`: **ALWAYS NEGATIVE** (represents cash outflow for purchases of property/equipment as shown in investing activities).
+- `fcf`: follows its reported sign (typically CFO + capex, but only if explicitly reported).
+
+**Per-share / Shares:**
+- `dividends_per_share`: **POSITIVE**.
+- `shares_outstanding`: **POSITIVE**.
+
+**Key principle:** never flip signs to normalize. If the filing shows cost_of_revenue as 10,469, store 10,469. If a 20-F shows cost of revenue in parentheses (200,362), that parenthetical means the filing is presenting it as a deduction — but on the face of most income statements, expenses appear as positive numbers. Use the value **as it would appear in a standard income statement presentation** (positive), not the parenthetical sign from a particular filing's formatting quirk.
+
+**When in doubt:** check TZOO's `expected.json` as the reference implementation (scores 100%).
+
 ## Ground Truth Restatement Rules
 
 Policy: **as-reported unless explicit restatement**.

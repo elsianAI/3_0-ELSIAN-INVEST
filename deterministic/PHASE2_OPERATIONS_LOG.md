@@ -503,3 +503,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 194 passed, 0 failed.
 - Decision: accept — IOSP reaches 100% (95/95). Root cause was clear: ")" cell from split-paren negative blocked sparse-column scan. One-character regex fix. Also benefits NEXN (+2.6pp). Regression-free.
 - Next step: Iterate on NEXN extraction improvements or add new cases.
+
+## 2026-02-28 19:00 - Iteration 23 - ALL
+- Agent: Copilot
+- Objective: Repo housekeeping — commit pending docs (README sign convention, IDEAS.md), add .gitignore rules for generated outputs, untrack TZOO artifacts, push all local commits to remote.
+- Hypothesis: N/A — documentation and repo hygiene only, no extraction logic changed.
+- Files changed: .gitignore (added deterministic generated output rules), deterministic/README.md (sign convention docs committed), deterministic/mejoras/IDEAS.md (committed), deterministic/cases/TZOO/extraction_result.json (untracked), deterministic/cases/TZOO/filings_manifest.json (untracked)
+- Commands executed: git rm --cached (TZOO artifacts), git status, git push
+- Metrics before: N/A — no extraction change
+- Metrics after: N/A — no extraction change
+- Tests: 194 passed, 0 failed (verified in Iteration 22).
+- Decision: accept — pure housekeeping, no code or metrics impact
+- Next step: Iterate on NEXN extraction improvements or add new cases.
