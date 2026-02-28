@@ -39,6 +39,7 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"discontinued\s+operations", re.I),
     ],
     "total_equity": [
+        re.compile(r"liabilities\s+and\s+", re.I),
         re.compile(r"discontinued\s+operations", re.I),
     ],
     "cash_and_equivalents": [

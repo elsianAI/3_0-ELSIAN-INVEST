@@ -348,3 +348,31 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — GCT 65.7→86.1% (+22 matched), TZOO 37.0→98.9% (+167 matched). Combined 45.2→95.2%. The parent-label concatenation unlocked eps_basic (6 periods) and GAAP eps_diluted (5 periods). Row-level $ realignment fixed EDGAR column misalignment for ebitda/cfo/net_income. "Total L&E = Total A" alias recovered total_assets for FY2025/FY2024. Remaining GCT wrong (7): VIE sub-table confusion for FY2022/FY2023 total_assets/total_liabilities (4), FY2021 total_liabilities=total_assets swap (1), FY2020 income_tax/interest_expense sign (2). Remaining GCT missed (8): SRC_004 20-F data quality (capex/shares/cost_of_revenue/eps for FY2020-2022).
 - Next step: Investigate remaining GCT VIE sub-table confusion (4 wrong) — may need section-aware priority for balance sheet fields in tax note subsections.
 
+## 2026-02-28 23:55 - Iteration 13 - TZOO
+- Agent: Copilot
+- Objective: Fix 3 wrong fields (Q1-2022/total_equity=92883, Q1-2024/income_tax=5730, Q1-2023/cash=16190) caused by (P1) deficit alias fuzzy-matching "total liabilities and stockholders' deficit" to total_equity and (P2) cross-filing comparative values winning over primary-filing values for Q periods.
+- Hypothesis: (P1) Adding reject pattern `liabilities\s+and\s+` for total_equity + adding deficit variants to total_assets aliases will prevent the 92883 BS-identity value from matching total_equity. (P2) Adding period_affinity to sort_key (0=primary, 1=comparative, FY always 0) and using affinity comparison in merge for same-priority filings will make the primary 10-Q's value win over comparative columns from other 10-Qs, while preserving FY restatement behavior.
+- Files changed:
+  - `deterministic/src/normalize/aliases.py` — added reject pattern `liabilities\s+and\s+` for total_equity
+  - `deterministic/config/field_aliases.json` — added deficit variants to total_assets aliases ("total liabilities and stockholders' deficit", etc.)
+  - `deterministic/src/pipeline.py` — added `_period_affinity()` static method (Q/H: checks period_key in filename; FY: always 0); inserted affinity as position [1] in `compute_sort_key` tuple
+  - `deterministic/src/merge.py` — changed same-priority merge from first-seen-wins to affinity comparison: only replaces existing when new candidate has strictly lower affinity (primary wins over comparative); same affinity keeps first-seen-wins (preserves FY restatement order)
+  - `deterministic/tests/unit/test_normalize.py` — 3 new tests: reject total_equity for "liabilities and" labels, resolve to total_assets instead
+  - `deterministic/tests/unit/test_selection.py` — 6 new tests: period_affinity for Q primary/comparative/FY, sort_key ordering, merge affinity for Q and FY
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v` → 169 passed, 0 failed
+  - `python3 -m deterministic.cli eval TZOO` → Score 100.0% (270/270)
+  - `python3 -m deterministic.cli eval GCT` → Score 86.1% (93/108)
+  - `python3 -m deterministic.cli dashboard` → TOTAL 96.0% (363/378)
+- Metrics before:
+  - TZOO: score=98.9% (267/270), matched=267, wrong=3, missed=0, extra=200, filings_coverage_pct=100.0, required_fields_coverage_pct=100.0
+  - GCT: score=86.1% (93/108), matched=93, wrong=7, missed=8, extra=181, filings_coverage_pct=100.0, required_fields_coverage_pct=92.6
+  - TOTAL: score=95.2% (360/378)
+- Metrics after:
+  - TZOO: score=100.0% (270/270), matched=270, wrong=0, missed=0, extra=200, filings_coverage_pct=100.0, required_fields_coverage_pct=100.0
+  - GCT: score=86.1% (93/108), matched=93, wrong=7, missed=8, extra=181, filings_coverage_pct=100.0, required_fields_coverage_pct=92.6
+  - TOTAL: score=96.0% (363/378)
+- Tests: 169 passed, 0 failed.
+- Decision: accept — TZOO wrong 3→0, score 98.9→100.0%. All 3 wrongs fixed: Q1-2022/total_equity (reject pattern), Q1-2024/income_tax (period affinity), Q1-2023/cash (period affinity). FY restatement behavior verified preserved (FY2019/cfo remains correct). GCT unchanged. Combined 95.2→96.0%.
+- Next step: Investigate GCT VIE sub-table confusion (4 wrong: FY2022-2023 total_assets/total_liabilities) and sign issues (FY2020 income_tax/interest_expense).
+

@@ -222,6 +222,22 @@ class DeterministicPipeline:
         return (source_filing, tbl_sign * tbl_num, row_sign * row_num, col_sign * col_num)
 
     @staticmethod
+    def _period_affinity(period_key: str, source_filing: str) -> int:
+        """Return 0 if source_filing is the primary filing for period_key, 1 otherwise.
+
+        Only discriminates for Q and H periods.  For FY periods always returns 0
+        so that newer 10-K comparative/restated values keep winning via
+        lexicographic first-seen (current behaviour).
+        """
+        if period_key.startswith("FY"):
+            return 0
+        # Check if the period designation appears in the filename.
+        # E.g. "Q1-2024" in "SRC_012_10-Q_Q1-2024.clean.md" → primary.
+        if period_key in source_filing:
+            return 0
+        return 1
+
+    @staticmethod
     def compute_sort_key(
         period_key: str,
         filing_type: str,
@@ -236,12 +252,16 @@ class DeterministicPipeline:
 
         Lower key = better candidate. Comparison order:
         1. primary_filing_rank (lower filing type rank is better)
-        2. source_type_rank (table < narrative)
-        3. semantic_rank (NEGATED label_priority + section_bonus; higher semantic = lower key)
-        4. stable_order_rank (filing ASC, tbl DESC, row DESC, col ASC by default)
+        2. period_affinity (0 = primary filing for this period, 1 = comparative)
+        3. source_type_rank (table < narrative)
+        4. semantic_rank (NEGATED label_priority + section_bonus; higher semantic = lower key)
+        5. stable_order_rank (filing ASC, tbl DESC, row DESC, col ASC by default)
         """
         filing_rank = DeterministicPipeline._filing_rank(
             period_key, filing_type, rules
+        )
+        affinity = DeterministicPipeline._period_affinity(
+            period_key, source_filing
         )
         src_rank = DeterministicPipeline._source_type_rank(
             source_type, rules
@@ -251,7 +271,7 @@ class DeterministicPipeline:
         stable = DeterministicPipeline._parse_stable_order(
             source_filing, source_location, rules
         )
-        return (filing_rank, src_rank, semantic_rank, stable)
+        return (filing_rank, affinity, src_rank, semantic_rank, stable)
 
     def extract(self, case_dir: str) -> ExtractionResult:
         """Extract financial data from filings in a case directory."""

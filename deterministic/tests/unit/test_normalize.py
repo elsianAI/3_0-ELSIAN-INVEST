@@ -252,6 +252,21 @@ class TestAliasResolver(unittest.TestCase):
         result = self.resolver.resolve("Income (loss) from operations")
         self.assertEqual(result, "ebit")
 
+    def test_total_liabilities_and_deficit_rejected_for_total_equity(self):
+        """'Total liabilities and stockholders' deficit' must NOT resolve to total_equity."""
+        result = self.resolver.resolve("Total liabilities and stockholders' deficit")
+        self.assertNotEqual(result, "total_equity")
+
+    def test_total_liabilities_and_deficit_resolves_to_total_assets(self):
+        """'Total liabilities and stockholders' deficit' should resolve to total_assets."""
+        result = self.resolver.resolve("Total liabilities and stockholders' deficit")
+        self.assertEqual(result, "total_assets")
+
+    def test_total_liabilities_and_equity_rejected_for_total_equity(self):
+        """'Total liabilities and shareholders' equity' must NOT resolve to total_equity."""
+        result = self.resolver.resolve("Total liabilities and shareholders' equity")
+        self.assertNotEqual(result, "total_equity")
+
 
 if __name__ == "__main__":
     unittest.main()
