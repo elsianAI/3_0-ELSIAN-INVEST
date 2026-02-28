@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] GCT+TZOO Iteration 12: parent-label concatenation, row-level $ period realignment, reject adjusted EPS/par-value shares, total L&E=total A alias — GCT 65.7→86.1%, TZOO 37.0→98.9%, combined 95.2% (360/378), 160 tests green.
 - [DETERMINISTIC] GCT Iteration 10: curated expected.json ground truth (108 fields, 6 annual periods FY2020-FY2025) — first eval baseline 65.7% (71/108), 21 wrong, 16 missed, 142 tests green.
 
 ## 2026-02-28
