@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] Iteration 25: NEXN 86.8→97.4% — income_tax reject 'taxes received', capex alias 'acquisition of fixed assets', income_tax aliases 'tax expenses'/'tax expenses (benefit)'. Zero regressions. 194 tests green.
 - [DETERMINISTIC] Iteration 24: NEXN 76.3→86.8% — gross_profit rejection patterns, sga additive accumulation (selling/marketing + G&A), pct-table filter with $-exception, guarded dollar-column calibration for mixed pct/monetary tables. Zero regressions (GCT/IOSP/TZOO all 100%). 194 tests green.
 - [DETERMINISTIC] Iteration 23: repo housekeeping — .gitignore for generated outputs, untrack TZOO artifacts, commit pending docs (README sign convention, IDEAS.md).
 - [DETERMINISTIC] Iteration 22: IOSP 97.9→100.0% — sparse-scan regex in tables.py now includes ")" to handle split-paren 3rd column. Also lifts NEXN 73.7→76.3%. 194 tests green.

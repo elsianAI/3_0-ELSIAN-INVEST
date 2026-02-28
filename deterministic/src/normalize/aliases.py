@@ -66,6 +66,7 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"\bcurrent\s+tax\s+expense", re.I),
         re.compile(r"\bdeferred\s+tax\s+expense", re.I),
         re.compile(r"\btaxes\s+paid\b", re.I),
+        re.compile(r"\btaxes\s+received\b", re.I),
     ],
     "shares_outstanding": [
         re.compile(r"par\s+value", re.I),

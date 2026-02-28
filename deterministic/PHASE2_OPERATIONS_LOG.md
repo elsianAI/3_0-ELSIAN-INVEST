@@ -527,3 +527,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 194 passed, 0 failed.
 - Decision: accept — NEXN improves +10.5pp (76.3→86.8%) with zero regressions on existing cases. Remaining NEXN failures: income_tax (4 periods, label disambiguation needed), total_debt (FY2024 wrong, FY2021 missed), capex (4 missed — needs cash flow section parsing). These require separate iterations.
 - Next step: Address NEXN income_tax disambiguation (tax expenses vs deferred tax vs current tax), or add capex extraction from cash flow statements.
+
+## 2026-02-28 22:00 - Iteration 25 - NEXN
+- Agent: Copilot
+- Objective: Fix NEXN income_tax (4 wrong) and capex (4 missed) — target ≥95%.
+- Hypothesis: (1) Adding reject pattern `taxes\s+received` prevents CF "Income taxes received" from winning over IS "Tax expenses". (2) Adding "acquisition of fixed assets" alias to capex captures NEXN's IFRS cash flow label. (3) Adding explicit "tax expenses" and "tax expenses (benefit)" aliases improves exact matching vs fuzzy.
+- Files changed: deterministic/src/normalize/aliases.py (income_tax rejection: taxes received), deterministic/config/field_aliases.json (capex alias + income_tax aliases)
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli extract NEXN, python3 -m deterministic.cli eval --all
+- Metrics before: NEXN score=86.8% (66/76), matched=66, wrong=5, missed=5, extra=42, filings_coverage_pct=100.0%, required_fields_coverage_pct=93.4%. GCT=100.0%, IOSP=100.0%, TZOO=100.0%.
+- Metrics after: NEXN score=97.4% (74/76), matched=74, wrong=1, missed=1, extra=47, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%. GCT=100.0%, IOSP=100.0%, TZOO=100.0%.
+- Tests: 194 passed, 0 failed.
+- Decision: accept — NEXN jumps +10.6pp (86.8→97.4%) with zero regressions. Remaining 2 failures are total_debt with expected=0 (FY2024 wrong: pipeline extracts -100000 from CF repayment line; FY2021 missed: no explicit debt=0 in filing). These require structural changes (e.g. explicit zero inference from BS absence).
+- Next step: Investigate total_debt=0 inference for NEXN, or move to new cases.
