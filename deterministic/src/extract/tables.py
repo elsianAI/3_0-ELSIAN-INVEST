@@ -69,7 +69,7 @@ def parse_number(text: str) -> Optional[float]:
 
 _MONTH_NAME_RE = re.compile(
     r"^(?:January|February|March|April|May|June|July|August|September|"
-    r"October|November|December)\s+\d{1,2},?$",
+    r"October|November|December)\s+\d{1,2},?\s*(?:\d{4})?$",
     re.IGNORECASE,
 )
 
@@ -186,6 +186,7 @@ def _date_to_period(month_num: int, year: str,
 def _identify_period_columns(
     headers: List[str],
     fiscal_year_end_month: int = 12,
+    filing_type: str = "",
 ) -> Dict[int, str]:
     """Map column indices to period identifiers.
 
@@ -194,6 +195,10 @@ def _identify_period_columns(
 
     Standalone dates like "September 30, 2025" are mapped to their quarter
     (Q3-2025) unless the month matches fiscal_year_end_month (default 12).
+
+    When filing_type is an annual filing (10-K, 20-F, annual_report) and
+    there is no sub-period context in the headers, standalone-date Q labels
+    are upgraded to FY.
     """
     period_map: Dict[int, str] = {}
     for idx, header in enumerate(headers):
@@ -275,11 +280,49 @@ def _identify_period_columns(
             period_map[idx] = f"Q{m.group(1)}-{m.group(2)}"
             continue
 
+    # ── Annual-context upgrade ───────────────────────────────────────
+    # When a table header row contains "Year Ended" or "Fiscal Year"
+    # (typically a colspan in HTML that only survives in the first
+    # column after Markdown conversion), standalone-date columns
+    # mapped to Q labels should be upgraded to FY.  This handles
+    # non-standard fiscal year ends (e.g. September/October for SONO).
+    # Columns explicitly labelled "Three Months Ended" etc. are excluded.
+    #
+    # Also activates for annual filings (10-K, 20-F) when the table has
+    # no sub-period headers at all, covering BS tables with only
+    # standalone dates.
+    _ANNUAL_FILING_TYPES = {"10-K", "20-F", "annual_report"}
+    annual_context = any(
+        re.search(r"year\s+ended|fiscal\s+year", h, re.IGNORECASE)
+        for h in headers
+    )
+    if not annual_context and filing_type in _ANNUAL_FILING_TYPES:
+        _SUB_PERIOD_HDR_RE = re.compile(
+            r"three\s+months?|six\s+months?|nine\s+months?",
+            re.IGNORECASE,
+        )
+        has_sub_period = any(_SUB_PERIOD_HDR_RE.search(h) for h in headers)
+        if not has_sub_period:
+            annual_context = True
+    if annual_context:
+        _SUB_PERIOD_RE = re.compile(
+            r"three\s+months?|six\s+months?|nine\s+months?",
+            re.IGNORECASE,
+        )
+        for idx in list(period_map.keys()):
+            pk = period_map[idx]
+            m_q = re.match(r"Q\d-(20\d{2})", pk)
+            if m_q:
+                hdr = headers[idx] if idx < len(headers) else ""
+                if not _SUB_PERIOD_RE.search(hdr):
+                    period_map[idx] = f"FY{m_q.group(1)}"
+
     return period_map
 
 
 def extract_from_markdown_table(
-    table_text: str, section_name: str = "", table_idx: int = 0
+    table_text: str, section_name: str = "", table_idx: int = 0,
+    filing_type: str = "",
 ) -> List[TableField]:
     """Extract field-value pairs from a single markdown table.
 
@@ -287,6 +330,7 @@ def extract_from_markdown_table(
         table_text: Raw markdown table text.
         section_name: Section/sub-section label for source_location.
         table_idx: Zero-based index of this table within the file (global counter).
+        filing_type: e.g. "10-K", "10-Q", "20-F" — used for annual-context period detection.
 
     Returns list of TableField with label, value, and period info.
     """
@@ -294,7 +338,7 @@ def extract_from_markdown_table(
     if not headers or not rows:
         return []
 
-    period_map = _identify_period_columns(headers)
+    period_map = _identify_period_columns(headers, filing_type=filing_type)
     if not period_map:
         # Try: first column is label, second is value (no period headers)
         if len(headers) >= 2:
@@ -381,8 +425,28 @@ def extract_from_markdown_table(
         #   sub-label: "—Basic"
         # into: "Net income per ordinary share—Basic", which resolves via
         # the alias table to eps_basic.
+        #
+        # Also handles bare generic sub-labels ("Basic", "Diluted") under
+        # a heading containing "per share" — these are EPS rows that lack
+        # the em-dash prefix common in other filings.  The heading is
+        # truncated at "per share" to keep the concatenated label short
+        # enough for fuzzy alias matching.
         if label.startswith(("\u2014", "\u2013")) and last_heading:
             label = f"{last_heading}{label}"
+        elif (
+            last_heading
+            and re.search(r"per\s+share", last_heading, re.IGNORECASE)
+            and not re.search(
+                r"shares\s+(?:used|of\s+common|outstanding)",
+                last_heading, re.IGNORECASE,
+            )
+            and label.lower() in {"basic", "diluted", "basic and diluted"}
+        ):
+            m_ps = re.search(
+                r"(.*?\bper\s+share)\b", last_heading, re.IGNORECASE
+            )
+            prefix = m_ps.group(1) if m_ps else last_heading
+            label = f"{prefix}\u2014{label}"
 
         # Skip percentage rows: if any data cell contains "%", skip entire row.
         # This avoids extracting margin/ratio tables as monetary values.
@@ -457,7 +521,8 @@ def extract_from_markdown_table(
 
 
 def extract_tables_from_clean_md(
-    clean_md_text: str, source_filename: str = ""
+    clean_md_text: str, source_filename: str = "",
+    filing_type: str = "",
 ) -> List[TableField]:
     """Extract all fields from a .clean.md file containing financial tables.
 
@@ -506,7 +571,11 @@ def extract_tables_from_clean_md(
             )
 
             for table_text in table_blocks:
-                fields = extract_from_markdown_table(table_text, section_label, table_idx=global_tbl_idx)
+                fields = extract_from_markdown_table(
+                    table_text, section_label,
+                    table_idx=global_tbl_idx,
+                    filing_type=filing_type,
+                )
                 global_tbl_idx += 1
                 for f in fields:
                     f.source_location = (

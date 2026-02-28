@@ -420,7 +420,8 @@ class DeterministicPipeline:
             if is_clean_md:
                 # Table extraction from markdown
                 table_fields = extract_tables_from_clean_md(
-                    text, source_filename=filing_path.name
+                    text, source_filename=filing_path.name,
+                    filing_type=metadata.filing_type,
                 )
                 for tf in table_fields:
                     canonical = self._alias_resolver.resolve(tf.label)

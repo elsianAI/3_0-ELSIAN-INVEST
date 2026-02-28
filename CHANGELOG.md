@@ -1,5 +1,8 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
+## 2026-03-02
+- [DETERMINISTIC] Iteration 28: New case SONO (Sonos Inc.) — non-standard FY ending Sep/Oct. Acquired 28 filings, curated expected.json ANNUAL_ONLY (6 periods, 116 fields). Fixed non-standard FY period detection: _MONTH_NAME_RE regex for full dates, annual-context Q→FY upgrade, filing-type 10-K context. Added aliases: net loss, loss per share, weighted-average shares. EPS parent-label concatenation for bare "Basic"/"Diluted" labels. First eval: 82.8% (96/116). Zero regressions (GCT/IOSP/NEXN/TZOO all 100%). 194 tests green.
+
 ## 2026-03-01
 - [DETERMINISTIC] Iteration 27: New case TEP (Teleperformance SE) — EU/IFRS company. Enhanced eu_regulators.py to import from pipeline 3.0 raw_filings_dir. Acquired 62 filings (16 source groups). Curated expected.json ANNUAL_ONLY (3 periods, 48 fields). First eval baseline: 4.2% (2/48). No regressions on existing cases.
 - [DETERMINISTIC] Iteration 26: NEXN 97.4→100.0% — total_debt reject patterns (repayment/receipt/proceeds), dash-as-zero in sparse-column scan for BS cells, "long term debt" alias (no hyphen). All 4 cases at 100%. 194 tests green.
