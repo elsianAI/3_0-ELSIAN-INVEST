@@ -50,6 +50,8 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"finance\s+lease", re.I),
     ],
     "income_tax": [
+        re.compile(r"before\s+income\s+tax", re.I),
+        re.compile(r"accrued\s+income\s+tax", re.I),
         re.compile(r"prepaid\s+income\s+tax", re.I),
         re.compile(r"income\s+tax\s+payable", re.I),
         re.compile(r"cash\s+paid.*income\s+tax", re.I),

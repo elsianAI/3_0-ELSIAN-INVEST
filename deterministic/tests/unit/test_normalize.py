@@ -267,6 +267,32 @@ class TestAliasResolver(unittest.TestCase):
         result = self.resolver.resolve("Total liabilities and shareholders' equity")
         self.assertNotEqual(result, "total_equity")
 
+    # ── income_tax rejection tests ──────────────────────────────────
+
+    def test_income_before_income_taxes_rejected(self):
+        """'Income before income taxes' is pretax income, not tax expense."""
+        self.assertIsNone(self.resolver.resolve("Income before income taxes"))
+
+    def test_income_before_income_tax_expense_rejected(self):
+        """'Income before income tax expense' is pretax income, not tax expense."""
+        self.assertIsNone(self.resolver.resolve("Income before income tax expense"))
+
+    def test_accrued_income_taxes_rejected(self):
+        """'Accrued income taxes' is a balance sheet item, not tax expense."""
+        self.assertIsNone(self.resolver.resolve("Accrued income taxes"))
+
+    def test_income_tax_expense_resolves(self):
+        """'Income tax expense' should still resolve to income_tax."""
+        self.assertEqual(self.resolver.resolve("Income tax expense"), "income_tax")
+
+    def test_income_taxes_resolves(self):
+        """'Income taxes' should still resolve to income_tax."""
+        self.assertEqual(self.resolver.resolve("Income taxes"), "income_tax")
+
+    def test_provision_for_income_taxes_resolves(self):
+        """'Provision for income taxes' should still resolve to income_tax."""
+        self.assertEqual(self.resolver.resolve("Provision for income taxes"), "income_tax")
+
 
 class TestNormalizeSign(unittest.TestCase):
     """Tests for _normalize_sign in pipeline.py."""

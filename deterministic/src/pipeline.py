@@ -53,6 +53,53 @@ _ALWAYS_POSITIVE_FIELDS = frozenset({
 
 _BENEFIT_RE = re.compile(r"\bbenefit\b", re.IGNORECASE)
 
+# ── Dividend per share from equity statement ─────────────────────────
+_DIVIDEND_PER_SHARE_RE = re.compile(
+    r"Dividend\s+paid\s*\(\s*\$\s*([\d,.]+)\s*per\s+share\s*\)",
+    re.IGNORECASE,
+)
+_BALANCE_DATE_RE = re.compile(
+    r"Balance\s+at\s+December\s+31[,]?\s+(20\d{2})",
+    re.IGNORECASE,
+)
+
+
+def _extract_dividends_per_share(
+    text: str, source_filename: str
+) -> List[Tuple[str, float, str]]:
+    """Extract dividends_per_share from equity statement labels.
+
+    Parses lines like 'Dividend paid ($ 1.71 per share)' and associates
+    them with the correct fiscal year by finding the preceding
+    'Balance at December 31, YYYY' marker (dividend FY = marker_year + 1).
+
+    Returns:
+        List of (period_key, value, source_location) tuples.
+    """
+    results: List[Tuple[str, float, str]] = []
+    # Collect all balance-date positions
+    balance_positions: List[Tuple[int, int]] = []  # (char_pos, year)
+    for m in _BALANCE_DATE_RE.finditer(text):
+        balance_positions.append((m.start(), int(m.group(1))))
+
+    for m in _DIVIDEND_PER_SHARE_RE.finditer(text):
+        try:
+            value = float(m.group(1).replace(",", ""))
+        except ValueError:
+            continue
+        # Find the nearest preceding balance date
+        preceding_year = None
+        for bpos, byear in reversed(balance_positions):
+            if bpos < m.start():
+                preceding_year = byear
+                break
+        if preceding_year is None:
+            continue
+        period_key = f"FY{preceding_year + 1}"
+        loc = f"{source_filename}:equity_statement:char{m.start()}"
+        results.append((period_key, value, loc))
+    return results
+
 
 def _normalize_sign(canonical: str, raw_label: str, value: float) -> float:
     """Ensure expense fields use the correct sign convention.
@@ -124,6 +171,7 @@ class DeterministicPipeline:
     # note/discontinued sections get penalized.
     _PRIMARY_IS_SECTION = re.compile(
         r":operating_income|:operating_profit|:consolidated_statements_of_operations"
+        r"|:consolidated_statements_of_income"
         r"|:consolidated_balance_sheets|:consolidated_statements_of_comprehensive",
         re.I,
     )
@@ -473,6 +521,31 @@ class DeterministicPipeline:
                         raw_value=tf.value,
                         scale=scale,
                     )
+
+                # ── Dividend per share from equity statement labels ──
+                for dps_period, dps_value, dps_loc in _extract_dividends_per_share(
+                    text, filing_path.name
+                ):
+                    canonical = "dividends_per_share"
+                    if dps_period not in period_fields:
+                        period_fields[dps_period] = {}
+                    if canonical not in period_fields[dps_period]:
+                        fr = FieldResult(
+                            value=dps_value,
+                            scale="raw",
+                            source_filing=filing_path.name,
+                            source_location=dps_loc,
+                            confidence="high",
+                        )
+                        period_fields[dps_period][canonical] = fr
+                        audit.accept(
+                            field_name=canonical,
+                            period=dps_period,
+                            source_filing=filing_path.name,
+                            raw_label="Dividend paid ($ per share)",
+                            raw_value=dps_value,
+                            scale="raw",
+                        )
 
             else:
                 # Narrative extraction from .txt files
