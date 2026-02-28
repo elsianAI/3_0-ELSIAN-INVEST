@@ -6,6 +6,7 @@ Orchestrates: acquire -> extract -> normalize -> merge -> evaluate.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -91,6 +92,26 @@ class DeterministicPipeline:
         return result
 
     # ── EXTRACT ──────────────────────────────────────────────────────
+
+    # Sub-section patterns: primary IS sections get a priority bonus,
+    # note/discontinued sections get penalized.
+    _PRIMARY_IS_SECTION = re.compile(
+        r":operating_income|:operating_profit|:consolidated_statements_of_operations",
+        re.I,
+    )
+    _DEPRIORITIZED_SECTION = re.compile(
+        r":loss_from_operations|:discontinued|:net_income_\(loss\)",
+        re.I,
+    )
+
+    @staticmethod
+    def _section_bonus(source_location: str) -> int:
+        """Return a priority bonus based on the table's sub-section."""
+        if DeterministicPipeline._PRIMARY_IS_SECTION.search(source_location):
+            return 5
+        if DeterministicPipeline._DEPRIORITIZED_SECTION.search(source_location):
+            return -5
+        return 0
 
     def extract(self, case_dir: str) -> ExtractionResult:
         """Extract financial data from filings in a case directory."""
@@ -203,11 +224,12 @@ class DeterministicPipeline:
 
                     # Collision resolution: if field already present, prefer
                     # the candidate with higher label-semantic priority.
-                    # Tiebreaker (equal priority): keep higher absolute value
-                    # (consolidated > segment, absolute amounts > percentages).
+                    # Section-based bonus adjusts priority for primary vs note
+                    # sub-sections. Tiebreaker (equal priority): keep higher
+                    # absolute value (consolidated > segment).
                     new_priority = self._alias_resolver.label_priority(
                         canonical, tf.label
-                    )
+                    ) + self._section_bonus(tf.source_location)
                     if canonical in period_fields[period_key]:
                         existing = period_fields[period_key][canonical]
                         old_priority = getattr(existing, "_label_priority", 0)

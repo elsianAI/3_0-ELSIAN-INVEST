@@ -21,6 +21,13 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"\beps\b", re.I),
         re.compile(r"\bdiluted\b", re.I),
         re.compile(r"\bbasic\b", re.I),
+        re.compile(r"before\s+income\s+tax", re.I),
+    ],
+    "ebit": [
+        re.compile(r"non[\s-]?gaap", re.I),
+    ],
+    "ingresos": [
+        re.compile(r"non[\s-]?gaap", re.I),
     ],
     "total_liabilities": [
         re.compile(r"liabilities\s+and\s+stockholders", re.I),
@@ -48,11 +55,17 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
 # Priority patterns: when multiple rows could map to same canonical,
 # a label matching one of these gets preference (score=100 exact, else 50).
 _PRIORITY_PATTERNS: Dict[str, List[re.Pattern]] = {
+    "ebit": [
+        re.compile(r"^operating\s+income", re.I),
+    ],
+    "net_income": [
+        re.compile(r"^net\s+income(\s*\(loss\))?\s*$", re.I),
+    ],
     "cash_and_equivalents": [
         re.compile(r"^cash\s+and\s+cash\s+equivalents$", re.I),
     ],
     "income_tax": [
-        re.compile(r"income\s+tax\s+expense", re.I),
+        re.compile(r"^(total\s+)?income\s+tax\s+expense(\s*\(benefit\))?\s*$", re.I),
         re.compile(r"provision\s+for\s+income\s+tax", re.I),
     ],
     "shares_outstanding": [
@@ -102,8 +115,8 @@ class AliasResolver:
     def _normalize(text: str) -> str:
         """Normalize a label for matching."""
         text = text.lower().strip()
-        # Remove common punctuation
-        text = re.sub(r"['''\",():]", "", text)
+        # Remove common punctuation (includes Unicode curly quotes)
+        text = re.sub(r"['\u2018\u2019\u201C\u201D\",():\u2014\u2013]", "", text)
         # Collapse whitespace
         text = re.sub(r"\s+", " ", text).strip()
         return text

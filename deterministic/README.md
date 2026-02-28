@@ -115,6 +115,16 @@ The error message tells you exactly what's missing. Fix it, re-stage, and commit
 
 Not affected. The hook only triggers for changes under `deterministic/`.
 
+## Ground Truth Restatement Rules
+
+Policy: **as-reported unless explicit restatement**.
+
+- `expected.json` uses the value from the **primary filing of each period** (the 10-K/10-Q that covers that fiscal period).
+- Exception: use a value from a later filing ONLY if that filing contains explicit textual evidence of an adjustment. Valid triggers: `restated`, `as revised`, `as corrected`, `reclassified`.
+- If a later filing shows a different comparative number WITHOUT an explicit trigger, treat it as NOT a restatement. Keep the primary filing value.
+- When applying a restatement, add a `restatement` block to the affected field documenting: trigger word, evidence text, which filing restated it, and the original value.
+- Root of `expected.json` must include: `"restatement_policy": "as_reported_unless_explicit_restatement"`.
+
 ## Isolation
 
 - 0 imports from `engine/` or `scripts/` (pipeline code)

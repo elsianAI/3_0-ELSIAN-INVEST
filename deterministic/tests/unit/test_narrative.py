@@ -75,6 +75,33 @@ class TestNarrativeFixture(unittest.TestCase):
             f"Expected revenue in labels: {labels}",
         )
 
+    # ── Iteration 6: context-rejection tests ───────────────────────
+
+    def test_non_gaap_context_blocked(self):
+        """Narrative preceded by 'Non-GAAP' should be suppressed."""
+        text = (
+            "On a Non-GAAP basis, operating income was $12.5 million "
+            "for the quarter."
+        )
+        fields = extract_from_narrative(text)
+        oi = [f for f in fields if "operating" in f.label.lower()]
+        self.assertEqual(len(oi), 0, f"Non-GAAP match should be blocked: {oi}")
+
+    def test_comparative_context_blocked(self):
+        """Values appearing after 'compared to' should not be extracted
+        as primary narrative fields."""
+        text = (
+            "Operating profit was $1.1 million, "
+            "compared to operating profit of $3.2 million in Q3 2024."
+        )
+        fields = extract_from_narrative(text)
+        # Should extract the primary value (1.1) but NOT the comparative (3.2)
+        oi = [f for f in fields if "operating" in f.label.lower()
+              or "profit" in f.label.lower()]
+        values = [f.value for f in oi]
+        self.assertIn(1.1, values, "Primary value 1.1 should be extracted")
+        self.assertNotIn(3.2, values, "Comparative value 3.2 should be blocked")
+
 
 if __name__ == "__main__":
     unittest.main()

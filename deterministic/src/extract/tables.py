@@ -311,12 +311,16 @@ def extract_tables_from_clean_md(
     """Extract all fields from a .clean.md file containing financial tables.
 
     Splits by section headings, processes each table, returns all fields.
+    Uses ### sub-sections within each ## section for finer-grained context.
     """
     all_fields: List[TableField] = []
 
     # Split by section (## SECTION NAME)
     section_pattern = re.compile(
         r"^##\s+(.+?)$", re.MULTILINE
+    )
+    subsection_pattern = re.compile(
+        r"^###\s+(.+?)$", re.MULTILINE
     )
     sections = section_pattern.split(clean_md_text)
 
@@ -327,21 +331,33 @@ def extract_tables_from_clean_md(
             current_section = part.strip().lower().replace(" ", "_")
             continue
 
-        # Find markdown tables in this part
-        table_blocks = re.findall(
-            r"((?:^\|.+\|$\n?)+)",
-            part,
-            re.MULTILINE,
-        )
+        # Further split by ### sub-sections within this ## section
+        sub_parts = subsection_pattern.split(part)
+        current_subsection = ""
+        for j, sub_part in enumerate(sub_parts):
+            if j % 2 == 1:
+                current_subsection = sub_part.strip().lower().replace(" ", "_")
+                continue
 
-        for table_text in table_blocks:
-            fields = extract_from_markdown_table(table_text, current_section)
-            for f in fields:
-                f.source_location = (
-                    f"{source_filename}:{f.source_location}"
-                    if source_filename
-                    else f.source_location
-                )
-            all_fields.extend(fields)
+            section_label = current_section
+            if current_subsection:
+                section_label = f"{current_section}:{current_subsection}"
+
+            # Find markdown tables in this sub-part
+            table_blocks = re.findall(
+                r"((?:^\|.+\|$\n?)+)",
+                sub_part,
+                re.MULTILINE,
+            )
+
+            for table_text in table_blocks:
+                fields = extract_from_markdown_table(table_text, section_label)
+                for f in fields:
+                    f.source_location = (
+                        f"{source_filename}:{f.source_location}"
+                        if source_filename
+                        else f.source_location
+                    )
+                all_fields.extend(fields)
 
     return all_fields

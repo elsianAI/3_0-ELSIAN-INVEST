@@ -182,6 +182,17 @@ def _detect_surrounding_period(text: str, match_start: int) -> str:
     return ""
 
 
+_NON_GAAP_CONTEXT = re.compile(
+    r"non[\s-]?gaap|adjusted|pro\s*forma|\bsegment\b|constant\s+currency",
+    re.IGNORECASE,
+)
+
+_COMPARATIVE_CONTEXT = re.compile(
+    r"compared\s+to|versus|vs\.?\s|prior[\s-]year|year[\s-]ago|from\s+\$",
+    re.IGNORECASE,
+)
+
+
 def extract_from_narrative(
     text: str, source_filename: str = ""
 ) -> List[NarrativeField]:
@@ -195,6 +206,11 @@ def extract_from_narrative(
     for m in _PATTERN_LABEL_VERB_VALUE.finditer(text):
         value = _parse_narrative_number(m.group("value"))
         if value is None:
+            continue
+        prefix = text[max(0, m.start() - 60):m.start()]
+        if _NON_GAAP_CONTEXT.search(prefix):
+            continue
+        if _COMPARATIVE_CONTEXT.search(prefix):
             continue
         period = _detect_surrounding_period(text, m.start())
         results.append(
@@ -213,6 +229,11 @@ def extract_from_narrative(
     for m in _PATTERN_VALUE_LABEL.finditer(text):
         value = _parse_narrative_number(m.group("value"))
         if value is None:
+            continue
+        prefix = text[max(0, m.start() - 60):m.start()]
+        if _NON_GAAP_CONTEXT.search(prefix):
+            continue
+        if _COMPARATIVE_CONTEXT.search(prefix):
             continue
         period = _detect_surrounding_period(text, m.start())
         results.append(

@@ -1,5 +1,8 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
+## 2026-02-28
+- [DETERMINISTIC] TZOO Iteration 6: FY2019 restatement in expected.json (7 fields + metadata), pipeline disambiguation fixes (aliases reject/priority, Non-GAAP/comparative narrative rejection, sub-section priority, Unicode normalizer) — wrong 18→0, score 31.9%→37.0% (100/270), 115 tests green.
+
 ## 2026-02-27
 - [DETERMINISTIC] TZOO Iteration 4: semantic disambiguation (aliases rejection/priority, row-level table filter, collision max-value tiebreaker) — score 52.9% → 100.0% (34/34), 110 tests green.
 - [DETERMINISTIC] PHASE2: created operations trace log in `deterministic/PHASE2_OPERATIONS_LOG.md` (template + TZOO Iteration 0-3).  [14:08]

@@ -132,3 +132,34 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — all 5 targeted errors fixed plus R&D alias gap closed; score jumped from 52.9% to 100%.
 - Next step: evaluate GCT case; reduce `extra` field count via tighter alias boundaries.
 
+## 2026-02-28 11:08 - Iteration 6 - TZOO
+- Agent: Copilot
+- Objective: Phase A — update expected.json with FY2019 restatement (8 fields, policy as_reported_unless_explicit_restatement) and FY2022 total_equity NCI-inclusive fix. Phase B — eliminate all 18 wrong values (target wrong=0) by fixing pipeline disambiguation (aliases, narrative context rejection, section-based priority, Unicode normalizer).
+- Hypothesis: Updating expected.json with restated FY2019 values will resolve 5 wrongs (explicit restatement). Fixing pipeline label disambiguation (reject/priority patterns), Non-GAAP/comparative narrative context rejection, sub-section priority bonus, and Unicode apostrophe normalization will resolve the remaining 13 wrongs.
+- Files changed:
+  - `deterministic/cases/TZOO/expected.json` — FY2019: 7 restated fields (ingresos, cost_of_revenue, gross_profit, ebit, income_tax, research_and_development, cash_and_equivalents) with restatement metadata; FY2019/net_income reverted to 4155 (total unchanged by disc-ops reclassification); FY2022/total_equity changed to 8851 (NCI-inclusive, consistent with FY2024/FY2023); root-level restatement_policy added.
+  - `deterministic/src/normalize/aliases.py` — added 3 reject patterns (net_income: "before income tax"; ebit: "non-gaap"; ingresos: "non-gaap"), 3 priority patterns (ebit: "^operating income"; net_income: exact match; income_tax: "(benefit)" suffix). Fixed Unicode normalizer: added U+2018/U+2019/U+201C/U+201D/U+2014/U+2013 to strip class.
+  - `deterministic/src/extract/narrative.py` — added _NON_GAAP_CONTEXT and _COMPARATIVE_CONTEXT regex patterns; applied both as prefix checks in Pattern 1 and Pattern 3 extraction loops.
+  - `deterministic/src/extract/tables.py` — extract_tables_from_clean_md now splits by ### sub-section headers within ## sections, producing section labels like "income_statement:operating_income_(loss)".
+  - `deterministic/src/pipeline.py` — added _section_bonus() with _PRIMARY_IS_SECTION (+5) and _DEPRIORITIZED_SECTION (-5) regex patterns; collision resolution now uses label_priority + section_bonus.
+  - `deterministic/tests/unit/test_normalize.py` — 3 new tests: reject "before income tax" for net_income, prefer "Operating income" for ebit priority, prefer exact "Net income" over qualified.
+  - `deterministic/tests/unit/test_narrative.py` — 2 new tests: block Non-GAAP narrative context, block comparative narrative context.
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v`
+  - `python3 -m deterministic.cli eval TZOO`
+- Metrics before:
+  - score=100.0% (34/34) [previous scope, iteration 5]
+  - After expected.json expanded to 270 fields (18 periods): score=31.9% (86/270), wrong=18, missed=166, extra=36
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=100.0 → 31.9%
+- Metrics after:
+  - score=37.0% (100/270)
+  - wrong=0
+  - missed=170
+  - extra=36
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=37.0
+- Tests: 115 passed, 0 failed (up from 110).
+- Decision: accept — wrong dropped from 18 to 0 (target achieved). Score rose from 31.9% to 37.0% (+14 net matched). 170 missed fields remain (mostly quarterly periods from 10-Q multi-header table parsing not yet implemented). 5 new unit tests added.
+- Next step: fix 10-Q multi-header table parsing to recover quarterly fields (target: reduce missed from 170); evaluate GCT case.
+

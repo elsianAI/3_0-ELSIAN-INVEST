@@ -175,6 +175,29 @@ class TestAliasResolver(unittest.TestCase):
         score = self.resolver.label_priority("ingresos", "Revenue")
         self.assertEqual(score, 0)
 
+    # ── Iteration 6: Phase B disambiguation tests ──────────────────
+
+    def test_net_income_rejects_before_income_tax(self):
+        """'Income before income taxes' must NOT resolve to net_income."""
+        result = self.resolver.resolve("Income before income taxes")
+        self.assertNotEqual(result, "net_income")
+
+    def test_ebit_prefers_operating_income(self):
+        """'Operating income' should get a higher priority score than
+        'Income from operations' for the ebit canonical field."""
+        score_oi = self.resolver.label_priority("ebit", "Operating income")
+        score_ifo = self.resolver.label_priority("ebit", "Income from operations")
+        self.assertGreater(score_oi, score_ifo)
+
+    def test_net_income_prefers_exact_over_qualified(self):
+        """Exact 'Net income' should score higher than
+        'Net income attributable to Travelzoo' for net_income."""
+        score_exact = self.resolver.label_priority("net_income", "Net income")
+        score_qualified = self.resolver.label_priority(
+            "net_income", "Net income attributable to Travelzoo"
+        )
+        self.assertGreater(score_exact, score_qualified)
+
 
 if __name__ == "__main__":
     unittest.main()
