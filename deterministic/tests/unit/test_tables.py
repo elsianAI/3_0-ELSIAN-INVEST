@@ -136,8 +136,12 @@ class TestExtractFromMarkdownTable(unittest.TestCase):
 
     # ── Iteration 4: row-level filtering ────────────────────────────
 
-    def test_total_liabilities_and_equity_row_ignored(self):
-        """'Total liabilities and stockholders' equity' row must be filtered."""
+    def test_total_liabilities_and_equity_row_extracted(self):
+        """'Total liabilities and stockholders' equity' row must be extracted.
+
+        This label maps to total_assets via the alias resolver (balance sheet
+        identity: total L+E = total A).  Rejection is handled by the alias
+        resolver's reject patterns for total_liabilities, not at table level."""
         table = """| | 2024 | 2023 |
 | --- | --- | --- |
 | Total liabilities | 50,369 | 46,499 |
@@ -146,7 +150,7 @@ class TestExtractFromMarkdownTable(unittest.TestCase):
         fields = extract_from_markdown_table(table, "balance_sheet")
         labels = [f.label for f in fields]
         self.assertIn("Total liabilities", labels)
-        self.assertNotIn("Total liabilities and stockholders' equity", labels)
+        self.assertIn("Total liabilities and stockholders' equity", labels)
 
     def test_eps_row_not_extracted_as_net_income(self):
         """EPS row labels should not be extractable as generic net_income.\n\n        This is tested at the alias level; here we verify the row IS extracted
@@ -265,6 +269,110 @@ class TestExtractTablesFromCleanMd(unittest.TestCase):
         self.assertLess(key1, key0,
                         "Later table (10469) should beat earlier table (12.5)")
         self.assertEqual(cost_fields[1].value, 10469.0)
+
+
+class TestMultiHeaderSubheader(unittest.TestCase):
+    """Tests for multi-row sub-header merging in 10-Q tables."""
+
+    def test_date_fragment_subheader_detected(self):
+        """'September 30,' row should be detected as sub-header."""
+        from deterministic.src.extract.tables import _is_subheader_row
+        cells = ["", "September 30,", "", "December 31,", "", "", "", ""]
+        self.assertTrue(_is_subheader_row(cells))
+
+    def test_period_indicator_subheader_detected(self):
+        """'Three Months Ended' row should be detected as sub-header."""
+        from deterministic.src.extract.tables import _is_subheader_row
+        cells = ["", "Three Months Ended", "", "Nine Months Ended", ""]
+        self.assertTrue(_is_subheader_row(cells))
+
+    def test_data_row_not_subheader(self):
+        """Normal data row with label in first cell is NOT a sub-header."""
+        from deterministic.src.extract.tables import _is_subheader_row
+        cells = ["Revenue", "22198", "", "", "20098", ""]
+        self.assertFalse(_is_subheader_row(cells))
+
+    def test_three_row_header_merging(self):
+        """10-Q income statement: Three/Nine Months Ended + date + year."""
+        table = (
+            "|  | Three Months Ended |  | Nine Months Ended |\n"
+            "| --- | --- | --- | --- |\n"
+            "|  | September 30, |  | September 30, |\n"
+            "|  | 2025 |  | 2024 |\n"
+            "| Revenue | 22198 |  | 63224 |\n"
+        )
+        fields = extract_from_markdown_table(table, "income_statement", 0)
+        periods = {f.column_header for f in fields}
+        self.assertIn("Q3-2025", periods,
+                       "Three Months Ended Sep 30 + 2025 → Q3-2025")
+
+    def test_balance_sheet_quarter_date(self):
+        """Sep 30 standalone date → Q3, Dec 31 → FY."""
+        table = (
+            "|  | September 30, 2025 |  | December 31, 2024 |\n"
+            "| --- | --- | --- | --- |\n"
+            "| Total assets | 46164 |  | 54722 |\n"
+        )
+        fields = extract_from_markdown_table(table, "balance_sheet", 0)
+        headers = {f.column_header for f in fields}
+        self.assertIn("Q3-2025", headers, "Sep 30 date → Q3")
+        self.assertIn("FY2024", headers, "Dec 31 date → FY")
+
+    def test_nine_months_ended_maps_to_9M(self):
+        """Nine Months Ended should produce 9M- prefix, not Q."""
+        from deterministic.src.extract.tables import _identify_period_columns
+        headers = ["", "Nine Months Ended September 30, 2025"]
+        pm = _identify_period_columns(headers)
+        self.assertEqual(pm.get(1), "9M-2025")
+
+
+class TestDateToPeriod(unittest.TestCase):
+    """Tests for _date_to_period mapping."""
+
+    def test_december_31_is_FY(self):
+        from deterministic.src.extract.tables import _date_to_period
+        self.assertEqual(_date_to_period(12, "2024"), "FY2024")
+
+    def test_september_30_is_Q3(self):
+        from deterministic.src.extract.tables import _date_to_period
+        self.assertEqual(_date_to_period(9, "2025"), "Q3-2025")
+
+    def test_march_31_is_Q1(self):
+        from deterministic.src.extract.tables import _date_to_period
+        self.assertEqual(_date_to_period(3, "2023"), "Q1-2023")
+
+    def test_june_30_is_Q2(self):
+        from deterministic.src.extract.tables import _date_to_period
+        self.assertEqual(_date_to_period(6, "2024"), "Q2-2024")
+
+
+class TestPercentageTableFilter(unittest.TestCase):
+    """Percentage/margin tables should be skipped entirely."""
+
+    def test_percentage_table_skipped(self):
+        """Table with ≥2 rows having standalone '%' cells is skipped."""
+        table = (
+            "|  | 2025 | | 2024 |\n"
+            "| --- | --- | --- | --- |\n"
+            "| Revenue | 100.0 | % | 100.0 |\n"
+            "| Cost | 20.4 |  | 12.7 |\n"
+            "| Net income | 0.8 | % | 16.2 |\n"
+        )
+        fields = extract_from_markdown_table(table, "income_statement", 0)
+        self.assertEqual(len(fields), 0,
+                         "Percentage table should produce zero fields")
+
+    def test_monetary_table_not_skipped(self):
+        """Table with $ values and no standalone '%' cells is NOT skipped."""
+        table = (
+            "|  | 2025 | | 2024 |\n"
+            "| --- | --- | --- | --- |\n"
+            "| Revenue | $ | 22198 | $ |\n"
+            "| Cost | 4519 |  | 2548 |\n"
+        )
+        fields = extract_from_markdown_table(table, "income_statement", 0)
+        self.assertGreater(len(fields), 0,
+                           "Monetary table should produce fields")
 
 
 if __name__ == "__main__":

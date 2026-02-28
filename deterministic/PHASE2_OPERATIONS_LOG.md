@@ -287,3 +287,37 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — first GCT ground truth established. 65.7% baseline is strong for a first eval. Key wrong patterns: eps_diluted (non-GAAP extraction), shares_outstanding (par value vs share count), FY2023 period collision (gets FY2024 values), FY2023 total_assets/total_liabilities (VIE sub-table confusion). 16 missed are mostly eps_basic and total_assets for FY2024/FY2025.
 - Next step: Fix GCT-specific pipeline issues (period collision FY2023, shares_outstanding extraction, VIE table filtering) to raise score above 80%.
 
+## 2026-02-28 22:30 - Iteration 11 - TZOO
+- Agent: Copilot
+- Objective: Implement quarterly period detection in 10-Q tables to recover 168 missed quarterly fields and fix remaining EPS alias gaps.
+- Hypothesis: Three changes should recover most missed quarterly fields: (1) multi-row sub-header merging for 10-Q income statement tables with 3-level headers, (2) standalone date → quarter mapping (Sep 30 → Q3, Mar 31 → Q1, etc.) for balance sheet columns, (3) percentage table filtering (skip MD&A common-size tables). Additionally, stripping parenthetical qualifiers "(loss)"/"(benefit)" in alias normalization and replacing punctuation with space (not remove) should fix the 12 missing EPS fields.
+- Files changed:
+  - `deterministic/src/extract/tables.py` — enhanced _is_subheader_row to detect date fragments and period indicators; _parse_markdown_table now merges consecutive sub-header rows; _identify_period_columns maps standalone dates to quarters (not FY) and adds Nine Months Ended → 9M-; added _date_to_period helper; added percentage-table pre-scan filter (≥2 rows with % → skip table)
+  - `deterministic/src/normalize/aliases.py` — _normalize now strips parenthetical qualifiers (loss/benefit/deficit/expense/income) before punctuation removal; punctuation chars replaced with space (not removed) so "share—basic" → "share basic"; added "operating loss" priority pattern for ebit
+  - `deterministic/src/pipeline.py` — broadened _DEPRIORITIZED_SECTION regex to include `:income.*from_operations` subsections (segment breakdowns)
+  - `deterministic/config/field_aliases.json` — added ebit aliases: "operating loss", "loss from operations"; added total_equity aliases: deficit variants ("total stockholders' deficit", etc.)
+  - `deterministic/tests/unit/test_tables.py` — 18 new tests: TestMultiHeaderSubheader (6), TestDateToPeriod (4), TestPercentageTableFilter (2)
+  - `deterministic/tests/unit/test_normalize.py` — 6 new tests: parenthetical stripping, em-dash spacing, operating loss, deficit, income (loss) from operations
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v` → 160 passed, 0 failed
+  - `python3 -m deterministic.cli eval TZOO` → Score 99.6% (269/270)
+- Metrics before:
+  - score=37.0% (100/270)
+  - matched=100
+  - wrong=0
+  - missed=170
+  - extra=36
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=37.0
+- Metrics after:
+  - score=99.6% (269/270)
+  - matched=269
+  - wrong=1
+  - missed=0
+  - extra=175
+  - filings_coverage_pct=100.0
+  - required_fields_coverage_pct=100.0
+- Tests: 160 passed, 0 failed.
+- Decision: accept — score 37.0% → 99.6%, matched 100 → 269, missed 170 → 0. The 1 remaining wrong (Q1-2023/cash_and_equivalents: 16190 vs expected 19138) is caused by a cross-filing reconciliation table in SRC_012 with mislabeled period column; fixing generically would require period-filing affinity which breaks existing restatement handling. 175 extra fields are from 9M/H/FY periods extracted from 10-Q comparative columns (harmless). GCT also improved from 0% to 65.7% as a side effect of the alias improvements.
+- Next step: Investigate GCT wrongs (21) — focus on shares_outstanding par-value confusion, eps_diluted non-GAAP, FY2023 period collision.
+

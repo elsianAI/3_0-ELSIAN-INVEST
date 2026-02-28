@@ -101,6 +101,7 @@ class DeterministicPipeline:
     )
     _DEPRIORITIZED_SECTION = re.compile(
         r":loss_from_operations"
+        r"|:income.*from_operations"
         r"|discontinued_operations"
         r"|:discontinued"
         r"|:net_income_\(loss\)"

@@ -219,6 +219,39 @@ class TestAliasResolver(unittest.TestCase):
         """Plain 'Total assets' must still resolve to total_assets."""
         self.assertEqual(self.resolver.resolve("Total assets"), "total_assets")
 
+    # ── Iteration 10: parenthetical qualifier stripping ────────────
+
+    def test_eps_basic_with_loss_qualifier(self):
+        """'Net income (loss) per share —basic' → eps_basic after stripping (loss)."""
+        result = self.resolver.resolve("Net income (loss) per share —basic")
+        self.assertEqual(result, "eps_basic")
+
+    def test_eps_diluted_with_loss_qualifier(self):
+        """'Income (loss) per share—diluted' → eps_diluted after stripping (loss)."""
+        result = self.resolver.resolve("Income (loss) per share—diluted")
+        self.assertEqual(result, "eps_diluted")
+
+    def test_emdash_spacing_normalize(self):
+        """'share—basic' and 'share —basic' both normalize consistently."""
+        n1 = AliasResolver._normalize("net income per share—basic")
+        n2 = AliasResolver._normalize("net income per share —basic")
+        self.assertEqual(n1, n2,
+                         "Em-dash with/without leading space should normalize the same")
+
+    def test_operating_loss_resolves_to_ebit(self):
+        """'Operating loss' should resolve to ebit."""
+        self.assertEqual(self.resolver.resolve("Operating loss"), "ebit")
+
+    def test_total_stockholders_deficit_resolves_to_total_equity(self):
+        """'Total stockholders' deficit' → total_equity."""
+        result = self.resolver.resolve("Total stockholders' deficit")
+        self.assertEqual(result, "total_equity")
+
+    def test_income_loss_from_operations_resolves_to_ebit(self):
+        """'Income (loss) from operations' → ebit after stripping (loss)."""
+        result = self.resolver.resolve("Income (loss) from operations")
+        self.assertEqual(result, "ebit")
+
 
 if __name__ == "__main__":
     unittest.main()

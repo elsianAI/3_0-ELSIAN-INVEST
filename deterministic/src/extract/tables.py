@@ -62,24 +62,45 @@ def parse_number(text: str) -> Optional[float]:
         return None
 
 
-def _is_subheader_row(cells: List[str]) -> bool:
-    """Check if a row is a sub-header containing year/period identifiers.
+_MONTH_NAME_RE = re.compile(
+    r"^(?:January|February|March|April|May|June|July|August|September|"
+    r"October|November|December)\s+\d{1,2},?$",
+    re.IGNORECASE,
+)
 
-    Detects rows like: | | 2024 | | 2023 | | | |
-    or: | | (In thousands) | | | | | |
-    These appear as the first data row after the separator in double-header tables.
+_PERIOD_INDICATOR_RE = re.compile(
+    r"^(?:Three|Six|Nine)\s+Months?\s+Ended$",
+    re.IGNORECASE,
+)
+
+
+def _is_subheader_row(cells: List[str]) -> bool:
+    """Check if a row is a sub-header containing year/period/date fragments.
+
+    Detects rows like:
+    - | | 2024 | | 2023 | | | |              (year sub-header)
+    - | | (In thousands) | | | | | |         (scale sub-header)
+    - | | September 30, | | December 31, |   (date fragment sub-header)
+    - | | Three Months Ended | | Nine ... |  (period indicator sub-header)
+    These appear as data rows after the separator in multi-header tables.
     """
     first_cell = cells[0].strip() if cells else ""
     if first_cell and not re.match(r"^\s*$", first_cell):
         return False
     # Check if any non-first cell contains a year or scale indicator
     rest = [c.strip() for c in cells[1:] if c.strip()]
+    if not rest:
+        return False
     has_year = any(re.fullmatch(r"20\d{2}", c) for c in rest)
     has_scale = any(
         c.lower().strip("()") in {"in thousands", "in millions", "in billions"}
         for c in rest
     )
-    return has_year or has_scale
+    # Detect date fragments: "September 30," or "December 31,"
+    has_date_fragment = any(_MONTH_NAME_RE.match(c) for c in rest)
+    # Detect period indicators: "Three Months Ended", "Nine Months Ended"
+    has_period_indicator = any(_PERIOD_INDICATOR_RE.match(c) for c in rest)
+    return has_year or has_scale or has_date_fragment or has_period_indicator
 
 
 def _parse_markdown_table(table_text: str) -> Tuple[List[str], List[List[str]]]:
@@ -113,32 +134,61 @@ def _parse_markdown_table(table_text: str) -> Tuple[List[str], List[List[str]]]:
             cells = [cell.strip() for cell in line.strip("|").split("|")]
             raw_rows.append(cells)
 
-    # Double-header support: if the first data row is a sub-header with years,
-    # merge it into headers and remove from data rows.
+    # Double-header support: consume consecutive sub-header rows and merge
+    # their content into ``headers``.  This handles 10-Q tables where headers
+    # span 2-3 rows, e.g.:
+    #   Row 0 (header):     | | Three Months Ended | | Nine Months Ended |
+    #   Row 1 (sub-header): | | September 30, | | September 30, |
+    #   Row 2 (sub-header): | | 2025 | | 2024 | | 2025 | | 2024 |
     rows = raw_rows
-    if rows and _is_subheader_row(rows[0]):
+    while rows and _is_subheader_row(rows[0]):
         sub = rows[0]
-        # Merge: for each column, if sub has a year and header is empty/generic,
-        # adopt the sub value as the header.
         for idx in range(min(len(headers), len(sub))):
             sub_val = sub[idx].strip()
-            if sub_val and re.fullmatch(r"20\d{2}", sub_val):
+            if not sub_val:
+                continue
+            hdr_val = headers[idx].strip()
+            if hdr_val:
+                # Concatenate: "Three Months Ended" + " " + "September 30,"
+                headers[idx] = f"{hdr_val} {sub_val}"
+            else:
                 headers[idx] = sub_val
         rows = rows[1:]
-        # Also skip a second sub-header row if it's a scale indicator like "(In thousands)"
-        if rows and _is_subheader_row(rows[0]):
-            rows = rows[1:]
 
     return headers, rows
 
 
+_MONTH_TO_NUM = {
+    "january": 1, "february": 2, "march": 3, "april": 4,
+    "may": 5, "june": 6, "july": 7, "august": 8,
+    "september": 9, "october": 10, "november": 11, "december": 12,
+}
+
+
+def _date_to_period(month_num: int, year: str,
+                    fiscal_year_end_month: int = 12) -> str:
+    """Map a month/year to a period label.
+
+    If the month matches the fiscal year end, returns FY{year}.
+    Otherwise returns Q{quarter}-{year}.
+    """
+    if month_num == fiscal_year_end_month:
+        return f"FY{year}"
+    q = (month_num - 1) // 3 + 1
+    return f"Q{q}-{year}"
+
+
 def _identify_period_columns(
     headers: List[str],
+    fiscal_year_end_month: int = 12,
 ) -> Dict[int, str]:
     """Map column indices to period identifiers.
 
     E.g. headers = ["", "2024", "2023", "2022"]
     Returns {1: "FY2024", 2: "FY2023", 3: "FY2022"}
+
+    Standalone dates like "September 30, 2025" are mapped to their quarter
+    (Q3-2025) unless the month matches fiscal_year_end_month (default 12).
     """
     period_map: Dict[int, str] = {}
     for idx, header in enumerate(headers):
@@ -163,17 +213,21 @@ def _identify_period_columns(
             re.IGNORECASE,
         )
         if m:
-            month_name = m.group(1).lower()
-            month_map = {
-                "january": 1, "february": 2, "march": 3, "april": 4,
-                "may": 5, "june": 6, "july": 7, "august": 8,
-                "september": 9, "october": 10, "november": 11, "december": 12,
-            }
-            month_num = month_map.get(month_name, 0)
+            month_num = _MONTH_TO_NUM.get(m.group(1).lower(), 0)
             if month_num:
                 q = (month_num - 1) // 3 + 1
                 period_map[idx] = f"Q{q}-{m.group(2)}"
                 continue
+
+        # "Nine Months Ended September 30, 2024" -> 9M-2024
+        m = re.search(
+            r"nine\s+months?\s+ended\s+([A-Za-z]+).*?(\d{4})",
+            header_clean,
+            re.IGNORECASE,
+        )
+        if m:
+            period_map[idx] = f"9M-{m.group(2)}"
+            continue
 
         # "Six Months Ended June 30, 2024" -> H1-2024
         m = re.search(
@@ -182,19 +236,14 @@ def _identify_period_columns(
             re.IGNORECASE,
         )
         if m:
-            month_name = m.group(1).lower()
-            month_map = {
-                "january": 1, "february": 2, "march": 3, "april": 4,
-                "may": 5, "june": 6, "july": 7, "august": 8,
-                "september": 9, "october": 10, "november": 11, "december": 12,
-            }
-            month_num = month_map.get(month_name, 0)
+            month_num = _MONTH_TO_NUM.get(m.group(1).lower(), 0)
             if month_num:
                 half = 1 if month_num <= 6 else 2
                 period_map[idx] = f"H{half}-{m.group(2)}"
                 continue
 
-        # "December 31, 2024" -> FY2024
+        # Standalone date: "September 30, 2025" or "December 31, 2024"
+        # Maps to quarter or FY depending on fiscal_year_end_month.
         m = re.search(
             r"(January|February|March|April|May|June|July|August|September|"
             r"October|November|December)\s+\d{1,2},?\s+(\d{4})",
@@ -202,8 +251,12 @@ def _identify_period_columns(
             re.IGNORECASE,
         )
         if m:
-            period_map[idx] = f"FY{m.group(2)}"
-            continue
+            month_num = _MONTH_TO_NUM.get(m.group(1).lower(), 0)
+            if month_num:
+                period_map[idx] = _date_to_period(
+                    month_num, m.group(2), fiscal_year_end_month
+                )
+                continue
 
         # Simple year: "2024"
         m = re.fullmatch(r"\s*(20\d{2})\s*", header_clean)
@@ -244,12 +297,21 @@ def extract_from_markdown_table(
 
     results: List[TableField] = []
 
-    # Pre-compile row-level ignore patterns
-    _IGNORE_LABELS = [
-        re.compile(r"total\s+liabilities\s+and\s+stockholders", re.I),
-        re.compile(r"total\s+liabilities\s+and\s+shareholders", re.I),
-        re.compile(r"total\s+liabilities\s+and\s+equity", re.I),
-    ]
+    # ── Percentage-table filter ──────────────────────────────────────
+    # If ≥2 data rows contain "%" as a standalone cell, the entire table
+    # is a margin/percentage breakdown (e.g. MD&A common-size IS).
+    # Skip it to prevent tiny % values from winning collisions against
+    # the real monetary table that appears earlier in the file.
+    pct_row_count = sum(
+        1 for r in rows
+        if any(c.strip() == "%" for c in r[1:])
+    )
+    if pct_row_count >= 2:
+        return []
+
+    # Track last section-heading row for parent-label concatenation.
+    # Heading rows have a non-empty label but no numeric data cells.
+    last_heading = ""
 
     for row_idx, row in enumerate(rows):
         if not row:
@@ -258,16 +320,23 @@ def extract_from_markdown_table(
         if not label:
             continue
 
-        # Skip rows whose label matches an aggregate we never want
-        if any(pat.search(label) for pat in _IGNORE_LABELS):
-            continue
-
-        # Skip header-like rows (all text, no numbers)
+        # Skip header-like rows (all text, no numbers) — but track as heading
         has_number = any(
             parse_number(cell) is not None for cell in row[1:]
         )
         if not has_number:
+            last_heading = label
             continue
+
+        # Parent-label concatenation: if label starts with an em-dash or
+        # en-dash sub-label marker (e.g. "—Basic", "—Diluted"), prepend
+        # the last section heading for context.  This turns:
+        #   heading: "Net income per ordinary share"
+        #   sub-label: "—Basic"
+        # into: "Net income per ordinary share—Basic", which resolves via
+        # the alias table to eps_basic.
+        if label.startswith(("\u2014", "\u2013")) and last_heading:
+            label = f"{last_heading}{label}"
 
         # Skip percentage rows: if any data cell contains "%", skip entire row.
         # This avoids extracting margin/ratio tables as monetary values.
@@ -275,7 +344,25 @@ def extract_from_markdown_table(
         if any("%" in cell for cell in data_cells):
             continue
 
-        for col_idx, period_key in period_map.items():
+        # Row-level period column adjustment for $-annotated rows.
+        # EDGAR tables often have sub-header years at positions that
+        # don't match the actual data columns.  When a data row has
+        # "$" markers whose count equals the number of detected periods,
+        # use the "$" positions as the real period column starts.
+        row_period_map = period_map
+        dollar_cols = [
+            i for i, cell in enumerate(row[1:], start=1)
+            if cell.strip() == "$"
+        ]
+        if dollar_cols and len(dollar_cols) == len(period_map):
+            sorted_periods = sorted(period_map.items(), key=lambda x: x[0])
+            candidate = {
+                dc: pk for dc, (_, pk) in zip(dollar_cols, sorted_periods)
+            }
+            if candidate != period_map:
+                row_period_map = candidate
+
+        for col_idx, period_key in row_period_map.items():
             if col_idx >= len(row):
                 continue
 
@@ -289,7 +376,7 @@ def extract_from_markdown_table(
             # columns: | $ | 83,902 | | | $ | 84,477 | |
             if value is None and re.fullmatch(r"[$€£¥]?", cell_text):
                 for scan_idx in range(col_idx + 1, len(row)):
-                    if scan_idx in period_map and scan_idx != col_idx:
+                    if scan_idx in row_period_map and scan_idx != col_idx:
                         break  # Don't cross into another period's columns
                     scan_val = parse_number(row[scan_idx].strip())
                     if scan_val is not None:

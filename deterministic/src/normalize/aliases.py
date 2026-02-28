@@ -52,10 +52,18 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"deferred\s+income\s+tax", re.I),
     ],
     "shares_outstanding": [
-        re.compile(r"common\s+stock.*par\s+value", re.I),
-        re.compile(r"common\s+stock.*\$\s*0\.\d", re.I),
+        re.compile(r"par\s+value", re.I),
         re.compile(r"preferred\s+stock", re.I),
         re.compile(r"\bdiluted\b", re.I),
+        re.compile(r"class\s+[a-z]\s", re.I),
+    ],
+    "eps_diluted": [
+        re.compile(r"\badjusted\b", re.I),
+        re.compile(r"non[\s-]?gaap", re.I),
+    ],
+    "eps_basic": [
+        re.compile(r"\badjusted\b", re.I),
+        re.compile(r"non[\s-]?gaap", re.I),
     ],
 }
 
@@ -64,6 +72,7 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
 _PRIORITY_PATTERNS: Dict[str, List[re.Pattern]] = {
     "ebit": [
         re.compile(r"^operating\s+income", re.I),
+        re.compile(r"^operating\s+loss", re.I),
     ],
     "net_income": [
         re.compile(r"^net\s+income(\s*\(loss\))?\s*$", re.I),
@@ -122,8 +131,14 @@ class AliasResolver:
     def _normalize(text: str) -> str:
         """Normalize a label for matching."""
         text = text.lower().strip()
-        # Remove common punctuation (includes Unicode curly quotes)
-        text = re.sub(r"['\u2018\u2019\u201C\u201D\",():\u2014\u2013]", "", text)
+        # Remove parenthetical qualifiers that add noise to financial labels.
+        # E.g. "Net income (loss) per share" → "Net income  per share"
+        text = re.sub(
+            r"\(\s*(?:loss|benefit|deficit|expense|income)\s*\)", "", text
+        )
+        # Replace common punctuation with space (not just remove) so that
+        # "share—basic" becomes "share basic" not "sharebasic".
+        text = re.sub(r"['\u2018\u2019\u201C\u201D\",():\u2014\u2013]", " ", text)
         # Collapse whitespace
         text = re.sub(r"\s+", " ", text).strip()
         return text
