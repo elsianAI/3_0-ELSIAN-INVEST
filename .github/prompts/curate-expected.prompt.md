@@ -99,10 +99,33 @@ Si un campo NO existe en los filings (por ejemplo, la empresa no reporta ebitda 
 - No mezclar periodos comparativos del mismo filing (un 10-K de FY2024 muestra FY2024 y FY2023 lado a lado — cada uno va a su periodo).
 - Cada valor DEBE incluir `source_filing` con el nombre exacto del fichero.
 
-### Signos
-- `capex`: guardar con el signo que muestra el cash flow statement (normalmente NEGATIVO: -177).
+### Convención de signos (OBLIGATORIA — leer antes de curar cualquier campo)
+
+**Principio general:** valores tal como aparecen en la cara del estado financiero, en su presentación estándar.
+
+**Income Statement — gastos siempre POSITIVOS:**
+- `cost_of_revenue`, `research_and_development`, `sga`, `depreciation_amortization`, `interest_expense`, `income_tax`: guardar como **número positivo**. Los gastos aparecen como valores positivos en la cara del income statement (son importes que reducen el beneficio, pero se presentan sin signo negativo).
+- `income_tax`: positivo = expense/provision. Puede ser **negativo** SOLO cuando el filing dice explícitamente "benefit from income taxes" o muestra un crédito fiscal.
+- `ingresos`, `gross_profit`: siempre **positivos**.
+- `ebit`, `ebitda`, `net_income`: **positivos** cuando hay beneficio, **negativos** cuando hay pérdida (reflejan la realidad económica).
+- `eps_basic`, `eps_diluted`: siguen el signo de `net_income`.
+
+**Balance Sheet — siempre POSITIVOS:**
+- `total_assets`, `total_liabilities`, `cash_and_equivalents`, `total_debt`: **positivos**.
+- `total_equity`: positivo cuando hay equity positivo, negativo cuando el déficit acumulado supera el capital.
+
+**Cash Flow:**
 - `cfo`: positivo = "net cash provided by", negativo = "net cash used in".
-- `income_tax`: positivo = expense/provision. No confundir con tax refund/payable/deferred.
+- `capex`: siempre **NEGATIVO** (es un outflow de inversión, tal como aparece en el cash flow statement).
+- `fcf`: sigue su signo reportado.
+
+**Per-share / Shares:**
+- `dividends_per_share`: **positivo**.
+- `shares_outstanding`: **positivo**.
+
+**TRAMPA IMPORTANTE — 20-F y paréntesis:** Algunos filings (especialmente 20-F de foreign private issuers) muestran gastos entre paréntesis como convención de formato. Esto NO significa que el valor sea negativo. Si el 20-F muestra `(200,362)` para cost_of_revenue, guardar `200362` (positivo), porque en la presentación estándar de un income statement los gastos son positivos.
+
+**Caso de duda:** consultar `deterministic/cases/TZOO/expected.json` como referencia (score 100%).
 
 ### Confusiones frecuentes
 - `net_income` ≠ EPS. Si la fila dice "per share" o "per diluted share", es EPS, no net_income.

@@ -444,6 +444,18 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
   - **Note**: This is the first IFRS case (TZOO/IOSP are US GAAP). Labels use IFRS terminology (e.g., "Profit (loss) for the year" vs "Net income", "Trade receivables" vs "Accounts receivable").
 - Next step: Curate expected.json for NEXN using the curate-expected prompt template (20-F annual periods only), then run first eval.
 
+## 2026-02-28 23:50 - Iteration 19 - GCT
+- Agent: Copilot
+- Objective: Fix sign convention inconsistency in GCT expected.json and formalize sign rules in curate-expected prompt template.
+- Hypothesis: GCT has income_tax and interest_expense stored as negative in ALL 6 periods, and cost_of_revenue negative in FY2020, contradicting the convention used in TZOO/IOSP (expenses positive, only capex/losses/negative-equity negative). Fixing to positive will drop eval score temporarily (pipeline extracts negative) but the ground truth will be correct.
+- Files changed: deterministic/cases/GCT/expected.json (sign fix + scale_notes update), .github/prompts/curate-expected.prompt.md (comprehensive sign convention rules)
+- Commands executed: python3 -m deterministic.cli eval GCT (before/after), python3 -m unittest discover -s deterministic/tests -v
+- Metrics before: score=100.0%, matched=108, wrong=0, missed=0, extra=191, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%
+- Metrics after: score=88.0%, matched=95, wrong=13, missed=0, extra=191, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%
+- Tests: 169 passed, 0 failed.
+- Decision: accept — ground truth is now correct and consistent across all cases. The 13 wrong are expected: 12 income_tax/interest_expense sign flips (pipeline extracts negative, expected now positive) + 1 cost_of_revenue FY2020 sign flip. Pipeline sign handling is a separate iteration. Also formalized sign convention in curate-expected prompt to prevent recurrence. NEXN FY2021 income_tax=-948 flagged for review (possibly genuine tax benefit).
+- Next step: Fix pipeline sign handling for income_tax/interest_expense to recover GCT 100%. Also curate IOSP expected.json.
+
 ## 2026-02-28 22:15 - Iteration 18 - NEXN
 - Agent: Copilot
 - Objective: Curate expected.json ground truth for NEXN (ANNUAL_ONLY scope) from 4 annual 20-F filings (SRC_001 to SRC_004).
