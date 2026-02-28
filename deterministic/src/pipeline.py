@@ -412,6 +412,10 @@ class DeterministicPipeline:
 
             # Extract fields
             period_fields: Dict[str, Dict[str, FieldResult]] = {}
+            # Track which raw labels contribute to additive fields so that
+            # new constituents are accumulated while same-label duplicates
+            # from a different table use normal collision resolution.
+            additive_labels: Dict[str, Dict[str, set]] = {}  # period→field→{labels}
 
             if is_clean_md:
                 # Table extraction from markdown
@@ -469,6 +473,8 @@ class DeterministicPipeline:
 
                     # Collision resolution via hierarchical sort key.
                     # Lower sort key = better candidate.
+                    # For additive fields, track contributor labels to
+                    # detect new constituents vs duplicate variants.
                     new_label_priority = self._alias_resolver.label_priority(
                         canonical, tf.label
                     )
@@ -487,6 +493,62 @@ class DeterministicPipeline:
                     )
                     if canonical in period_fields[period_key]:
                         existing = period_fields[period_key][canonical]
+                        # ── Additive fields (e.g. sga) ──────────────
+                        # When two DIFFERENT labels both map to the same
+                        # additive canonical (e.g. "Selling and marketing"
+                        # + "General and administrative" → sga), SUM their
+                        # values.  Same-constituent variants (detected by
+                        # substring matching, e.g. "selling and marketing"
+                        # vs "selling and marketing expenses") are discarded
+                        # to prevent double-counting.
+                        norm_lbl = self._alias_resolver._normalize(tf.label)
+                        if self._alias_resolver.is_additive(canonical):
+                            seen = additive_labels.get(
+                                period_key, {}
+                            ).get(canonical, set())
+                            is_new = not any(
+                                s in norm_lbl or norm_lbl in s
+                                for s in seen
+                            )
+                            if is_new:
+                                # New constituent label → accumulate
+                                combined_value = existing.value + _normalize_sign(
+                                    canonical, tf.label, tf.value
+                                )
+                                fr = FieldResult(
+                                    value=combined_value,
+                                    scale=existing.scale,
+                                    source_filing=existing.source_filing,
+                                    source_location=existing.source_location,
+                                    confidence=existing.confidence,
+                                )
+                                fr._sort_key = existing._sort_key  # type: ignore[attr-defined]
+                                period_fields[period_key][canonical] = fr
+                                additive_labels.setdefault(
+                                    period_key, {}
+                                ).setdefault(canonical, set()).add(norm_lbl)
+                                audit.accept(
+                                    field_name=canonical,
+                                    period=period_key,
+                                    source_filing=filing_path.name,
+                                    raw_label=tf.label,
+                                    raw_value=tf.value,
+                                    scale=scale,
+                                )
+                                continue
+                            else:
+                                # Same constituent variant → discard
+                                audit.discard(
+                                    field_name=canonical,
+                                    period=period_key,
+                                    reason="additive_duplicate_constituent",
+                                    source_filing=filing_path.name,
+                                    raw_label=tf.label,
+                                    raw_value=tf.value,
+                                    scale=scale,
+                                )
+                                continue
+                        # ── Normal collision resolution ──────────────
                         old_sort_key = getattr(
                             existing, "_sort_key",
                             (999, 999, 0, ("", 0, 0, 0)),
@@ -513,6 +575,12 @@ class DeterministicPipeline:
                     )
                     fr._sort_key = new_sort_key  # type: ignore[attr-defined]
                     period_fields[period_key][canonical] = fr
+                    # Seed additive_labels when first storing an additive field
+                    if self._alias_resolver.is_additive(canonical):
+                        norm_lbl = self._alias_resolver._normalize(tf.label)
+                        additive_labels.setdefault(
+                            period_key, {}
+                        ).setdefault(canonical, set()).add(norm_lbl)
                     audit.accept(
                         field_name=canonical,
                         period=period_key,

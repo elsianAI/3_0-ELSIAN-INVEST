@@ -303,16 +303,57 @@ def extract_from_markdown_table(
     results: List[TableField] = []
 
     # ── Percentage-table filter ──────────────────────────────────────
-    # If ≥2 data rows contain "%" as a standalone cell, the entire table
-    # is a margin/percentage breakdown (e.g. MD&A common-size IS).
-    # Skip it to prevent tiny % values from winning collisions against
-    # the real monetary table that appears earlier in the file.
+    # Skip tables that are pure percentage breakdowns (e.g. MD&A common-
+    # size IS with "100.0 %", "12.5", etc.).  Detected when ≥2 data rows
+    # contain a standalone "%" cell AND no row contains a "$" marker.
+    # The "$" exception keeps mixed tables (monetary + margin columns)
+    # alive — the dollar-column calibration below ensures the period map
+    # points at the monetary columns, and the per-row "%" skip (below)
+    # filters individual percentage rows.
     pct_row_count = sum(
         1 for r in rows
         if any(c.strip() == "%" for c in r[1:])
     )
-    if pct_row_count >= 2:
+    has_dollar_any = any(
+        cell.strip() == "$" for r in rows for cell in r[1:]
+    )
+    if pct_row_count >= 2 and not has_dollar_any:
         return []
+
+    # ── Dollar-column calibration (mixed pct/monetary tables only) ───
+    # Some filings (e.g. IFRS 20-F) embed a "% of revenue" sub-column
+    # next to each monetary sub-column under the same period header.
+    # The header-based period detection may land on the percentage sub-
+    # column, while the actual monetary data is offset to a "$"-marked
+    # column.  For rows WITH "$" markers, the row-level calibration
+    # below handles this.  For rows WITHOUT "$", the sparse-scan would
+    # pick up the percentage value instead of the monetary one.
+    #
+    # Guard: only apply when the table is confirmed as mixed (≥2 pct
+    # rows AND has "$" markers), so pure monetary tables (GCT, TZOO)
+    # are never affected.
+    if pct_row_count >= 2 and has_dollar_any and period_map and rows:
+        from collections import Counter
+        dollar_signatures: Counter = Counter()
+        for _probe_row in rows:
+            dcols = tuple(
+                i for i, cell in enumerate(_probe_row[1:], start=1)
+                if cell.strip() == "$"
+            )
+            if dcols and len(dcols) == len(period_map):
+                dollar_signatures[dcols] += 1
+        if dollar_signatures:
+            best_sig, best_count = dollar_signatures.most_common(1)[0]
+            # Only recalibrate if ≥2 rows agree AND positions differ
+            # from the current header-based period_map
+            if best_count >= 2 and set(best_sig) != set(period_map.keys()):
+                sorted_periods = sorted(
+                    period_map.items(), key=lambda x: x[0]
+                )
+                period_map = {
+                    dc: pk
+                    for dc, (_, pk) in zip(best_sig, sorted_periods)
+                }
 
     # Track last section-heading row for parent-label concatenation.
     # Heading rows have a non-empty label but no numeric data cells.

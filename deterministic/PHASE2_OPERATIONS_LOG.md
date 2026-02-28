@@ -515,3 +515,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 194 passed, 0 failed (verified in Iteration 22).
 - Decision: accept — pure housekeeping, no code or metrics impact
 - Next step: Iterate on NEXN extraction improvements or add new cases.
+
+## 2026-03-01 18:30 - Iteration 24 - NEXN
+- Agent: Copilot
+- Objective: Raise NEXN score from 76.3% to ≥85% by fixing gross_profit false positives, incomplete sga extraction, and percentage-table leakage.
+- Hypothesis: (1) Rejecting "per active customer/advertiser" and "margin" labels for gross_profit eliminates false positives. (2) Adding selling/marketing aliases to sga + additive accumulation logic in pipeline.py sums G&A + selling/marketing correctly. (3) Allowing mixed monetary/percentage tables through the pct-filter (via has_dollar_any exception) exposes the real monetary values. (4) Guarded dollar-column calibration (only on mixed pct/monetary tables) fixes period-column misalignment for rows without "$" markers. All without regressing GCT/IOSP/TZOO.
+- Files changed: deterministic/src/normalize/aliases.py (gross_profit rejection patterns, additive field support), deterministic/config/field_aliases.json (sga aliases expanded + "additive": true), deterministic/src/extract/tables.py (pct-filter $-exception, guarded dollar-column calibration), deterministic/src/pipeline.py (additive field accumulation logic with substring dedup)
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli extract NEXN, python3 -m deterministic.cli eval NEXN, python3 -m deterministic.cli eval --all
+- Metrics before: NEXN score=76.3% (58/76), matched=58, wrong=13, missed=5, extra=41, filings_coverage_pct=100.0%, required_fields_coverage_pct=93.4%. GCT=100.0%, IOSP=100.0%, TZOO=100.0%.
+- Metrics after: NEXN score=86.8% (66/76), matched=66, wrong=5, missed=5, extra=42, filings_coverage_pct=100.0%, required_fields_coverage_pct=93.4%. GCT=100.0%, IOSP=100.0%, TZOO=100.0%.
+- Tests: 194 passed, 0 failed.
+- Decision: accept — NEXN improves +10.5pp (76.3→86.8%) with zero regressions on existing cases. Remaining NEXN failures: income_tax (4 periods, label disambiguation needed), total_debt (FY2024 wrong, FY2021 missed), capex (4 missed — needs cash flow section parsing). These require separate iterations.
+- Next step: Address NEXN income_tax disambiguation (tax expenses vs deferred tax vs current tax), or add capex extraction from cash flow statements.

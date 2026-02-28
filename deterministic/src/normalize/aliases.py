@@ -46,6 +46,11 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
     "cash_and_equivalents": [
         re.compile(r"restricted\s*cash", re.I),
     ],
+    "gross_profit": [
+        re.compile(r"per\s+(?:active\s+)?customer", re.I),
+        re.compile(r"per\s+(?:active\s+)?advertiser", re.I),
+        re.compile(r"\bmargin\b", re.I),
+    ],
     "capex": [
         re.compile(r"finance\s+lease", re.I),
     ],
@@ -120,6 +125,7 @@ class AliasResolver:
     def __init__(self, config_path: str = ""):
         self._aliases: Dict[str, List[str]] = {}
         self._multipliers: Dict[str, Optional[float]] = {}
+        self._additive: set = set()  # canonical names marked additive
         self._lookup: Dict[str, str] = {}  # normalized alias -> canonical
 
         if not config_path:
@@ -142,6 +148,8 @@ class AliasResolver:
             multiplier = config.get("multiplier")
             self._aliases[canonical] = aliases
             self._multipliers[canonical] = multiplier
+            if config.get("additive", False):
+                self._additive.add(canonical)
 
             # Build lookup: normalized alias -> canonical
             self._lookup[self._normalize(canonical)] = canonical
@@ -214,6 +222,10 @@ class AliasResolver:
     def get_multiplier(self, canonical_name: str) -> Optional[float]:
         """Get the scale multiplier for a canonical field. None = no assumption."""
         return self._multipliers.get(canonical_name)
+
+    def is_additive(self, canonical: str) -> bool:
+        """Return True if canonical field uses additive accumulation."""
+        return canonical in self._additive
 
     def get_all_canonical_names(self) -> List[str]:
         """Return all known canonical field names."""
