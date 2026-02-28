@@ -374,12 +374,13 @@ def extract_from_markdown_table(
             cell_text = row[col_idx].strip()
             value = parse_number(cell_text)
 
-            # Sparse-column scan: if cell has no numeric value (empty or
-            # currency symbol like "$"), scan forward through subsequent
-            # columns until we find a number or hit another period column.
+            # Sparse-column scan: if cell has no numeric value (empty,
+            # currency symbol like "$", or stray closing paren from split-
+            # paren negatives), scan forward through subsequent columns
+            # until we find a number or hit another period column.
             # This handles EDGAR tables where each period spans multiple
             # columns: | $ | 83,902 | | | $ | 84,477 | |
-            if value is None and re.fullmatch(r"[$€£¥]?", cell_text):
+            if value is None and re.fullmatch(r"[$€£¥)]?", cell_text):
                 for scan_idx in range(col_idx + 1, len(row)):
                     if scan_idx in row_period_map and scan_idx != col_idx:
                         break  # Don't cross into another period's columns

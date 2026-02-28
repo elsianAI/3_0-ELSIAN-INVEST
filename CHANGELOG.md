@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] Iteration 22: IOSP 97.9→100.0% — sparse-scan regex in tables.py now includes ")" to handle split-paren 3rd column. Also lifts NEXN 73.7→76.3%. 194 tests green.
 - [DETERMINISTIC] Iteration 21: IOSP 88.4→97.9% — expected.json SGA/R&D restatement, dividends_per_share extraction from equity statements, _PRIMARY_IS_SECTION expanded, income_tax alias reject patterns. No regressions. 193 tests green.
 - [DETERMINISTIC] Iteration 20: sign normalization in pipeline — expense fields abs(), income_tax conditional on 'benefit' label. GCT 88→100%, IOSP 72.6→88.4%, TZOO stays 100%. 12 new unit tests (181 total).
 - [DETERMINISTIC] Iteration 19: GCT sign convention fix — income_tax, interest_expense flipped to positive in all 6 periods, cost_of_revenue FY2020 flipped to positive. Formalized comprehensive sign convention rules in curate-expected.prompt.md. GCT eval 100%→88% (13 wrong = pipeline sign mismatch, ground truth now correct).

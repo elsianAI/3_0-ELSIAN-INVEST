@@ -491,3 +491,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 193 passed, 0 failed.
 - Decision: accept — IOSP 88.4%→97.9% (+9.5pp). 4 wrongs fixed (SGA/R&D restatement), 5 missed recovered (dividends_per_share), income_tax aliases hardened. No regressions: GCT=100%, TZOO=100%, NEXN=73.7%. Remaining 2 wrongs (FY2023 sga=387.8 vs expected 380.5, FY2023 R&D=41.7 vs expected 49.0) are due to table parser not extracting 3rd-column parenthetical values from IS — separate tables.py fix needed.
 - Next step: Fix FY2023 SGA/R&D 3rd-column parenthetical parsing in tables.py, or iterate on NEXN extraction improvements.
+
+## 2026-02-28 18:00 - Iteration 22 - IOSP
+- Agent: Copilot
+- Objective: Fix IOSP last 2 wrongs (FY2023 sga=387.8 vs 380.5, FY2023 R&D=41.7 vs 49.0) caused by 3rd-column split-paren values not being extracted from SRC_001.
+- Hypothesis: The sparse-column scan in tables.py only triggers when the cell is empty or a currency symbol ($). When a period header lands on a ")" cell (closing paren from split-paren negative), the scan doesn't activate. Adding ")" to the triggering regex should fix extraction of 3rd+ columns in multi-period split-paren tables.
+- Files changed: deterministic/src/extract/tables.py (sparse-scan regex expanded to include ")"), deterministic/tests/unit/test_tables.py (new test: test_split_paren_third_column)
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli eval --all
+- Metrics before: IOSP score=97.9%, matched=93, wrong=2, missed=0, extra=187, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%
+- Metrics after: IOSP score=100.0%, matched=95, wrong=0, missed=0, extra=193, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%. NEXN also improved 73.7%→76.3% (same root cause). GCT=100%, TZOO=100%.
+- Tests: 194 passed, 0 failed.
+- Decision: accept — IOSP reaches 100% (95/95). Root cause was clear: ")" cell from split-paren negative blocked sparse-column scan. One-character regex fix. Also benefits NEXN (+2.6pp). Regression-free.
+- Next step: Iterate on NEXN extraction improvements or add new cases.

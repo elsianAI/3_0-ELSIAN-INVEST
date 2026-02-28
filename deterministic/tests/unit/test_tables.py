@@ -374,6 +374,27 @@ class TestPercentageTableFilter(unittest.TestCase):
         self.assertGreater(len(fields), 0,
                            "Monetary table should produce fields")
 
+    def test_split_paren_third_column(self):
+        """3-period table with split-paren negatives extracts ALL 3 columns.
+
+        Regression test: when a period header lands on a ')' cell from a
+        split-paren negative, the sparse-column scan must still activate
+        to find the real value in a subsequent cell.
+        """
+        table = (
+            "|  |  | 2025 |  |  | 2024 |  |  | 2023 |  |  |  |  |\n"
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- "
+            "| --- | --- | --- | --- |\n"
+            "| SGA |  |  | ( 285.1 | ) |  |  | ( 305.3 | ) |  "
+            "|  | ( 380.5 | ) |\n"
+        )
+        fields = extract_from_markdown_table(table, "income_statement", 0)
+        by_period = {f.column_header: f.value for f in fields if f.label == "SGA"}
+        self.assertAlmostEqual(by_period.get("FY2025"), -285.1)
+        self.assertAlmostEqual(by_period.get("FY2024"), -305.3)
+        self.assertAlmostEqual(by_period.get("FY2023"), -380.5,
+                               msg="3rd column with split-paren must be extracted")
+
 
 if __name__ == "__main__":
     unittest.main()
