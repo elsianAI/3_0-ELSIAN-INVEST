@@ -415,3 +415,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — housekeeping commit for supporting files.
 - Next step: Push all local commits to remote. Then add a 3rd ticker to validate generalization.
 
+## 2026-02-28 19:30 - Iteration 16 - IOSP
+- Agent: Copilot
+- Objective: Bootstrap new case IOSP (Innospec Inc, NASDAQ, USD, CIK 879354) — create case.json and acquire SEC filings.
+- Hypothesis: SEC EDGAR should have standard 10-K/10-Q filings for this US specialty chemicals company; acquire should download 28 filings with 100% coverage.
+- Files changed: deterministic/cases/IOSP/case.json (new)
+- Commands executed: python3 -m deterministic.cli acquire IOSP, python3 -m unittest discover -s deterministic/tests -v
+- Metrics before: N/A — new case, no expected.json yet.
+- Metrics after: N/A — no expected.json to evaluate against. Acquisition: 28 filings downloaded (6 annual, 12 quarterly, 10 earnings), 0 failed, 100.0% coverage.
+- Tests: 169 passed, 0 failed.
+- Decision: accept — filings acquired successfully. Clean.md review confirms income statement, balance sheet, and cash flow tables are well-structured. Scale is "(in millions)" throughout, "(in thousands)" for shares only. Note: two FY2023 10-K filings (SRC_003 799 lines, SRC_004 735 lines) — likely original + amendment. CIK resolved to 0001054905 by SEC API (user provided 879354).
+- Next step: Curate expected.json for IOSP using the curate-expected prompt template, then run first eval.
+
