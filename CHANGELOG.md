@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] Iteration 27: New case TEP (Teleperformance SE) — EU/IFRS company. Enhanced eu_regulators.py to import from pipeline 3.0 raw_filings_dir. Acquired 62 filings (16 source groups). Curated expected.json ANNUAL_ONLY (3 periods, 48 fields). First eval baseline: 4.2% (2/48). No regressions on existing cases.
 - [DETERMINISTIC] Iteration 26: NEXN 97.4→100.0% — total_debt reject patterns (repayment/receipt/proceeds), dash-as-zero in sparse-column scan for BS cells, "long term debt" alias (no hyphen). All 4 cases at 100%. 194 tests green.
 - [DETERMINISTIC] Iteration 25: NEXN 86.8→97.4% — income_tax reject 'taxes received', capex alias 'acquisition of fixed assets', income_tax aliases 'tax expenses'/'tax expenses (benefit)'. Zero regressions. 194 tests green.
 - [DETERMINISTIC] Iteration 24: NEXN 76.3→86.8% — gross_profit rejection patterns, sga additive accumulation (selling/marketing + G&A), pct-table filter with $-exception, guarded dollar-column calibration for mixed pct/monetary tables. Zero regressions (GCT/IOSP/TZOO all 100%). 194 tests green.

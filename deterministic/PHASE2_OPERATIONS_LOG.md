@@ -551,3 +551,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 194 passed, 0 failed.
 - Decision: accept — NEXN reaches 100% (76/76). All 4 cases at 100%. Three complementary fixes: (1) total_debt reject patterns block CF repayment/receipt lines, (2) dash-as-zero in sparse-column scan turns "-" into 0.0 for BS cells, (3) "long term debt" alias covers the non-hyphenated variant in SRC_003.
 - Next step: Add a new case or improve test coverage for dash-as-zero behavior.
+
+## 2026-03-01 00:10 - Iteration 27 - TEP
+- Agent: Copilot
+- Objective: Bootstrap new case TEP (Teleperformance SE) — EU/IFRS company, Euronext Paris, EUR. Enhance eu_regulators.py acquire to import raw filings from pipeline 3.0, curate expected.json (ANNUAL_ONLY), first eval.
+- Hypothesis: Enhancing fetch_eu_manual to auto-import from raw_filings_dir will bridge the gap between pipeline 3.0 crawled content and the deterministic module. PDF-based filings will produce lower extraction quality than HTML-based SEC filings, but the baseline will be established for future iteration.
+- Files changed: deterministic/src/acquire/eu_regulators.py (enhanced to import from raw_filings_dir with PDF-to-text and HTML-to-markdown generation), deterministic/cases/TEP/case.json (new), deterministic/cases/TEP/expected.json (new, 3 periods x 16 fields = 48 total), CHANGELOG.md, deterministic/PHASE2_OPERATIONS_LOG.md
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli acquire TEP, python3 -m deterministic.cli extract TEP, python3 -m deterministic.cli eval TEP, python3 -m deterministic.cli eval --all
+- Metrics before: N/A — new case, no previous TEP metrics. Existing cases: GCT=100.0%, IOSP=100.0%, NEXN=100.0%, TZOO=100.0%.
+- Metrics after: TEP score=4.2% (2/48), matched=2, wrong=7, missed=39, extra=2, filings_coverage_pct=100.0%, required_fields_coverage_pct=18.8%. GCT=100.0%, IOSP=100.0%, NEXN=100.0%, TZOO=100.0% — zero regressions.
+- Tests: 194 passed, 0 failed.
+- Decision: accept — TEP case bootstrapped successfully. eu_regulators.py enhanced to import 16 source groups (62 files) from pipeline 3.0 raw filings. expected.json curated from two press release PDFs (FY2025/FY2024 from tp-press-release-2025, FY2023 from SRC_001). Low extraction score (4.2%) is expected for PDF-based filings without structured HTML tables — the .txt files from PDF extraction lack table formatting that the pipeline's table parser needs.
+- Next step: Improve TEP extraction by (1) enhancing narrative extraction for IFRS press release patterns (e.g. "Revenue X,XXX" in prose), (2) improving period detection for EU filings with 2025/2024 comparative columns, (3) addressing scale detection issue (FY2025 ingresos=10.0 billion instead of 10209 million).
