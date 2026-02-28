@@ -110,4 +110,35 @@ if [ ${#missing_fields[@]} -gt 0 ]; then
 fi
 
 echo "[pre-commit] Traceability check PASSED. All fields present."
+
+# ── 5. Validate expected.json files if staged ───────────────────────────────
+
+STAGED_EXPECTED=$(git diff --cached --name-only | grep "^deterministic/cases/.*/expected\.json$" || true)
+
+if [ -n "$STAGED_EXPECTED" ]; then
+    echo "[pre-commit] Validating staged expected.json files..."
+    for expected_file in $STAGED_EXPECTED; do
+        # Validate using the deterministic validator
+        python3 -c "
+import sys
+from deterministic.src.validate_expected import validate_expected
+errors = validate_expected('$expected_file')
+if errors:
+    print(f'  INVALID: $expected_file')
+    for e in errors:
+        print(f'    - {e}')
+    sys.exit(1)
+else:
+    print(f'  VALID: $expected_file')
+" || {
+            echo ""
+            echo "ERROR: expected.json validation failed for: $expected_file"
+            echo "  Fix: Run 'python3 -m deterministic.cli validate <TICKER>' for details."
+            echo ""
+            exit 1
+        }
+    done
+    echo "[pre-commit] expected.json validation PASSED."
+fi
+
 exit 0

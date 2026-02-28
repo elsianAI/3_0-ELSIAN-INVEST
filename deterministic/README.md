@@ -1,8 +1,23 @@
 # Deterministic Extraction Module
 
-End-to-end Python module for extracting financial data from SEC EDGAR filings without LLMs.
+Sistema de extracción financiera determinista diseñado para escalar a cualquier empresa cotizada del mundo.
 
-Given a ticker, downloads filings, parses them, extracts financial fields, and evaluates against curated ground truth.
+Objetivo: dado un ticker de cualquier mercado, descargar sus filings regulatorios, extraer datos financieros estructurados y validarlos contra ground truth curado — sin dependencia de LLMs en la extracción core.
+
+## Visión de Arquitectura
+
+Este módulo no es un script de extracción — es un sistema de ingeniería pensado para crecer. La arquitectura objetivo se basa en clases con interfaces bien definidas por fase, de modo que cada componente sea intercambiable y testeable de forma aislada.
+
+**Principios de diseño:**
+
+- **Una clase por fase** (acquire, extract, normalize, merge, evaluate), cada una con un contrato de entrada/salida tipado.
+- **Múltiples implementaciones por fase**: por ejemplo, `SecEdgarFetcher` y `EsefFetcher` para acquire; `IxbrlExtractor`, `TableExtractor` y `NarrativeExtractor` para extract. Se registran y el pipeline decide cuál usar según el caso.
+- **Pipeline como orquestador ligero**: la clase `DeterministicPipeline` encadena fases y gestiona el contexto compartido (trazabilidad, audit log, confianza por dato). No contiene lógica de negocio.
+- **Configuración sobre código**: reglas de selección, prioridades de filing, pesos de sección — todo vive en `config/`, con override por caso en `case.json`. Nada hardcodeado.
+- **Cobertura global**: fetchers por regulador (SEC EDGAR, ESEF Europa, EDINET Japón...), iXBRL como fuente primaria donde exista, HTML/PDF como fallback universal.
+- **Preparado para producción**: en fase de desarrollo usamos ground truth curado para validar reglas. En producción, el pipeline funciona solo — con una capa LLM posterior que revisa y completa lo que la extracción determinista no cubre con confianza suficiente.
+
+La implementación actual está en transición hacia esta arquitectura. Ver `mejoras/IDEAS.md` para el roadmap detallado.
 
 ## Quick Start
 

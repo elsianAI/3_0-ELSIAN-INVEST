@@ -403,3 +403,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — TZOO wrong 3→0, score 98.9→100.0%. All 3 wrongs fixed: Q1-2022/total_equity (reject pattern), Q1-2024/income_tax (period affinity), Q1-2023/cash (period affinity). FY restatement behavior verified preserved (FY2019/cfo remains correct). GCT unchanged. Combined 95.2→96.0%.
 - Next step: Investigate GCT VIE sub-table confusion (4 wrong: FY2022-2023 total_assets/total_liabilities) and sign issues (FY2020 income_tax/interest_expense).
 
+## 2026-03-01 01:15 - Iteration 15 - INFRA
+- Agent: Copilot
+- Objective: Commit supporting infrastructure files accumulated during Phase 2 iterations.
+- Hypothesis: No metric impact — these are tooling/config/documentation files.
+- Files changed: .githooks/pre-commit, .github/copilot-instructions.md, .github/agents/deterministic.agent.md, .github/prompts/curate-expected.prompt.md, PLAN_FASE2_EXTRACCION_DETERMINISTA.md, deterministic/README.md, deterministic/cli.py, deterministic/config/selection_rules.json, deterministic/src/validate_expected.py, deterministic/tests/unit/test_validate_expected.py, deterministic/cases/GCT/case.json, deterministic/mejoras/IDEAS.md
+- Commands executed: git add + git commit
+- Metrics before: N/A — infrastructure only, no extraction logic changed.
+- Metrics after: N/A — infrastructure only.
+- Tests: 169 passed, 0 failed (unchanged from iteration 14).
+- Decision: accept — housekeeping commit for supporting files.
+- Next step: Push all local commits to remote. Then add a 3rd ticker to validate generalization.
+

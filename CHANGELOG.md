@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] Iteration 15: commit supporting infra files (pre-commit hook, copilot instructions, GCT case.json, selection_rules, validate_expected, IDEAS.md, CLI).
 - [DETERMINISTIC] Iteration 14: GCT 86.1→100.0%, TZOO 98.9→100.0% — split-paren parsing, VIE/note section deprioritization, mezzanine alias, reject patterns (add-back, finance lease, current/deferred tax), EPS basic-and-diluted duplication, capex+shares aliases — combined 100.0% (378/378), 169 tests green.
 - [DETERMINISTIC] Iteration 13: TZOO 100.0% — fix total_equity alias collision (reject "liabilities and" pattern) + cross-filing period affinity for Q periods (primary 10-Q wins over comparative) — wrong 3→0, 169 tests green, combined 96.0%.
 - [DETERMINISTIC] GCT+TZOO Iteration 12: parent-label concatenation, row-level $ period realignment, reject adjusted EPS/par-value shares, total L&E=total A alias — GCT 65.7→86.1%, TZOO 37.0→98.9%, combined 95.2% (360/378), 160 tests green.

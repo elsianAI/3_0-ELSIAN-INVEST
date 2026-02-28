@@ -6,6 +6,8 @@ Usage:
     python3 -m deterministic.cli eval TZOO
     python3 -m deterministic.cli run TZOO
     python3 -m deterministic.cli run --all
+    python3 -m deterministic.cli validate TZOO
+    python3 -m deterministic.cli validate --all
     python3 -m deterministic.cli dashboard
 """
 
@@ -181,6 +183,38 @@ def cmd_dashboard_eval() -> int:
     return 0
 
 
+def cmd_validate(args: argparse.Namespace) -> int:
+    """Validate expected.json structural consistency."""
+    from deterministic.src.validate_expected import validate_expected, validate_all_cases
+
+    if args.all:
+        cases_dir = str(Path(__file__).parent / "cases")
+        all_errors = validate_all_cases(cases_dir)
+        if not all_errors:
+            print("[validate] All expected.json files are valid.")
+            return 0
+        for ticker, errors in sorted(all_errors.items()):
+            print(f"\n[validate] {ticker}: {len(errors)} error(s)")
+            for err in errors:
+                print(f"  - {err}")
+        return 1
+
+    ticker = args.ticker
+    case_dir = _find_case_dir(ticker)
+    expected_path = str(Path(case_dir) / "expected.json")
+    print(f"[validate] {ticker} -> {expected_path}")
+
+    errors = validate_expected(expected_path)
+    if not errors:
+        print("  VALID: No errors found.")
+        return 0
+
+    print(f"  INVALID: {len(errors)} error(s):")
+    for err in errors:
+        print(f"  - {err}")
+    return 1
+
+
 def _print_eval_report(report) -> None:
     print(f"  Score: {report.score:.1f}% ({report.matched}/{report.total_expected})")
     print(f"  Matched: {report.matched}")
@@ -233,6 +267,11 @@ def main() -> int:
     # dashboard
     subparsers.add_parser("dashboard", help="Summary dashboard of all cases")
 
+    # validate
+    p_validate = subparsers.add_parser("validate", help="Validate expected.json consistency")
+    p_validate.add_argument("ticker", nargs="?", default="", help="Ticker symbol")
+    p_validate.add_argument("--all", action="store_true", help="Validate all cases")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -245,6 +284,7 @@ def main() -> int:
         "eval": cmd_eval,
         "run": cmd_run,
         "dashboard": cmd_dashboard,
+        "validate": cmd_validate,
     }
 
     handler = commands.get(args.command)

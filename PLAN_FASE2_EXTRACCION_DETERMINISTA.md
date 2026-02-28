@@ -546,6 +546,16 @@ Todo agente (Opus, Codex, User) que trabaje en `deterministic/` debe cumplir est
 - Después de cualquier refactor que toque más de 2 ficheros.
 - **Un commit = una iteración.** No acumular múltiples cambios en un solo commit.
 
+### Política de restatements en ground truth
+
+Política: **as-reported unless explicit restatement**.
+
+- `expected.json` usa el valor del **filing primario del periodo** (el 10-K/10-Q que cubre ese año/trimestre fiscal).
+- Excepción: usar valor de filing posterior SOLO si contiene evidencia textual explícita: `restated`, `as revised`, `as corrected`, `reclassified` en cabecera de columna comparativa o nota al pie.
+- Si un filing posterior muestra un comparativo diferente SIN trigger explícito → no es restatement → mantener filing primario.
+- Cuando se aplica restatement: documentar en el campo afectado un bloque `restatement` con trigger, evidencia, filing origen y valor original.
+- Raíz de `expected.json` debe incluir: `"restatement_policy": "as_reported_unless_explicit_restatement"`.
+
 ---
 
 ## 16. Para arrancar (Subfase A — caso TZOO)
