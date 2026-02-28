@@ -36,6 +36,7 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"liabilities\s+and\s+stockholders", re.I),
         re.compile(r"liabilities\s+and\s+shareholders", re.I),
         re.compile(r"liabilities\s+and\s+equity", re.I),
+        re.compile(r"mezzanine\s+equity", re.I),
         re.compile(r"discontinued\s+operations", re.I),
     ],
     "total_equity": [
@@ -45,26 +46,43 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
     "cash_and_equivalents": [
         re.compile(r"restricted\s*cash", re.I),
     ],
+    "capex": [
+        re.compile(r"finance\s+lease", re.I),
+    ],
     "income_tax": [
         re.compile(r"prepaid\s+income\s+tax", re.I),
         re.compile(r"income\s+tax\s+payable", re.I),
         re.compile(r"cash\s+paid.*income\s+tax", re.I),
         re.compile(r"cash.*refund.*income\s+tax", re.I),
         re.compile(r"deferred\s+income\s+tax", re.I),
+        re.compile(r"^add:", re.I),
+        re.compile(r"\bcurrent\s+tax\s+expense", re.I),
+        re.compile(r"\bdeferred\s+tax\s+expense", re.I),
+        re.compile(r"\btaxes\s+paid\b", re.I),
     ],
     "shares_outstanding": [
         re.compile(r"par\s+value", re.I),
         re.compile(r"preferred\s+stock", re.I),
-        re.compile(r"\bdiluted\b", re.I),
+        # Reject "diluted" labels UNLESS "basic" is also present
+        # (combined "basic and diluted" labels are valid share counts).
+        re.compile(r"^(?!.*\bbasic\b).*\bdiluted\b", re.I),
         re.compile(r"class\s+[a-z]\s", re.I),
     ],
     "eps_diluted": [
         re.compile(r"\badjusted\b", re.I),
         re.compile(r"non[\s-]?gaap", re.I),
+        re.compile(r"weighted\s+average", re.I),
+        re.compile(r"number\s+of.*shares", re.I),
     ],
     "eps_basic": [
         re.compile(r"\badjusted\b", re.I),
         re.compile(r"non[\s-]?gaap", re.I),
+        re.compile(r"weighted\s+average", re.I),
+        re.compile(r"number\s+of.*shares", re.I),
+    ],
+    "interest_expense": [
+        re.compile(r"^add:", re.I),
+        re.compile(r"\bpaid\b", re.I),
     ],
 }
 

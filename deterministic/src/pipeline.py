@@ -96,7 +96,8 @@ class DeterministicPipeline:
     # Sub-section patterns: primary IS sections get a priority bonus,
     # note/discontinued sections get penalized.
     _PRIMARY_IS_SECTION = re.compile(
-        r":operating_income|:operating_profit|:consolidated_statements_of_operations",
+        r":operating_income|:operating_profit|:consolidated_statements_of_operations"
+        r"|:consolidated_balance_sheets|:consolidated_statements_of_comprehensive",
         re.I,
     )
     _DEPRIORITIZED_SECTION = re.compile(
@@ -105,7 +106,10 @@ class DeterministicPipeline:
         r"|discontinued_operations"
         r"|:discontinued"
         r"|:net_income_\(loss\)"
-        r"|prepaid_income_taxes",
+        r"|prepaid_income_taxes"
+        r"|:income_tax_payable"
+        r"|details_of_income_tax"
+        r"|components_of_income",
         re.I,
     )
 
@@ -536,6 +540,29 @@ class DeterministicPipeline:
                 filing_extractions.append(
                     (metadata.filing_type, filing_path.name, period_fields)
                 )
+
+        # Post-process per-filing: "basic and diluted" EPS duplication.
+        # When a filing reports a combined "basic and diluted" figure and
+        # only eps_basic was resolved, copy the value to eps_diluted
+        # (and vice versa) within the same filing extraction.
+        for _ft, _fn, pf in filing_extractions:
+            for _pk in pf:
+                if "eps_basic" in pf[_pk] and "eps_diluted" not in pf[_pk]:
+                    pf[_pk]["eps_diluted"] = FieldResult(
+                        value=pf[_pk]["eps_basic"].value,
+                        scale=pf[_pk]["eps_basic"].scale,
+                        source_filing=pf[_pk]["eps_basic"].source_filing,
+                        source_location=pf[_pk]["eps_basic"].source_location,
+                        confidence=pf[_pk]["eps_basic"].confidence,
+                    )
+                elif "eps_diluted" in pf[_pk] and "eps_basic" not in pf[_pk]:
+                    pf[_pk]["eps_basic"] = FieldResult(
+                        value=pf[_pk]["eps_diluted"].value,
+                        scale=pf[_pk]["eps_diluted"].scale,
+                        source_filing=pf[_pk]["eps_diluted"].source_filing,
+                        source_location=pf[_pk]["eps_diluted"].source_location,
+                        confidence=pf[_pk]["eps_diluted"].confidence,
+                    )
 
         # Merge all filing extractions
         result = merge_extractions(

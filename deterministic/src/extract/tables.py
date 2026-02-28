@@ -34,6 +34,11 @@ def parse_number(text: str) -> Optional[float]:
     if text.startswith("(") and text.endswith(")"):
         is_negative = True
         text = text[1:-1].strip()
+    elif text.startswith("(") and not text.endswith(")"):
+        # Split-cell parenthetical: SEC filings often put ')' in the next cell.
+        # Treat "( 1,234" as negative.
+        is_negative = True
+        text = text[1:].strip()
     elif text.startswith("-") or text.startswith("−"):
         is_negative = True
         text = text[1:].strip()
