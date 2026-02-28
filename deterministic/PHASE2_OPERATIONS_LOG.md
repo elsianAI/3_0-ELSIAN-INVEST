@@ -443,3 +443,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
   - **8-K/Earnings**: None available (foreign private issuers don't file 8-K).
   - **Note**: This is the first IFRS case (TZOO/IOSP are US GAAP). Labels use IFRS terminology (e.g., "Profit (loss) for the year" vs "Net income", "Trade receivables" vs "Accounts receivable").
 - Next step: Curate expected.json for NEXN using the curate-expected prompt template (20-F annual periods only), then run first eval.
+
+## 2026-02-28 22:15 - Iteration 18 - NEXN
+- Agent: Copilot
+- Objective: Curate expected.json ground truth for NEXN (ANNUAL_ONLY scope) from 4 annual 20-F filings (SRC_001 to SRC_004).
+- Hypothesis: Manual extraction from audited IFRS financials should produce high-quality ground truth. First eval baseline expected in 50-80% range given IFRS label differences and pipeline limitations.
+- Files changed: deterministic/cases/NEXN/expected.json (new)
+- Commands executed: python3 -m deterministic.cli eval NEXN, python3 -m unittest discover -s deterministic/tests -v
+- Metrics before: N/A — no expected.json existed for NEXN.
+- Metrics after: score=73.7%, matched=56, wrong=15, missed=5, extra=38, filings_coverage_pct=100.0%, required_fields_coverage_pct=93.4%
+- Tests: 169 passed, 0 failed.
+- Decision: accept — expected.json curated with 4 periods (FY2024-FY2021), 19 fields each (76 total). Omitted fields: ebitda (only Adjusted EBITDA in filings), fcf (not stated), dividends_per_share (no dividends), interest_expense (Financing expenses includes non-interest items). Key decisions: (1) gross_profit = IFRS gross profit from reconciliation tables (includes D&A attributable to CoR), (2) sga = selling_and_marketing + G&A (reported separately by NEXN), (3) capex = Acquisition of fixed assets only (PP&E), (4) FY2024-FY2022 EPS post-consolidation from SRC_001 (2:1 share consolidation), FY2021 EPS pre-consolidation from SRC_002. First eval: 73.7% — 15 wrong (gross_profit scale mismatch, sga only finds G&A, EPS restatement), 5 missed (capex, total_debt FY2021).
+- Next step: Iterate on NEXN extraction — fix gross_profit extraction (pipeline reads wrong table row), improve sga alias to capture selling+marketing+G&A combined, address capex extraction, investigate EPS restatement handling.
