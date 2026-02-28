@@ -427,3 +427,19 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — filings acquired successfully. Clean.md review confirms income statement, balance sheet, and cash flow tables are well-structured. Scale is "(in millions)" throughout, "(in thousands)" for shares only. Note: two FY2023 10-K filings (SRC_003 799 lines, SRC_004 735 lines) — likely original + amendment. CIK resolved to 0001054905 by SEC API (user provided 879354).
 - Next step: Curate expected.json for IOSP using the curate-expected prompt template, then run first eval.
 
+## 2026-02-28 20:30 - Iteration 17 - NEXN
+- Agent: Copilot
+- Objective: Bootstrap new case NEXN (Nexxen International Ltd, NASDAQ, USD) — foreign private issuer filing 20-F + 6-K. Create case.json, acquire filings, review filing content.
+- Hypothesis: SEC EDGAR should resolve NEXN correctly and download 20-F (annual) and 6-K (periodic) filings. 6-K are likely cover-page wrappers without financial tables (same pattern as GCT), while 20-F should contain full IFRS financials.
+- Files changed: deterministic/cases/NEXN/case.json (new)
+- Commands executed: python3 -m deterministic.cli acquire NEXN, python3 -m unittest discover -s deterministic/tests -v
+- Metrics before: N/A — new case, no expected.json yet.
+- Metrics after: N/A — no expected.json to evaluate against. Acquisition: 16 filings downloaded (4 annual 20-F, 12 quarterly 6-K, 0 earnings), 0 failed, 100.0% coverage.
+- Tests: 169 passed, 0 failed.
+- Decision: accept — filings acquired successfully. Key findings:
+  - **CIK**: User provided 1622986 (old Tremor International). SEC ticker map resolved NEXN to CIK 1849396 (Nexxen International Ltd) — correct entity.
+  - **20-F (4 filings, FY2022–FY2025)**: All have .clean.md with all 4 financial sections (Income Statement, Balance Sheet, Cash Flow, Equity). Scale = "USD thousands" throughout. IFRS reporting. Revenue FY2024 = $365,477K. Complete EPS/shares data.
+  - **6-K (12 filings)**: ALL are wrapper cover pages — AGM notices, postponement announcements, and earnings press release covers referencing Exhibit 99.1. Zero financial tables in primary document. No .clean.md generated (correct behavior). Exhibit 99.1 content not captured.
+  - **8-K/Earnings**: None available (foreign private issuers don't file 8-K).
+  - **Note**: This is the first IFRS case (TZOO/IOSP are US GAAP). Labels use IFRS terminology (e.g., "Profit (loss) for the year" vs "Net income", "Trade receivables" vs "Accounts receivable").
+- Next step: Curate expected.json for NEXN using the curate-expected prompt template (20-F annual periods only), then run first eval.

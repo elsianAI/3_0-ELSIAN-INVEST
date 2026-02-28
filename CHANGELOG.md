@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] Iteration 17: new case NEXN (Nexxen International, Israel/UK FPI) — case.json created, 16 SEC filings acquired (4 annual 20-F, 12 quarterly 6-K, 0 earnings), 100% coverage. 6-K confirmed as wrapper cover pages (no financial tables). First IFRS case.
 - [DETERMINISTIC] Iteration 16: new case IOSP (Innospec Inc) — case.json created, 28 SEC filings acquired (6 annual, 12 quarterly, 10 earnings), 100% coverage, clean.md tables confirmed readable.
 - [DETERMINISTIC] Iteration 15: commit supporting infra files (pre-commit hook, copilot instructions, GCT case.json, selection_rules, validate_expected, IDEAS.md, CLI).
 - [DETERMINISTIC] Iteration 14: GCT 86.1→100.0%, TZOO 98.9→100.0% — split-paren parsing, VIE/note section deprioritization, mezzanine alias, reject patterns (add-back, finance lease, current/deferred tax), EPS basic-and-diluted duplication, capex+shares aliases — combined 100.0% (378/378), 169 tests green.
