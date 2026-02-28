@@ -88,6 +88,11 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"weighted\s+average", re.I),
         re.compile(r"number\s+of.*shares", re.I),
     ],
+    "total_debt": [
+        re.compile(r"\brepayment\b", re.I),
+        re.compile(r"\breceipt\b", re.I),
+        re.compile(r"\bproceeds\b", re.I),
+    ],
     "interest_expense": [
         re.compile(r"^add:", re.I),
         re.compile(r"\bpaid\b", re.I),

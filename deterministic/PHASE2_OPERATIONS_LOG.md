@@ -539,3 +539,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 194 passed, 0 failed.
 - Decision: accept — NEXN jumps +10.6pp (86.8→97.4%) with zero regressions. Remaining 2 failures are total_debt with expected=0 (FY2024 wrong: pipeline extracts -100000 from CF repayment line; FY2021 missed: no explicit debt=0 in filing). These require structural changes (e.g. explicit zero inference from BS absence).
 - Next step: Investigate total_debt=0 inference for NEXN, or move to new cases.
+
+## 2026-02-28 22:46 - Iteration 26 - NEXN
+- Agent: Copilot
+- Objective: Fix the last 2 NEXN failures — FY2024/total_debt (wrong: -100000 from CF repayment line) and FY2021/total_debt (missed: dash "-" in BS not parsed as 0).
+- Hypothesis: (A) Adding reject patterns for total_debt (`\brepayment\b`, `\breceipt\b`, `\bproceeds\b`) will block CF items from resolving to total_debt. (B) Adding dash-as-zero logic inside the sparse-column scan in tables.py will parse "-" as 0.0 when encountered in a period column span. (C) Adding "long term debt" (no hyphen) alias will let SRC_003 "Long term debt" rows resolve to total_debt.
+- Files changed: deterministic/src/extract/tables.py, deterministic/src/normalize/aliases.py, deterministic/config/field_aliases.json
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v; python3 -m deterministic.cli eval --all
+- Metrics before: NEXN score=97.4% (74/76), matched=74, wrong=2, missed=0, extra=43, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%. GCT=100.0%, IOSP=100.0%, TZOO=100.0%.
+- Metrics after: NEXN score=100.0% (76/76), matched=76, wrong=0, missed=0, extra=43, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%. GCT=100.0%, IOSP=100.0%, TZOO=100.0%.
+- Tests: 194 passed, 0 failed.
+- Decision: accept — NEXN reaches 100% (76/76). All 4 cases at 100%. Three complementary fixes: (1) total_debt reject patterns block CF repayment/receipt lines, (2) dash-as-zero in sparse-column scan turns "-" into 0.0 for BS cells, (3) "long term debt" alias covers the non-hyphenated variant in SRC_003.
+- Next step: Add a new case or improve test coverage for dash-as-zero behavior.

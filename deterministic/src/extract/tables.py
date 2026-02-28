@@ -425,10 +425,22 @@ def extract_from_markdown_table(
                 for scan_idx in range(col_idx + 1, len(row)):
                     if scan_idx in row_period_map and scan_idx != col_idx:
                         break  # Don't cross into another period's columns
-                    scan_val = parse_number(row[scan_idx].strip())
+                    scan_text = row[scan_idx].strip()
+                    scan_val = parse_number(scan_text)
                     if scan_val is not None:
                         value = scan_val
                         break
+                    # Dash-as-zero inside sparse scan: a dash in
+                    # a period's span means 0, not "no data".
+                    if scan_text in {"\u2014", "\u2013", "-"}:
+                        value = 0.0
+                        break
+
+            # Dash-as-zero: if the period column itself contains a
+            # dash, treat as 0.  Handles rows like
+            # "Long-term debt | - | 99,072" where "-" means zero.
+            if value is None and cell_text in {"\u2014", "\u2013", "-"}:
+                value = 0.0
 
             if value is not None:
                 location = f"table:{section_name}:tbl{table_idx}:row{row_idx + 1}:col{col_idx}"
