@@ -25,6 +25,7 @@ from deterministic.src.acquire.eu_regulators import fetch_eu_manual
 from deterministic.src.extract.detect import analyze_filing, FilingMetadata
 from deterministic.src.extract.tables import (
     extract_tables_from_clean_md,
+    extract_tables_from_text,
     TableField,
 )
 from deterministic.src.extract.narrative import (
@@ -184,7 +185,12 @@ class DeterministicPipeline:
         r"|prepaid_income_taxes"
         r"|:income_tax_payable"
         r"|details_of_income_tax"
-        r"|components_of_income",
+        r"|components_of_income"
+        r"|components_of_results"
+        r"|net_income.*margin"
+        r"|balance_sheet_data"
+        r"|federal_income_taxes"
+        r"|statutory_rate",
         re.I,
     )
 
@@ -617,6 +623,118 @@ class DeterministicPipeline:
                         )
 
             else:
+                # Space-aligned table extraction from .txt files
+                # (e.g. pdfplumber output with column-preserving layout)
+                txt_table_fields = extract_tables_from_text(
+                    text, source_filename=filing_path.name,
+                )
+                for tf in txt_table_fields:
+                    canonical = self._alias_resolver.resolve(tf.label)
+                    if canonical is None:
+                        audit.discard(
+                            field_name=tf.label,
+                            period=tf.column_header,
+                            reason="label_ambiguous",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                        )
+                        continue
+
+                    # Scale inference
+                    field_mult = self._alias_resolver.get_multiplier(canonical)
+                    scale, confidence = infer_scale_cascade(
+                        filing_scale, "", metadata.scale, field_mult
+                    )
+
+                    # Sanity check
+                    if not validate_scale_sanity(tf.value, canonical, scale):
+                        audit.discard(
+                            field_name=canonical,
+                            period=tf.column_header,
+                            reason="scale_uncertain",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                            scale=scale,
+                        )
+                        continue
+
+                    period_key = tf.column_header
+                    if not period_key or period_key == "unknown":
+                        audit.discard(
+                            field_name=canonical,
+                            period="unknown",
+                            reason="period_unknown",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                            scale=scale,
+                        )
+                        continue
+
+                    if period_key not in period_fields:
+                        period_fields[period_key] = {}
+
+                    # Collision resolution
+                    new_label_priority = self._alias_resolver.label_priority(
+                        canonical, tf.label
+                    )
+                    section_bonus = 0
+                    loc_lower = tf.source_location.lower()
+                    if "income_statement" in loc_lower:
+                        section_bonus = 1
+                    elif "balance_sheet" in loc_lower:
+                        section_bonus = 1
+                    elif "cash_flow" in loc_lower:
+                        section_bonus = 1
+                    new_sort_key = self.compute_sort_key(
+                        period_key=period_key,
+                        filing_type=metadata.filing_type,
+                        source_type="table",
+                        label_priority=new_label_priority,
+                        section_bonus=section_bonus,
+                        source_filing=filing_path.name,
+                        source_location=tf.source_location,
+                        rules=rules,
+                    )
+
+                    if canonical in period_fields[period_key]:
+                        existing = period_fields[period_key][canonical]
+                        old_sort_key = getattr(
+                            existing, "_sort_key",
+                            (999, 999, 0, ("", 0, 0, 0)),
+                        )
+                        if new_sort_key >= old_sort_key:
+                            audit.discard(
+                                field_name=canonical,
+                                period=period_key,
+                                reason="lower_priority_duplicate",
+                                source_filing=filing_path.name,
+                                raw_label=tf.label,
+                                raw_value=tf.value,
+                                scale=scale,
+                            )
+                            continue
+
+                    fr = FieldResult(
+                        value=_normalize_sign(canonical, tf.label, tf.value),
+                        scale=scale,
+                        source_filing=filing_path.name,
+                        source_location=tf.source_location,
+                        confidence=confidence,
+                    )
+                    fr._sort_key = new_sort_key  # type: ignore[attr-defined]
+                    period_fields[period_key][canonical] = fr
+                    audit.accept(
+                        field_name=canonical,
+                        period=period_key,
+                        source_filing=filing_path.name,
+                        raw_label=tf.label,
+                        raw_value=tf.value,
+                        scale=scale,
+                    )
+
                 # Narrative extraction from .txt files
                 narrative_fields = extract_from_narrative(
                     text, source_filename=filing_path.name

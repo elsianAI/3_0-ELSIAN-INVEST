@@ -45,6 +45,12 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
     ],
     "cash_and_equivalents": [
         re.compile(r"restricted\s*cash", re.I),
+        # Reject labels where "cash and cash equiv..." appears as substring
+        # but is NOT at the start (e.g., "Effect of exchange rate changes
+        # on cash and cash equivalents", "Net increase (decrease) in cash
+        # and cash equivalents").  Only "Cash and cash equivalents" (BS row)
+        # should resolve to this canonical.
+        re.compile(r"^(?!cash\b).*cash\s+and\s+cash\s+equiv", re.I),
     ],
     "gross_profit": [
         re.compile(r"per\s+(?:active\s+)?customer", re.I),
@@ -53,6 +59,7 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
     ],
     "capex": [
         re.compile(r"finance\s+lease", re.I),
+        re.compile(r"accrued\s+but\s+not\s+paid", re.I),
     ],
     "income_tax": [
         re.compile(r"before\s+income\s+tax", re.I),
@@ -97,6 +104,10 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"^add:", re.I),
         re.compile(r"\bpaid\b", re.I),
     ],
+    "research_and_development": [
+        re.compile(r"tax\s+credit", re.I),
+        re.compile(r"in[\s-]process", re.I),
+    ],
 }
 
 # Priority patterns: when multiple rows could map to same canonical,
@@ -111,6 +122,9 @@ _PRIORITY_PATTERNS: Dict[str, List[re.Pattern]] = {
     ],
     "cash_and_equivalents": [
         re.compile(r"^cash\s+and\s+cash\s+equivalents$", re.I),
+    ],
+    "cfo": [
+        re.compile(r"net\s+cash\s+(?:provided|used)\s+(?:by|in)\s+operating", re.I),
     ],
     "income_tax": [
         re.compile(r"^(total\s+)?income\s+tax\s+expense(\s*\(benefit\))?\s*$", re.I),

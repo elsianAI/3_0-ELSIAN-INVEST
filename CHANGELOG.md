@@ -1,5 +1,8 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
+## 2026-03-03
+- [DETERMINISTIC] Iteration 29: SONO 82.8→97.4% — reject patterns for ambiguous labels (R&D tax credits, capex accrued-not-paid, cash change lines), expanded _DEPRIORITIZED_SECTION (components_of_results, net_income_margin, balance_sheet_data, federal_income_taxes), smarter cross-filing merge (replace deprioritized values with better-quality candidates), cfo priority pattern for "net cash provided/used by operating". 17 of 20 WRONG fixed, zero regressions (GCT/IOSP/NEXN/TZOO all 100%). 194 tests green.
+
 ## 2026-03-02
 - [DETERMINISTIC] Iteration 28: New case SONO (Sonos Inc.) — non-standard FY ending Sep/Oct. Acquired 28 filings, curated expected.json ANNUAL_ONLY (6 periods, 116 fields). Fixed non-standard FY period detection: _MONTH_NAME_RE regex for full dates, annual-context Q→FY upgrade, filing-type 10-K context. Added aliases: net loss, loss per share, weighted-average shares. EPS parent-label concatenation for bare "Basic"/"Diluted" labels. First eval: 82.8% (96/116). Zero regressions (GCT/IOSP/NEXN/TZOO all 100%). 194 tests green.
 
