@@ -683,3 +683,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 202 passed, 0 failed (was 197; +5 new tables tests)
 - Decision: accept — hardening change, regression caught and fixed, abbreviated month support verified
 - Next step: Iteration 38 — isolate selection rules cache by config_dir
+
+## 2026-03-01 12:00 - Iteration 38 - ALL (hardening)
+- Agent: Copilot
+- Objective: Replace global class-level _SELECTION_RULES cache with per-config_dir cache dict to prevent cross-contamination when multiple DeterministicPipeline instances use different config directories.
+- Hypothesis: Keying the cache by str(Path(config_dir).resolve()) isolates selection rules per directory. This prevents a bug where a second pipeline instance would reuse rules loaded by the first.
+- Files changed: deterministic/src/pipeline.py, deterministic/tests/unit/test_selection.py
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli eval --all
+- Metrics before: GCT 100% (108/108), IOSP 100% (95/95), NEXN 100% (76/76), SONO 100% (116/116), TEP 100% (48/48), TZOO 100% (270/270)
+- Metrics after: GCT 100% (108/108), IOSP 100% (95/95), NEXN 100% (76/76), SONO 100% (116/116), TEP 100% (48/48), TZOO 100% (270/270) — no regression
+- Tests: 203 passed, 0 failed (was 202; +1 new cache isolation test)
+- Decision: accept — defensive fix for multi-config scenario, no regression
+- Next step: All hardening iterations complete. Consider adding new cases or further robustness improvements.

@@ -205,24 +205,26 @@ class DeterministicPipeline:
 
     # ── Selection rules (loaded from config/selection_rules.json) ────
 
-    _SELECTION_RULES: Optional[Dict] = None
+    _SELECTION_RULES_CACHE: Dict[str, Dict] = {}
     _TBL_RE = re.compile(r"tbl(\d+)")
     _ROW_RE = re.compile(r"row(\d+)")
     _COL_RE = re.compile(r"col(\d+)")
 
     @classmethod
     def _load_selection_rules(cls, config_dir: str) -> Dict:
-        """Load selection_rules.json once and cache."""
-        if cls._SELECTION_RULES is not None:
-            return cls._SELECTION_RULES
+        """Load selection_rules.json once per config_dir and cache."""
+        key = str(Path(config_dir).resolve())
+        if key in cls._SELECTION_RULES_CACHE:
+            return cls._SELECTION_RULES_CACHE[key]
         path = Path(config_dir) / "selection_rules.json"
         if path.exists():
-            cls._SELECTION_RULES = json.loads(
+            rules = json.loads(
                 path.read_text(encoding="utf-8")
             )
         else:
-            cls._SELECTION_RULES = {}
-        return cls._SELECTION_RULES
+            rules = {}
+        cls._SELECTION_RULES_CACHE[key] = rules
+        return rules
 
     @staticmethod
     def _section_bonus(source_location: str,
