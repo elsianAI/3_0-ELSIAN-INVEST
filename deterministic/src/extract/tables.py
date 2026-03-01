@@ -626,14 +626,6 @@ _YEAR_RE = re.compile(r"\b(20\d{2})\b")
 # Regex matching a date-headed column like 12/31/2025
 _DATE_COL_RE = re.compile(r"\b(\d{1,2}/\d{1,2}/(20\d{2}))\b")
 
-# Textual date header: "Dec. 31, 2024" or "September 30, 2025"
-_TEXT_DATE_COL_RE = re.compile(
-    r"((?:January|February|March|April|May|June|July|August|September|"
-    r"October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|"
-    r"Sep|Sept|Oct|Nov|Dec)\.?)\s+(\d{1,2}),?\s+(20\d{2})",
-    re.IGNORECASE,
-)
-
 # Header patterns for financial statement sections
 _SECTION_HEADER_RE = re.compile(
     r"(?:CONSOLIDATED\s+)?(?:INCOME\s+STATEMENT|BALANCE\s+SHEET|"

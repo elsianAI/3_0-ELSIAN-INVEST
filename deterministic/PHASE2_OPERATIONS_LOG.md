@@ -695,3 +695,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 203 passed, 0 failed (was 202; +1 new cache isolation test)
 - Decision: accept — defensive fix for multi-config scenario, no regression
 - Next step: All hardening iterations complete. Consider adding new cases or further robustness improvements.
+
+## 2026-03-01 14:00 - Iteration 39 - ALL (Codex review fixes)
+- Agent: Copilot
+- Objective: Address 3 findings from Codex code review: (P2) comparative suffix can pollute period assignment in narrative extraction, (P3) dead _TEXT_DATE_COL_RE regex in tables.py, (P3) untracked files noted.
+- Hypothesis: Trimming the suffix at the first comparative keyword in _detect_surrounding_period prevents period misassignment from phrases like "compared to $18M in 2023". Removing _TEXT_DATE_COL_RE eliminates dead code. No extraction regressions expected.
+- Files changed: deterministic/src/extract/narrative.py, deterministic/src/extract/tables.py, deterministic/tests/unit/test_narrative.py
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli eval --all
+- Metrics before: GCT 100% (108/108), IOSP 100% (95/95), NEXN 100% (76/76), SONO 100% (116/116), TEP 100% (48/48), TZOO 100% (270/270)
+- Metrics after: GCT 100% (108/108), IOSP 100% (95/95), NEXN 100% (76/76), SONO 100% (116/116), TEP 100% (48/48), TZOO 100% (270/270) — no regression
+- Tests: 206 passed, 0 failed (was 203; +3 new narrative period tests)
+- Decision: accept — Codex P2 and P3 findings resolved, all cases stable
+- Next step: Untracked files (.github/agents/elsian-4.agent.md, deterministic/cases/TALO/) are external artifacts — user decision to .gitignore or commit.

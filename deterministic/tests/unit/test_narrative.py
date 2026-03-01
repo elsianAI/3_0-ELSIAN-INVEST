@@ -128,6 +128,48 @@ class TestNarrativeFixture(unittest.TestCase):
         self.assertTrue(len(oi) >= 1, "Clean GAAP sentence should be extracted")
         self.assertAlmostEqual(oi[0].value, 4.8, places=1)
 
+    # ── P2 fix: comparative suffix must not pollute period ────────────
+
+    def test_comparative_suffix_does_not_set_period(self):
+        """'compared to $18M in 2023' should not assign FY2023 to primary."""
+        text = "Revenue was $20 million compared to $18 million in 2023."
+        fields = extract_from_narrative(text)
+        rev = [f for f in fields if "revenue" in f.label.lower()]
+        self.assertTrue(len(rev) >= 1, "Primary value should be extracted")
+        self.assertAlmostEqual(rev[0].value, 20.0, places=1)
+        self.assertNotEqual(
+            rev[0].period_hint, "FY2023",
+            "Period should NOT come from comparative clause",
+        )
+
+    def test_period_before_comparative_preserved(self):
+        """Period stated before a comparative clause should be kept."""
+        text = (
+            "For FY2024, revenue was $20 million "
+            "compared to $18 million in 2023."
+        )
+        fields = extract_from_narrative(text)
+        rev = [f for f in fields if "revenue" in f.label.lower()]
+        self.assertTrue(len(rev) >= 1, "Primary value should be extracted")
+        self.assertEqual(
+            rev[0].period_hint, "FY2024",
+            "Period from prefix should be preserved",
+        )
+
+    def test_period_between_value_and_comparative_preserved(self):
+        """Period after value but before 'compared to' should be kept."""
+        text = (
+            "Revenue was $20 million in Q3-2024, "
+            "compared to $18 million in Q3-2023."
+        )
+        fields = extract_from_narrative(text)
+        rev = [f for f in fields if "revenue" in f.label.lower()]
+        self.assertTrue(len(rev) >= 1, "Primary value should be extracted")
+        self.assertEqual(
+            rev[0].period_hint, "Q3-2024",
+            "Period between value and comparative should be preserved",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
