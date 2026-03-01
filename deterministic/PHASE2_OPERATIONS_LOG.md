@@ -636,3 +636,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — housekeeping commit to capture IFRS-supporting changes that were part of TEP iteration work
 - Next step: Commit pdfplumber integration (pdf_to_text.py + requirements.txt) as separate iteration. Then commit IDEAS.md documentation.
 
+## 2026-03-03 17:05 - Iteration 34 - ALL (housekeeping)
+- Agent: Copilot
+- Objective: Commit pdfplumber integration for column-preserving PDF extraction (replaces pypdf as primary extractor with pypdf as fallback).
+- Hypothesis: pdfplumber (layout=True) preserves table column alignment in European corporate PDFs where pypdf collapses whitespace. This enables the table parser to correctly reconstruct financial tables from PDF-derived filings (TEP).
+- Files changed: deterministic/src/acquire/pdf_to_text.py (pdfplumber primary + pypdf fallback), deterministic/requirements.txt (added pdfplumber>=0.10)
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v
+- Metrics before: N/A — pdfplumber already active in working tree since TEP iterations
+- Metrics after: N/A — no behavior change, formalizing existing state
+- Tests: 194 passed, 0 failed.
+- Decision: accept — new dependency pdfplumber approved by user for European PDF processing
+- Next step: Commit IDEAS.md documentation update.
+
