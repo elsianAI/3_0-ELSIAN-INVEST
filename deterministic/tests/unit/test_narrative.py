@@ -103,5 +103,31 @@ class TestNarrativeFixture(unittest.TestCase):
         self.assertNotIn(3.2, values, "Comparative value 3.2 should be blocked")
 
 
+    def test_non_gaap_suffix_blocked(self):
+        """Non-GAAP marker AFTER the value should also be suppressed."""
+        text = (
+            "Operating income was $4.8 million on a non-GAAP basis "
+            "for the fiscal year."
+        )
+        fields = extract_from_narrative(text)
+        oi = [f for f in fields if "operating" in f.label.lower()]
+        self.assertEqual(len(oi), 0, f"Non-GAAP suffix should be blocked: {oi}")
+
+    def test_non_gaap_prefix_still_blocked(self):
+        """Non-GAAP marker BEFORE the value (existing behavior)."""
+        text = "Adjusted operating income was $12.5 million for Q1."
+        fields = extract_from_narrative(text)
+        oi = [f for f in fields if "operating" in f.label.lower()]
+        self.assertEqual(len(oi), 0, f"Adjusted prefix should be blocked: {oi}")
+
+    def test_gaap_clean_sentence_extracted(self):
+        """A clean GAAP sentence should still be extracted normally."""
+        text = "Operating income was $4.8 million for the fiscal year."
+        fields = extract_from_narrative(text)
+        oi = [f for f in fields if "operating" in f.label.lower()]
+        self.assertTrue(len(oi) >= 1, "Clean GAAP sentence should be extracted")
+        self.assertAlmostEqual(oi[0].value, 4.8, places=1)
+
+
 if __name__ == "__main__":
     unittest.main()

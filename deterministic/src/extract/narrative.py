@@ -207,9 +207,10 @@ def extract_from_narrative(
         value = _parse_narrative_number(m.group("value"))
         if value is None:
             continue
-        prefix = text[max(0, m.start() - 60):m.start()]
-        if _NON_GAAP_CONTEXT.search(prefix):
+        context = text[max(0, m.start() - 100):m.end() + 100]
+        if _NON_GAAP_CONTEXT.search(context):
             continue
+        prefix = text[max(0, m.start() - 60):m.start()]
         if _COMPARATIVE_CONTEXT.search(prefix):
             continue
         period = _detect_surrounding_period(text, m.start())
@@ -230,9 +231,10 @@ def extract_from_narrative(
         value = _parse_narrative_number(m.group("value"))
         if value is None:
             continue
-        prefix = text[max(0, m.start() - 60):m.start()]
-        if _NON_GAAP_CONTEXT.search(prefix):
+        context = text[max(0, m.start() - 100):m.end() + 100]
+        if _NON_GAAP_CONTEXT.search(context):
             continue
+        prefix = text[max(0, m.start() - 60):m.start()]
         if _COMPARATIVE_CONTEXT.search(prefix):
             continue
         period = _detect_surrounding_period(text, m.start())

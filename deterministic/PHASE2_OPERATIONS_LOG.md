@@ -659,3 +659,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 194 passed, 0 failed.
 - Decision: accept — captures architectural decision rationale for future reference
 - Next step: All 6 cases at 100%. All working-tree changes committed. Consider adding new cases to expand coverage.
+
+## 2026-03-01 10:00 - Iteration 36 - ALL (hardening)
+- Agent: Copilot
+- Objective: Bidirectional non-GAAP context filter in narrative extractor — block values where non-GAAP/adjusted/pro forma/constant currency/segment appears AFTER the number (suffix), not just before (prefix).
+- Hypothesis: Replacing the 60-char prefix-only check with a ±100-char bidirectional context window for _NON_GAAP_CONTEXT will block suffix patterns like "Operating income was $4.8M on a non-GAAP basis". COMPARATIVE check stays prefix-only since it is inherently directional.
+- Files changed: deterministic/src/extract/narrative.py, deterministic/tests/unit/test_narrative.py
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli eval --all
+- Metrics before: GCT 100% (108/108), IOSP 100% (95/95), NEXN 100% (76/76), SONO 100% (116/116), TEP 100% (48/48), TZOO 100% (270/270)
+- Metrics after: GCT 100% (108/108), IOSP 100% (95/95), NEXN 100% (76/76), SONO 100% (116/116), TEP 100% (48/48), TZOO 100% (270/270) — no regression
+- Tests: 197 passed, 0 failed (was 194; +3 new narrative tests)
+- Decision: accept — hardening change, no regression, blocks latent non-GAAP suffix vulnerability
+- Next step: Iteration 37 — abbreviated month support in period mapping (markdown + text parser)
