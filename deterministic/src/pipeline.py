@@ -199,7 +199,10 @@ class DeterministicPipeline:
     # replace these values when a better source exists.
     _STRONGLY_DEPRIORITIZED_SECTION = re.compile(
         r"federal_income_taxes"
-        r"|statutory_rate",
+        r"|statutory_rate"
+        r"|:statements_of_operations:"
+        r"|:balance_sheets:"
+        r"|:statements_of_cash_flows:",
         re.I,
     )
 

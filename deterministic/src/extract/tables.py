@@ -387,6 +387,71 @@ def extract_from_markdown_table(
     if pct_row_count >= 2 and not has_dollar_any:
         return []
 
+    # ── Numeric-anchor calibration for sparse headers ─────────────
+    # When period columns in the header row are sparse (gap >= 2 between
+    # adjacent periods), the data values often sit at DIFFERENT columns
+    # than the header years.  E.g.:
+    #   header: | _ | 2025 | _ | 2024 | _ | 2023 | _ | _ | _ | _ |
+    #   data:   | lbl | _ | val | _ | _ | val | _ | _ | val | _ |
+    # Header years at [1,3,5], data at [2,5,8].  Without recalibration,
+    # col5 (FY2023 by header) picks up FY2024's value.
+    #
+    # Fix: scan data rows for numeric column positions.  When >=3 rows
+    # agree on a consistent N-column pattern (N = number of periods) that
+    # differs from the header columns, recalibrate period_map.
+    _pcols_sorted = sorted(period_map.keys())
+    _min_gap = min(
+        (_pcols_sorted[i + 1] - _pcols_sorted[i]
+         for i in range(len(_pcols_sorted) - 1)),
+        default=1,
+    )
+    _sparse_header = _min_gap >= 2
+    if _sparse_header and period_map and rows and len(period_map) >= 2:
+        from collections import Counter as _AnchorCounter
+        _num_patterns: _AnchorCounter = _AnchorCounter()
+        for _pr in rows:
+            _ncols = tuple(
+                i for i, cell in enumerate(_pr[1:], start=1)
+                if parse_number(cell.strip()) is not None
+            )
+            if len(_ncols) == len(period_map):
+                _num_patterns[_ncols] += 1
+        if _num_patterns:
+            _best_np, _best_nc = _num_patterns.most_common(1)[0]
+            _sorted_periods = sorted(
+                period_map.items(), key=lambda x: x[0]
+            )
+            _sorted_hcols = [c for c, _ in _sorted_periods]
+            _max_drift = max(
+                abs(nc - hc)
+                for nc, hc in zip(_best_np, _sorted_hcols)
+            )
+            if (
+                _best_nc >= 3
+                and set(_best_np) != set(period_map.keys())
+                and all(
+                    _best_np[i] < _best_np[i + 1]
+                    for i in range(len(_best_np) - 1)
+                )
+                and _max_drift <= 3
+                # Boundary-crossing check: only recalibrate when at
+                # least one data column sits AT or PAST the NEXT
+                # period's header column.  This distinguishes cases
+                # where the sparse scan would silently fail (TALO:
+                # data at col5 = header col5 for a DIFFERENT period)
+                # from cases where data is between headers and the
+                # sparse scan bridges the gap correctly (GCT CF:
+                # data at col4, next header at col5).
+                and any(
+                    _best_np[i] >= _sorted_hcols[i + 1]
+                    for i in range(len(_sorted_hcols) - 1)
+                )
+            ):
+                period_map = {
+                    nc: pk
+                    for nc, (_, pk) in zip(_best_np, _sorted_periods)
+                }
+
     # ── Dollar-column calibration (mixed pct/monetary tables only) ───
     # Some filings (e.g. IFRS 20-F) embed a "% of revenue" sub-column
     # next to each monetary sub-column under the same period header.
@@ -397,8 +462,8 @@ def extract_from_markdown_table(
     # pick up the percentage value instead of the monetary one.
     #
     # Guard: only apply when the table is confirmed as mixed (≥2 pct
-    # rows AND has "$" markers), so pure monetary tables (GCT, TZOO)
-    # are never affected.
+    # rows AND has "$" markers), so pure monetary tables are never
+    # affected by this secondary calibration.
     if pct_row_count >= 2 and has_dollar_any and period_map and rows:
         from collections import Counter
         dollar_signatures: Counter = Counter()
@@ -628,8 +693,8 @@ _DATE_COL_RE = re.compile(r"\b(\d{1,2}/\d{1,2}/(20\d{2}))\b")
 
 # Header patterns for financial statement sections
 _SECTION_HEADER_RE = re.compile(
-    r"(?:CONSOLIDATED\s+)?(?:INCOME\s+STATEMENT|BALANCE\s+SHEET|"
-    r"CASH\s+FLOW\s+STATEMENT|STATEMENT\s+OF\s+(?:FINANCIAL\s+POSITION|"
+    r"(?:CONSOLIDATED\s+)?(?:INCOME\s+STATEMENTS?|BALANCE\s+SHEETS?|"
+    r"CASH\s+FLOW\s+STATEMENTS?|STATEMENTS?\s+OF\s+(?:FINANCIAL\s+POSITION|"
     r"INCOME|OPERATIONS|CASH[-\s]?FLOWS?|"
     r"COMPREHENSIVE\s+(?:INCOME|LOSS))|"
     r"FINANCIAL\s+HIGHLIGHTS|KEY\s+(?:FINANCIAL\s+)?(?:DATA|FIGURES))",
@@ -638,11 +703,11 @@ _SECTION_HEADER_RE = re.compile(
 
 # Section-type detection for source_location tagging
 _IS_KEYWORDS = re.compile(
-    r"INCOME\s+STATEMENT|STATEMENT\s+OF\s+(?:OPERATIONS|INCOME)|PROFIT\s+(?:AND|OR)\s+LOSS",
+    r"INCOME\s+STATEMENTS?|STATEMENTS?\s+OF\s+(?:OPERATIONS|INCOME)|PROFIT\s+(?:AND|OR)\s+LOSS",
     re.IGNORECASE,
 )
 _BS_KEYWORDS = re.compile(
-    r"BALANCE\s+SHEET|FINANCIAL\s+POSITION",
+    r"BALANCE\s+SHEETS?|FINANCIAL\s+POSITION",
     re.IGNORECASE,
 )
 _CF_KEYWORDS = re.compile(
@@ -899,7 +964,8 @@ def extract_tables_from_text(
     # line that is clearly a section header (section number + "parent company").
     # TOC entries (ending with a page number) are excluded.
     _PC_SECTION_RE = re.compile(
-        r"^\d+\.\d+\.?\s+(?:parent\s+company|comptes\s+sociaux)",
+        r"^\d+\.\d+\.?\s+(?:parent\s+company|comptes\s+sociaux)"
+        r"|^Schedule\s+I[.\s\u2014\u2013-]",
         re.IGNORECASE,
     )
     parent_company_zone_start = len(lines)  # default: no zone
@@ -908,6 +974,17 @@ def extract_tables_from_text(
         if _PC_SECTION_RE.match(stripped):
             # Skip TOC entries that end with a page number
             if re.search(r"\b\d{1,4}\s*$", stripped):
+                continue
+            # Skip TOC entries where the next 1-2 lines contain a page
+            # reference like "F-\n43" (SEC filing index format).
+            is_toc_entry = False
+            for offset in range(1, 3):
+                if i + offset < len(lines):
+                    next_stripped = lines[i + offset].strip()
+                    if re.match(r"^[A-Z]-\s*\d*$", next_stripped):
+                        is_toc_entry = True
+                        break
+            if is_toc_entry:
                 continue
             parent_company_zone_start = i
             break
@@ -954,6 +1031,42 @@ def extract_tables_from_text(
             continue
         section_type = _detect_section_type(stripped)
         sections.append((i, stripped, section_type))
+
+    # Secondary pass: detect headers split across two lines.
+    # PDF-to-text conversion can break a word mid-line, producing
+    # "CONSOLIDATED B\nALANCE SHEETS" instead of "CONSOLIDATED BALANCE
+    # SHEETS".  Try joining consecutive non-empty lines (with and without
+    # a separating space) and check the combined text.
+    _existing_section_lines = {s[0] for s in sections}
+    for i in range(1, len(lines)):
+        if i >= exclusion_zone_start or (i - 1) >= exclusion_zone_start:
+            continue
+        prev_s = lines[i - 1].strip()
+        curr_s = lines[i].strip()
+        if not prev_s or not curr_s:
+            continue
+        # Skip if either line is already a detected section
+        if (i - 1) in _existing_section_lines or i in _existing_section_lines:
+            continue
+        # Try concatenation without space (split word) and with space
+        for combined in (prev_s + curr_s, prev_s + " " + curr_s):
+            if len(combined) > 120:
+                continue
+            m = _SECTION_HEADER_RE.search(combined)
+            if m and m.start() <= 15:
+                context_start = max(0, i - 21)
+                context = " ".join(
+                    lines[j].lower() for j in range(context_start, i - 1)
+                )
+                if "parent company" in context or "comptes sociaux" in context:
+                    break
+                section_type = _detect_section_type(combined)
+                sections.append((i - 1, combined, section_type))
+                _existing_section_lines.add(i - 1)
+                break
+
+    # Re-sort sections by line number after adding split-header entries
+    sections.sort(key=lambda s: s[0])
 
     if not sections:
         return []

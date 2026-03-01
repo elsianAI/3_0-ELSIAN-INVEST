@@ -442,5 +442,94 @@ class TestAbbreviatedMonthPeriods(unittest.TestCase):
         self.assertIn("FY2024", headers, "Dec. 31 → FY")
 
 
+class TestNumericAnchorCalibration(unittest.TestCase):
+    """Numeric-anchor calibration for sparse-header tables.
+
+    EDGAR tables where header years sit at columns [1,3,5] but actual
+    data sits at [2,5,8] require recalibrating period_map so that the
+    sparse-column scan doesn't mis-assign values across periods.
+    """
+
+    def test_sparse_header_with_shifted_data(self):
+        """Headers at cols [1,3,5], data at [2,5,8] — must recalibrate.
+
+        Without calibration, col5 (FY2023 by header) picks up FY2024's
+        value (1,973,568).  With calibration, FY2023 correctly gets col8.
+        """
+        table = (
+            "|  | 2025 |  | 2024 |  | 2023 |  |  |  |  |\n"
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n"
+            "| Revenue |  | 1,780,070 |  |  | 1,973,568 |  |  | 1,457,886 |  |\n"
+            "| SGA |  | 155,368 |  |  | 201,517 |  |  | 158,493 |  |\n"
+            "| DD&A |  | 1,056,281 |  |  | 1,023,558 |  |  | 663,534 |  |\n"
+            "| Accretion |  | 125,296 |  |  | 117,604 |  |  | 86,152 |  |\n"
+        )
+        fields = extract_from_markdown_table(table, "income_statement", 0)
+        by_period = {}
+        for f in fields:
+            if f.label == "Revenue":
+                by_period[f.column_header] = f.value
+        self.assertAlmostEqual(by_period.get("FY2025"), 1780070.0)
+        self.assertAlmostEqual(by_period.get("FY2024"), 1973568.0)
+        self.assertAlmostEqual(
+            by_period.get("FY2023"), 1457886.0,
+            msg="FY2023 must get col8 value, not col5 (FY2024's data)"
+        )
+
+    def test_no_calibration_when_data_between_headers(self):
+        """Headers at [1,3,5], data at [1,4,7] — scan handles this fine.
+
+        When numeric columns don't cross into the next header col
+        (col4 < col5), the sparse scan finds the value correctly.
+        Recalibration should NOT fire.
+        """
+        table = (
+            "|  | 2025 |  | 2024 |  | 2023 |  |  |  |  |  |  |\n"
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n"
+            "| Revenue | 300,666 |  |  | 285,236 |  |  | 188,633 |  |  |  |  |\n"
+            "| SGA | 46,559 |  |  | 73,944 |  |  | 30,008 |  |  |  |  |\n"
+            "| R&D | 10,832 |  |  | 9,791 |  |  | 3,925 |  |  |  |  |\n"
+            "| OpExp | 155,690 |  |  | 154,614 |  |  | 78,555 |  |  |  |  |\n"
+        )
+        fields = extract_from_markdown_table(table, "income_statement", 0)
+        by_period = {}
+        for f in fields:
+            if f.label == "Revenue":
+                by_period[f.column_header] = f.value
+        self.assertAlmostEqual(by_period.get("FY2025"), 300666.0)
+        self.assertAlmostEqual(by_period.get("FY2024"), 285236.0)
+        self.assertAlmostEqual(by_period.get("FY2023"), 188633.0)
+
+    def test_mixed_layout_rows_no_calibration(self):
+        """Table with mixed column layouts — calibration must not fire.
+
+        Some rows have data at (1,3,5) and others at (1,4,7).  The
+        majority pattern (1,4,7) doesn't cross headers, so no
+        calibration should occur.  Row at (1,3,5) still works via
+        direct header match.
+        """
+        table = (
+            "|  | 2025 |  | 2024 |  | 2023 |  |  |  |  |  |  |\n"
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n"
+            "| DD&A | 8,332 |  | 8,524 |  | 2,873 |  |  |  |  |  |  |\n"
+            "| SBC | 4,951 |  | 16,825 |  | 2,503 |  |  |  |  |  |  |\n"
+            "| AR | 5,765 |  |  | 234 |  |  | 5,058 |  |  |  |  |\n"
+            "| Inv | 11,517 |  |  | 46,875 |  |  | 16,514 |  |  |  |  |\n"
+            "| AP | 52,906 |  |  | 38,188 |  |  | 46,258 |  |  |  |  |\n"
+        )
+        fields = extract_from_markdown_table(table, "cash_flow", 0)
+        by_period = {}
+        for f in fields:
+            if f.label == "DD&A":
+                by_period[f.column_header] = f.value
+        self.assertAlmostEqual(by_period.get("FY2025"), 8332.0)
+        self.assertAlmostEqual(
+            by_period.get("FY2024"), 8524.0,
+            msg="DD&A at col3 must map to FY2024 (header col3), "
+            "not be shifted by majority-pattern calibration"
+        )
+        self.assertAlmostEqual(by_period.get("FY2023"), 2873.0)
+
+
 if __name__ == "__main__":
     unittest.main()

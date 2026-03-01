@@ -734,3 +734,18 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 206 passed, 0 failed
 - Decision: accept — generic download infrastructure in place. Annual reports acquired but are "Integrated Reports" (marketing PDFs, no full P&L tables). FY2022/2021/2019 press releases with tabular financials are NOT available from tp.com/SourcesPack; tp.com is a SPA with obfuscated media IDs not discoverable via static scraping. Historical curation requires locating the annual results press releases via another route (AMF BDIF portal, Wayback Machine, or manual IR contact).
 - Next step: Find FY2023 annual press release URL (would have FY2022 as comparative). Once press releases are located and added to `filings_sources`, re-run acquire and curate expected.json for FY2022/2021/2019.
+
+## 2026-03-02 10:30 - Iteration 42 - TALO
+- Agent: Copilot
+- Objective: Improve TALO score from 36.5% baseline toward ≥85%. Multiple targeted fixes: DD&A alias, Schedule I deprioritization, plural section-header regex, TOC false-positive skip, and a new numeric-anchor calibration for sparse-header tables to fix the critical column-shift issue.
+- Hypothesis: The dominant root cause of wrong extractions is a column shift: 3-year IS tables have header years at sparse cols [1,3,5] but data at [2,5,8], causing FY2023 (col5 by header) to pick up FY2024's value. A numeric-anchor calibration that detects this boundary-crossing pattern and recalibrates period_map should fix ~19 IS fields across FY2023/FY2022/FY2021. Secondary fixes (DD&A alias, Schedule I patterns, plural regex, TOC skip) address additional misses.
+- Files changed: `deterministic/src/extract/tables.py` (numeric-anchor calibration, _SECTION_HEADER_RE plural, _IS_KEYWORDS/_BS_KEYWORDS plural, _PC_SECTION_RE Schedule I, TOC F- skip, split-header secondary pass), `deterministic/src/pipeline.py` (_STRONGLY_DEPRIORITIZED_SECTION patterns for Schedule I sections), `deterministic/config/field_aliases.json` (DD&A aliases), `deterministic/src/merge.py` (debug cleanup), `deterministic/tests/unit/test_tables.py` (+3 numeric-anchor calibration tests)
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v` (multiple runs, all green)
+  - `python3 -m deterministic.cli eval TALO` (before and after)
+  - `python3 -m deterministic.cli eval --all` (regression check)
+- Metrics before: TALO score=36.5% (31/85), matched=31, wrong=41, missed=13, extra=195, required_fields_coverage=84.7%. GCT=100%, IOSP=100%, NEXN=100%, SONO=100%, TEP=100%, TZOO=100%.
+- Metrics after: TALO score=70.6% (60/85), matched=60, wrong=19, missed=6, extra=229, required_fields_coverage=92.9%. GCT=100% (108/108), IOSP=100% (95/95), NEXN=100% (76/76), SONO=100% (116/116), TEP=100% (48/48), TZOO=100% (270/270) — zero regressions.
+- Tests: 209 passed, 0 failed (was 206; +3 new numeric-anchor calibration tests)
+- Decision: accept — TALO +34.1pp (36.5% → 70.6%). Column-shift fix resolved 19 IS/CF fields across 3 historical periods. Boundary-crossing condition prevents false calibration on tables with mixed row layouts (GCT CF, etc.). Remaining 19 wrong are BS fields (consolidated BS only in .txt vertical format, not in .clean.md markdown tables) and capex (wrong sign/source). 6 missed are FY2022/FY2021 EPS/cash/debt from older periods not covered in available tables.
+- Next step: (a) Address capex sign issue (expected negative, actual positive — investigate source table and sign normalization), (b) Investigate .txt vertical-format parsing to extract consolidated BS/CF fields, (c) Consider Schedule I → consolidated mapping or .txt parser improvements for total_assets/total_liabilities/total_equity.
