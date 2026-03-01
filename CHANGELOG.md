@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] Iteration 40: New case TALO (Talos Energy, oil & gas E&P, NYSE, USD). Bootstrap: acquire 12 filings (4 annual 10-Ks), curate expected.json (5 periods, 85 fields). First eval: 36.5% (31/85).
 - [DETERMINISTIC] Iteration 39: Codex review fixes — comparative suffix period trimming in narrative, dead _TEXT_DATE_COL_RE regex removed from tables. 3 new tests.
 - [DETERMINISTIC] Iteration 38: isolate selection rules cache by config_dir (Dict keyed by resolved path).
 - [DETERMINISTIC] Iteration 37: period parser hardening — abbreviated month support (Sep., Dec., Sept.) in markdown/txt tables + 'Quarters Ended' period pattern. 5 new tests.

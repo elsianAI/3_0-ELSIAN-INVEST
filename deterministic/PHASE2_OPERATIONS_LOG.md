@@ -707,3 +707,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 206 passed, 0 failed (was 203; +3 new narrative period tests)
 - Decision: accept — Codex P2 and P3 findings resolved, all cases stable
 - Next step: Untracked files (.github/agents/elsian-4.agent.md, deterministic/cases/TALO/) are external artifacts — user decision to .gitignore or commit.
+
+## 2026-03-01 18:00 - Iteration 40 - TALO (new case bootstrap + expected.json curation + first eval)
+- Agent: Copilot
+- Objective: Bootstrap new case TALO (Talos Energy, NYSE, oil & gas E&P, USD). Acquire filings from SEC, curate expected.json (ANNUAL_ONLY, 5 periods FY2025-FY2021, 17 fields each), run first eval.
+- Hypothesis: Acquire will download 10-K filings for 5+ years. Expected.json curated from reading .clean.md and .txt filings (consolidated BS from .txt since .clean.md captures parent-only Schedule I). First eval will show low score due to oil & gas specific terminology (DD&A, G&A) and parent-only BS extraction in .clean.md.
+- Files changed: deterministic/cases/TALO/case.json (new), deterministic/cases/TALO/expected.json (new), deterministic/cases/TALO/filings/ (12 filings acquired)
+- Commands executed: python3 -m deterministic.cli acquire TALO, python3 -m deterministic.cli eval TALO, python3 -m unittest discover -s deterministic/tests -v
+- Metrics before: N/A — new case, no prior extraction
+- Metrics after: TALO score 36.5% (31/85) — matched=31, wrong=41, missed=13, extra=195, required_fields_coverage=84.7%
+- Tests: 206 passed, 0 failed
+- Decision: accept — new case bootstrapped and first eval establishes baseline. Key issues: (1) .clean.md has parent-only Schedule I BS → pipeline extracts wrong total_assets/liabilities/equity, (2) "Depreciation, depletion and amortization" not aliased to depreciation_amortization, (3) many wrong values from non-consolidated tables.
+- Next step: Improve TALO score by (a) adding "depreciation depletion and amortization" alias, (b) investigating BS extraction from .clean.md parent-only issue, (c) fixing CFO/capex extraction from wrong sections.
