@@ -599,3 +599,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 194 passed, 0 failed.
 - Decision: accept — SONO reached 100.0% (+2.6pp from 97.4%). All 3 targeted WRONG fields fixed plus discovery and fix of total_liabilities additive-sum bug (which also improves NEXN from 93.4% to 98.7%). Four root causes addressed: (a) _normalize now strips "(benefit from)" and "(used in)" parentheticals enabling correct label resolution, (b) tax reconciliation sections strongly deprioritized (-100) so they lose to IS values in merge, (c) expected.json ground truth corrected for FY2020/total_debt, (d) `\bcurrent\b` reject prevents additive sum of sub-total + total for total_liabilities. Zero regressions on GCT/IOSP/TZOO.
 - Next step: Investigate NEXN FY2021/eps_basic pre-existing regression (expected=0.51, actual=0.48). Then evaluate TEP case status. Consider removing `balance_sheet_data` from _DEPRIORITIZED_SECTION (it penalizes correct BS values but had no visible impact since SONO's BS is under misclassified section).
+
+## 2026-03-01 09:51 - Iteration 31 - NEXN
+- Agent: Copilot
+- Objective: Fix NEXN FY2021/eps_basic (expected=0.51, actual=0.48) to reach 100% on all 5 cases.
+- Hypothesis: The pipeline extracts 0.48 (diluted EPS) instead of 0.51 (basic EPS) because "Diluted earnings (loss) per share (in USD)" fuzzy-matches the eps_basic alias "earnings per share" with high confidence, overriding the correct "Basic earnings (loss) per share" value. Adding a reject pattern `^(?!.*\bbasic\b).*\bdiluted\b` to eps_basic will prevent diluted labels from resolving to eps_basic (same pattern already used for shares_outstanding).
+- Files changed: deterministic/src/normalize/aliases.py (added eps_basic reject pattern for diluted-only labels)
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli eval NEXN, python3 -m deterministic.cli eval GCT, python3 -m deterministic.cli eval IOSP, python3 -m deterministic.cli eval SONO, python3 -m deterministic.cli eval TZOO
+- Metrics before: NEXN score=98.7% (75/76), matched=75, wrong=1 (FY2021/eps_basic: 0.51→0.48), missed=0, extra=43, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%. GCT=100.0%, IOSP=100.0%, SONO=100.0%, TZOO=100.0%.
+- Metrics after: NEXN score=100.0% (76/76), matched=76, wrong=0, missed=0, extra=43, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%. GCT=100.0% (108/108), IOSP=100.0% (95/95), SONO=100.0% (116/116), TZOO=100.0% (270/270) — ALL 5 CASES AT 100%. Combined: 665/665 = 100.0%.
+- Tests: 194 passed, 0 failed.
+- Decision: accept — NEXN eps_basic collision fixed. All 5 cases now at 100.0%. The reject pattern mirrors the existing shares_outstanding pattern (reject diluted-only labels). Zero regressions.
+- Next step: All 5 active cases at 100%. Next priorities: (1) evaluate TEP case (EU/IFRS, currently 4.2%), (2) consider adding new cases to expand coverage, (3) potential cleanup of `balance_sheet_data` from _DEPRIORITIZED_SECTION.

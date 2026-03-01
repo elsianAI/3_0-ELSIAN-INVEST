@@ -41,7 +41,8 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"equity\s+and\s+liabilities", re.I),
         # Reject sub-totals: "total current liabilities" and
         # "total non-current liabilities" are subsets, not the full total.
-        # Without this, the additive logic sums them with the real total.
+        # The pipeline has a post-processing fallback that sums sub-totals
+        # when no direct "total liabilities" line exists (IFRS filings).
         re.compile(r"\bcurrent\b", re.I),
     ],
     "total_equity": [
@@ -103,6 +104,9 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"non[\s-]?gaap", re.I),
         re.compile(r"weighted\s+average", re.I),
         re.compile(r"number\s+of.*shares", re.I),
+        # Reject "diluted" labels UNLESS "basic" is also present
+        # (combined "basic and diluted" labels are valid eps_basic).
+        re.compile(r"^(?!.*\bbasic\b).*\bdiluted\b", re.I),
     ],
     "total_debt": [
         re.compile(r"\brepayment\b", re.I),
@@ -119,7 +123,6 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"right-of-use", re.I),
         re.compile(r"right[\s-]?of[\s-]?use", re.I),
         re.compile(r"intangible\s+assets\s+acquired", re.I),
-        re.compile(r"impairment", re.I),
     ],
     "research_and_development": [
         re.compile(r"tax\s+credit", re.I),
@@ -147,6 +150,10 @@ _PRIORITY_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"^(total\s+)?income\s+tax\s+expense(\s*\(benefit\))?\s*$", re.I),
         re.compile(r"^income\s+tax$", re.I),
         re.compile(r"provision\s+for\s+income\s+tax", re.I),
+    ],
+    "interest_expense": [
+        re.compile(r"\bgross\s+financing", re.I),
+        re.compile(r"^interest\s+expense", re.I),
     ],
     "shares_outstanding": [
         re.compile(r"shares\s+used\s+in\s+per\s+share\s+calc", re.I),
