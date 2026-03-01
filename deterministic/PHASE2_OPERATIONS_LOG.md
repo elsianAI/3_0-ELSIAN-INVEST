@@ -671,3 +671,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 197 passed, 0 failed (was 194; +3 new narrative tests)
 - Decision: accept — hardening change, no regression, blocks latent non-GAAP suffix vulnerability
 - Next step: Iteration 37 — abbreviated month support in period mapping (markdown + text parser)
+
+## 2026-03-01 11:00 - Iteration 37 - ALL (hardening)
+- Agent: Copilot
+- Objective: Support abbreviated months (Sep., Dec., Sept., etc.) in markdown table period mapping and space-aligned text parser. Also add 'Quarters Ended' pattern to prevent Q→FY upgrade in quarterly summary tables.
+- Hypothesis: Expanding _MONTH_NAME_RE, _MONTH_TO_NUM, standalone date regex, and adding _resolve_month() helper will correctly parse headers with abbreviated months. Adding 'Quarters Ended' to _SUB_PERIOD_HDR_RE and as a dedicated pattern in _identify_period_columns will prevent quarterly data from being mapped as annual when tables use abbreviated month dates (e.g., 'Dec. 31, 2019').
+- Files changed: deterministic/src/extract/tables.py, deterministic/tests/unit/test_tables.py
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli eval --all
+- Metrics before: GCT 100% (108/108), IOSP 100% (95/95), NEXN 100% (76/76), SONO 100% (116/116), TEP 100% (48/48), TZOO 100% (270/270)
+- Metrics after: GCT 100% (108/108), IOSP 100% (95/95), NEXN 100% (76/76), SONO 100% (116/116), TEP 100% (48/48), TZOO 100% (270/270) — no regression. Intermediate regression discovered and fixed: TZOO Q4→FY upgrade for 'Quarters Ended' tables.
+- Tests: 202 passed, 0 failed (was 197; +5 new tables tests)
+- Decision: accept — hardening change, regression caught and fixed, abbreviated month support verified
+- Next step: Iteration 38 — isolate selection rules cache by config_dir

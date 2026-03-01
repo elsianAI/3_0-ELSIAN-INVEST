@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] Iteration 37: period parser hardening — abbreviated month support (Sep., Dec., Sept.) in markdown/txt tables + 'Quarters Ended' period pattern. 5 new tests.
 - [DETERMINISTIC] Iteration 36: narrative hardening — bidirectional non-GAAP context filter (±100 chars), COMPARATIVE stays prefix-only. 3 new tests.
 
 ## 2026-03-03

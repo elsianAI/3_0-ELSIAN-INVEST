@@ -69,7 +69,8 @@ def parse_number(text: str) -> Optional[float]:
 
 _MONTH_NAME_RE = re.compile(
     r"^(?:January|February|March|April|May|June|July|August|September|"
-    r"October|November|December)\s+\d{1,2},?\s*(?:\d{4})?$",
+    r"October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|"
+    r"Oct|Nov|Dec)\.?\s+\d{1,2},?\s*(?:\d{4})?$",
     re.IGNORECASE,
 )
 
@@ -167,7 +168,15 @@ _MONTH_TO_NUM = {
     "january": 1, "february": 2, "march": 3, "april": 4,
     "may": 5, "june": 6, "july": 7, "august": 8,
     "september": 9, "october": 10, "november": 11, "december": 12,
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4,
+    "jun": 6, "jul": 7, "aug": 8, "sep": 9, "sept": 9,
+    "oct": 10, "nov": 11, "dec": 12,
 }
+
+
+def _resolve_month(token: str) -> int:
+    """Normalize a month token and return its number, or 0 if unknown."""
+    return _MONTH_TO_NUM.get(token.lower().rstrip("."), 0)
 
 
 def _date_to_period(month_num: int, year: str,
@@ -218,12 +227,12 @@ def _identify_period_columns(
 
         # "Three Months Ended Sep 30, 2024" -> Q3-2024
         m = re.search(
-            r"three\s+months?\s+ended\s+([A-Za-z]+).*?(\d{4})",
+            r"three\s+months?\s+ended\s+([A-Za-z]+\.?).*?(\d{4})",
             header_clean,
             re.IGNORECASE,
         )
         if m:
-            month_num = _MONTH_TO_NUM.get(m.group(1).lower(), 0)
+            month_num = _resolve_month(m.group(1))
             if month_num:
                 q = (month_num - 1) // 3 + 1
                 period_map[idx] = f"Q{q}-{m.group(2)}"
@@ -231,7 +240,7 @@ def _identify_period_columns(
 
         # "Nine Months Ended September 30, 2024" -> 9M-2024
         m = re.search(
-            r"nine\s+months?\s+ended\s+([A-Za-z]+).*?(\d{4})",
+            r"nine\s+months?\s+ended\s+([A-Za-z]+\.?).*?(\d{4})",
             header_clean,
             re.IGNORECASE,
         )
@@ -241,27 +250,41 @@ def _identify_period_columns(
 
         # "Six Months Ended June 30, 2024" -> H1-2024
         m = re.search(
-            r"six\s+months?\s+ended\s+([A-Za-z]+).*?(\d{4})",
+            r"six\s+months?\s+ended\s+([A-Za-z]+\.?).*?(\d{4})",
             header_clean,
             re.IGNORECASE,
         )
         if m:
-            month_num = _MONTH_TO_NUM.get(m.group(1).lower(), 0)
+            month_num = _resolve_month(m.group(1))
             if month_num:
                 half = 1 if month_num <= 6 else 2
                 period_map[idx] = f"H{half}-{m.group(2)}"
                 continue
 
-        # Standalone date: "September 30, 2025" or "December 31, 2024"
-        # Maps to quarter or FY depending on fiscal_year_end_month.
+        # "Quarters Ended Dec. 31, 2019" -> Q4-2019
         m = re.search(
-            r"(January|February|March|April|May|June|July|August|September|"
-            r"October|November|December)\s+\d{1,2},?\s+(\d{4})",
+            r"quarters?\s+ended\s+([A-Za-z]+\.?).*?(\d{4})",
             header_clean,
             re.IGNORECASE,
         )
         if m:
-            month_num = _MONTH_TO_NUM.get(m.group(1).lower(), 0)
+            month_num = _resolve_month(m.group(1))
+            if month_num:
+                q = (month_num - 1) // 3 + 1
+                period_map[idx] = f"Q{q}-{m.group(2)}"
+                continue
+
+        # Standalone date: "September 30, 2025", "Dec. 31, 2024"
+        # Maps to quarter or FY depending on fiscal_year_end_month.
+        m = re.search(
+            r"(January|February|March|April|May|June|July|August|September|"
+            r"October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|"
+            r"Sep|Sept|Oct|Nov|Dec)\.?\s+\d{1,2},?\s+(\d{4})",
+            header_clean,
+            re.IGNORECASE,
+        )
+        if m:
+            month_num = _resolve_month(m.group(1))
             if month_num:
                 period_map[idx] = _date_to_period(
                     month_num, m.group(2), fiscal_year_end_month
@@ -298,7 +321,7 @@ def _identify_period_columns(
     )
     if not annual_context and filing_type in _ANNUAL_FILING_TYPES:
         _SUB_PERIOD_HDR_RE = re.compile(
-            r"three\s+months?|six\s+months?|nine\s+months?",
+            r"three\s+months?|six\s+months?|nine\s+months?|quarters?\s+ended",
             re.IGNORECASE,
         )
         has_sub_period = any(_SUB_PERIOD_HDR_RE.search(h) for h in headers)
@@ -306,7 +329,7 @@ def _identify_period_columns(
             annual_context = True
     if annual_context:
         _SUB_PERIOD_RE = re.compile(
-            r"three\s+months?|six\s+months?|nine\s+months?",
+            r"three\s+months?|six\s+months?|nine\s+months?|quarters?\s+ended",
             re.IGNORECASE,
         )
         for idx in list(period_map.keys()):
@@ -602,6 +625,14 @@ _YEAR_RE = re.compile(r"\b(20\d{2})\b")
 
 # Regex matching a date-headed column like 12/31/2025
 _DATE_COL_RE = re.compile(r"\b(\d{1,2}/\d{1,2}/(20\d{2}))\b")
+
+# Textual date header: "Dec. 31, 2024" or "September 30, 2025"
+_TEXT_DATE_COL_RE = re.compile(
+    r"((?:January|February|March|April|May|June|July|August|September|"
+    r"October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|"
+    r"Sep|Sept|Oct|Nov|Dec)\.?)\s+(\d{1,2}),?\s+(20\d{2})",
+    re.IGNORECASE,
+)
 
 # Header patterns for financial statement sections
 _SECTION_HEADER_RE = re.compile(

@@ -396,5 +396,51 @@ class TestPercentageTableFilter(unittest.TestCase):
                                msg="3rd column with split-paren must be extracted")
 
 
+class TestAbbreviatedMonthPeriods(unittest.TestCase):
+    """Abbreviated months (Sep., Dec., Sept.) in headers."""
+
+    def test_three_months_ended_sep_dot(self):
+        """'Three Months Ended Sep. 30, 2025' → Q3-2025."""
+        from deterministic.src.extract.tables import _identify_period_columns
+        headers = ["", "Three Months Ended Sep. 30, 2025"]
+        pm = _identify_period_columns(headers)
+        self.assertEqual(pm.get(1), "Q3-2025")
+
+    def test_standalone_dec_dot_annual_context(self):
+        """'Dec. 31, 2024' in annual filing → FY2024."""
+        from deterministic.src.extract.tables import _identify_period_columns
+        headers = ["", "Dec. 31, 2024"]
+        pm = _identify_period_columns(headers, filing_type="10-K")
+        self.assertEqual(pm.get(1), "FY2024")
+
+    def test_sept_dot_recognized(self):
+        """'Sept. 30, 2025' → Q3-2025."""
+        from deterministic.src.extract.tables import _identify_period_columns
+        headers = ["", "Sept. 30, 2025"]
+        pm = _identify_period_columns(headers)
+        self.assertEqual(pm.get(1), "Q3-2025")
+
+    def test_abbreviated_month_subheader_detected(self):
+        """Sub-header row with abbreviated month is detected."""
+        from deterministic.src.extract.tables import _is_subheader_row
+        cells = ["", "Sep. 30,", "", "Dec. 31,"]
+        self.assertTrue(
+            _is_subheader_row(cells),
+            "Abbreviated month sub-header should be detected",
+        )
+
+    def test_markdown_table_with_abbreviated_months(self):
+        """Full markdown table with abbreviated month headers."""
+        table = (
+            "|  | Sep. 30, 2025 |  | Dec. 31, 2024 |\n"
+            "| --- | --- | --- | --- |\n"
+            "| Total assets | 46164 |  | 54722 |\n"
+        )
+        fields = extract_from_markdown_table(table, "balance_sheet", 0)
+        headers = {f.column_header for f in fields}
+        self.assertIn("Q3-2025", headers, "Sep. 30 → Q3")
+        self.assertIn("FY2024", headers, "Dec. 31 → FY")
+
+
 if __name__ == "__main__":
     unittest.main()
