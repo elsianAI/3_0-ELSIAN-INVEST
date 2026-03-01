@@ -1,6 +1,7 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-03
+- [DETERMINISTIC] Iteration 32: TEP 95.83→100.0% — guided anchors (midpoint partitioning for column position derivation from headers), sub-section header stop (prevent CF bleeding into equity changes table). ALL 6 CASES AT 100% (713/713 combined). 194 tests green.
 - [DETERMINISTIC] Iteration 31: NEXN 98.7→100.0% — eps_basic reject pattern for diluted-only labels. ALL 5 CASES AT 100% (665/665 combined). 194 tests green.
 - [DETERMINISTIC] Iteration 30: SONO 97.4→100.0% — _normalize regex extended for "(benefit from)" and "(used in)" parentheticals, _STRONGLY_DEPRIORITIZED_SECTION (-100) for tax reconciliation, expected.json FY2020/total_debt correction (24918→18251), total_liabilities reject pattern `\bcurrent\b` to prevent additive-sum bug (also improves NEXN 93.4→98.7%). Additional reject patterns: income_tax, interest_expense, depreciation_amortization. Zero regressions (GCT/IOSP/TZOO all 100%). 194 tests green.
 - [DETERMINISTIC] Iteration 29: SONO 82.8→97.4% — reject patterns for ambiguous labels (R&D tax credits, capex accrued-not-paid, cash change lines), expanded _DEPRIORITIZED_SECTION (components_of_results, net_income_margin, balance_sheet_data, federal_income_taxes), smarter cross-filing merge (replace deprioritized values with better-quality candidates), cfo priority pattern for "net cash provided/used by operating". 17 of 20 WRONG fixed, zero regressions (GCT/IOSP/NEXN/TZOO all 100%). 194 tests green.

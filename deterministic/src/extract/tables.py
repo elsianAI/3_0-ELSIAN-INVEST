@@ -586,3 +586,490 @@ def extract_tables_from_clean_md(
                 all_fields.extend(fields)
 
     return all_fields
+
+
+# ── Space-aligned table parser (for pdfplumber .txt output) ──────────
+
+# Regex for a number token (possibly negative, possibly with commas)
+_NUM_TOKEN_RE = re.compile(
+    r"-?\d[\d,]*(?:\.\d+)?|"            # -1,234 or 1,234.56 (must have ≥1 digit)
+    r"\(-?\d[\d,]*(?:\.\d+)?\)|"        # (1,234)
+    r"−\d[\d,]*(?:\.\d+)?",             # −1,234 (unicode minus)
+)
+
+# Regex matching a year like 2025, 2024, etc.
+_YEAR_RE = re.compile(r"\b(20\d{2})\b")
+
+# Regex matching a date-headed column like 12/31/2025
+_DATE_COL_RE = re.compile(r"\b(\d{1,2}/\d{1,2}/(20\d{2}))\b")
+
+# Header patterns for financial statement sections
+_SECTION_HEADER_RE = re.compile(
+    r"(?:CONSOLIDATED\s+)?(?:INCOME\s+STATEMENT|BALANCE\s+SHEET|"
+    r"CASH\s+FLOW\s+STATEMENT|STATEMENT\s+OF\s+(?:FINANCIAL\s+POSITION|"
+    r"INCOME|OPERATIONS|CASH[-\s]?FLOWS?|"
+    r"COMPREHENSIVE\s+(?:INCOME|LOSS))|"
+    r"FINANCIAL\s+HIGHLIGHTS|KEY\s+(?:FINANCIAL\s+)?(?:DATA|FIGURES))",
+    re.IGNORECASE,
+)
+
+# Section-type detection for source_location tagging
+_IS_KEYWORDS = re.compile(
+    r"INCOME\s+STATEMENT|STATEMENT\s+OF\s+(?:OPERATIONS|INCOME)|PROFIT\s+(?:AND|OR)\s+LOSS",
+    re.IGNORECASE,
+)
+_BS_KEYWORDS = re.compile(
+    r"BALANCE\s+SHEET|FINANCIAL\s+POSITION",
+    re.IGNORECASE,
+)
+_CF_KEYWORDS = re.compile(
+    r"CASH\s+FLOW|CASH[-\s]?FLOWS?",
+    re.IGNORECASE,
+)
+
+
+def _detect_section_type(header: str) -> str:
+    """Classify a section header into IS/BS/CF."""
+    if _IS_KEYWORDS.search(header):
+        return "income_statement"
+    if _BS_KEYWORDS.search(header):
+        return "balance_sheet"
+    if _CF_KEYWORDS.search(header):
+        return "cash_flow"
+    return "unknown"
+
+
+def _find_number_columns(lines: List[str]) -> List[int]:
+    """Find consistent numeric column end-positions across multiple lines.
+
+    Returns list of end-position anchors for value columns, sorted left-to-right.
+    Each anchor is the position with the most hits within a cluster of
+    right-aligned numbers.
+    """
+    from collections import Counter
+
+    # Collect end-positions of all number tokens across lines
+    end_positions: Counter = Counter()
+    for line in lines:
+        for m in _NUM_TOKEN_RE.finditer(line):
+            end_positions[m.end()] += 1
+
+    if not end_positions:
+        return []
+
+    # Cluster nearby end-positions (within 3 chars) — tight threshold to
+    # keep columns that are only ~6-8 chars apart separate.
+    sorted_positions = sorted(end_positions.keys())
+    clusters: List[List[int]] = []
+    current_cluster: List[int] = [sorted_positions[0]]
+
+    for pos in sorted_positions[1:]:
+        if pos - current_cluster[-1] <= 3:
+            current_cluster.append(pos)
+        else:
+            clusters.append(current_cluster)
+            current_cluster = [pos]
+    clusters.append(current_cluster)
+
+    # Keep clusters with enough hits (>=3 data lines)
+    result: List[int] = []
+    for cluster in clusters:
+        total_hits = sum(end_positions[p] for p in cluster)
+        if total_hits >= 3:
+            # Pick the position with most hits
+            best_pos = max(cluster, key=lambda p: end_positions[p])
+            result.append(best_pos)
+
+    return sorted(result)
+
+
+def _guided_anchors_from_headers(
+    data_lines: List[str], header_end_positions: List[int],
+) -> List[int]:
+    """Derive data-aligned column anchors guided by header end-positions.
+
+    Raw header positions often don't coincide with data number end-positions
+    (headers are centered or right-aligned differently from data).  Instead
+    of using headers directly as anchors (which causes mis-assignment),
+    partition the position space at midpoints between consecutive headers
+    and pick the strongest data end-position in each partition.
+    """
+    from collections import Counter as _Counter
+
+    end_positions: _Counter = _Counter()
+    for line in data_lines:
+        for m in _NUM_TOKEN_RE.finditer(line):
+            end_positions[m.end()] += 1
+
+    if not end_positions:
+        return list(header_end_positions)
+
+    n = len(header_end_positions)
+
+    # Midpoints between consecutive headers define partition boundaries
+    midpoints: List[float] = []
+    for i in range(n - 1):
+        midpoints.append(
+            (header_end_positions[i] + header_end_positions[i + 1]) / 2.0
+        )
+
+    anchors: List[int] = []
+    for i in range(n):
+        lo = midpoints[i - 1] if i > 0 else -1e9
+        hi = midpoints[i] if i < len(midpoints) else 1e9
+
+        # Candidates: data positions within this partition with >= 2 hits
+        candidates = [
+            (pos, cnt)
+            for pos, cnt in end_positions.items()
+            if pos > lo and pos <= hi and cnt >= 2
+        ]
+
+        if not candidates:
+            # No strong candidates: fall back to raw header position
+            anchors.append(header_end_positions[i])
+            continue
+
+        # Best = most hits; tiebreak by proximity to header
+        best = max(
+            candidates,
+            key=lambda pc: (pc[1], -abs(pc[0] - header_end_positions[i])),
+        )
+        anchors.append(best[0])
+
+    return sorted(anchors)
+
+
+def _extract_value_at_column(
+    line: str, col_anchor: int, all_anchors: List[int],
+) -> Optional[float]:
+    """Extract the numeric value from a line closest to a column anchor.
+
+    Uses nearest-number assignment: each number token on the line is assigned
+    to the closest column anchor, and we return the one assigned to col_anchor.
+    """
+    matches = list(_NUM_TOKEN_RE.finditer(line))
+    if not matches:
+        # Check for dash-as-zero near the column
+        # Look in a window around the anchor
+        window_start = max(0, col_anchor - 10)
+        window_end = min(len(line), col_anchor + 3)
+        segment = line[window_start:window_end].strip()
+        if segment in {"—", "–", "-"}:
+            return 0.0
+        return None
+
+    # Assign each match to its nearest anchor
+    best_match = None
+    best_dist = float("inf")
+    for m in matches:
+        m_end = m.end()
+        dist = abs(m_end - col_anchor)
+        # Check this is closest to OUR anchor, not another one
+        closest_anchor = min(all_anchors, key=lambda a: abs(m_end - a))
+        if closest_anchor == col_anchor and dist < best_dist:
+            best_dist = dist
+            best_match = m
+
+    if best_match is None:
+        return None
+
+    return parse_number(best_match.group())
+
+
+def _extract_space_aligned_table(
+    lines: List[str],
+    section_name: str,
+    table_idx: int,
+    period_headers: Dict[int, str],
+    col_anchors: List[int],
+    source_filename: str,
+) -> List[TableField]:
+    """Extract fields from a block of space-aligned table lines."""
+    results: List[TableField] = []
+
+    for row_idx, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped:
+            continue
+
+        # Find all number tokens on this line
+        num_matches = list(_NUM_TOKEN_RE.finditer(line))
+        if not num_matches:
+            continue
+
+        # The label is everything before the first number
+        first_num_start = num_matches[0].start()
+        label = line[:first_num_start].strip()
+        if not label:
+            continue
+
+        # Skip lines that look like headers/section dividers
+        if label.startswith("---") or label.startswith("==="):
+            continue
+        if _SECTION_HEADER_RE.match(label):
+            continue
+        # Skip lines that are just scale indicators
+        if label.lower().strip("()€$ ") in {
+            "in millions of euros", "in millions", "millions",
+            "in thousands", "in billions", "€ millions",
+        }:
+            continue
+
+        # Extract values at each column position
+        extracted: Dict[int, Optional[float]] = {}
+        for col_idx, anchor in enumerate(col_anchors):
+            if col_idx not in period_headers:
+                continue
+            extracted[col_idx] = _extract_value_at_column(
+                line, anchor, col_anchors,
+            )
+
+        # Fallback: when position-based assignment leaves columns empty
+        # and the line has exactly N numbers matching N columns, use
+        # left-to-right ordering (handles long-label lines where numbers
+        # are shifted to the right of their expected positions).
+        assigned_count = sum(1 for v in extracted.values() if v is not None)
+        active_cols = [ci for ci in extracted]
+        if (
+            assigned_count < len(active_cols)
+            and len(num_matches) == len(active_cols)
+        ):
+            for i, ci in enumerate(active_cols):
+                v = parse_number(num_matches[i].group())
+                if v is not None:
+                    extracted[ci] = v
+
+        for col_idx, value in extracted.items():
+            if value is not None:
+                period_key = period_headers[col_idx]
+                location = (
+                    f"{source_filename}:table:{section_name}:"
+                    f"tbl{table_idx}:row{row_idx + 1}:col{col_idx}"
+                )
+                results.append(
+                    TableField(
+                        label=label,
+                        value=value,
+                        column_header=period_key,
+                        source_location=location,
+                    )
+                )
+
+    return results
+
+
+def extract_tables_from_text(
+    text: str, source_filename: str = "",
+) -> List[TableField]:
+    """Extract fields from space-aligned tables in plain text (pdfplumber output).
+
+    Detects financial statement sections, identifies column positions from
+    number alignment, and extracts label/value pairs with period assignment.
+    """
+    all_fields: List[TableField] = []
+    lines = text.split("\n")
+
+    # Detect parent-company financial statements zone: find the actual
+    # section header (e.g. "5.2. Parent company financial statements") as
+    # opposed to passing mentions in paragraphs.  We look for a standalone
+    # line that is clearly a section header (section number + "parent company").
+    # TOC entries (ending with a page number) are excluded.
+    _PC_SECTION_RE = re.compile(
+        r"^\d+\.\d+\.?\s+(?:parent\s+company|comptes\s+sociaux)",
+        re.IGNORECASE,
+    )
+    parent_company_zone_start = len(lines)  # default: no zone
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if _PC_SECTION_RE.match(stripped):
+            # Skip TOC entries that end with a page number
+            if re.search(r"\b\d{1,4}\s*$", stripped):
+                continue
+            parent_company_zone_start = i
+            break
+
+    # Detect notes zone: IFRS URDs have a "Notes to the consolidated
+    # financial statements" section containing thousands of lines of
+    # accounting policy descriptions that mention "balance sheet",
+    # "income statement", etc. — these must NOT be parsed as tables.
+    _NOTES_SECTION_RE = re.compile(
+        r"^\d+\.\d+\.\d*\.?\s+notes\s+to\s+the\s+consolidated",
+        re.IGNORECASE,
+    )
+    notes_zone_start = len(lines)  # default: no zone
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if _NOTES_SECTION_RE.match(stripped):
+            if re.search(r"\b\d{1,4}\s*$", stripped):
+                continue  # Skip TOC entries
+            notes_zone_start = i
+            break
+
+    # Use the earlier of the two exclusion zones
+    exclusion_zone_start = min(parent_company_zone_start, notes_zone_start)
+
+    # Find section boundaries: look for financial statement headers
+    sections: List[Tuple[int, str, str]] = []  # (line_idx, header_text, section_type)
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        m = _SECTION_HEADER_RE.search(stripped)
+        if not m or len(stripped) > 120:
+            continue
+        # Require the match to start near the beginning of the line
+        # (real headers have the keyword within the first ~15 chars;
+        # notes paragraphs mention these terms much further in).
+        if m.start() > 15:
+            continue
+        # Skip everything in the exclusion zones (notes + parent company)
+        if i >= exclusion_zone_start:
+            continue
+        # Secondary check: skip if "parent company" appears in nearby context
+        context_start = max(0, i - 20)
+        context = " ".join(lines[j].lower() for j in range(context_start, i))
+        if "parent company" in context or "comptes sociaux" in context:
+            continue
+        section_type = _detect_section_type(stripped)
+        sections.append((i, stripped, section_type))
+
+    if not sections:
+        return []
+
+    global_tbl_idx = 0
+
+    for sec_idx, (start_line, header_text, section_type) in enumerate(sections):
+        # Section ends at next section or end of file (max 120 lines)
+        if sec_idx + 1 < len(sections):
+            end_line = sections[sec_idx + 1][0]
+        else:
+            end_line = min(start_line + 120, len(lines))
+
+        # Also stop at page separators (long dash sequences) to prevent
+        # data from unrelated appendix tables being processed with wrong
+        # column anchors.
+        for check_idx in range(start_line + 1, end_line):
+            if re.match(r"^-{20,}$", lines[check_idx].strip()):
+                end_line = check_idx
+                break
+
+        # Stop at numbered sub-section headers (e.g. "5.1.5. Consolidated
+        # statement of changes in equity") that indicate a new financial
+        # statement the parser doesn't explicitly detect.  Skip the first
+        # few lines to avoid matching the section's own header.
+        for check_idx in range(start_line + 3, end_line):
+            stripped_check = lines[check_idx].strip()
+            if re.match(r"\d+\.\d+\.\d+\.?\s+\w", stripped_check):
+                end_line = check_idx
+                break
+
+        section_lines = lines[start_line:end_line]
+
+        # Find period headers within the section
+        period_headers: Dict[int, str] = {}
+        header_line_idx = -1
+        header_end_positions: List[int] = []  # end positions of year/date headers
+
+        for j, sline in enumerate(section_lines[:10]):  # Look in first 10 lines
+            # Try date columns first: 12/31/2025  12/31/2024
+            date_matches = list(_DATE_COL_RE.finditer(sline))
+            if len(date_matches) >= 2:
+                header_end_positions = []
+                for dm_idx, dm in enumerate(date_matches):
+                    year = dm.group(2)
+                    month_day = dm.group(1).split("/")
+                    month = int(month_day[0])
+                    if month == 12:
+                        period_headers[dm_idx] = f"FY{year}"
+                    else:
+                        q = (month - 1) // 3 + 1
+                        period_headers[dm_idx] = f"Q{q}-{year}"
+                    header_end_positions.append(dm.end())
+                header_line_idx = j
+                break
+
+            # Try simple year columns: 2025    2024
+            year_matches = list(_YEAR_RE.finditer(sline))
+            # Filter to years that make sense (2019-2030) and are positioned
+            # in the right half of the line (where data columns go)
+            if len(year_matches) >= 2:
+                # Check that years are in the data area (not in label text)
+                label_area_end = len(sline) // 3  # rough: label takes first third
+                data_years = [
+                    ym for ym in year_matches
+                    if ym.start() > label_area_end
+                ]
+                if len(data_years) >= 2:
+                    header_end_positions = []
+                    for dy_idx, dy in enumerate(data_years):
+                        period_headers[dy_idx] = f"FY{dy.group(1)}"
+                        header_end_positions.append(dy.end())
+                    header_line_idx = j
+                    break
+
+        if not period_headers or header_line_idx < 0:
+            continue
+
+        # Data lines start after the header line
+        data_lines = section_lines[header_line_idx + 1:]
+
+        # Find column positions from number alignment
+        col_anchors = _find_number_columns(data_lines[:50])
+        if len(col_anchors) < len(period_headers):
+            # Fallback: use header positions to derive data-aligned anchors
+            if (
+                header_end_positions
+                and len(header_end_positions) == len(period_headers)
+            ):
+                col_anchors = _guided_anchors_from_headers(
+                    data_lines[:50], header_end_positions,
+                )
+            else:
+                continue
+
+        # Match column anchors to period headers using header positions.
+        if (
+            header_end_positions
+            and len(header_end_positions) == len(period_headers)
+        ):
+            if len(col_anchors) > len(period_headers):
+                # More anchors than periods: proximity-match to header positions
+                matched_anchors: List[int] = []
+                used_anchors: set = set()
+                for hpos in header_end_positions:
+                    best = min(
+                        (a for a in col_anchors if a not in used_anchors),
+                        key=lambda a: abs(a - hpos),
+                        default=None,
+                    )
+                    if best is not None:
+                        matched_anchors.append(best)
+                        used_anchors.add(best)
+                if len(matched_anchors) == len(period_headers):
+                    col_anchors = matched_anchors
+                else:
+                    col_anchors = col_anchors[:len(period_headers)]
+            else:
+                # Same number of anchors as periods: check alignment quality.
+                # If anchors are far from headers (e.g. notes column detected
+                # instead of a data column), use header positions directly.
+                max_dist = max(
+                    abs(col_anchors[i] - header_end_positions[i])
+                    for i in range(len(period_headers))
+                )
+                if max_dist > 10:
+                    col_anchors = _guided_anchors_from_headers(
+                        data_lines[:50], header_end_positions,
+                    )
+
+        fields = _extract_space_aligned_table(
+            data_lines,
+            section_type,
+            global_tbl_idx,
+            period_headers,
+            col_anchors,
+            source_filename,
+        )
+        global_tbl_idx += 1
+        all_fields.extend(fields)
+
+    return all_fields

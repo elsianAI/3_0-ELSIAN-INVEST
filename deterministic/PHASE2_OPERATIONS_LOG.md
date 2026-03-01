@@ -611,3 +611,15 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 194 passed, 0 failed.
 - Decision: accept — NEXN eps_basic collision fixed. All 5 cases now at 100.0%. The reject pattern mirrors the existing shares_outstanding pattern (reject diluted-only labels). Zero regressions.
 - Next step: All 5 active cases at 100%. Next priorities: (1) evaluate TEP case (EU/IFRS, currently 4.2%), (2) consider adding new cases to expand coverage, (3) potential cleanup of `balance_sheet_data` from _DEPRIORITIZED_SECTION.
+
+## 2026-03-01 09:58 - Iteration 32 - TEP
+- Agent: Copilot
+- Objective: Bring TEP from 95.83% (46/48) to 100% by fixing 2 remaining WRONG FY2023 fields (net_income=523 exp=592, total_debt=3821 exp=4600).
+- Hypothesis: (1) Column clustering merges FY2024 (pos 67-69) and FY2023 (pos 75-77) into one mega-cluster because sparse hits at bridging positions (71, 74) chain them together with threshold=3. Using header positions to partition the data-position space via midpoints will correctly separate the two data columns. (2) The CF section (5.1.4) extends 120 lines and bleeds into Statement of Changes in Equity (5.1.5), which contains "Net profit = 523" for FY2024 that gets assigned to FY2023 via CF headers. Adding a sub-section stop condition (detect `X.Y.Z.` numbered headers) will truncate CF before equity table.
+- Files changed: deterministic/src/extract/tables.py (_guided_anchors_from_headers helper: partitions position space using midpoints between headers, picks strongest data position per partition; two call sites updated to use guided anchors instead of raw header positions; sub-section header stop condition using `\d+\.\d+\.\d+\.?\s+\w` regex to prevent sections from bleeding into subsequent numbered sub-sections)
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli eval TEP, python3 -m deterministic.cli eval --all
+- Metrics before: TEP score=95.83% (46/48), matched=46, wrong=2 (FY2023/net_income=523 exp=592, FY2023/total_debt=3821 exp=4600), missed=0, extra=10, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%. All other 5 cases at 100.0%.
+- Metrics after: TEP score=100.0% (48/48), matched=48, wrong=0, missed=0, extra=10, filings_coverage_pct=100.0%, required_fields_coverage_pct=100.0%. GCT=100.0% (108/108), IOSP=100.0% (95/95), NEXN=100.0% (76/76), SONO=100.0% (116/116), TZOO=100.0% (270/270) — ALL 6 CASES AT 100%. Combined: 713/713 = 100.0%.
+- Tests: 194 passed, 0 failed.
+- Decision: accept — TEP reached 100.0% (+4.17pp from 95.83%). Both root causes addressed: (a) guided anchors use midpoint partitioning to derive data-aligned column positions from header positions, eliminating cluster-merging issue caused by sparse bridging hits; (b) sub-section header detection prevents financial statement sections from bleeding into subsequent numbered sub-sections (e.g., CF into equity changes). Zero regressions across all 6 cases.
+- Next step: All 6 active cases at 100%. Consider adding new cases to expand coverage. Potential cleanup of `balance_sheet_data` from _DEPRIORITIZED_SECTION.
