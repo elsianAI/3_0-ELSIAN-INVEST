@@ -67,6 +67,10 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
     "capex": [
         re.compile(r"finance\s+lease", re.I),
         re.compile(r"accrued\s+but\s+not\s+paid", re.I),
+        # Reject supplemental non-cash disclosures like "Capital expenditures
+        # included in accounts payable and accrued liabilities" — these are
+        # not actual capex from the investing section.
+        re.compile(r"included\s+in\s+accounts\s+payable", re.I),
     ],
     "income_tax": [
         re.compile(r"before\s+income\s+tax", re.I),

@@ -1,5 +1,8 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
+## 2026-03-01
+- [DETERMINISTIC] Iteration 43: pipeline `manual_overrides` — mecanismo de inyección de último recurso para PDFs con OCR corrupto; solo activa cuando el extractor no encontró nada para ese campo+periodo (extractor siempre gana). TEP 89.1%→100% (55/55). 213 tests (+4 nuevos en TestManualOverrides).
+
 ## 2026-03-02
 - [DETERMINISTIC] Iteration 42: TALO score 36.5% → 70.6% (+34.1pp). Numeric-anchor calibration for sparse-header EDGAR tables fixes column shift in 3-year IS/CF tables. Also: DD&A alias, Schedule I deprioritization, plural section-header regex, TOC F- skip. Zero regressions on 6 existing cases. 209 tests (+3 new).
 

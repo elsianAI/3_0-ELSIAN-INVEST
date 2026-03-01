@@ -523,17 +523,27 @@ def extract_from_markdown_table(
             label = f"{last_heading}{label}"
         elif (
             last_heading
-            and re.search(r"per\s+share", last_heading, re.IGNORECASE)
+            and re.search(
+                r"per\s+(?:common\s+|ordinary\s+)?share",
+                last_heading, re.IGNORECASE,
+            )
             and not re.search(
                 r"shares\s+(?:used|of\s+common|outstanding)",
                 last_heading, re.IGNORECASE,
             )
             and label.lower() in {"basic", "diluted", "basic and diluted"}
         ):
+            # Truncate heading at "per [common/ordinary] share" and
+            # normalise to just "per share" so alias matching succeeds
+            # for labels like "Net income (loss) per common share".
             m_ps = re.search(
-                r"(.*?\bper\s+share)\b", last_heading, re.IGNORECASE
+                r"(.*?\bper)\s+(?:common\s+|ordinary\s+)?(share)\b",
+                last_heading, re.IGNORECASE,
             )
-            prefix = m_ps.group(1) if m_ps else last_heading
+            prefix = (
+                f"{m_ps.group(1)} {m_ps.group(2)}"
+                if m_ps else last_heading
+            )
             label = f"{prefix}\u2014{label}"
 
         # Skip percentage rows: if any data cell contains "%", skip entire row.

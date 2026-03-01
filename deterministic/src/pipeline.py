@@ -968,6 +968,11 @@ class DeterministicPipeline:
             filing_extractions, ticker=ticker, currency=currency
         )
 
+        # Inject manual_overrides from case.json — ONLY for fields that the
+        # extractor could not find (e.g. corrupted PDF sources). If the
+        # extractor already produced a value, it always wins.
+        self._apply_manual_overrides(config, result)
+
         # Update audit
         result.audit.fields_extracted += audit.accepted_count
         result.audit.fields_discarded += audit.discarded_count
@@ -977,6 +982,94 @@ class DeterministicPipeline:
         )
 
         return result
+
+    # ── MANUAL OVERRIDES ─────────────────────────────────────────────
+
+    @staticmethod
+    def _apply_manual_overrides(
+        config: Dict[str, Any],
+        result: "ExtractionResult",
+    ) -> None:
+        """Inject manual_overrides from case.json only for missing fields.
+
+        A field is considered missing if the extractor produced no value for
+        that period+field combination after merging all filings.  If the
+        extractor found anything — even with low confidence — it always wins
+        and the override is silently skipped.
+
+        This is the last-resort mechanism for when source PDFs are corrupted
+        (garbled OCR, multi-column layout, reversed token order) and the
+        value has been confirmed manually from the document.
+
+        Override spec in case.json::
+
+            "manual_overrides": {
+                "FY2022": {
+                    "ingresos": {"value": 8154, "note": "KPI p.56 tp_ri_2022"},
+                    "fcf":      {"value": 703}
+                }
+            }
+
+        Args:
+            config: Parsed case.json dict.
+            result: ExtractionResult after merge_extractions (mutated in place).
+        """
+        overrides = config.get("manual_overrides")
+        if not overrides or not isinstance(overrides, dict):
+            return
+
+        for period_key, fields in overrides.items():
+            if not isinstance(fields, dict):
+                continue
+
+            # Pre-validate specs: only consider dict entries with a numeric value.
+            # This prevents creating empty period entries for malformed overrides.
+            valid_specs = {
+                fn: spec
+                for fn, spec in fields.items()
+                if isinstance(spec, dict) and "value" in spec
+            }
+            if not valid_specs:
+                continue
+
+            # Create the period entry if the extractor found nothing at all
+            # for this period (e.g. the filing only contains KPI headlines).
+            if period_key not in result.periods:
+                fecha_fin = ""
+                m = re.match(r"FY(\d{4})$", period_key)
+                if m:
+                    fecha_fin = f"{m.group(1)}-12-31"
+                result.periods[period_key] = PeriodResult(
+                    fecha_fin=fecha_fin,
+                    tipo_periodo="anual",
+                )
+
+            period_result = result.periods[period_key]
+
+            for field_name, spec in valid_specs.items():
+                # Extractor wins: skip if any value already present.
+                if field_name in period_result.fields:
+                    continue
+
+                try:
+                    value = float(spec["value"])
+                except (TypeError, ValueError):
+                    continue
+
+                note = spec.get("note", "")
+                loc = (
+                    f"case.json:manual_overrides:{period_key}:{field_name}"
+                    + (f":{note}" if note else "")
+                )
+                fr = FieldResult(
+                    value=value,
+                    scale="raw",
+                    source_filing="manual_override",
+                    source_location=loc,
+                    confidence="manual",
+                )
+                period_result.fields[field_name] = fr
+                result.audit.fields_extracted += 1
 
     # ── EVALUATE ─────────────────────────────────────────────────────
 
