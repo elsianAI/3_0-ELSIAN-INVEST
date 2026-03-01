@@ -2,7 +2,9 @@
 
 ## 2026-03-03
 - [DETERMINISTIC] Iteration 35: IDEAS.md — technical decision log for pdfplumber vs PyMuPDF and TATR future integration plan.
+- [DETERMINISTIC] Iteration 35: IDEAS.md — technical decision log for pdfplumber vs PyMuPDF and TATR future integration plan.
 - [DETERMINISTIC] Iteration 34: pdfplumber integration — column-preserving PDF extraction (primary), pypdf fallback. New dependency pdfplumber>=0.10.
+- [DETERMINISTIC] Iteration 35: IDEAS.md — technical decision log for pdfplumber vs PyMuPDF and TATR future integration plan.
 - [DETERMINISTIC] Iteration 34: pdfplumber integration — column-preserving PDF extraction (primary), pypdf fallback. New dependency pdfplumber>=0.10.
 - [DETERMINISTIC] Iteration 33: IFRS alias expansions (total_liabilities additive, total_debt additive, cfo/capex/depreciation/interest/tax/eps_basic variants) + total_liabilities sub-total recovery in pipeline.py. Housekeeping commit for TEP work.
 - [DETERMINISTIC] Iteration 32: TEP 95.83→100.0% — guided anchors (midpoint partitioning for column position derivation from headers), sub-section header stop (prevent CF bleeding into equity changes table). ALL 6 CASES AT 100% (713/713 combined). 194 tests green.

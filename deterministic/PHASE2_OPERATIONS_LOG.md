@@ -648,3 +648,14 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — new dependency pdfplumber approved by user for European PDF processing
 - Next step: Commit IDEAS.md documentation update.
 
+## 2026-03-03 17:10 - Iteration 35 - ALL (housekeeping)
+- Agent: Copilot
+- Objective: Commit IDEAS.md documentation — technical decision log for pdfplumber vs PyMuPDF and future TATR integration plan.
+- Hypothesis: Documentation-only change. No code affected.
+- Files changed: deterministic/mejoras/IDEAS.md
+- Commands executed: N/A — documentation only
+- Metrics before: N/A — documentation only
+- Metrics after: N/A — documentation only
+- Tests: 194 passed, 0 failed.
+- Decision: accept — captures architectural decision rationale for future reference
+- Next step: All 6 cases at 100%. All working-tree changes committed. Consider adding new cases to expand coverage.
