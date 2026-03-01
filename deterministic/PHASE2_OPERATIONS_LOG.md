@@ -719,3 +719,18 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 206 passed, 0 failed
 - Decision: accept — new case bootstrapped and first eval establishes baseline. Key issues: (1) .clean.md has parent-only Schedule I BS → pipeline extracts wrong total_assets/liabilities/equity, (2) "Depreciation, depletion and amortization" not aliased to depreciation_amortization, (3) many wrong values from non-consolidated tables.
 - Next step: Improve TALO score by (a) adding "depreciation depletion and amortization" alias, (b) investigating BS extraction from .clean.md parent-only issue, (c) fixing CFO/capex extraction from wrong sections.
+
+## 2026-03-01 18:30 - Iteration 41 - TEP (generic HTTP download in eu_regulators + acquire historical filings)
+- Agent: Copilot
+- Objective: Make eu_regulators.py fully generic with HTTP download capability (no case-specific logic). Any EU case can declare `filings_sources` URLs in case.json; the module downloads, extracts PDF→txt, converts HTML→clean.md automatically. TEP case.json updated with tp.com annual report URLs for FY2022/FY2021/FY2019.
+- Hypothesis: Adding `_download_sources()` to eu_regulators.py and `filings_sources` list to case.json will allow the acquire step to autonomously download missing historical filings, enabling future curation of FY2022/2021/2019 expected.json entries.
+- Files changed: `deterministic/src/acquire/eu_regulators.py`, `deterministic/cases/TEP/case.json`
+- Commands executed:
+  - `python3 -m deterministic.cli acquire TEP`
+  - `python3 -m deterministic.cli eval TEP`
+  - `python3 -m unittest discover -s deterministic/tests -v`
+- Metrics before: score=100% (48/48), matched=48, wrong=0, missed=0, extra=9, filings_coverage=100%, required_fields_coverage=100%
+- Metrics after: score=100% (48/48), matched=48, wrong=0, missed=0, extra=9, filings_coverage=100%, required_fields_coverage=100% — no regression; 3 new historical PDFs acquired (tp-annual-report-2022.pdf, tp-annual-report-2021.pdf, tp-annual-report-2019.pdf) + 2 .txt extractions
+- Tests: 206 passed, 0 failed
+- Decision: accept — generic download infrastructure in place. Annual reports acquired but are "Integrated Reports" (marketing PDFs, no full P&L tables). FY2022/2021/2019 press releases with tabular financials are NOT available from tp.com/SourcesPack; tp.com is a SPA with obfuscated media IDs not discoverable via static scraping. Historical curation requires locating the annual results press releases via another route (AMF BDIF portal, Wayback Machine, or manual IR contact).
+- Next step: Find FY2023 annual press release URL (would have FY2022 as comparative). Once press releases are located and added to `filings_sources`, re-run acquire and curate expected.json for FY2022/2021/2019.
