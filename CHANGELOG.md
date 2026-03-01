@@ -4,6 +4,7 @@
 - [DETERMINISTIC] Iteration 42: TALO score 36.5% → 70.6% (+34.1pp). Numeric-anchor calibration for sparse-header EDGAR tables fixes column shift in 3-year IS/CF tables. Also: DD&A alias, Schedule I deprioritization, plural section-header regex, TOC F- skip. Zero regressions on 6 existing cases. 209 tests (+3 new).
 
 ## 2026-03-01
+- [DETERMINISTIC] Iteration 42: TEP expected.json — añadidos FY2022 (2 campos), FY2021 (3 campos), FY2019 (2 campos) con valores confirmados de integrated reports. Score: 100%→89.1% (7 campos nuevos, 1 matched, 6 missed por OCR corrupto). 209 tests pass.
 - [DETERMINISTIC] Iteration 41: eu_regulators.py — generic HTTP download via `filings_sources` in case.json (`_download_sources()`). TEP case.json updated with 3 tp.com annual report URLs (FY2022/2021/2019). 206 tests pass.
 - [DETERMINISTIC] Iteration 40: New case TALO (Talos Energy, oil & gas E&P, NYSE, USD). Bootstrap: acquire 12 filings (4 annual 10-Ks), curate expected.json (5 periods, 85 fields). First eval: 36.5% (31/85).
 - [DETERMINISTIC] Iteration 39: Codex review fixes — comparative suffix period trimming in narrative, dead _TEXT_DATE_COL_RE regex removed from tables. 3 new tests.

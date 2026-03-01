@@ -735,6 +735,19 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — generic download infrastructure in place. Annual reports acquired but are "Integrated Reports" (marketing PDFs, no full P&L tables). FY2022/2021/2019 press releases with tabular financials are NOT available from tp.com/SourcesPack; tp.com is a SPA with obfuscated media IDs not discoverable via static scraping. Historical curation requires locating the annual results press releases via another route (AMF BDIF portal, Wayback Machine, or manual IR contact).
 - Next step: Find FY2023 annual press release URL (would have FY2022 as comparative). Once press releases are located and added to `filings_sources`, re-run acquire and curate expected.json for FY2022/2021/2019.
 
+## 2026-03-01 20:30 - Iteration 42 - TEP (expected.json FY2022/FY2021/FY2019 curation)
+- Agent: Copilot
+- Objective: Expand expected.json from 3 periods (FY2023-2025) to 6 periods (FY2019-2025) using confirmed values from available integrated reports.
+- Hypothesis: Adding historically-confirmed KPI fields (ingresos, fcf, dividends_per_share) to expected.json will increase eval scope and expose pipeline coverage gaps for OCR-corrupted PDFs.
+- Files changed: `deterministic/cases/TEP/expected.json`
+- Commands executed: python3 -m deterministic.cli extract TEP, python3 -m deterministic.cli eval TEP, python3 -m unittest discover -s deterministic/tests -v
+- Metrics before: score=100.0% (48/48), matched=48, wrong=0, missed=0, extra=9, filings_coverage=100%, required_fields_coverage=100%
+- Metrics after: score=89.1% (49/55), matched=49, wrong=0, missed=6, extra=8, filings_coverage=100%, required_fields_coverage=89.1%
+- Tests: 209 passed, 0 failed
+- Decision: accept — score drop is expected (7 new fields added, 1 matched by narrative on FY2019/ingresos, 6 correctly missed). The 6 misses reflect a genuine limitation: integrated report PDFs (tp_ri_2022/2021/2019) have OCR-corrupted text where most values lack the `label-verb-value` pattern needed by narrative.py. FY2022/ingresos fails because OCR produces `€8,154 M\n 2022 revenue` (reversed, no `in|of`). Root fix requires annual results press releases, not pattern changes.
+- Next step: (a) Locate FY2022/FY2023 annual results press release URLs (tp.com media IDs not guessable; try AMF BDIF or IR collector). (b) For GCT: curate expected.json and run first eval.
+
+
 ## 2026-03-02 10:30 - Iteration 42 - TALO
 - Agent: Copilot
 - Objective: Improve TALO score from 36.5% baseline toward ≥85%. Multiple targeted fixes: DD&A alias, Schedule I deprioritization, plural section-header regex, TOC false-positive skip, and a new numeric-anchor calibration for sparse-header tables to fix the critical column-shift issue.
