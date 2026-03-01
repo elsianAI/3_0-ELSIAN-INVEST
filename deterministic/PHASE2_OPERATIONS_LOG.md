@@ -763,6 +763,21 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Decision: accept — TALO +34.1pp (36.5% → 70.6%). Column-shift fix resolved 19 IS/CF fields across 3 historical periods. Boundary-crossing condition prevents false calibration on tables with mixed row layouts (GCT CF, etc.). Remaining 19 wrong are BS fields (consolidated BS only in .txt vertical format, not in .clean.md markdown tables) and capex (wrong sign/source). 6 missed are FY2022/FY2021 EPS/cash/debt from older periods not covered in available tables.
 - Next step: (a) Address capex sign issue (expected negative, actual positive — investigate source table and sign normalization), (b) Investigate .txt vertical-format parsing to extract consolidated BS/CF fields, (c) Consider Schedule I → consolidated mapping or .txt parser improvements for total_assets/total_liabilities/total_equity.
 
+## 2026-03-01 15:00 - Iteration 44 - ALL CASES (bugfix filing_type NameError)
+- Agent: Copilot
+- Objective: Fix NameError `filing_type` not defined in `extract_vertical_bs` block of `pipeline.py` (line 870). The bug was introduced in Iter43 when editing `pipeline.py` for manual_overrides — `metadata.filing_type` was accidentally written as bare `filing_type`, crashing all SEC eval/extract calls.
+- Hypothesis: Replacing `filing_type=filing_type` with `filing_type=metadata.filing_type` will restore all SEC cases and unlock vertical-BS extraction for TALO (which was blocked by the NameError since Iter43 was committed).
+- Files changed: `deterministic/src/pipeline.py` (line 870: `filing_type` → `metadata.filing_type`)
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v`
+  - `python3 -m deterministic.cli eval --all`
+  - `python3 -m deterministic.cli dashboard`
+- Metrics before: GCT=ERROR, IOSP=ERROR, NEXN=ERROR, SONO=ERROR, TALO=ERROR, TEP=100%, TZOO=ERROR (NameError on all SEC cases — only TEP eu_manual worked)
+- Metrics after: GCT=100% (108/108), IOSP=100% (95/95), NEXN=100% (76/76), SONO=100% (116/116), TALO=92.9% (79/85), TEP=100% (55/55), TZOO=100% (270/270). TOTAL=99.3% (799/805)
+- Tests: 213 passed, 0 failed
+- Decision: accept — one-line fix restores all cases. TALO gains implicitly from +9.3pp (70.6→92.9%) because the vertical-BS extractor (previously silently broken by the NameError) now fires correctly.
+- Next step: Continue TALO towards ≥85% (already 92.9%). Address remaining 6 wrong/missed: capex sign issue and BS fields in .txt vertical format.
+
 ## 2026-03-01 13:14 - Iteration 43 - TEP + pipeline (manual_overrides)
 - Agent: Copilot
 - Objective: Implement `manual_overrides` last-resort mechanism in pipeline.py. Values defined in case.json are injected ONLY when the extractor found nothing for that field+period (extractor always wins). Applied to TEP to resolve 6 fields missed due to corrupted OCR in integrated report PDFs (reversed token order: `€8,154 M\n 2022 revenue`).

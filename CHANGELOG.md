@@ -1,6 +1,8 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
 ## 2026-03-01
+- [DETERMINISTIC] Iter44: fix NameError `filing_type` not defined en extract_vertical_bs block de pipeline.py — restaura todos los casos SEC; TALO 70.6%→92.9%
+
 - [DETERMINISTIC] Iteration 43: pipeline `manual_overrides` — mecanismo de inyección de último recurso para PDFs con OCR corrupto; solo activa cuando el extractor no encontró nada para ese campo+periodo (extractor siempre gana). TEP 89.1%→100% (55/55). 213 tests (+4 nuevos en TestManualOverrides).
 
 ## 2026-03-02

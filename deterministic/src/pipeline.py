@@ -28,6 +28,7 @@ from deterministic.src.extract.tables import (
     extract_tables_from_text,
     TableField,
 )
+from deterministic.src.extract.vertical import extract_vertical_bs
 from deterministic.src.extract.narrative import (
     extract_from_narrative,
     NarrativeField,
@@ -802,6 +803,109 @@ class DeterministicPipeline:
                         additive_labels.setdefault(
                             period_key, {}
                         ).setdefault(canonical, set()).add(dedup_seed)
+                    audit.accept(
+                        field_name=canonical,
+                        period=period_key,
+                        source_filing=filing_path.name,
+                        raw_label=tf.label,
+                        raw_value=tf.value,
+                        scale=scale,
+                    )
+
+                # ── Vertical-format consolidated BS extraction ───
+                # EDGAR .txt may have the consolidated BS in a vertical
+                # layout (one label per line) that the space-aligned
+                # parser cannot handle.  This targeted extractor pulls
+                # key BS totals directly.  A high section_bonus (+20)
+                # ensures these authoritative consolidated values beat
+                # Schedule I / parent-only values from other sources.
+                _VERTICAL_BS_BONUS = 20
+                for tf in extract_vertical_bs(
+                    text, source_filename=filing_path.name,
+                ):
+                    canonical = self._alias_resolver.resolve(tf.label)
+                    if canonical is None:
+                        # Synthetic labels (e.g. "Total debt (current +
+                        # long-term)") may not resolve via aliases.
+                        # The source_location encodes the canonical name.
+                        loc = tf.source_location
+                        if ":total_debt" in loc:
+                            canonical = "total_debt"
+                        elif ":total_assets" in loc:
+                            canonical = "total_assets"
+                        elif ":total_liabilities" in loc:
+                            canonical = "total_liabilities"
+                        elif ":total_equity" in loc:
+                            canonical = "total_equity"
+                        elif ":cash_and_equivalents" in loc:
+                            canonical = "cash_and_equivalents"
+                    if canonical is None:
+                        continue
+
+                    field_mult = self._alias_resolver.get_multiplier(canonical)
+                    scale, confidence = infer_scale_cascade(
+                        filing_scale, "", metadata.scale, field_mult
+                    )
+
+                    if not validate_scale_sanity(tf.value, canonical, scale):
+                        audit.discard(
+                            field_name=canonical,
+                            period=tf.column_header,
+                            reason="scale_uncertain",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                        )
+                        continue
+
+                    period_key = tf.column_header
+                    if not period_key or not period_key.startswith("FY"):
+                        continue
+
+                    label_pri = self._alias_resolver.label_priority(
+                        canonical, tf.label
+                    )
+                    new_sort_key = self.compute_sort_key(
+                        period_key=period_key,
+                        filing_type=metadata.filing_type,
+                        source_type="table",
+                        label_priority=label_pri,
+                        section_bonus=_VERTICAL_BS_BONUS,
+                        source_filing=filing_path.name,
+                        source_location=tf.source_location,
+                        rules=rules,
+                    )
+
+                    if period_key not in period_fields:
+                        period_fields[period_key] = {}
+
+                    if canonical in period_fields[period_key]:
+                        existing = period_fields[period_key][canonical]
+                        old_sort_key = getattr(
+                            existing, "_sort_key",
+                            (999, 999, 999, 999, (999,)),
+                        )
+                        if new_sort_key >= old_sort_key:
+                            audit.discard(
+                                field_name=canonical,
+                                period=period_key,
+                                reason="lower_priority_duplicate",
+                                source_filing=filing_path.name,
+                                raw_label=tf.label,
+                                raw_value=tf.value,
+                                scale=scale,
+                            )
+                            continue
+
+                    fr = FieldResult(
+                        value=_normalize_sign(canonical, tf.label, tf.value),
+                        scale=scale,
+                        source_filing=filing_path.name,
+                        source_location=tf.source_location,
+                        confidence=confidence,
+                    )
+                    fr._sort_key = new_sort_key  # type: ignore[attr-defined]
+                    period_fields[period_key][canonical] = fr
                     audit.accept(
                         field_name=canonical,
                         period=period_key,
