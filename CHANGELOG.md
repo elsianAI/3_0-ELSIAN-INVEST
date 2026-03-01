@@ -1,5 +1,8 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
+## 2026-03-02
+- [DETERMINISTIC] Iter46: TALO 70.6%→100% (85/85). New vertical BS parser, capex reject pattern, EPS per-share regex, global label reject for section titles, Schedule I deprioritization, cross-section penalty for total_equity from IS, negative total_debt from IS rejection, long-term debt regex broadening. Zero regressions across all 7 cases.
+
 ## 2026-03-01
 - [DETERMINISTIC] Iter44: fix NameError `filing_type` not defined en extract_vertical_bs block de pipeline.py — restaura todos los casos SEC; TALO 70.6%→92.9%
 

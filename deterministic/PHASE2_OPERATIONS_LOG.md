@@ -3,6 +3,25 @@
 Purpose: single source of truth for the python-only iteration loop in Phase 2.
 Scope: deterministic module only (`deterministic/`), no LLM production pipeline events.
 
+## 2026-03-02 20:00 - Iteration 46 - TALO (100% achieved)
+- Agent: Copilot
+- Objective: Bring TALO from 70.6% (Iter42 baseline) to 100%. TALO's consolidated BS only exists in vertical-format .txt files; .clean.md only has Schedule I (parent-only) data. Also fix capex sign issues and EPS label mismatches.
+- Hypothesis: A combination of (1) new vertical BS parser for .txt files, (2) capex reject pattern for supplemental disclosures, (3) broadened per-share regex for EPS, (4) global reject for section-title labels, (5) Schedule I deprioritization, (6) cross-section penalty for total_equity from IS, (7) negative total_debt from IS rejection, and (8) long-term debt regex broadening will push TALO to 100% without regressions.
+- Files changed:
+  - `deterministic/src/extract/vertical.py` (NEW — vertical-format BS parser: finds standalone ASSETS in CONSOLIDATED context, extracts cash, total_assets, total_liabilities, total_equity, debt components; synthesises total_debt from current + long-term)
+  - `deterministic/src/pipeline.py` (import + integration of vertical BS extractor with section_bonus=20; Schedule I pattern in _STRONGLY_DEPRIORITIZED_SECTION; cross-section penalty for total_equity from IS in _section_bonus; negative total_debt from IS rejection)
+  - `deterministic/src/normalize/aliases.py` (capex reject: `included_in_accounts_payable`; global reject patterns: `for the year(s) ended`, `statements of changes in`, `we have audited`)
+  - `deterministic/src/extract/tables.py` (per-share regex: `per\s+(?:common\s+|ordinary\s+)?share` with prefix normalization for EPS labels like "Net income (loss) per common share")
+  - `deterministic/src/merge.py` (no net change — experimented with full sort-key comparison but reverted due to regressions)
+- Commands executed:
+  - `python3 -m unittest discover -s deterministic/tests -v` (multiple runs; 213 passed)
+  - `python3 -m deterministic.cli eval --all` (multiple iterations)
+  - `python3 -m deterministic.cli eval TALO` (intermediate checks)
+- Metrics before: TALO=70.6% (60/85), GCT=100% (108/108), IOSP=100% (95/95), NEXN=100% (76/76), SONO=100% (116/116), TEP=100% (55/55), TZOO=100% (270/270). TOTAL=97.0% (770/795)
+- Metrics after: TALO=100% (85/85), GCT=100% (108/108), IOSP=100% (95/95), NEXN=100% (76/76), SONO=100% (116/116), TEP=100% (55/55), TZOO=100% (270/270). TOTAL=100% (805/805)
+- Tests: 213 passed, 0 failed
+- Decision: accept — TALO 100% achieved (+29.4pp from Iter42) with zero regressions across all 7 cases. All 805 expected fields across all cases now match. Key techniques: vertical BS parser with high section_bonus for authoritative consolidated values; targeted reject/penalty rules for misclassified labels.
+- Next step: (a) Consider adding unit tests for vertical.py. (b) Explore reducing Extra count (242 for TALO, 544 for SONO). (c) Evaluate new tickers or improve GCT/NEXN edge cases if needed.
 ## Entry Template
 
 ```md

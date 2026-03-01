@@ -198,12 +198,16 @@ class DeterministicPipeline:
     # with high label priority, but the values may have wrong sign or
     # disagree with the IS value.  A -100 penalty ensures the merge will
     # replace these values when a better source exists.
+    # Schedule I / parent-only balance sheets (e.g. "the following table
+    # presents the balance sheet information for the respective periods")
+    # also get strongly deprioritized — consolidated values must win.
     _STRONGLY_DEPRIORITIZED_SECTION = re.compile(
         r"federal_income_taxes"
         r"|statutory_rate"
         r"|:statements_of_operations:"
         r"|:balance_sheets:"
-        r"|:statements_of_cash_flows:",
+        r"|:statements_of_cash_flows:"
+        r"|the_following_table_presents.*balance_sheet",
         re.I,
     )
 
@@ -232,11 +236,17 @@ class DeterministicPipeline:
 
     @staticmethod
     def _section_bonus(source_location: str,
-                       rules: Optional[Dict] = None) -> int:
+                       rules: Optional[Dict] = None,
+                       canonical: Optional[str] = None) -> int:
         """Return a priority bonus based on the table's sub-section.
 
         Reads bonus/penalty values from rules['section_weights'] if available,
         otherwise defaults to +5 / -5 / -100.
+
+        When *canonical* is ``"total_equity"`` and the source is an
+        income-statement section, applies a severe penalty (equity
+        never belongs on the IS — the matched value is almost certainly
+        par value or shares outstanding).
         """
         bonus = 5
         penalty = -5
@@ -247,12 +257,22 @@ class DeterministicPipeline:
             penalty = sw.get("deprioritized_penalty", -5)
             severe_penalty = sw.get("strongly_deprioritized_penalty", -100)
         if DeterministicPipeline._PRIMARY_IS_SECTION.search(source_location):
-            return bonus
-        if DeterministicPipeline._STRONGLY_DEPRIORITIZED_SECTION.search(source_location):
-            return severe_penalty
-        if DeterministicPipeline._DEPRIORITIZED_SECTION.search(source_location):
-            return penalty
-        return 0
+            base = bonus
+        elif DeterministicPipeline._STRONGLY_DEPRIORITIZED_SECTION.search(source_location):
+            base = severe_penalty
+        elif DeterministicPipeline._DEPRIORITIZED_SECTION.search(source_location):
+            base = penalty
+        else:
+            base = 0
+
+        # total_equity from income-statement is always a misclassification
+        # (typically par value or shares outstanding).
+        if canonical == "total_equity":
+            loc_lower = source_location.lower()
+            if ":income_statement:" in loc_lower:
+                base = min(base, severe_penalty)
+
+        return base
 
     @staticmethod
     def _filing_rank(period_key: str, filing_type: str,
@@ -483,6 +503,24 @@ class DeterministicPipeline:
                         )
                         continue
 
+                    # Reject negative total_debt from IS sections — on
+                    # the income statement, negative values matching the
+                    # total_debt alias are always something else (e.g.
+                    # "Loss on extinguishment of debt").
+                    if (canonical == "total_debt"
+                            and tf.value < 0
+                            and ":income_statement:" in tf.source_location.lower()):
+                        audit.discard(
+                            field_name=canonical,
+                            period=tf.column_header,
+                            reason="negative_debt_in_IS",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                            scale=scale,
+                        )
+                        continue
+
                     period_key = tf.column_header
                     if not period_key or period_key == "unknown":
                         # Discard: better to lose a field than assign wrong period
@@ -508,7 +546,7 @@ class DeterministicPipeline:
                         canonical, tf.label
                     )
                     new_sec_bonus = self._section_bonus(
-                        tf.source_location, rules
+                        tf.source_location, rules, canonical=canonical
                     )
                     new_sort_key = self.compute_sort_key(
                         period_key=period_key,
