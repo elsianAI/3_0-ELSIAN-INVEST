@@ -623,3 +623,16 @@ Scope: deterministic module only (`deterministic/`), no LLM production pipeline 
 - Tests: 194 passed, 0 failed.
 - Decision: accept — TEP reached 100.0% (+4.17pp from 95.83%). Both root causes addressed: (a) guided anchors use midpoint partitioning to derive data-aligned column positions from header positions, eliminating cluster-merging issue caused by sparse bridging hits; (b) sub-section header detection prevents financial statement sections from bleeding into subsequent numbered sub-sections (e.g., CF into equity changes). Zero regressions across all 6 cases.
 - Next step: All 6 active cases at 100%. Consider adding new cases to expand coverage. Potential cleanup of `balance_sheet_data` from _DEPRIORITIZED_SECTION.
+
+## 2026-03-03 17:00 - Iteration 33 - ALL (housekeeping)
+- Agent: Copilot
+- Objective: Commit previously unstaged IFRS alias expansions and total_liabilities sub-total recovery logic that were part of the TEP work but omitted from iter 32's commit.
+- Hypothesis: These changes are already active in the working tree and contributed to the 100% scores achieved in iter 32. Committing them formalizes the traceability without changing any behavior.
+- Files changed: deterministic/config/field_aliases.json (IFRS aliases: total_liabilities additive + current/non-current, total_debt additive + "other financial liabilities", cfo "net cash flow", capex "acquisition of intangible assets", depreciation_amortization variants, interest_expense "financing costs", income_tax "income tax", eps_basic "earnings per share"), deterministic/src/pipeline.py (post-process recovery of total_liabilities from NC+current sub-totals for IFRS filings)
+- Commands executed: python3 -m unittest discover -s deterministic/tests -v, python3 -m deterministic.cli eval NEXN
+- Metrics before: N/A — changes already active in working tree since iter 32 (all 6 cases at 100%)
+- Metrics after: N/A — no behavior change, formalizing existing working-tree state
+- Tests: 194 passed, 0 failed.
+- Decision: accept — housekeeping commit to capture IFRS-supporting changes that were part of TEP iteration work
+- Next step: Commit pdfplumber integration (pdf_to_text.py + requirements.txt) as separate iteration. Then commit IDEAS.md documentation.
+

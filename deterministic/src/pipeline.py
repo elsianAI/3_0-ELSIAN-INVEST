@@ -435,6 +435,8 @@ class DeterministicPipeline:
             # new constituents are accumulated while same-label duplicates
             # from a different table use normal collision resolution.
             additive_labels: Dict[str, Dict[str, set]] = {}  # period→field→{labels}
+            # Save raw table fields for post-processing (e.g. sub-total recovery)
+            _raw_table_fields: list = []
 
             if is_clean_md:
                 # Table extraction from markdown
@@ -442,6 +444,7 @@ class DeterministicPipeline:
                     text, source_filename=filing_path.name,
                     filing_type=metadata.filing_type,
                 )
+                _raw_table_fields = list(table_fields)
                 for tf in table_fields:
                     canonical = self._alias_resolver.resolve(tf.label)
                     if canonical is None:
@@ -641,6 +644,7 @@ class DeterministicPipeline:
                 txt_table_fields = extract_tables_from_text(
                     text, source_filename=filing_path.name,
                 )
+                _raw_table_fields = list(txt_table_fields)
                 for tf in txt_table_fields:
                     canonical = self._alias_resolver.resolve(tf.label)
                     if canonical is None:
@@ -889,6 +893,42 @@ class DeterministicPipeline:
                         raw_value=nf.value,
                         scale=scale,
                     )
+
+            # ── Post-process: recover total_liabilities from sub-totals ──
+            # IFRS filings often have "Total non-current liabilities" and
+            # "Total current liabilities" without a standalone "Total
+            # liabilities" line.  The \bcurrent\b rejection prevents these
+            # from resolving via aliases to avoid double-counting in US GAAP
+            # filings.  Recover by summing the sub-totals when the parent
+            # total is missing.
+            import re as _re
+            _NC_LIAB_RE = _re.compile(
+                r"total\s+non[- ]?current\s+liabilities", _re.I
+            )
+            _C_LIAB_RE = _re.compile(
+                r"total\s+current\s+liabilities", _re.I
+            )
+            for pk in list(period_fields.keys()):
+                if "total_liabilities" not in period_fields[pk]:
+                    nc_val = None
+                    c_val = None
+                    nc_loc = ""
+                    for rtf in _raw_table_fields:
+                        if rtf.column_header != pk:
+                            continue
+                        if _NC_LIAB_RE.search(rtf.label):
+                            nc_val = rtf.value
+                            nc_loc = rtf.source_location
+                        elif _C_LIAB_RE.search(rtf.label):
+                            c_val = rtf.value
+                    if nc_val is not None and c_val is not None:
+                        period_fields[pk]["total_liabilities"] = FieldResult(
+                            value=nc_val + c_val,
+                            scale=filing_scale,
+                            source_filing=filing_path.name,
+                            source_location=nc_loc,
+                            confidence=filing_scale_confidence,
+                        )
 
             if period_fields:
                 filing_extractions.append(
