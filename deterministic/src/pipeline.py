@@ -188,8 +188,17 @@ class DeterministicPipeline:
         r"|components_of_income"
         r"|components_of_results"
         r"|net_income.*margin"
-        r"|balance_sheet_data"
-        r"|federal_income_taxes"
+        r"|balance_sheet_data",
+        re.I,
+    )
+
+    # Tax reconciliation tables get a severe penalty because their total
+    # line ("Provision for income taxes") matches the income_tax canonical
+    # with high label priority, but the values may have wrong sign or
+    # disagree with the IS value.  A -100 penalty ensures the merge will
+    # replace these values when a better source exists.
+    _STRONGLY_DEPRIORITIZED_SECTION = re.compile(
+        r"federal_income_taxes"
         r"|statutory_rate",
         re.I,
     )
@@ -221,16 +230,20 @@ class DeterministicPipeline:
         """Return a priority bonus based on the table's sub-section.
 
         Reads bonus/penalty values from rules['section_weights'] if available,
-        otherwise defaults to +5 / -5.
+        otherwise defaults to +5 / -5 / -100.
         """
         bonus = 5
         penalty = -5
+        severe_penalty = -100
         if rules and "section_weights" in rules:
             sw = rules["section_weights"]
             bonus = sw.get("primary_is_bonus", 5)
             penalty = sw.get("deprioritized_penalty", -5)
+            severe_penalty = sw.get("strongly_deprioritized_penalty", -100)
         if DeterministicPipeline._PRIMARY_IS_SECTION.search(source_location):
             return bonus
+        if DeterministicPipeline._STRONGLY_DEPRIORITIZED_SECTION.search(source_location):
+            return severe_penalty
         if DeterministicPipeline._DEPRIORITIZED_SECTION.search(source_location):
             return penalty
         return 0
@@ -701,6 +714,54 @@ class DeterministicPipeline:
 
                     if canonical in period_fields[period_key]:
                         existing = period_fields[period_key][canonical]
+                        # ── Additive fields ──────────────────────────
+                        # Use label + source_location for dedup so same
+                        # label from different table sections (e.g.
+                        # non-current vs current) is accumulated.
+                        norm_lbl = self._alias_resolver._normalize(tf.label)
+                        dedup_key = norm_lbl + "|" + tf.source_location
+                        if self._alias_resolver.is_additive(canonical):
+                            seen = additive_labels.get(
+                                period_key, {}
+                            ).get(canonical, set())
+                            is_new = dedup_key not in seen
+                            if is_new:
+                                combined_value = existing.value + _normalize_sign(
+                                    canonical, tf.label, tf.value
+                                )
+                                fr = FieldResult(
+                                    value=combined_value,
+                                    scale=existing.scale,
+                                    source_filing=existing.source_filing,
+                                    source_location=existing.source_location,
+                                    confidence=existing.confidence,
+                                )
+                                fr._sort_key = existing._sort_key  # type: ignore[attr-defined]
+                                period_fields[period_key][canonical] = fr
+                                additive_labels.setdefault(
+                                    period_key, {}
+                                ).setdefault(canonical, set()).add(dedup_key)
+                                audit.accept(
+                                    field_name=canonical,
+                                    period=period_key,
+                                    source_filing=filing_path.name,
+                                    raw_label=tf.label,
+                                    raw_value=tf.value,
+                                    scale=scale,
+                                )
+                                continue
+                            else:
+                                audit.discard(
+                                    field_name=canonical,
+                                    period=period_key,
+                                    reason="additive_duplicate_constituent",
+                                    source_filing=filing_path.name,
+                                    raw_label=tf.label,
+                                    raw_value=tf.value,
+                                    scale=scale,
+                                )
+                                continue
+                        # ── Normal collision resolution ──────────────
                         old_sort_key = getattr(
                             existing, "_sort_key",
                             (999, 999, 0, ("", 0, 0, 0)),
@@ -726,6 +787,12 @@ class DeterministicPipeline:
                     )
                     fr._sort_key = new_sort_key  # type: ignore[attr-defined]
                     period_fields[period_key][canonical] = fr
+                    # Seed additive_labels when first storing an additive field
+                    if self._alias_resolver.is_additive(canonical):
+                        dedup_seed = self._alias_resolver._normalize(tf.label) + "|" + tf.source_location
+                        additive_labels.setdefault(
+                            period_key, {}
+                        ).setdefault(canonical, set()).add(dedup_seed)
                     audit.accept(
                         field_name=canonical,
                         period=period_key,

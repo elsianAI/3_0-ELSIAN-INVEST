@@ -38,9 +38,15 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"liabilities\s+and\s+equity", re.I),
         re.compile(r"mezzanine\s+equity", re.I),
         re.compile(r"discontinued\s+operations", re.I),
+        re.compile(r"equity\s+and\s+liabilities", re.I),
+        # Reject sub-totals: "total current liabilities" and
+        # "total non-current liabilities" are subsets, not the full total.
+        # Without this, the additive logic sums them with the real total.
+        re.compile(r"\bcurrent\b", re.I),
     ],
     "total_equity": [
         re.compile(r"liabilities\s+and\s+", re.I),
+        re.compile(r"equity\s+and\s+liabilities", re.I),
         re.compile(r"discontinued\s+operations", re.I),
     ],
     "cash_and_equivalents": [
@@ -74,6 +80,9 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"\bdeferred\s+tax\s+expense", re.I),
         re.compile(r"\btaxes\s+paid\b", re.I),
         re.compile(r"\btaxes\s+received\b", re.I),
+        re.compile(r"taxes\s+other\s+than\s+income", re.I),
+        re.compile(r"current\s+income\s+tax\b(?!\s+expense)", re.I),
+        re.compile(r"income\s+tax\s+receivable", re.I),
     ],
     "shares_outstanding": [
         re.compile(r"par\s+value", re.I),
@@ -103,6 +112,14 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
     "interest_expense": [
         re.compile(r"^add:", re.I),
         re.compile(r"\bpaid\b", re.I),
+        re.compile(r"lease\s+liabilities", re.I),
+        re.compile(r"net\s+financial\s+interest", re.I),
+    ],
+    "depreciation_amortization": [
+        re.compile(r"right-of-use", re.I),
+        re.compile(r"right[\s-]?of[\s-]?use", re.I),
+        re.compile(r"intangible\s+assets\s+acquired", re.I),
+        re.compile(r"impairment", re.I),
     ],
     "research_and_development": [
         re.compile(r"tax\s+credit", re.I),
@@ -128,6 +145,7 @@ _PRIORITY_PATTERNS: Dict[str, List[re.Pattern]] = {
     ],
     "income_tax": [
         re.compile(r"^(total\s+)?income\s+tax\s+expense(\s*\(benefit\))?\s*$", re.I),
+        re.compile(r"^income\s+tax$", re.I),
         re.compile(r"provision\s+for\s+income\s+tax", re.I),
     ],
     "shares_outstanding": [
@@ -183,7 +201,8 @@ class AliasResolver:
         # Remove parenthetical qualifiers that add noise to financial labels.
         # E.g. "Net income (loss) per share" → "Net income  per share"
         text = re.sub(
-            r"\(\s*(?:loss|benefit|deficit|expense|income)\s*\)", "", text
+            r"\(\s*(?:loss|benefit(?:\s+from)?|deficit|expense|income|used\s+in)\s*\)",
+            "", text,
         )
         # Replace common punctuation with space (not just remove) so that
         # "share—basic" becomes "share basic" not "sharebasic".
