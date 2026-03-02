@@ -3,6 +3,26 @@
 Purpose: single source of truth for the python-only iteration loop in Phase 2.
 Scope: deterministic module only (`deterministic/`), no LLM production pipeline events.
 
+## 2026-03-02 13:40 - Iteration 47 - PR (new case bootstrap)
+- Agent: Copilot
+- Objective: Añadir caso PR (Permian Resources Corp, NYSE, USD) al módulo deterministic de 3_0. Simular el step de acquire copiando los 28 filings ya disponibles en 4_0-ELSIAN-INVEST/cases/PR/filings/ y creando case.json, expected.json y filings_manifest.json en formato 3_0.
+- Hypothesis: El caso se puede incorporar directamente sin ejecutar sec_edgar.py, usando los artefactos de 4_0 como fuente. El expected.json (141 campos, 9 períodos) es compatible con el esquema 3_0 tras añadir restatement_policy. Los tests no se ven afectados (no hay código de pipeline nuevo).
+- Files changed:
+  - `deterministic/cases/PR/case.json` (NEW — caso PR: NYSE, USD, CIK 0001658566, source_hint sec)
+  - `deterministic/cases/PR/expected.json` (NEW — 9 períodos: FY2025/2024/2023 + Q3-Q1 2025 + Q3-Q1 2024; 141 campos ground truth; restatement_policy as_reported)
+  - `deterministic/cases/PR/filings/` (NEW — 81 ficheros copiados de 4_0: 28 filings × .htm/.txt/.clean.md, menos 3 8-K sin .clean.md)
+  - `deterministic/cases/PR/filings_manifest.json` (NEW — acquire simulado: 28 filings, 100% coverage, source sec_edgar)
+- Commands executed:
+  - `cp -r 4_0/.../PR/filings/ deterministic/cases/PR/filings/` (81 ficheros)
+  - `python3 /tmp/write_pr_expected.py` (genera expected.json vía Python)
+  - `python3 /tmp/write_pr_manifest.py` (genera filings_manifest.json)
+  - `python3 -m unittest discover -s deterministic/tests -v` (213 passed)
+- Metrics before: TALO=100% (85/85), GCT=100% (108/108), IOSP=100% (95/95), NEXN=100% (76/76), SONO=100% (116/116), TEP=100% (55/55), TZOO=100% (270/270). TOTAL=100% (805/805)
+- Metrics after: N/A — caso PR incorporado pero sin eval ejecutado; extract pendiente de primera iteración
+- Tests: 213 passed, 0 failed
+- Decision: accept — caso PR añadido correctamente al pool. Filings en formato SRC_{NNN} compatible con el pipeline. Los 141 campos del expected.json cubren 3 FY anuales + 6 trimestres. Cero regresiones en los 7 casos existentes.
+- Next step: Ejecutar `python3 -m deterministic.cli extract PR` + `eval PR` para obtener score inicial y comenzar iteración de mejora.
+
 ## 2026-03-02 20:00 - Iteration 46 - TALO (100% achieved)
 - Agent: Copilot
 - Objective: Bring TALO from 70.6% (Iter42 baseline) to 100%. TALO's consolidated BS only exists in vertical-format .txt files; .clean.md only has Schedule I (parent-only) data. Also fix capex sign issues and EPS label mismatches.
