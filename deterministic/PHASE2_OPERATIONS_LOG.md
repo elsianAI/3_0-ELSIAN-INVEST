@@ -3,6 +3,18 @@
 Purpose: single source of truth for the python-only iteration loop in Phase 2.
 Scope: deterministic module only (`deterministic/`), no LLM production pipeline events.
 
+## 2026-03-02 14:30 - Iteration 48 - PR
+- Agent: Copilot (Claude Sonnet 4.6)
+- Objective: Mejorar score de PR desde 77.3% (109/141) corrigiendo 3 causas raíz: (1) ingresos MISSED porque IS usa "Oil and gas sales"; (2) shares_outstanding WRONG tomando fila par-value BS "Class A: … shares issued and … shares outstanding | 76"; (3) total_equity WRONG eligiendo "Total shareholders' equity" (sin NCI) sobre "Total equity" (consolidado).
+- Hypothesis: Añadir aliases oil/gas a ingresos (+8→+9 matched); reject 'shares issued and' elimina par-value; priority pattern exacto "^total equity$" hace que la fila grand-total gane sobre la sub-total de Class A.
+- Files changed: `deterministic/config/field_aliases.json` (ingresos: +7 aliases oil/gas/operating revenues; shares_outstanding: +1 alias "basic weighted average shares"), `deterministic/src/normalize/aliases.py` (_REJECT_PATTERNS["shares_outstanding"]: +1 patrón "shares issued and\b", eliminado "class [a-z] "; _PRIORITY_PATTERNS: nuevo entry "total_equity" con "^total\s+equity$")
+- Commands executed: `python3 -m unittest discover -s deterministic/tests -v`; `python3 -m deterministic.cli extract PR`; `python3 -m deterministic.cli eval PR`; `python3 -m deterministic.cli eval TZOO`
+- Metrics before: PR score=77.3% (109/141), matched=109, wrong=24, missed=8, extra=279, filings_coverage=100%, required_fields_coverage=N/A
+- Metrics after: PR score=85.8% (121/141), matched=121, wrong=11, missed=9, extra=280, filings_coverage=100%, required_fields_coverage=93.6%. TZOO: 100.0% (sin regresión).
+- Tests: 213 passed, 0 failed
+- Decision: accept — +12 matched neto. ingresos y total_equity totalmente resueltos. shares_outstanding: par-value correctamente rechazado pero la nota EPS del filing tiene columnas $ entrelazadas que desalinean el parser de tablas markdown — el label "Basic weighted average shares of Class A Common Stock outstanding" resuelve OK en AliasResolver pero extract_tables_from_clean_md devuelve 0 resultados para ese campo. El patrón "class [a-z] " fue eliminado porque rechazaba también la línea válida de weighted avg (tiene "Class A Common").
+- Next step: (a) Iter49: fix tabla EPS con $ entrelazados — opciones: (i) detectar y colapsar columnas "$" en _parse_markdown_table antes de alinear periodos; (ii) añadir patrón narrative.py para formato .txt vertical (label\nval1\nval2\nval3). (b) D&A Q-periods: actual=YTD, resolver sustracción de periodos acumulativos. (c) FY2023/eps_basic y FY2023/net_income: provienen de filing comparativo — revisar sort_key de periodo.
+
 ## 2026-03-02 13:40 - Iteration 47 - PR (new case bootstrap)
 - Agent: Copilot
 - Objective: Añadir caso PR (Permian Resources Corp, NYSE, USD) al módulo deterministic de 3_0. Simular el step de acquire copiando los 28 filings ya disponibles en 4_0-ELSIAN-INVEST/cases/PR/filings/ y creando case.json, expected.json y filings_manifest.json en formato 3_0.

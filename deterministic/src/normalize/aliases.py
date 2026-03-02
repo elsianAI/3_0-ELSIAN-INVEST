@@ -105,7 +105,13 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         # Reject "diluted" labels UNLESS "basic" is also present
         # (combined "basic and diluted" labels are valid share counts).
         re.compile(r"^(?!.*\bbasic\b).*\bdiluted\b", re.I),
-        re.compile(r"class\s+[a-z]\s", re.I),
+        # Reject BS par-value class breakdown rows like
+        # "Class A: XXX shares issued and YYY shares outstanding at..."
+        # These carry the par value in $K, not the actual share count.
+        # NOTE: the generic 'class [a-z] ' pattern was removed because it
+        # incorrectly rejects valid labels like
+        # "Basic weighted average shares of Class A Common Stock outstanding".
+        re.compile(r"shares\s+issued\s+and\b", re.I),
     ],
     "eps_diluted": [
         re.compile(r"\badjusted\b", re.I),
@@ -147,6 +153,12 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
 # Priority patterns: when multiple rows could map to same canonical,
 # a label matching one of these gets preference (score=100 exact, else 50).
 _PRIORITY_PATTERNS: Dict[str, List[re.Pattern]] = {
+    "total_equity": [
+        # Prefer the consolidated equity grand total ("Total equity") over
+        # class-specific sub-totals ("Total shareholders' equity", etc.)
+        # which exclude non-controlling interests.
+        re.compile(r"^total\s+equity$", re.I),
+    ],
     "ebit": [
         re.compile(r"^operating\s+income", re.I),
         re.compile(r"^operating\s+loss", re.I),
