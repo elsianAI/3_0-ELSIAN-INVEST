@@ -1,0 +1,1059 @@
+{
+  "version_esquema": "AgentReport_v1",
+  "caso_id": "CASE_20260311_ACLS",
+  "fecha_corte": "2026-03-11",
+  "agente": {
+    "agent_role": "FORENSIC",
+    "agent_nombre": "FORENSIC_SCORING_v1",
+    "modelo": "GPT-5",
+    "idioma": "es"
+  },
+  "input_refs": {
+    "truth_pack_caso_id": "CASE_20260311_ACLS",
+    "implied_expectations_caso_id": "CASE_20260311_ACLS",
+    "sources_pack_caso_id": "UNKNOWN"
+  },
+  "forensic_scoring": [
+    {
+      "red_flag_id": "RF-01",
+      "severidad": "MEDIO",
+      "base_cuantificable": "Ingresos FY2023-FY2025 -25.8%, R&D+SG&A +14.2%, margen EBIT 23.5% a 14.2%."
+    },
+    {
+      "red_flag_id": "RF-02",
+      "severidad": "ALTO",
+      "base_cuantificable": "Recompras FY2025 121.1M USD, equivalentes al 113.1% del FCF y al 102.3% del CFO; Q4-2025 FCF -8.9M USD."
+    },
+    {
+      "red_flag_id": "RF-03",
+      "severidad": "ALTO",
+      "base_cuantificable": "Q4-2025 CFO -6.6M USD con EBIT +36.2M USD; gap EBIT-CFO -42.7M USD."
+    },
+    {
+      "red_flag_id": "RF-04",
+      "severidad": "MEDIO",
+      "base_cuantificable": "Gap EBIT-CFO FY2023 -41.0% y FY2024 -33.2%."
+    },
+    {
+      "red_flag_id": "RF-05",
+      "severidad": "MEDIO",
+      "base_cuantificable": "Otros ingresos implícitos FY2025 ~24.3M USD, equivalentes al 20.4% del EBIT."
+    },
+    {
+      "red_flag_id": "RF-06",
+      "severidad": "MEDIO",
+      "base_cuantificable": "SBC explícita FY2025 20.8M USD; ajustes no cash implícitos 39.8M USD, 4.7% de ingresos."
+    },
+    {
+      "red_flag_id": "RF-07",
+      "severidad": "MEDIO",
+      "base_cuantificable": "Capex/D&A FY2024 0.77x y FY2025 0.64x."
+    },
+    {
+      "red_flag_id": "RF-08",
+      "severidad": "MEDIO",
+      "base_cuantificable": "Deferred revenue total -21.2% YoY; componente corriente -30.8% YoY."
+    },
+    {
+      "red_flag_id": "RF-09",
+      "severidad": "ALTO",
+      "base_cuantificable": "Inventario FY2025 329.0M USD, DIO ~260 días, inventario/ingresos 39.2%."
+    },
+    {
+      "red_flag_id": "RF-10",
+      "severidad": "BAJO",
+      "base_cuantificable": "Deuda total del TruthPack nula, pero sólo se identifican finance leases visibles por 42.3M USD y sin muro de deuda."
+    }
+  ],
+  "supervivencia_resultado": "PASS",
+  "survival_score_0_5": 3,
+  "kill_criteria_formalizados": [
+    {
+      "kc_id": "KC-01",
+      "descripcion": "Dos trimestres consecutivos con CFO trimestral <= 0 USD o CFO TTM <= 0 USD.",
+      "probabilidad_0_1": 0.34,
+      "ventana_temporal": {
+        "inicio": "2026-03-11",
+        "fin_esperado": "2027-03-11"
+      },
+      "criterio_chequeo": "Confirmar en 10-Q/10-K que el CFO trimestral sea negativo en dos trimestres seguidos, o que el CFO TTM caiga a cero o menos.",
+      "accion_si_activado": "SALIR"
+    },
+    {
+      "kc_id": "KC-02",
+      "descripcion": "Inventarios > 300M USD y DIO > 250 días en dos cierres consecutivos con ingresos TTM <= 850M USD.",
+      "probabilidad_0_1": 0.46,
+      "ventana_temporal": {
+        "inicio": "2026-03-11",
+        "fin_esperado": "2026-12-31"
+      },
+      "criterio_chequeo": "Validar inventario, COGS TTM e ingresos TTM en dos cierres seguidos; ambos umbrales deben cumplirse simultáneamente.",
+      "accion_si_activado": "REDUCIR_50"
+    },
+    {
+      "kc_id": "KC-03",
+      "descripcion": "Ingresos FY2026 < 700M USD o dos trimestres consecutivos con caída interanual > 25%.",
+      "probabilidad_0_1": 0.28,
+      "ventana_temporal": {
+        "inicio": "2026-03-11",
+        "fin_esperado": "2027-03-11"
+      },
+      "criterio_chequeo": "Comprobar en 10-Q/10-K el run-rate anualizado o el cierre FY2026 frente a FY2025.",
+      "accion_si_activado": "REDUCIR_50"
+    },
+    {
+      "kc_id": "KC-04",
+      "descripcion": "Recompras 12M > FCF 12M y caja más inversiones de corto plazo < 300M USD.",
+      "probabilidad_0_1": 0.38,
+      "ventana_temporal": {
+        "inicio": "2026-03-11",
+        "fin_esperado": "2027-03-11"
+      },
+      "criterio_chequeo": "Cruzar cash flow trailing 12 months, notas de recompras y balance trimestral.",
+      "accion_si_activado": "REVISAR_COMITE"
+    },
+    {
+      "kc_id": "KC-05",
+      "descripcion": "Deferred revenue total < 90M USD o caída adicional > 15% YoY.",
+      "probabilidad_0_1": 0.42,
+      "ventana_temporal": {
+        "inicio": "2026-03-11",
+        "fin_esperado": "2027-03-11"
+      },
+      "criterio_chequeo": "Verificar deferred revenue corriente y de largo plazo en balance y sumar ambos importes.",
+      "accion_si_activado": "REDUCIR_50"
+    },
+    {
+      "kc_id": "KC-06",
+      "descripcion": "Margen bruto < 40% en dos trimestres consecutivos.",
+      "probabilidad_0_1": 0.2,
+      "ventana_temporal": {
+        "inicio": "2026-03-11",
+        "fin_esperado": "2027-03-11"
+      },
+      "criterio_chequeo": "Calcular gross profit sobre ingresos trimestrales reportados; activar sólo si ocurre dos veces seguidas.",
+      "accion_si_activado": "REDUCIR_50"
+    },
+    {
+      "kc_id": "KC-07",
+      "descripcion": "Caja más inversiones de corto plazo < 1.25x pasivos corrientes o < 200M USD.",
+      "probabilidad_0_1": 0.18,
+      "ventana_temporal": {
+        "inicio": "2026-03-11",
+        "fin_esperado": "2028-03-11"
+      },
+      "criterio_chequeo": "Comparar balance trimestral con pasivos corrientes y efectivo más inversiones a corto plazo.",
+      "accion_si_activado": "REDUCIR_50"
+    },
+    {
+      "kc_id": "KC-08",
+      "descripcion": "Backlog o bookings caen > 3 trimestres consecutivos, o se pierden design wins clave en implantación iónica.",
+      "probabilidad_0_1": 0.27,
+      "ventana_temporal": {
+        "inicio": "2026-03-11",
+        "fin_esperado": "2028-03-11"
+      },
+      "criterio_chequeo": "Usar supplemental earnings, conference calls o disclosures operativos para confirmar caída sostenida o pérdida de clientes clave.",
+      "accion_si_activado": "REVISAR_COMITE"
+    }
+  ],
+  "max_position_size": {
+    "pct_cartera": 2.5,
+    "limite_absoluto_usd": null,
+    "justificacion": "Score 3/5 con confianza 0.68: la liquidez visible evita un caso de liquidación inminente, pero tres banderas altas de working capital y disciplina de capital impiden una posición plena. Un tamaño superior exigiría ver normalización de inventario, CFO y recompras."
+  },
+  "resumen_ejecutivo": {
+    "bullets": [
+      "La liquidez cercana de 374.3M USD y la deuda visible baja sostienen la supervivencia base a 12-24 meses.",
+      "Las tres banderas altas son recompras superiores al FCF, ruptura EBIT-CFO en Q4-2025 e inventario en 329.0M USD.",
+      "El riesgo central no es refinanciación sino capital de trabajo, calidad de caja y disciplina de asignación de capital.",
+      "FY2025 cerró con CFO anual positivo, pero Q4-2025 mostró CFO negativo y menor colchón de deferred revenue.",
+      "Veredicto APTO con score 3/5 y tamaño máximo sugerido de 2.5% de cartera."
+    ],
+    "veredicto": "APTO",
+    "veredicto_role_local": "APTO",
+    "confianza_0_1": 0.68,
+    "justificacion_texto": "ACLS no presenta un caso clásico de supervivencia por balance: mantiene 145.5M USD de caja, 228.8M USD de inversiones de corto plazo y sólo 42.3M USD de finance leases visibles. Eso permite asignar PASS y score 3/5, porque el riesgo de liquidación en 12-24 meses sigue contenido si la compañía modera recompras y normaliza capital de trabajo.\n\nLa rebaja a 3/5 viene de tres banderas altas: recompras superiores al FCF, ruptura EBIT-CFO en Q4-2025 e inventario en 329.0M USD con 260 días. La supervivencia depende más de disciplina de caja e inventario que de refinanciación. Faltan backlog/bookings y una tabla completa de deuda, por eso la confianza queda en 0.68."
+  },
+  "claims": [
+    {
+      "claim_id": "CLM_001",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "ACLS mantiene capacidad base de supervivencia a 12-24 meses porque el balance sigue líquido y no muestra un muro de deuda visible.",
+      "confianza_0_1": 0.81,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001_10-K_FY2025",
+          "url": null,
+          "titulo": "10-K FY2025",
+          "fecha": null,
+          "ubicacion": "us-gaap:CashAndCashEquivalentsAtCarryingValue As_Of_12_31_2025",
+          "cita_corta": "Cash and cash equivalents",
+          "interpretacion": "La caja reportada de 145.5M USD aporta un colchón material."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "url": null,
+          "titulo": "8-K 2026-02-17",
+          "fecha": "2026-02-17",
+          "ubicacion": "balance sheet, filas de finance lease obligation",
+          "cita_corta": "Current portion of finance lease obligation",
+          "interpretacion": "La deuda visible se concentra en leases y no apunta a una pared de vencimientos."
+        }
+      ],
+      "falsacion": {
+        "test": "Caja más inversiones de corto plazo por debajo de 300M USD, o aparición de deuda financiera material no identificada.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_002",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "La política de recompras FY2025 deterioró la protección de liquidez al consumir más del 100% del FCF anual en pleno downturn.",
+      "confianza_0_1": 0.9,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "url": null,
+          "titulo": "8-K 2026-02-17",
+          "fecha": "2026-02-17",
+          "ubicacion": "cash flow table, fila 'Repurchase of common stock'",
+          "cita_corta": "Repurchase of common stock",
+          "interpretacion": "Las recompras FY2025 fueron 121.1M USD."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001_10-K_FY2025",
+          "url": null,
+          "titulo": "10-K FY2025",
+          "fecha": null,
+          "ubicacion": "us-gaap:NetCashProvidedByUsedInOperatingActivities Duration_1_1_2025_To_12_31_2025",
+          "cita_corta": "Net cash provided by operating activities",
+          "interpretacion": "El CFO FY2025 fue 118.3M USD y no cubrió holgadamente recompras más capex."
+        }
+      ],
+      "falsacion": {
+        "test": "Recompras trailing 12 meses <= 75% del FCF trailing 12 meses durante dos trimestres consecutivos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "filing"
+      }
+    },
+    {
+      "claim_id": "CLM_003",
+      "tipo": "HECHO",
+      "criticidad": "CRITICO",
+      "enunciado": "El inventario es hoy la mayor fuente de riesgo forense porque inmoviliza liquidez y eleva el riesgo de write-down si el ciclo no rebota.",
+      "confianza_0_1": 0.87,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001_10-K_FY2025",
+          "url": null,
+          "titulo": "10-K FY2025",
+          "fecha": null,
+          "ubicacion": "us-gaap:InventoryNet As_Of_12_31_2025",
+          "cita_corta": "Inventory net",
+          "interpretacion": "El inventario cerró FY2025 en 329.0M USD."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001_10-K_FY2025",
+          "url": null,
+          "titulo": "10-K FY2025",
+          "fecha": null,
+          "ubicacion": "us-gaap:CostOfGoodsAndServicesSold Duration_1_1_2025_To_12_31_2025",
+          "cita_corta": "Cost of goods and services sold",
+          "interpretacion": "Con el COGS FY2025, el DIO implícito ronda 260 días."
+        }
+      ],
+      "falsacion": {
+        "test": "Inventario < 300M USD y DIO < 220 días en dos cierres trimestrales consecutivos.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_004",
+      "tipo": "INFERENCIA",
+      "criticidad": "CRITICO",
+      "enunciado": "La mejora anual FY2025 no saneó por completo la calidad de caja, porque Q4-2025 volvió a romper la conversión EBIT-CFO.",
+      "confianza_0_1": 0.74,
+      "impacto": "ALTO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "url": null,
+          "titulo": "8-K 2026-02-17",
+          "fecha": "2026-02-17",
+          "ubicacion": "cash flow table, fila 'Net cash (used in) provided by operating activities', columna Q4-2025",
+          "cita_corta": "Net cash used in operating activities",
+          "interpretacion": "Q4-2025 tuvo CFO negativo de -6.6M USD."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "url": null,
+          "titulo": "8-K 2026-02-17",
+          "fecha": "2026-02-17",
+          "ubicacion": "income statement, fila 'Income from operations', columna Q4-2025",
+          "cita_corta": "Income from operations",
+          "interpretacion": "El EBIT Q4-2025 fue positivo, por lo que la ruptura se explica por el puente a caja."
+        }
+      ],
+      "falsacion": {
+        "test": "Dos trimestres consecutivos con CFO positivo y conversión CFO/EBIT superior al 80% sin liberación extraordinaria de working capital.",
+        "ventana_meses": {
+          "min": 3,
+          "max": 12
+        },
+        "fuente_prevista": "10-Q"
+      }
+    },
+    {
+      "claim_id": "CLM_005",
+      "tipo": "HECHO",
+      "criticidad": "IMPORTANTE",
+      "enunciado": "La calidad del beneficio está apoyada por otros ingresos no operativos y SBC creciente, lo que reduce la pureza del net income.",
+      "confianza_0_1": 0.72,
+      "impacto": "MEDIO",
+      "evidencias": [
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_001_10-K_FY2025",
+          "url": null,
+          "titulo": "10-K FY2025",
+          "fecha": null,
+          "ubicacion": "us-gaap:ProfitLoss y us-gaap:OperatingIncomeLoss Duration_1_1_2025_To_12_31_2025",
+          "cita_corta": "Profit loss; operating income loss",
+          "interpretacion": "Net income superó a EBIT pese a intereses e impuestos, implicando otros ingresos materiales."
+        },
+        {
+          "tipo": "SOURCEPACK",
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "url": null,
+          "titulo": "8-K 2026-02-17",
+          "fecha": "2026-02-17",
+          "ubicacion": "cash flow table, fila 'Stock-based compensation expense'",
+          "cita_corta": "Stock-based compensation expense",
+          "interpretacion": "La SBC FY2025 fue 20.8M USD."
+        }
+      ],
+      "falsacion": {
+        "test": "Otros ingresos no operativos por debajo del 10% del EBIT y SBC inferior al 3.5% de ingresos durante un año completo.",
+        "ventana_meses": {
+          "min": 6,
+          "max": 12
+        },
+        "fuente_prevista": "10-K"
+      }
+    }
+  ],
+  "predicciones_calibracion": [
+    {
+      "pred_id": "PRED_001",
+      "descripcion": "Inventario > 300M USD y DIO > 250 días en al menos uno de los próximos dos cierres trimestrales.",
+      "probabilidad_0_1": 0.46,
+      "ventana_meses": {
+        "min": 3,
+        "max": 9
+      },
+      "criterio_validacion": "Tomar inventario de balance y COGS TTM; la predicción acierta si ambos umbrales se cumplen en un cierre.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_002",
+      "descripcion": "Deferred revenue total cae por debajo de 100M USD antes del cierre FY2026.",
+      "probabilidad_0_1": 0.42,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Sumar deferred revenue corriente y de largo plazo reportados en balance.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_003",
+      "descripcion": "Al menos un trimestre adicional con CFO trimestral <= 0 USD durante los próximos 12 meses.",
+      "probabilidad_0_1": 0.48,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "La predicción acierta si cualquier 10-Q o 10-K muestra CFO trimestral no positivo.",
+      "fuente_prevista": "10-Q"
+    },
+    {
+      "pred_id": "PRED_004",
+      "descripcion": "Las recompras FY2026 vuelven a exceder el FCF FY2026.",
+      "probabilidad_0_1": 0.35,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Comparar cash outflow por repurchases contra CFO menos capex del ejercicio completo.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_005",
+      "descripcion": "Margen bruto < 42% en al menos uno de los próximos cuatro trimestres.",
+      "probabilidad_0_1": 0.29,
+      "ventana_meses": {
+        "min": 3,
+        "max": 12
+      },
+      "criterio_validacion": "Calcular gross profit sobre revenue trimestral reportado; acierta si cae bajo 42%.",
+      "fuente_prevista": "earnings"
+    },
+    {
+      "pred_id": "PRED_006",
+      "descripcion": "FY2026 cierra con ingresos < 780M USD o con dos trimestres consecutivos <= -15% YoY.",
+      "probabilidad_0_1": 0.33,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Usar revenue reportado en 10-Q/10-K y comparar contra FY2025 o contra el mismo trimestre del año previo.",
+      "fuente_prevista": "10-K"
+    },
+    {
+      "pred_id": "PRED_007",
+      "descripcion": "Caja más inversiones de corto plazo caen por debajo de 325M USD al cierre FY2026.",
+      "probabilidad_0_1": 0.26,
+      "ventana_meses": {
+        "min": 6,
+        "max": 12
+      },
+      "criterio_validacion": "Sumar cash and cash equivalents más short-term investments en el balance anual o trimestral.",
+      "fuente_prevista": "10-K"
+    }
+  ],
+  "peticiones_de_fuentes": [
+    {
+      "prioridad": "ALTA",
+      "item": "Backlog, bookings y book-to-bill trimestral por línea de producto",
+      "por_que_importa": "Permite distinguir si el inventario alto responde a un bache transitorio o a pérdida estructural de demanda/cuota.",
+      "como_obtenerlo": "Supplemental earnings, investor presentation, conference call transcript o consulta directa a IR.",
+      "tipo_fuente": "IR deck / earnings supplemental / conference call transcript",
+      "costo_disponibilidad": "MEDIA; suele existir parcialmente en llamadas, no siempre en filing."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Tabla completa de vencimientos de deuda y leases 12-24 meses",
+      "por_que_importa": "Reduce la incertidumbre sobre obligaciones financieras reales y elimina el punto ciego de deuda_total_usd nula.",
+      "como_obtenerlo": "10-K FY2025, nota de leases/debt, tabla contractual obligations o notas del balance.",
+      "tipo_fuente": "10-K note / contractual obligations table",
+      "costo_disponibilidad": "BAJA; debería estar en filing o anexos."
+    },
+    {
+      "prioridad": "ALTA",
+      "item": "Detalle de inventario por raw materials, WIP, finished goods y ageing",
+      "por_que_importa": "Es clave para estimar obsolescencia, probabilidad de write-down y convertibilidad real a caja.",
+      "como_obtenerlo": "10-K nota de inventarios si existe; si no, earnings Q&A, channel checks o conversación con IR.",
+      "tipo_fuente": "10-K note / IR Q&A / channel checks",
+      "costo_disponibilidad": "MEDIA-ALTA; rara vez viene completo en filing."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Detalle de deferred revenue y anticipos de clientes por geografía o producto",
+      "por_que_importa": "Aclara si la caída del colchón operativo es puntual por entregas o estructural por menor toma de pedidos.",
+      "como_obtenerlo": "10-K/10-Q nota de revenue o transcripción de resultados.",
+      "tipo_fuente": "10-Q / 10-K revenue note / transcript",
+      "costo_disponibilidad": "MEDIA."
+    },
+    {
+      "prioridad": "MEDIA",
+      "item": "Política de recompras: autorización remanente, criterios y gatillos internos",
+      "por_que_importa": "Permite evaluar si la disciplina de capital puede corregirse rápido o seguirá drenando liquidez.",
+      "como_obtenerlo": "10-K, 8-K de autorizaciones, proxy DEF 14A o conference call.",
+      "tipo_fuente": "8-K / DEF 14A / earnings transcript",
+      "costo_disponibilidad": "BAJA."
+    }
+  ],
+  "payload": {
+    "payload_version": "ForensicPayload_v1",
+    "contenido": {
+      "objetivo_del_rol": "Evaluar supervivencia 12-24 meses, riesgo de dilución/estrés de deuda y red flags contables; proponer kill criteria falsables.",
+      "veredicto_forense": {
+        "status": "APTO",
+        "confianza_0_1": 0.68,
+        "razon_principal": "La liquidez visible y la ausencia de un muro de deuda sostienen la supervivencia base, pero el perfil forense se deteriora por working capital frágil, inventario alto y recompras por encima del FCF."
+      },
+      "supervivencia": {
+        "horizonte_meses": {
+          "min": 12,
+          "max": 24
+        },
+        "evaluacion": {
+          "resultado": "PASS",
+          "score_0_5": 3,
+          "por_que": [
+            "La liquidez cercana asciende a 374.3M USD y cubre 1.89x los pasivos corrientes.",
+            "No aparece un muro de deuda convencional; sólo se identifican finance leases visibles por 42.3M USD.",
+            "Hay tres banderas altas que impiden un score 4: recompras > FCF, CFO Q4-2025 negativo e inventario extremo.",
+            "El riesgo principal es operativo y de capital de trabajo, no de refinanciación.",
+            "La disciplina de capital puede corregirse rápido, pero todavía no hay evidencia observada de esa corrección."
+          ]
+        },
+        "liquidez": {
+          "caja_usd": 145451000,
+          "linea_credito_disponible_usd": null,
+          "otras_fuentes_liquidez": [
+            "inversiones_corto_plazo 228802000 USD",
+            "inversiones_largo_plazo 182396000 USD"
+          ],
+          "runway_meses_estimado": 49,
+          "metodo_estimacion": "Se annualiza el estrés de Q4-2025 usando CFO trimestral -6.6M USD más capex trimestral -2.3M USD contra caja. El escenario base no usa runway porque FY2025 cerró con CFO y FCF positivos.",
+          "notas": "No se identificó revolver disponible. La compañía sigue autofinanciada en el agregado anual, pero el puente trimestral de caja se debilitó."
+        },
+        "deuda_y_refinanciacion": {
+          "deuda_total_usd": null,
+          "deuda_neta_usd": null,
+          "coste_deuda_aprox_pct": null,
+          "coverage_intereses": 22.24,
+          "net_debt_ebitda": null,
+          "maturity_wall": {
+            "existe": false,
+            "horizonte_meses": 24,
+            "comentario": "No se observa muro de deuda financiera convencional. Sólo aparece 1.6M USD de finance lease corriente y 40.8M USD de lease de largo plazo visible."
+          },
+          "vencimientos": [
+            {
+              "anio": 2026,
+              "importe_usd": 1575000,
+              "tipo": "leasing",
+              "riesgo": "BAJO",
+              "fuente_ref": {
+                "source_id": "SRC_019_8-K_2026-02-17",
+                "ubicacion": "balance sheet, current portion of finance lease obligation"
+              }
+            }
+          ],
+          "covenants": {
+            "disponible": false,
+            "tipos_detectados": [],
+            "riesgo_breach": "BAJO",
+            "comentario": "No se identificaron covenant packages materiales. El 10-K/8-K revisado apunta a leases sin restrictive covenants relevantes."
+          }
+        },
+        "riesgo_dilucion": {
+          "nivel": "BAJO",
+          "motores": [
+            "SBC"
+          ],
+          "share_count_yoy_pct": -3,
+          "comentario": "La SBC es material, pero la compañía fue compradora neta de acciones y el diluted share count cayó frente a FY2024. El riesgo de dilución neta hoy es bajo."
+        }
+      },
+      "calidad_de_resultados_y_contabilidad": {
+        "resumen": "No aparece un patrón fuerte de fraude de ingresos, related parties o deuda oculta material en los filings revisados. El problema forense es de calidad de caja y asignación de capital: la conversión EBIT-caja fue débil en FY2023-FY2024 y volvió a romperse en Q4-2025. Además, el net income depende parcialmente de ingresos no operativos y de un nivel creciente de SBC. El inventario alto y la caída del deferred revenue hacen más frágil el puente a caja.",
+        "red_flags": [
+          {
+            "flag_id": "RF-01",
+            "categoria": "OTHER",
+            "descripcion": "Los gastos operativos crecieron mientras los ingresos caían desde el pico FY2023, comprimiendo el margen EBIT.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.72,
+            "por_que_importa": "Reduce la elasticidad del EBIT y aumenta el riesgo de que otra caída de ingresos destruya caja.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001_10-K_FY2025",
+                "ubicacion": "us-gaap:ResearchAndDevelopmentExpense y tabla de Sales and marketing",
+                "cita_corta": "Research and development; Sales and marketing",
+                "interpretacion": "R&D+SG&A subieron frente a FY2023 pese al descenso de ventas."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Dos trimestres consecutivos con opex/ingresos estabilizado y margen EBIT >= 18%.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-02",
+            "categoria": "OTHER",
+            "descripcion": "Las recompras FY2025 excedieron el FCF anual y siguieron activas incluso con FCF negativo en Q4-2025.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.63,
+            "por_que_importa": "Drena liquidez que podría absorber inventario alto o otro trimestre débil de caja.",
+            "evidencias": [
+              {
+                "source_id": "SRC_019_8-K_2026-02-17",
+                "ubicacion": "cash flow table, repurchase of common stock",
+                "cita_corta": "Repurchase of common stock",
+                "interpretacion": "Las recompras de 121.1M USD superaron el FCF FY2025."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Recompras trailing 12 meses <= 75% del FCF trailing 12 meses durante dos trimestres.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-03",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Q4-2025 tuvo CFO negativo con EBIT positivo, rompiendo el puente de conversión en el trimestre más reciente.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.55,
+            "por_que_importa": "Una repetición volvería a cuestionar la autosuficiencia del modelo sin ajuste de capital.",
+            "evidencias": [
+              {
+                "source_id": "SRC_019_8-K_2026-02-17",
+                "ubicacion": "cash flow e income statement, columnas Q4-2025",
+                "cita_corta": "Net cash used in operating activities",
+                "interpretacion": "CFO -6.6M USD frente a EBIT positivo."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Dos trimestres seguidos con CFO positivo y conversión CFO/EBIT superior al 80%.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 9
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-04",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "Durante FY2023-FY2024 el beneficio operativo no convirtió plenamente en caja por absorción de capital de trabajo.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.64,
+            "por_que_importa": "Indica que el pico de beneficios no fue de la misma calidad que sugiere el EBIT.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001_10-K_FY2025",
+                "ubicacion": "Operating income y operating cash flow FY2023-FY2024",
+                "cita_corta": "Operating income loss; Net cash provided by operating activities",
+                "interpretacion": "El gap EBIT-CFO fue -41.0% en FY2023 y -33.2% en FY2024."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "CFO/EBIT >= 85% en un año completo sin liberaciones extraordinarias de inventario o AR.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-05",
+            "categoria": "ONE_OFFS",
+            "descripcion": "El net income FY2025 se sostuvo con otros ingresos no operativos relevantes frente al EBIT.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.47,
+            "por_que_importa": "Hace menos repetible el beneficio neto si bajan tasas o disminuye el portafolio invertido.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001_10-K_FY2025",
+                "ubicacion": "ProfitLoss, OperatingIncomeLoss, InterestExpenseNonoperating, IncomeTaxExpenseBenefit",
+                "cita_corta": "Profit loss; interest expense",
+                "interpretacion": "La conciliación implica ~24.3M USD de otros ingresos no operativos."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Otros ingresos no operativos por debajo del 10% del EBIT en el siguiente ejercicio completo.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-06",
+            "categoria": "SBC",
+            "descripcion": "La SBC y otros ajustes no cash crecieron como porcentaje de ingresos mientras el negocio se contraía.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.58,
+            "por_que_importa": "Reduce la calidad económica del EBITDA ajustado y eleva el coste implícito de compensación.",
+            "evidencias": [
+              {
+                "source_id": "SRC_019_8-K_2026-02-17",
+                "ubicacion": "Adjusted EBITDA y stock-based compensation expense FY2025",
+                "cita_corta": "Adjusted EBITDA; Stock-based compensation expense",
+                "interpretacion": "La SBC explícita fue 20.8M USD y los ajustes no cash implícitos 39.8M USD."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "SBC < 3.5% de ingresos y ajustes no cash < 3% de ingresos durante un año completo.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-07",
+            "categoria": "CAPEX_CAPITALIZATION",
+            "descripcion": "El capex quedó por debajo de la depreciación durante dos años consecutivos.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.54,
+            "por_que_importa": "Puede implicar subinversión y deterioro futuro de capacidad/productividad en un negocio tecnológico.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001_10-K_FY2025",
+                "ubicacion": "PaymentsToAcquirePropertyPlantAndEquipment y DepreciationDepletionAndAmortization",
+                "cita_corta": "Payments to acquire property, plant and equipment",
+                "interpretacion": "El ratio capex/D&A cayó a 0.64x en FY2025."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Capex/D&A >= 0.9x durante los próximos 12 meses o disclosure claro de bajo maintenance capex estructural.",
+              "ventana_meses": {
+                "min": 6,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          },
+          {
+            "flag_id": "RF-08",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "El colchón de financiación operativa por ingresos diferidos cayó de forma relevante en FY2025.",
+            "severidad": "MEDIA",
+            "probabilidad_0_1": 0.57,
+            "por_que_importa": "Resta financiación espontánea del cliente y vuelve más exigente el puente a caja.",
+            "evidencias": [
+              {
+                "source_id": "SRC_019_8-K_2026-02-17",
+                "ubicacion": "balance sheet, deferred revenue y long-term deferred revenue",
+                "cita_corta": "Deferred revenue",
+                "interpretacion": "El deferred revenue total cayó a 108.9M USD desde 138.2M USD."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Deferred revenue total estabilizado por encima de 110M USD o crecimiento interanual positivo.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-09",
+            "categoria": "WORKING_CAPITAL",
+            "descripcion": "La sobreacumulación de inventario es inconsistente con ingresos en declive y eleva el riesgo de write-downs.",
+            "severidad": "ALTA",
+            "probabilidad_0_1": 0.74,
+            "por_que_importa": "Congela liquidez, puede forzar descuentos y amenaza márgenes si el backlog no absorbe el stock.",
+            "evidencias": [
+              {
+                "source_id": "SRC_001_10-K_FY2025",
+                "ubicacion": "InventoryNet As_Of_12_31_2025 y Revenues Duration_1_1_2025_To_12_31_2025",
+                "cita_corta": "Inventory net; Revenues",
+                "interpretacion": "Inventario +16.6% YoY mientras ingresos -17.6% YoY."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Inventario < 300M USD y DIO < 220 días en dos cierres consecutivos.",
+              "ventana_meses": {
+                "min": 3,
+                "max": 12
+              },
+              "fuente_prevista": "10-Q"
+            }
+          },
+          {
+            "flag_id": "RF-10",
+            "categoria": "LEASES",
+            "descripcion": "La deuda financiera total no está plenamente reconstruida en el TruthPack, aunque la deuda visible es baja.",
+            "severidad": "BAJA",
+            "probabilidad_0_1": 0.34,
+            "por_que_importa": "Baja la confianza del score y deja una incertidumbre abierta sobre el coste financiero real.",
+            "evidencias": [
+              {
+                "source_id": "SRC_019_8-K_2026-02-17",
+                "ubicacion": "balance sheet, current portion y long-term finance lease obligation",
+                "cita_corta": "Long-term finance lease obligation",
+                "interpretacion": "Se identifican 42.3M USD visibles, pero no un desglose integral de deuda total."
+              }
+            ],
+            "test_de_falsacion": {
+              "test": "Divulgación completa de deuda y vencimientos que confirme que el pasivo financiero total es sólo de leases o igualmente manejable.",
+              "ventana_meses": {
+                "min": 1,
+                "max": 12
+              },
+              "fuente_prevista": "10-K"
+            }
+          }
+        ],
+        "puentes_criticos": {
+          "ebitda_a_cfo": {
+            "lectura": "FY2023 y FY2024 mostraron una conversión pobre de beneficio operativo a caja por absorción de capital de trabajo. FY2025 mejoró en el agregado anual, pero Q4-2025 volvió a romper el puente con CFO negativo pese a EBIT positivo. El foco real está en inventario, deferred revenue y timing de cobros/pagos.",
+            "posibles_distorsiones": [
+              "capital circulante",
+              "intereses",
+              "impuestos",
+              "otros"
+            ]
+          },
+          "cfo_a_fcf": {
+            "lectura": "El paso de CFO a FCF es estructuralmente limpio porque el capex desembolsado es bajo. El problema no es el capex, sino que el FCF fue reasignado a recompras y no a reforzar el balance operativo.",
+            "capex_riesgo": "MEDIO",
+            "notas": "Capex < D&A durante dos años consecutivos. Además, FY2025 tuvo CFI positivo por desinversiones de portafolio, no por mejora operativa."
+          }
+        }
+      },
+      "capital_allocation_y_alineacion": {
+        "recompras": {
+          "disponible": true,
+          "sostenible_por_fcf": "NO",
+          "comentario": "Las recompras FY2025 fueron 121.1M USD frente a FCF FY2025 de 107.0M USD. La política actual es demasiado agresiva para un entorno de ingresos en descenso."
+        },
+        "sbc_y_compensacion": {
+          "sbc_relevante": "SI",
+          "comentario": "La SBC explícita de 20.8M USD y el aumento de ajustes no cash reducen la pureza del beneficio ajustado."
+        },
+        "mna": {
+          "riesgo_mala_asignacion": "BAJO",
+          "comentario": "No hay evidencia en los inputs de una política reciente de M&A que agrave el riesgo de supervivencia."
+        },
+        "alineacion_management": {
+          "insiders": "UNKNOWN",
+          "comentario": "Solicitar tabla de ownership de insiders en DEF 14A o filings relacionados para evaluar mejor alineación."
+        }
+      },
+      "downside_engineering": {
+        "escenarios_adversos": [
+          {
+            "escenario_id": "D-001",
+            "descripcion": "La demanda no rebota y el inventario no se normaliza; la empresa acaba descontando producto o provisionando stock.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "caída de CFO",
+              "subida de working capital",
+              "otros"
+            ],
+            "indicadores_tempranos": [
+              "Inventario > 300M USD",
+              "DIO > 250 días",
+              "Margen bruto < 42%",
+              "Deferred revenue < 100M USD"
+            ]
+          },
+          {
+            "escenario_id": "D-002",
+            "descripcion": "Management mantiene recompras elevadas a pesar de FCF debilitado, reduciendo el colchón líquido.",
+            "impacto_en_supervivencia": "MEDIO",
+            "mecanismo_de_dolor": [
+              "caída de CFO",
+              "otros"
+            ],
+            "indicadores_tempranos": [
+              "Recompras 12M > FCF 12M",
+              "Caja + inversiones corto plazo < 325M USD",
+              "Financing outflows > CFO"
+            ]
+          },
+          {
+            "escenario_id": "D-003",
+            "descripcion": "La caída de ingresos resulta estructural por pérdida de cuota o menor contenido tecnológico de la oferta.",
+            "impacto_en_supervivencia": "ALTO",
+            "mecanismo_de_dolor": [
+              "caída de CFO",
+              "otros"
+            ],
+            "indicadores_tempranos": [
+              "Ingresos FY2026 < 780M USD",
+              "Backlog/bookings en descenso prolongado",
+              "Margen bruto < 40%",
+              "Pérdida de design wins clave"
+            ]
+          }
+        ],
+        "conclusion_downside": "El downside más probable no es una insolvencia rápida por deuda, sino una compresión gradual del balance operativo si inventario, deferred revenue y recompras siguen moviéndose en la dirección equivocada. Si esos tres vectores empeoran a la vez, el score de supervivencia caería de 3 a 2 con rapidez."
+      },
+      "kill_criteria_propuestos": [
+        {
+          "kc_id": "KC-01",
+          "relacionado_con": "supervivencia",
+          "definicion": "Dos trimestres consecutivos con CFO trimestral <= 0 USD o CFO TTM <= 0 USD.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "SALIR",
+          "por_que": "Confirmaría que la ruptura de Q4-2025 no fue aislada y que el negocio dejó de autofinanciarse."
+        },
+        {
+          "kc_id": "KC-02",
+          "relacionado_con": "contabilidad",
+          "definicion": "Inventarios > 300M USD y DIO > 250 días en dos cierres consecutivos con ingresos TTM <= 850M USD.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Aumenta de forma material la probabilidad de write-downs y absorción persistente de caja."
+        },
+        {
+          "kc_id": "KC-03",
+          "relacionado_con": "supervivencia",
+          "definicion": "Ingresos FY2026 < 700M USD o dos trimestres consecutivos con caída interanual > 25%.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 12
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Ese nivel de ingresos pondría en duda la cobertura de la estructura fija actual."
+        },
+        {
+          "kc_id": "KC-04",
+          "relacionado_con": "fcf",
+          "definicion": "Recompras 12M > FCF 12M y caja más inversiones de corto plazo < 300M USD.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Convertiría una decisión de capital reversible en un problema directo de supervivencia."
+        },
+        {
+          "kc_id": "KC-05",
+          "relacionado_con": "supervivencia",
+          "definicion": "Deferred revenue total < 90M USD o caída adicional > 15% YoY.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 12
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Indicaría menor financiación espontánea del cliente y menor visibilidad comercial."
+        },
+        {
+          "kc_id": "KC-06",
+          "relacionado_con": "margen",
+          "definicion": "Margen bruto < 40% en dos trimestres consecutivos.",
+          "ventana_meses": {
+            "min": 3,
+            "max": 18
+          },
+          "fuente_prevista": "earnings",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Señalaría presión competitiva o necesidad de descontar inventario para convertirlo en caja."
+        },
+        {
+          "kc_id": "KC-07",
+          "relacionado_con": "supervivencia",
+          "definicion": "Caja más inversiones de corto plazo < 1.25x pasivos corrientes o < 200M USD.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "filing",
+          "accion_recomendada": "REDUCIR_50",
+          "por_que": "Marcaría una erosión relevante del colchón que hoy sostiene el PASS."
+        },
+        {
+          "kc_id": "KC-08",
+          "relacionado_con": "otro",
+          "definicion": "Backlog o bookings caen > 3 trimestres consecutivos, o se pierden design wins clave.",
+          "ventana_meses": {
+            "min": 6,
+            "max": 24
+          },
+          "fuente_prevista": "kpi_operativo",
+          "accion_recomendada": "REVISAR_COMITE",
+          "por_que": "Separaría definitivamente ciclicidad de pérdida estructural de cuota."
+        }
+      ],
+      "recomendacion_para_arbitro": {
+        "riesgo_global": "MEDIO",
+        "tamaño_maximo_sugerido_pct_cartera": 2.5,
+        "condiciones_para_aumentar_tamaño": [
+          "Dos trimestres consecutivos con CFO positivo y conversión CFO/EBIT superior al 80%.",
+          "Inventario por debajo de 300M USD y DIO por debajo de 220 días.",
+          "Deferred revenue total estabilizado por encima de 110M USD.",
+          "Recompras trailing 12 meses <= 75% del FCF trailing 12 meses."
+        ],
+        "condiciones_para_reducir_o_salir": [
+          "Dos trimestres consecutivos con CFO <= 0 USD o CFO TTM <= 0 USD.",
+          "Inventario > 300M USD y DIO > 250 días en dos cierres consecutivos.",
+          "Caja más inversiones de corto plazo < 300M USD mientras recompras siguen > FCF.",
+          "Margen bruto < 40% en dos trimestres consecutivos."
+        ]
+      },
+      "faltantes_criticos_forense": [
+        {
+          "item": "backlog_bookings",
+          "por_que_importa": "Permite distinguir ciclo de mercado de pérdida estructural de cuota.",
+          "como_obtenerlo": "IR deck, supplemental earnings, conference call transcript o respuesta de IR."
+        },
+        {
+          "item": "tabla_vencimientos",
+          "por_que_importa": "Reduce la incertidumbre sobre deuda total y vencimientos reales 12-24 meses.",
+          "como_obtenerlo": "10-K FY2025, nota de leases/debt y tablas contractuales."
+        },
+        {
+          "item": "detalle_inventario_ageing",
+          "por_que_importa": "Es clave para estimar write-down potencial y velocidad de monetización del inventario.",
+          "como_obtenerlo": "Nota de inventarios, IR Q&A o channel checks."
+        },
+        {
+          "item": "covenants",
+          "por_que_importa": "Confirma si existen restricciones ocultas sobre liquidez, cobertura o leverage.",
+          "como_obtenerlo": "Debt note, lease agreements o anexos contractuales del 10-K."
+        },
+        {
+          "item": "detalle_deferred_revenue",
+          "por_que_importa": "Aclara si la caída del colchón de cliente es puntual o estructural.",
+          "como_obtenerlo": "Nota de revenue/deferred revenue en 10-Q/10-K o transcripción de resultados."
+        }
+      ]
+    }
+  },
+  "log": {
+    "limitaciones": [
+      "SourcesPack_v1 no estuvo disponible; el scoring se apoya en TruthPack_v1, ImpliedExpectations_v1 bloqueado y ForensicDetection_v1.",
+      "deuda_total_usd permanece incompleta; sólo se identificaron finance leases visibles por 42.3M USD.",
+      "No hay backlog, bookings ni book-to-bill para separar ciclicidad de pérdida de cuota.",
+      "No hay ageing ni desglose del inventario para cuantificar con precisión el write-down probable.",
+      "ImpliedExpectations_v1 está BLOCKED por data quality PARTIAL y EV nulo, lo que reduce la confianza global."
+    ],
+    "autochequeos": {
+      "sin_metricas_inventadas": true,
+      "claims_criticos_con_evidencia": true,
+      "probabilidades_explicitas": true
+    }
+  },
+  "_meta": {
+    "agente": "FORENSIC_SCORING_v1",
+    "version": "1.0.0",
+    "timestamp": "2026-03-11T00:00:00+01:00",
+    "inputs_hash": "sha256:7acb570a3db88369ddb1895efc613b6dba3654641af6a5ec7dfcd915fd762908"
+  }
+}

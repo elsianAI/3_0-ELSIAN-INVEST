@@ -1,0 +1,539 @@
+{
+  "version_esquema": "ForensicDetection_v1",
+  "caso_id": "CASE_20260311_ACLS",
+  "fecha_corte": "2026-03-11",
+  "ticker": "ACLS",
+  "report_type": "forensic_detection",
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1",
+    "truth_pack_data_quality": "PARTIAL",
+    "truth_pack_file": "TruthPack_v1_ACLS.json",
+    "sources_pack_v1_disponible": false,
+    "filings_revisados_directamente": [
+      "SRC_019_8-K_2026-02-17",
+      "SRC_001_10-K_FY2024",
+      "SRC_045_DEF14A_2025-03-31"
+    ]
+  },
+  "red_flags": [
+    {
+      "id": "RF_001_inventory_overbuild",
+      "categoria": "capital_de_trabajo",
+      "hallazgo": "Sobreacumulacion de inventario en un ano de contraccion de ventas.",
+      "detalle": "Al 2025-12-31, inventarios netos subieron a 329.0m USD (+16.6% YoY) mientras los ingresos FY2025 cayeron a 839.0m USD (-17.6% YoY). El DIO spot subio de 182.9 dias a 259.8 dias usando inventario de cierre y COGS anual.",
+      "cuantificacion": {
+        "inventarios_fy2025_usd": 329010000,
+        "inventarios_fy2024_usd": 282225000,
+        "variacion_inventarios_yoy_pct": 16.58,
+        "ingresos_fy2025_usd": 839048000,
+        "ingresos_fy2024_usd": 1017865000,
+        "variacion_ingresos_yoy_pct": -17.57,
+        "dio_fy2025_dias": 259.82,
+        "dio_fy2024_dias": 182.9,
+        "aumento_dio_dias": 76.92
+      },
+      "implicacion_forense": "Anomalia clasica de working capital: mas inventario con menos demanda/facturacion. Incrementa riesgo de obsolescencia, descuentos y compresion de CFO si no se normaliza.",
+      "source_id": "SRC_001_10-K_FY2025",
+      "ubicacion": "SRC_001_10-K_FY2025.htm:ixbrl:As_Of_12_31_2025_sXEC2JH_4UCdqr7_kI7GBQ:us-gaap:InventoryNet",
+      "refs_adicionales": [
+        {
+          "source_id": "SRC_001_10-K_FY2025",
+          "ubicacion": "SRC_001_10-K_FY2025.htm:ixbrl:As_Of_12_31_2024_uBemj8N3f0iQgJ8KTl1HjQ:us-gaap:InventoryNet"
+        },
+        {
+          "source_id": "SRC_001_10-K_FY2025",
+          "ubicacion": "SRC_001_10-K_FY2025.htm:ixbrl:Duration_1_1_2025_To_12_31_2025_Z36k37SwOEGsMkEmcykpKA:us-gaap:Revenues"
+        },
+        {
+          "source_id": "SRC_001_10-K_FY2025",
+          "ubicacion": "SRC_001_10-K_FY2025.htm:ixbrl:Duration_1_1_2025_To_12_31_2025_Z36k37SwOEGsMkEmcykpKA:us-gaap:CostOfGoodsAndServicesSold"
+        }
+      ]
+    },
+    {
+      "id": "RF_002_q4_cash_conversion_break",
+      "categoria": "puente_ebit_cfo",
+      "hallazgo": "Ruptura brusca de conversion de EBIT a CFO en Q4-2025.",
+      "detalle": "Q4-2025 cerro con EBIT positivo de 36.172m USD pero CFO de -6.567m USD. La diferencia contra EBIT fue de -42.739m USD (-118.2% sobre EBIT). El puente de caja del trimestre muestra un cargo de -45.079m USD en 'change in other assets and liabilities, net'.",
+      "cuantificacion": {
+        "q4_2025_ebit_usd": 36172000,
+        "q4_2025_cfo_usd": -6567000,
+        "q4_2025_gap_ebit_cfo_usd": -42739000,
+        "q4_2025_conversion_pct": -18.15,
+        "q4_2025_change_other_assets_liabilities_net_usd": -45079000,
+        "q4_2024_cfo_usd": 12780000
+      },
+      "implicacion_forense": "La calidad de beneficios se deteriora cuando el resultado operativo no convierte en caja y el desvio depende de rubros agregados de activos/pasivos operativos.",
+      "source_id": "SRC_019_8-K_2026-02-17",
+      "ubicacion": "SRC_019_8-K_2026-02-17.clean.md:table:cash_flow:condensed_consolidated_statements_of_cash_flows:tbl9:row8:col3",
+      "refs_adicionales": [
+        {
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "SRC_019_8-K_2026-02-17.clean.md:table:income_statement:consolidated_statements_of_operations:tbl2:row15:col3"
+        },
+        {
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow table, row 'Change in other assets and liabilities, net', columna Q4-2025)"
+        },
+        {
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "SRC_019_8-K_2026-02-17.clean.md:table:cash_flow:condensed_consolidated_statements_of_cash_flows:tbl9:row8:col7"
+        }
+      ]
+    },
+    {
+      "id": "RF_003_buybacks_outpacing_fcf",
+      "categoria": "asignacion_de_capital_y_supervivencia",
+      "hallazgo": "Recompras superaron el FCF anual en un ejercicio de caida de ingresos y terminaron el ano con FCF trimestral negativo.",
+      "detalle": "En FY2025 la recompra de acciones fue 121.081m USD, equivalente a 113.1% del FCF del ano (107.010m USD) y 102.3% del CFO anual (118.305m USD). En Q4-2025 se recompraron 25.231m USD aun con FCF trimestral de -8.902m USD.",
+      "cuantificacion": {
+        "recompras_fy2025_usd": 121081000,
+        "fcf_fy2025_usd": 107010000,
+        "cfo_fy2025_usd": 118305000,
+        "recompras_sobre_fcf_pct": 113.15,
+        "recompras_sobre_cfo_pct": 102.35,
+        "recompras_q4_2025_usd": 25231000,
+        "fcf_q4_2025_usd": -8902000
+      },
+      "implicacion_forense": "No es una anomalia GAAP, pero si una bandera roja de supervivencia: la salida de caja por retornos al accionista absorbio mas caja de la que el negocio genero libremente en el ano.",
+      "source_id": "SRC_019_8-K_2026-02-17",
+      "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow table, fila 'Repurchase of common stock', columnas FY2025 y Q4-2025)",
+      "refs_adicionales": [
+        {
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "SRC_019_8-K_2026-02-17.clean.md:table:cash_flow:condensed_consolidated_statements_of_cash_flows:tbl9:row8:col3"
+        },
+        {
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "SRC_019_8-K_2026-02-17.clean.md:table:cash_flow:condensed_consolidated_statements_of_cash_flows:tbl9:row10:col3"
+        }
+      ]
+    },
+    {
+      "id": "RF_004_deferred_revenue_unwind",
+      "categoria": "capital_de_trabajo_y_ingresos_diferidos",
+      "hallazgo": "Desaparece parte relevante del colchon de financiacion por ingresos diferidos.",
+      "detalle": "El deferred revenue corriente cayo de 94.673m USD a 65.494m USD (-30.8% YoY). Sumando el componente de largo plazo, el total bajo de 138.174m USD a 108.939m USD (-21.2% YoY). Esto reduce financiacion operativa por anticipos y agrava la presion sobre CFO.",
+      "cuantificacion": {
+        "deferred_revenue_corriente_fy2025_usd": 65494000,
+        "deferred_revenue_corriente_fy2024_usd": 94673000,
+        "variacion_corriente_yoy_pct": -30.82,
+        "deferred_revenue_total_fy2025_usd": 108939000,
+        "deferred_revenue_total_fy2024_usd": 138174000,
+        "variacion_total_yoy_pct": -21.16
+      },
+      "implicacion_forense": "No apunta por si solo a reconocimiento agresivo; si apunta a menor financiacion de clientes y menor amortiguador de caja frente a inventario elevado.",
+      "source_id": "SRC_019_8-K_2026-02-17",
+      "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (balance sheet, filas 'Deferred revenue' y 'Long-term deferred revenue', columnas 2025 y 2024)",
+      "refs_adicionales": [
+        {
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "SRC_019_8-K_2026-02-17.txt:465"
+        },
+        {
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "SRC_019_8-K_2026-02-17.txt:480"
+        }
+      ]
+    }
+  ],
+  "liquidez": {
+    "fecha_base_operativa": "2025-12-31",
+    "efectivo_disponible_usd": 145451000,
+    "inversiones_corto_plazo_usd": 228802000,
+    "liquidez_cercana_usd": 374253000,
+    "inversiones_largo_plazo_usd": 182396000,
+    "liquidez_total_con_inversiones_usd": 556649000,
+    "activos_corrientes_usd": 943202000,
+    "pasivos_corrientes_usd": 197660000,
+    "pasivos_totales_usd": 326674000,
+    "current_ratio_x": 4.77,
+    "quick_ratio_x": 2.75,
+    "cobertura_caja_mas_inversiones_cp_sobre_pasivos_corrientes_x": 1.89,
+    "cobertura_caja_mas_inversiones_cp_sobre_pasivos_totales_x": 1.15,
+    "deuda_financiera_reportada_truthpack_usd": null,
+    "deuda_identificada_en_filings_revisados": {
+      "finance_lease_current_usd": 1575000,
+      "finance_lease_long_term_usd": 40754000,
+      "finance_lease_total_usd": 42329000,
+      "note": "No se localizaron revolver ni otras facilities de deuda financiera en los filings revisados; el pasivo financiero visible es principalmente finance lease."
+    },
+    "lineas_credito_disponibles_usd": null,
+    "lineas_credito_nota": "No identificadas en TruthPack ni en los filings 10-K/8-K revisados.",
+    "runway_estimado": {
+      "base_operativa": {
+        "meses": null,
+        "metodo": "No aplica: FY2025 y TTM cerraron con CFO y FCF positivos."
+      },
+      "escenario_estres_q4_2025_caja_sola": {
+        "meses": 49,
+        "metodo": "Caja de 2025-12-31 dividida por el burn mensual implicito del FCF de Q4-2025."
+      },
+      "escenario_estres_q4_2025_caja_mas_inversiones_cp": {
+        "meses": 126.1,
+        "metodo": "Caja + inversiones de corto plazo al 2025-12-31 divididas por el burn mensual implicito del FCF de Q4-2025."
+      }
+    },
+    "vencimientos_deuda_proximos_12_24m": {
+      "identificados_con_precision": [
+        {
+          "tipo": "Current portion of finance lease obligation",
+          "monto_usd": 1575000,
+          "ventana": "<=12 meses",
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (balance sheet, fila 'Current portion of finance lease obligation', columna 2025)"
+        },
+        {
+          "tipo": "Long-term finance lease obligation",
+          "monto_usd": 40754000,
+          "ventana": ">12 meses; el split exacto 12-24 meses no esta desagregado en el paquete 2025 revisado",
+          "source_id": "SRC_019_8-K_2026-02-17",
+          "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (balance sheet, fila 'Long-term finance lease obligation', columna 2025)"
+        }
+      ],
+      "nota": "No se identifico muro de deuda financiera tradicional; la obligacion explicitamente visible es de arrendamiento financiero."
+    },
+    "riesgo_incumplimiento_covenants": {
+      "estado": "No se identificaron covenant packages de deuda financiera en los documentos revisados. El 10-K revisado indica que los lease agreements no contienen material restrictive covenants.",
+      "source_id": "SRC_001_10-K_FY2024",
+      "ubicacion": "SRC_001_10-K_FY2024.txt:6215"
+    },
+    "riesgo_dilucion_accionaria": {
+      "observacion": "Con los datos revisados no aparece necesidad inmediata de emision de equity: las acciones emitidas y en circulacion bajaron de 32.365m a 30.717m (-5.1% YoY) por recompras.",
+      "acciones_2024": 32365000,
+      "acciones_2025": 30717000,
+      "variacion_yoy_pct": -5.09,
+      "source_id": "SRC_019_8-K_2026-02-17",
+      "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (balance sheet, fila de common stock outstanding 2025 vs 2024; cash flow row 'Repurchase of common stock')"
+    },
+    "observaciones_12_24m": [
+      "La liquidez cercana a caja es amplia frente a pasivos corrientes, pero la calidad de esa liquidez depende de sostener conversion de caja positiva y de no repetir recompras por encima del FCF.",
+      "El principal foco de supervivencia a 12-24 meses no es un muro de deuda; es la combinacion de inventario alto, menor deferred revenue y posibilidad de repetir trimestres tipo Q4-2025 con CFO negativo."
+    ],
+    "source_refs": [
+      {
+        "source_id": "SRC_019_8-K_2026-02-17",
+        "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (balance sheet, filas 'Cash and cash equivalents', 'Short-term investments', 'Total current liabilities', 'Total liabilities', columna 2025)"
+      }
+    ]
+  },
+  "puentes": {
+    "periodo_base": "FY2025",
+    "metodologia": {
+      "ebit_a_cfo": "CFO reportado menos EBIT reportado; se documentan add-backs y usos/liberaciones de capital de trabajo disponibles.",
+      "cfo_a_fcf": "FCF = CFO + CAPEX, dado que CAPEX se reporta como salida negativa de caja.",
+      "capex_mantenimiento_vs_crecimiento": "No separable con el TruthPack actual; se usa CAPEX total desembolsado.",
+      "impuestos_pagados_usd": null,
+      "nota_impuestos": "No extraido explicitamente del paquete."
+    },
+    "ebit_a_cfo": {
+      "FY2025": {
+        "ebit_usd": 119315000,
+        "cfo_usd": 118305000,
+        "gap_usd": -1010000,
+        "gap_pct_sobre_ebit": -0.85,
+        "conversion_pct": 99.15,
+        "add_backs_y_ajustes": [
+          {
+            "concepto": "Depreciation and amortization",
+            "monto_usd": 17613000,
+            "pct_sobre_ebit": 14.76,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow table, fila 'Depreciation and amortization', columna FY2025)"
+          },
+          {
+            "concepto": "Stock-based compensation expense",
+            "monto_usd": 20773000,
+            "pct_sobre_ebit": 17.41,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow table, fila 'Stock-based compensation expense', columna FY2025)"
+          },
+          {
+            "concepto": "Other",
+            "monto_usd": -9461000,
+            "pct_sobre_ebit": -7.93,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow table, fila 'Other', columna FY2025)"
+          },
+          {
+            "concepto": "Change in other assets and liabilities, net",
+            "monto_usd": -30858000,
+            "pct_sobre_ebit": -25.86,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow table, fila 'Change in other assets and liabilities, net', columna FY2025)"
+          }
+        ],
+        "working_capital_aproximado_desde_balance": [
+          {
+            "concepto": "Accounts receivable",
+            "delta_usd": -34670000,
+            "efecto_caja_usd": 34670000,
+            "pct_sobre_ebit": 29.06,
+            "source_id": "SRC_001_10-K_FY2025",
+            "ubicacion": "SRC_001_10-K_FY2025.htm:ixbrl:As_Of_12_31_2025_sXEC2JH_4UCdqr7_kI7GBQ:us-gaap:AccountsReceivableNetCurrent"
+          },
+          {
+            "concepto": "Inventories",
+            "delta_usd": 46785000,
+            "efecto_caja_usd": -46785000,
+            "pct_sobre_ebit": -39.21,
+            "source_id": "SRC_001_10-K_FY2025",
+            "ubicacion": "SRC_001_10-K_FY2025.htm:ixbrl:As_Of_12_31_2025_sXEC2JH_4UCdqr7_kI7GBQ:us-gaap:InventoryNet"
+          },
+          {
+            "concepto": "Accounts payable",
+            "delta_usd": -4619000,
+            "efecto_caja_usd": -4619000,
+            "pct_sobre_ebit": -3.87,
+            "source_id": "SRC_001_10-K_FY2025",
+            "ubicacion": "SRC_001_10-K_FY2025.htm:ixbrl:As_Of_12_31_2025_sXEC2JH_4UCdqr7_kI7GBQ:us-gaap:AccountsPayableCurrent"
+          },
+          {
+            "concepto": "Deferred revenue corriente",
+            "delta_usd": -29179000,
+            "efecto_caja_usd": -29179000,
+            "pct_sobre_ebit": -24.46,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (balance sheet, fila 'Deferred revenue', columnas 2025 vs 2024)"
+          }
+        ],
+        "distorsiones_gte_15_pct": [
+          {
+            "concepto": "Stock-based compensation expense",
+            "pct_sobre_ebit": 17.41
+          },
+          {
+            "concepto": "Change in other assets and liabilities, net",
+            "pct_sobre_ebit": -25.86
+          },
+          {
+            "concepto": "Inventory build vs FY2024",
+            "pct_sobre_ebit": -39.21
+          },
+          {
+            "concepto": "Deferred revenue corriente - variacion vs FY2024",
+            "pct_sobre_ebit": -24.46
+          }
+        ]
+      },
+      "Q4_2025": {
+        "ebit_usd": 36172000,
+        "cfo_usd": -6567000,
+        "gap_usd": -42739000,
+        "gap_pct_sobre_ebit": -118.15,
+        "conversion_pct": -18.15,
+        "componentes": [
+          {
+            "concepto": "Net income",
+            "monto_usd": 34297000,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md:table:income_statement:consolidated_statements_of_operations:tbl2:row23:col2"
+          },
+          {
+            "concepto": "Depreciation and amortization",
+            "monto_usd": 4461000,
+            "pct_sobre_ebit": 12.33,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md:table:cash_flow:condensed_consolidated_statements_of_cash_flows:tbl9:row4:col3"
+          },
+          {
+            "concepto": "Stock-based compensation expense",
+            "monto_usd": 5105000,
+            "pct_sobre_ebit": 14.11,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow table, fila 'Stock-based compensation expense', columna Q4-2025)"
+          },
+          {
+            "concepto": "Other",
+            "monto_usd": -5351000,
+            "pct_sobre_ebit": -14.79,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow table, fila 'Other', columna Q4-2025)"
+          },
+          {
+            "concepto": "Change in other assets and liabilities, net",
+            "monto_usd": -45079000,
+            "pct_sobre_ebit": -124.62,
+            "source_id": "SRC_019_8-K_2026-02-17",
+            "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow table, fila 'Change in other assets and liabilities, net', columna Q4-2025)"
+          }
+        ],
+        "distorsiones_gte_15_pct": [
+          {
+            "concepto": "Gap EBIT a CFO",
+            "pct_sobre_ebit": -118.15
+          },
+          {
+            "concepto": "Change in other assets and liabilities, net",
+            "pct_sobre_ebit": -124.62
+          }
+        ]
+      }
+    },
+    "cfo_a_fcf": {
+      "FY2025": {
+        "cfo_usd": 118305000,
+        "capex_usd": -11295000,
+        "fcf_usd": 107010000,
+        "gap_usd": -11295000,
+        "gap_pct_sobre_cfo": -9.55,
+        "distorsion_gte_15_pct": false,
+        "asignacion_capital_posterior": {
+          "recompras_usd": 121081000,
+          "recompras_sobre_fcf_pct": 113.15,
+          "dividendos_usd": null,
+          "nota": "Las recompras excedieron el FCF anual."
+        }
+      },
+      "Q4_2025": {
+        "cfo_usd": -6567000,
+        "capex_usd": -2335000,
+        "fcf_usd": -8902000,
+        "gap_usd": -2335000,
+        "gap_pct_sobre_cfo": 35.56,
+        "distorsion_gte_15_pct": true,
+        "asignacion_capital_posterior": {
+          "recompras_usd": 25231000,
+          "nota": "Hubo recompras pese a FCF trimestral negativo."
+        }
+      }
+    },
+    "resumen_puentes_criticos": [
+      "A nivel FY2025 el puente EBIT->CFO cierra casi plano en el agregado, pero solo despues de absorber distorsiones grandes y contrapuestas en stock-based compensation, working capital y other assets/liabilities.",
+      "El puente Q4-2025 es el punto critico: EBIT positivo no se tradujo en caja y el trimestre termino con FCF negativo.",
+      "El puente CFO->FCF no es el principal problema por CAPEX; el mayor drenaje posterior a FCF fue la recompra de acciones."
+    ]
+  },
+  "kill_criteria_candidatos": [
+    {
+      "id": "KC_001_cfo_negative_recurrence",
+      "criterio": "Dos trimestres consecutivos con CFO negativo o CFO TTM <= 0 USD.",
+      "ventana_temporal": "Proximos 12 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "umbral_actual_relevante": {
+        "q4_2025_cfo_usd": -6567000,
+        "cfo_ttm_usd": 118305000
+      },
+      "razon_objetiva": "Q4-2025 ya mostro CFO negativo con EBIT positivo; si se repite deja de ser un bache aislado.",
+      "source_id": "SRC_019_8-K_2026-02-17",
+      "ubicacion": "SRC_019_8-K_2026-02-17.clean.md:table:cash_flow:condensed_consolidated_statements_of_cash_flows:tbl9:row8:col3"
+    },
+    {
+      "id": "KC_002_inventory_not_normalizing",
+      "criterio": "Inventarios > 300m USD y DIO spot > 250 dias en dos cierres consecutivos con ingresos TTM <= 850m USD.",
+      "ventana_temporal": "Proximos 12 meses",
+      "probabilidad_cualitativa": "ALTA",
+      "umbral_actual_relevante": {
+        "inventarios_usd": 329010000,
+        "dio_dias": 259.82,
+        "ingresos_ttm_usd": 839048000
+      },
+      "razon_objetiva": "El criterio ya esta casi activado en el cierre FY2025; falta ver si se normaliza o se cronifica.",
+      "source_id": "SRC_001_10-K_FY2025",
+      "ubicacion": "SRC_001_10-K_FY2025.htm:ixbrl:As_Of_12_31_2025_sXEC2JH_4UCdqr7_kI7GBQ:us-gaap:InventoryNet"
+    },
+    {
+      "id": "KC_003_buybacks_above_fcf_with_liquidity_drawdown",
+      "criterio": "Recompras acumuladas de 12 meses > FCF de 12 meses y caja + inversiones de corto plazo < 300m USD.",
+      "ventana_temporal": "Proximos 12 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "umbral_actual_relevante": {
+        "recompras_12m_usd": 121081000,
+        "fcf_12m_usd": 107010000,
+        "caja_mas_inversiones_cp_usd": 374253000
+      },
+      "razon_objetiva": "La primera condicion ya se cumple; la segunda vigila si la disciplina de capital compromete el colchon de liquidez.",
+      "source_id": "SRC_019_8-K_2026-02-17",
+      "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow row 'Repurchase of common stock' y balance rows 'Cash and cash equivalents'/'Short-term investments', columnas FY2025)"
+    },
+    {
+      "id": "KC_004_deferred_revenue_erosion",
+      "criterio": "Deferred revenue total < 90m USD o caida adicional > 15% YoY.",
+      "ventana_temporal": "Proximos 12 meses",
+      "probabilidad_cualitativa": "MEDIA",
+      "umbral_actual_relevante": {
+        "deferred_revenue_total_usd": 108939000,
+        "variacion_yoy_pct": -21.16
+      },
+      "razon_objetiva": "El cushion de financiacion de clientes ya cayo 21.2% YoY; una nueva caida reduciria aun mas la elasticidad de caja.",
+      "source_id": "SRC_019_8-K_2026-02-17",
+      "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (balance sheet, filas 'Deferred revenue' y 'Long-term deferred revenue', columnas 2025 y 2024)"
+    },
+    {
+      "id": "KC_005_liquidity_buffer_break",
+      "criterio": "Caja + inversiones de corto plazo < 1.25x pasivos corrientes o < 200m USD.",
+      "ventana_temporal": "Proximos 24 meses",
+      "probabilidad_cualitativa": "BAJA",
+      "umbral_actual_relevante": {
+        "caja_mas_inversiones_cp_usd": 374253000,
+        "pasivos_corrientes_usd": 197660000,
+        "cobertura_actual_x": 1.89
+      },
+      "razon_objetiva": "Hoy el buffer es amplio, pero este umbral obliga a reaccionar si el deterioro operativo y las recompras consumen la liquidez cercana.",
+      "source_id": "SRC_019_8-K_2026-02-17",
+      "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (balance sheet, filas 'Cash and cash equivalents', 'Short-term investments', 'Total current liabilities', columna 2025)"
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "TruthPack con overall_status PARTIAL; no estaba disponible un SourcesPack_v1 empaquetado.",
+      "Se revisaron filing raws selectivos para cubrir huecos de deuda, leases, related party y recompras.",
+      "deuda_total_usd y enterprise_value_usd siguen nulos en el TruthPack; no se pudo reconstruir deuda financiera total con el mismo nivel de certeza que la caja.",
+      "No se extrajeron impuestos pagados ni split mantenimiento/crecimiento del CAPEX; el puente CFO->FCF usa CAPEX total desembolsado.",
+      "El filing trimestral/8-K de 2025 revisado no expone el calendario completo 12-24 meses de operating lease liabilities actualizado; solo se identifican con precision las finance lease obligations del balance."
+    ],
+    "areas_revisadas": [
+      {
+        "area": "liquidez_y_supervivencia_12_24m",
+        "resultado": "revisado_con_hallazgos",
+        "detalle": "Liquidez cercana fuerte en balance, pero tensionada por inventario alto, menor deferred revenue y recompras superiores al FCF."
+      },
+      {
+        "area": "reconocimiento_de_ingresos",
+        "resultado": "revisado_sin_bandera_roja_material",
+        "detalle": "A/R bajo 17.1% YoY con ingresos -17.6% YoY y DSO estable en 72.8->73.3 dias; no hay evidencia cuantitativa de revenue pull-forward via receivables.",
+        "source_id": "SRC_001_10-K_FY2025",
+        "ubicacion": "SRC_001_10-K_FY2025.htm:ixbrl:As_Of_12_31_2025_sXEC2JH_4UCdqr7_kI7GBQ:us-gaap:AccountsReceivableNetCurrent"
+      },
+      {
+        "area": "capitalizacion_de_costes_y_capex",
+        "resultado": "revisado_sin_bandera_roja_material",
+        "detalle": "CAPEX FY2025 fue 11.295m USD frente a D&A de 17.613m USD; no se observa spike de capitalizacion para maquillar EBIT/CFO.",
+        "source_id": "SRC_019_8-K_2026-02-17",
+        "ubicacion": "SRC_019_8-K_2026-02-17.clean.md (cash flow rows 'Depreciation and amortization' y 'Expenditures for property, plant and equipment and capitalized software', columna FY2025)"
+      },
+      {
+        "area": "goodwill_e_intangibles",
+        "resultado": "revisado_sin_bandera_roja_material",
+        "detalle": "No se localizaron lineas de goodwill/intangibles ni cargos de impairment en los filings 2024-2025 revisados.",
+        "source_id": "SRC_001_10-K_FY2024",
+        "ubicacion": "Revision textual de 10-K/8-K 2024-2025 para terminos 'goodwill', 'intangible assets' e 'impairment'"
+      },
+      {
+        "area": "transacciones_relacionadas",
+        "resultado": "revisado_sin_bandera_roja_material",
+        "detalle": "El 10-K revisado indica no significant related-party transactions requiring disclosure y la proxy 2025 dice que no se identificaron related person transactions requiring disclosure en 2024.",
+        "source_id": "SRC_045_DEF14A_2025-03-31",
+        "ubicacion": "SRC_045_DEF14A_2025-03-31.txt:2229-2237"
+      },
+      {
+        "area": "off_balance_y_garantias",
+        "resultado": "revisado_sin_bandera_roja_material",
+        "detalle": "Se identificaron leases; el 10-K revisado indica que los lease agreements no contienen material restrictive covenants. No se localizaron facilities de deuda financiera ni garantias fuera de balance en la revision selectiva.",
+        "source_id": "SRC_001_10-K_FY2024",
+        "ubicacion": "SRC_001_10-K_FY2024.txt:6215"
+      }
+    ],
+    "traza_calculo": [
+      "DIO y DSO se calcularon como balance de cierre / flujo anual * 365; son ratios spot, no promedio.",
+      "Runway de estres = caja o caja+inversiones de corto plazo / burn mensual implicito en el FCF de Q4-2025.",
+      "FCF = CFO + CAPEX dado que el CAPEX en el paquete esta reportado con signo negativo.",
+      "Para cuantificar el drenaje de working capital FY2025 se contrastaron balances FY2025 vs FY2024 en A/R, inventarios, A/P y deferred revenue."
+    ]
+  },
+  "_meta": {
+    "moneda": "USD",
+    "fecha_base_balance": "2025-12-31",
+    "observacion": "Artefacto de deteccion sin scoring ni veredicto final."
+  }
+}

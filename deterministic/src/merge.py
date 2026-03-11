@@ -88,38 +88,24 @@ def merge_extractions(
                         fields_discarded += 1
                         discard_reasons.append("duplicate_conflict")
                     elif new_priority == existing_priority:
-                        # Same filing-type priority.
-                        # sort_key layout: (filing_rank, affinity,
-                        #                   src_rank, semantic_rank,
-                        #                   stable_order)
+                        # Same filing-type priority: use period affinity
+                        # from sort key to let the primary filing win over
+                        # comparative columns from another filing.
+                        # sort_key layout: (filing_rank, affinity, ...)
                         existing_sk = getattr(existing, "_sort_key", None)
                         new_sk = getattr(field_result, "_sort_key", None)
                         if (
                             existing_sk is not None
                             and new_sk is not None
-                            and len(existing_sk) > 3
-                            and len(new_sk) > 3
+                            and len(existing_sk) > 1
+                            and len(new_sk) > 1
+                            and new_sk[1] < existing_sk[1]
                         ):
-                            # 1) Affinity wins: primary filing beats
-                            #    comparative (affinity 0 < 1).
-                            if new_sk[1] < existing_sk[1]:
-                                merged_periods[period_key][
-                                    field_name
-                                ] = field_result
-                            # 2) Same affinity, but existing comes from a
-                            #    deprioritized section (semantic_rank > 0
-                            #    implies section_bonus < 0).  Allow a
-                            #    better-quality candidate to replace it.
-                            elif (
-                                new_sk[1] == existing_sk[1]
-                                and existing_sk[3] > 0
-                                and new_sk[3] < existing_sk[3]
-                            ):
-                                merged_periods[period_key][
-                                    field_name
-                                ] = field_result
-                        # Else keep existing (first-seen-wins when both
-                        # quality signals are equal or absent).
+                            # New candidate is the primary filing for
+                            # this period (affinity 0 < 1) → replace.
+                            merged_periods[period_key][field_name] = field_result
+                        # Else keep existing (first-seen-wins within
+                        # same affinity preserves FY restatement order).
                         fields_discarded += 1
                         discard_reasons.append("duplicate_conflict")
                     else:

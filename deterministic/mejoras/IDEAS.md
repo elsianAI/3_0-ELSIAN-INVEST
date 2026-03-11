@@ -175,37 +175,3 @@ Vender el dataset limpio y estructurado a terceros: otras plataformas fintech, i
 
 #### Implicación para el 4.0
 Diseñar el 4.0 sabiendo que las Capas 0+1 deben poder funcionar como producto independiente. Esto significa: API limpia desde el día uno, documentación de cada endpoint, rate limiting, autenticación, y sobre todo — que la capa de datos no dependa de la capa de análisis para tener valor.
-
----
-
-### 14. Extracción de tablas PDF — Decisiones técnicas y evolución futura
-
-#### Estado actual: pdfplumber (layout=True)
-Implementado como reemplazo de pypdf. Usa `extract_text(layout=True)` que preserva columnas alineadas y permite al table parser reconstruir tablas financieras desde PDFs europeos. Funciona bien para tablas con estructura clara.
-
-#### PyMuPDF descartado como motor base
-Se evaluó PyMuPDF (pymupdf4llm) como alternativa más rápida, pero tiene un problema de kerning en PDFs con fuentes corporativas europeas que lo hace inviable para tablas financieras:
-- Labels rotos: "Operat i ng prof i t" en vez de "Operating profit" — no matchea aliases
-- Números rotos: "- 289" en vez de "-289" — rompe parsing numérico
-- Columnas pegadas al label en vez de alineadas por espacios
-
-pdfplumber no tiene estos problemas porque usa un approach diferente para reconstruir el layout del texto. **PyMuPDF es más rápido para texto genérico, pero pdfplumber es superior para tablas financieras en PDFs corporativos.**
-
-#### Mejora futura para el 4.0: Table Transformer (TATR)
-**Cuando pdfplumber no sea suficiente para tablas complejas.**
-
-Modelo de deep learning de Microsoft (basado en DETR) específicamente entrenado para detectar y estructurar tablas en documentos. En el benchmark comparativo de arXiv (2410.09871), TATR logra F1 de 0.79 para tablas de documentos financieros — muy por encima de cualquier solución basada en reglas (Tabula 0.24, PyMuPDF 0.18, pdfplumber 0.06, Camelot 0.10).
-
-**Cómo se integraría:**
-- **Dependencias:** PyTorch + Hugging Face Transformers + modelo pre-entrenado `microsoft/table-transformer-detection` + `microsoft/table-transformer-structure-recognition`
-- **Flujo:** PDF página → imagen (renderizada con pdfplumber o Pillow) → TATR detecta bounding boxes de tablas → TATR reconoce estructura (filas, columnas, headers) → extrae texto por celda con coordenadas → genera tabla markdown
-- **Bonus para provenance (idea #12):** TATR da bounding boxes exactos de cada celda en coordenadas de página, lo que permite mapear directamente al PDF original para "click to source"
-
-**Estrategia de integración:**
-1. **pdfplumber como base** (implementado) — cubre el 80% de los casos
-2. **TATR como segundo extractor** — se activa cuando pdfplumber falla o cuando la confianza es baja (pocas columnas detectadas, filas inconsistentes)
-3. **Cross-validation** — si ambos extraen la misma tabla, comparar resultados para aumentar confianza
-4. Encaja en la arquitectura de clases (idea #10): `PdfPlumberExtractor` y `TableTransformerExtractor` como dos implementaciones de `TableExtractor`, orquestadas por confianza
-
-**Cuándo implementarlo:**
-Cuando el volumen de empresas europeas/PDF justifique la inversión. pdfplumber resolverá los primeros 20-30 tickers. Si empezamos a ver fallos sistemáticos en tablas complejas, es el momento de añadir TATR.

@@ -1,5 +1,11 @@
 # CHANGELOG — 3_0-ELSIAN-INVEST
 
+## 2026-03-11
+- [PIPELINE] ACLS: CATALYST_SCORING (opus)  [20:17]
+- [PIPELINE] ACLS: FORENSIC_SCORING (opus)  [19:59]
+- [PIPELINE] ACLS: CATALYST_DETECTION (gpt-5.4)  [19:57]
+- [PIPELINE] ACLS: FORENSIC_DETECTION (opus)  [19:41]
+
 ## 2026-03-02
 - [DETERMINISTIC] Iter48: PR 77.3%→85.8% (+12 matched). ingresos: +7 aliases oil/gas/operating revenues. total_equity: _PRIORITY_PATTERNS "^total equity$" para preferir grand-total sobre sub-total Class A. shares_outstanding: reject "shares issued and" elimina par-value BS; retirado "class [a-z] " que rechazaba weighted-avg. TZOO: 100% (no regresión).
 - [DETERMINISTIC] Iter47: Nuevo caso PR (Permian Resources, NYSE, USD) — acquire simulado: 28 filings copiados de 4_0, expected.json 141 campos (FY2025/2024/2023 + 6 trimestres). 213 tests pass.

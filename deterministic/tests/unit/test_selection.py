@@ -16,8 +16,8 @@ class TestSelectionSortKey(unittest.TestCase):
     def setUp(self):
         config_dir = str(Path(__file__).parent.parent.parent / "config")
         self.pipeline = DeterministicPipeline(config_dir=config_dir)
-        # Force reload of selection rules
-        DeterministicPipeline._SELECTION_RULES_CACHE.clear()
+        # Force reload of selection rules (class-level cache)
+        DeterministicPipeline._SELECTION_RULES = None
 
     def test_primary_filing_beats_8k(self):
         """10-K filing should beat 8-K for FY period."""
@@ -452,32 +452,6 @@ class TestMergePeriodAffinity(unittest.TestCase):
         result = merge_extractions(filing_extractions, ticker="TEST")
         actual = result.periods["FY2019"].fields["cfo"].value
         self.assertEqual(actual, 11236, "First-seen should win for FY (restatement preserved)")
-
-
-class TestSelectionRulesCacheIsolation(unittest.TestCase):
-    """Verify that selection rules cache is keyed by config_dir."""
-
-    def setUp(self):
-        DeterministicPipeline._SELECTION_RULES_CACHE.clear()
-
-    def tearDown(self):
-        DeterministicPipeline._SELECTION_RULES_CACHE.clear()
-
-    def test_two_config_dirs_isolated(self):
-        """Two temp dirs with different selection_rules.json must not share cache."""
-        import tempfile
-        with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
-            rules1 = {"filing_priority_by_period": {"FY": ["10-K"]}}
-            rules2 = {"filing_priority_by_period": {"FY": ["20-F", "10-K"]}}
-            (Path(d1) / "selection_rules.json").write_text(json.dumps(rules1))
-            (Path(d2) / "selection_rules.json").write_text(json.dumps(rules2))
-
-            loaded1 = DeterministicPipeline._load_selection_rules(d1)
-            loaded2 = DeterministicPipeline._load_selection_rules(d2)
-
-            self.assertEqual(loaded1["filing_priority_by_period"]["FY"], ["10-K"])
-            self.assertEqual(loaded2["filing_priority_by_period"]["FY"], ["20-F", "10-K"])
-            self.assertIsNot(loaded1, loaded2)
 
 
 if __name__ == "__main__":

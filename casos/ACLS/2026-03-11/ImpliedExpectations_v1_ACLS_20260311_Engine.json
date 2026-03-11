@@ -1,0 +1,186 @@
+{
+  "version_esquema": "ImpliedExpectations_v1",
+  "caso_id": "CASE_20260311_ACLS",
+  "fecha_corte": "2026-03-11",
+  "empresa": {
+    "ticker": "ACLS",
+    "nombre": "Axcelis Technologies, Inc.",
+    "bolsa": "NASDAQ",
+    "pais": "US",
+    "sector": "Technology",
+    "industria": "Semiconductor Equipment & Materials"
+  },
+  "input_refs": {
+    "truth_pack_version": "TruthPack_v1",
+    "truth_pack_caso_id": "CASE_20260311_ACLS"
+  },
+  "status": "BLOCKED",
+  "motivo_blocked": "Prerequisito N1 incumplido: truth_pack.data_quality.status = \"PARTIAL\" (se requiere \"PASS\"). Adicionalmente, enterprise_value_usd = null porque deuda_total_usd no esta presente; sin EV no pueden calcularse multiplos EV-based ni reverse valuation.",
+  "snapshot_mercado": {
+    "fecha": "2026-03-11",
+    "precio_usd": 85.82,
+    "market_cap_usd": 2636290000,
+    "enterprise_value_usd": null,
+    "deuda_total_usd": null,
+    "caja_usd": 145451000,
+    "deuda_neta_usd": null,
+    "acciones_diluidas": 30718800
+  },
+  "metricas_base": {
+    "periodo_base": "TTM",
+    "fecha_fin_periodo_base": "2025-12-31",
+    "ingresos_usd": 839048000,
+    "ebit_usd": 119316000,
+    "cfo_usd": 118305000,
+    "capex_usd": -11295000,
+    "fcf_usd": 107010000,
+    "margen_operativo_pct": 14.22,
+    "margen_fcf_pct": 12.75
+  },
+  "seleccion_metodo": {
+    "metodo_principal": "BLOCKED",
+    "razon": "El FCF TTM es positivo y, sin bloqueos, el metodo natural seria REVERSE_DCF_FCF. Sin embargo, la regla N1 exige data_quality.status == PASS y el TruthPack esta en PARTIAL; ademas EV es nulo por ausencia de deuda_total_usd.",
+    "metodos_secundarios": [
+      "MULTIPLOS_IMPLICITOS_SOLO"
+    ]
+  },
+  "multiples_implicitos": {
+    "disponible": true,
+    "ev_ebit": null,
+    "ev_fcf": null,
+    "p_fcf": 24.6359,
+    "fcf_yield_pct": 4.0591,
+    "comentario": "Solo se pudo calcular la lectura sobre market cap (P/FCF y FCF yield). Los multiplos EV-based quedan indeterminados y los derivados EV negativos del TruthPack se descartan porque EV es nulo."
+  },
+  "parametros_modelo": {
+    "horizonte_anos": 5,
+    "tasa_descuento_grid": [
+      0.08,
+      0.1,
+      0.12
+    ],
+    "crecimiento_terminal_grid": [
+      0.02,
+      0.03
+    ],
+    "multiple_terminal_fcf_grid": [
+      10,
+      12,
+      15,
+      18
+    ],
+    "nota_parametros": "Se usan rangos discretos estandar para sensibilidad sin precision falsa. La malla teorica mantiene 24 combinaciones unicas (3x2x4), verificada contra el bug conocido de duplicados. Aunque no se ejecuta el grid por bloqueo, las convenciones quedan fijadas.",
+    "convenciones": {
+      "definicion_fcf": "FCF = CFO - CAPEX (usando capex como salida de caja)",
+      "ev_formula": "EV = market_cap + deuda_total - caja",
+      "si_fcf_negativo": "usar earnings power / EBIT y no reverse DCF de FCF"
+    }
+  },
+  "reverse_dcf_fcf": {
+    "aplicable": false,
+    "fcf0_usd": 107010000,
+    "resultado_grid": [],
+    "sensibilidades": {
+      "ranking_drivers": [
+        {
+          "driver": "cagr_fcf_5y",
+          "importancia": "ALTA"
+        },
+        {
+          "driver": "multiple_terminal",
+          "importancia": "MEDIA"
+        },
+        {
+          "driver": "tasa_descuento",
+          "importancia": "MEDIA"
+        }
+      ],
+      "observacion": "No calculado: con EV ausente y gate de calidad bloqueado no puede resolverse el CAGR de FCF implicito en ninguna celda del grid."
+    },
+    "validaciones_modelo": {
+      "ev_presente": false,
+      "fcf0_presente": true,
+      "resultados_sin_valores_absurdos": false,
+      "detalle": "Modelo no ejecutado por doble bloqueo: data_quality.status != PASS y enterprise_value_usd = null."
+    }
+  },
+  "reverse_earnings_power": {
+    "aplicable": false,
+    "metrica_base": "EBIT",
+    "valor_base_usd": 119316000,
+    "rango_normalizado_usd": {
+      "min": null,
+      "base": null,
+      "max": null
+    },
+    "implied_multiple_sobre_normalizado": {
+      "multiple_min": null,
+      "multiple_base": null,
+      "multiple_max": null
+    },
+    "lectura": "No se ejecuta inferencia de earnings power aunque hay EBIT TTM disponible, porque el motor queda bloqueado por calidad PARTIAL y EV nulo. Se usa EBIT, no EBITA; el EBITDA ajustado presente en el TruthPack no sustituye este metodo.",
+    "supuestos": [
+      "Requiere truth_pack.data_quality.status == PASS antes de inferir expectativas.",
+      "Requiere EV presente para traducir EBIT normalizado a multiple implicito de empresa.",
+      "La metrica base del metodo es EBIT, no EBITA."
+    ]
+  },
+  "resumen_expectativas_implicitas": {
+    "enunciados": [
+      "Con el TruthPack actual no se puede traducir de forma defendible el precio/EV en una trayectoria implicita de FCF o EBIT por bloqueo de calidad y EV ausente.",
+      "La unica lectura parcial disponible es P/FCF ~24.6x sobre FCF TTM positivo, pero no basta para inferir crecimiento, reinversion o multiple terminal implicitos."
+    ],
+    "variable_critica_principal": "RIESGO_CAPITAL",
+    "que_deberia_observarse_en_6_12_meses": [
+      "Carga explicita de deuda_total_usd y enterprise_value_usd en el TruthPack.",
+      "Reconstruccion TTM con data_quality.status = PASS y 4 trimestres contiguos consistentes.",
+      "Normalizacion del capital de trabajo tras un Q4-2025 con CFO negativo (-6.567 millones USD).",
+      "Confirmacion de FCF TTM positivo via CFO y CAPEX de los proximos 10-Q/10-K."
+    ]
+  },
+  "banderas": {
+    "expectativas_extremas": false,
+    "posible_value_trap": false,
+    "posible_peak_earnings": false,
+    "alto_riesgo_balance": false,
+    "opacidad_alta": true,
+    "notas": [
+      "opacidad_alta por data_quality PARTIAL y ausencia de deuda_total_usd/EV.",
+      "alto_riesgo_balance no es evaluable de forma robusta con deuda_total_usd nula.",
+      "Q4-2025 tuvo CFO negativo, lo que vuelve mas volatil la base de FCF aun siendo positiva en TTM."
+    ]
+  },
+  "faltantes_criticos": [
+    {
+      "item": "enterprise_value_usd",
+      "por_que_importa": "Es el ancla obligatoria para reverse valuation y multiplos EV-based.",
+      "como_resolver": "Incluir EV directo o completar deuda_total_usd para derivarlo con EV = market_cap + deuda_total - caja."
+    },
+    {
+      "item": "deuda_total",
+      "por_que_importa": "Sin deuda total no se puede derivar EV ni evaluar riesgo financiero/balance.",
+      "como_resolver": "Extraer deuda financiera de corto y largo plazo del balance y poblar deuda_total_usd."
+    }
+  ],
+  "log": {
+    "limitaciones": [
+      "Gate obligatorio incumplido: data_quality.status = PARTIAL.",
+      "enterprise_value_usd sigue nulo porque deuda_total_usd no esta informada.",
+      "Los multiplos EV/EBIT y EV/FCF reportados en metricas_derivadas son invalidos con EV nulo y no se usan.",
+      "El balance disponible solo aporta caja, activos, pasivos y patrimonio; no desglosa deuda financiera.",
+      "Q4-2025 mostro CFO negativo, lo que introduce volatilidad en la lectura del FCF base."
+    ],
+    "traza_calculo": [
+      "Modo detectado: NORMAL (no hay RemediationPlan_v1 ni PatchBundle_v3).",
+      "Validacion N1: truth_pack.data_quality.status = PARTIAL, por lo que el artefacto queda BLOCKED.",
+      "Validacion N2: FCF/EBIT TTM presentes, pero enterprise_value_usd = null.",
+      "Snapshot de mercado tomado de truth_pack.mercado: precio 85.82 USD, market cap 2,636,290,000 USD, caja 145,451,000 USD.",
+      "Base operativa tomada del bloque ttm con fecha_fin 2025-12-31.",
+      "P/FCF conservado desde metricas_derivadas: 24.6359x; FCF yield: 4.0591%.",
+      "No se calculan EV/EBIT ni EV/FCF por EV ausente; se descartan derivados EV negativos del TruthPack.",
+      "Control de bug conocido: grid teorico 3x2x4 = 24 combinaciones unicas, sin filas duplicadas.",
+      "Control metodologico: se usa EBIT para earnings power; EBITA no se utiliza.",
+      "No se ejecutan reverse DCF ni earnings power por bloqueo de calidad y faltante critico de EV."
+    ]
+  }
+}
