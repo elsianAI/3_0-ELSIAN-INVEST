@@ -15,6 +15,16 @@ from typing import Dict, List, Optional, Tuple
 # Maps canonical field name -> list of regex patterns. If a raw label
 # matches any pattern for the resolved canonical, that resolution is
 # rejected (returns None).
+
+# Global reject patterns: applied to ALL canonical fields before
+# per-field patterns.  These catch section titles / headers that the
+# space-aligned parser might misinterpret as data rows.
+_GLOBAL_REJECT_PATTERNS: List[re.Pattern] = [
+    re.compile(r"for\s+the\s+years?\s+ended", re.I),
+    re.compile(r"statements?\s+of\s+changes?\s+in", re.I),
+    re.compile(r"we\s+have\s+audited", re.I),
+]
+
 _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
     "net_income": [
         re.compile(r"per\s*share", re.I),
@@ -38,13 +48,26 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"liabilities\s+and\s+equity", re.I),
         re.compile(r"mezzanine\s+equity", re.I),
         re.compile(r"discontinued\s+operations", re.I),
+        re.compile(r"equity\s+and\s+liabilities", re.I),
+        # Reject sub-totals: "total current liabilities" and
+        # "total non-current liabilities" are subsets, not the full total.
+        # The pipeline has a post-processing fallback that sums sub-totals
+        # when no direct "total liabilities" line exists (IFRS filings).
+        re.compile(r"\bcurrent\b", re.I),
     ],
     "total_equity": [
         re.compile(r"liabilities\s+and\s+", re.I),
+        re.compile(r"equity\s+and\s+liabilities", re.I),
         re.compile(r"discontinued\s+operations", re.I),
     ],
     "cash_and_equivalents": [
         re.compile(r"restricted\s*cash", re.I),
+        # Reject labels where "cash and cash equiv..." appears as substring
+        # but is NOT at the start (e.g., "Effect of exchange rate changes
+        # on cash and cash equivalents", "Net increase (decrease) in cash
+        # and cash equivalents").  Only "Cash and cash equivalents" (BS row)
+        # should resolve to this canonical.
+        re.compile(r"^(?!cash\b).*cash\s+and\s+cash\s+equiv", re.I),
     ],
     "gross_profit": [
         re.compile(r"per\s+(?:active\s+)?customer", re.I),
@@ -53,6 +76,11 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
     ],
     "capex": [
         re.compile(r"finance\s+lease", re.I),
+        re.compile(r"accrued\s+but\s+not\s+paid", re.I),
+        # Reject supplemental non-cash disclosures like "Capital expenditures
+        # included in accounts payable and accrued liabilities" — these are
+        # not actual capex from the investing section.
+        re.compile(r"included\s+in\s+accounts\s+payable", re.I),
     ],
     "income_tax": [
         re.compile(r"before\s+income\s+tax", re.I),
@@ -67,6 +95,9 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"\bdeferred\s+tax\s+expense", re.I),
         re.compile(r"\btaxes\s+paid\b", re.I),
         re.compile(r"\btaxes\s+received\b", re.I),
+        re.compile(r"taxes\s+other\s+than\s+income", re.I),
+        re.compile(r"current\s+income\s+tax\b(?!\s+expense)", re.I),
+        re.compile(r"income\s+tax\s+receivable", re.I),
     ],
     "shares_outstanding": [
         re.compile(r"par\s+value", re.I),
@@ -74,7 +105,26 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         # Reject "diluted" labels UNLESS "basic" is also present
         # (combined "basic and diluted" labels are valid share counts).
         re.compile(r"^(?!.*\bbasic\b).*\bdiluted\b", re.I),
-        re.compile(r"class\s+[a-z]\s", re.I),
+        # Reject BS par-value class breakdown rows like
+        # "Class A: XXX shares issued and YYY shares outstanding at..."
+        # These carry the par value in $K, not the actual share count.
+        # NOTE: the generic 'class [a-z] ' pattern was removed because it
+        # incorrectly rejects valid labels like
+        # "Basic weighted average shares of Class A Common Stock outstanding".
+        re.compile(r"shares\s+issued\s+and\b", re.I),
+    ],
+    "shares_outstanding_end": [
+        re.compile(r"par\s+value", re.I),
+        re.compile(r"preferred\s+stock", re.I),
+        re.compile(r"shares\s+issued\s+and\b", re.I),
+    ],
+    "weighted_avg_basic": [
+        re.compile(r"\bdiluted\b", re.I),
+        re.compile(r"par\s+value", re.I),
+    ],
+    "weighted_avg_diluted": [
+        re.compile(r"\bbasic\b(?!.*\bdiluted\b)", re.I),
+        re.compile(r"par\s+value", re.I),
     ],
     "eps_diluted": [
         re.compile(r"\badjusted\b", re.I),
@@ -87,21 +137,64 @@ _REJECT_PATTERNS: Dict[str, List[re.Pattern]] = {
         re.compile(r"non[\s-]?gaap", re.I),
         re.compile(r"weighted\s+average", re.I),
         re.compile(r"number\s+of.*shares", re.I),
+        # Reject "diluted" labels UNLESS "basic" is also present
+        # (combined "basic and diluted" labels are valid eps_basic).
+        re.compile(r"^(?!.*\bbasic\b).*\bdiluted\b", re.I),
     ],
     "total_debt": [
         re.compile(r"\brepayment\b", re.I),
         re.compile(r"\breceipt\b", re.I),
         re.compile(r"\bproceeds\b", re.I),
+        # Reject supplemental non-cash disclosure rows like
+        # "Equity issued and long-term debt assumed to acquire properties"
+        # — these are not actual balance-sheet debt positions.
+        re.compile(r"\bassumed\b", re.I),
+        # Reject current-portion rows when they appear as separate BS line items
+        # (e.g. "Current portion of long-term debt").  Expected.json uses the
+        # non-current long-term debt net figure only.
+        re.compile(r"\bcurrent\s+portion\b", re.I),
     ],
     "interest_expense": [
         re.compile(r"^add:", re.I),
         re.compile(r"\bpaid\b", re.I),
+        re.compile(r"lease\s+liabilities", re.I),
+        re.compile(r"net\s+financial\s+interest", re.I),
+    ],
+    "interest_expense_net": [
+        re.compile(r"^add:", re.I),
+        re.compile(r"\bpaid\b", re.I),
+        re.compile(r"lease\s+liabilities", re.I),
+    ],
+    "pretax_income": [
+        re.compile(r"provision\s+for\s+income\s+tax", re.I),
+        re.compile(r"net\s+income", re.I),
+        re.compile(r"operating\s+income", re.I),
+    ],
+    "depreciation_amortization": [
+        re.compile(r"right-of-use", re.I),
+        re.compile(r"right[\s-]?of[\s-]?use", re.I),
+        re.compile(r"intangible\s+assets\s+acquired", re.I),
+        # Reject the BS contra-asset "Accumulated depreciation, depletion and
+        # amortization" — this is the cumulative balance, not the period expense.
+        # The period expense appears as "Depreciation, depletion and amortization"
+        # on the IS or CFO section without the "Accumulated" prefix.
+        re.compile(r"\baccumulated\b", re.I),
+    ],
+    "research_and_development": [
+        re.compile(r"tax\s+credit", re.I),
+        re.compile(r"in[\s-]process", re.I),
     ],
 }
 
 # Priority patterns: when multiple rows could map to same canonical,
 # a label matching one of these gets preference (score=100 exact, else 50).
 _PRIORITY_PATTERNS: Dict[str, List[re.Pattern]] = {
+    "total_equity": [
+        # Prefer the consolidated equity grand total ("Total equity") over
+        # class-specific sub-totals ("Total shareholders' equity", etc.)
+        # which exclude non-controlling interests.
+        re.compile(r"^total\s+equity$", re.I),
+    ],
     "ebit": [
         re.compile(r"^operating\s+income", re.I),
         re.compile(r"^operating\s+loss", re.I),
@@ -112,15 +205,44 @@ _PRIORITY_PATTERNS: Dict[str, List[re.Pattern]] = {
     "cash_and_equivalents": [
         re.compile(r"^cash\s+and\s+cash\s+equivalents$", re.I),
     ],
+    "cfo": [
+        re.compile(r"net\s+cash\s+(?:provided|used)\s+(?:by|in)\s+operating", re.I),
+    ],
     "income_tax": [
         re.compile(r"^(total\s+)?income\s+tax\s+expense(\s*\(benefit\))?\s*$", re.I),
+        re.compile(r"^income\s+tax$", re.I),
         re.compile(r"provision\s+for\s+income\s+tax", re.I),
+    ],
+    "interest_expense": [
+        re.compile(r"\bgross\s+financing", re.I),
+        re.compile(r"^interest\s+expense", re.I),
     ],
     "shares_outstanding": [
         re.compile(r"shares\s+used\s+in\s+per\s+share\s+calc", re.I),
         re.compile(r"weighted\s+average.*shares.*outstanding", re.I),
         re.compile(r"weighted\s+average\s+common\s+shares", re.I),
         re.compile(r"\bbasic\b", re.I),
+    ],
+    "shares_outstanding_end": [
+        re.compile(r"issued\s+and\s+outstanding", re.I),
+        re.compile(r"shares\s+outstanding\s+at\s+period\s+end", re.I),
+    ],
+    "weighted_avg_basic": [
+        re.compile(r"weighted\s+average.*basic", re.I),
+        re.compile(r"weighted-average.*basic", re.I),
+    ],
+    "weighted_avg_diluted": [
+        re.compile(r"weighted\s+average.*diluted", re.I),
+        re.compile(r"weighted-average.*diluted", re.I),
+    ],
+    "pretax_income": [
+        re.compile(r"income\s+before\s+income\s+tax", re.I),
+        re.compile(r"profit\s+before\s+tax", re.I),
+        re.compile(r"earnings\s+before\s+income\s+taxes", re.I),
+    ],
+    "interest_expense_net": [
+        re.compile(r"^interest\s+expense,\s*net", re.I),
+        re.compile(r"^net\s+interest\s+expense", re.I),
     ],
 }
 
@@ -169,7 +291,8 @@ class AliasResolver:
         # Remove parenthetical qualifiers that add noise to financial labels.
         # E.g. "Net income (loss) per share" → "Net income  per share"
         text = re.sub(
-            r"\(\s*(?:loss|benefit|deficit|expense|income)\s*\)", "", text
+            r"\(\s*(?:loss|benefit(?:\s+from)?|deficit|expense|income|used\s+in)\s*\)",
+            "", text,
         )
         # Replace common punctuation with space (not just remove) so that
         # "share—basic" becomes "share basic" not "sharebasic".
@@ -181,6 +304,9 @@ class AliasResolver:
     @staticmethod
     def _is_rejected(canonical: str, raw_label: str) -> bool:
         """Return True if raw_label is contextually invalid for canonical."""
+        for pat in _GLOBAL_REJECT_PATTERNS:
+            if pat.search(raw_label):
+                return True
         patterns = _REJECT_PATTERNS.get(canonical, [])
         for pat in patterns:
             if pat.search(raw_label):

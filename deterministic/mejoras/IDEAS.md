@@ -175,3 +175,97 @@ Vender el dataset limpio y estructurado a terceros: otras plataformas fintech, i
 
 #### Implicación para el 4.0
 Diseñar el 4.0 sabiendo que las Capas 0+1 deben poder funcionar como producto independiente. Esto significa: API limpia desde el día uno, documentación de cada endpoint, rate limiting, autenticación, y sobre todo — que la capa de datos no dependa de la capa de análisis para tener valor.
+
+---
+
+### 14. Extracción de tablas PDF — Decisiones técnicas y evolución futura
+
+#### Estado actual: pdfplumber (layout=True)
+Implementado como reemplazo de pypdf. Usa `extract_text(layout=True)` que preserva columnas alineadas y permite al table parser reconstruir tablas financieras desde PDFs europeos. Funciona bien para tablas con estructura clara.
+
+#### PyMuPDF descartado como motor base
+Se evaluó PyMuPDF (pymupdf4llm) como alternativa más rápida, pero tiene un problema de kerning en PDFs con fuentes corporativas europeas que lo hace inviable para tablas financieras:
+- Labels rotos: "Operat i ng prof i t" en vez de "Operating profit" — no matchea aliases
+- Números rotos: "- 289" en vez de "-289" — rompe parsing numérico
+- Columnas pegadas al label en vez de alineadas por espacios
+
+pdfplumber no tiene estos problemas porque usa un approach diferente para reconstruir el layout del texto. **PyMuPDF es más rápido para texto genérico, pero pdfplumber es superior para tablas financieras en PDFs corporativos.**
+
+#### Mejora futura para el 4.0: Table Transformer (TATR)
+**Cuando pdfplumber no sea suficiente para tablas complejas.**
+
+Modelo de deep learning de Microsoft (basado en DETR) específicamente entrenado para detectar y estructurar tablas en documentos. En el benchmark comparativo de arXiv (2410.09871), TATR logra F1 de 0.79 para tablas de documentos financieros — muy por encima de cualquier solución basada en reglas (Tabula 0.24, PyMuPDF 0.18, pdfplumber 0.06, Camelot 0.10).
+
+**Cómo se integraría:**
+- **Dependencias:** PyTorch + Hugging Face Transformers + modelo pre-entrenado `microsoft/table-transformer-detection` + `microsoft/table-transformer-structure-recognition`
+- **Flujo:** PDF página → imagen (renderizada con pdfplumber o Pillow) → TATR detecta bounding boxes de tablas → TATR reconoce estructura (filas, columnas, headers) → extrae texto por celda con coordenadas → genera tabla markdown
+- **Bonus para provenance (idea #12):** TATR da bounding boxes exactos de cada celda en coordenadas de página, lo que permite mapear directamente al PDF original para "click to source"
+
+**Estrategia de integración:**
+1. **pdfplumber como base** (implementado) — cubre el 80% de los casos
+2. **TATR como segundo extractor** — se activa cuando pdfplumber falla o cuando la confianza es baja (pocas columnas detectadas, filas inconsistentes)
+3. **Cross-validation** — si ambos extraen la misma tabla, comparar resultados para aumentar confianza
+4. Encaja en la arquitectura de clases (idea #10): `PdfPlumberExtractor` y `TableTransformerExtractor` como dos implementaciones de `TableExtractor`, orquestadas por confianza
+
+**Cuándo implementarlo:**
+Cuando el volumen de empresas europeas/PDF justifique la inversión. pdfplumber resolverá los primeros 20-30 tickers. Si empezamos a ver fallos sistemáticos en tablas complejas, es el momento de añadir TATR.
+
+---
+
+### 15. Sistema multi-agente para gestión del proyecto
+
+#### El problema
+Cada sesión de VS Code Copilot empieza de cero. El agente técnico (elsian-4) ejecuta bien lo que se le pide, pero no tiene criterio estratégico: no sabe qué priorizar, cuándo cambiar de rumbo, ni cuándo un bloque está completo. Hoy esa inteligencia la pone el usuario humano en cada sesión. Esto no escala.
+
+#### La solución: agente director + protocolo de comunicación
+
+Crear un segundo agente de VS Code (`project-director.agent.md`) cuya única responsabilidad sea la dirección estratégica del proyecto. No escribe código. No toca archivos de código. Solo lee estado, toma decisiones y genera instrucciones para los agentes técnicos.
+
+**Características del director:**
+- Ligero (~200-250 líneas de .agent.md). No es un superagente — tiene un rol específico.
+- Entiende el producto a alto nivel: visión comercial, capas, líneas de producto, competidores.
+- Conoce el roadmap (5 fases) y los criterios de transición entre fases.
+- Toma decisiones informadas: ¿cuándo dejamos de añadir tickers? ¿cuándo pasamos a iXBRL? ¿qué hacemos si un componente se bloquea?
+- Puede adaptar el plan cuando surgen problemas o cambios durante el desarrollo.
+
+**Separación de responsabilidades:**
+- **Director:** lee estado, evalúa, prioriza, decide, genera instrucciones. No ejecuta.
+- **Técnico (elsian-4):** ejecuta instrucciones, escribe código, corre tests. No prioriza.
+- **Futuro:** agentes adicionales especializados (QA, data curation, etc.) usando el mismo protocolo.
+
+#### Protocolo de comunicación entre agentes
+
+Los agentes se comunican a través de archivos en `docs/project/` — un espacio compartido con convenciones claras:
+
+| Archivo | Quién escribe | Quién lee | Propósito |
+|---|---|---|---|
+| `PROJECT_STATE.md` | Director | Todos | Tablero central: fase actual, tareas en progreso, bloqueantes, métricas |
+| `DECISIONS.md` | Director | Todos | Registro de decisiones estratégicas con fecha, contexto y razón |
+| `BACKLOG.md` | Director | Técnicos | Cola de trabajo priorizada con dependencias |
+| `CHANGELOG.md` | Técnicos | Director | Registro de cambios implementados (ya existe en raíz de 4.0) |
+| `ROADMAP.md` | Director | Todos | Hoja de ruta estratégica (ya creado, en raíz de 4.0) |
+
+**Regla fundamental:** cada agente, al arrancar una sesión, lee sus fuentes. Al terminar, actualiza sus outputs. Así el siguiente agente retoma desde donde se dejó.
+
+**Flujo típico:**
+1. Usuario abre chat con director → director lee PROJECT_STATE + CHANGELOG + BACKLOG
+2. Director evalúa estado, detecta progreso, identifica siguiente prioridad
+3. Director da instrucción concreta al usuario (o directamente al agente técnico si se encadena)
+4. Usuario abre chat con elsian-4 → técnico ejecuta la tarea
+5. Técnico actualiza CHANGELOG al terminar
+6. Usuario vuelve al director → director actualiza PROJECT_STATE y BACKLOG
+
+#### Diseño para escalabilidad
+
+El protocolo está pensado para que añadir un agente nuevo sea tan simple como añadir un Fetcher al pipeline:
+- Crear el `.agent.md` con su rol específico
+- Definir qué archivos de `docs/project/` lee y cuáles escribe
+- Documentar su rol en el PROJECT_STATE.md
+
+Posibles agentes futuros:
+- **QA Agent:** solo corre regresión, reporta problemas, verifica que no hay regresiones
+- **Data Curator:** especializado en curar expected.json desde filings originales
+- **Qualitative Agent:** especializado en extracción cualitativa con LLM (Capa 2)
+
+#### Cuándo implementarlo
+Ahora. El coste es bajo (crear 1 agente + 3 archivos) y el beneficio es alto: cada sesión nueva empieza con contexto completo en vez de desde cero.

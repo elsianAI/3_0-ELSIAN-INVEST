@@ -161,8 +161,22 @@ def _resolve_currency(currency_text: str) -> str:
 
 
 def _detect_surrounding_period(text: str, match_start: int) -> str:
-    """Try to detect a period from text surrounding a match."""
-    window = text[max(0, match_start - 200): match_start + 200]
+    """Try to detect a period from text surrounding a match.
+
+    Trims the suffix at the first comparative keyword so that periods
+    from comparative clauses (e.g. "compared to $18M in 2023") are not
+    attributed to the primary value.
+    """
+    prefix = text[max(0, match_start - 200):match_start]
+    suffix = text[match_start:match_start + 200]
+
+    # Trim suffix at the first comparative keyword to avoid picking up
+    # the comparative period (e.g. "compared to $18M in 2023")
+    comp_match = _COMPARATIVE_CONTEXT.search(suffix)
+    if comp_match:
+        suffix = suffix[:comp_match.start()]
+
+    window = prefix + suffix
 
     # FY pattern
     m = re.search(r"\bFY\s?(\d{4})\b", window, re.IGNORECASE)
@@ -207,9 +221,10 @@ def extract_from_narrative(
         value = _parse_narrative_number(m.group("value"))
         if value is None:
             continue
-        prefix = text[max(0, m.start() - 60):m.start()]
-        if _NON_GAAP_CONTEXT.search(prefix):
+        context = text[max(0, m.start() - 100):m.end() + 100]
+        if _NON_GAAP_CONTEXT.search(context):
             continue
+        prefix = text[max(0, m.start() - 60):m.start()]
         if _COMPARATIVE_CONTEXT.search(prefix):
             continue
         period = _detect_surrounding_period(text, m.start())
@@ -230,9 +245,10 @@ def extract_from_narrative(
         value = _parse_narrative_number(m.group("value"))
         if value is None:
             continue
-        prefix = text[max(0, m.start() - 60):m.start()]
-        if _NON_GAAP_CONTEXT.search(prefix):
+        context = text[max(0, m.start() - 100):m.end() + 100]
+        if _NON_GAAP_CONTEXT.search(context):
             continue
+        prefix = text[max(0, m.start() - 60):m.start()]
         if _COMPARATIVE_CONTEXT.search(prefix):
             continue
         period = _detect_surrounding_period(text, m.start())

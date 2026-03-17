@@ -51,6 +51,18 @@ N5) Seleccionar método principal:
     - FCF ≤ 0 pero EBIT > 0 => REVERSE_EARNINGS_POWER
     - Ambos ≤ 0 => MULTIPLOS_IMPLICITOS_SOLO
 
+N5.x) NORMALIZACIÓN DE FCF EN NEGOCIOS CON FLOAT:
+    - Si existe evidencia explícita de que un negocio o adquisición introduce working capital tipo float / settlement y management cuantifica su impacto:
+      - construir `FCF0_reportado`
+      - construir `FCF0_ajustado_ex_float`
+    - Si la diferencia absoluta > 10% del FCF reportado:
+      - el método principal debe usar el FCF ajustado
+      - mantener el FCF reportado como ancla secundaria comparativa
+    - Debes reportar ambos múltiplos:
+      - EV/FCF reportado
+      - EV/FCF ajustado
+    - Debes explicar cuál es la lectura correcta del precio bajo cada ancla.
+
 N6) Ejecutar reverse valuation con grids:
     - tasa_descuento_grid: [0.08, 0.10, 0.12]
     - crecimiento_terminal_grid: [0.02, 0.03]

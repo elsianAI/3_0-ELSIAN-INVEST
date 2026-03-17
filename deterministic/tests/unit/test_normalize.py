@@ -92,7 +92,15 @@ class TestAliasResolver(unittest.TestCase):
 
     def test_shares_outstanding_matches_weighted_avg(self):
         result = self.resolver.resolve("Weighted average common shares—basic")
-        self.assertEqual(result, "shares_outstanding")
+        self.assertEqual(result, "weighted_avg_basic")
+
+    def test_weighted_avg_diluted_matches_weighted_avg(self):
+        result = self.resolver.resolve("Weighted average shares outstanding diluted")
+        self.assertEqual(result, "weighted_avg_diluted")
+
+    def test_shares_outstanding_end_matches_period_end_label(self):
+        result = self.resolver.resolve("Common stock issued and outstanding")
+        self.assertEqual(result, "shares_outstanding_end")
 
     def test_shares_outstanding_rejects_common_stock_par(self):
         """'Common stock, $0.01 par value ...' must NOT resolve to shares_outstanding."""
@@ -270,12 +278,24 @@ class TestAliasResolver(unittest.TestCase):
     # ── income_tax rejection tests ──────────────────────────────────
 
     def test_income_before_income_taxes_rejected(self):
-        """'Income before income taxes' is pretax income, not tax expense."""
-        self.assertIsNone(self.resolver.resolve("Income before income taxes"))
+        """'Income before income taxes' should resolve to pretax_income."""
+        self.assertEqual(
+            self.resolver.resolve("Income before income taxes"),
+            "pretax_income",
+        )
 
     def test_income_before_income_tax_expense_rejected(self):
-        """'Income before income tax expense' is pretax income, not tax expense."""
-        self.assertIsNone(self.resolver.resolve("Income before income tax expense"))
+        """'Income before income tax expense' should resolve to pretax_income."""
+        self.assertEqual(
+            self.resolver.resolve("Income before income tax expense"),
+            "pretax_income",
+        )
+
+    def test_interest_expense_net_resolves(self):
+        self.assertEqual(
+            self.resolver.resolve("Interest expense, net"),
+            "interest_expense_net",
+        )
 
     def test_accrued_income_taxes_rejected(self):
         """'Accrued income taxes' is a balance sheet item, not tax expense."""

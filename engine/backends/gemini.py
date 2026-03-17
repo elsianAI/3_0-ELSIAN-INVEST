@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import subprocess
 import json
+import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -15,6 +16,15 @@ from .base import LLMBackend, DispatchResult, _try_recover_json
 _AUTH_CACHE: dict[tuple[str, str], tuple[float, bool, str | None, str | None]] = {}
 _AUTH_CACHE_TTL_OK = 600
 _AUTH_CACHE_TTL_FAIL = 60
+_RUNTIME_CRASH_PATTERNS = (
+    "unsettled top-level await",
+    "yoga-layout",
+)
+_HEADLESS_ENV_OVERRIDES = {
+    "CI": "1",
+    "NO_COLOR": "1",
+    "TERM": "dumb",
+}
 
 
 class GeminiBackend(LLMBackend):
@@ -48,6 +58,76 @@ class GeminiBackend(LLMBackend):
         timeout: int,
     ) -> DispatchResult:
         disable_yolo = self._disable_yolo()
+        max_attempts = 2
+        for attempt in range(1, max_attempts + 1):
+            cmd = self._build_command(model_name, prompt, disable_yolo)
+            start = time.time()
+            try:
+                proc = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout,
+                    cwd=str(cwd) if cwd else None,
+                    env=self._build_subprocess_env(),
+                )
+                duration = time.time() - start
+                raw = proc.stdout or ""
+                stderr_full = proc.stderr or ""
+                stderr_text = stderr_full[:2000]
+                runtime_crash = self._is_runtime_crash(stderr_full)
+
+                if proc.returncode != 0 and not raw.strip():
+                    if runtime_crash and attempt < max_attempts:
+                        time.sleep(1)
+                        continue
+                    error = (
+                        f"Gemini CLI runtime crash: {stderr_text}"
+                        if runtime_crash else
+                        f"Non-zero exit code: {proc.returncode}. stderr: {stderr_text}"
+                    )
+                    return DispatchResult(
+                        False, None, stderr_full, model_name, "gemini", duration,
+                        error,
+                        exit_code=proc.returncode,
+                    )
+
+                # Try to extract JSON from output (gemini may include preamble text)
+                output = _try_recover_json(raw)
+                if output is not None:
+                    # Gemini CLI may wrap the artifact in an envelope
+                    if (
+                        isinstance(output, dict)
+                        and "response" in output
+                        and ("session_id" in output or "stats" in output)
+                    ):
+                        inner = _try_recover_json(str(output["response"]))
+                        if inner is not None and isinstance(inner, dict):
+                            output = inner
+                    return DispatchResult(
+                        True, output, raw, model_name, "gemini", duration,
+                        exit_code=proc.returncode,
+                    )
+
+                err_suffix = f" (stderr: {stderr_text})" if stderr_text else ""
+                return DispatchResult(
+                    False, None, raw, model_name, "gemini", duration,
+                    f"Could not parse JSON from output{err_suffix}",
+                    exit_code=proc.returncode,
+                )
+            except subprocess.TimeoutExpired:
+                return DispatchResult(
+                    False, None, "", model_name, "gemini", timeout, "Timeout",
+                    exit_code=124,
+                )
+
+        return DispatchResult(
+            False, None, "", model_name, "gemini", 0.0,
+            "Gemini CLI runtime crash without recoverable output",
+            exit_code=13,
+        )
+
+    def _build_command(self, model_name: str, prompt: str, disable_yolo: bool) -> list[str]:
         cmd = [
             self.binary_path,
             "-p",
@@ -59,59 +139,16 @@ class GeminiBackend(LLMBackend):
         ]
         if not disable_yolo:
             cmd.append("--yolo")
+        return cmd
 
-        start = time.time()
-        try:
-            proc = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                cwd=str(cwd) if cwd else None,
-            )
-            duration = time.time() - start
-            raw = proc.stdout or ""
-            stderr_full = proc.stderr or ""
-            stderr_text = stderr_full[:2000]
+    def _build_subprocess_env(self) -> dict[str, str]:
+        env = os.environ.copy()
+        env.update(_HEADLESS_ENV_OVERRIDES)
+        return env
 
-            if proc.returncode != 0 and not raw.strip():
-                # Pass full stderr as raw_output so _is_retryable_dispatch_error
-                # can detect quota/rate-limit patterns (e.g. TerminalQuotaError)
-                # even when they appear late in the stderr stream.
-                return DispatchResult(
-                    False, None, stderr_full, model_name, "gemini", duration,
-                    f"Non-zero exit code: {proc.returncode}. stderr: {stderr_text}",
-                    exit_code=proc.returncode,
-                )
-
-            # Try to extract JSON from output (gemini may include preamble text)
-            output = _try_recover_json(raw)
-            if output is not None:
-                # Gemini CLI may wrap the artifact in an envelope
-                if (
-                    isinstance(output, dict)
-                    and "response" in output
-                    and ("session_id" in output or "stats" in output)
-                ):
-                    inner = _try_recover_json(str(output["response"]))
-                    if inner is not None and isinstance(inner, dict):
-                        output = inner
-                return DispatchResult(
-                    True, output, raw, model_name, "gemini", duration,
-                    exit_code=proc.returncode,
-                )
-
-            err_suffix = f" (stderr: {stderr_text})" if stderr_text else ""
-            return DispatchResult(
-                False, None, raw, model_name, "gemini", duration,
-                f"Could not parse JSON from output{err_suffix}",
-                exit_code=proc.returncode,
-            )
-        except subprocess.TimeoutExpired:
-            return DispatchResult(
-                False, None, "", model_name, "gemini", timeout, "Timeout",
-                exit_code=124,
-            )
+    def _is_runtime_crash(self, stderr_text: str) -> bool:
+        lowered = (stderr_text or "").lower()
+        return any(pattern in lowered for pattern in _RUNTIME_CRASH_PATTERNS)
 
     def _disable_yolo(self) -> bool:
         # v2: check model_catalog
@@ -161,6 +198,7 @@ class GeminiBackend(LLMBackend):
             ver = subprocess.run(
                 [self.binary_path, "--version"],
                 capture_output=True, text=True, timeout=10,
+                env=self._build_subprocess_env(),
             )
             if ver.returncode != 0:
                 return _cache_store(
@@ -182,6 +220,7 @@ class GeminiBackend(LLMBackend):
             auth = subprocess.run(
                 preflight_cmd,
                 capture_output=True, text=True, timeout=60,
+                env=self._build_subprocess_env(),
             )
             if auth.returncode != 0:
                 stderr_full_pf = auth.stderr or ""

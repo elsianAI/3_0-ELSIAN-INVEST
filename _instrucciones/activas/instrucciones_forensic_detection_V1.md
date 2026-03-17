@@ -57,11 +57,27 @@ N4) PUENTES CRÍTICOS:
    - CFO → FCF (capex mantenimiento vs crecimiento; dividendos; recompras)
    - Documentar distorsiones ≥ 15% entre etapas
 
-N5) CANDIDATOS A CRITERIOS DE LIQUIDACIÓN (3-7):
+N5) CHECKS ESPECIALES OBLIGATORIOS:
+   - Receivables pass-through / settlement:
+     - Si el filing separa trade receivables, settlement receivables, merchant funds receivable, client funds receivable u otros pass-through similares:
+       - extraer total y componentes;
+       - calcular DSO_total y DSO_trade;
+       - NO elevar red flag automática de cobranza usando DSO_total cuando el exceso provenga principalmente de receivables de liquidación/pass-through.
+     - En ese caso, usar DSO_trade para el juicio de cobro y DSO_total solo como señal de mezcla / float / settlement working capital.
+   - Bridge EBIT→pretax:
+     - Antes de declarar un gap EBIT→pretax "sin explicar", reconciliar directamente todas las líneas below-the-line visibles en el filing.
+     - Solo está permitido usar lenguaje de gap no explicado si el residual supera simultáneamente 5% de EBIT y $10M absolutos.
+   - Float / settlement businesses:
+     - Si management cuantifica un impacto de working capital asociado a gift cards, payments, marketplace, payroll float o insurance float:
+       - calcular una vista reportada;
+       - calcular una vista ajustada_ex_float;
+       - la red flag dominante debe ser calidad del FCF, no aging genérico de AR.
+
+N6) CANDIDATOS A CRITERIOS DE LIQUIDACIÓN (3-7):
    - Condiciones objetivas y medibles
    - Ventana temporal clara
    - Probabilidad cualitativa (ALTA | MEDIA | BAJA)
 
-N6) Validar exhaustividad: todas las áreas contables revisadas.
+N7) Validar exhaustividad: todas las áreas contables revisadas.
 
-N7) Emitir JSON único `ForensicDetection_v1` con red_flags[] + liquidez + puentes + kill_criteria_candidatos[] (SIN severidad, SIN veredicto).
+N8) Emitir JSON único `ForensicDetection_v1` con red_flags[] + liquidez + puentes + kill_criteria_candidatos[] (SIN severidad, SIN veredicto).

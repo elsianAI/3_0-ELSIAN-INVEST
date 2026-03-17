@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from engine.diagnostics import compact_failure_ctx
 try:
     from scripts.runners.clean_md_quality import is_clean_md_useful as _is_clean_md_useful_common
 except Exception:
@@ -66,6 +67,19 @@ STEP_SCHEMAS = {
 
 _HIGH_VOLUME_OUTPUT_STEPS = {"BULL", "RED_TEAM", "ARBITRO"}
 
+_PROMPT_COMPACTION_BUDGETS: dict[str, dict[str, int]] = {
+    "ARBITRO": {
+        "TruthPack_v1": 45_000,
+        "AgentReport_v1_BULL": 18_000,
+        "AgentReport_v1_REDTEAM": 18_000,
+        "AgentReport_v1_RED_TEAM": 18_000,
+        "AgentReport_v1_CATALYST": 12_000,
+        "AgentReport_v1_FORENSIC": 12_000,
+        "ImpliedExpectations_v1": 8_000,
+        "__default__": 12_000,
+    },
+}
+
 
 _EXCERPT_HEAD_CHARS = 70_000
 _EXCERPT_TAIL_CHARS = 40_000
@@ -108,6 +122,45 @@ def _coerce_excerpt_chunk(chunk: str, budget: int) -> str:
     if len(chunk) <= budget:
         return chunk
     return chunk[:budget]
+
+
+def _resolve_prompt_compaction_budget(step_name: str, artifact_name: str) -> int | None:
+    step_budgets = _PROMPT_COMPACTION_BUDGETS.get(step_name, {})
+    if not step_budgets:
+        return None
+    for prefix, budget in step_budgets.items():
+        if prefix == "__default__":
+            continue
+        if artifact_name.startswith(prefix):
+            return budget
+    return step_budgets.get("__default__")
+
+
+def _compact_json_artifact_for_prompt(step_name: str, artifact_name: str, content: str) -> tuple[str, bool]:
+    budget = _resolve_prompt_compaction_budget(step_name, artifact_name)
+    if budget is None:
+        return content, False
+    try:
+        payload = json.loads(content)
+    except Exception:
+        return _coerce_excerpt_chunk(content, budget), True
+    compacted = compact_failure_ctx(payload, max_chars=budget)
+    if isinstance(payload, dict) and isinstance(compacted, dict):
+        preserved_scalars = ("version_esquema", "ticker", "agent_role", "caso_id")
+        preserved_objects = ("resumen_ejecutivo", "decision_packet", "gates", "decision_probabilistica")
+        for key in preserved_scalars:
+            if key in payload and key not in compacted:
+                compacted[key] = payload[key]
+        for key in preserved_objects:
+            if key in payload and key not in compacted:
+                sub_budget = min(max(budget // 6, 800), 6_000)
+                mini = compact_failure_ctx({key: payload[key]}, max_chars=sub_budget)
+                if key in mini:
+                    compacted[key] = mini[key]
+    compacted_str = json.dumps(compacted, indent=2, ensure_ascii=False)
+    if len(compacted_str) > budget:
+        compacted_str = _coerce_excerpt_chunk(compacted_str, budget)
+    return compacted_str, True
 
 
 def _build_financial_focus_excerpt(
@@ -307,11 +360,16 @@ def build_prompt(
         for name, path in input_artifacts.items():
             if path.exists():
                 content = path.read_text()
+                compacted = False
+                content, compacted = _compact_json_artifact_for_prompt(step_name, name, content)
                 # Truncate very large artifacts to avoid exceeding context
                 limit = _limits["input_artifact_chars"]
                 if len(content) > limit:
                     content = content[:limit] + f"\n\n... [TRUNCATED at {limit // 1000}k]"
-                artifact_parts.append(f"### {name}\n```json\n{content}\n```")
+                heading = f"### {name}"
+                if compacted:
+                    heading += " [COMPACTADO_PARA_PROMPT]"
+                artifact_parts.append(f"{heading}\n```json\n{content}\n```")
         if artifact_parts:
             parts.append(f"# DATOS DE INPUT\n\n" + "\n\n".join(artifact_parts))
 

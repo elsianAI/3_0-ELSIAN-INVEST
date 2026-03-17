@@ -75,6 +75,84 @@ class TestPipelineExtractFromFixtures(unittest.TestCase):
         self.assertIn("audit", d)
 
 
+class TestManualOverrides(unittest.TestCase):
+    """Tests for _apply_manual_overrides — last-resort for corrupted PDFs."""
+
+    def test_override_injected_when_extractor_found_nothing(self):
+        """Override is applied when the extractor has no value for the field."""
+        result = ExtractionResult(ticker="TST", currency="USD")
+        result.periods["FY2019"] = PeriodResult(fecha_fin="2019-12-31", tipo_periodo="anual")
+        config = {
+            "manual_overrides": {
+                "FY2019": {
+                    "ingresos": {"value": 5355, "note": "KPI p.1"}
+                }
+            }
+        }
+        DeterministicPipeline._apply_manual_overrides(config, result)
+        self.assertIn("FY2019", result.periods)
+        fr = result.periods["FY2019"].fields["ingresos"]
+        self.assertEqual(fr.value, 5355.0)
+        self.assertEqual(fr.confidence, "manual")
+        self.assertEqual(fr.source_filing, "manual_override")
+        self.assertIn("KPI p.1", fr.source_location)
+        self.assertEqual(result.audit.fields_extracted, 1)
+
+    def test_extractor_wins_when_value_already_present(self):
+        """Extractor value is preserved; override is silently skipped."""
+        result = ExtractionResult(ticker="TST", currency="USD")
+        result.periods["FY2022"] = PeriodResult(fecha_fin="2022-12-31", tipo_periodo="anual")
+        result.periods["FY2022"].fields["ingresos"] = FieldResult(
+            value=9000.0, scale="millions", confidence="low"
+        )
+        config = {
+            "manual_overrides": {
+                "FY2022": {
+                    "ingresos": {"value": 8154},
+                    "fcf":      {"value": 703},
+                }
+            }
+        }
+        DeterministicPipeline._apply_manual_overrides(config, result)
+        # Extracted value must not be overwritten
+        self.assertEqual(result.periods["FY2022"].fields["ingresos"].value, 9000.0)
+        self.assertEqual(result.periods["FY2022"].fields["ingresos"].confidence, "low")
+        # Missing field IS injected
+        self.assertEqual(result.periods["FY2022"].fields["fcf"].value, 703.0)
+        self.assertEqual(result.periods["FY2022"].fields["fcf"].confidence, "manual")
+        # Only fcf was injected
+        self.assertEqual(result.audit.fields_extracted, 1)
+
+    def test_period_created_when_extractor_missed_it_entirely(self):
+        """Period is created from scratch when extractor produced nothing for it."""
+        result = ExtractionResult(ticker="TST", currency="USD")
+        config = {
+            "manual_overrides": {
+                "FY2021": {
+                    "ingresos":          {"value": 7115},
+                    "fcf":               {"value": 661},
+                    "dividends_per_share": {"value": 3.30},
+                }
+            }
+        }
+        DeterministicPipeline._apply_manual_overrides(config, result)
+        self.assertIn("FY2021", result.periods)
+        self.assertEqual(result.periods["FY2021"].fecha_fin, "2021-12-31")
+        self.assertEqual(result.periods["FY2021"].tipo_periodo, "anual")
+        self.assertEqual(len(result.periods["FY2021"].fields), 3)
+        self.assertEqual(result.audit.fields_extracted, 3)
+
+    def test_no_crash_on_empty_or_missing_overrides(self):
+        """Absent or empty manual_overrides block is handled gracefully."""
+        result = ExtractionResult(ticker="TST", currency="USD")
+        DeterministicPipeline._apply_manual_overrides({}, result)
+        DeterministicPipeline._apply_manual_overrides({"manual_overrides": {}}, result)
+        DeterministicPipeline._apply_manual_overrides(
+            {"manual_overrides": {"FY2020": {"ingresos": "bad_spec"}}}, result
+        )
+        self.assertEqual(len(result.periods), 0)
+
+
 class TestEvaluate(unittest.TestCase):
     """Test the evaluate function with a known extraction and expected."""
 

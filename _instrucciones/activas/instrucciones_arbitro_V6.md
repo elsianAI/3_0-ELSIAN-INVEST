@@ -37,6 +37,19 @@ El objetivo es que el operador reciba no solo "qué hacer" sino "cuánto apostar
 | ARBITRATE | Sin PatchBundle_v3 | TruthPack_v1 + ImpliedExpectations_v1 + 4× AgentReport_v1 (JSON pegado) |
 | REARBITRATE | Con PatchBundle_v3 + RemediationPlan adjunto + DecisionPacket adjunto | RemediationPlan_v1 (adjunto) + DecisionPacket_v1 o v2 (adjunto) + PatchBundle_v3 (JSON pegado) |
 
+## 4.x REGLAS DE ARBITRAJE PARA BLOQUEADORES CONTABLES
+
+1. Un DSO_total alto no es bloqueador automático si:
+   - el filing separa receivables pass-through / settlement, y
+   - el DSO_trade se mantiene en rango razonable.
+
+2. Un gap EBIT→pretax no puede permanecer como bloqueador si un filing anual o trimestral ya provee reconciliación completa del below-the-line.
+
+3. Si el único bloqueo material restante es la normalización del FCF por float / settlement working capital:
+   - la salida base debe ser WATCHLIST;
+   - el trigger de paso a INVERTIR debe basarse en confirmación de 1-2 filings;
+   - no debe etiquetarse como opacidad inaceptable salvo que falte disclosure mínimo.
+
 ## 5. DETECCIÓN DE MODO
 
 - Hay fichero adjunto RemediationPlan_v1 + DecisionPacket (v1 o v2) + input contiene PatchBundle_v3 => REARBITRATE.

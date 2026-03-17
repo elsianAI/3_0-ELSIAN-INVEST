@@ -5,6 +5,7 @@ import unittest
 from deterministic.src.normalize.scale import (
     normalize_to_millions,
     infer_scale_cascade,
+    resolve_scale_for_field,
     validate_scale_sanity,
 )
 
@@ -51,6 +52,20 @@ class TestInferScaleCascade(unittest.TestCase):
         scale, conf = infer_scale_cascade("raw", "raw", "raw", None)
         self.assertEqual(scale, "raw")
         self.assertEqual(conf, "low")
+
+    def test_share_fields_are_locked_to_raw(self):
+        scale, conf = resolve_scale_for_field(
+            "weighted_avg_diluted", "millions", "millions", "millions", None
+        )
+        self.assertEqual(scale, "raw")
+        self.assertEqual(conf, "high")
+
+    def test_per_share_fields_are_locked_to_raw(self):
+        scale, conf = resolve_scale_for_field(
+            "eps_diluted", "millions", "millions", "millions", None
+        )
+        self.assertEqual(scale, "raw")
+        self.assertEqual(conf, "high")
 
 
 class TestValidateScaleSanity(unittest.TestCase):

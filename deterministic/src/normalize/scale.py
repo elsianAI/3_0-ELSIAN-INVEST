@@ -15,6 +15,25 @@ SCALE_MULTIPLIERS = {
     "billions": 1000.0,
 }
 
+SHARE_FIELDS = {
+    "shares_outstanding",
+    "shares_outstanding_end",
+    "weighted_avg_basic",
+    "weighted_avg_diluted",
+}
+
+PER_SHARE_FIELDS = {
+    "eps_basic",
+    "eps_diluted",
+    "dividends_per_share",
+}
+
+RATIO_FIELDS = {
+    "gross_margin_pct",
+    "ebit_margin_pct",
+    "net_margin_pct",
+}
+
 
 def normalize_to_millions(
     value: float, scale: str
@@ -67,6 +86,28 @@ def infer_scale_cascade(
 
     # Level 5: uncertainty
     return "raw", "low"
+
+
+def resolve_scale_for_field(
+    canonical: str,
+    raw_notes_scale: str,
+    header_scale: str,
+    preflight_scale: str,
+    field_multiplier: Optional[float],
+) -> Tuple[str, str]:
+    """Resolve scale while enforcing unit-family guardrails."""
+    if canonical in SHARE_FIELDS:
+        return "raw", "high"
+    if canonical in PER_SHARE_FIELDS:
+        return "raw", "high"
+    if canonical in RATIO_FIELDS:
+        return "raw", "high"
+    return infer_scale_cascade(
+        raw_notes_scale,
+        header_scale,
+        preflight_scale,
+        field_multiplier,
+    )
 
 
 def apply_scale(value: float, scale: str) -> float:

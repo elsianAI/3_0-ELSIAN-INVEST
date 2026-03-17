@@ -25,15 +25,17 @@ from deterministic.src.acquire.eu_regulators import fetch_eu_manual
 from deterministic.src.extract.detect import analyze_filing, FilingMetadata
 from deterministic.src.extract.tables import (
     extract_tables_from_clean_md,
+    extract_tables_from_text,
     TableField,
 )
+from deterministic.src.extract.vertical import extract_vertical_bs
 from deterministic.src.extract.narrative import (
     extract_from_narrative,
     NarrativeField,
 )
 from deterministic.src.normalize.aliases import AliasResolver
 from deterministic.src.normalize.scale import (
-    infer_scale_cascade,
+    resolve_scale_for_field,
     validate_scale_sanity,
 )
 from deterministic.src.normalize.audit import AuditLog
@@ -184,50 +186,93 @@ class DeterministicPipeline:
         r"|prepaid_income_taxes"
         r"|:income_tax_payable"
         r"|details_of_income_tax"
-        r"|components_of_income",
+        r"|components_of_income"
+        r"|components_of_results"
+        r"|net_income.*margin"
+        r"|balance_sheet_data",
+        re.I,
+    )
+
+    # Tax reconciliation tables get a severe penalty because their total
+    # line ("Provision for income taxes") matches the income_tax canonical
+    # with high label priority, but the values may have wrong sign or
+    # disagree with the IS value.  A -100 penalty ensures the merge will
+    # replace these values when a better source exists.
+    # Schedule I / parent-only balance sheets (e.g. "the following table
+    # presents the balance sheet information for the respective periods")
+    # also get strongly deprioritized — consolidated values must win.
+    _STRONGLY_DEPRIORITIZED_SECTION = re.compile(
+        r"federal_income_taxes"
+        r"|statutory_rate"
+        r"|:statements_of_operations:"
+        r"|:balance_sheets:"
+        r"|:statements_of_cash_flows:"
+        r"|the_following_table_presents.*balance_sheet",
         re.I,
     )
 
     # ── Selection rules (loaded from config/selection_rules.json) ────
 
-    _SELECTION_RULES: Optional[Dict] = None
+    _SELECTION_RULES_CACHE: Dict[str, Dict] = {}
     _TBL_RE = re.compile(r"tbl(\d+)")
     _ROW_RE = re.compile(r"row(\d+)")
     _COL_RE = re.compile(r"col(\d+)")
 
     @classmethod
     def _load_selection_rules(cls, config_dir: str) -> Dict:
-        """Load selection_rules.json once and cache."""
-        if cls._SELECTION_RULES is not None:
-            return cls._SELECTION_RULES
+        """Load selection_rules.json once per config_dir and cache."""
+        key = str(Path(config_dir).resolve())
+        if key in cls._SELECTION_RULES_CACHE:
+            return cls._SELECTION_RULES_CACHE[key]
         path = Path(config_dir) / "selection_rules.json"
         if path.exists():
-            cls._SELECTION_RULES = json.loads(
+            rules = json.loads(
                 path.read_text(encoding="utf-8")
             )
         else:
-            cls._SELECTION_RULES = {}
-        return cls._SELECTION_RULES
+            rules = {}
+        cls._SELECTION_RULES_CACHE[key] = rules
+        return rules
 
     @staticmethod
     def _section_bonus(source_location: str,
-                       rules: Optional[Dict] = None) -> int:
+                       rules: Optional[Dict] = None,
+                       canonical: Optional[str] = None) -> int:
         """Return a priority bonus based on the table's sub-section.
 
         Reads bonus/penalty values from rules['section_weights'] if available,
-        otherwise defaults to +5 / -5.
+        otherwise defaults to +5 / -5 / -100.
+
+        When *canonical* is ``"total_equity"`` and the source is an
+        income-statement section, applies a severe penalty (equity
+        never belongs on the IS — the matched value is almost certainly
+        par value or shares outstanding).
         """
         bonus = 5
         penalty = -5
+        severe_penalty = -100
         if rules and "section_weights" in rules:
             sw = rules["section_weights"]
             bonus = sw.get("primary_is_bonus", 5)
             penalty = sw.get("deprioritized_penalty", -5)
+            severe_penalty = sw.get("strongly_deprioritized_penalty", -100)
         if DeterministicPipeline._PRIMARY_IS_SECTION.search(source_location):
-            return bonus
-        if DeterministicPipeline._DEPRIORITIZED_SECTION.search(source_location):
-            return penalty
-        return 0
+            base = bonus
+        elif DeterministicPipeline._STRONGLY_DEPRIORITIZED_SECTION.search(source_location):
+            base = severe_penalty
+        elif DeterministicPipeline._DEPRIORITIZED_SECTION.search(source_location):
+            base = penalty
+        else:
+            base = 0
+
+        # total_equity from income-statement is always a misclassification
+        # (typically par value or shares outstanding).
+        if canonical == "total_equity":
+            loc_lower = source_location.lower()
+            if ":income_statement:" in loc_lower:
+                base = min(base, severe_penalty)
+
+        return base
 
     @staticmethod
     def _filing_rank(period_key: str, filing_type: str,
@@ -416,12 +461,16 @@ class DeterministicPipeline:
             # new constituents are accumulated while same-label duplicates
             # from a different table use normal collision resolution.
             additive_labels: Dict[str, Dict[str, set]] = {}  # period→field→{labels}
+            # Save raw table fields for post-processing (e.g. sub-total recovery)
+            _raw_table_fields: list = []
 
             if is_clean_md:
                 # Table extraction from markdown
                 table_fields = extract_tables_from_clean_md(
-                    text, source_filename=filing_path.name
+                    text, source_filename=filing_path.name,
+                    filing_type=metadata.filing_type,
                 )
+                _raw_table_fields = list(table_fields)
                 for tf in table_fields:
                     canonical = self._alias_resolver.resolve(tf.label)
                     if canonical is None:
@@ -437,7 +486,8 @@ class DeterministicPipeline:
 
                     # Scale inference
                     field_mult = self._alias_resolver.get_multiplier(canonical)
-                    scale, confidence = infer_scale_cascade(
+                    scale, confidence = resolve_scale_for_field(
+                        canonical,
                         filing_scale, "", metadata.scale, field_mult
                     )
 
@@ -447,6 +497,24 @@ class DeterministicPipeline:
                             field_name=canonical,
                             period=tf.column_header,
                             reason="scale_uncertain",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                            scale=scale,
+                        )
+                        continue
+
+                    # Reject negative total_debt from IS sections — on
+                    # the income statement, negative values matching the
+                    # total_debt alias are always something else (e.g.
+                    # "Loss on extinguishment of debt").
+                    if (canonical == "total_debt"
+                            and tf.value < 0
+                            and ":income_statement:" in tf.source_location.lower()):
+                        audit.discard(
+                            field_name=canonical,
+                            period=tf.column_header,
+                            reason="negative_debt_in_IS",
                             source_filing=filing_path.name,
                             raw_label=tf.label,
                             raw_value=tf.value,
@@ -479,7 +547,7 @@ class DeterministicPipeline:
                         canonical, tf.label
                     )
                     new_sec_bonus = self._section_bonus(
-                        tf.source_location, rules
+                        tf.source_location, rules, canonical=canonical
                     )
                     new_sort_key = self.compute_sort_key(
                         period_key=period_key,
@@ -616,6 +684,278 @@ class DeterministicPipeline:
                         )
 
             else:
+                # Space-aligned table extraction from .txt files
+                # (e.g. pdfplumber output with column-preserving layout)
+                txt_table_fields = extract_tables_from_text(
+                    text, source_filename=filing_path.name,
+                )
+                _raw_table_fields = list(txt_table_fields)
+                for tf in txt_table_fields:
+                    canonical = self._alias_resolver.resolve(tf.label)
+                    if canonical is None:
+                        audit.discard(
+                            field_name=tf.label,
+                            period=tf.column_header,
+                            reason="label_ambiguous",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                        )
+                        continue
+
+                    # Scale inference
+                    field_mult = self._alias_resolver.get_multiplier(canonical)
+                    scale, confidence = resolve_scale_for_field(
+                        canonical,
+                        filing_scale, "", metadata.scale, field_mult
+                    )
+
+                    # Sanity check
+                    if not validate_scale_sanity(tf.value, canonical, scale):
+                        audit.discard(
+                            field_name=canonical,
+                            period=tf.column_header,
+                            reason="scale_uncertain",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                            scale=scale,
+                        )
+                        continue
+
+                    period_key = tf.column_header
+                    if not period_key or period_key == "unknown":
+                        audit.discard(
+                            field_name=canonical,
+                            period="unknown",
+                            reason="period_unknown",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                            scale=scale,
+                        )
+                        continue
+
+                    if period_key not in period_fields:
+                        period_fields[period_key] = {}
+
+                    # Collision resolution
+                    new_label_priority = self._alias_resolver.label_priority(
+                        canonical, tf.label
+                    )
+                    section_bonus = 0
+                    loc_lower = tf.source_location.lower()
+                    if "income_statement" in loc_lower:
+                        section_bonus = 1
+                    elif "balance_sheet" in loc_lower:
+                        section_bonus = 1
+                    elif "cash_flow" in loc_lower:
+                        section_bonus = 1
+                    new_sort_key = self.compute_sort_key(
+                        period_key=period_key,
+                        filing_type=metadata.filing_type,
+                        source_type="table",
+                        label_priority=new_label_priority,
+                        section_bonus=section_bonus,
+                        source_filing=filing_path.name,
+                        source_location=tf.source_location,
+                        rules=rules,
+                    )
+
+                    if canonical in period_fields[period_key]:
+                        existing = period_fields[period_key][canonical]
+                        # ── Additive fields ──────────────────────────
+                        # Use label + source_location for dedup so same
+                        # label from different table sections (e.g.
+                        # non-current vs current) is accumulated.
+                        norm_lbl = self._alias_resolver._normalize(tf.label)
+                        dedup_key = norm_lbl + "|" + tf.source_location
+                        if self._alias_resolver.is_additive(canonical):
+                            seen = additive_labels.get(
+                                period_key, {}
+                            ).get(canonical, set())
+                            is_new = dedup_key not in seen
+                            if is_new:
+                                combined_value = existing.value + _normalize_sign(
+                                    canonical, tf.label, tf.value
+                                )
+                                fr = FieldResult(
+                                    value=combined_value,
+                                    scale=existing.scale,
+                                    source_filing=existing.source_filing,
+                                    source_location=existing.source_location,
+                                    confidence=existing.confidence,
+                                )
+                                fr._sort_key = existing._sort_key  # type: ignore[attr-defined]
+                                period_fields[period_key][canonical] = fr
+                                additive_labels.setdefault(
+                                    period_key, {}
+                                ).setdefault(canonical, set()).add(dedup_key)
+                                audit.accept(
+                                    field_name=canonical,
+                                    period=period_key,
+                                    source_filing=filing_path.name,
+                                    raw_label=tf.label,
+                                    raw_value=tf.value,
+                                    scale=scale,
+                                )
+                                continue
+                            else:
+                                audit.discard(
+                                    field_name=canonical,
+                                    period=period_key,
+                                    reason="additive_duplicate_constituent",
+                                    source_filing=filing_path.name,
+                                    raw_label=tf.label,
+                                    raw_value=tf.value,
+                                    scale=scale,
+                                )
+                                continue
+                        # ── Normal collision resolution ──────────────
+                        old_sort_key = getattr(
+                            existing, "_sort_key",
+                            (999, 999, 0, ("", 0, 0, 0)),
+                        )
+                        if new_sort_key >= old_sort_key:
+                            audit.discard(
+                                field_name=canonical,
+                                period=period_key,
+                                reason="lower_priority_duplicate",
+                                source_filing=filing_path.name,
+                                raw_label=tf.label,
+                                raw_value=tf.value,
+                                scale=scale,
+                            )
+                            continue
+
+                    fr = FieldResult(
+                        value=_normalize_sign(canonical, tf.label, tf.value),
+                        scale=scale,
+                        source_filing=filing_path.name,
+                        source_location=tf.source_location,
+                        confidence=confidence,
+                    )
+                    fr._sort_key = new_sort_key  # type: ignore[attr-defined]
+                    period_fields[period_key][canonical] = fr
+                    # Seed additive_labels when first storing an additive field
+                    if self._alias_resolver.is_additive(canonical):
+                        dedup_seed = self._alias_resolver._normalize(tf.label) + "|" + tf.source_location
+                        additive_labels.setdefault(
+                            period_key, {}
+                        ).setdefault(canonical, set()).add(dedup_seed)
+                    audit.accept(
+                        field_name=canonical,
+                        period=period_key,
+                        source_filing=filing_path.name,
+                        raw_label=tf.label,
+                        raw_value=tf.value,
+                        scale=scale,
+                    )
+
+                # ── Vertical-format consolidated BS extraction ───
+                # EDGAR .txt may have the consolidated BS in a vertical
+                # layout (one label per line) that the space-aligned
+                # parser cannot handle.  This targeted extractor pulls
+                # key BS totals directly.  A high section_bonus (+20)
+                # ensures these authoritative consolidated values beat
+                # Schedule I / parent-only values from other sources.
+                _VERTICAL_BS_BONUS = 20
+                for tf in extract_vertical_bs(
+                    text, source_filename=filing_path.name,
+                ):
+                    canonical = self._alias_resolver.resolve(tf.label)
+                    if canonical is None:
+                        # Synthetic labels (e.g. "Total debt (current +
+                        # long-term)") may not resolve via aliases.
+                        # The source_location encodes the canonical name.
+                        loc = tf.source_location
+                        if ":total_debt" in loc:
+                            canonical = "total_debt"
+                        elif ":total_assets" in loc:
+                            canonical = "total_assets"
+                        elif ":total_liabilities" in loc:
+                            canonical = "total_liabilities"
+                        elif ":total_equity" in loc:
+                            canonical = "total_equity"
+                        elif ":cash_and_equivalents" in loc:
+                            canonical = "cash_and_equivalents"
+                    if canonical is None:
+                        continue
+
+                    field_mult = self._alias_resolver.get_multiplier(canonical)
+                    scale, confidence = resolve_scale_for_field(
+                        canonical,
+                        filing_scale, "", metadata.scale, field_mult
+                    )
+
+                    if not validate_scale_sanity(tf.value, canonical, scale):
+                        audit.discard(
+                            field_name=canonical,
+                            period=tf.column_header,
+                            reason="scale_uncertain",
+                            source_filing=filing_path.name,
+                            raw_label=tf.label,
+                            raw_value=tf.value,
+                        )
+                        continue
+
+                    period_key = tf.column_header
+                    if not period_key or not period_key.startswith("FY"):
+                        continue
+
+                    label_pri = self._alias_resolver.label_priority(
+                        canonical, tf.label
+                    )
+                    new_sort_key = self.compute_sort_key(
+                        period_key=period_key,
+                        filing_type=metadata.filing_type,
+                        source_type="table",
+                        label_priority=label_pri,
+                        section_bonus=_VERTICAL_BS_BONUS,
+                        source_filing=filing_path.name,
+                        source_location=tf.source_location,
+                        rules=rules,
+                    )
+
+                    if period_key not in period_fields:
+                        period_fields[period_key] = {}
+
+                    if canonical in period_fields[period_key]:
+                        existing = period_fields[period_key][canonical]
+                        old_sort_key = getattr(
+                            existing, "_sort_key",
+                            (999, 999, 999, 999, (999,)),
+                        )
+                        if new_sort_key >= old_sort_key:
+                            audit.discard(
+                                field_name=canonical,
+                                period=period_key,
+                                reason="lower_priority_duplicate",
+                                source_filing=filing_path.name,
+                                raw_label=tf.label,
+                                raw_value=tf.value,
+                                scale=scale,
+                            )
+                            continue
+
+                    fr = FieldResult(
+                        value=_normalize_sign(canonical, tf.label, tf.value),
+                        scale=scale,
+                        source_filing=filing_path.name,
+                        source_location=tf.source_location,
+                        confidence=confidence,
+                    )
+                    fr._sort_key = new_sort_key  # type: ignore[attr-defined]
+                    period_fields[period_key][canonical] = fr
+                    audit.accept(
+                        field_name=canonical,
+                        period=period_key,
+                        source_filing=filing_path.name,
+                        raw_label=tf.label,
+                        raw_value=tf.value,
+                        scale=scale,
+                    )
+
                 # Narrative extraction from .txt files
                 narrative_fields = extract_from_narrative(
                     text, source_filename=filing_path.name
@@ -634,8 +974,12 @@ class DeterministicPipeline:
                         continue
 
                     # Scale: use narrative's own scale if available
-                    scale = nf.scale if nf.scale != "raw" else filing_scale
-                    confidence = "medium" if nf.scale != "raw" else filing_scale_confidence
+                    if canonical in {"shares_outstanding", "shares_outstanding_end", "weighted_avg_basic", "weighted_avg_diluted", "eps_basic", "eps_diluted", "dividends_per_share"}:
+                        scale = "raw"
+                        confidence = "high"
+                    else:
+                        scale = nf.scale if nf.scale != "raw" else filing_scale
+                        confidence = "medium" if nf.scale != "raw" else filing_scale_confidence
 
                     period_key = nf.period_hint
                     if not period_key:
@@ -704,6 +1048,42 @@ class DeterministicPipeline:
                         scale=scale,
                     )
 
+            # ── Post-process: recover total_liabilities from sub-totals ──
+            # IFRS filings often have "Total non-current liabilities" and
+            # "Total current liabilities" without a standalone "Total
+            # liabilities" line.  The \bcurrent\b rejection prevents these
+            # from resolving via aliases to avoid double-counting in US GAAP
+            # filings.  Recover by summing the sub-totals when the parent
+            # total is missing.
+            import re as _re
+            _NC_LIAB_RE = _re.compile(
+                r"total\s+non[- ]?current\s+liabilities", _re.I
+            )
+            _C_LIAB_RE = _re.compile(
+                r"total\s+current\s+liabilities", _re.I
+            )
+            for pk in list(period_fields.keys()):
+                if "total_liabilities" not in period_fields[pk]:
+                    nc_val = None
+                    c_val = None
+                    nc_loc = ""
+                    for rtf in _raw_table_fields:
+                        if rtf.column_header != pk:
+                            continue
+                        if _NC_LIAB_RE.search(rtf.label):
+                            nc_val = rtf.value
+                            nc_loc = rtf.source_location
+                        elif _C_LIAB_RE.search(rtf.label):
+                            c_val = rtf.value
+                    if nc_val is not None and c_val is not None:
+                        period_fields[pk]["total_liabilities"] = FieldResult(
+                            value=nc_val + c_val,
+                            scale=filing_scale,
+                            source_filing=filing_path.name,
+                            source_location=nc_loc,
+                            confidence=filing_scale_confidence,
+                        )
+
             if period_fields:
                 filing_extractions.append(
                     (metadata.filing_type, filing_path.name, period_fields)
@@ -737,6 +1117,11 @@ class DeterministicPipeline:
             filing_extractions, ticker=ticker, currency=currency
         )
 
+        # Inject manual_overrides from case.json — ONLY for fields that the
+        # extractor could not find (e.g. corrupted PDF sources). If the
+        # extractor already produced a value, it always wins.
+        self._apply_manual_overrides(config, result)
+
         # Update audit
         result.audit.fields_extracted += audit.accepted_count
         result.audit.fields_discarded += audit.discarded_count
@@ -746,6 +1131,94 @@ class DeterministicPipeline:
         )
 
         return result
+
+    # ── MANUAL OVERRIDES ─────────────────────────────────────────────
+
+    @staticmethod
+    def _apply_manual_overrides(
+        config: Dict[str, Any],
+        result: "ExtractionResult",
+    ) -> None:
+        """Inject manual_overrides from case.json only for missing fields.
+
+        A field is considered missing if the extractor produced no value for
+        that period+field combination after merging all filings.  If the
+        extractor found anything — even with low confidence — it always wins
+        and the override is silently skipped.
+
+        This is the last-resort mechanism for when source PDFs are corrupted
+        (garbled OCR, multi-column layout, reversed token order) and the
+        value has been confirmed manually from the document.
+
+        Override spec in case.json::
+
+            "manual_overrides": {
+                "FY2022": {
+                    "ingresos": {"value": 8154, "note": "KPI p.56 tp_ri_2022"},
+                    "fcf":      {"value": 703}
+                }
+            }
+
+        Args:
+            config: Parsed case.json dict.
+            result: ExtractionResult after merge_extractions (mutated in place).
+        """
+        overrides = config.get("manual_overrides")
+        if not overrides or not isinstance(overrides, dict):
+            return
+
+        for period_key, fields in overrides.items():
+            if not isinstance(fields, dict):
+                continue
+
+            # Pre-validate specs: only consider dict entries with a numeric value.
+            # This prevents creating empty period entries for malformed overrides.
+            valid_specs = {
+                fn: spec
+                for fn, spec in fields.items()
+                if isinstance(spec, dict) and "value" in spec
+            }
+            if not valid_specs:
+                continue
+
+            # Create the period entry if the extractor found nothing at all
+            # for this period (e.g. the filing only contains KPI headlines).
+            if period_key not in result.periods:
+                fecha_fin = ""
+                m = re.match(r"FY(\d{4})$", period_key)
+                if m:
+                    fecha_fin = f"{m.group(1)}-12-31"
+                result.periods[period_key] = PeriodResult(
+                    fecha_fin=fecha_fin,
+                    tipo_periodo="anual",
+                )
+
+            period_result = result.periods[period_key]
+
+            for field_name, spec in valid_specs.items():
+                # Extractor wins: skip if any value already present.
+                if field_name in period_result.fields:
+                    continue
+
+                try:
+                    value = float(spec["value"])
+                except (TypeError, ValueError):
+                    continue
+
+                note = spec.get("note", "")
+                loc = (
+                    f"case.json:manual_overrides:{period_key}:{field_name}"
+                    + (f":{note}" if note else "")
+                )
+                fr = FieldResult(
+                    value=value,
+                    scale="raw",
+                    source_filing="manual_override",
+                    source_location=loc,
+                    confidence="manual",
+                )
+                period_result.fields[field_name] = fr
+                result.audit.fields_extracted += 1
 
     # ── EVALUATE ─────────────────────────────────────────────────────
 

@@ -46,6 +46,7 @@ from .model_defaults import (
     resolve_model_list,
     write_engine_config_atomic,
 )
+from .truthpack_import import import_truthpack_case
 
 
 def _add_empresa_hint_args(parser: argparse.ArgumentParser) -> None:
@@ -146,6 +147,40 @@ Examples:
     p_step.add_argument("step_name", type=str)
     p_step.add_argument("--date", type=str, default=None)
     _add_empresa_hint_args(p_step)
+
+    # import-truthpack
+    p_import_tp = subparsers.add_parser(
+        "import-truthpack",
+        help="Importa un truth_pack legacy y deja el caso listo para reanudar desde IMPLIED.",
+        description=(
+            "Convierte un truth_pack legacy/custom a TruthPack_v1 operativo, "
+            "crea o actualiza _estado.json y marca TRUTH_PACK como DONE."
+        ),
+    )
+    p_import_tp.add_argument("ticker", type=str)
+    p_import_tp.add_argument("--date", type=str, default=None)
+    p_import_tp.add_argument(
+        "--input",
+        type=Path,
+        default=None,
+        help="Ruta al truth_pack legacy (por defecto: casos/{ticker}/{date}/truth_pack.json)",
+    )
+    p_import_tp.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Sobrescribe el TruthPack importado si ya existe.",
+    )
+    p_import_tp.add_argument(
+        "--run-remaining",
+        action="store_true",
+        help="Tras la importación, ejecuta automáticamente los pasos restantes con `continue`.",
+    )
+    p_import_tp.add_argument(
+        "--no-plan",
+        action="store_true",
+        help="Skip interactive model plan when using --run-remaining.",
+    )
+    _add_empresa_hint_args(p_import_tp)
 
     # rehacer
     p_rehacer = subparsers.add_parser(
@@ -479,6 +514,9 @@ Examples:
 
     elif args.command == "step":
         _cmd_step(config, args)
+
+    elif args.command == "import-truthpack":
+        _cmd_import_truthpack(config, args)
 
     elif args.command == "rehacer":
         _cmd_rehacer(config, args)
@@ -1801,6 +1839,48 @@ def _cmd_step(config, args):
             push_if_needed(config.workspace, git_cfg)
 
     print(f"[engine] Step {step_name}: {'success' if result.get('success') else 'failed'}")
+
+
+def _cmd_import_truthpack(config, args):
+    """Importa un truth_pack legacy y prepara el caso para continuar."""
+    date_str = args.date or date.today().isoformat()
+    ticker = args.ticker.upper()
+
+    case_dir = config.get_path("casos") / ticker / date_str
+    input_path = (
+        args.input.expanduser().resolve()
+        if args.input is not None
+        else (case_dir / "truth_pack.json").resolve()
+    )
+
+    if not input_path.exists():
+        print(f"[engine] ERROR: truth_pack legacy no encontrado en {input_path}", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        output_path = import_truthpack_case(
+            case_dir=case_dir,
+            ticker=ticker,
+            date_str=date_str,
+            input_path=input_path,
+            exchange=getattr(args, "exchange", ""),
+            country=getattr(args, "country", ""),
+            web_ir=getattr(args, "web_ir", ""),
+            overwrite=getattr(args, "overwrite", False),
+        )
+    except Exception as exc:
+        print(f"[engine] ERROR importing truth_pack: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"[engine] Imported TruthPack: {output_path}")
+    print(
+        "[engine] Case bootstrapped. Next command: "
+        f"python3 -m engine continue {ticker} --date {date_str}"
+    )
+
+    if getattr(args, "run_remaining", False):
+        print("[engine] Running remaining pipeline steps...")
+        _cmd_continue(config, args)
 
 
 def _cmd_rehacer(config, args):

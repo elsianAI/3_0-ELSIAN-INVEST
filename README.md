@@ -52,8 +52,8 @@ python3 -m engine continue AAPL --date 2026-02-15
 
 # Model defaults (persistentes)
 python3 -m engine defaults show
-python3 -m engine defaults set --pipeline-models "1,2,3" --fusion-model claude-opus-4.6
-python3 -m engine defaults step set --step BULL --models claude-opus-4.6,gemini-3-flash --fusion-model claude-sonnet-4.6
+python3 -m engine defaults set --pipeline-models "gpt-5.4,claude-opus-4.6,gemini-3.1-pro-preview" --fusion-model claude-opus-4.6 --single-model gpt-5.4
+python3 -m engine defaults step set --step BULL --models gpt-5.4,claude-opus-4.6 --fusion-model claude-sonnet-4.6
 python3 -m engine defaults edit   # asistente interactivo TTY
 
 # Validate artifacts in a case
@@ -154,20 +154,20 @@ Principales comandos:
 {
   "version": "2.0.0",
   "model_catalog": {
-    "gpt-5.3-codex-spark": { "...": "..." },
+    "gpt-5.4": { "...": "..." },
     "claude-opus-4.6": { "...": "..." },
     "gemini-3.1-pro-preview": { "...": "..." }
   },
   "pipeline_models": [
-    "gpt-5.3-codex-spark",
+    "gpt-5.4",
     "claude-opus-4.6",
     "gemini-3.1-pro-preview"
   ],
   "fusion_model": "claude-opus-4.6",
-  "default_single_model": "gpt-5.3-codex-spark",
+  "default_single_model": "gpt-5.4",
   "step_overrides": {
     "TP_EXTRACTOR_FILING": {
-      "models": ["gpt-5.3-codex-spark"]
+      "models": ["gpt-5.4"]
     },
     "BULL": {
       "fusion_model": "claude-opus-4.6"
@@ -182,6 +182,7 @@ Principales comandos:
 ```
 
 - **Modelo canónico**: ahora usa `model_profile` (ej. `claude-opus-4.6`) y resuelve transporte (`codex` / `claude` / `gemini`).
+- **GPT-5.4 en Codex**: verificado en local con `codex-cli 0.111.0`; el `model_id` soportado por la cuenta ChatGPT es `gpt-5.4`.
 - **Defaults persistentes**:
   - `pipeline_models`: perfiles para pasos multi-modelo por defecto.
   - `fusion_model`: fusión por defecto para multi-modelo.

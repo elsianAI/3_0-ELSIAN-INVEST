@@ -442,6 +442,8 @@ def _is_retryable_dispatch_error(error: str | None, raw_output: str | None = Non
         "connection reset", "connection aborted", "econnreset",
         # Gemini-specific quota errors
         "quota", "terminalquotaerror", "exhausted your capacity", "exhausted capacity",
+        # Gemini CLI runtime crashes observed under large prompts/headless runs
+        "unsettled top-level await", "yoga-layout", "gemini cli runtime crash",
     )
     return any(p in text for p in patterns)
 
